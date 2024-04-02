@@ -12,16 +12,18 @@
 		"postpublish": "ls *.mjs *.js *.wasm *.wasm.gz *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
 	},
 	"dependencies": {
-		"@babel/cli": "^7.8.4",
-		"@babel/core": "^7.8.7",
-		"@babel/plugin-proposal-class-properties": "^7.10.4",
-		"@babel/preset-env": "^7.0.0",
 		"php-wasm-iconv": "^0.0.1",
 		"php-wasm-libxml": "^0.0.1",
 		"php-wasm-libzip": "^0.0.1",
 		"php-wasm-sqlite": "^0.0.1",
 		"php-wasm-tidy": "^0.0.1",
 		"vrzno": "^0.0.1"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.8.4",
+		"@babel/core": "^7.8.7",
+		"@babel/plugin-proposal-class-properties": "^7.10.4",
+		"@babel/preset-env": "^7.0.0",
 	},
 	"contributors": [
 		{
