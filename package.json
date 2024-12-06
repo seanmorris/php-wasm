@@ -40,6 +40,26 @@
     "php-wasm-zlib": "0.0.9-alpha-23",
     "vrzno": "0.0.9-alpha-23"
   },
+  "workspaces": [
+    "packages/dom",
+    "packages/gd",
+    "packages/iconv",
+    "packages/intl",
+    "packages/libxml",
+    "packages/libyaml",
+    "packages/libzip",
+    "packages/mbstring",
+    "packages/openssl",
+    "packages/pdo-pglite",
+    "packages/pdo-cfd1",
+    "packages/phar",
+    "packages/simplexml",
+    "packages/sqlite",
+    "packages/tidy",
+    "packages/vrzno",
+    "packages/xml",
+    "packages/zlib"
+  ],
   "contributors": [
     {
       "name": "Sean Morris",

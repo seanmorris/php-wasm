@@ -447,6 +447,8 @@ test('Can get the date from a native object with strtotime() and format it with 
 test('Can use url_fopen with file_get_contents.', async () => {
 	const php = new PhpNode();
 
+	let stdOut = '', stdErr = '';
+
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
@@ -481,6 +483,8 @@ test('Can get headers from url_fopen with file_get_contents.', async () => {
 test('Can use url_fopen with file_get_contents with a context.', async () => {
 	const php = new PhpNode();
 
+	let stdOut = '', stdErr = '';
+
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
@@ -499,6 +503,8 @@ test('Can use url_fopen with file_get_contents with a context.', async () => {
 
 test('Can use url_fopen with file_get_contents with a context. (POST) ', async () => {
 	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
 
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
 	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));

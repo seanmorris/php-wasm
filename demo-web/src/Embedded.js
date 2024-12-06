@@ -9,6 +9,9 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
+console.log(PhpWeb.phpVersion);
+console.log(PhpWeb.phpVersionFull);
+
 const sharedLibs = [
 	`php${PhpWeb.phpVersion}-zlib.so`,
 	`php${PhpWeb.phpVersion}-zip.so`,
@@ -20,6 +23,7 @@ const sharedLibs = [
 	`php${PhpWeb.phpVersion}-mbstring.so`,
 	`php${PhpWeb.phpVersion}-sqlite.so`,
 	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
+	`php${PhpWeb.phpVersion}-phar.so`,
 	`php${PhpWeb.phpVersion}-xml.so`,
 	`php${PhpWeb.phpVersion}-simplexml.so`,
 	{url: `libs/libxml2.so`, ini:false},

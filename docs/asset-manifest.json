@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/php-wasm/static/css/main.9114cb59.css",
-    "main.js": "/php-wasm/static/js/main.2ce74b59.js",
+    "main.js": "/php-wasm/static/js/main.64ff368e.js",
     "static/js/835.ba3f1ffc.chunk.js": "/php-wasm/static/js/835.ba3f1ffc.chunk.js",
     "static/js/97.c6261c0f.chunk.js": "/php-wasm/static/js/97.c6261c0f.chunk.js",
     "static/js/330.c76e5618.chunk.js": "/php-wasm/static/js/330.c76e5618.chunk.js",
@@ -11,7 +11,7 @@
     "static/js/574.49428a7c.chunk.js": "/php-wasm/static/js/574.49428a7c.chunk.js",
     "static/js/40.9229f9f2.chunk.js": "/php-wasm/static/js/40.9229f9f2.chunk.js",
     "static/js/622.dfd05a2c.chunk.js": "/php-wasm/static/js/622.dfd05a2c.chunk.js",
-    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.6d65c25ae045e78a850e.wasm",
+    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.12e2dc81bf6a90854f60.wasm",
     "static/media/postgres.wasm": "/php-wasm/static/media/postgres.a28dc5fef609f15836f3.wasm",
     "static/media/postgres.data": "/php-wasm/static/media/postgres.50ee79fa149a7ae743ea.data",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
@@ -503,12 +503,12 @@
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
     "main.9114cb59.css.map": "/php-wasm/static/css/main.9114cb59.css.map",
-    "main.2ce74b59.js.map": "/php-wasm/static/js/main.2ce74b59.js.map",
+    "main.64ff368e.js.map": "/php-wasm/static/js/main.64ff368e.js.map",
     "331.b658539f.chunk.js.map": "/php-wasm/static/js/331.b658539f.chunk.js.map",
     "774.54b28235.chunk.js.map": "/php-wasm/static/js/774.54b28235.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.9114cb59.css",
-    "static/js/main.2ce74b59.js"
+    "static/js/main.64ff368e.js"
   ]
 }
