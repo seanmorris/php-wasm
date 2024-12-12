@@ -101,7 +101,7 @@ test('Can refresh memory between executions', async () => {
 	await php.run(`<?php $i = 100;`);
 	await php.run(`<?php $i++;`);
 	await php.refresh();
-	await php.run(`<?php ini_set('display_errors', 1); error_reporting(E_ALL | E_STRICT); echo $i . PHP_EOL;`);
+	await php.run(`<?php ini_set('display_errors', 1); @error_reporting(E_ALL | E_STRICT); echo $i . PHP_EOL;`);
 
 	assert.equal(stdOut, `\nWarning: Undefined variable $i in php-wasm run script on line 1\n\n`);
 	assert.equal(stdErr, '');

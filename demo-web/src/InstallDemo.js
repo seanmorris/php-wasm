@@ -12,14 +12,18 @@ import WwwIcon from './icons/www-icon-32.png'
 import editorIcon from './icons/editor-icon-32.png';
 
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-setTimeout(() => {
-	if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
-	{
-		window.location.reload()
-	}
-}, 350);
 
-(navigator.serviceWorker && navigator.serviceWorker.controller) || window.location.reload();
+const params = new URLSearchParams(window.location.search);
+
+if(!params.has('no-service-worker'))
+{
+	setTimeout(() => {
+		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
+		{
+			window.location.reload()
+		}
+	}, 350);
+}
 
 const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 

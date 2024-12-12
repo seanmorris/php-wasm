@@ -1,6 +1,17 @@
 name: Test
 on: [push]
 jobs:
+  test-8-4-static:
+    name: Test 8.4 Static
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+      - run: make image test
+
   test-8-3-static:
     name: Test 8.3 Static
     runs-on: ubuntu-latest
@@ -46,6 +57,17 @@ jobs:
       - run: make image test PHP_VERSION=8.0
 
 
+  test-8-4-dynamic:
+    name: Test 8.4 Dynamic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4-dynamic.ci .env
+      - run: make image test
+
   test-dynamic:
     name: Test 8.3 Dynamic
     runs-on: ubuntu-latest
@@ -90,6 +112,17 @@ jobs:
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image test PHP_VERSION=8.0
 
+
+  test-8-4-shared:
+    name: Test 8.4 Shared
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4-shared.ci .env
+      - run: make image test
 
   test-shared:
     name: Test 8.3 Shared

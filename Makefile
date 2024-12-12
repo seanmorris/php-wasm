@@ -76,10 +76,10 @@ $(error BROTLI MUST BE 0, 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FI
 endif
 
 ## PHP Version
-PHP_VERSION?=8.3
+PHP_VERSION?=${PHP_VERSION_DEFAULT}
 
-ifeq ($(filter ${PHP_VERSION},8.3 8.2 8.1 8.0),)
-$(error PHP_VERSION MUST BE 8.3, 8.2, 8.1 or 8.0. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${PHP_VERSION},8.4 8.3 8.2 8.1 8.0),)
+$(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ## More Options
@@ -178,8 +178,14 @@ PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
 TEST_LIST=
 
+ifeq (${PHP_VERSION},8.4)
+PHP_VERSION_FULL=8.4.1
+PHP_BRANCH=php-${PHP_VERSION_FULL}
+PHP_AR=libphp
+endif
+
 ifeq (${PHP_VERSION},8.3)
-PHP_VERSION_FULL=8.3.7
+PHP_VERSION_FULL=8.3.11
 PHP_BRANCH=php-${PHP_VERSION_FULL}
 PHP_AR=libphp
 endif
@@ -431,12 +437,12 @@ DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS
 
 EXTENSIONS_JS=Object.fromEntries(Object.entries({"WITH_BCMATH":"${WITH_BCMATH}","WITH_CALENDAR":"${WITH_CALENDAR}","WITH_CTYPE":"${WITH_CTYPE}","WITH_FILTER":"${WITH_FILTER}","WITH_TOKENIZER":"${WITH_TOKENIZER}","WITH_VRZNO":"${WITH_VRZNO}","WITH_EXIF":"${WITH_EXIF}","WITH_PHAR":"${WITH_PHAR}","WITH_LIBXML":"${WITH_LIBXML}","WITH_DOM":"${WITH_DOM}","WITH_XML":"${WITH_XML}","WITH_SIMPLEXML":"${WITH_SIMPLEXML}","WITH_LIBZIP":"${WITH_LIBZIP}","WITH_ICONV":"${WITH_ICONV}","WITH_SQLITE":"${WITH_SQLITE}","WITH_GD":"${WITH_GD}","WITH_ZLIB":"${WITH_ZLIB}","WITH_LIBPNG":"${WITH_LIBPNG}","WITH_FREETYPE":"${WITH_FREETYPE}","WITH_LIBJPEG":"${WITH_LIBJPEG}","WITH_YAML":"${WITH_YAML}","WITH_TIDY":"${WITH_TIDY}","WITH_MBSTRING":"${WITH_MBSTRING}","WITH_ONIGURUMA":"${WITH_ONIGURUMA}","WITH_OPENSSL":"${WITH_OPENSSL}","WITH_INTL":"${WITH_INTL}"}).filter(([k,v]) => v !== "0"))
 
-${PHP_DIST_DIR}/config.mjs:
+${PHP_DIST_DIR}/config.mjs: .env
 	echo '' > $@
 	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
 
-${PHP_DIST_DIR}/config.js:
+${PHP_DIST_DIR}/config.js: .env
 	echo 'module.exports = {};' > $@
 	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
@@ -704,6 +710,10 @@ third_party/php${PHP_VERSION}-src/scripts/phpize-built: ${DEPENDENCIES} | ${ORDE
 	${DOCKER_RUN_IN_PHP} chmod +x scripts/phpize
 	${DOCKER_RUN_IN_PHP} touch scripts/phpize-built
 
+patch/php8.4.patch:
+	bash -c 'cd third_party/php8.4-src/ && git diff > ../../patch/php8.4.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.4-src/|g' ./patch/php8.4.patch
+
 patch/php8.3.patch:
 	bash -c 'cd third_party/php8.3-src/ && git diff > ../../patch/php8.3.patch'
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.3-src/|g' ./patch/php8.3.patch
@@ -825,3 +835,7 @@ all-versions:
 	${MAKE} PHP_VERSION=8.1 all cgi-all
 	${MAKE} PHP_VERSION=8.2 all cgi-all
 	${MAKE} PHP_VERSION=8.3 all cgi-all
+	${MAKE} PHP_VERSION=8.4 all cgi-all
+
+remap:
+	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.mjs.wasm.map

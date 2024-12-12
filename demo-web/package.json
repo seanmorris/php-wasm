@@ -33,8 +33,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "./npm-start.sh",
-    "build": "./npm-build.sh",
+    "start": "bash ./npm-start.sh",
+    "build": "bash ./npm-build.sh",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "clean": ""

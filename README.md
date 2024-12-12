@@ -24,8 +24,8 @@ _PHP in WebAssembly, npm not required._
 * Modules are now webpack-compatible out of the box.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 * Fixed the bug with POST requests under Firefox.
-* Adding support for PHP 8.3.7
-* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
+* Adding support for PHP 8.3.7 & 8.4.1.
+* Automatic CI testing for PHP 8.0, 8.1, 8.2, 8.3, & 8.4.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 

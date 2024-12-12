@@ -101,9 +101,12 @@ $(addsuffix /php${PHP_VERSION}-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): package
 
 third_party/php${PHP_VERSION}-pdo-sqlite/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/pdo_sqlite /src/third_party/php${PHP_VERSION}-pdo-sqlite
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/pdo_sqlite.c
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_driver.c
-	${DOCKER_RUN} sed -i 's|../pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_statement.c
+	${DOCKER_RUN} sed -i 's|\.\./pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/pdo_sqlite.c
+	${DOCKER_RUN} sed -i 's|\.\./pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_driver.c
+	${DOCKER_RUN} sed -i 's|\.\./pdo|pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_statement.c
+	${DOCKER_RUN} sed -i 's|\.\./php_pdo|php_pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/pdo_sqlite.c
+	${DOCKER_RUN} sed -i 's|\.\./php_pdo|php_pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_driver.c
+	${DOCKER_RUN} sed -i 's|\.\./php_pdo|php_pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_statement.c
 
 packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo-sqlite/config.m4
 	@ echo -e "\e[33;4mBuilding php-pdo-sqlite\e[0m"
@@ -113,7 +116,7 @@ packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-pdo-sqlite=/src/lib;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's#-export-dynamic##g' Makefile;
-	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include';
+	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include' RE2C=re2c;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -DHAVE_CONFIG_H -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/pdo_sqlite.a /src/packages/sqlite/libsqlite3.so
 
 $(addsuffix /php${PHP_VERSION}-pdo-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so

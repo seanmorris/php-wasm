@@ -50,12 +50,12 @@ cgi: ${CGI_MJS} ${CGI_CJS}
 
 CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured # $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
 
-${PHP_CGI_DIST_DIR}/config.mjs:
+${PHP_CGI_DIST_DIR}/config.mjs: .env
 	echo '' > $@
 	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
 
-${PHP_CGI_DIST_DIR}/config.js:
+${PHP_CGI_DIST_DIR}/config.js: .env
 	echo 'module.exports = {};' > $@
 	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
