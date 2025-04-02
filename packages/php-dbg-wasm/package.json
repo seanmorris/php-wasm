@@ -1,0 +1,49 @@
+{
+  "name": "php-dbg-wasm",
+  "version": "0.0.9-alpha-27",
+  "description": "phpdbg for wasm.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Sean Morris",
+      "email": "php-wasm@seanmorr.is",
+      "url": "https://seanmorr.is"
+    }
+  ],
+  "scripts": {
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
+  },
+  "keywords": [
+    "php",
+    "wasm",
+    "php-wasm",
+    "php-dbg-wasm",
+    "vrzno"
+  ],
+  "files": [
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "package.json",
+    "libxml2.so",
+    "PhpDbgWeb.js",
+    "PhpDbgWeb.mjs",
+    "php-dbg-web.js",
+    "php-dbg-web.mjs",
+    "php-dbg-web.js.wasm",
+    "php-dbg-web.mjs.wasm",
+    "config.js",
+    "config.mjs",
+    "fsOps.js",
+    "fsOps.mjs",
+    "webTransactions.js",
+    "webTransactions.mjs",
+    "resolveDependencies.js",
+    "resolveDependencies.mjs"
+  ]
+}

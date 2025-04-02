@@ -86,7 +86,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-web.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.js.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -107,7 +107,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-web.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -129,7 +129,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-worker.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.js.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -150,7 +150,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-worker.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -172,7 +172,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-node.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.js.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -192,7 +192,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-node.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -214,7 +214,7 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-webview.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.js.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -235,6 +235,6 @@ ifneq (${SKIP_SHARED_LIBS},1)
 	${MAKE} $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
 endif
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-cgi-wasm/php-cgi-webview.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 endif
 	@ cat ico.ans >&2

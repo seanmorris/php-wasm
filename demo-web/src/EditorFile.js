@@ -1,6 +1,7 @@
 import './Common.css';
 import './EditorEntry.css';
 
+import cmdIcon from './icons/cmd-icon-16.png';
 import fileIcon from './nomo-dark/file.svg';
 import filePhpIcon from './nomo-dark/file.php.svg';
 import fileJsIcon from './nomo-dark/file.js.svg';
@@ -75,6 +76,10 @@ export default function EditorFile({path, name}) {
 		setShowRename(true);
 	};
 
+	const openPhpDbg = path => {
+		window.open('/dbg-preview.html?path=' + path);
+	};
+
 	const deleteFile = async () => {
 		await sendMessage('unlink', [_path]);
 		setShowContext(false);
@@ -122,6 +127,12 @@ export default function EditorFile({path, name}) {
 				{_name}
 			</p>
 			{showContext && <span className = "contents only-focus">
+				{extension === 'php' && (
+					<p className = "context" onClick = {() => openPhpDbg(_path)}>
+						<img className = "file icon" src = {cmdIcon} alt = "" />
+						Open in PHP-DBG
+					</p>
+				)}
 				<p className = "context" onClick = {() => renameFile(true)}>
 					<img className = "file icon" src = {renameIcon} alt = "" />
 					Rename

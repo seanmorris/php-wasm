@@ -16,6 +16,7 @@ import githubIcon from './icons/github-icon-32.png';
 import sunburstIcon from './icons/sunburst.png';
 import netscapeIcon from './icons/netscape.png';
 import mouseIcon from './icons/mouse.png';
+import cmdIcon from './icons/cmd-icon-32.png';
 import dbIcon from './icons/database.png';
 import downIcon from './icons/down.png';
 import upIcon from './icons/up.png';
@@ -111,6 +112,11 @@ function Home() {
 
 				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
+					<a target = "_blank" href = {process.env.PUBLIC_URL + '/dbg-preview.html'} className="icon-box">
+						<img src = {cmdIcon} alt = "PHP-DBG Preview" />
+						<span>PHP-DBG Preview</span>
+					</a>
+
 					<a target = "_blank" href = {process.env.PUBLIC_URL + '/forecast.html'} className="icon-box">
 						<img src = {sunburstIcon} alt = "Inline FrontEnd PHP" />
 						<span>Inline FrontEnd PHP</span>

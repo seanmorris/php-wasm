@@ -10,6 +10,7 @@ import Home from './Home';
 import InstallDemo from './InstallDemo';
 import Editor from './Editor';
 import { onMessage } from 'php-cgi-wasm/msg-bus';
+import DbgPreview from './DbgPreview';
 
 const params = new URLSearchParams(window.location.search);
 
@@ -33,6 +34,7 @@ root.render(<React.StrictMode>
 			<Route path = "/" element = { <Home /> } />
 			<Route path = "/home.html" element = { <Home /> } />
 			<Route path = "/embedded-php.html" element = { <Embedded /> } />
+			<Route path = "/dbg-preview.html" element = { <DbgPreview /> } />
 			<Route path = "/select-framework.html" element = { <SelectFramework /> } />
 			<Route path = "/install-demo.html" element = { <InstallDemo /> } />
 			<Route path = "/code-editor.html" element = { <Editor /> } />

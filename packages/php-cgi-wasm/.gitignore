@@ -5,3 +5,6 @@
 *.data
 *.wasm
 *.so
+*.ORIGINAL
+*.MAPPED
+mapped/

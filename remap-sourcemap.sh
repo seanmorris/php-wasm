@@ -1,58 +1,50 @@
 #!/usr/bin/env bash
 
-set -x;
+set -eu;
 
-# SOURCE_MAP=packages/php-wasm/php-node.mjs.wasm.map
-# SOURCE_MAP=packages/php-cgi-wasm/php-cgi-worker.mjs.wasm.map
-# SOURCE_MAP=packages/php-wasm/php-web.mjs.wasm.map
-
-SOURCE_MAP=${1}
-
-SOURCE_MAP_DIR=`dirname ${SOURCE_MAP}`
-
-MAPPED=${SOURCE_MAP_DIR}/mapped;
-BACKUP=${SOURCE_MAP}.BAK
 PHP_VERSION=8.3
 
-if [ -e ${BACKUP} ]; then {
-	rm ${BACKUP};
-} fi;
+SOURCE_MAP=${1}
+DEST_DIR=${2}
 
-cp ${SOURCE_MAP} ${BACKUP}
+DEST_DIR_REALPATH=`realpath ${DEST_DIR}`
 
-mkdir -p ${MAPPED}
+SOURCE_MAP_BASENAME=`basename ${SOURCE_MAP}`
+SOURCE_MAP_REALPATH=`realpath ${SOURCE_MAP}`
+SOURCE_MAP_DIR=`dirname ${SOURCE_MAP_REALPATH}`
 
-jq -r '.sources[] | select( match("^\\.\\./\\.\\./(?!\\.\\.)")) | sub("../../"; "")' < ${SOURCE_MAP} \
-| while read SOURCE_FILE; do {
-	DIRNAME=`dirname ${SOURCE_FILE}`;
-	BASENAME=`basename ${SOURCE_FILE}`;
-	DEST_DIR=${MAPPED}/php${PHP_VERSION}/${DIRNAME}/;
-	mkdir -p ${DEST_DIR};
-	cp third_party/php${PHP_VERSION}-src/${SOURCE_FILE} ${DEST_DIR}${BASENAME};
+ORIGINAL=${SOURCE_MAP_REALPATH}.ORIGINAL
+MAPPED=${SOURCE_MAP_REALPATH}.MAPPED
+
+cd ${SOURCE_MAP_DIR}
+rm -f sources.list sources.json ${ORIGINAL} ${MAPPED}
+
+cp ${SOURCE_MAP_REALPATH} ${ORIGINAL}
+
+jq -r '.sources[]' < ${SOURCE_MAP_REALPATH} | while read SOURCE_FILE; do {
+	if [ `basename ${SOURCE_FILE}` == "<stdout>" ]; then
+		continue
+	fi
+	if [ ! -e ${SOURCE_FILE} ]; then
+		echo "NOT FOUND" ${SOURCE_FILE}
+		exit 1;
+	fi
+
+	echo Mapping ${SOURCE_FILE} ...
+
+	SOURCE_FILE_REALPATH=`realpath ${SOURCE_FILE}`
+	SOURCE_FILE_DIR=`dirname ${SOURCE_FILE_REALPATH}`
+	MAPPED_PATH=mapped${SOURCE_FILE_REALPATH}
+
+	mkdir -p mapped/${SOURCE_FILE_DIR}
+	cp ${SOURCE_FILE} mapped/${SOURCE_FILE_DIR}
+
+	echo ${MAPPED_PATH} >> sources.list
 }; done;
 
-jq -r '.sources[] | select( match("^\\.\\./\\.\\./\\.\\./\\.\\./\\.\\./")) | sub("../../../../../"; "/")' < ${SOURCE_MAP} \
-| while read SOURCE_FILE; do {
-	DIRNAME=`dirname ${SOURCE_FILE}`;
-	BASENAME=`basename ${SOURCE_FILE}`;
-	DEST_DIR=${MAPPED}/${DIRNAME}/;
-	mkdir -p ${DEST_DIR};
-	cp ${SOURCE_FILE} ${DEST_DIR}${BASENAME};
-}; done;
+jq -R . sources.list | jq -s . > sources.json
+jq -c --slurpfile sources sources.json '.sources = $sources[0]' ${ORIGINAL} > ${MAPPED}
 
-jq -r '.sources[] | select( match("^(?:.+)")) | sub("../../"; "")' < ${SOURCE_MAP} \
-| while read SOURCE_FILE; do {
-	if [[ ${SOURCE_FILE} == ../../* ]]; then
-		continue;
-	fi;
-	DIRNAME=`dirname ${SOURCE_FILE}`;
-	BASENAME=`basename ${SOURCE_FILE}`;
-	DEST_DIR=${MAPPED}/php${PHP_VERSION}/${DIRNAME}/;
-	mkdir -p ${DEST_DIR};
-	cp third_party/php${PHP_VERSION}-src/${SOURCE_FILE} ${DEST_DIR}${BASENAME};
-}; done;
+cp -rfv mapped/ ${DEST_DIR_REALPATH}
+cp ${MAPPED} ${DEST_DIR_REALPATH}/${SOURCE_MAP_BASENAME}
 
-sed -i 's|\.\./\.\./\.\./\.\./\.\./|mapped/|g' ${SOURCE_MAP}
-sed -i 's|\.\./\.\./|mapped/php'"${PHP_VERSION}"'/|g' ${SOURCE_MAP}
-
-chown -R ${OUTER_UID} ${MAPPED}

@@ -423,7 +423,7 @@ BUILD_FLAGS=-f ../../php.mk \
 		-I /src/third_party/php${PHP_VERSION}-src/ \
 		-I /src/third_party/php${PHP_VERSION}-src/Zend \
 		-I /src/third_party/php${PHP_VERSION}-src/main \
-		-I /src/third_party/php${PHP_VERSION}-src/TSRM/ \
+		-I /src/third_party/php${PHP_VERSION}-src/sapi/ \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/ \
 		-I /src/lib/include \
 		$(addprefix /src/,${ARCHIVES}) \
@@ -474,7 +474,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-web.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-web.js.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -502,7 +502,7 @@ endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 	${MAKE} ${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-web.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-web.mjs.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -529,7 +529,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-worker.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-worker.js.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -555,7 +555,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-worker.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-worker.mjs.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -582,7 +582,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-node.js.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -608,7 +608,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-node.mjs.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -635,7 +635,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-webview.js.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-webview.js.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -661,7 +661,7 @@ ifneq (${PRELOAD_ASSETS},)
 endif
 	${MAKE} $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
 ifeq (${WITH_SOURCEMAPS},1)
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-webview.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cli/php-webview.mjs.wasm.map ${PHP_DIST_DIR}
 endif
 	@ cat ico.ans >&2
 
@@ -772,6 +772,10 @@ clean:
 		packages/php-cgi-wasm/*.mjs \
 		packages/php-cgi-wasm/*.map \
 		packages/php-cgi-wasm/mapped \
+		packages/php-dbg-wasm/*.js \
+		packages/php-dbg-wasm/*.mjs \
+		packages/php-dbg-wasm/*.map \
+		packages/php-dbg-wasm/mapped \
 		packages/*/*.so \
 		packages/*/*.dat \
 		packages/*/*.wasm \
@@ -859,4 +863,4 @@ all-versions:
 	${MAKE} PHP_VERSION=8.4 all cgi-all
 
 remap:
-	${DOCKER_RUN} ./remap-sourcemap.sh packages/php-wasm/php-node.mjs.wasm.map
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-web.mjs.wasm.map packages/php-dbg-wasm

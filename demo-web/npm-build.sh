@@ -41,4 +41,13 @@ cp build/index.html build/embedded-php.html;
 cp build/index.html build/select-framework.html;
 cp build/index.html build/install-demo.html;
 cp build/index.html build/code-editor.html;
-git add ../docs/*js ../docs/static/js/* ../demo-web/public/*.js
+git add \
+	../docs/*js \
+	../docs/*.html \
+	../docs/*.wasm \
+	../docs/*.data \
+	../docs/*.json \
+	../docs/static/* \
+	../demo-web/public/*.js \
+	../demo-web/public/*.wasm \
+	../demo-web/public/*.data \

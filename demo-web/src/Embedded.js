@@ -5,8 +5,8 @@ import "react-ace-builds/webpack-resolver-min";
 
 import { PGlite } from '@electric-sql/pglite';
 
-// import { PhpWeb } from 'php-wasm/PhpWeb';
-import { PhpDbgWeb as PhpWeb } from 'php-dbg-wasm/PhpDbgWeb';
+import { PhpWeb } from 'php-wasm/PhpWeb';
+// import { PhpDbgWeb as PhpWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
@@ -29,7 +29,6 @@ const sharedLibs = [
 
 const files = [
 	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
-	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 ];
 
 const ini = `
@@ -49,7 +48,7 @@ function Embedded() {
 	const input = useRef('');
 	const persist = useRef('');
 	const single  = useRef('');
-	const stdin  = useRef('');
+	// const stdin  = useRef('');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -72,7 +71,6 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		window.list = [1,2,3,4];
 		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
@@ -337,24 +335,6 @@ function Embedded() {
 		editor.current.editor.setValue(await file.text(), -1);;
 	};
 
-	const checkEnter = async event => {
-		if(event.key === 'Enter')
-		{
-			const inputValue = stdin.current.value;
-			stdin.current.value = '';
-
-			// phpRef.current.inputString('-e /preload/hello-world.php');
-			setStdOut(stdOut => String(stdOut || '') + inputValue + '\n');
-			const exitCode = await phpRef.current.tick(inputValue);
-			setExitCode(exitCode);
-
-			console.log(exitCode, inputValue);
-
-			event.preventDefault();
-			return;
-		}
-	};
-
 	const topBar = (<div className = "row header toolbar">
 		<div className = "cols">
 			<div className = "row start">
@@ -471,7 +451,7 @@ function Embedded() {
 						<div className = "stdout output liquid">
 							<div className = "column">
 								<iframe srcDoc = {stdOut} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
-								<div className = "scroller">{stdOut}<input name = "stdin" onKeyDown={checkEnter} ref = {stdin} /></div>
+								<div className = "scroller">{stdOut}</div>
 							</div>
 						</div>
 					</div>
