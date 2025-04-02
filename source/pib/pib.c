@@ -42,10 +42,14 @@ char *_sapi_name = NULL;
  */
 int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 {
-	_sapi_name = __sapi_name;
+	if(!_sapi_name)
+	{
+		_sapi_name = malloc(strlen(__sapi_name) + 1);
+		strcpy(_sapi_name, __sapi_name);
+	}
+
 	putenv("USE_ZEND_ALLOC=0");
 
-	// fprintf(stderr, "SAPI: %s...\n\n", _sapi_name);
 	if(0 == strcmp(_sapi_name, "embed"))
 	{
 		return php_embed_init(0, NULL);

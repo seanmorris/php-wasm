@@ -123,7 +123,6 @@ export class PhpBase extends EventTarget
 
 	inputString(byteString)
 	{
-		console.trace(byteString);
 		this.input(this.encoder.encode(byteString));
 	}
 

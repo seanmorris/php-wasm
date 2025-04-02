@@ -90,7 +90,7 @@ test('Can maintain memory between executions', async () => {
 });
 
 test('Can refresh memory between executions', async () => {
-	const php = new PhpNode();
+	const php = new PhpNode({});
 
 	let stdOut = '', stdErr = '';
 
@@ -101,10 +101,11 @@ test('Can refresh memory between executions', async () => {
 	await php.run(`<?php $i = 100;`);
 	await php.run(`<?php $i++;`);
 	await php.refresh();
-	await php.run(`<?php ini_set('display_errors', 1); @error_reporting(E_ALL | E_STRICT); echo $i . PHP_EOL;`);
+	await php.run(`<?php ini_set('display_errors', 1); @error_reporting(E_ALL | E_STRICT); var_dump($i) . PHP_EOL;`);
 
-	assert.equal(stdOut, `\nWarning: Undefined variable $i in php-wasm run script on line 1\n\n`);
+	assert.equal(stdOut, `\nWarning: Undefined variable $i in php-wasm run script on line 1\nNULL\n`);
 	assert.equal(stdErr, '');
+
 });
 
 test('Can read files from the local FS through PHP functions', async () => {
