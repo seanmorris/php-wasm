@@ -42,13 +42,20 @@ export default function EditorFolder({path = '/', name = ''}) {
 
 	const onBlur = event => setTimeout(() => setShowContext(false), 160);
 
+	const openFile = path => {
+		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: path}));
+		query.set('path', path);
+		window.history.replaceState({}, null, window.location.pathname + '?' + query);
+	};
+
 	const newFileKeyUp = async event => {
 		if(event.key === 'Enter')
 		{
 			if(event.target.value)
 			{
 				const newName = path + '/' + event.target.value;
-				sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
+				await sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
+				openFile(newName);
 				loadFiles();
 			}
 

@@ -27,3 +27,13 @@
 	vertical-align: middle;
 	margin-right: 0.5rem;
 }
+
+.editor-entry p.context:hover {
+	background-color: #008;
+	color: #ccc;
+}
+
+.editor-entry p.context:hover input {
+	background-color: #008;
+	color: #ccc;
+}

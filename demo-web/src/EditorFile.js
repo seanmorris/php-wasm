@@ -66,9 +66,7 @@ export default function EditorFile({path, name}) {
 
 	const openFile = () => {
 		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: _path}));
-
 		query.set('path', _path);
-
 		window.history.replaceState({}, null, window.location.pathname + '?' + query);
 	};
 
@@ -77,7 +75,9 @@ export default function EditorFile({path, name}) {
 	};
 
 	const openPhpDbg = path => {
-		window.open('/dbg-preview.html?path=' + path);
+		const q = new URLSearchParams({path});
+		const u = new URL('./dbg-preview.html?' + q.toString(), process.env.PUBLIC_URL || window.location);
+		window.open(u);
 	};
 
 	const deleteFile = async () => {
@@ -98,6 +98,7 @@ export default function EditorFile({path, name}) {
 
 				setName(event.target.value);
 				setPath(newPath);
+				openFile();
 			}
 
 			setShowRename(false);
