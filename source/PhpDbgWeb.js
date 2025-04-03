@@ -10,6 +10,11 @@ export class PhpDbgWeb extends PhpBase
 	constructor(args = {})
 	{
 		super(PhpBinary, args, 'phpdbg');
+
+		this.running = false;
+		this.paused = false;
+		this.currentFile = null;
+		this.currentLine = null;
 	}
 
 	startTransaction()
@@ -67,30 +72,94 @@ export class PhpDbgWeb extends PhpBase
 	{
 		const php = (await this.binary);
 
-		const valueA = input;
+		const runFlagPtr = php.ccall(
+			'phpdbg_wasm_get_running_flag_pointer'
+			, NUM
+			, []
+			, []
+			, {}
+		);
 
+		const pauseFlagPtr = php.ccall(
+			'phpdbg_wasm_get_paused_flag_pointer'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const currentFilePtr = php.ccall(
+			'phpdbg_wasm_get_current_file'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const currentLinePtr = php.ccall(
+			'phpdbg_wasm_get_current_line'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const valueA = input;
 		// this.inputString(valueA);
 
 		const lenA = php.lengthBytesUTF8(valueA) + 1;
 		const locA = php._malloc(lenA);
 		php.stringToUTF8(valueA, locA, lenA);
 
-		const call = php.ccall(
-			'phpdbg_main'
-			, NUM
-			, [NUM]
-			, [locA]
-			, {async: true}
-		);
+		try
+		{
+			let call
+			let first = true;
 
-		return call
-		.catch(error => {
+			do
+			{
+				call = php.ccall(
+					'phpdbg_main'
+					, NUM
+					, [NUM]
+					, [first ? locA : null]
+					, {async: true}
+				);
+
+				await call;
+
+				await this.flush();
+
+				this.running = php.getValue(runFlagPtr, 'i8');
+				this.paused = php.getValue(pauseFlagPtr, 'i8');
+
+				this.currentFile = php.UTF8ToString(php.getValue(currentFilePtr, '*'));
+				this.currentLine = php.getValue(currentLinePtr, 'i32');
+
+				if(this.paused)
+				{
+					php.setValue(pauseFlagPtr, 0, 'i8');
+				}
+
+				first = false;
+
+			} while(this.running && !this.paused);
+
+			return call;
+		}
+		catch(error)
+		{
 			console.log(error);
-		}).finally(() => {
-			this.flush();
+		}
+		finally
+		{
 			php._free(locA);
-
-		});
+			if(!this.running)
+			{
+				this.currentFile = null;
+				this.currentLine = null;
+			}
+		}
 	}
 
 	async refresh()

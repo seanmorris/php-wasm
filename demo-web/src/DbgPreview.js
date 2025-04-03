@@ -34,6 +34,9 @@ const ini = `
 let init = true;
 
 export default function DbgPreview() {
+	const [prompt, setPrompt] = useState('prompt');
+	const [file, setFile] = useState('');
+	const [line, setLine] = useState('');
 	const phpRef = useRef(null);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
@@ -63,15 +66,20 @@ export default function DbgPreview() {
 
 	const onOutput = event => {
 		console.log(event.detail.join(''));
-		setOutput(output => [...output, ...event.detail.map(text => ({text, type: 'stdout'}))]);
+		setOutput(output => [...output, ...event.detail.map(text => ({
+			text: text.replace('\n', '\u240A\n').replace('\r', '\u240D')
+			, type: 'stdout'
+		}))]);
 
 		scrollToEnd();
 	};
 
 	const onError  = event => {
 		console.log(event.detail.join(''));
-		setOutput(output => [...output, ...event.detail.map(text => ({text, type: 'stderr'}))]);
-		// setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
+		setOutput(output => [...output, ...event.detail.map(text => ({
+			text: text.replace('\n', '\u240A\n').replace('\r', '\u240D')
+			, type: 'stderr'
+		}))]);
 
 		scrollToEnd();
 	};
@@ -127,9 +135,26 @@ export default function DbgPreview() {
 		setReady(false);
 		// phpRef.current.inputString('-e /preload/hello-world.php');
 		setOutput(output => [...output, {text: inputValue, type: 'stdin'}]);
-		const exitCode = await phpRef.current.tick(inputValue);
+
+		const php = phpRef.current;
+		const exitCode = await php.tick(inputValue);
+
+		if(php.running)
+		{
+			setPrompt('');
+			setFile(php.currentFile);
+			setLine(php.currentLine);
+		}
+		else
+		{
+			setPrompt('prompt');
+
+			setFile('');
+			setLine('');
+		}
+
 		setReady(true);
-		console.log(exitCode, inputValue);
+		// console.log(inputValue, exitCode);
 		setExitCode(exitCode);
 		stdIn.current.focus();
 	}
@@ -156,14 +181,9 @@ export default function DbgPreview() {
 		</div>
 	</div>);
 
-	const statusBar = (<div className = "row status toolbar">
-		<div>
-			<div className = "row start" data-status>
-				{statusMessage}
-			</div>
-		</div>
-		<div>
-		</div>
+	const statusBar = (<div className = "row status">
+		<div className = "row start toolbar" data-status>{file}<span className='line'>{line}</span></div>
+		<div className = "row start wide toolbar" data-status>{statusMessage}</div>
 	</div>);
 
 	return (<div className = "dbg-preview margined">
@@ -177,7 +197,7 @@ export default function DbgPreview() {
 						{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index}>{line.text}</div>))}
 					</div>
 					<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-						<span>prompt&gt;</span>
+						<span>{prompt}&gt;</span>
 						<input autoFocus = {true} name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
 						<button onClick = {runCommand}>&gt;</button>
 					</div>

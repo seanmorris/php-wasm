@@ -122,3 +122,16 @@
 	filter: opacity(0.75) saturate(0.75);
 	color: #CCC;
 }
+
+.dbg-preview .status > div {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.dbg-preview .status > div > span:empty {
+	display: none;
+}
+
+.dbg-preview .status > div > span.line:before {
+	content: ':';
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env make
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs rebuild
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 
@@ -864,3 +864,6 @@ all-versions:
 
 remap:
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-web.mjs.wasm.map packages/php-dbg-wasm
+
+rebuild:
+	touch third_party/php8.3-src/configured
