@@ -822,7 +822,7 @@ push-image:
 
 save-image:
 	mkdir -p ./image
-	docker image save seanmorris/phpwasm-emscripten-builder -o ./image/builder.tar
+	docker image save seanmorris/php-emscripten-builder -o ./image/builder.tar
 
 NPM_PUBLISH_DRY?=--dry-run
 
