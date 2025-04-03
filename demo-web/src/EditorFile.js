@@ -78,7 +78,7 @@ export default function EditorFile({path, name}) {
 		const q = new URLSearchParams({path});
 		const u = new URL(
 			'./dbg-preview.html?' + q.toString()
-			, new URL(process.env.PUBLIC_URL, window.location)
+			, new URL(process.env.PUBLIC_URL + '/', window.location)
 		);
 
 		window.open(u);
