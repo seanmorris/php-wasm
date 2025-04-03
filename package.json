@@ -19,8 +19,8 @@
     "@babel/core": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/preset-env": "^7.0.0",
+    "ansi-to-html": "^0.7.2",
     "cv3-test": "^0.1.6",
-    "pobot": "^0.1.5",
     "pdo-cfd1": "0.0.9-alpha-23",
     "pdo-pglite": "0.0.9-alpha-23",
     "php-wasm-dom": "0.0.9-alpha-23",
@@ -38,6 +38,7 @@
     "php-wasm-xml": "0.0.9-alpha-23",
     "php-wasm-yaml": "0.0.9-alpha-23",
     "php-wasm-zlib": "0.0.9-alpha-23",
+    "pobot": "^0.1.5",
     "vrzno": "0.0.9-alpha-23"
   },
   "workspaces": [

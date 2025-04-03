@@ -37,7 +37,7 @@ jq -r '.sources[]' < ${SOURCE_MAP_REALPATH} | while read SOURCE_FILE; do {
 	MAPPED_PATH=mapped${SOURCE_FILE_REALPATH}
 
 	mkdir -p mapped/${SOURCE_FILE_DIR}
-	cp ${SOURCE_FILE} mapped/${SOURCE_FILE_DIR}
+	cp -rfv ${SOURCE_FILE} mapped/${SOURCE_FILE_DIR}
 
 	echo ${MAPPED_PATH} >> sources.list
 }; done;
@@ -46,5 +46,5 @@ jq -R . sources.list | jq -s . > sources.json
 jq -c --slurpfile sources sources.json '.sources = $sources[0]' ${ORIGINAL} > ${MAPPED}
 
 cp -rfv mapped/ ${DEST_DIR_REALPATH}
-cp ${MAPPED} ${DEST_DIR_REALPATH}/${SOURCE_MAP_BASENAME}
+cp -rfv ${MAPPED} ${DEST_DIR_REALPATH}/${SOURCE_MAP_BASENAME}
 

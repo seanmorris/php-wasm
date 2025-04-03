@@ -135,3 +135,8 @@
 .dbg-preview .status > div > span.line:before {
 	content: ':';
 }
+
+.dbg-preview .ansi[style~="text-shadow:"] {
+	text-shadow: none !important;
+	font-weight: bold !important;
+}

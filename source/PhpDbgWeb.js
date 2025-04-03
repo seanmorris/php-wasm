@@ -15,6 +15,7 @@ export class PhpDbgWeb extends PhpBase
 		this.paused = false;
 		this.currentFile = null;
 		this.currentLine = null;
+		this.inputPtr = null;
 	}
 
 	startTransaction()
@@ -38,34 +39,38 @@ export class PhpDbgWeb extends PhpBase
 
 		const php = (await this.binary);
 
-		const valueA = 'phpdbg';
-		const lenA = php.lengthBytesUTF8(valueA) + 1;
-		const locA = php._malloc(lenA);
-		php.stringToUTF8(valueA, locA, lenA);
+		const cmd = ['phpdbg', '-e'];
 
-		const valueB = '-be';
-		const lenB = php.lengthBytesUTF8(valueB) + 1;
-		const locB = php._malloc(lenB);
-		php.stringToUTF8(valueB, locB, lenB);
-
-		const lloc = php._malloc(4 * 2);
-
-		php.setValue(lloc + 0, locA, '*');
-		php.setValue(lloc + 4, locB, '*');
-
-		const call = php.ccall(
-			'main_init'
-			, NUM
-			, [NUM, NUM]
-			, [2, lloc]
-			, {async: true}
-		);
-
-		return call.finally(() => {
-			this.flush();
-			php._free(lloc);
-			php._free(locA);
+		const ptrs = cmd.map(part => {
+			const len = php.lengthBytesUTF8(part) + 1;
+			const loc = php._malloc(len);
+			php.stringToUTF8(part, loc, len);
+			return loc;
 		});
+
+		const arLoc = php._malloc(4 * ptrs.length);
+
+		for(const i in ptrs)
+		{
+			php.setValue(arLoc + 4 * i, ptrs[i], '*');
+		}
+
+		try
+		{
+			return php.ccall(
+				'main_init'
+				, NUM
+				, [NUM, NUM]
+				, [ptrs.length, arLoc]
+				, {async: true}
+			);
+		}
+		finally
+		{
+			this.flush();
+			// ptrs.forEach(p => php._free(p));
+			// php._free(arLoc);
+		}
 	}
 
 	async tick(input)
@@ -104,61 +109,47 @@ export class PhpDbgWeb extends PhpBase
 			, {}
 		);
 
-		const valueA = input;
-		// this.inputString(valueA);
-
-		const lenA = php.lengthBytesUTF8(valueA) + 1;
-		const locA = php._malloc(lenA);
-		php.stringToUTF8(valueA, locA, lenA);
-
 		try
 		{
-			let call
-			let first = true;
+			const len = php.lengthBytesUTF8(input) + 1;
+			const loc = php._malloc(len);
+			php.stringToUTF8(input, loc, len);
 
-			do
+			this.inputPtr = loc;
+			const call = php.ccall(
+				'phpdbg_main'
+				, NUM
+				, [NUM]
+				, [this.inputPtr]
+				, {async: true}
+			);
+
+			await call;
+
+			this.running = php.getValue(runFlagPtr, 'i8');
+			this.paused = php.getValue(pauseFlagPtr, 'i8');
+
+			this.currentFile = php.UTF8ToString(php.getValue(currentFilePtr, '*'));
+			this.currentLine = php.getValue(currentLinePtr, 'i32');
+
+			if(this.paused)
 			{
-				call = php.ccall(
-					'phpdbg_main'
-					, NUM
-					, [NUM]
-					, [first ? locA : null]
-					, {async: true}
-				);
-
-				await call;
-
-				await this.flush();
-
-				this.running = php.getValue(runFlagPtr, 'i8');
-				this.paused = php.getValue(pauseFlagPtr, 'i8');
-
-				this.currentFile = php.UTF8ToString(php.getValue(currentFilePtr, '*'));
-				this.currentLine = php.getValue(currentLinePtr, 'i32');
-
-				if(this.paused)
-				{
-					php.setValue(pauseFlagPtr, 0, 'i8');
-				}
-
-				first = false;
-
-			} while(this.running && !this.paused);
+				php.setValue(pauseFlagPtr, 0, 'i8');
+			}
 
 			return call;
 		}
-		catch(error)
-		{
-			console.log(error);
-		}
 		finally
 		{
-			php._free(locA);
 			if(!this.running)
 			{
 				this.currentFile = null;
 				this.currentLine = null;
 			}
+
+			await this.flush();
+			php._free(this.inputPtr);
+
 		}
 	}
 

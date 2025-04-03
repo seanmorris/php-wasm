@@ -4,6 +4,12 @@ import { PGlite } from '@electric-sql/pglite';
 
 import './dbg-preview.css';
 
+import Convert from 'ansi-to-html';
+
+const parser = new Convert;
+
+console.log(parser);
+
 const sharedLibs = [
 	`php${PhpDbgWeb.phpVersion}-zlib.so`,
 	`php${PhpDbgWeb.phpVersion}-zip.so`,
@@ -31,15 +37,24 @@ const ini = `
 	expose_php=0
 `;
 
+const escapeHtml = s => s
+	.replace(/&/g, "&amp;")
+	.replace(/</g, "&lt;")
+	.replace(/>/g, "&gt;")
+	.replace(/"/g, "&quot;")
+	.replace(/'/g, "&#039;");
+
 let init = true;
 
+let lastCommand = null;
+
 export default function DbgPreview() {
-	const [prompt, setPrompt] = useState('prompt');
-	const [file, setFile] = useState('');
-	const [line, setLine] = useState('');
 	const phpRef = useRef(null);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
+	const [prompt, setPrompt] = useState('prompt');
+	const [file, setFile] = useState('');
+	const [line, setLine] = useState('');
 	const [ready, setReady] = useState(false);
 	const [output, setOutput] = useState([]);
 	const [exitCode, setExitCode] = useState('');
@@ -66,20 +81,32 @@ export default function DbgPreview() {
 
 	const onOutput = event => {
 		console.log(event.detail.join(''));
-		setOutput(output => [...output, ...event.detail.map(text => ({
-			text: text.replace('\n', '\u240A\n').replace('\r', '\u240D')
-			, type: 'stdout'
-		}))]);
+
+		const newOutput = event.detail.map(text => text
+			.replace('\n', '\u240A\n')
+			.replace('\r', '\u240D'));
+
+		const ansi = newOutput.map(line => {
+			return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) }
+		});
+
+		setOutput(output => [...output, ...ansi]);
 
 		scrollToEnd();
 	};
 
 	const onError  = event => {
 		console.log(event.detail.join(''));
-		setOutput(output => [...output, ...event.detail.map(text => ({
-			text: text.replace('\n', '\u240A\n').replace('\r', '\u240D')
-			, type: 'stderr'
-		}))]);
+
+		const newOutput = event.detail.map(text => text
+			.replace('\n', '\u240A\n')
+			.replace('\r', '\u240D'));
+
+		const ansi = newOutput.map(line => {
+			return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) }
+		});
+
+		setOutput(output => [...output, ...ansi]);
 
 		scrollToEnd();
 	};
@@ -99,7 +126,6 @@ export default function DbgPreview() {
 			console.log(init, startPath);
 			if(init && startPath)
 			{
-				console.log(stdIn.current);
 				stdIn.current.value = `exec ${startPath}`;
 				console.log(stdIn.current.value);
 				runCommand();
@@ -134,10 +160,13 @@ export default function DbgPreview() {
 		stdIn.current.value = '';
 		setReady(false);
 		// phpRef.current.inputString('-e /preload/hello-world.php');
-		setOutput(output => [...output, {text: inputValue, type: 'stdin'}]);
+		setOutput(output => [...output, {text: inputValue || lastCommand, type: 'stdin'}]);
+		scrollToEnd();
 
 		const php = phpRef.current;
-		const exitCode = await php.tick(inputValue);
+		const exitCode = await php.tick(inputValue || lastCommand);
+
+		lastCommand = inputValue || lastCommand;
 
 		if(php.running)
 		{
@@ -194,7 +223,7 @@ export default function DbgPreview() {
 				<div className='console-frame' ref = {terminal}>
 					<div className='console-output'>
 						<span className = "warning">⚠️ <i>This is in VERY early alpha!</i> ⚠️</span>
-						{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index}>{line.text}</div>))}
+						{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
 					</div>
 					<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
 						<span>{prompt}&gt;</span>

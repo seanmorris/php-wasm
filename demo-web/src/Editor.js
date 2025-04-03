@@ -9,10 +9,12 @@ import Header from './Header';
 
 import ace from 'ace-builds';
 import AceEditor from "react-ace-builds";
+import { Range } from "ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 import { createRoot } from 'react-dom/client';
 
 import reactIcon from './react-icon.svg';
+import redCircle from './circle-red.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
 
@@ -37,15 +39,16 @@ const modes = {
 	, 'yaml': 'ace/mode/yaml'
 };
 
+const breakpoints = new Map;
+
 export default function Editor() {
 	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
 	const [showLeft, setShowLeft] = useState([]);
 	const currentPath = useRef(null);
 	const editBox = useRef(null);
-	const editor = useRef(null);
+	const aceRef = useRef(null);
 	const tabBox = useRef(null);
-
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -57,7 +60,7 @@ export default function Editor() {
 
 			sendMessage('writeFile', [
 				currentPath.current
-				, new TextEncoder().encode(editor.current.editor.getValue())
+				, new TextEncoder().encode(aceRef.current.editor.getValue())
 			]);
 
 			const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
@@ -92,7 +95,7 @@ export default function Editor() {
 					name = "input"
 					width = "100%"
 					height = "100%"
-					ref = {editor}
+					ref = {aceRef}
 				/>
 			);
 		}
@@ -117,13 +120,13 @@ export default function Editor() {
 				const first = [...openFilesMap.entries()][0][1];
 				first.active = true;
 				currentPath.current = first.path;
-				editor.current.editor.setSession(first.session);
+				aceRef.current.editor.setSession(first.session);
 			}
 			else
 			{
 				currentPath.current = null;
-				editor.current.editor.setSession(ace.createEditSession('', 'ace/mode/text'));
-				editor.current.editor.setReadOnly(true);
+				aceRef.current.editor.setSession(ace.createEditSession('', 'ace/mode/text'));
+				aceRef.current.editor.setReadOnly(true);
 			}
 		}
 
@@ -143,7 +146,9 @@ export default function Editor() {
 
 		currentPath.current = path;
 
-		editor.current.editor.setReadOnly(false);
+		const editor = aceRef.current.editor;
+
+		editor.setReadOnly(false);
 
 		if(!newFile.session)
 		{
@@ -160,7 +165,7 @@ export default function Editor() {
 
 		if(newFile.session)
 		{
-			editor.current.editor.setSession(newFile.session);
+			editor.setSession(newFile.session);
 			return;
 		}
 
@@ -183,7 +188,47 @@ export default function Editor() {
 			setOpenFiles(openFilesList);
 		});
 
-		editor.current.editor.setSession(newFile.session);
+		editor.setSession(newFile.session);
+
+		editor.on("guttermousedown", event => {
+			const target = event.domEvent.target;
+
+			if (target.className.indexOf("ace_gutter-cell") == -1)
+			{
+				return;
+			}
+
+			if (!editor.isFocused())
+			{
+				return;
+			}
+
+			if (event.clientX > 28 + target.getBoundingClientRect().left)
+			{
+				return;
+			}
+
+			const line = event.getDocumentPosition().row;
+			const existing = event.editor.session.getBreakpoints(line, 0);
+
+			if(!breakpoints.has(`${path}:${line}`))
+			{
+				console.log(line);
+				event.editor.session.setBreakpoint(line);
+				const marker = event.editor.session.addMarker(new Range(line, 0, line, Infinity), 'active_breakpoint', 'fullLine', true);
+				breakpoints.set(`${path}:${line}`, marker);
+			}
+			else
+			{
+				event.editor.session.clearBreakpoint(line);
+				event.editor.session.removeMarker( breakpoints.get(`${path}:${line}`) );
+				breakpoints.delete(`${path}:${line}`);
+			}
+
+			console.log(breakpoints);
+
+			event.stop();
+		});
 
 		tabBox.current.scrollTo({left:-tabBox.current.scrollWidth, behavior: 'smooth'});
 	};

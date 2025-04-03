@@ -121,3 +121,19 @@
 .grow {
 	flex-grow: 1;
 }
+
+.editor .ace_gutter-cell.ace_breakpoint {
+	/* backdrop-filter: invert(1); */
+	background-image: url(./circle-red.svg);
+	background-position: 3px 50%;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.editor .ace_marker-layer .active_breakpoint {
+	position: absolute;
+	background-color: #FF02;
+	/* mix-blend-mode: luminosity; */
+	/* background-blend-mode: luminosity; */
+	/* background-blend-mode: exclusion; */
+}
