@@ -76,7 +76,11 @@ export default function EditorFile({path, name}) {
 
 	const openPhpDbg = path => {
 		const q = new URLSearchParams({path});
-		const u = new URL('./dbg-preview.html?' + q.toString(), process.env.PUBLIC_URL || window.location);
+		const u = new URL(
+			'./dbg-preview.html?' + q.toString()
+			, new URL(process.env.PUBLIC_URL, window.location)
+		);
+
 		window.open(u);
 	};
 
