@@ -15,7 +15,7 @@ export class PhpDbgWeb extends PhpBase
 		this.paused = false;
 		this.currentFilePtr = null;
 		this.currentLinePtr = null;
-		this.startingTransaction = null;
+		this.bpCountPtr = null;
 
 		this.binary = this.binary.then((php) => {
 			console.log(php);
@@ -49,12 +49,8 @@ export class PhpDbgWeb extends PhpBase
 
 		php.inputDataQueue.push(line + '\n');
 
-		console.log(1, php.inputDataQueue);
-
 		if(php.awaitingInput)
 		{
-			console.log(2, php.inputDataQueue);
-
 			php.awaitingInput( php.inputDataQueue.shift() );
 			php.awaitingInput = null;
 		}
@@ -111,6 +107,14 @@ export class PhpDbgWeb extends PhpBase
 				, {}
 			);
 
+			this.bpCountPtr = php.ccall(
+				'php_wasm_get_bpcount'
+				, NUM
+				, []
+				, []
+				, {}
+			);
+
 			return process;
 		}
 		finally
@@ -146,6 +150,13 @@ export class PhpDbgWeb extends PhpBase
 		const php = await this.binary;
 
 		return php.getValue(this.currentLinePtr, 'i32');
+	}
+
+	async bpCount()
+	{
+		const php = await this.binary;
+
+		return php.getValue(this.bpCountPtr, 'i32');
 	}
 
 	async refresh()

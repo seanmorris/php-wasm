@@ -132,7 +132,7 @@
 
 .editor .ace_marker-layer .active_breakpoint {
 	position: absolute;
-	background-color: #FF02;
+	background-color: #CC06;
 	/* mix-blend-mode: luminosity; */
 	/* background-blend-mode: luminosity; */
 	/* background-blend-mode: exclusion; */

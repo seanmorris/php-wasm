@@ -281,7 +281,7 @@ index 2e2faf8..9cbb048 100644
  %.c: %.y
  %.c: %.l
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
-index a583854..c4325f8 100644
+index a583854..49f0301 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
 +++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
 @@ -16,6 +16,8 @@
@@ -293,7 +293,7 @@ index a583854..c4325f8 100644
  #include "phpdbg.h"
  #include "phpdbg_prompt.h"
  #include "phpdbg_bp.h"
-@@ -148,6 +150,20 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+@@ -148,6 +150,24 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
  #endif
  } /* }}} */
  
@@ -310,11 +310,15 @@ index a583854..c4325f8 100644
 +	return &phpdbg_wasm_current_line;
 +}
 +
++int* EMSCRIPTEN_KEEPALIVE php_wasm_get_bpcount(void)
++{
++	return &PHPDBG_G(bp_count);
++}
 +
  static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  {
  	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-@@ -177,6 +193,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+@@ -177,6 +197,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  
  static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
  {
@@ -324,7 +328,7 @@ index a583854..c4325f8 100644
  	zend_hash_destroy(&PHPDBG_G(registered));
  	phpdbg_destroy_watchpoints();
  
-@@ -1118,7 +1137,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+@@ -1118,7 +1141,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
  	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
  } /* }}} */
  
@@ -473,6 +477,18 @@ index c054326..0c81d93 100644
  		zend_object *exception = EG(exception);
  
  		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
+index b7b5df6..f6e26e8 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
+@@ -42,6 +42,7 @@ PHPDBG_COMMAND(leave);
+ PHPDBG_COMMAND(frame);
+ PHPDBG_COMMAND(print);
+ PHPDBG_COMMAND(break);
++PHPDBG_COMMAND(unbreak);
+ PHPDBG_COMMAND(back);
+ PHPDBG_COMMAND(list);
+ PHPDBG_COMMAND(info);
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c
 index 964d82e..361821c 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c

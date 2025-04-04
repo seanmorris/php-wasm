@@ -17,6 +17,7 @@ import reactIcon from './react-icon.svg';
 import redCircle from './circle-red.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
+import Debugger from './Debugger';
 
 const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
@@ -45,10 +46,15 @@ export default function Editor() {
 	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
 	const [showLeft, setShowLeft] = useState([]);
+	const [phpdbg, setPhpDbg] = useState(false);
+
+	const activeLines = useRef(new Set);
+	const currentBreak = useRef({});
 	const currentPath = useRef(null);
 	const editBox = useRef(null);
 	const aceRef = useRef(null);
 	const tabBox = useRef(null);
+	const openDbg = useRef(null);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -169,16 +175,20 @@ export default function Editor() {
 			return;
 		}
 
+		const extension = path.split('.').pop();
+		const mode = modes[extension] ?? 'ace/mode/text';
+
+		newFile.session = ace.createEditSession('', mode);
+		editor.setSession(newFile.session);
+
 		const code = new TextDecoder().decode(
 			await sendMessage('readFile', [path])
 		);
 
 		setContents(code);
+		editor.setValue(code);
 
-		const extension = path.split('.').pop();
-		const mode = modes[extension] ?? 'ace/mode/text';
-
-		newFile.session = ace.createEditSession(code, mode);
+		editor.clearSelection();
 
 		newFile.dirty = false;
 
@@ -188,9 +198,9 @@ export default function Editor() {
 			setOpenFiles(openFilesList);
 		});
 
-		editor.setSession(newFile.session);
+		// editor.setOption("firstLineNumber", 0);
 
-		editor.on("guttermousedown", event => {
+		editor.on("guttermousedown", async event => {
 			const target = event.domEvent.target;
 
 			if (target.className.indexOf("ace_gutter-cell") == -1)
@@ -209,20 +219,34 @@ export default function Editor() {
 			}
 
 			const line = event.getDocumentPosition().row;
-			const existing = event.editor.session.getBreakpoints(line, 0);
+			// const existing = event.editor.session.getBreakpoints(line, 0);
 
-			if(!breakpoints.has(`${path}:${line}`))
+			if(!breakpoints.has(`${path}:${1 + line}`))
 			{
-				console.log(line);
 				event.editor.session.setBreakpoint(line);
-				const marker = event.editor.session.addMarker(new Range(line, 0, line, Infinity), 'active_breakpoint', 'fullLine', true);
-				breakpoints.set(`${path}:${line}`, marker);
+
+				let id = breakpoints.size;
+
+				if(openDbg.current)
+				{
+					openDbg.current.setBreakpoint(path, 1 + line);
+					id = await openDbg.current.bpCount();
+				}
+
+				breakpoints.set(`${path}:${1 + line}`, id);
 			}
 			else
 			{
+				const id = breakpoints.get(`${path}:${1 + line}`);
+
 				event.editor.session.clearBreakpoint(line);
-				event.editor.session.removeMarker( breakpoints.get(`${path}:${line}`) );
-				breakpoints.delete(`${path}:${line}`);
+
+				if(openDbg.current)
+				{
+					openDbg.current.clearBreakpoint(id);
+				}
+
+				breakpoints.delete(`${path}:${1 + line}`);
 			}
 
 			console.log(breakpoints);
@@ -233,7 +257,56 @@ export default function Editor() {
 		tabBox.current.scrollTo({left:-tabBox.current.scrollWidth, behavior: 'smooth'});
 	};
 
-	const handleOpenFile = async event => openFile(event.detail);
+	const handleOpenFile = event => openFile(event.detail);
+
+	const startDebugger = () => {
+
+		const editor = aceRef.current.editor;
+
+		if(openDbg.current)
+		{
+			activeLines.current.forEach(m => editor.session.removeMarker(m));
+			openDbg.current = null;
+			setPhpDbg(openDbg.current);
+			return;
+		}
+
+		openDbg.current = <Debugger
+			file = {currentPath.current}
+			ref = {openDbg}
+			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
+			setCurrentFile = {file => currentBreak.current.file = file}
+			setCurrentLine = {line => currentBreak.current.line = line}
+			onStdIn = {async () => {
+				const file = currentBreak.current.file;
+				const line = currentBreak.current.line;
+
+				activeLines.current.forEach(m => editor.session.removeMarker(m));
+
+				if(file && line)
+				{
+					await openFile(file);
+
+					const marker = editor.session.addMarker(
+						new Range(-1 + line, 0, -1 + line, Infinity), 'active_breakpoint', 'fullLine', true
+					);
+
+					activeLines.current.add(marker);
+				}
+			}}
+		/>;
+
+		setPhpDbg(openDbg.current);
+	};
+
+	const handleStartDebugger = event => startDebugger();
+	const handleRun = event => openDbg.current.run();
+	const handleStep = event => openDbg.current.step();
+	const handleContinue = event => openDbg.current.continue();
+	const handleUntil = event => openDbg.current.until();
+	const handleNext = event => openDbg.current.next();
+	const handleFinish = event => openDbg.current.finish();
+	const handleLeave = event => openDbg.current.leave();
 
 	return (
 		<div className = "editor" data-show-left = {showLeft}>
@@ -246,6 +319,31 @@ export default function Editor() {
 					<button className='square' onClick = {handleSave}>
 						<img src = {saveIcon} />
 					</button>
+					<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
+						D
+					</button>
+					{phpdbg && (
+						<span>
+						<button title = "Step" className='square' onClick = {handleStep}>
+							S
+						</button>
+						<button title = "Continue" className='square' onClick = {handleContinue}>
+							C
+						</button>
+						<button title = "Until" className='square' onClick = {handleUntil}>
+							U
+						</button>
+						<button title = "Next" className='square' onClick = {handleNext}>
+							N
+						</button>
+						<button title = "Finish" className='square' onClick = {handleFinish}>
+							F
+						</button>
+						<button title = "Leave" className='square' onClick = {handleLeave}>
+							L
+						</button>
+						</span>
+					)}
 				</div>
 				<div className = "row">
 					<div className = "file-area frame inset">
@@ -271,6 +369,9 @@ export default function Editor() {
 								<pre>{contents}</pre>
 							</div>
 						</div>
+						{phpdbg && (
+							<div className='inset frame grow'>{phpdbg}</div>
+						)}
 					</div>
 				</div>
 				<div className = "inset right demo-bar">
