@@ -189,7 +189,7 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 			SG(headers_sent) = 1;
 		}
 
-		if(EG(exception))
+		if(EG(exception) && !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception))))
 		{
 			zend_exception_error(EG(exception), E_ERROR);
 			retVal = 2;

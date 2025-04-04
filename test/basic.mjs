@@ -35,8 +35,7 @@ describe('Returns 0 as an exit code.', async () => {
 			'<?php function main(): int { echo "Hello World" . PHP_EOL; return 0;}; exit(main());',
 		);
 
-		// assert.equal(stdOut, 'Hello World\n');
-		assert.equal(stdOut, '');
+		assert.equal(stdOut, 'Hello World\n');
 		assert.equal(stdErr, '');
 		assert.equal(exitCode, 0);
 	});
@@ -55,7 +54,6 @@ describe('Returns 0 as an exit code.', async () => {
 			'<?php exit(0);',
 		);
 
-		// assert.equal(stdOut, 'Hello World\n');
 		assert.equal(stdOut, '');
 		assert.equal(stdErr, '');
 		assert.equal(exitCode, 0);
@@ -75,7 +73,6 @@ describe('Returns 0 as an exit code.', async () => {
 			'<?php exit();',
 		);
 
-		// assert.equal(stdOut, 'Hello World\n');
 		assert.equal(stdOut, '');
 		assert.equal(stdErr, '');
 		assert.equal(exitCode, 0);
