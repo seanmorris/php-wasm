@@ -1,4 +1,4 @@
-import { test } from 'node:test';
+import { describe, test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../packages/php-wasm/PhpNode.mjs';
 
@@ -17,6 +17,69 @@ test('Can run PHP', async () => {
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, '');
 	assert.equal(stdErr, '');
+});
+
+describe('Returns 0 as an exit code.', async () => {
+
+	test('User report', async () => {
+		const php = new PhpNode({ persist: {mountPath: '/host' , localPath: '/'} });
+
+		let stdOut = '', stdErr = '';
+
+		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+		await php.binary;
+
+		const exitCode = await php.run(
+			'<?php function main(): int { echo "Hello World" . PHP_EOL; return 0;}; exit(main());',
+		);
+
+		// assert.equal(stdOut, 'Hello World\n');
+		assert.equal(stdOut, '');
+		assert.equal(stdErr, '');
+		assert.equal(exitCode, 0);
+	});
+
+	test('Distilled', async () => {
+		const php = new PhpNode({ persist: {mountPath: '/host' , localPath: '/'} });
+
+		let stdOut = '', stdErr = '';
+
+		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+		await php.binary;
+
+		const exitCode = await php.run(
+			'<?php exit(0);',
+		);
+
+		// assert.equal(stdOut, 'Hello World\n');
+		assert.equal(stdOut, '');
+		assert.equal(stdErr, '');
+		assert.equal(exitCode, 0);
+	});
+
+	test('???', async () => {
+		const php = new PhpNode({ persist: {mountPath: '/host' , localPath: '/'} });
+
+		let stdOut = '', stdErr = '';
+
+		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+		await php.binary;
+
+		const exitCode = await php.run(
+			'<?php exit();',
+		);
+
+		// assert.equal(stdOut, 'Hello World\n');
+		assert.equal(stdOut, '');
+		assert.equal(stdErr, '');
+		assert.equal(exitCode, 0);
+	});
 });
 
 test('Can print to STDOUT', async () => {

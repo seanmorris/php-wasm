@@ -216,6 +216,13 @@ export default function Editor() {
 				console.log(event);
 
 				const session = editor.getSession();
+
+				if(!sessionsMap.has(session))
+				{
+					console.trace('Unmapped session!');
+					return;
+				}
+
 				const {path} = sessionsMap.get(session);
 
 				const target = event.domEvent.target;
@@ -336,28 +343,32 @@ export default function Editor() {
 					<button className='square' onClick = {handleSave}>
 						<img src = {saveIcon} />
 					</button>
-					<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
-						D
-					</button>
-					{phpdbg && (
+					{!phpdbg ? (
+						<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
+							▶
+						</button>
+					) : (
 						<span>
+						<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
+							⏹
+						</button>
 						<button title = "Step" className='square' onClick = {handleStep}>
-							S
+							⇥
 						</button>
 						<button title = "Continue" className='square' onClick = {handleContinue}>
-							C
+							→
 						</button>
 						<button title = "Until" className='square' onClick = {handleUntil}>
-							U
+							⤻
 						</button>
 						<button title = "Next" className='square' onClick = {handleNext}>
-							N
+							↦
 						</button>
 						<button title = "Finish" className='square' onClick = {handleFinish}>
-							F
+							↑
 						</button>
 						<button title = "Leave" className='square' onClick = {handleLeave}>
-							L
+							↳
 						</button>
 						</span>
 					)}

@@ -232,7 +232,7 @@ export default forwardRef(function Debugger({
 		<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
 			{!ready && (<img src = {loading} />)}
 			<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
-			<input autoFocus = {true} disabled={!ready} name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+			<input autoFocus = {true} disabled={!ready} autocomplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
 			<button onClick = {runCommand}>&gt;</button>
 		</div>
 	</div>);
