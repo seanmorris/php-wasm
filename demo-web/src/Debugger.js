@@ -43,7 +43,6 @@ const escapeHtml = s => s
 	.replace(/"/g, "&quot;")
 	.replace(/'/g, "&#039;");
 
-let init = true;
 let lastCommand = null;
 
 export default forwardRef(function Debugger({
@@ -57,32 +56,35 @@ export default forwardRef(function Debugger({
 	const [ready, setReady] = useState(false);
 	const [output, setOutput] = useState([]);
 	const [exitCode, setExitCode] = useState('');
+	const init = useRef(true);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
 	const startPath = file;
 
 	useImperativeHandle(ref, () => ({
-		setBreakpoint (file, line) { runCommand(null, `b ${file}:${line}`); },
-		clearBreakpoint (id) { runCommand(null, `b ~ ${id}`); },
+		setBreakpoint (file, line) { runCommand(null, `b ${file}:${line}`, true); },
+		clearBreakpoint (id) { runCommand(null, `b ~ ${id}`, true); },
 		bpCount() { return phpRef.current.bpCount(); },
-		run() { runCommand(null, `run`); },
-		step() { runCommand(null, `step`); },
-		continue() { runCommand(null, `continue`); },
-		until() { runCommand(null, `until`); },
-		next() { runCommand(null, `next`); },
-		finish() { runCommand(null, `finish`); },
-		leave() { runCommand(null, `leave`); },
+		run() { runCommand(null, `run`, true); },
+		step() { runCommand(null, `step`, true); },
+		continue() { runCommand(null, `continue`, true); },
+		until() { runCommand(null, `until`, true); },
+		next() { runCommand(null, `next`, true); },
+		finish() { runCommand(null, `finish`, true); },
+		leave() { runCommand(null, `leave`, true); },
 	}));
 
 	let timeout = null;
 
 	const scrollToEnd = () => {
-		if (!stdIn.current) {
+		if(!stdIn.current)
+		{
 			return;
 		}
 
-		if (timeout) {
+		if(timeout)
+		{
 			clearTimeout(timeout);
 		}
 
@@ -134,7 +136,7 @@ export default forwardRef(function Debugger({
 				await runCommand(null, `exec ${startPath}`);
 			}
 
-			await Promise.all( initCommands.map(async cmd => runCommand(null, cmd, false)) );
+			await Promise.all( initCommands.map(async cmd => runCommand(null, cmd, true)) );
 
 			await runCommand(null, 'set pagination off', true);
 
@@ -144,34 +146,35 @@ export default forwardRef(function Debugger({
 			focusInput();
 		}
 
-		php.addEventListener('stdin-request', firstInput, {once: true});
-		php.addEventListener('stdin-request', async event => {
+		const onStdInHandler = async event => {
 			setCurrentFile && setCurrentFile( await php.currentFile() );
 			setCurrentLine && setCurrentLine( await php.currentLine() );
 			setPrompt( parser.toHtml(escapeHtml(await php.getPrompt())) );
-
 			onStdIn && onStdIn(event);
-		});
+		};
+
+		const once = {once: true};
+
+		php.addEventListener('stdin-request', onStdInHandler);
+		php.addEventListener('stdin-request', firstInput, once);
 
 		php.run();
-
-		php.binary.then(() => {
-
-		});
 
 		return () => {
 			php.removeEventListener('output', onOutput);
 			php.removeEventListener('error', onError);
+			php.removeEventListener('stdin-request', onStdInHandler);
+			php.removeEventListener('stdin-request', firstInput, once);
 		};
 	}, []);
 
 	useEffect(() => {
-		if(init)
+		if(init.current)
 		{
-			refreshPhp(init);
-			init = false;
+			refreshPhp(init.current);
+			init.current = false;
 		}
-	}, [refreshPhp]);
+	}, [refreshPhp, init]);
 
 	const checkEnter = async event => {
 		if(event.key === 'Enter')
@@ -186,11 +189,19 @@ export default forwardRef(function Debugger({
 
 		const inputValue = command || stdIn.current.value || '';
 
-		if (command === null) {
+		if(!phpRef.current)
+		{
+			return;
+		}
+
+		if(command === null)
+		{
 			stdIn.current.value = '';
 		}
 
-		if (localEcho && !silent) {
+		if(localEcho && !silent)
+		{
+
 			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
 			scrollToEnd();
 		}
@@ -201,12 +212,14 @@ export default forwardRef(function Debugger({
 
 		lastCommand = inputValue || lastCommand;
 		setExitCode(exitCode);
-		stdIn.current.focus();
+
+		stdIn.current && stdIn.current.focus();
 	}
 
 	const focusInput = event => {
-		if (window.getSelection().toString() === '') {
-			stdIn.current.focus();
+		if(window.getSelection().toString() === '')
+		{
+			stdIn.current && stdIn.current.focus();
 		}
 	};
 

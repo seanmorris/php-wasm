@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import EditorFolder from './EditorFolder';
@@ -22,6 +22,7 @@ import Debugger from './Debugger';
 const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const openFilesMap = new Map();
+const sessionsMap = new WeakMap;
 
 const modes = {
 	'php': 'ace/mode/php'
@@ -141,6 +142,8 @@ export default function Editor() {
 	};
 
 	const openFile = async path => {
+		const editor = aceRef.current.editor;
+
 		const name = path.split('/').pop();
 		const newFile = openFilesMap.has(path)
 			? openFilesMap.get(path)
@@ -151,8 +154,6 @@ export default function Editor() {
 		window.history.replaceState({}, null, window.location.pathname + '?' + query);
 
 		currentPath.current = path;
-
-		const editor = aceRef.current.editor;
 
 		editor.setReadOnly(false);
 
@@ -181,6 +182,8 @@ export default function Editor() {
 		newFile.session = ace.createEditSession('', mode);
 		editor.setSession(newFile.session);
 
+		sessionsMap.set(newFile.session, newFile);
+
 		const code = new TextDecoder().decode(
 			await sendMessage('readFile', [path])
 		);
@@ -200,62 +203,76 @@ export default function Editor() {
 
 		// editor.setOption("firstLineNumber", 0);
 
-		editor.on("guttermousedown", async event => {
-			const target = event.domEvent.target;
-
-			if (target.className.indexOf("ace_gutter-cell") == -1)
-			{
-				return;
-			}
-
-			if (!editor.isFocused())
-			{
-				return;
-			}
-
-			if (event.clientX > 28 + target.getBoundingClientRect().left)
-			{
-				return;
-			}
-
-			const line = event.getDocumentPosition().row;
-			// const existing = event.editor.session.getBreakpoints(line, 0);
-
-			if(!breakpoints.has(`${path}:${1 + line}`))
-			{
-				event.editor.session.setBreakpoint(line);
-
-				let id = breakpoints.size;
-
-				if(openDbg.current)
-				{
-					openDbg.current.setBreakpoint(path, 1 + line);
-					id = await openDbg.current.bpCount();
-				}
-
-				breakpoints.set(`${path}:${1 + line}`, id);
-			}
-			else
-			{
-				const id = breakpoints.get(`${path}:${1 + line}`);
-
-				event.editor.session.clearBreakpoint(line);
-
-				if(openDbg.current)
-				{
-					openDbg.current.clearBreakpoint(id);
-				}
-
-				breakpoints.delete(`${path}:${1 + line}`);
-			}
-
-			console.log(breakpoints);
-
-			event.stop();
-		});
-
 		tabBox.current.scrollTo({left:-tabBox.current.scrollWidth, behavior: 'smooth'});
 	};
+
+	useEffect(() => {
+		console.log(aceRef.current);
+		if(aceRef.current)
+		{
+			const onGutter = async event => {
+
+				const editor = aceRef.current.editor;
+				console.log(event);
+
+				const session = editor.getSession();
+				const {path} = sessionsMap.get(session);
+
+				const target = event.domEvent.target;
+
+				if(target.className.indexOf("ace_gutter-cell") == -1)
+				{
+					return;
+				}
+
+				if(event.clientX > 28 + target.getBoundingClientRect().left)
+				{
+					return;
+				}
+
+				const line = event.getDocumentPosition().row;
+				// const existing = event.editor.session.getBreakpoints(line, 0);
+
+				if(!breakpoints.has(`${path}:${1 + line}`))
+				{
+					event.editor.session.setBreakpoint(line);
+
+					let id = breakpoints.size;
+
+					if(openDbg.current)
+					{
+						openDbg.current.setBreakpoint(path, 1 + line);
+						id = await openDbg.current.bpCount();
+					}
+
+					breakpoints.set(`${path}:${1 + line}`, id);
+				}
+				else
+				{
+					const id = breakpoints.get(`${path}:${1 + line}`);
+
+					event.editor.session.clearBreakpoint(line);
+
+					if(openDbg.current)
+					{
+						openDbg.current.clearBreakpoint(id);
+					}
+
+					breakpoints.delete(`${path}:${1 + line}`);
+				}
+
+				console.log(breakpoints);
+
+				event.stop();
+			};
+
+			aceRef.current.editor.on('guttermousedown', onGutter);
+
+			return () => {
+				aceRef.current.editor.session.off('off', onGutter);
+			};
+		}
+	}, [aceRef.current]);
 
 	const handleOpenFile = event => openFile(event.detail);
 
