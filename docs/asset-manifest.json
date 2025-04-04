@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/php-wasm/static/css/main.8c3a5832.css",
-    "main.js": "/php-wasm/static/js/main.a7ec0724.js",
+    "main.css": "/php-wasm/static/css/main.1d23e04b.css",
+    "main.js": "/php-wasm/static/js/main.2773a6b9.js",
     "static/js/835.ba3f1ffc.chunk.js": "/php-wasm/static/js/835.ba3f1ffc.chunk.js",
     "static/js/97.c6261c0f.chunk.js": "/php-wasm/static/js/97.c6261c0f.chunk.js",
     "static/js/330.c76e5618.chunk.js": "/php-wasm/static/js/330.c76e5618.chunk.js",
     "static/js/675.42a30c6f.chunk.js": "/php-wasm/static/js/675.42a30c6f.chunk.js",
-    "static/js/331.b658539f.chunk.js": "/php-wasm/static/js/331.b658539f.chunk.js",
-    "static/js/774.54b28235.chunk.js": "/php-wasm/static/js/774.54b28235.chunk.js",
+    "static/js/331.506cf2fc.chunk.js": "/php-wasm/static/js/331.506cf2fc.chunk.js",
+    "static/js/774.71f6224c.chunk.js": "/php-wasm/static/js/774.71f6224c.chunk.js",
     "static/js/574.49428a7c.chunk.js": "/php-wasm/static/js/574.49428a7c.chunk.js",
     "static/js/40.9229f9f2.chunk.js": "/php-wasm/static/js/40.9229f9f2.chunk.js",
     "static/js/622.dfd05a2c.chunk.js": "/php-wasm/static/js/622.dfd05a2c.chunk.js",
-    "static/media/php-dbg-web.mjs.wasm": "/php-wasm/static/media/php-dbg-web.mjs.39ce0d61a73759f506fe.wasm",
-    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.7f794f672cedfe5948ef.wasm",
-    "static/media/postgres.wasm": "/php-wasm/static/media/postgres.a28dc5fef609f15836f3.wasm",
-    "static/media/postgres.data": "/php-wasm/static/media/postgres.50ee79fa149a7ae743ea.data",
+    "static/media/php-dbg-web.mjs.wasm": "/php-wasm/static/media/php-dbg-web.mjs.c95165efff4227c660bc.wasm",
+    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.b4c865a49abfac486810.wasm",
+    "static/media/postgres.wasm": "/php-wasm/static/media/postgres.882a4fc4178bf2b803a6.wasm",
+    "static/media/postgres.data": "/php-wasm/static/media/postgres.6a6af95f67e70830cb39.data",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
     "worker-javascript.js": "/php-wasm/70896c45cb42a1a16168cef789116031.js",
     "mode-php_laravel_blade.js": "/php-wasm/e43564c89288d9dc205f894bb77f6254.js",
@@ -336,7 +336,7 @@
     "ext-linking.js": "/php-wasm/d293578c305f17cb67549877f6d5545c.js",
     "graphqlschema.js": "/php-wasm/872bd129a8f1b0ea220203636689646c.js",
     "velocity.js": "/php-wasm/216159cd8fdffa505cf076d5f63d6d63.js",
-    "static/media/loading.svg": "/php-wasm/static/media/loading.2b896576627b3dc4cce9.svg",
+    "static/media/loading.svg": "/php-wasm/static/media/loading.2b896576627b3dc4cce900803caca1bc.svg",
     "static/media/file.markdown.svg": "/php-wasm/static/media/file.markdown.7ef6ad7c564b0360e1de49e30eee062b.svg",
     "ext-simple_tokenizer.js": "/php-wasm/5bb0785b0459bed91b2a371c46f8541d.js",
     "textile.js": "/php-wasm/944f4aa96bfa69a0ebbf61c2af1cfb85.js",
@@ -363,6 +363,7 @@
     "static/media/folder.open.svg": "/php-wasm/static/media/folder.open.0a3c803d387ce8b5fa5ce9b385e5ac8f.svg",
     "static/media/folder.close.svg": "/php-wasm/static/media/folder.close.1563cfb999a79a3d12b262afc1e61713.svg",
     "static/media/file.svg": "/php-wasm/static/media/file.f4b77c1e1712fc00a95b1b4c45709c99.svg",
+    "static/media/circle-red.svg": "/php-wasm/static/media/circle-red.ceed2491f388fa37223a419d83e1ef95.svg",
     "php_laravel_blade.js": "/php-wasm/40064f074583135ca817d3240c2ed429.js",
     "haskell_cabal.js": "/php-wasm/c0eebaec55db3f9dfe8e8e6f1eeef982.js",
     "assembly_x86.js": "/php-wasm/05f2b6d27716f95c75421370d5ee9029.js",
@@ -503,13 +504,13 @@
     "ftl.js": "/php-wasm/f76ee9c8abfdd96fb9d70116d40435d5.js",
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
-    "main.8c3a5832.css.map": "/php-wasm/static/css/main.8c3a5832.css.map",
-    "main.a7ec0724.js.map": "/php-wasm/static/js/main.a7ec0724.js.map",
-    "331.b658539f.chunk.js.map": "/php-wasm/static/js/331.b658539f.chunk.js.map",
-    "774.54b28235.chunk.js.map": "/php-wasm/static/js/774.54b28235.chunk.js.map"
+    "main.1d23e04b.css.map": "/php-wasm/static/css/main.1d23e04b.css.map",
+    "main.2773a6b9.js.map": "/php-wasm/static/js/main.2773a6b9.js.map",
+    "331.506cf2fc.chunk.js.map": "/php-wasm/static/js/331.506cf2fc.chunk.js.map",
+    "774.71f6224c.chunk.js.map": "/php-wasm/static/js/774.71f6224c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.8c3a5832.css",
-    "static/js/main.a7ec0724.js"
+    "static/css/main.1d23e04b.css",
+    "static/js/main.2773a6b9.js"
   ]
 }

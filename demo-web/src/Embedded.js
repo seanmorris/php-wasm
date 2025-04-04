@@ -6,7 +6,6 @@ import "react-ace-builds/webpack-resolver-min";
 import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
-// import { PhpDbgWeb as PhpWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 

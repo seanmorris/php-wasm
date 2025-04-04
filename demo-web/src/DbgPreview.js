@@ -3,12 +3,11 @@ import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import { PGlite } from '@electric-sql/pglite';
 
 import './dbg-preview.css';
+import loading from './loading.svg';
 
 import Convert from 'ansi-to-html';
 
 const parser = new Convert;
-
-console.log(parser);
 
 const sharedLibs = [
 	`php${PhpDbgWeb.phpVersion}-zlib.so`,
@@ -45,14 +44,16 @@ const escapeHtml = s => s
 	.replace(/'/g, "&#039;");
 
 let init = true;
-
 let lastCommand = null;
+let localEcho = true;
+
+const delay = d => new Promise(a => setTimeout(a, d));
 
 export default function DbgPreview() {
 	const phpRef = useRef(null);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
-	const [prompt, setPrompt] = useState('prompt');
+	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mprompt> ')));
 	const [file, setFile] = useState('');
 	const [line, setLine] = useState('');
 	const [ready, setReady] = useState(false);
@@ -79,8 +80,8 @@ export default function DbgPreview() {
 		timeout = setTimeout(() => stdIn.current.scrollIntoView(), 10);
 	};
 
-	const onOutput = event => {
-		console.log(event.detail.join(''));
+	const onOutput = async event => {
+		// console.log(event.detail.join(''));
 
 		const newOutput = event.detail.map(text => text
 			.replace('\n', '\u240A\n')
@@ -88,15 +89,16 @@ export default function DbgPreview() {
 
 		const ansi = newOutput.map(line => {
 			return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) }
+			// return { type: 'stdout', text: escapeHtml(line) }
 		});
 
 		setOutput(output => [...output, ...ansi]);
-
+		// await delay(32);
 		scrollToEnd();
 	};
 
-	const onError  = event => {
-		console.log(event.detail.join(''));
+	const onError  = async event => {
+		// console.log(event.detail.join(''));
 
 		const newOutput = event.detail.map(text => text
 			.replace('\n', '\u240A\n')
@@ -104,14 +106,15 @@ export default function DbgPreview() {
 
 		const ansi = newOutput.map(line => {
 			return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) }
+			// return { type: 'stderr', text: escapeHtml(line) }
 		});
 
 		setOutput(output => [...output, ...ansi]);
-
+		// await delay(32);
 		scrollToEnd();
 	};
 
-	const refreshPhp = useCallback((init) => {
+	const refreshPhp = useCallback(init => {
 		setStatusMessage('loading...');
 		phpRef.current = new PhpDbgWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
@@ -120,16 +123,33 @@ export default function DbgPreview() {
 		php.addEventListener('output', onOutput);
 		php.addEventListener('error', onError);
 
-		php.run().then(() => {
-			setReady(true);
-			setStatusMessage('php-dbg-wasm ready!');
-			console.log(init, startPath);
+		const firstInput = async () => {
+
 			if(init && startPath)
 			{
-				stdIn.current.value = `exec ${startPath}`;
-				console.log(stdIn.current.value);
-				runCommand();
+				setReady(false);
+				await runCommand(null, 'set pagination off');
+				await runCommand(null, `exec ${startPath}`);
+				// setReady(true);
 			}
+
+			setStatusMessage('php-dbg-wasm ready!');
+			setReady(true);
+			await delay(10);
+			focusInput();
+		}
+
+		php.addEventListener('stdin-request', firstInput, {once: true});
+		php.addEventListener('stdin-request', async event => {
+			setFile( await php.currentFile() );
+			setLine( await php.currentLine() );
+			setPrompt( parser.toHtml(escapeHtml(await php.getPrompt())) );
+		});
+
+		php.run();
+
+		php.binary.then(() => {
+
 		});
 
 		return () => {
@@ -155,41 +175,35 @@ export default function DbgPreview() {
 		}
 	};
 
-	const runCommand = async event => {
-		const inputValue = stdIn.current.value;
-		stdIn.current.value = '';
-		setReady(false);
-		// phpRef.current.inputString('-e /preload/hello-world.php');
-		setOutput(output => [...output, {text: inputValue || lastCommand, type: 'stdin'}]);
-		scrollToEnd();
+	const runCommand = async (event, command = null) => {
+
+		const inputValue = command || stdIn.current.value || '';
+
+		console.log(0, inputValue, stdIn.current.value);
+
+		if (command === null) {
+			stdIn.current.value = '';
+		}
+
+		if (localEcho) {
+			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
+			// await delay(32);
+			scrollToEnd();
+		}
 
 		const php = phpRef.current;
-		const exitCode = await php.tick(inputValue || lastCommand);
+
+		await php.provideInput(inputValue);
 
 		lastCommand = inputValue || lastCommand;
-
-		if(php.running)
-		{
-			setPrompt('');
-			setFile(php.currentFile);
-			setLine(php.currentLine);
-		}
-		else
-		{
-			setPrompt('prompt');
-
-			setFile('');
-			setLine('');
-		}
-
-		setReady(true);
-		// console.log(inputValue, exitCode);
 		setExitCode(exitCode);
 		stdIn.current.focus();
 	}
 
 	const focusInput = event => {
-		stdIn.current.focus();
+		if (window.getSelection().toString() === '') {
+			stdIn.current.focus();
+		}
 	};
 
 	const topBar = (<div className = "row header toolbar">
@@ -211,14 +225,17 @@ export default function DbgPreview() {
 	</div>);
 
 	const statusBar = (<div className = "row status">
-		<div className = "row start toolbar" data-status>{file}<span className='line'>{line}</span></div>
+		<div className = "row start toolbar" data-status>
+			<span className='file'>{file}</span>
+			<span className='line'>{line}</span>
+		</div>
 		<div className = "row start wide toolbar" data-status>{statusMessage}</div>
 	</div>);
 
 	return (<div className = "dbg-preview margined">
 		<div className='bevel column'>
 			{topBar}
-			<div className='inset console'>
+			<div className='inset console' onMouseUp={focusInput}>
 				<div className='scroll-to-bottom' onClick={focusInput}>&#x1F847;</div>
 				<div className='console-frame' ref = {terminal}>
 					<div className='console-output'>
@@ -226,8 +243,9 @@ export default function DbgPreview() {
 						{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
 					</div>
 					<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-						<span>{prompt}&gt;</span>
-						<input autoFocus = {true} name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+						{!ready && (<img src = {loading} />)}
+						<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
+						<input autoFocus = {true} disabled={!ready} name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
 						<button onClick = {runCommand}>&gt;</button>
 					</div>
 				</div>

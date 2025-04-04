@@ -13,9 +13,17 @@ export class PhpDbgWeb extends PhpBase
 
 		this.running = false;
 		this.paused = false;
-		this.currentFile = null;
-		this.currentLine = null;
-		this.inputPtr = null;
+		this.currentFilePtr = null;
+		this.currentLinePtr = null;
+		this.startingTransaction = null;
+
+		this.binary = this.binary.then((php) => {
+			console.log(php);
+			php.inputDataQueue = [];
+			php.awaitingInput = null;
+			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
+			return php;
+		});
 	}
 
 	startTransaction()
@@ -30,13 +38,35 @@ export class PhpDbgWeb extends PhpBase
 
 	run()
 	{
-		return this._enqueue(() => this._main(), []);
+		return this._main();
+		// return this._enqueue(() => this._main(), []);
+	}
+
+	async provideInput(line)
+	{
+		const php = await this.binary;
+		await this.startTransaction();
+
+		php.inputDataQueue.push(line + '\n');
+
+		console.log(1, php.inputDataQueue);
+
+		if(php.awaitingInput)
+		{
+			console.log(2, php.inputDataQueue);
+
+			php.awaitingInput( php.inputDataQueue.shift() );
+			php.awaitingInput = null;
+		}
+
+		this.addEventListener('stdin-request', async () => {
+			this.flush();
+		}, {once: true});
+
 	}
 
 	async _main()
 	{
-		this.inputString('\n');
-
 		const php = (await this.binary);
 
 		const cmd = ['phpdbg', '-e'];
@@ -57,13 +87,31 @@ export class PhpDbgWeb extends PhpBase
 
 		try
 		{
-			return php.ccall(
-				'main_init'
+			const process = php.ccall(
+				'main'
 				, NUM
 				, [NUM, NUM]
 				, [ptrs.length, arLoc]
 				, {async: true}
 			);
+
+			this.currentFilePtr = php.ccall(
+				'phpdbg_wasm_get_current_file'
+				, NUM
+				, []
+				, []
+				, {}
+			);
+
+			this.currentLinePtr = php.ccall(
+				'phpdbg_wasm_get_current_line'
+				, NUM
+				, []
+				, []
+				, {}
+			);
+
+			return process;
 		}
 		finally
 		{
@@ -73,84 +121,31 @@ export class PhpDbgWeb extends PhpBase
 		}
 	}
 
-	async tick(input)
+	async getPrompt()
 	{
-		const php = (await this.binary);
+		const php = await this.binary;
 
-		const runFlagPtr = php.ccall(
-			'phpdbg_wasm_get_running_flag_pointer'
-			, NUM
+		return php.ccall(
+			'phpdbg_get_prompt'
+			, STR
 			, []
 			, []
 			, {}
-		);
+		);;
+	}
 
-		const pauseFlagPtr = php.ccall(
-			'phpdbg_wasm_get_paused_flag_pointer'
-			, NUM
-			, []
-			, []
-			, {}
-		);
+	async currentFile()
+	{
+		const php = await this.binary;
 
-		const currentFilePtr = php.ccall(
-			'phpdbg_wasm_get_current_file'
-			, NUM
-			, []
-			, []
-			, {}
-		);
+		return php.UTF8ToString(php.getValue(this.currentFilePtr, '*'));
+	}
 
-		const currentLinePtr = php.ccall(
-			'phpdbg_wasm_get_current_line'
-			, NUM
-			, []
-			, []
-			, {}
-		);
+	async currentLine()
+	{
+		const php = await this.binary;
 
-		try
-		{
-			const len = php.lengthBytesUTF8(input) + 1;
-			const loc = php._malloc(len);
-			php.stringToUTF8(input, loc, len);
-
-			this.inputPtr = loc;
-			const call = php.ccall(
-				'phpdbg_main'
-				, NUM
-				, [NUM]
-				, [this.inputPtr]
-				, {async: true}
-			);
-
-			await call;
-
-			this.running = php.getValue(runFlagPtr, 'i8');
-			this.paused = php.getValue(pauseFlagPtr, 'i8');
-
-			this.currentFile = php.UTF8ToString(php.getValue(currentFilePtr, '*'));
-			this.currentLine = php.getValue(currentLinePtr, 'i32');
-
-			if(this.paused)
-			{
-				php.setValue(pauseFlagPtr, 0, 'i8');
-			}
-
-			return call;
-		}
-		finally
-		{
-			if(!this.running)
-			{
-				this.currentFile = null;
-				this.currentLine = null;
-			}
-
-			await this.flush();
-			php._free(this.inputPtr);
-
-		}
+		return php.getValue(this.currentLinePtr, 'i32');
 	}
 
 	async refresh()
