@@ -184,12 +184,17 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 
 		retVal = zend_eval_string(code, NULL, "php-wasm run script");
 
-		if (!SG(headers_sent)) {
+		if(!SG(headers_sent))
+		{
 			sapi_send_headers();
 			SG(headers_sent) = 1;
 		}
 
+#if PHP_MAJOR_VERSION >= 8 && PHP_MINOR_VERSION >= 1
 		if(EG(exception) && !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception))))
+#else
+		if(EG(exception))
+#endif
 		{
 			zend_exception_error(EG(exception), E_ERROR);
 			retVal = 2;
