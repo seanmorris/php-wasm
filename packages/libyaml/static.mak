@@ -37,6 +37,8 @@ TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 SKIP_LIBS+= -lyaml
 endif
 
+NOTPARALLEL+= lib/lib/libyaml.a packages/libyaml/php${PHP_VERSION}-yaml.so
+
 third_party/libyaml/.gitignore:
 	@ echo -e "\e[33;4mDownloading libyaml\e[0m"
 	${DOCKER_RUN} git clone https://github.com/yaml/libyaml.git third_party/libyaml \

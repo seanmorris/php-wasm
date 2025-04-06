@@ -22,6 +22,8 @@ endif
 
 DOCKER_RUN_IN_EXT_PHAR=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-phar/ emscripten-builder
 
+NOTPARALLEL+= packages/phar/php${PHP_VERSION}-phar.so
+
 third_party/php${PHP_VERSION}-phar/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/phar /src/third_party/php${PHP_VERSION}-phar
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-phar/config.m4

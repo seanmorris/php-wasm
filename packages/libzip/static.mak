@@ -35,6 +35,8 @@ SKIP_LIBS+= -lzip
 PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
 endif
 
+NOTPARALLEL+= lib/lib/libzip.a packages/libzip/php${PHP_VERSION}-zip.so
+
 third_party/libzip/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibZip\e[0m"
 	${DOCKER_RUN} git clone https://github.com/nih-at/libzip.git third_party/libzip \
@@ -65,6 +67,7 @@ $(addsuffix /libzip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/libzip.so
 third_party/php${PHP_VERSION}-zip/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zip /src/third_party/php${PHP_VERSION}-zip
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-zip/config.m4
+
 packages/libzip/php${PHP_VERSION}-zip.so: ${PHPIZE} packages/libzip/libzip.so third_party/php${PHP_VERSION}-zip/config.m4
 	@ echo -e "\e[33;4mBuilding php-zip\e[0m"
 	${DOCKER_RUN_IN_EXT_ZIP} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;

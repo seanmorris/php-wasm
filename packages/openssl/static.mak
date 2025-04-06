@@ -45,6 +45,8 @@ PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 SKIP_LIBS+= -lssl -lcrypto
 endif
 
+NOTPARALLEL+= lib/lib/libssl.a packages/openssl/php${PHP_VERSION}-openssl.so
+
 third_party/openssl/.gitignore:
 	@ echo -e "\e[33;4mDownloading OpenSSL\e[0m"
 	${DOCKER_RUN} git clone https://github.com/openssl/openssl.git third_party/openssl \

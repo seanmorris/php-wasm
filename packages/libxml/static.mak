@@ -30,6 +30,8 @@ PHP_ASSET_LIST+= libxml2.so
 SKIP_LIBS+= -lxml2
 endif
 
+NOTPARALLEL+= lib/lib/libxml2.a packages/libxml/php${PHP_VERSION}-libxml.so
+
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"
 	${DOCKER_RUN} git clone https://gitlab.gnome.org/GNOME/libxml2.git third_party/libxml2 \

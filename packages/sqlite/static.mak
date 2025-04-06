@@ -40,6 +40,9 @@ TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
 endif
 
+# NOTPARALLEL+= lib/lib/libsqlite3.a packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
+NOTPARALLEL+= lib/lib/libsqlite3.a packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
+
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
 	wget -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz

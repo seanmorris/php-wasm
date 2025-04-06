@@ -189,6 +189,7 @@ PHP_ASSET_LIST+=
 endif
 
 PRELOAD_NAME=php
+NOTPARALLEL=
 
 all: _all cgi-all dbg-all
 
@@ -459,6 +460,12 @@ WEBVIEW_JS+= ${PHP_DIST_DIR}/php-webview.js.wasm.map.MAPPED
 NODE_MJS+= ${PHP_DIST_DIR}/php-node.mjs.wasm.map.MAPPED
 NODE_JS+= ${PHP_DIST_DIR}/php-node.js.wasm.map.MAPPED
 endif
+
+NOTPARALLEL+=\
+	$(addprefix ${PHP_DBG_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-worker.mjs) \
+	$(addprefix ${PHP_DBG_DIST_DIR}/,php-web.js php-webview.js php-node.js php-worker.js)
+
+.NOTPARALLEL: ${NOTPARALLEL}
 
 web-mjs: ${WEB_MJS}
 web-js: ${WEB_JS}

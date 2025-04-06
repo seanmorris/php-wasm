@@ -18,6 +18,8 @@ third_party/llvm/.gitignore:
 
 ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
 
+NOTPARALLEL+= ${LIBICU_DATFILE} lib/lib/libicuuc.a packages/intl/php${PHP_VERSION}-intl.so
+
 ${LIBICU_DATFILE}: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
 

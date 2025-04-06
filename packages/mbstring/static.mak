@@ -58,6 +58,8 @@ SKIP_LIBS+= -lonig
 PHP_ASSET_LIST+= libonig.so
 endif
 
+NOTPARALLEL+= lib/lib/libonig.a packages/mbstring/php${PHP_VERSION}-mbstring.so
+
 third_party/oniguruma/.gitignore:
 	@ echo -e "\e[33;4mDownloading ONIGURUMA\e[0m"
 	${DOCKER_RUN} git clone https://github.com/kkos/oniguruma.git third_party/oniguruma \

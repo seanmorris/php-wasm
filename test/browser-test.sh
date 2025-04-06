@@ -14,4 +14,10 @@ MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm httpd:2.4"
 docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} &
 trap "docker kill php-wasm-test-apache" 0;
 
+set +x;
+while ! nc -z localhost ${PORT}; do
+	sleep 0.1
+done
+set -x;
+
 npx cvtest test/BrowserTest.mjs;

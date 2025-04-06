@@ -30,6 +30,8 @@ TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-simplexml.so
 endif
 
+NOTPARALLEL+= packages/simplexml/php${PHP_VERSION}-simplexml.so
+
 third_party/php${PHP_VERSION}-simplexml/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lrf /src/third_party/php${PHP_VERSION}-src/ext/simplexml /src/third_party/php${PHP_VERSION}-simplexml
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-simplexml/config.m4
