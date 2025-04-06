@@ -61,6 +61,7 @@ $(addsuffix /libz.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/libz.so
 
 third_party/php${PHP_VERSION}-zlib/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zlib /src/third_party/php${PHP_VERSION}-zlib
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-zlib/config.m4
 
 packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_party/php${PHP_VERSION}-zlib/config.m4
 	@ echo -e "\e[33;4mBuilding php-zlib\e[0m"

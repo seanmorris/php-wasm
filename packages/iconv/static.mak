@@ -61,6 +61,7 @@ $(addsuffix /libiconv.so,$(sort ${SHARED_ASSET_PATHS})): packages/iconv/libiconv
 
 third_party/php${PHP_VERSION}-iconv/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/iconv /src/third_party/php${PHP_VERSION}-iconv
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-iconv/config.m4
 
 packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so third_party/php${PHP_VERSION}-iconv/config.m4
 	@ echo -e "\e[33;4mBuilding php-iconv\e[0m"

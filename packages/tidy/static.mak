@@ -70,6 +70,7 @@ $(addsuffix /libtidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/libtidy.so
 
 third_party/php${PHP_VERSION}-tidy/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/tidy /src/third_party/php${PHP_VERSION}-tidy
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-tidy/config.m4
 
 packages/tidy/php${PHP_VERSION}-tidy.so: ${PHPIZE} packages/tidy/libtidy.so third_party/php${PHP_VERSION}-tidy/config.m4
 	@ echo -e "\e[33;4mBuilding php-tidy\e[0m"

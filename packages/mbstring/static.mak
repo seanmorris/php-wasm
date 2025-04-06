@@ -83,6 +83,7 @@ $(addsuffix /libonig.so,$(sort ${SHARED_ASSET_PATHS})): packages/mbstring/liboni
 
 third_party/php${PHP_VERSION}-mbstring/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/mbstring /src/third_party/php${PHP_VERSION}-mbstring
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-mbstring/config.m4
 
 packages/mbstring/php${PHP_VERSION}-mbstring.so: ${PHPIZE} third_party/php${PHP_VERSION}-mbstring/config.m4 packages/mbstring/libonig.so
 	@ echo -e "\e[33;4mBuilding php-mbstring\e[0m"

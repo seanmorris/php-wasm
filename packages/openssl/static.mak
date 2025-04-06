@@ -86,6 +86,7 @@ packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VE
 
 third_party/php${PHP_VERSION}-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php${PHP_VERSION}-openssl
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-openssl/config.m4
 
 packages/openssl/php${PHP_VERSION}-openssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
 	@ echo -e "\e[33;4mBuilding php-openssl\e[0m"

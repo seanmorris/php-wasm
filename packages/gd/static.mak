@@ -164,6 +164,7 @@ endif
 
 third_party/php${PHP_VERSION}-gd/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/gd /src/third_party/php${PHP_VERSION}-gd
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-gd/config.m4
 
 packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/config.m4 ${GD_LIBS}
 	@ echo -e "\e[33;4mBuilding php-gd\e[0m"

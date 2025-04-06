@@ -56,6 +56,7 @@ $(addsuffix /libxml2.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/libxml2.
 ## EXPERIMENTAL!!
 third_party/php${PHP_VERSION}-libxml/config0.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/libxml /src/third_party/php${PHP_VERSION}-libxml
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-libxml/config0.m4
 
 packages/libxml/php${PHP_VERSION}-libxml.so: ${PHPIZE} packages/libxml/libxml2.so third_party/php${PHP_VERSION}-xml/config.m4
 	@ echo -e "\e[33;4mBuilding php-libxml\e[0m"

@@ -22,13 +22,9 @@ ${LIBICU_DATFILE}: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
 
 lib/lib/libicudata.a: lib/lib/libicuuc.a
-
 lib/lib/libicui18n.a: lib/lib/libicuuc.a
-
 lib/lib/libicuio.a: lib/lib/libicuuc.a
-
 lib/lib/libicutest.a: lib/lib/libicuuc.a
-
 lib/lib/libicutu.a: lib/lib/libicuuc.a
 
 lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
@@ -138,6 +134,7 @@ packages/intl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSI
 
 third_party/php${PHP_VERSION}-intl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php${PHP_VERSION}-intl
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-intl/config.m4
 
 packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/intl/libicudata.so third_party/php${PHP_VERSION}-intl/config.m4
 	@ echo -e "\e[33;4mBuilding php-intl\e[0m"

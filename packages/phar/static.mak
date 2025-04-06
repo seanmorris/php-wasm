@@ -24,6 +24,7 @@ DOCKER_RUN_IN_EXT_PHAR=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-phar/
 
 third_party/php${PHP_VERSION}-phar/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/phar /src/third_party/php${PHP_VERSION}-phar
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-phar/config.m4
 
 packages/phar/php${PHP_VERSION}-phar.so: ${PHPIZE} third_party/php${PHP_VERSION}-phar/config.m4
 	@ echo -e "\e[33;4mBuilding php-phar\e[0m"
