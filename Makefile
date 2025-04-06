@@ -190,6 +190,8 @@ endif
 
 PRELOAD_NAME=php
 
+all: all cgi-all dbg-all
+
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
 -include $(addsuffix /pre.mak,$(shell npm ls -p))
@@ -410,7 +412,7 @@ TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.
 
 ALL=${MJS} ${CJS} ${TAG_JS}
 
-all: ${ALL}
+_all: ${ALL}
 cjs: ${CJS}
 mjs: ${MJS}
 
