@@ -193,7 +193,7 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 #if PHP_MAJOR_VERSION >= 8 && PHP_MINOR_VERSION >= 1
 		if(EG(exception) && !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception))))
 #else
-		if(EG(exception))
+		if(EG(exception) && !zend_is_unwind_exit(EG(exception)))
 #endif
 		{
 			zend_exception_error(EG(exception), E_ERROR);
