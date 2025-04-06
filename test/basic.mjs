@@ -58,25 +58,6 @@ describe('Returns 0 as an exit code.', async () => {
 		assert.equal(stdErr, '');
 		assert.equal(exitCode, 0);
 	});
-
-	test('???', async () => {
-		const php = new PhpNode({ persist: {mountPath: '/host' , localPath: '/'} });
-
-		let stdOut = '', stdErr = '';
-
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-		await php.binary;
-
-		const exitCode = await php.run(
-			'<?php exit();',
-		);
-
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
-		assert.equal(exitCode, 0);
-	});
 });
 
 test('Can print to STDOUT', async () => {

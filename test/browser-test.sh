@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
 set -x;
-PORT=3000
-RUNNING=`lsof -t -i:${PORT}`;
+PORT=9000
+RUNNING=`lsof -ti:${PORT}`;
 
 if [ ! -z "${RUNNING}" ]; then {
 	echo "A process is currently using port ${PORT}" >&2
 	read -p "Kill the process? (y/N) " -n 1 -r >&2
 	echo
-	
+
 	if [[ ! $REPLY =~ ^[Yy]$ ]]; then {
 		exit 0
 	}
 	fi
-	
+
 	kill ${RUNNING}
 }
 fi

@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "pdo-pglite": "0.0.9-alpha-27",
+    "php-cgi-wasm": "0.0.9-alpha-27",
+    "php-wasm": "0.0.9-alpha-27",
+    "php-wasm-dom": "0.0.9-alpha-27",
+    "php-wasm-gd": "0.0.9-alpha-27",
+    "php-wasm-iconv": "0.0.9-alpha-27",
+    "php-wasm-intl": "0.0.9-alpha-27",
+    "php-wasm-libxml": "0.0.9-alpha-27",
+    "php-wasm-libzip": "0.0.9-alpha-27",
+    "php-wasm-mbstring": "0.0.9-alpha-27",
+    "php-wasm-openssl": "0.0.9-alpha-27",
+    "php-wasm-phar": "0.0.9-alpha-27",
+    "php-wasm-simplexml": "0.0.9-alpha-27",
+    "php-wasm-sqlite": "0.0.9-alpha-27",
+    "php-wasm-tidy": "0.0.9-alpha-27",
+    "php-wasm-xml": "0.0.9-alpha-27",
+    "php-wasm-yaml": "0.0.9-alpha-27",
+    "php-wasm-zlib": "0.0.9-alpha-27"
+  }
+}

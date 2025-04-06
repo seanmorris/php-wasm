@@ -50,6 +50,8 @@ export default forwardRef(function Debugger({
 	, localEcho = true, initCommands = [], onStdIn
 }, ref) {
 	const phpRef = useRef(null);
+	const cmdStack = useRef(['']);
+	const cmdStackIndex = useRef(0);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
 	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mprompt> ')));
@@ -177,8 +179,58 @@ export default forwardRef(function Debugger({
 	}, [refreshPhp, init]);
 
 	const checkEnter = async event => {
+		if(event.key === 'ArrowUp')
+		{
+			event.preventDefault();
+
+			if(event.target.selectionStart > 0)
+			{
+				event.target.selectionStart = 0;
+				event.target.selectionEnd = 0;
+				return;
+			}
+
+			cmdStackIndex.current--;
+			if(cmdStackIndex.current < 0)
+			{
+				cmdStackIndex.current = cmdStack.current.length - 1;
+			}
+
+			stdIn.current.value = cmdStack.current[cmdStackIndex.current];
+
+			event.target.selectionStart = 0;
+			event.target.selectionEnd = 0;
+
+			return;
+		}
+
+		if(event.key === 'ArrowDown')
+		{
+			event.preventDefault();
+
+			const end = event.target.value.length;
+
+			if(event.target.selectionStart < end)
+			{
+				event.target.selectionStart = end;
+				event.target.selectionEnd = end;
+				return;
+			}
+
+			stdIn.current.value = cmdStack.current[cmdStackIndex.current];
+
+			cmdStackIndex.current++;
+			if(cmdStackIndex.current >= cmdStack.current.length)
+			{
+				cmdStackIndex.current = 0;
+			}
+
+			return;
+		}
+
 		if(event.key === 'Enter')
 		{
+			cmdStackIndex.current = 0;
 			await runCommand();
 			event.preventDefault();
 			return;
@@ -201,7 +253,7 @@ export default forwardRef(function Debugger({
 
 		if(localEcho && !silent)
 		{
-
+			inputValue && cmdStack.current.push(inputValue);
 			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
 			scrollToEnd();
 		}
@@ -232,7 +284,7 @@ export default forwardRef(function Debugger({
 		<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
 			{!ready && (<img src = {loading} />)}
 			<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
-			<input autoFocus = {true} disabled={!ready} autocomplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+			<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
 			<button onClick = {runCommand}>&gt;</button>
 		</div>
 	</div>);

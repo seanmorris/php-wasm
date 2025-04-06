@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "pdo-pglite": "../packages/pdo-pglite",
+    "php-cgi-wasm": "../packages/php-cgi-wasm",
+    "php-dbg-wasm": "../packages/php-dbg-wasm",
+    "php-wasm": "../packages/php-wasm",
+    "php-wasm-dom": "../packages/dom",
+    "php-wasm-gd": "../packages/gd",
+    "php-wasm-iconv": "../packages/iconv",
+    "php-wasm-intl": "../packages/intl",
+    "php-wasm-libxml": "../packages/libxml",
+    "php-wasm-libzip": "../packages/libzip",
+    "php-wasm-mbstring": "../packages/mbstring",
+    "php-wasm-openssl": "../packages/openssl",
+    "php-wasm-phar": "../packages/phar",
+    "php-wasm-simplexml": "../packages/simplexml",
+    "php-wasm-sqlite": "../packages/sqlite",
+    "php-wasm-tidy": "../packages/tidy",
+    "php-wasm-xml": "../packages/xml",
+    "php-wasm-yaml": "../packages/libyaml",
+    "php-wasm-zlib": "../packages/zlib"
+  }
+}

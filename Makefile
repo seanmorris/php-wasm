@@ -865,5 +865,8 @@ all-versions:
 remap:
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-web.mjs.wasm.map packages/php-dbg-wasm
 
+reconfigure:
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
+
 rebuild:
-	touch third_party/php8.3-src/configured
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
