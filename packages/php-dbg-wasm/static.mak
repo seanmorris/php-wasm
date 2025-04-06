@@ -4,18 +4,29 @@ ${ENV_DIR}/${PHP_DBG_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/${PRELOAD_NAME}.data ${PHP_DBG_DIST_DIR}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_DBG_ASSET_DIR}/
 
-NOTPARALLEL+= $(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.mjs php-dbg-webview.mjs php-dbg-node.mjs php-dbg-worker.mjs) \
+NOTPARALLEL+=\
+	$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.mjs php-dbg-webview.mjs php-dbg-node.mjs php-dbg-worker.mjs) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.js php-dbg-webview.js php-dbg-node.js php-dbg-worker.js)
 
-DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.mjs php-dbg-webview.mjs php-dbg-node.mjs php-dbg-worker.mjs) \
-	$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.mjs PhpDbgWebview.mjs PhpDbgNode.mjs PhpDbgWorker.mjs) \
+DBG_MJS=\
+	$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.mjs) \
+	$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.mjs) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,resolveDependencies.mjs)
+#	$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.mjs php-dbg-webview.mjs php-dbg-node.mjs php-dbg-worker.mjs) \
+#	$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.mjs PhpDbgWebview.mjs PhpDbgNode.mjs PhpDbgWorker.mjs) \
+#	$(addprefix ${PHP_DBG_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \
+#	$(addprefix ${PHP_DBG_DIST_DIR}/,resolveDependencies.mjs)
 
-DBG_CJS=$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.js php-dbg-webview.js php-dbg-node.js php-dbg-worker.js) \
-	$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.js PhpDbgWebview.js PhpDbgNode.js PhpDbgWorker.js) \
+DBG_CJS=\
+	$(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.js) \
+	$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.js) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js msg-bus.js webTransactions.js) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,resolveDependencies.js)
+#	 $(addprefix ${PHP_DBG_DIST_DIR}/,php-dbg-web.js php-dbg-webview.js php-dbg-node.js php-dbg-worker.js) \
+#	 $(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.js PhpDbgWebview.js PhpDbgNode.js PhpDbgWorker.js) \
+#	 $(addprefix ${PHP_DBG_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js msg-bus.js webTransactions.js) \
+#	 $(addprefix ${PHP_DBG_DIST_DIR}/,resolveDependencies.js)
 
 WEB_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.mjs breakoutRequest.mjs parseResponse.mjs php-dbg-web.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
 WEB_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.js  breakoutRequest.js  parseResponse.js  php-dbg-web.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
