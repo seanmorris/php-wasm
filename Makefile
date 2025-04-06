@@ -190,7 +190,7 @@ endif
 
 PRELOAD_NAME=php
 
-all: all cgi-all dbg-all
+all: _all cgi-all dbg-all
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
