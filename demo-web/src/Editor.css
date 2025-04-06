@@ -25,7 +25,6 @@
 
 .editor .frame {
 	position: relative;
-	align-items: stretch;
 }
 
 .editor .frame .scroller {

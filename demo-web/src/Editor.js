@@ -379,26 +379,28 @@ export default function Editor() {
 							<EditorFolder path = "/" name = "/" />
 						</div>
 					</div>
-					<div className = "edit-area inset">
-						<div className = "tab-area frame">
-							<div className='scroller' ref = {tabBox}>
-							{openFiles.map(file =>
-								<div className='tab' key = {file.path} data-active = {file.active}>
-									<div onClick = { () => openFile(file.path)}>
-										{file.name} {file.dirty ? '!' : ''}
+					<div className='edit-area'>
+						<div className = "inset column grow">
+							<div className = "tab-area frame">
+								<div className='scroller' ref = {tabBox}>
+								{openFiles.map(file =>
+									<div className='tab' key = {file.path} data-active = {file.active}>
+										<div onClick = { () => openFile(file.path)}>
+											{file.name} {file.dirty ? '!' : ''}
+										</div>
+										<div onClick = { () => closeFile(file.path)}>×</div>
 									</div>
-									<div onClick = { () => closeFile(file.path)}>×</div>
+								)}
 								</div>
-							)}
 							</div>
-						</div>
-						<div className='frame grow'>
-							<div id = "edit-root" className = "scroller">
-								<pre>{contents}</pre>
+							<div className='frame grow'>
+								<div id = "edit-root" className = "scroller">
+									<pre>{contents}</pre>
+								</div>
 							</div>
 						</div>
 						{phpdbg && (
-							<div className='inset frame grow'>{phpdbg}</div>
+							<div className='inset row grow'><div className='frame grow'>{phpdbg}</div></div>
 						)}
 					</div>
 				</div>

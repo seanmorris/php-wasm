@@ -2,7 +2,7 @@
 
 set -eux;
 PORT=9000
-CI=
+export CI=
 
 pushd demo-web && {
 	npm run build
