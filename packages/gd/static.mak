@@ -160,8 +160,6 @@ PHP_ASSET_LIST+= libwebp.so
 SKIP_LIBS+= -lwebp
 endif
 
-NOTPARALLEL+= packages/gd/php${PHP_VERSION}-gd.so lib/lib/libfreetype.a lib/lib/libjpeg.a
-
 third_party/php${PHP_VERSION}-gd/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/gd /src/third_party/php${PHP_VERSION}-gd
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-gd/config.m4

@@ -191,7 +191,10 @@ endif
 PRELOAD_NAME=php
 NOTPARALLEL=
 
-all: _all cgi-all dbg-all
+all:
+	$(MAKE) _all
+	$(MAKE) cgi-all
+	$(MAKE) dbg-all
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
@@ -441,23 +444,10 @@ NODE_MJS+= ${PHP_DIST_DIR}/php-node.mjs.wasm.map.MAPPED
 NODE_JS+= ${PHP_DIST_DIR}/php-node.js.wasm.map.MAPPED
 endif
 
-MJS=${WEB_MJS} ${WORKER_MJS} ${NODE_MJS} ${WEBVIEW_MJS}
-CJS=${WEB_JS} ${WORKER_JS} ${NODE_JS} ${WEBVIEW_JS}
-
 TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
 ALL=${MJS} ${CJS} ${TAG_JS}
 
 tags: ${TAG_JS}
-_all: ${ALL}
-cjs: ${CJS}
-mjs: ${MJS}
-
-
-NOTPARALLEL+=\
-	$(addprefix ${PHP_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-worker.mjs) \
-	$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-worker.js)
-
-.NOTPARALLEL: ${NOTPARALLEL}
 
 web-mjs: ${WEB_MJS}
 web-js: ${WEB_JS}
@@ -467,6 +457,33 @@ webview-mjs: ${WEBVIEW_MJS}
 webview-js: ${WEBVIEW_JS}
 node-mjs: ${NODE_MJS}
 node-js: ${NODE_JS}
+
+_all: tags
+	$(MAKE) web-mjs
+	$(MAKE) worker-mjs
+	$(MAKE) webview-mjs
+	$(MAKE) node-mjs
+	$(MAKE) web-js
+	$(MAKE) worker-js
+	$(MAKE) webview-js
+	$(MAKE) node-js
+
+mjs: tags
+	$(MAKE) web-mjs
+	$(MAKE) worker-mjs
+	$(MAKE) webview-mjs
+	$(MAKE) node-mjs
+
+cjs: tags
+	$(MAKE) web-js
+	$(MAKE) worker-js
+	$(MAKE) webview-js
+	$(MAKE) node-js
+
+NOTPARALLEL+=\
+	$(addprefix ${PHP_DIST_DIR}/,php-web.mjs php-webview.mjs php-node.mjs php-worker.mjs) \
+	$(addprefix ${PHP_DIST_DIR}/,php-web.js php-webview.js php-node.js php-worker.js) \
+	third_party/php${PHP_VERSION}-src/configured
 
 DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS} ${PRE_JS_FILES}
 EXTENSIONS_JS=Object.fromEntries(Object.entries({"WITH_BCMATH":"${WITH_BCMATH}","WITH_CALENDAR":"${WITH_CALENDAR}","WITH_CTYPE":"${WITH_CTYPE}","WITH_FILTER":"${WITH_FILTER}","WITH_TOKENIZER":"${WITH_TOKENIZER}","WITH_VRZNO":"${WITH_VRZNO}","WITH_EXIF":"${WITH_EXIF}","WITH_PHAR":"${WITH_PHAR}","WITH_LIBXML":"${WITH_LIBXML}","WITH_DOM":"${WITH_DOM}","WITH_XML":"${WITH_XML}","WITH_SIMPLEXML":"${WITH_SIMPLEXML}","WITH_LIBZIP":"${WITH_LIBZIP}","WITH_ICONV":"${WITH_ICONV}","WITH_SQLITE":"${WITH_SQLITE}","WITH_GD":"${WITH_GD}","WITH_ZLIB":"${WITH_ZLIB}","WITH_LIBPNG":"${WITH_LIBPNG}","WITH_FREETYPE":"${WITH_FREETYPE}","WITH_LIBJPEG":"${WITH_LIBJPEG}","WITH_YAML":"${WITH_YAML}","WITH_TIDY":"${WITH_TIDY}","WITH_MBSTRING":"${WITH_MBSTRING}","WITH_ONIGURUMA":"${WITH_ONIGURUMA}","WITH_OPENSSL":"${WITH_OPENSSL}","WITH_INTL":"${WITH_INTL}"}).filter(([k,v]) => v !== "0"))

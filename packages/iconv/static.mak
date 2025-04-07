@@ -37,8 +37,6 @@ TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SKIP_LIBS+= -liconv
 endif
 
-NOTPARALLEL+= lib/lib/libiconv.a packages/iconv/php${PHP_VERSION}-iconv.so
-
 third_party/libiconv-1.17/README:
 	@ echo -e "\e[33;4mDownloading Iconv\e[0m"
 	${DOCKER_RUN} wget -q https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz

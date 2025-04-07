@@ -42,8 +42,6 @@ TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
 endif
 
-NOTPARALLEL+= packages/tidy/php${PHP_VERSION}-tidy.so
-
 third_party/tidy-html5/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibTidy\e[0m"
 	${DOCKER_RUN} git clone https://github.com/htacg/tidy-html5.git third_party/tidy-html5 \

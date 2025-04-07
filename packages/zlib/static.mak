@@ -36,8 +36,6 @@ PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 SKIP_LIBS+= -lz
 endif
 
-NOTPARALLEL+= lib/lib/libz.a packages/zlib/php${PHP_VERSION}-zlib.so
-
 third_party/zlib/.gitignore:
 	@ echo -e "\e[33;4mDownloading Zlib\e[0m"
 	${DOCKER_RUN} git clone https://github.com/madler/zlib.git third_party/zlib \

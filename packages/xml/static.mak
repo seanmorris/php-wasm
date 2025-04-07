@@ -30,8 +30,6 @@ TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-xml.so
 endif
 
-NOTPARALLEL+= packages/xml/php${PHP_VERSION}-xml.so
-
 third_party/php${PHP_VERSION}-xml/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/xml /src/third_party/php${PHP_VERSION}-xml
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-xml/config.m4

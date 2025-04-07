@@ -5,8 +5,14 @@ ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/
 
 NOTPARALLEL+=\
-	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-worker.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-worker.js)
+	web-cgi-mjs \
+	worker-cgi-mjs \
+	webview-cgi-mjs \
+	node-cgi-mjs \
+	web-cgi-js \
+	worker-cgi-js \
+	webview-cgi-js \
+	node-cgi-js
 
 WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php-cgi-web.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
 WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
@@ -57,16 +63,30 @@ webview-cgi-js: $(WEBVIEW_CGI_JS)
 node-cgi-mjs: $(NODE_CGI_MJS)
 node-cgi-js: $(NODE_CGI_JS)
 
-CGI_MJS=${WEB_CGI_MJS} ${WORKER_CGI_MJS} ${NODE_CGI_MJS} ${WEBVIEW_CGI_MJS}
-CGI_CJS=${WEB_CGI_JS}  ${WORKER_CGI_JS}  ${NODE_CGI_JS}  ${WEBVIEW_CGI_JS}
+cgi: cgi-all
 
-CGI_= ${CGI_MJS} ${CGI_CJS}
-ALL+= ${CGI_ALL}
+cgi-all:
+	$(MAKE) web-cgi-mjs
+	$(MAKE) worker-cgi-mjs
+	$(MAKE) webview-cgi-mjs
+	$(MAKE) node-cgi-mjs
+	$(MAKE) web-cgi-js
+	$(MAKE) worker-cgi-js
+	$(MAKE) webview-cgi-js
+	$(MAKE) node-cgi-js
 
-cgi-all: ${CGI_ALL}
-cgi-mjs: ${CGI_MJS}
-cgi-cjs: ${CGI_CJS}
-cgi: ${CGI_MJS} ${CGI_CJS}
+cgi-mjs:
+	$(MAKE) web-cgi-mjs
+	$(MAKE) worker-cgi-mjs
+	$(MAKE) webview-cgi-mjs
+	$(MAKE) node-cgi-mjs
+
+cgi-cjs:
+	$(MAKE) web-cgi-js
+	$(MAKE) worker-cgi-js
+	$(MAKE) webview-cgi-js
+	$(MAKE) node-cgi-js
+
 
 ifneq (${PRE_JS_FILES},)
 CGI_DEPENDENCIES+= .cache/pre.js
