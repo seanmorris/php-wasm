@@ -55,51 +55,51 @@ NODE_DBG_JS_ASSETS+= ${PHP_DBG_DIST_DIR}/php-dbg-node.js.wasm.map.MAPPED
 endif
 
 web-dbg-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_DBG_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_DBG_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_DBG_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 web-dbg-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_DBG_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_DBG_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_DBG_JS_ASSETS}
 	@ cat ico.ans >&2
 
 worker-dbg-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_DBG_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_DBG_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_DBG_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 worker-dbg-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_DBG_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_DBG_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_DBG_JS_ASSETS}
 	@ cat ico.ans >&2
 
 webview-dbg-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_DBG_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_DBG_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_DBG_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 webview-dbg-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_DBG_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_DBG_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_DBG_JS_ASSETS}
 	@ cat ico.ans >&2
 
 node-dbg-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_DBG_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_DBG_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_DBG_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 node-dbg-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_DBG_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_DBG_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_DBG_JS_ASSETS}
 	@ cat ico.ans >&2
 
 dbg: dbg-all

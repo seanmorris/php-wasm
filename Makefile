@@ -115,11 +115,11 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 DOCKER_COMPOSE?=docker-compose
 CPU_COUNT=`nproc || echo 1`
+MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
-
-MAKEFLAGS+= "-l${CPU_COUNT}"
+MAKEFLAGS+= "-l${MAX_LOAD}"
 
 PHP_VERSION_DEFAULT=8.3
 
@@ -355,7 +355,7 @@ MAIN_MODULE?=1
 ASYNCIFY?=1
 
 BUILD_FLAGS=-f ../../php.mk \
-	-j${CPU_COUNT} -l${CPU_COUNT} \
+	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
@@ -456,51 +456,51 @@ ALL=${MJS} ${CJS} ${TAG_JS}
 tags: ${TAG_JS}
 
 web-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 web-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
 	@ cat ico.ans >&2
 
 worker-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 worker-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_JS_ASSETS}
 	@ cat ico.ans >&2
 
 webview-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 webview-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_JS_ASSETS}
 	@ cat ico.ans >&2
 
 node-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_MJS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
 	@ cat ico.ans >&2
 
 node-js:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_JS}
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_JS_ASSETS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS}
 	@ cat ico.ans >&2
 
 _all: tags
@@ -731,16 +731,16 @@ ${ENV_FILE}:
 	touch ${ENV_FILE}
 
 archives:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${ARCHIVES}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES}
 
 shared:
-	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${SHARED_LIBS}
+	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS}
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 #	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
-	${MAKE} -j${CPU_COUNT} -l${CPU_COUNT} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
+	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
 
 PHPIZE: ${PHPIZE}
 
