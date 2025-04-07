@@ -730,15 +730,17 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 ${ENV_FILE}:
 	touch ${ENV_FILE}
 
-archives: ${ARCHIVES}
+archives:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${ARCHIVES}
 
-shared: ${SHARED_LIBS}
+shared:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${SHARED_LIBS}
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 #	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
-	${MAKE} -j${CPU_COUNT} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
+	${MAKE} -j${CPU_COUNT} -l${CPU_COUNT} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
 
 PHPIZE: ${PHPIZE}
 

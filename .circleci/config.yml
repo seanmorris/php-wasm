@@ -78,6 +78,30 @@ jobs:
       - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
 
+  make-test-browser:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2024.05.1
+    resource_class: medium
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.3.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install
+      - run: npm i -g cv3-test netcat
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+      - run: sudo apt-get update
+      - run: sudo apt install -y software-properties-common google-chrome-stable
+      - run: cd demo-web; ./switch-packages.sh local; cd ..;
+      - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: make image
+      - run: docker network create phpwasm_default
+      - run: make web-mjs worker-cgi-mjs web-dbg-mjs
+      - run: test/browser-test.sh
+
   make-test-8-3-shared:
     parallelism: 1
     machine:
