@@ -136,7 +136,7 @@ third_party/php${PHP_VERSION}-intl/config.m4: third_party/php${PHP_VERSION}-src/
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php${PHP_VERSION}-intl
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-intl/config.m4
 
-packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/intl/libicudata.so third_party/php${PHP_VERSION}-intl/config.m4
+packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} third_party/php${PHP_VERSION}-intl/config.m4 packages/intl/libicudata.so packages/intl/libicuuc.so packages/intl/libicui18n.so packages/intl/libicuio.so /src/packages/intl/libicutu.so /src/packages/intl/libicutest.so
 	@ echo -e "\e[33;4mBuilding php-intl\e[0m"
 	${DOCKER_RUN_IN_EXT_INTL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_INTL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
