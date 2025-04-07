@@ -355,7 +355,7 @@ MAIN_MODULE?=1
 ASYNCIFY?=1
 
 BUILD_FLAGS=-f ../../php.mk \
-	-j${CPU_COUNT} --max-load ${CPU_COUNT} \
+	-j1 --max-load ${CPU_COUNT} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
