@@ -245,7 +245,7 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j${CPU_COUNT};
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
@@ -258,7 +258,7 @@ lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j${CPU_COUNT};
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 packages/gd/libpng.so: lib/lib/libpng.so
