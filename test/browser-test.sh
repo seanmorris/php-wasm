@@ -4,7 +4,7 @@ set -eux;
 PORT=9000
 export CI=
 
-# pushd demo-web && npm run build && popd;
+pushd demo-web && npm run build && popd;
 
 docker kill php-wasm-test-apache || true;
 
