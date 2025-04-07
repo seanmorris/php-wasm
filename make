@@ -14,4 +14,6 @@ test -e third_party/make-4.4 || {
 	cd ../..
 }
 
-third_party/make-4.4/third_party/make-4.4/bin/bin/make ${@} 2>&1 | tee build.log
+third_party/make-4.4/third_party/make-4.4/bin/bin/make ${@}
+
+exit $?
