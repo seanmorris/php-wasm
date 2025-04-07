@@ -110,7 +110,7 @@ third_party/php${PHP_VERSION}-pdo-sqlite/config.m4: third_party/php${PHP_VERSION
 	${DOCKER_RUN} sed -i 's|\.\./php_pdo|php_pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_driver.c
 	${DOCKER_RUN} sed -i 's|\.\./php_pdo|php_pdo|g' third_party/php${PHP_VERSION}-pdo-sqlite/sqlite_statement.c
 
-packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo-sqlite/config.m4
+packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-pdo-sqlite/config.m4 packages/sqlite/php${PHP_VERSION}-sqlite.so
 	@ echo -e "\e[33;4mBuilding php-pdo-sqlite\e[0m"
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
