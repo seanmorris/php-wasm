@@ -459,41 +459,49 @@ web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 web-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_JS_ASSETS}
+	@ cat ico.ans >&2
 
 worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 worker-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_JS_ASSETS}
+	@ cat ico.ans >&2
 
 webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 webview-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_JS_ASSETS}
+	@ cat ico.ans >&2
 
 node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 node-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_JS_ASSETS}
+	@ cat ico.ans >&2
 
 _all: tags
 	$(MAKE) web-mjs
@@ -576,8 +584,7 @@ ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-web.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-web.mjs: ENVIRONMENT=web
@@ -594,8 +601,7 @@ ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-worker.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-worker.js: ENVIRONMENT=worker
@@ -612,8 +618,7 @@ ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-worker.mjs: ENVIRONMENT=worker
@@ -629,8 +634,7 @@ ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-node.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-node.js: ENVIRONMENT=node
@@ -647,8 +651,7 @@ ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-node.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-node.mjs: ENVIRONMENT=node
@@ -664,8 +667,7 @@ ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-webview.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php-webview.js: ENVIRONMENT=webview
@@ -682,8 +684,7 @@ ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php-webview.mjs: ENVIRONMENT=webview
@@ -699,8 +700,7 @@ ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ########## Package files ###########
 

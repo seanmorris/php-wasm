@@ -58,41 +58,49 @@ web-dbg-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_DBG_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_DBG_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 web-dbg-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_DBG_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_DBG_JS_ASSETS}
+	@ cat ico.ans >&2
 
 worker-dbg-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_DBG_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_DBG_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 worker-dbg-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_DBG_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_DBG_JS_ASSETS}
+	@ cat ico.ans >&2
 
 webview-dbg-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_DBG_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_DBG_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 webview-dbg-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_DBG_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_DBG_JS_ASSETS}
+	@ cat ico.ans >&2
 
 node-dbg-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_DBG_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_DBG_MJS_ASSETS}
+	@ cat ico.ans >&2
 
 node-dbg-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_DBG_JS}
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_DBG_JS_ASSETS}
+	@ cat ico.ans >&2
 
 dbg: dbg-all
 
@@ -156,8 +164,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-web.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-web.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-web.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -175,8 +182,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-web.mjs.wasm.map ${PHP_DBG_DIST_DIR}
@@ -195,8 +201,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-worker.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-worker.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -214,8 +219,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-worker.mjs.wasm.map ${PHP_DBG_DIST_DIR}
@@ -234,8 +238,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-node.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-node.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -252,8 +255,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-node.mjs.wasm.map ${PHP_DBG_DIST_DIR}
@@ -272,8 +274,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-webview.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-webview.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -291,8 +292,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs
-	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-webview.mjs.wasm.map ${PHP_DBG_DIST_DIR}

@@ -64,41 +64,49 @@ web-cgi-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WEB_CGI_MJS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEB_CGI_MJS_ASSETS)
+	@ cat ico.ans >&2
 
 web-cgi-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WEB_CGI_JS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEB_CGI_JS_ASSETS)
+	@ cat ico.ans >&2
 
 worker-cgi-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WORKER_CGI_MJS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WORKER_CGI_MJS_ASSETS)
+	@ cat ico.ans >&2
 
 worker-cgi-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WORKER_CGI_JS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WORKER_CGI_JS_ASSETS)
+	@ cat ico.ans >&2
 
 webview-cgi-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WEBVIEW_CGI_MJS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEBVIEW_CGI_MJS_ASSETS)
+	@ cat ico.ans >&2
 
 webview-cgi-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(WEBVIEW_CGI_JS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEBVIEW_CGI_JS_ASSETS)
+	@ cat ico.ans >&2
 
 node-cgi-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(NODE_CGI_MJS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(NODE_CGI_MJS_ASSETS)
+	@ cat ico.ans >&2
 
 node-cgi-js:
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) $(NODE_CGI_JS)
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(NODE_CGI_JS_ASSETS)
+	@ cat ico.ans >&2
 
 cgi: cgi-all
 
@@ -163,8 +171,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-web.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-web.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.js.wasm.map ${PHP_CGI_DIST_DIR}
@@ -182,8 +189,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.mjs.wasm.map ${PHP_CGI_DIST_DIR}
@@ -202,8 +208,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-worker.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.js.wasm.map ${PHP_CGI_DIST_DIR}
@@ -221,8 +226,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map: ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.mjs.wasm.map ${PHP_CGI_DIST_DIR}
@@ -241,8 +245,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-node.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.js.wasm.map ${PHP_CGI_DIST_DIR}
@@ -259,8 +262,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.mjs.wasm.map ${PHP_CGI_DIST_DIR}
@@ -279,8 +281,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-webview.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.js.wasm.map ${PHP_CGI_DIST_DIR}
@@ -298,8 +299,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}/
-	@ cat ico.ans >&2
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.mjs.wasm.map ${PHP_CGI_DIST_DIR}
