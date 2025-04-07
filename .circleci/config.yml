@@ -98,7 +98,6 @@ jobs:
       - run: cd demo-web; ./switch-packages.sh local; cd ..;
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: make web-mjs worker-cgi-mjs web-dbg-mjs
       - run: test/browser-test.sh
 
