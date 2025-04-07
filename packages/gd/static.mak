@@ -245,7 +245,7 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j${CPU_COUNT};
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
@@ -258,7 +258,7 @@ lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
-	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
+	${DOCKER_RUN_IN_LIBPNG} emmake make -j${CPU_COUNT};
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
 packages/gd/libpng.so: lib/lib/libpng.so
@@ -280,7 +280,7 @@ lib/lib/libwebp.so: lib/lib/libwebp.a
 lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"
 	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j1
+	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak install
 	${DOCKER_RUN} rm /src/lib/lib/libwebp.so
 

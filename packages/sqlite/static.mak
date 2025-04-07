@@ -67,7 +67,7 @@ third_party/php${PHP_VERSION}-sqlite/config.m4: third_party/php${PHP_VERSION}-sr
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/sqlite3 /src/third_party/php${PHP_VERSION}-sqlite
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-sqlite/config.m4
 
-packages/sqlite/php${PHP_VERSION}-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-sqlite/config.m4
+packages/sqlite/php${PHP_VERSION}-sqlite.so: ${PHPIZE} third_party/php${PHP_VERSION}-sqlite/config.m4 packages/sqlite/libsqlite3.so
 	@ echo -e "\e[33;4mBuilding php-sqlite\e[0m"
 	${DOCKER_RUN_IN_EXT_SQLITE} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SQLITE} cp config0.m4 config.m4
