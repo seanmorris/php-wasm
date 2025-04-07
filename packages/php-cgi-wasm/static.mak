@@ -8,18 +8,6 @@ NOTPARALLEL+=\
 	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-worker.mjs) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-worker.js)
 
-CGI_MJS=\
-	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.mjs php-cgi-webview.mjs php-cgi-node.mjs php-cgi-worker.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.mjs PhpCgiWebview.mjs PhpCgiNode.mjs PhpCgiWorker.mjs PhpCgiBase.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.mjs breakoutRequest.mjs parseResponse.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.mjs PhpCgiWebBase.mjs)
-
-CGI_CJS=\
-	$(addprefix ${PHP_CGI_DIST_DIR}/,php-cgi-web.js php-cgi-webview.js php-cgi-node.js php-cgi-worker.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiWeb.js PhpCgiWebview.js PhpCgiNode.js PhpCgiWorker.js PhpCgiBase.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,webTransactions.js breakoutRequest.js parseResponse.js fsOps.js msg-bus.js webTransactions.js) \
-	$(addprefix ${PHP_CGI_DIST_DIR}/,resolveDependencies.js PhpCgiWebBase.js)
-
 WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php-cgi-web.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
 WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
 WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWorker.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-worker.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
@@ -68,6 +56,9 @@ webview-cgi-mjs: $(WEBVIEW_CGI_MJS)
 webview-cgi-js: $(WEBVIEW_CGI_JS)
 node-cgi-mjs: $(NODE_CGI_MJS)
 node-cgi-js: $(NODE_CGI_JS)
+
+CGI_MJS=${WEB_CGI_MJS} ${WORKER_CGI_MJS} ${NODE_CGI_MJS} ${WEBVIEW_CGI_MJS}
+CGI_CJS=${WEB_CGI_JS}  ${WORKER_CGI_JS}  ${NODE_CGI_JS}  ${WEBVIEW_CGI_JS}
 
 CGI_= ${CGI_MJS} ${CGI_CJS}
 ALL+= ${CGI_ALL}

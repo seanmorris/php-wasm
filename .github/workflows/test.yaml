@@ -16,7 +16,8 @@ jobs:
       - run: sudo apt install -y software-properties-common google-chrome-stable
       - run: cd demo-web; ./switch-packages.sh local; cd ..;
       - run: cp .circleci/.env_8.3-dynamic.ci .env
-      - run: make image web-mjs worker-cgi-mjs web-dbg-mjs
+      - run: make image
+      - run: ./make -j`nproc || echo 1` web-mjs worker-cgi-mjs web-dbg-mjs
       - run: test/browser-test.sh
 
   test-8-4-static:
@@ -29,7 +30,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-3-static:
     name: Test 8.3 Static
@@ -41,7 +42,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-2-static:
     name: Test 8.2 Static
@@ -53,7 +54,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.2
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.2
 
   test-8-1-static:
     name: Test 8.1 Static
@@ -65,7 +66,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.1
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.1
 
   test-8-0-static:
     name: Test 8.0 Static
@@ -77,7 +78,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.0
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.0
 
 
   test-8-4-dynamic:
@@ -90,7 +91,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-3-dynamic:
     name: Test 8.3 Dynamic
@@ -102,7 +103,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-2-dynamic:
     name: Test 8.2 Dynamic
@@ -114,7 +115,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.2
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.2
 
   test-8-1-dynamic:
     name: Test 8.1 Dynamic
@@ -126,7 +127,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.1
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.1
 
   test-8-0-dynamic:
     name: Test 8.0 Dynamic
@@ -138,7 +139,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.0
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.0
 
 
   test-8-4-shared:
@@ -151,7 +152,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-3-shared:
     name: Test 8.3 Shared
@@ -163,7 +164,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test
+      - run: ./make -j`nproc || echo 1` test
 
   test-8-2-shared:
     name: Test 8.2 Shared
@@ -175,7 +176,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.2
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.2
 
   test-8-1-shared:
     name: Test 8.1 Shared
@@ -187,7 +188,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.1
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.1
 
   test-8-0-shared:
     name: Test 8.0 Shared
@@ -199,4 +200,4 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image
-      - run: make -j`nproc || echo 1` test PHP_VERSION=8.0
+      - run: ./make -j`nproc || echo 1` test PHP_VERSION=8.0
