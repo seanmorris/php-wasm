@@ -116,7 +116,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.js: ENVIRONMENT=web
 ${PHP_DBG_DIST_DIR}/php-dbg-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -136,7 +136,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: ENVIRONMENT=web
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -155,7 +155,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: ENVIRONMENT=worker
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -175,7 +175,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: ENVIRONMENT=worker
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -194,7 +194,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.js: ENVIRONMENT=node
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -214,7 +214,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: ENVIRONMENT=node
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -232,7 +232,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: ENVIRONMENT=webview
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -252,7 +252,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: ENVIRONMENT=webview
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 phpdbg install-phpdbg install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/phpdbg/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}

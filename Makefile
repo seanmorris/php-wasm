@@ -513,7 +513,7 @@ ${PHP_DIST_DIR}/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -531,7 +531,7 @@ ${PHP_DIST_DIR}/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -549,7 +549,7 @@ ${PHP_DIST_DIR}/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -567,7 +567,7 @@ ${PHP_DIST_DIR}/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -584,7 +584,7 @@ ${PHP_DIST_DIR}/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -602,7 +602,7 @@ ${PHP_DIST_DIR}/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -619,7 +619,7 @@ ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -637,7 +637,7 @@ ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
