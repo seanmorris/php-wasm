@@ -1,7 +1,7 @@
 #!/usr/bin/env make
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs rebuild
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets rebuild reconfigure packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --shuffle=random
 
 ## Defaults:
 
@@ -119,6 +119,8 @@ DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 
+MAKEFLAGS+= "-l${CPU_COUNT}"
+
 PHP_VERSION_DEFAULT=8.3
 
 WITH_CGI=1
@@ -193,8 +195,6 @@ NOTPARALLEL=
 
 all:
 	$(MAKE) _all
-	$(MAKE) cgi-all
-	$(MAKE) dbg-all
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
@@ -355,7 +355,7 @@ MAIN_MODULE?=1
 ASYNCIFY?=1
 
 BUILD_FLAGS=-f ../../php.mk \
-	-j1 --max-load ${CPU_COUNT} \
+	-j${CPU_COUNT} -l${CPU_COUNT} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
@@ -402,46 +402,52 @@ ifneq (${PRE_JS_FILES},)
 DEPENDENCIES+= .cache/pre.js
 endif
 
-WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-web.mjs)
-WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-web.js)
-WORKER_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-worker.mjs)
-WORKER_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-worker.js)
-WEBVIEW_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs OutputBuffer.mjs fsOps.mjs webTransactions.mjs resolveDependencies.mjs _Event.mjs php-webview.mjs)
-WEBVIEW_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js  OutputBuffer.js  fsOps.js  webTransactions.js  resolveDependencies.js  _Event.js php-webview.js)
-NODE_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs php-node.mjs)
-NODE_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js  OutputBuffer.js  fsOps.js  resolveDependencies.js  _Event.js php-node.js)
+MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
+CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
+
+MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
+CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
 
 EXTRA_MODULES=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
-WEB_MJS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WEB_JS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
-WORKER_MJS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WORKER_JS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
-WEBVIEW_MJS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WEBVIEW_JS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
-NODE_MJS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-NODE_JS+= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs php-web.mjs ${MJS_HELPERS_WEB})
+WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js php-web.js ${CJS_HELPERS_WEB})
+WORKER_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs php-worker.mjs ${MJS_HELPERS_WEB})
+WORKER_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js php-worker.js ${CJS_HELPERS_WEB})
+WEBVIEW_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs php-webview.mjs ${MJS_HELPERS_WEB})
+WEBVIEW_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js php-webview.js ${CJS_HELPERS_WEB})
+NODE_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs php-node.mjs ${MJS_HELPERS})
+NODE_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js php-node.js ${CJS_HELPERS})
+
+WEB_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
+WEB_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+WORKER_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
+WORKER_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
+WEBVIEW_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
+WEBVIEW_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
+NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
 
 ifneq (${PRELOAD_ASSETS},)
-WEB_MJS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEB_JS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_MJS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_JS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_MJS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_JS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_MJS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_JS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
 
 ifeq (${WITH_SOURCEMAPS},1)
-WEB_MJS+= ${PHP_DIST_DIR}/php-web.mjs.wasm.map.MAPPED
-WEB_JS+= ${PHP_DIST_DIR}/php-web.js.wasm.map.MAPPED
-WORKER_MJS+= ${PHP_DIST_DIR}/php-worker.mjs.wasm.map.MAPPED
-WORKER_JS+= ${PHP_DIST_DIR}/php-worker.mjs.wasm.map.MAPPED
-WEBVIEW_MJS+= ${PHP_DIST_DIR}/php-webview.mjs.wasm.map.MAPPED
-WEBVIEW_JS+= ${PHP_DIST_DIR}/php-webview.js.wasm.map.MAPPED
-NODE_MJS+= ${PHP_DIST_DIR}/php-node.mjs.wasm.map.MAPPED
-NODE_JS+= ${PHP_DIST_DIR}/php-node.js.wasm.map.MAPPED
+WEB_MJS_ASSETS+= ${PHP_DIST_DIR}/php-web.mjs.wasm.map.MAPPED
+WEB_JS_ASSETS+= ${PHP_DIST_DIR}/php-web.js.wasm.map.MAPPED
+WORKER_MJS_ASSETS+= ${PHP_DIST_DIR}/php-worker.mjs.wasm.map.MAPPED
+WORKER_JS_ASSETS+= ${PHP_DIST_DIR}/php-worker.mjs.wasm.map.MAPPED
+WEBVIEW_MJS_ASSETS+= ${PHP_DIST_DIR}/php-webview.mjs.wasm.map.MAPPED
+WEBVIEW_JS_ASSETS+= ${PHP_DIST_DIR}/php-webview.js.wasm.map.MAPPED
+NODE_MJS_ASSETS+= ${PHP_DIST_DIR}/php-node.mjs.wasm.map.MAPPED
+NODE_JS_ASSETS+= ${PHP_DIST_DIR}/php-node.js.wasm.map.MAPPED
 endif
 
 TAG_JS=$(addprefix ${PHP_DIST_DIR}/,php-tags.mjs php-tags.jsdelivr.mjs php-tags.unpkg.mjs php-tags.local.mjs)
@@ -449,14 +455,45 @@ ALL=${MJS} ${CJS} ${TAG_JS}
 
 tags: ${TAG_JS}
 
-web-mjs: ${WEB_MJS}
-web-js: ${WEB_JS}
-worker-mjs: ${WORKER_MJS}
-worker-js: ${WORKER_JS}
-webview-mjs: ${WEBVIEW_MJS}
-webview-js: ${WEBVIEW_JS}
-node-mjs: ${NODE_MJS}
-node-js: ${NODE_JS}
+web-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WEB_MJS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_MJS_ASSETS}
+
+web-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WEB_JS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEB_JS_ASSETS}
+
+worker-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WORKER_MJS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_MJS_ASSETS}
+
+worker-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WORKER_JS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WORKER_JS_ASSETS}
+
+webview-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WEBVIEW_MJS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_MJS_ASSETS}
+
+webview-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${WEBVIEW_JS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${WEBVIEW_JS_ASSETS}
+
+node-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${NODE_MJS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_MJS_ASSETS}
+
+node-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) ${NODE_JS}
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${NODE_JS_ASSETS}
 
 _all: tags
 	$(MAKE) web-mjs
@@ -467,18 +504,35 @@ _all: tags
 	$(MAKE) worker-js
 	$(MAKE) webview-js
 	$(MAKE) node-js
+	$(MAKE) cgi-all
+	$(MAKE) dbg-all
 
 mjs: tags
 	$(MAKE) web-mjs
 	$(MAKE) worker-mjs
 	$(MAKE) webview-mjs
 	$(MAKE) node-mjs
+	$(MAKE) cgi-mjs
+	$(MAKE) dbg-mjs
 
 cjs: tags
 	$(MAKE) web-js
 	$(MAKE) worker-js
 	$(MAKE) webview-js
 	$(MAKE) node-js
+	$(MAKE) cgi-js
+	$(MAKE) dbg-js
+
+common-web:
+	$(MAKE) web-mjs
+	$(MAKE) worker-cgi-mjs
+	$(MAKE) web-dbg-mjs
+
+common:
+	$(MAKE) web-mjs
+	$(MAKE) worker-cgi-mjs
+	$(MAKE) web-dbg-mjs
+	$(MAKE) node-mjs
 
 NOTPARALLEL+=\
 	web-mjs \
@@ -497,12 +551,12 @@ ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
 	- cp -Lprf ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_ASSET_DIR}/
 
-${PHP_DIST_DIR}/config.mjs: .env
+${PHP_DIST_DIR}/config.mjs: ${ENV_FILE}
 	echo '' > $@
 	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
 
-${PHP_DIST_DIR}/config.js: .env
+${PHP_DIST_DIR}/config.js: ${ENV_FILE}
 	echo 'module.exports = {};' > $@
 	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
 	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
@@ -513,7 +567,7 @@ ${PHP_DIST_DIR}/php-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -531,7 +585,7 @@ ${PHP_DIST_DIR}/php-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -549,7 +603,7 @@ ${PHP_DIST_DIR}/php-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -567,7 +621,7 @@ ${PHP_DIST_DIR}/php-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -584,7 +638,7 @@ ${PHP_DIST_DIR}/php-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -602,7 +656,7 @@ ${PHP_DIST_DIR}/php-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -619,7 +673,7 @@ ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -637,7 +691,7 @@ ${PHP_DIST_DIR}/php-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}
@@ -716,10 +770,6 @@ patch/php8.1.patch:
 patch/php8.0.patch:
 	bash -c 'cd third_party/php8.0-src/ && git diff > ../../patch/php8.0.patch'
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.0-src/|g' ./patch/php8.0.patch
-
-# patch/libicu.patch:
-# 	bash -c 'cd third_party/libicu-72-1 && git diff > ../../patch/libicu.patch'
-# 	perl -pi -w -e 's|([ab])/|\1/third_party/libicu-72-1/|g' ./patch/libicu.patch
 
 php-clean:
 	${DOCKER_RUN_IN_PHP} rm -f configured
@@ -854,4 +904,4 @@ reconfigure:
 rebuild:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
-.NOTPARALLEL: ${NOTPARALLEL}
+# .NOTPARALLEL: ${NOTPARALLEL}

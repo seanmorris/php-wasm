@@ -14,54 +14,91 @@ NOTPARALLEL+=\
 	webview-cgi-js \
 	node-cgi-js
 
-WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php-cgi-web.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
-WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js  breakoutRequest.js  parseResponse.js  php-cgi-web.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
-WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWorker.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-worker.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
-WORKER_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWorker.js  breakoutRequest.js  parseResponse.js  php-cgi-worker.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
-WEBVIEW_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWebview.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-webview.mjs fsOps.mjs msg-bus.mjs webTransactions.mjs resolveDependencies.mjs)
-WEBVIEW_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWebview.js  breakoutRequest.js  parseResponse.js  php-cgi-webview.js  fsOps.js  msg-bus.js  webTransactions.js resolveDependencies.js)
-NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs breakoutRequest.mjs parseResponse.mjs php-cgi-node.mjs fsOps.mjs resolveDependencies.mjs)
-NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js  breakoutRequest.js  parseResponse.js  php-cgi-node.js  fsOps.js resolveDependencies.js)
+CGI_MJS_HELPERS=breakoutRequest.mjs parseResponse.mjs msg-bus.mjs config.mjs
+CGI_CJS_HELPERS=breakoutRequest.js  parseResponse.js  msg-bus.js config.js
 
-WEB_CGI_MJS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
-WEB_CGI_JS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
-WORKER_CGI_MJS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
-WORKER_CGI_JS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
-WEBVIEW_CGI_MJS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
-WEBVIEW_CGI_JS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
-NODE_CGI_MJS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.mjs
-NODE_CGI_JS+= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CGI_DIST_DIR}/config.js
+CGI_MJS_HELPERS_WEB=${CGI_MJS_HELPERS} msg-bus.mjs
+CGI_CJS_HELPERS_WEB=${CGI_CJS_HELPERS} msg-bus.js
+
+WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php-cgi-web.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js php-cgi-web.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWorker.mjs php-cgi-worker.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WORKER_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWorker.js php-cgi-worker.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+WEBVIEW_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWebview.mjs php-cgi-webview.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WEBVIEW_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWebview.js php-cgi-webview.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs php-cgi-node.mjs ${CGI_MJS_HELPERS} ${MJS_HELPERS})
+NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js php-cgi-node.js ${CGI_CJS_HELPERS} ${CJS_HELPERS})
+
+WEB_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEB_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ifneq (${PRELOAD_ASSETS},)
-WEB_CGI_MJS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-WEB_CGI_JS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_CGI_MJS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_CGI_JS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_CGI_MJS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_CGI_JS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_CGI_MJS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_CGI_JS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_CGI_MJS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_CGI_JS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_CGI_MJS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_CGI_JS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_CGI_MJS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_CGI_JS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_CGI_MJS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_CGI_JS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
 
 ifeq (${WITH_SOURCEMAPS},1)
-WEB_CGI_MJS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs.wasm.map.MAPPED
-WEB_CGI_JS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.js.wasm.map.MAPPED
-WORKER_CGI_MJS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
-WORKER_CGI_JS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
-WEBVIEW_CGI_MJS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs.wasm.map.MAPPED
-WEBVIEW_CGI_JS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.js.wasm.map.MAPPED
-NODE_CGI_MJS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs.wasm.map.MAPPED
-NODE_CGI_JS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.js.wasm.map.MAPPED
+WEB_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs.wasm.map.MAPPED
+WEB_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.js.wasm.map.MAPPED
+WORKER_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
+WORKER_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
+WEBVIEW_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs.wasm.map.MAPPED
+WEBVIEW_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.js.wasm.map.MAPPED
+NODE_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs.wasm.map.MAPPED
+NODE_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.js.wasm.map.MAPPED
 endif
 
-web-cgi-mjs: $(WEB_CGI_MJS)
-web-cgi-js: $(WEB_CGI_JS)
-worker-cgi-mjs: $(WORKER_CGI_MJS)
-worker-cgi-js: $(WORKER_CGI_JS)
-webview-cgi-mjs: $(WEBVIEW_CGI_MJS)
-webview-cgi-js: $(WEBVIEW_CGI_JS)
-node-cgi-mjs: $(NODE_CGI_MJS)
-node-cgi-js: $(NODE_CGI_JS)
+web-cgi-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WEB_CGI_MJS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEB_CGI_MJS_ASSETS)
+
+web-cgi-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WEB_CGI_JS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEB_CGI_JS_ASSETS)
+
+worker-cgi-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WORKER_CGI_MJS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WORKER_CGI_MJS_ASSETS)
+
+worker-cgi-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WORKER_CGI_JS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WORKER_CGI_JS_ASSETS)
+
+webview-cgi-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WEBVIEW_CGI_MJS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEBVIEW_CGI_MJS_ASSETS)
+
+webview-cgi-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(WEBVIEW_CGI_JS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(WEBVIEW_CGI_JS_ASSETS)
+
+node-cgi-mjs:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(NODE_CGI_MJS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(NODE_CGI_MJS_ASSETS)
+
+node-cgi-js:
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} ${PHP_CONFIGURE_DEPS}
+	$(MAKE) $(NODE_CGI_JS)
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} $(NODE_CGI_JS_ASSETS)
 
 cgi: cgi-all
 
@@ -92,7 +129,7 @@ ifneq (${PRE_JS_FILES},)
 CGI_DEPENDENCIES+= .cache/pre.js
 endif
 
-CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured # $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
+CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
 ${PHP_CGI_DIST_DIR}/config.mjs: .env
 	echo '' > $@
@@ -117,7 +154,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.js: ENVIRONMENT=web
 ${PHP_CGI_DIST_DIR}/php-cgi-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -137,7 +174,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ENVIRONMENT=web
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -156,7 +193,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ENVIRONMENT=worker
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -176,7 +213,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ENVIRONMENT=worker
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -195,7 +232,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ENVIRONMENT=node
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -215,7 +252,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ENVIRONMENT=node
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -233,7 +270,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ENVIRONMENT=webview
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -253,7 +290,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ENVIRONMENT=webview
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make -j1 cgi install-cgi install-build install-programs install-headers -ej${CPU_COUNT} ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
