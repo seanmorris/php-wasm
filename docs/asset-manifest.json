@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/php-wasm/static/css/main.6b1c6f76.css",
-    "main.js": "/php-wasm/static/js/main.a41fd74b.js",
+    "main.js": "/php-wasm/static/js/main.5cef3196.js",
     "static/js/835.ba3f1ffc.chunk.js": "/php-wasm/static/js/835.ba3f1ffc.chunk.js",
     "static/js/97.c6261c0f.chunk.js": "/php-wasm/static/js/97.c6261c0f.chunk.js",
     "static/js/330.c76e5618.chunk.js": "/php-wasm/static/js/330.c76e5618.chunk.js",
@@ -11,8 +11,8 @@
     "static/js/574.49428a7c.chunk.js": "/php-wasm/static/js/574.49428a7c.chunk.js",
     "static/js/40.9229f9f2.chunk.js": "/php-wasm/static/js/40.9229f9f2.chunk.js",
     "static/js/622.dfd05a2c.chunk.js": "/php-wasm/static/js/622.dfd05a2c.chunk.js",
-    "static/media/php-dbg-web.mjs.wasm": "/php-wasm/static/media/php-dbg-web.mjs.14b18392eb196ab6fa6f.wasm",
-    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.5ee456293d0ac390c490.wasm",
+    "static/media/php-dbg-web.mjs.wasm": "/php-wasm/static/media/php-dbg-web.mjs.5bd47726c1659b40270f.wasm",
+    "static/media/php-web.mjs.wasm": "/php-wasm/static/media/php-web.mjs.47904da39acda498106f.wasm",
     "static/media/postgres.wasm": "/php-wasm/static/media/postgres.882a4fc4178bf2b803a6.wasm",
     "static/media/postgres.data": "/php-wasm/static/media/postgres.6a6af95f67e70830cb39.data",
     "worker-xquery.js": "/php-wasm/16470d85f9e6b184411b622ce1783fd0.js",
@@ -505,12 +505,12 @@
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
     "main.6b1c6f76.css.map": "/php-wasm/static/css/main.6b1c6f76.css.map",
-    "main.a41fd74b.js.map": "/php-wasm/static/js/main.a41fd74b.js.map",
+    "main.5cef3196.js.map": "/php-wasm/static/js/main.5cef3196.js.map",
     "331.506cf2fc.chunk.js.map": "/php-wasm/static/js/331.506cf2fc.chunk.js.map",
     "774.71f6224c.chunk.js.map": "/php-wasm/static/js/774.71f6224c.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.6b1c6f76.css",
-    "static/js/main.a41fd74b.js"
+    "static/js/main.5cef3196.js"
   ]
 }

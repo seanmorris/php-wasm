@@ -315,6 +315,8 @@ export default function Editor() {
 						new Range(-1 + line, 0, -1 + line, Infinity), 'active_breakpoint', 'fullLine', true
 					);
 
+					editor.scrollToLine(-1 + line, true, true, () => {});
+
 					activeLines.current.add(marker);
 				}
 			}}
@@ -348,7 +350,7 @@ export default function Editor() {
 							▶
 						</button>
 					) : (
-						<span>
+						<span className='contents'>
 						<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
 							⏹
 						</button>
