@@ -1,6 +1,6 @@
 {
   "name": "php-cgi-wasm",
-  "version": "0.0.9-alpha-27",
+  "version": "0.0.9-alpha-28",
   "description": "php-cgi for wasm.",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "vrzno"
   ],
   "files": [
+    "*.wasm",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -45,20 +46,12 @@
     "PhpCgiWorker.mjs",
     "php-cgi-web.js",
     "php-cgi-web.mjs",
-    "php-cgi-web.js.wasm",
-    "php-cgi-web.mjs.wasm",
     "php-cgi-worker.js",
     "php-cgi-worker.mjs",
-    "php-cgi-worker.js.wasm",
-    "php-cgi-worker.mjs.wasm",
     "php-cgi-node.js",
     "php-cgi-node.mjs",
-    "php-cgi-node.js.wasm",
-    "php-cgi-node.mjs.wasm",
     "php-cgi-webview.js",
     "php-cgi-webview.mjs",
-    "php-cgi-webview.js.wasm",
-    "php-cgi-webview.mjs.wasm",
     "breakoutRequest.js",
     "breakoutRequest.mjs",
     "config.js",

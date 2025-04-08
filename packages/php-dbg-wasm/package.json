@@ -1,6 +1,6 @@
 {
   "name": "php-dbg-wasm",
-  "version": "0.0.9-alpha-27",
+  "version": "0.0.9-alpha-28",
   "description": "phpdbg for wasm.",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "vrzno"
   ],
   "files": [
+    "*.wasm",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -35,8 +36,6 @@
     "PhpDbgWeb.mjs",
     "php-dbg-web.js",
     "php-dbg-web.mjs",
-    "php-dbg-web.js.wasm",
-    "php-dbg-web.mjs.wasm",
     "config.js",
     "config.mjs",
     "fsOps.js",

@@ -30,6 +30,7 @@ rm -f public/*.wasm;
 rm -f public/*.data;
 rm -f public/*.map;
 rm -f public/*.js;
+rm -rf public/static/media/*.map public/static/media/mapped
 
 npx webpack --config service-worker-prod.config.ts;
 react-scripts build;

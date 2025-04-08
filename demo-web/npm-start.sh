@@ -22,17 +22,17 @@ ls node_modules/*/*.so node_modules/php-wasm-intl/icudt72l.dat | while read FILE
 	cp ${FILE} public/;
 }; done;
 
-# if [ -d '../packages/php-wasm/mapped' ]; then {
-# 	cp -r ../packages/php-wasm/mapped public/static/media
-# 	cp ../packages/php-wasm/*.map public/static/media
-# }
-# fi
+if [ -d '../packages/php-wasm/mapped' ]; then {
+	cp -r ../packages/php-wasm/mapped public/static/media
+	cp ../packages/php-wasm/*.map public/static/media
+}
+fi
 
-# if [ -d '../packages/php-cgi-wasm/mapped' ]; then {
-# 	cp -r ../packages/php-cgi-wasm/mapped public/static/media
-# 	cp ../packages/php-cgi-wasm/*.map public/static/media
-# }
-# fi
+if [ -d '../packages/php-cgi-wasm/mapped' ]; then {
+	cp -r ../packages/php-cgi-wasm/mapped public/static/media
+	cp ../packages/php-cgi-wasm/*.map public/static/media
+}
+fi
 
 if [ -d '../packages/php-dbg-wasm/mapped' ]; then {
 	cp -r ../packages/php-dbg-wasm/mapped public/static/media

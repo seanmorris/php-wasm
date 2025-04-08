@@ -1,6 +1,6 @@
 {
   "name": "php-wasm-builder",
-  "version": "0.0.9-alpha-27",
+  "version": "0.0.9-alpha-28",
   "description": "Builds php-wasm, php-cgi-wasm & dependencies.",
   "repository": "https://github.com/seanmorris/php-wasm",
   "author": "Sean Morris<php-wasm@seanmorr.is>",

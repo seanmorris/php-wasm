@@ -1,6 +1,6 @@
 {
   "name": "php-wasm",
-  "version": "0.0.9-alpha-27",
+  "version": "0.0.9-alpha-28",
   "description": "Run PHP right in the browser or anywhere else JS can run",
   "repository": {
     "type": "git",
@@ -29,6 +29,7 @@
     "vrzno"
   ],
   "files": [
+    "*.wasm",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -45,20 +46,12 @@
     "PhpWorker.mjs",
     "php-node.js",
     "php-node.mjs",
-    "php-node.js.wasm",
-    "php-node.mjs.wasm",
     "php-web.js",
     "php-web.mjs",
-    "php-web.js.wasm",
-    "php-web.mjs.wasm",
     "php-worker.js",
     "php-worker.mjs",
-    "php-worker.js.wasm",
-    "php-worker.mjs.wasm",
     "php-webview.js",
     "php-webview.mjs",
-    "php-webview.js.wasm",
-    "php-webview.mjs.wasm",
     "php-tags.mjs",
     "php-tags.local.mjs",
     "php-tags.jsdelivr.mjs",
@@ -76,11 +69,6 @@
     "webTransactions.js",
     "webTransactions.mjs",
     "libxml2.so",
-    "php-web.mjs.wasm.map",
-    "php-webview.mjs.wasm.map",
-    "php-worker.mjs.wasm.map",
-    "php-node.mjs.wasm.map",
-    "php-shell.mjs.wasm.map",
     "mapped/*"
   ]
 }

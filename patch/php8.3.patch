@@ -477,18 +477,6 @@ index c054326..0c81d93 100644
  		zend_object *exception = EG(exception);
  
  		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
-diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
-index b7b5df6..f6e26e8 100644
---- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
-+++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.h
-@@ -42,6 +42,7 @@ PHPDBG_COMMAND(leave);
- PHPDBG_COMMAND(frame);
- PHPDBG_COMMAND(print);
- PHPDBG_COMMAND(break);
-+PHPDBG_COMMAND(unbreak);
- PHPDBG_COMMAND(back);
- PHPDBG_COMMAND(list);
- PHPDBG_COMMAND(info);
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c
 index 964d82e..361821c 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c

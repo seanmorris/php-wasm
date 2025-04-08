@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eu;
+set -eux;
 
 PHP_VERSION=8.3
 
@@ -27,6 +27,7 @@ jq -r '.sources[]' < ${SOURCE_MAP_REALPATH} | while read SOURCE_FILE; do {
 	fi
 	if [ ! -e ${SOURCE_FILE} ]; then
 		echo "NOT FOUND" ${SOURCE_FILE}
+		echo "PWD" `pwd`
 		exit 1;
 	fi
 

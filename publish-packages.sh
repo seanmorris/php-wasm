@@ -11,34 +11,55 @@ echo -e "Getting ready to publish to channel: \033[33m${NPM_TAG}\033[0m"
 
 sleep 3;
 
-set -eu;
+# THIS SCRIPT SHOULD QUIT IMMEDIATELY UPON ERRORS
+set -euo pipefail
 
 ls packages | while read PACKAGE; do {
+
 	if [[ ${PACKAGE} == "sdl" ]]; then
 		continue;
 	fi;
-	echo "Examining ${PACKAGE}...";
-	cd "packages/${PACKAGE}";
+
+	echo -e "Checking package.json[files] in \033[1m${PACKAGE}\033[0m"
+
+	cd "packages/${PACKAGE}"
+
 	jq -r '.files | join("\n")' < package.json | while read FILE; do {
-		if [[ ${FILE} == php8.[012]* ]]; then
+
+		if [[ ${FILE} == php8.[01234]* ]]; then
 			continue;
 		fi;
-		if [[ ${FILE} == "mapped/*" ]] || [[ ${FILE} == *.map ]]; then
+
+		if [[ ${FILE} == 'mapped/*' ]] || [[ ${FILE} == *.map ]]; then
 			continue;
 		fi;
-		echo -e "\tChecking for ${FILE}...";
-		ls -al "${FILE}" > /dev/null;
+
+		if [[ ${FILE} == '*.wasm' ]] || [[ ${FILE} == *.map ]]; then
+			continue;
+		fi;
+
+		if [ ! -e ${FILE} ]; then
+			echo -e "\033[31mMISSING ${FILE} in ${PACKAGE}!\033[0m"
+			exit 1;
+		fi;
+
 	}; done;
+
 	cd "../..";
+
 }; done
 
-set -eux;
+set -euo pipefail
 
 ls packages | while read PACKAGE; do {
 	if [[ ${PACKAGE} == "sdl" ]]; then
 		continue;
 	fi;
-	cd "packages/${PACKAGE}";
-	npm publish --tag ${NPM_TAG};
-	cd "../..";
+	cd "packages/${PACKAGE}"
+	echo -e "\033[33mChanged files in \033[1m${PACKAGE}:\033[0m";
+	npm diff --tag ${NPM_TAG} --diff-name-only || ( cd ../.. && continue )
+	set -x
+	npm publish --tag ${NPM_TAG}
+	set +x
+	cd "../.."
 }; done;

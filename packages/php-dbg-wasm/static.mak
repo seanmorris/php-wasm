@@ -23,13 +23,13 @@ WEBVIEW_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWebview.js php-dbg-webview
 NODE_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgNode.mjs php-dbg-node.mjs ${MJS_HELPERS_WEB})
 NODE_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgNode.js php-dbg-node.js ${CJS_HELPERS})
 
-WEB_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
+WEB_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
 WEB_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-WORKER_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
+WORKER_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
 WORKER_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-WEBVIEW_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
+WEBVIEW_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
 WEBVIEW_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-NODE_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
+NODE_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
 NODE_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
 
 ifneq (${PRELOAD_ASSETS},)
