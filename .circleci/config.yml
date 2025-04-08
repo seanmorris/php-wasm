@@ -13,6 +13,16 @@ workflows:
           requires:
             - make-archives
 
+      - make-test-8-4-static:
+        requires:
+            - make-archives
+      - make-test-8-4-shared:
+          requires:
+            - make-archives
+      - make-test-8-4-dynamic:
+          requires:
+            - make-archives
+
       - make-test-8-3-static:
           requires:
             - make-archives
@@ -128,7 +138,8 @@ jobs:
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
       - run: time make test
-  make-test-8-4-static:
+
+  make-test-8-3-static:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
