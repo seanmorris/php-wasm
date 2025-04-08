@@ -6,7 +6,7 @@
     "url": "git+https://github.com/seanmorris/php-wasm.git"
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
-  "version": "0.0.9-alpha-28",
+  "version": "0.0.9-alpha-29",
   "main": "index.mjs",
   "files": [
     "index.mjs",

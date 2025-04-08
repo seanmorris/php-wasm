@@ -1,6 +1,6 @@
 {
   "name": "php-wasm",
-  "version": "0.0.9-alpha-28",
+  "version": "0.0.9-alpha-29",
   "description": "Run PHP right in the browser or anywhere else JS can run",
   "repository": {
     "type": "git",
