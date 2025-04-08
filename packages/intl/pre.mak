@@ -2,11 +2,12 @@
 
 WITH_INTL?=dynamic
 
+LIBICU_VERSION_DOT=$(subst -,.,$(LIBICU_VERSION))
 LIBICU_VERSION_UNDERSCORE=$(subst -,_,$(LIBICU_VERSION))
 
 LIBICU_VERSION=72-1
 LIBICU_TAG?=release-${LIBICU_VERSION}
-LIBICU_DATFILE=lib/share/icu/${LIBICU_VERSION}/icudt72l.dat
+LIBICU_DATFILE=lib/share/icu/${LIBICU_VERSION_DOT}/icudt72l.dat
 DOCKER_RUN_IN_LIBICU=${DOCKER_ENV} -w /src/third_party/icu-${LIBICU_VERSION}/icu/source emscripten-builder
 DOCKER_RUN_IN_EXT_INTL=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-intl emscripten-builder
 DOCKER_RUN_IN_LIBICU_ALT=${DOCKER_ENV} -w /src/third_party/icu-${LIBICU_VERSION}/icu_alt/icu/source emscripten-builder
