@@ -14,7 +14,7 @@ workflows:
             - make-archives
 
       - make-test-8-4-static:
-        requires:
+          requires:
             - make-archives
       - make-test-8-4-shared:
           requires:
