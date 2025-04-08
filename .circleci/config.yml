@@ -59,7 +59,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - checkout
       - run: npm install
@@ -70,23 +70,11 @@ jobs:
           paths:
             - project/
 
-  make-test-8-3-static:
-    parallelism: 1
-    machine:
-      image: ubuntu-2204:2024.05.1
-    resource_class: medium
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: cp .circleci/.env_8.3.ci .env
-      - run: find . -type f -name "*.a" -exec touch {} +
-      - run: time make test
-
   make-test-browser:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -102,15 +90,61 @@ jobs:
       - run: cd demo-web; ./switch-packages.sh local; cd ..;
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: make web-mjs worker-cgi-mjs web-dbg-mjs
       - run: test/browser-test.sh
+
+  make-test-8-4-static:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2024.05.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.4.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
+      - run: time make test
+
+  make-test-8-4-shared:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2024.05.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.4-shared.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
+      - run: time make test
+
+  make-test-8-4-dynamic:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2024.05.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.4-dynamic.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
+      - run: time make test
+  make-test-8-4-static:
+    parallelism: 1
+    machine:
+      image: ubuntu-2204:2024.05.1
+    resource_class: xlarge
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: cp .circleci/.env_8.4.ci .env
+      - run: find . -type f -name "*.a" -exec touch {} +
+      - run: time make test
 
   make-test-8-3-shared:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -122,7 +156,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -134,7 +168,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
             at: ~/
@@ -146,7 +180,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -158,7 +192,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -170,7 +204,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
             at: ~/
@@ -182,7 +216,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -194,7 +228,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -206,7 +240,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
             at: ~/
@@ -218,7 +252,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
@@ -230,7 +264,7 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
     steps:
       - attach_workspace:
           at: ~/
