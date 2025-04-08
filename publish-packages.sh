@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 NPM_TAG=${1};
-NOT_DRY_RUN=
 
 if [ -z "${NPM_TAG}" ]; then {
 	echo "A tag is required.";
@@ -61,7 +60,7 @@ ls packages | while read PACKAGE; do {
 	npm diff --tag ${NPM_TAG} --diff-name-only || ( cd ../.. && continue )
 	if [[ "${NOT_DRY_RUN:-}" == "real" ]]; then
 		set -x
-		xyz publish --tag ${NPM_TAG}
+		npm publish --tag ${NPM_TAG}
 		set +x
 	else
 		set -x

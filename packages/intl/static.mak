@@ -1,20 +1,13 @@
 #!/usr/bin/env make
 
-third_party/libicu-${LIBICU_VERSION}/.gitignore:
+third_party/icu-${LIBICU_VERSION}/icu/readme.html:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
-	${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-${LIBICU_VERSION} \
-		--branch ${LIBICU_TAG} \
-		--single-branch     \
-		--depth 1;
-	${DOCKER_RUN} cp -rf /src/third_party/libicu-${LIBICU_VERSION} /src/third_party/libicu_alt
-	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu-${LIBICU_VERSION}
-
-third_party/llvm/.gitignore:
-	@ echo -e "\e[33;4mDownloading LLVM\e[0m"
-	${DOCKER_RUN} git clone https://github.com/emscripten-core/llvm-project.git third_party/llvm \
-		--branch main \
-		--single-branch     \
-		--depth 1;
+	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
+	${DOCKER_RUN} mkdir -p third_party/icu-${LIBICU_VERSION}
+	${DOCKER_RUN} tar -xvzf icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz -C third_party/icu-${LIBICU_VERSION}/
+	${DOCKER_RUN} cp -rf /src/third_party/icu-${LIBICU_VERSION} /src/third_party/icu_alt
+	${DOCKER_RUN} mv /src/third_party/icu_alt /src/third_party/icu-${LIBICU_VERSION}
+	${DOCKER_RUN} rm icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz*
 
 ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
 
@@ -27,7 +20,7 @@ lib/lib/libicuio.a: lib/lib/libicuuc.a
 lib/lib/libicutest.a: lib/lib/libicuuc.a
 lib/lib/libicutu.a: lib/lib/libicuuc.a
 
-lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
+lib/lib/libicuuc.a: third_party/icu-${LIBICU_VERSION}/icu/readme.html
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure \
 		--with-data-packaging=archive \
@@ -59,13 +52,13 @@ lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 		CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	- ${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} rm -rf \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/bin \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/data/out/tmp/icudt* \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/data/out/icudt*
 	${DOCKER_RUN_IN_LIBICU} cp -rfv \
-		/src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
-	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
+		/src/third_party/icu-${LIBICU_VERSION}/icu_alt/icu/source/bin \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/
+	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/icu-${LIBICU_VERSION}/icu/source/bin/*'
 	${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
