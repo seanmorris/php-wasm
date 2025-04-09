@@ -709,7 +709,7 @@ self.addEventListener('message',  event => php.handleMessageEvent(event));
 
 ## 🏗️ Custom Builds
 
-To use the the in-place builder, first install `php-wasm-builder` globally:
+To use the in-place builder, first install `php-wasm-builder` globally:
 
 ***Requires docker, docker-compose, coreutils, wget, & make.***
 
