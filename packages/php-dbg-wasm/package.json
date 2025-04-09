@@ -1,6 +1,6 @@
 {
   "name": "php-dbg-wasm",
-  "version": "0.0.9-alpha-29",
+  "version": "0.0.9-alpha-30",
   "description": "phpdbg for wasm.",
   "repository": {
     "type": "git",

@@ -503,6 +503,17 @@ node-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS}
 	@ cat ico.ans >&2
 
+# You must have one of the above built to use the following step.
+# Don't use it unless you're mad at your CPU cooler.
+fast-build: third_party/php${PHP_VERSION}-src/main/main.o
+	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} \
+		${WEB_MJS} ${WORKER_MJS} ${WEBVIEW_MJS} ${NODE_MJS} \
+		${WEB_JS}  ${WORKER_JS}  ${WEBVIEW_JS}  ${NODE_JS} \
+		${WEB_CGI_MJS} ${WORKER_CGI_MJS} ${WEBVIEW_CGI_MJS} ${NODE_CGI_MJS} \
+		${WEB_CGI_JS}  ${WORKER_CGI_JS}  ${WEBVIEW_CGI_JS}  ${NODE_CGI_JS} \
+		${WEB_DBG_MJS} ${WEB_DBG_JS}
+	@ cat ico.ans >&2
+
 _all: tags
 	$(MAKE) web-mjs
 	$(MAKE) worker-mjs

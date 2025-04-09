@@ -3,13 +3,18 @@
 third_party/icu-${LIBICU_VERSION}/icu/readme.html:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
 	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
+	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
 	${DOCKER_RUN} mkdir -p third_party/icu-${LIBICU_VERSION}
 	${DOCKER_RUN} tar -xvzf icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz -C third_party/icu-${LIBICU_VERSION}/
+	${DOCKER_RUN} rm -rf /src/third_party/icu-72-1/icu/source/data/
+	${DOCKER_RUN} unzip icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip -d third_party/icu-${LIBICU_VERSION}/icu/source
 	${DOCKER_RUN} cp -rf /src/third_party/icu-${LIBICU_VERSION} /src/third_party/icu_alt
 	${DOCKER_RUN} mv /src/third_party/icu_alt /src/third_party/icu-${LIBICU_VERSION}
-	${DOCKER_RUN} rm icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz*
+	${DOCKER_RUN} rm icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz* icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip*
 
 ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
+
+icu-data: ${LIBICU_DATFILE}
 
 ${LIBICU_DATFILE}: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
