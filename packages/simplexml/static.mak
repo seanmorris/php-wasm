@@ -32,6 +32,7 @@ endif
 
 third_party/php${PHP_VERSION}-simplexml/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lrf /src/third_party/php${PHP_VERSION}-src/ext/simplexml /src/third_party/php${PHP_VERSION}-simplexml
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-simplexml/config.m4
 
 packages/simplexml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PHP_VERSION}-simplexml/config.m4
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;

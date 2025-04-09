@@ -1,37 +1,31 @@
 #!/usr/bin/env make
 
-third_party/libicu-${LIBICU_VERSION}/.gitignore:
+third_party/icu-${LIBICU_VERSION}/icu/readme.html:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
-	${DOCKER_RUN} git clone https://github.com/unicode-org/icu.git third_party/libicu-${LIBICU_VERSION} \
-		--branch ${LIBICU_TAG} \
-		--single-branch     \
-		--depth 1;
-	${DOCKER_RUN} cp -rf /src/third_party/libicu-${LIBICU_VERSION} /src/third_party/libicu_alt
-	${DOCKER_RUN} mv /src/third_party/libicu_alt /src/third_party/libicu-${LIBICU_VERSION}
-
-third_party/llvm/.gitignore:
-	@ echo -e "\e[33;4mDownloading LLVM\e[0m"
-	${DOCKER_RUN} git clone https://github.com/emscripten-core/llvm-project.git third_party/llvm \
-		--branch main \
-		--single-branch     \
-		--depth 1;
+	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
+	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
+	${DOCKER_RUN} mkdir -p third_party/icu-${LIBICU_VERSION}
+	${DOCKER_RUN} tar -xvzf icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz -C third_party/icu-${LIBICU_VERSION}/
+	${DOCKER_RUN} rm -rf /src/third_party/icu-72-1/icu/source/data/
+	${DOCKER_RUN} unzip icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip -d third_party/icu-${LIBICU_VERSION}/icu/source
+	${DOCKER_RUN} cp -rf /src/third_party/icu-${LIBICU_VERSION} /src/third_party/icu_alt
+	${DOCKER_RUN} mv /src/third_party/icu_alt /src/third_party/icu-${LIBICU_VERSION}
+	${DOCKER_RUN} rm icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz* icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip*
 
 ICU_DATA_FILTER_FILE=/src/packages/intl/filter.json
+
+icu-data: ${LIBICU_DATFILE}
 
 ${LIBICU_DATFILE}: lib/lib/libicudata.a
 	${DOCKER_RUN_IN_LIBICU} emmake make -C data -j${CPU_COUNT} install
 
 lib/lib/libicudata.a: lib/lib/libicuuc.a
-
 lib/lib/libicui18n.a: lib/lib/libicuuc.a
-
 lib/lib/libicuio.a: lib/lib/libicuuc.a
-
 lib/lib/libicutest.a: lib/lib/libicuuc.a
-
 lib/lib/libicutu.a: lib/lib/libicuuc.a
 
-lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
+lib/lib/libicuuc.a: third_party/icu-${LIBICU_VERSION}/icu/readme.html
 	@ echo -e "\e[33;4mBuilding LIBICU\e[0m"
 	${DOCKER_RUN_IN_LIBICU_ALT} ./configure \
 		--with-data-packaging=archive \
@@ -63,13 +57,13 @@ lib/lib/libicuuc.a: third_party/libicu-${LIBICU_VERSION}/.gitignore
 		CXXFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	- ${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} rm -rf \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/tmp/icudt* \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/data/out/icudt*
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/bin \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/data/out/tmp/icudt* \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/data/out/icudt*
 	${DOCKER_RUN_IN_LIBICU} cp -rfv \
-		/src/third_party/libicu-${LIBICU_VERSION}/libicu_alt/icu4c/source/bin \
-		/src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/
-	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/libicu-${LIBICU_VERSION}/icu4c/source/bin/*'
+		/src/third_party/icu-${LIBICU_VERSION}/icu_alt/icu/source/bin \
+		/src/third_party/icu-${LIBICU_VERSION}/icu/source/
+	${DOCKER_RUN_IN_LIBICU} bash -c 'chmod +x /src/third_party/icu-${LIBICU_VERSION}/icu/source/bin/*'
 	${DOCKER_RUN_IN_LIBICU} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBICU} emmake make install
 
@@ -138,8 +132,9 @@ packages/intl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSI
 
 third_party/php${PHP_VERSION}-intl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/intl /src/third_party/php${PHP_VERSION}-intl
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-intl/config.m4
 
-packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/intl/libicudata.so third_party/php${PHP_VERSION}-intl/config.m4
+packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} third_party/php${PHP_VERSION}-intl/config.m4 packages/intl/libicudata.so packages/intl/libicuuc.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutu.so packages/intl/libicutest.so
 	@ echo -e "\e[33;4mBuilding php-intl\e[0m"
 	${DOCKER_RUN_IN_EXT_INTL} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_INTL} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
@@ -147,7 +142,7 @@ packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} packages/intl/libicudata.so t
 	${DOCKER_RUN_IN_EXT_INTL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_INTL} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_INTL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_INTL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/intl.a \
+	${DOCKER_RUN_IN_EXT_INTL} emcc -j1 -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/intl.a \
 		/src/packages/intl/libicudata.so \
 		/src/packages/intl/libicuuc.so \
 		/src/packages/intl/libicui18n.so  \

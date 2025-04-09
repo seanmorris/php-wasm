@@ -23,3 +23,4 @@ third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c t
 
 third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
 	@ ${DOCKER_RUN} cp -prf third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
+#	@ ${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4

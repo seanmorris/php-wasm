@@ -32,6 +32,7 @@ endif
 
 third_party/php${PHP_VERSION}-dom/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/dom /src/third_party/php${PHP_VERSION}-dom
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-dom/config.m4
 
 packages/dom/php${PHP_VERSION}-dom.so: ${PHPIZE} third_party/php${PHP_VERSION}-dom/config.m4
 	${DOCKER_RUN_IN_EXT_DOM} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;

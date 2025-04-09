@@ -1,0 +1,11 @@
+*.mjs
+*.js
+*.br
+*.gz
+*.data
+*.wasm
+*.so
+*.map
+*.ORIGINAL
+*.MAPPED
+mapped/

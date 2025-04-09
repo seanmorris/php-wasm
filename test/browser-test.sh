@@ -1,30 +1,18 @@
 #!/usr/bin/env bash
 
-set -x;
-PORT=3000
-RUNNING=`lsof -t -i:${PORT}`;
+set -eux;
+PORT=9000
+export CI=
 
-if [ ! -z "${RUNNING}" ]; then {
-	echo "A process is currently using port ${PORT}" >&2
-	read -p "Kill the process? (y/N) " -n 1 -r >&2
-	echo
-	
-	if [[ ! $REPLY =~ ^[Yy]$ ]]; then {
-		exit 0
-	}
-	fi
-	
-	kill ${RUNNING}
-}
-fi
+pushd demo-web && npm run build && popd;
 
-pushd demo-web && {
-	npx webpack --config service-worker-dev.config.ts && PORT=${PORT} BROWSER=none npx react-scripts start &
-	trap "lsof -t -i:${PORT} | xargs -I{} kill {}" 0;
-	ps aux | grep ${SERVER_PID}
-};
+docker kill php-wasm-test-apache || true;
 
-popd;
+HOST_DIR="${PWD}/demo-web/build"
+MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm httpd:2.4"
+
+docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} &
+trap "docker kill php-wasm-test-apache" 0;
 
 set +x;
 while ! nc -z localhost ${PORT}; do
@@ -32,4 +20,4 @@ while ! nc -z localhost ${PORT}; do
 done
 set -x;
 
-npx cvtest test/BrowserTest.mjs
+npx cvtest test/BrowserTest.mjs;

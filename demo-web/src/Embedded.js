@@ -20,13 +20,14 @@ const sharedLibs = [
 	`php${PhpWeb.phpVersion}-mbstring.so`,
 	`php${PhpWeb.phpVersion}-sqlite.so`,
 	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
+	// `php${PhpWeb.phpVersion}-phar.so`,
 	`php${PhpWeb.phpVersion}-xml.so`,
 	`php${PhpWeb.phpVersion}-simplexml.so`,
-	{url: `libs/libxml2.so`, ini:false},
+	{url: `libxml2.so`, ini:false},
 ];
 
 const files = [
-	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }
+	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
 ];
 
 const ini = `
@@ -46,6 +47,7 @@ function Embedded() {
 	const input = useRef('');
 	const persist = useRef('');
 	const single  = useRef('');
+	// const stdin  = useRef('');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -68,7 +70,6 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		window.list = [1,2,3,4];
 		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;

@@ -4,10 +4,10 @@ export async function startTransaction(wrapper)
 
 	if(wrapper.transactionStarted || !php.persist)
 	{
-		return;
+		return wrapper.transactionStarted;
 	}
 
-	return await new Promise((accept, reject) => {
+	wrapper.transactionStarted = new Promise((accept, reject) => {
 		return php.FS.syncfs(true, error => {
 			if(error)
 			{
@@ -15,11 +15,12 @@ export async function startTransaction(wrapper)
 			}
 			else
 			{
-				wrapper.transactionStarted = true;
 				accept();
 			}
 		});
 	});
+
+	return await wrapper.transactionStarted;
 }
 
 export async function commitTransaction(wrapper, readOnly = false)

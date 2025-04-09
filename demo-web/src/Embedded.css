@@ -153,6 +153,14 @@ h1 {
 	flex-direction: row;
 }
 
+.row.wide {
+	flex: 1;
+}
+
+.row.status {
+	display: flex;
+}
+
 body > div {
 	display: flex;
 	flex-direction: row;
@@ -407,4 +415,8 @@ body:not(.loading) .loader {
 
 #example-wrapper:has( #example:empty ) {
 	display: none;
+}
+
+.stdout input {
+	display: inline;
 }

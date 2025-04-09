@@ -1,6 +1,7 @@
 import './Common.css';
 import './EditorEntry.css';
 
+import cmdIcon from './icons/cmd-icon-16.png';
 import fileIcon from './nomo-dark/file.svg';
 import filePhpIcon from './nomo-dark/file.php.svg';
 import fileJsIcon from './nomo-dark/file.js.svg';
@@ -65,14 +66,22 @@ export default function EditorFile({path, name}) {
 
 	const openFile = () => {
 		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: _path}));
-
 		query.set('path', _path);
-
 		window.history.replaceState({}, null, window.location.pathname + '?' + query);
 	};
 
 	const renameFile = () => {
 		setShowRename(true);
+	};
+
+	const openPhpDbg = path => {
+		const q = new URLSearchParams({path});
+		const u = new URL(
+			'./dbg-preview.html?' + q.toString()
+			, new URL(process.env.PUBLIC_URL + '/', window.location)
+		);
+
+		window.open(u);
 	};
 
 	const deleteFile = async () => {
@@ -93,6 +102,7 @@ export default function EditorFile({path, name}) {
 
 				setName(event.target.value);
 				setPath(newPath);
+				openFile();
 			}
 
 			setShowRename(false);
@@ -122,6 +132,12 @@ export default function EditorFile({path, name}) {
 				{_name}
 			</p>
 			{showContext && <span className = "contents only-focus">
+				{extension === 'php' && (
+					<p className = "context" onClick = {() => openPhpDbg(_path)}>
+						<img className = "file icon" src = {cmdIcon} alt = "" />
+						Open in PHP-DBG
+					</p>
+				)}
 				<p className = "context" onClick = {() => renameFile(true)}>
 					<img className = "file icon" src = {renameIcon} alt = "" />
 					Rename

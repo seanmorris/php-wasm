@@ -11,7 +11,8 @@ _PHP in WebAssembly, npm not required._
 
 ## 🌟 v0.0.9-alpha - Aiming for the (GitHub) Stars
 
-* Adding PHP-CGI support!
+* Adding PHP-CGI & PH-DBG support!
+* Faster build time!
 * Runtime extension loading!
 * libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
 * php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
@@ -24,8 +25,8 @@ _PHP in WebAssembly, npm not required._
 * Modules are now webpack-compatible out of the box.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 * Fixed the bug with POST requests under Firefox.
-* Adding support for PHP 8.3.7
-* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
+* Adding support for PHP 8.3.11 & 8.4.1.
+* Automatic CI testing for PHP 8.0, 8.1, 8.2, 8.3, & 8.4.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -709,7 +710,7 @@ self.addEventListener('message',  event => php.handleMessageEvent(event));
 
 ## 🏗️ Custom Builds
 
-To use the the in-place builder, first install `php-wasm-builder` globally:
+To use the in-place builder, first install `php-wasm-builder` globally:
 
 ***Requires docker, docker-compose, coreutils, wget, & make.***
 
@@ -1134,7 +1135,7 @@ The repository [pib-legacy](https://github.com/seanmorris/pib-legacy) was create
 
 https://github.com/oraoto/pib
 
-The repository `pib-legacy` was created to preserve the original state of the project: https://github.com/seanmorris/pib-legacy
+https://github.com/seanmorris/pib-legacy
 
 ## 🍻 Licensed under the Apache License, Version 2.0
 

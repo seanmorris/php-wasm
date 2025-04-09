@@ -1,0 +1,237 @@
+diff --git a/third_party/php8.4-src/ext/openssl/openssl.c b/third_party/php8.4-src/ext/openssl/openssl.c
+index be68216..a8ba810 100644
+--- a/third_party/php8.4-src/ext/openssl/openssl.c
++++ b/third_party/php8.4-src/ext/openssl/openssl.c
+@@ -1336,8 +1336,8 @@ PHP_MINIT_FUNCTION(openssl)
+ 	/* override the default tcp socket provider */
+ 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
+ 
+-	php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
+ 
+ 	REGISTER_INI_ENTRIES();
+ 
+diff --git a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
+index bc47c15..e39e120 100644
+--- a/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
++++ b/third_party/php8.4-src/ext/pdo_sqlite/pdo_sqlite.c
+@@ -22,8 +22,8 @@
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+ #include "SAPI.h"
+-#include "ext/pdo/php_pdo.h"
+-#include "ext/pdo/php_pdo_driver.h"
++#include "../ext/pdo/php_pdo.h"
++#include "../ext/pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
+index 3c2b4ef..818d913 100644
+--- a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
++++ b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_driver.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "ext/pdo/php_pdo.h"
+-#include "ext/pdo/php_pdo_driver.h"
++#include "../ext/pdo/php_pdo.h"
++#include "../ext/pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
+index 29309ac..728b862 100644
+--- a/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
++++ b/third_party/php8.4-src/ext/pdo_sqlite/sqlite_statement.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "ext/pdo/php_pdo.h"
+-#include "ext/pdo/php_pdo_driver.h"
++#include "../ext/pdo/php_pdo.h"
++#include "../ext/pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ 
+diff --git a/third_party/php8.4-src/ext/standard/basic_functions.c b/third_party/php8.4-src/ext/standard/basic_functions.c
+index dbbf989..c947419 100644
+--- a/third_party/php8.4-src/ext/standard/basic_functions.c
++++ b/third_party/php8.4-src/ext/standard/basic_functions.c
+@@ -357,8 +357,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
+ 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper);
+ #endif
+ 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
+-	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
+ 
+ 	return SUCCESS;
+ }
+diff --git a/third_party/php8.4-src/ext/standard/credits.c b/third_party/php8.4-src/ext/standard/credits.c
+index 4e8722d..1343330 100644
+--- a/third_party/php8.4-src/ext/standard/credits.c
++++ b/third_party/php8.4-src/ext/standard/credits.c
+@@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
+ 		PUTS("PHP Credits\n");
+ 	}
+ 
++	php_info_print_table_start();
++	php_info_print_table_header(1, "php-wasm");
++	php_info_print_table_row(1, "Sean Morris & Oraoto");
++	php_info_print_table_end();
++
+ 	if (flag & PHP_CREDITS_GROUP) {
+ 		/* Group */
+ 
+diff --git a/third_party/php8.4-src/ext/standard/credits_ext.h b/third_party/php8.4-src/ext/standard/credits_ext.h
+index 49b263c..d8e38a8 100644
+--- a/third_party/php8.4-src/ext/standard/credits_ext.h
++++ b/third_party/php8.4-src/ext/standard/credits_ext.h
+@@ -44,10 +44,12 @@ CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann, Daniel R
+ CREDIT_LINE("Opcache", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Dmitry Stogov, Xinchen Hui");
+ CREDIT_LINE("OpenSSL", "Stig Venaas, Wez Furlong, Sascha Kettler, Scott MacVicar, Eliot Lear");
+ CREDIT_LINE("pcntl", "Jason Greene, Arnaud Le Blanc");
++CREDIT_LINE("pdo-pglite", "Sean Morris");
+ CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
+ CREDIT_LINE("PHP Archive", "Gregory Beaver, Marcus Boerger");
+ CREDIT_LINE("PHP Data Objects", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky");
+ CREDIT_LINE("PHP hash", "Sara Golemon, Rasmus Lerdorf, Stefan Esser, Michael Wallner, Scott MacVicar");
++CREDIT_LINE("pib", "Oraoto, Sean Morris");
+ CREDIT_LINE("Posix", "Kristian Koehntopp");
+ CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
+ CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
+@@ -69,6 +71,7 @@ CREDIT_LINE("System V Semaphores", "Tom May");
+ CREDIT_LINE("System V Shared Memory", "Christian Cartus");
+ CREDIT_LINE("tidy", "John Coggeshall, Ilia Alshanetsky");
+ CREDIT_LINE("tokenizer", "Andrei Zmievski, Johannes Schlueter");
++CREDIT_LINE("Vrzno", "Sean Morris");
+ CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen, Sterling Hughes");
+ CREDIT_LINE("XMLReader", "Rob Richards");
+ CREDIT_LINE("XMLWriter", "Rob Richards, Pierre-Alain Joye");
+diff --git a/third_party/php8.4-src/ext/tokenizer/tokenizer.c b/third_party/php8.4-src/ext/tokenizer/tokenizer.c
+index 9d1b19d..94c3f5a 100644
+--- a/third_party/php8.4-src/ext/tokenizer/tokenizer.c
++++ b/third_party/php8.4-src/ext/tokenizer/tokenizer.c
+@@ -318,7 +318,7 @@ static void add_token(
+ 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
+ }
+ 
+-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
++bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+ {
+ 	zval source_zval;
+ 	zend_lex_state original_lex_state;
+diff --git a/third_party/php8.4-src/main/fastcgi.c b/third_party/php8.4-src/main/fastcgi.c
+index 448576a..7209487 100644
+--- a/third_party/php8.4-src/main/fastcgi.c
++++ b/third_party/php8.4-src/main/fastcgi.c
+@@ -551,6 +551,7 @@ void fcgi_shutdown(void)
+ {
+ 	if (is_initialized) {
+ 		zend_hash_destroy(&fcgi_mgmt_vars);
++		is_initialized = 0;
+ 	}
+ 	is_fastcgi = 0;
+ 	if (allowed_clients) {
+diff --git a/third_party/php8.4-src/sapi/cgi/Makefile.frag b/third_party/php8.4-src/sapi/cgi/Makefile.frag
+index 79e2afe..0956f43 100644
+--- a/third_party/php8.4-src/sapi/cgi/Makefile.frag
++++ b/third_party/php8.4-src/sapi/cgi/Makefile.frag
+@@ -1,7 +1,7 @@
+ cgi: $(SAPI_CGI_PATH)
+ 
+ $(SAPI_CGI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FASTCGI_OBJS) $(PHP_CGI_OBJS)
+-	$(BUILD_CGI)
++	$(BUILD_CGI) $(WASM_SHARED_LIBS)
+ 
+ install-cgi: $(SAPI_CGI_PATH)
+ 	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.4-src/sapi/cgi/cgi_main.c b/third_party/php8.4-src/sapi/cgi/cgi_main.c
+index 0e7b300..3652b52 100644
+--- a/third_party/php8.4-src/sapi/cgi/cgi_main.c
++++ b/third_party/php8.4-src/sapi/cgi/cgi_main.c
+@@ -18,7 +18,7 @@
+    |          Dmitry Stogov <dmitry@php.net>                              |
+    +----------------------------------------------------------------------+
+ */
+-
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1872,7 +1872,8 @@ int main(int argc, char *argv[])
+ 	SG(request_info).path_translated = NULL;
+ #endif
+ 
+-	cgi_sapi_module.executable_location = argv[0];
++	// cgi_sapi_module.executable_location = argv[0];
++	cgi_sapi_module.executable_location = NULL;
+ 	if (!cgi && !fastcgi && !bindpath) {
+ 		cgi_sapi_module.additional_functions = additional_functions;
+ 	}
+@@ -1954,8 +1955,10 @@ consult the installation file that came with this distribution, or visit \n\
+ 	}
+ 
+ 	/* make php call us to get _ENV vars */
+-	php_php_import_environment_variables = php_import_environment_variables;
+-	php_import_environment_variables = cgi_php_import_environment_variables;
++	if(php_import_environment_variables != cgi_php_import_environment_variables) {
++		php_php_import_environment_variables = php_import_environment_variables;
++		php_import_environment_variables = cgi_php_import_environment_variables;
++	}
+ 
+ 	if (fastcgi) {
+ 		/* How many times to run PHP scripts before dying */
+@@ -2681,3 +2684,18 @@ consult the installation file that came with this distribution, or visit \n\
+ 	return exit_status;
+ }
+ /* }}} */
++
++void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
++{
++	putenv("USE_ZEND_ALLOC=0");
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_getenv(char *name)
++{
++	return getenv(name);
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
++{
++	return _sapi_cgi_putenv(name, strlen(name), value);
++}
+diff --git a/third_party/php8.4-src/sapi/cli/Makefile.frag b/third_party/php8.4-src/sapi/cli/Makefile.frag
+index aa1d642..649533d 100644
+--- a/third_party/php8.4-src/sapi/cli/Makefile.frag
++++ b/third_party/php8.4-src/sapi/cli/Makefile.frag
+@@ -1,7 +1,7 @@
+ cli: $(SAPI_CLI_PATH)
+ 
+ $(SAPI_CLI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_CLI_OBJS)
+-	$(BUILD_CLI)
++	$(BUILD_CLI) $(WASM_SHARED_LIBS)
+ 
+ install-cli: $(SAPI_CLI_PATH)
+ 	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.4-src/sapi/embed/php_embed.c b/third_party/php8.4-src/sapi/embed/php_embed.c
+index c18480d..787687f 100644
+--- a/third_party/php8.4-src/sapi/embed/php_embed.c
++++ b/third_party/php8.4-src/sapi/embed/php_embed.c
+@@ -242,8 +242,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
+ 		return FAILURE;
+ 	}
+ 
+-	SG(headers_sent) = 1;
+-	SG(request_info).no_headers = 1;
++	SG(headers_sent) = 0;
++	SG(request_info).no_headers = 0;
+ 	php_register_variable("PHP_SELF", "-", NULL);
+ 
+ 	return SUCCESS;

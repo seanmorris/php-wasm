@@ -91,7 +91,7 @@ index c6b907f..c0804c8 100644
  #include "php_pdo_sqlite_int.h"
  
 diff --git a/third_party/php8.3-src/ext/standard/basic_functions.c b/third_party/php8.3-src/ext/standard/basic_functions.c
-index 746465d..c293515 100644
+index 97001bc..dd1139c 100644
 --- a/third_party/php8.3-src/ext/standard/basic_functions.c
 +++ b/third_party/php8.3-src/ext/standard/basic_functions.c
 @@ -351,8 +351,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
@@ -160,7 +160,7 @@ index 75cc99d..872164e 100644
  	zval source_zval;
  	zend_lex_state original_lex_state;
 diff --git a/third_party/php8.3-src/main/fastcgi.c b/third_party/php8.3-src/main/fastcgi.c
-index 88cfbc2..ec20428 100644
+index 60a30a5..6389696 100644
 --- a/third_party/php8.3-src/main/fastcgi.c
 +++ b/third_party/php8.3-src/main/fastcgi.c
 @@ -553,6 +553,7 @@ void fcgi_shutdown(void)
@@ -185,7 +185,7 @@ index 79e2afe..0956f43 100644
  install-cgi: $(SAPI_CGI_PATH)
  	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.3-src/sapi/cgi/cgi_main.c b/third_party/php8.3-src/sapi/cgi/cgi_main.c
-index 156599f..1404fea 100644
+index 364758c..a969bc8 100644
 --- a/third_party/php8.3-src/sapi/cgi/cgi_main.c
 +++ b/third_party/php8.3-src/sapi/cgi/cgi_main.c
 @@ -18,7 +18,7 @@
@@ -197,7 +197,7 @@ index 156599f..1404fea 100644
  #include "php.h"
  #include "php_globals.h"
  #include "php_variables.h"
-@@ -1858,7 +1858,8 @@ int main(int argc, char *argv[])
+@@ -1879,7 +1879,8 @@ int main(int argc, char *argv[])
  	SG(request_info).path_translated = NULL;
  #endif
  
@@ -207,7 +207,7 @@ index 156599f..1404fea 100644
  	if (!cgi && !fastcgi && !bindpath) {
  		cgi_sapi_module.additional_functions = additional_functions;
  	}
-@@ -1934,8 +1935,10 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -1955,8 +1956,10 @@ consult the installation file that came with this distribution, or visit \n\
  	}
  
  	/* make php call us to get _ENV vars */
@@ -220,7 +220,7 @@ index 156599f..1404fea 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2655,3 +2658,18 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -2676,3 +2679,18 @@ consult the installation file that came with this distribution, or visit \n\
  	return exit_status;
  }
  /* }}} */
@@ -267,3 +267,235 @@ index 4626451..ba21863 100644
  	php_register_variable("PHP_SELF", "-", NULL);
  
  	return SUCCESS;
+diff --git a/third_party/php8.3-src/sapi/phpdbg/Makefile.frag b/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
+index 2e2faf8..9cbb048 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
++++ b/third_party/php8.3-src/sapi/phpdbg/Makefile.frag
+@@ -6,7 +6,7 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+ 	$(BUILD_PHPDBG_SHARED)
+ 
+ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+-	$(BUILD_PHPDBG)
++	$(BUILD_PHPDBG) $(WASM_SHARED_LIBS)
+ 
+ %.c: %.y
+ %.c: %.l
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
+index a583854..49f0301 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #include "phpdbg.h"
+ #include "phpdbg_prompt.h"
+ #include "phpdbg_bp.h"
+@@ -148,6 +150,24 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+ #endif
+ } /* }}} */
+ 
++const char* phpdbg_wasm_current_file = NULL;
++uint32_t phpdbg_wasm_current_line = NULL;
++
++const char** EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_file(void)
++{
++	return &phpdbg_wasm_current_file;
++}
++
++uint32_t* EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_line(void)
++{
++	return &phpdbg_wasm_current_line;
++}
++
++int* EMSCRIPTEN_KEEPALIVE php_wasm_get_bpcount(void)
++{
++	return &PHPDBG_G(bp_count);
++}
++
+ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ {
+ 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+@@ -177,6 +197,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ 
+ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
+ {
++	phpdbg_wasm_current_file = NULL;
++	phpdbg_wasm_current_line = NULL;
++
+ 	zend_hash_destroy(&PHPDBG_G(registered));
+ 	phpdbg_destroy_watchpoints();
+ 
+@@ -1118,7 +1141,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+ 	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+ } /* }}} */
+ 
+-int main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
+ {
+ 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+ 	char *sapi_name;
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.h b/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
+index 8857816..6b18f62 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
+@@ -182,7 +182,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
+ #ifndef _WIN32
+ #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
+ #else
+-#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
++#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED)
+ #endif /* }}} */
+ 
+ /* {{{ output descriptors */
+@@ -311,4 +311,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
+ 	zend_ulong lines;                                  /* max number of lines to display */
+ ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+ 
++extern const char* phpdbg_wasm_current_file;
++extern uint32_t phpdbg_wasm_current_line;
++
++
+ #endif /* PHPDBG_H */
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c
+index 6249e79..e3e7c34 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c
+@@ -774,7 +774,7 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
+ 				free(cmd);
+ 			}
+ #else
+-			phpdbg_write("%s", phpdbg_get_prompt());
++			// phpdbg_write("%s", phpdbg_get_prompt());
+ 			phpdbg_consume_stdin_line(buf);
+ 			buffer = estrdup(buf);
+ #endif
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
+index 14ae71a..8163757 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
+@@ -14,6 +14,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #ifdef HAVE_CONFIG_H
+ #include "config.h"
+ #endif
+@@ -22,52 +24,40 @@
+ 
+ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+ 
+-/* is easy to generalize ... but not needed for now */
+-PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
+-	int bytes = PHPDBG_G(input_buflen), len = 0;
++EM_ASYNC_JS(int, phpdbg_internal_consume_stdin_line, (char *buf, int max_length), {
++
++	let input;
++
++	Module.triggerStdin();
+ 
+-	if (PHPDBG_G(input_buflen)) {
+-		memcpy(buf, PHPDBG_G(input_buffer), bytes);
++	if(Module.inputDataQueue.length)
++	{
++		input = String(Module.inputDataQueue.shift());
++	}
++	else
++	{
++		let a, r;
++		const promise = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
++		Module.awaitingInput = a;
++		input = String(await promise);
+ 	}
+ 
+-	PHPDBG_G(last_was_newline) = 1;
++	if(input.length >= max_length)
++	{
++		input = input.slice(0, max_length - 1);
++	}
+ 
+-	do {
+-		int i;
+-		if (bytes <= 0) {
+-			continue;
+-		}
++	stringToUTF8(input, buf, input.length + 1);
+ 
+-		for (i = len; i < len + bytes; i++) {
+-			if (buf[i] == '\x03') {
+-				if (i != len + bytes - 1) {
+-					memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+-				}
+-				len--;
+-				i--;
+-				continue;
+-			}
+-			if (buf[i] == '\n') {
+-				PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+-				if (PHPDBG_G(input_buflen)) {
+-					memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+-				}
+-				if (i != PHPDBG_MAX_CMD - 1) {
+-					buf[i + 1] = 0;
+-				}
+-				return i;
+-			}
+-		}
+ 
+-		len += bytes;
+-	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0);
+ 
+-	if (bytes <= 0) {
+-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+-		zend_bailout();
+-	}
++	return input.length;
++});
+ 
+-	return bytes;
++
++/* is easy to generalize ... but not needed for now */
++PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
++	return phpdbg_internal_consume_stdin_line(buf, PHPDBG_MAX_CMD);
+ }
+ 
+ PHPDBG_API int phpdbg_mixed_read(int fd, char *ptr, int len, int tmo) {
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
+index c054326..0c81d93 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
+@@ -1657,6 +1657,8 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
+ 	PHPDBG_G(in_execution) = 1;
+ 
+ 	while (1) {
++		phpdbg_wasm_current_file = zend_get_executed_filename();
++		phpdbg_wasm_current_line = zend_get_executed_lineno();
+ 		zend_object *exception = EG(exception);
+ 
+ 		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c
+index 964d82e..361821c 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_utils.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
++
+ #include "zend.h"
+ 
+ #include "php.h"
+@@ -293,7 +295,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt) /* {{{ */
+ 	PHPDBG_G(prompt)[0] = strdup(prompt);
+ } /* }}} */
+ 
+-PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
++PHPDBG_API const char EMSCRIPTEN_KEEPALIVE *phpdbg_get_prompt(void) /* {{{ */
+ {
+ 	/* find cached prompt */
+ 	if (PHPDBG_G(prompt)[1]) {

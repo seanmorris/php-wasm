@@ -9,7 +9,7 @@
 	flex-direction: column;
 	align-self: stretch;
 	box-sizing: border-box;
-	margin: 1rem;
+	margin: 0.5rem;
 	flex-grow: 1;
 }
 
@@ -25,7 +25,6 @@
 
 .editor .frame {
 	position: relative;
-	align-items: stretch;
 }
 
 .editor .frame .scroller {
@@ -48,9 +47,11 @@
 }
 
 .editor .file-area .context {
+	padding: 0.25rem;
 	margin-left: 1rem;;
 	background-color: #999;
 	color: #333;
+	border-bottom: 1px solid #333;
 	margin-top: 0;
 	margin-bottom: 0;
 }
@@ -118,4 +119,20 @@
 
 .grow {
 	flex-grow: 1;
+}
+
+.editor .ace_gutter-cell.ace_breakpoint {
+	/* backdrop-filter: invert(1); */
+	background-image: url(./circle-red.svg);
+	background-position: 3px 50%;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.editor .ace_marker-layer .active_breakpoint {
+	position: absolute;
+	background-color: #CC06;
+	/* mix-blend-mode: luminosity; */
+	/* background-blend-mode: luminosity; */
+	/* background-blend-mode: exclusion; */
 }

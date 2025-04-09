@@ -1,5 +1,8 @@
 #!/usr/bin/env make
 
+third_party/pdo-pglite/README.md: third_party/pdo-pglite/pdo_pglite.c
+third_party/pdo-pglite/config.m4: third_party/pdo-pglite/pdo_pglite.c
+
 ifdef PDO_PGLITE_DEV_PATH
 third_party/pdo-pglite/pdo_pglite.c: $(wildcard ${PDO_PGLITE_DEV_PATH}/*)
 	echo -e "\e[33;4mImporting pdo-pglite\e[0m"

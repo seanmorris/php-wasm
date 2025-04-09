@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import EditorFolder from './EditorFolder';
@@ -9,16 +9,20 @@ import Header from './Header';
 
 import ace from 'ace-builds';
 import AceEditor from "react-ace-builds";
+import { Range } from "ace-builds";
 import "react-ace-builds/webpack-resolver-min";
 import { createRoot } from 'react-dom/client';
 
 import reactIcon from './react-icon.svg';
+import redCircle from './circle-red.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
+import Debugger from './Debugger';
 
 const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
 
 const openFilesMap = new Map();
+const sessionsMap = new WeakMap;
 
 const modes = {
 	'php': 'ace/mode/php'
@@ -37,15 +41,21 @@ const modes = {
 	, 'yaml': 'ace/mode/yaml'
 };
 
+const breakpoints = new Map;
+
 export default function Editor() {
 	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
 	const [showLeft, setShowLeft] = useState([]);
+	const [phpdbg, setPhpDbg] = useState(false);
+
+	const activeLines = useRef(new Set);
+	const currentBreak = useRef({});
 	const currentPath = useRef(null);
 	const editBox = useRef(null);
-	const editor = useRef(null);
+	const aceRef = useRef(null);
 	const tabBox = useRef(null);
-
+	const openDbg = useRef(null);
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -57,7 +67,7 @@ export default function Editor() {
 
 			sendMessage('writeFile', [
 				currentPath.current
-				, new TextEncoder().encode(editor.current.editor.getValue())
+				, new TextEncoder().encode(aceRef.current.editor.getValue())
 			]);
 
 			const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
@@ -92,7 +102,7 @@ export default function Editor() {
 					name = "input"
 					width = "100%"
 					height = "100%"
-					ref = {editor}
+					ref = {aceRef}
 				/>
 			);
 		}
@@ -117,13 +127,13 @@ export default function Editor() {
 				const first = [...openFilesMap.entries()][0][1];
 				first.active = true;
 				currentPath.current = first.path;
-				editor.current.editor.setSession(first.session);
+				aceRef.current.editor.setSession(first.session);
 			}
 			else
 			{
 				currentPath.current = null;
-				editor.current.editor.setSession(ace.createEditSession('', 'ace/mode/text'));
-				editor.current.editor.setReadOnly(true);
+				aceRef.current.editor.setSession(ace.createEditSession('', 'ace/mode/text'));
+				aceRef.current.editor.setReadOnly(true);
 			}
 		}
 
@@ -132,6 +142,8 @@ export default function Editor() {
 	};
 
 	const openFile = async path => {
+		const editor = aceRef.current.editor;
+
 		const name = path.split('/').pop();
 		const newFile = openFilesMap.has(path)
 			? openFilesMap.get(path)
@@ -143,7 +155,7 @@ export default function Editor() {
 
 		currentPath.current = path;
 
-		editor.current.editor.setReadOnly(false);
+		editor.setReadOnly(false);
 
 		if(!newFile.session)
 		{
@@ -160,20 +172,26 @@ export default function Editor() {
 
 		if(newFile.session)
 		{
-			editor.current.editor.setSession(newFile.session);
+			editor.setSession(newFile.session);
 			return;
 		}
+
+		const extension = path.split('.').pop();
+		const mode = modes[extension] ?? 'ace/mode/text';
+
+		newFile.session = ace.createEditSession('', mode);
+		editor.setSession(newFile.session);
+
+		sessionsMap.set(newFile.session, newFile);
 
 		const code = new TextDecoder().decode(
 			await sendMessage('readFile', [path])
 		);
 
 		setContents(code);
+		editor.setValue(code);
 
-		const extension = path.split('.').pop();
-		const mode = modes[extension] ?? 'ace/mode/text';
-
-		newFile.session = ace.createEditSession(code, mode);
+		editor.clearSelection();
 
 		newFile.dirty = false;
 
@@ -183,12 +201,138 @@ export default function Editor() {
 			setOpenFiles(openFilesList);
 		});
 
-		editor.current.editor.setSession(newFile.session);
+		// editor.setOption("firstLineNumber", 0);
 
 		tabBox.current.scrollTo({left:-tabBox.current.scrollWidth, behavior: 'smooth'});
 	};
 
-	const handleOpenFile = async event => openFile(event.detail);
+	useEffect(() => {
+		console.log(aceRef.current);
+		if(aceRef.current)
+		{
+			const onGutter = async event => {
+
+				const editor = aceRef.current.editor;
+				console.log(event);
+
+				const session = editor.getSession();
+
+				if(!sessionsMap.has(session))
+				{
+					console.trace('Unmapped session!');
+					return;
+				}
+
+				const {path} = sessionsMap.get(session);
+
+				const target = event.domEvent.target;
+
+				if(target.className.indexOf("ace_gutter-cell") == -1)
+				{
+					return;
+				}
+
+				if(event.clientX > 28 + target.getBoundingClientRect().left)
+				{
+					return;
+				}
+
+				const line = event.getDocumentPosition().row;
+				// const existing = event.editor.session.getBreakpoints(line, 0);
+
+				if(!breakpoints.has(`${path}:${1 + line}`))
+				{
+					event.editor.session.setBreakpoint(line);
+
+					let id = breakpoints.size;
+
+					if(openDbg.current)
+					{
+						openDbg.current.setBreakpoint(path, 1 + line);
+						id = await openDbg.current.bpCount();
+					}
+
+					breakpoints.set(`${path}:${1 + line}`, id);
+				}
+				else
+				{
+					const id = breakpoints.get(`${path}:${1 + line}`);
+
+					event.editor.session.clearBreakpoint(line);
+
+					if(openDbg.current)
+					{
+						openDbg.current.clearBreakpoint(id);
+					}
+
+					breakpoints.delete(`${path}:${1 + line}`);
+				}
+
+				console.log(breakpoints);
+
+				event.stop();
+			};
+
+			aceRef.current.editor.on('guttermousedown', onGutter);
+
+			return () => {
+				aceRef.current.editor.session.off('off', onGutter);
+			};
+		}
+	}, [aceRef.current]);
+
+	const handleOpenFile = event => openFile(event.detail);
+
+	const startDebugger = () => {
+
+		const editor = aceRef.current.editor;
+
+		if(openDbg.current)
+		{
+			activeLines.current.forEach(m => editor.session.removeMarker(m));
+			openDbg.current = null;
+			setPhpDbg(openDbg.current);
+			return;
+		}
+
+		openDbg.current = <Debugger
+			file = {currentPath.current}
+			ref = {openDbg}
+			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
+			setCurrentFile = {file => currentBreak.current.file = file}
+			setCurrentLine = {line => currentBreak.current.line = line}
+			onStdIn = {async () => {
+				const file = currentBreak.current.file;
+				const line = currentBreak.current.line;
+
+				activeLines.current.forEach(m => editor.session.removeMarker(m));
+
+				if(file && line)
+				{
+					await openFile(file);
+
+					const marker = editor.session.addMarker(
+						new Range(-1 + line, 0, -1 + line, Infinity), 'active_breakpoint', 'fullLine', true
+					);
+
+					editor.scrollToLine(-1 + line, true, true, () => {});
+
+					activeLines.current.add(marker);
+				}
+			}}
+		/>;
+
+		setPhpDbg(openDbg.current);
+	};
+
+	const handleStartDebugger = event => startDebugger();
+	const handleRun = event => openDbg.current.run();
+	const handleStep = event => openDbg.current.step();
+	const handleContinue = event => openDbg.current.continue();
+	const handleUntil = event => openDbg.current.until();
+	const handleNext = event => openDbg.current.next();
+	const handleFinish = event => openDbg.current.finish();
+	const handleLeave = event => openDbg.current.leave();
 
 	return (
 		<div className = "editor" data-show-left = {showLeft}>
@@ -201,6 +345,35 @@ export default function Editor() {
 					<button className='square' onClick = {handleSave}>
 						<img src = {saveIcon} />
 					</button>
+					{!phpdbg ? (
+						<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
+							▶
+						</button>
+					) : (
+						<span className='contents'>
+						<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
+							⏹
+						</button>
+						<button title = "Step" className='square' onClick = {handleStep}>
+							⇥
+						</button>
+						<button title = "Continue" className='square' onClick = {handleContinue}>
+							→
+						</button>
+						<button title = "Until" className='square' onClick = {handleUntil}>
+							⤻
+						</button>
+						<button title = "Next" className='square' onClick = {handleNext}>
+							↦
+						</button>
+						<button title = "Finish" className='square' onClick = {handleFinish}>
+							↑
+						</button>
+						<button title = "Leave" className='square' onClick = {handleLeave}>
+							↳
+						</button>
+						</span>
+					)}
 				</div>
 				<div className = "row">
 					<div className = "file-area frame inset">
@@ -208,24 +381,29 @@ export default function Editor() {
 							<EditorFolder path = "/" name = "/" />
 						</div>
 					</div>
-					<div className = "edit-area inset">
-						<div className = "tab-area frame">
-							<div className='scroller' ref = {tabBox}>
-							{openFiles.map(file =>
-								<div className='tab' key = {file.path} data-active = {file.active}>
-									<div onClick = { () => openFile(file.path)}>
-										{file.name} {file.dirty ? '!' : ''}
+					<div className='edit-area'>
+						<div className = "inset column grow">
+							<div className = "tab-area frame">
+								<div className='scroller' ref = {tabBox}>
+								{openFiles.map(file =>
+									<div className='tab' key = {file.path} data-active = {file.active}>
+										<div onClick = { () => openFile(file.path)}>
+											{file.name} {file.dirty ? '!' : ''}
+										</div>
+										<div onClick = { () => closeFile(file.path)}>×</div>
 									</div>
-									<div onClick = { () => closeFile(file.path)}>×</div>
+								)}
 								</div>
-							)}
+							</div>
+							<div className='frame grow'>
+								<div id = "edit-root" className = "scroller">
+									<pre>{contents}</pre>
+								</div>
 							</div>
 						</div>
-						<div className='frame grow'>
-							<div id = "edit-root" className = "scroller">
-								<pre>{contents}</pre>
-							</div>
-						</div>
+						{phpdbg && (
+							<div className='inset row grow'><div className='frame grow'>{phpdbg}</div></div>
+						)}
 					</div>
 				</div>
 				<div className = "inset right demo-bar">

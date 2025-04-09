@@ -1,0 +1,152 @@
+.dbg-preview {
+	display: flex;
+}
+
+.dbg-preview:not([data-iframed="1"]) {
+	width: calc(100% - 1rem);
+	height: calc(100dvh - 1rem);
+}
+
+.dbg-preview .warning {
+	filter: opacity(0.75) saturate(0.75);
+	color: #CCC;
+}
+
+.dbg-preview .status > div {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.dbg-preview .status > div > span.file:empty,
+.dbg-preview .status > div > span.file:empty + span.line {
+	display: none;
+}
+
+.dbg-preview .status > div > span.line:before {
+	content: ':';
+}
+
+.dbg-preview .ansi[style~="text-shadow:"] {
+	text-shadow: none !important;
+	font-weight: bold !important;
+}
+
+.phpdbg-console-input img {
+	width: 1.75rem;
+	margin-right: 0.5rem;
+}
+
+.dbg-preview .frame {
+	position: relative;
+	display: flex;
+	flex: 1;
+}
+
+.phpdbg-console {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	width: 100%;;
+	height: 100%;
+	background-color: #000;
+	color: #FFF;
+	flex: 1;
+	padding: 1rem;
+	box-sizing: border-box;
+
+
+	overflow-y: scroll;
+	overflow-x: auto;
+}
+
+.phpdbg-console .scroll-to-bottom {
+	z-index: 100;
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	width: 2rem;
+	height: 2rem;
+	background-color: #888;
+	color: #000;
+	text-align: center;
+	line-height: 2.125rem;
+	overflow: hidden;
+	padding: 0;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.phpdbg-console .console-output {
+	white-space: pre-wrap;
+}
+
+.phpdbg-console .console-input span {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.phpdbg-console .console-output .line[data-type="stderr"] {
+	color: #888;
+}
+
+.phpdbg-console .console-output .line[data-type="stdin"] {
+	color: #FF0;
+}
+
+.phpdbg-console :not(.line[data-type="stdin"])  + .line[data-type="stdin"],
+.phpdbg-console :not(.line[data-type="stdout"]) + .line[data-type="stdout"],
+.phpdbg-console :not(.line[data-type="stderr"]) + .line[data-type="stderr"] {
+	margin-top: 0.5rem;
+}
+
+.phpdbg-console .console-input {
+	display: flex;
+	align-items: center;
+	border-top: 1px solid #999;
+	margin-top: 1rem;
+	transition: filter 0.5s ease-in-out;
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) {
+	filter: saturate(0);
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) span {
+	filter: opacity(0.25);
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) span {
+	font-style: italic;
+}
+
+.phpdbg-console .console-input input {
+	flex: 1;
+	min-height: 100%;
+	box-sizing: border-box;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	padding-left: 0.25rem;
+	padding-right: 0.25rem;
+	font: inherit;
+	color: inherit;
+	background-color: inherit;
+	border: 0;
+	cursor: text;
+}
+
+.phpdbg-console .console-input span {
+	color: #FF0;
+}
+
+.phpdbg-console .console-input button {
+	border: 0;
+	margin: 0;
+	width: 2rem;
+	height: 100%;
+	font-weight: bold;
+	background-color: #888;
+}
+
+.phpdbg-console .console-input button:active {
+	filter: brightness(2);
+}

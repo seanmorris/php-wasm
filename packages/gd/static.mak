@@ -160,10 +160,9 @@ PHP_ASSET_LIST+= libwebp.so
 SKIP_LIBS+= -lwebp
 endif
 
-
-
 third_party/php${PHP_VERSION}-gd/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/gd /src/third_party/php${PHP_VERSION}-gd
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-gd/config.m4
 
 packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/config.m4 ${GD_LIBS}
 	@ echo -e "\e[33;4mBuilding php-gd\e[0m"
@@ -281,7 +280,7 @@ lib/lib/libwebp.so: lib/lib/libwebp.a
 lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"
 	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j1
+	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak install
 	${DOCKER_RUN} rm /src/lib/lib/libwebp.so
 

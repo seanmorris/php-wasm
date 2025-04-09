@@ -57,7 +57,8 @@ lib/lib/libcrypto.a: lib/lib/libssl.a
 lib/lib/libssl.a: third_party/openssl/.gitignore
 	@ echo -e "\e[33;4mBuilding OpenSSL\e[0m"
 	${DOCKER_RUN_IN_OPENSSL} ./config -fPIC --prefix=/src/lib/ no-shared no-asm no-engine no-dso no-dgram no-srtp no-stdio no-err no-ocsp no-psk no-stdio no-ts -DNO_FORK -static --static
-	${DOCKER_RUN_IN_OPENSSL} emmake make -j${CPU_COUNT} build_generated libssl.a libcrypto.a
+	${DOCKER_RUN_IN_OPENSSL} emmake make -j${CPU_COUNT} build_generated
+	${DOCKER_RUN_IN_OPENSSL} emmake make -j${CPU_COUNT} libssl.a libcrypto.a
 	${DOCKER_RUN_IN_OPENSSL} emmake make install_sw
 
 lib/lib/libssl.so: lib/lib/libssl.a
@@ -86,6 +87,7 @@ packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VE
 
 third_party/php${PHP_VERSION}-openssl/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/openssl /src/third_party/php${PHP_VERSION}-openssl
+	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-openssl/config.m4
 
 packages/openssl/php${PHP_VERSION}-openssl.so: ${PHPIZE} packages/openssl/libssl.so packages/openssl/libcrypto.so third_party/php${PHP_VERSION}-openssl/config.m4
 	@ echo -e "\e[33;4mBuilding php-openssl\e[0m"
