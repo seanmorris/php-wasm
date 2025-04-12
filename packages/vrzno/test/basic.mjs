@@ -563,6 +563,3 @@ describe('Can call Math.random on globalThis.', async () => {
 	assert.equal(stdOut, '');
 	assert.equal(stdErr, '');
 });
-
-
-//
