@@ -26,34 +26,21 @@ import { resolveDependencies } from './resolveDependencies';
 const STR = 'string';
 const NUM = 'number';
 
-//*/
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
 	, 'number'
 	, ['string', 'string']
 	, [key, value]
 );
-/*/
-const putEnv = (php, key, value) => {
-	value = value ?? "";
-	const len = php.lengthBytesUTF8(value) + 1;
-	const loc = php._malloc(len);
-	php.stringToUTF8(value, loc, len);
-
-	const result = php.ccall(
-		'wasm_sapi_cgi_putenv'
-		, 'number'
-		, ['string', 'number']
-		, [key, loc]
-	);
-
-	php._free(loc);
-
-	return result;
-}
-//*/
 
 const requestTimes = new WeakMap;
+
+const noTrailingSlash = s => s.slice(-1) !== '/' ? s : s.slice(0, -1);
+const noLeadingSlash = s => s.slice(0, 1) !== '/' ? s : s.slice(1);
+const joinPaths = (...args) => [
+	noTrailingSlash(args[0]), // Don't strip the leading slash on the first segment...
+	...args.slice(1).map( a => noLeadingSlash(noTrailingSlash(a)) )
+].join('/');
 
 export class PhpCgiBase
 {
@@ -118,7 +105,7 @@ export class PhpCgiBase
 		this.files      = files      || this.files;
 		this.extraActions = actions  || {};
 
-		this.phpArgs   = args;
+		this.phpArgs = args;
 
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
@@ -209,8 +196,8 @@ export class PhpCgiBase
 
 	handleFetchEvent(event)
 	{
-		const url     = new URL(event.request.url);
-		const prefix  = this.prefix;
+		const url = new URL(event.request.url);
+		const prefix = this.prefix;
 
 		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
 
@@ -295,7 +282,7 @@ export class PhpCgiBase
 		const phpArgs = {
 			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
 			, ...this.phpArgs
-			, stdin: () =>  this.input
+			, stdin: () => this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
 			, stdout: x => this.output.push(x)
@@ -368,10 +355,8 @@ export class PhpCgiBase
 
 		if(globalThis.caches)
 		{
-			const cache  = await caches.open('static-v1');
+			const cache = await caches.open('static-v1');
 			const cached = await cache.match(url);
-
-			// this.maxRequestAge
 
 			if(cached)
 			{
@@ -415,13 +400,22 @@ export class PhpCgiBase
 		else
 		{
 
-			path = docroot + '/' + rewrite.substr((vHostPrefix || this.prefix).length);
+			path = joinPaths(docroot, rewrite.substr((vHostPrefix || this.prefix).length));
 			scriptName = path;
 		}
 
+		const aboutPath = php.FS.analyzePath(path);
+
 		if(vHostEntrypoint)
 		{
-			scriptName = vHostPrefix + '/' + vHostEntrypoint;
+			if(!aboutPath.exists || aboutPath.object.isFolder) // Rewrite SCRIPT_NAME to the entrypoint if we don't have a php file...
+			{
+				scriptName = joinPaths(vHostPrefix, vHostEntrypoint);
+			}
+			else
+			{
+				scriptName = joinPaths(vHostPrefix, rewrite.substr(vHostPrefix.length));
+			}
 		}
 
 		let originalPath = url.pathname;
@@ -430,11 +424,9 @@ export class PhpCgiBase
 
 		if(extension !== 'php' && extension !== 'phar')
 		{
-			const aboutPath = php.FS.analyzePath(path);
-
-			// Return static file
 			if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
 			{
+				// Return static file
 				const response = new Response(php.FS.readFile(path, { encoding: 'binary', url }), {});
 				response.headers.append('x-php-wasm-cache-time', new Date().getTime());
 				if(extension in this.types)
@@ -443,24 +435,23 @@ export class PhpCgiBase
 				}
 				if(globalThis.caches)
 				{
-					const cache  = await caches.open('static-v1');
+					const cache = await caches.open('static-v1');
 					cache.put(url, response.clone());
 				}
 				this.onRequest(request, response);
 				return response;
 			}
-			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length  ])
+			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length ])
 			{
 				originalPath += '/'
 			}
 
 			// Rewrite to index
-			path = docroot + '/index.php';
+			path = joinPaths(docroot, 'index.php');
 		}
 
 		// Ensure query parameters are preserved.
 		originalPath += url.search
-
 
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
@@ -469,9 +460,8 @@ export class PhpCgiBase
 			return response;
 		}
 
-		const aboutPath = php.FS.analyzePath(path);
-
-		if(!aboutPath.exists)
+		// path may have changed, so re-check it:
+		if(!php.FS.analyzePath(path).exists)
 		{
 			const rawResponse = this.notFound
 				? this.notFound(request)
@@ -485,9 +475,9 @@ export class PhpCgiBase
 			}
 		}
 
-		this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
+		this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
 		this.output = [];
-		this.error  = [];
+		this.error = [];
 
 		const selfUrl = new URL(globalThis.location || request.url);
 
