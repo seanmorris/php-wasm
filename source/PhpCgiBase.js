@@ -42,6 +42,101 @@ const joinPaths = (...args) => [
 	...args.slice(1).map( a => noLeadingSlash(noTrailingSlash(a)) )
 ].join('/');
 
+class CookieJar
+{
+	cookies = new Map;
+	store(rawCookie)
+	{
+		let name = null;
+
+		const cookie = {created: Date.now(), raw: rawCookie};
+
+		const parts = rawCookie.split(';').map(p => p.trim() );
+
+		for(const part of parts)
+		{
+			const equal = part.indexOf('=');
+
+			const key   = part.substr(0, equal);
+			const value = part.substr(1 + equal);
+
+			const lowerKey = key.toLowerCase();
+
+			if(!name)
+			{
+				name = key;
+				cookie.name = key;
+				cookie.value = value;
+			}
+			else if(lowerKey === 'expires')
+			{
+				cookie[lowerKey] = new Date(value).getTime();
+			}
+			else if(lowerKey === 'max-age')
+			{
+				cookie[lowerKey] = 1000 * Number(value);
+			}
+			else
+			{
+				cookie[lowerKey] = value;
+			}
+		}
+
+		if(cookie.expires && cookie.created >= cookie.expires)
+		{
+			this.cookies.delete(cookie.name);
+		}
+		else
+		{
+			this.cookies.set(cookie.name, cookie);
+		}
+	}
+
+	retrieve(path = null)
+	{
+		const cookies = [];
+
+		const now = Date.now();
+
+		for(const cookie of this.cookies.values())
+		{
+			if(cookie.expires && cookie.expires <= now)
+			{
+				this.cookies.delete(cookie.name);
+				continue;
+			}
+
+			if(cookie['max-age'] && cookie['max-age'] >= now - cookie.created)
+			{
+				this.cookies.delete(cookie.name);
+				continue;
+			}
+
+			if(path === null || !cookie.path || cookie.path === path.substr(0, cookie.path.length))
+			{
+				cookies.push(cookie);
+			}
+		}
+
+		return cookies;
+	}
+
+	dump(path = null)
+	{
+		return this.retrieve(path).map(c => c.raw).join('\n');
+	}
+
+	load(rawCookies)
+	{
+		rawCookies.trim().split('\n').map(line => this.store(line));
+	}
+
+	toEnv(path = null)
+	{
+		return this.retrieve(path).map(e => `${e.name}=${e.value}`).join(';');
+	}
+}
+
 export class PhpCgiBase
 {
 	docroot    = null;
@@ -97,7 +192,7 @@ export class PhpCgiBase
 		this.exclude    = exclude    || this.exclude;
 		this.rewrite    = rewrite    || this.rewrite;
 		this.entrypoint = entrypoint || this.entrypoint;
-		this.cookies    = cookies    || new Map;
+		this.cookieJar  = new CookieJar(cookies);
 		this.types      = types      || this.types;
 		this.onRequest  = onRequest  || this.onRequest;
 		this.notFound   = notFound   || this.notFound;
@@ -331,6 +426,8 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
+			this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
+
 			await this.loadInit(php);
 
 			return php;
@@ -506,7 +603,7 @@ export class PhpCgiBase
 		putEnv(php, 'PATH_TRANSLATED', path);
 
 		putEnv(php, 'QUERY_STRING', get);
-		putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
+		putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
 		putEnv(php, 'REDIRECT_STATUS', '200');
 		putEnv(php, 'CONTENT_TYPE', contentType);
 		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
@@ -522,6 +619,49 @@ export class PhpCgiBase
 				, []
 				, {async: true}
 			);
+
+			++this.count;
+
+			const parsedResponse = parseResponse(this.output);
+
+			let status = 200;
+
+			if(parsedResponse.headers.has('Status'))
+			{
+				status = parsedResponse.headers.get('Status').substr(0, 3);
+			}
+
+			for(const rawCookie of parsedResponse.headers.getSetCookie())
+			{
+				this.cookieJar.store(rawCookie);
+			}
+
+			php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
+
+			const headers = new Headers(parsedResponse.headers);
+
+			if(!headers.has('Content-type'))
+			{
+				if(extension in this.types)
+				{
+					headers.set('Content-type', this.types[extension]);
+				}
+				else
+				{
+					headers.set('Content-type', 'text/html; charset=utf-8');
+				}
+			}
+
+			if(parsedResponse.headers.has('Location'))
+			{
+				headers.set('Location', parsedResponse.headers.get('Location'));
+			}
+
+			const response = new Response(parsedResponse.body || '', { status, headers, url });
+
+			this.onRequest(request, response);
+
+			return response;
 		}
 		catch (error)
 		{
@@ -559,55 +699,6 @@ export class PhpCgiBase
 				this.refresh();
 			}
 		}
-
-		++this.count;
-
-		const parsedResponse = parseResponse(this.output);
-
-		let status = 200;
-
-		for(const [name, value] of Object.entries(parsedResponse.headers))
-		{
-			if(name === 'Status')
-			{
-				status = value.substr(0, 3);
-			}
-		}
-
-		if(parsedResponse.headers['Set-Cookie'])
-		{
-			const raw = parsedResponse.headers['Set-Cookie'];
-			const semi  = raw.indexOf(';');
-			const equal = raw.indexOf('=');
-			const key   = raw.substr(0, equal);
-			const value = raw.substr(1 + equal, -1 + semi - equal);
-
-			this.cookies.set(key, value,);
-		}
-
-		const headers = {...parsedResponse.headers};
-
-		// delete headers['Set-Cookie'];
-
-		if(extension in this.types)
-		{
-			// headers["Content-type"] = this.types[extension];
-		}
-		else
-		{
-			headers["Content-type"] = headers["Content-type"] ?? 'text/html; charset=utf-8';
-		}
-
-		if(parsedResponse.headers.Location)
-		{
-			headers.Location = parsedResponse.headers.Location;
-		}
-
-		const response = new Response(parsedResponse.body || '', { headers, status, url });
-
-		this.onRequest(request, response);
-
-		return response;
 	}
 
 	analyzePath(path)

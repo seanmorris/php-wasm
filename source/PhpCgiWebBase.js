@@ -132,6 +132,8 @@ export class PhpCgiWebBase extends PhpCgiBase
 				, {async: true}
 			);
 
+			this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
+
 			await this.loadInit(php);
 
 			return php;

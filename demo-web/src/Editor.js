@@ -151,7 +151,10 @@ export default function Editor() {
 
 		query.set('path', path);
 
-		window.history.replaceState({}, null, window.location.pathname + '?' + query);
+		if(!openDbg.current)
+		{
+			window.history.replaceState({}, null, window.location.pathname + '?' + query);
+		}
 
 		currentPath.current = path;
 
@@ -163,34 +166,32 @@ export default function Editor() {
 		}
 
 		const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
-
 		openFilesList.map(f => f.active = false);
-
 		newFile.active = true;
-
 		setOpenFiles(openFilesList);
 
-		if(newFile.session)
+		if(newFile.loading)
 		{
-			editor.setSession(newFile.session);
+			editor.setSession(await newFile.loading);
 			return;
 		}
 
+		let _accept;
+		newFile.loading = new Promise(accept => _accept = accept);
+
 		const extension = path.split('.').pop();
 		const mode = modes[extension] ?? 'ace/mode/text';
-
-		newFile.session = ace.createEditSession('', mode);
-		sessionsMap.set(newFile.session, newFile);
 
 		const code = new TextDecoder().decode(
 			await sendMessage('readFile', [path])
 		);
 
+		newFile.session = ace.createEditSession(code, mode);
+		sessionsMap.set(newFile.session, newFile);
 		editor.setSession(newFile.session);
-		editor.setValue(code);
 		setContents(code);
 
-		editor.clearSelection();
+		_accept(newFile.session);
 
 		newFile.dirty = false;
 

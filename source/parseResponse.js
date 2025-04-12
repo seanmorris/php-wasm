@@ -1,5 +1,5 @@
 export const parseResponse = response => {
-	const headers = {};
+	const headers = new Headers()
 	const line = [];
 	const decoder = new TextDecoder();
 
@@ -16,11 +16,11 @@ export const parseResponse = response => {
 
 				if(colon < 0)
 				{
-					headers[ header ] = true;
+					headers.append(header, true);
 				}
 				else
 				{
-					headers[ header.substring(0, colon) ] = header.substring(colon + 2);
+					headers.append(header.substring(0, colon), header.substring(colon + 2));
 				}
 
 				line.length = 0;
