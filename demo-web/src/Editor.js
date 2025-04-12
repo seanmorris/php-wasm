@@ -155,7 +155,7 @@ export default function Editor() {
 
 		currentPath.current = path;
 
-		editor.setReadOnly(false);
+		editor.setReadOnly(!!openDbg.current);
 
 		if(!newFile.session)
 		{
@@ -180,16 +180,15 @@ export default function Editor() {
 		const mode = modes[extension] ?? 'ace/mode/text';
 
 		newFile.session = ace.createEditSession('', mode);
-		editor.setSession(newFile.session);
-
 		sessionsMap.set(newFile.session, newFile);
 
 		const code = new TextDecoder().decode(
 			await sendMessage('readFile', [path])
 		);
 
-		setContents(code);
+		editor.setSession(newFile.session);
 		editor.setValue(code);
+		setContents(code);
 
 		editor.clearSelection();
 
@@ -291,9 +290,12 @@ export default function Editor() {
 		{
 			activeLines.current.forEach(m => editor.session.removeMarker(m));
 			openDbg.current = null;
+			editor.setReadOnly(false);
 			setPhpDbg(openDbg.current);
 			return;
 		}
+
+		editor.setReadOnly(true);
 
 		openDbg.current = <Debugger
 			file = {currentPath.current}
