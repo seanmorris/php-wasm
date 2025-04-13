@@ -132,7 +132,12 @@ export class PhpCgiWebBase extends PhpCgiBase
 				, {async: true}
 			);
 
-			this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
+			const cookieStat = php.FS.analyzePath('/config/.cookies');
+
+			if(cookieStat.exists)
+			{
+				this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
+			}
 
 			await this.loadInit(php);
 
