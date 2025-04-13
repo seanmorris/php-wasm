@@ -783,7 +783,6 @@ ${PHPIZE}: third_party/php${PHP_VERSION}-src/scripts/phpize-built
 
 third_party/php${PHP_VERSION}-src/scripts/phpize-built: ENVIRONMENT=web
 third_party/php${PHP_VERSION}-src/scripts/phpize-built: ${DEPENDENCIES} | ${ORDER_ONLY}
-	# ${DOCKER_RUN_IN_PHP} emmake make scripts/phpize ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} emmake make install-build  ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} chmod +x scripts/phpize
 	${DOCKER_RUN_IN_PHP} touch scripts/phpize-built
