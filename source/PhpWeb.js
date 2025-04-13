@@ -60,6 +60,11 @@ export class PhpWeb extends PhpBase
 				const run = callback(...params);
 				run.then(accept).catch(reject);
 				await run;
+				let lockChecks = 25;
+				while(!this.queue.length && lockChecks--)
+				{
+					await new Promise(a => setTimeout(a, 5));
+				}
 			} while(this.queue.length)
 
 			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());

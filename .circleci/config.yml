@@ -69,7 +69,9 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
+    environment:
+      PS1: ">"
     steps:
       - checkout
       - run: npm install
@@ -84,7 +86,9 @@ jobs:
     parallelism: 1
     machine:
       image: ubuntu-2204:2024.05.1
-    resource_class: medium
+    resource_class: xlarge
+    environment:
+      PS1: ">"
     steps:
       - attach_workspace:
           at: ~/
@@ -99,8 +103,7 @@ jobs:
       - run: sudo apt install -y software-properties-common google-chrome-stable
       - run: cd demo-web; ./switch-packages.sh local; cd ..;
       - run: cp .circleci/.env_8.3-dynamic.ci .env
-      - run: make image
-      - run: make web-mjs worker-cgi-mjs web-dbg-mjs
+      - run: make common-web
       - run: test/browser-test.sh
 
   make-test-8-4-static:

@@ -2,26 +2,25 @@
   "name": "php-cgi-wasm-node-demo",
   "version": "0.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "./index.mjs"
   },
   "dependencies": {
-    "php-cgi-wasm": "0.0.9-alpha-27",
-    "php-wasm-dom": "0.0.9-alpha-27",
-    "php-wasm-gd": "0.0.9-alpha-27",
-    "php-wasm-iconv": "0.0.9-alpha-27",
-    "php-wasm-intl": "0.0.9-alpha-27",
-    "php-wasm-libxml": "0.0.9-alpha-27",
-    "php-wasm-libzip": "0.0.9-alpha-27",
-    "php-wasm-mbstring": "0.0.9-alpha-27",
-    "php-wasm-openssl": "0.0.9-alpha-27",
-    "php-wasm-phar": "0.0.9-alpha-27",
-    "php-wasm-simplexml": "0.0.9-alpha-27",
-    "php-wasm-sqlite": "0.0.9-alpha-27",
-    "php-wasm-tidy": "0.0.9-alpha-27",
-    "php-wasm-xml": "0.0.9-alpha-27",
-    "php-wasm-yaml": "0.0.9-alpha-27",
-    "php-wasm-zlib": "0.0.9-alpha-27"
+    "php-cgi-wasm": "../packages/php-cgi-wasm",
+    "php-wasm-dom": "../packages/dom",
+    "php-wasm-gd": "../packages/gd",
+    "php-wasm-iconv": "../packages/iconv",
+    "php-wasm-intl": "../packages/intl",
+    "php-wasm-libxml": "../packages/libxml",
+    "php-wasm-libzip": "../packages/libzip",
+    "php-wasm-mbstring": "../packages/mbstring",
+    "php-wasm-openssl": "../packages/openssl",
+    "php-wasm-phar": "../packages/phar",
+    "php-wasm-simplexml": "../packages/simplexml",
+    "php-wasm-sqlite": "../packages/sqlite",
+    "php-wasm-tidy": "../packages/tidy",
+    "php-wasm-xml": "../packages/xml",
+    "php-wasm-yaml": "../packages/libyaml",
+    "php-wasm-zlib": "../packages/zlib"
   }
 }

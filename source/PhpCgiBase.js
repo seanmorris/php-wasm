@@ -26,34 +26,116 @@ import { resolveDependencies } from './resolveDependencies';
 const STR = 'string';
 const NUM = 'number';
 
-//*/
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
 	, 'number'
 	, ['string', 'string']
 	, [key, value]
 );
-/*/
-const putEnv = (php, key, value) => {
-	value = value ?? "";
-	const len = php.lengthBytesUTF8(value) + 1;
-	const loc = php._malloc(len);
-	php.stringToUTF8(value, loc, len);
-
-	const result = php.ccall(
-		'wasm_sapi_cgi_putenv'
-		, 'number'
-		, ['string', 'number']
-		, [key, loc]
-	);
-
-	php._free(loc);
-
-	return result;
-}
-//*/
 
 const requestTimes = new WeakMap;
+
+const noTrailingSlash = s => s.slice(-1) !== '/' ? s : s.slice(0, -1);
+const noLeadingSlash = s => s.slice(0, 1) !== '/' ? s : s.slice(1);
+const joinPaths = (...args) => [
+	noTrailingSlash(args[0]), // Don't strip the leading slash on the first segment...
+	...args.slice(1).map( a => noLeadingSlash(noTrailingSlash(a)) )
+].join('/');
+
+class CookieJar
+{
+	cookies = new Map;
+	store(rawCookie)
+	{
+		let name = null;
+
+		const cookie = {created: Date.now(), raw: rawCookie};
+
+		const parts = rawCookie.split(';').map(p => p.trim() );
+
+		for(const part of parts)
+		{
+			const equal = part.indexOf('=');
+
+			const key   = part.substr(0, equal);
+			const value = part.substr(1 + equal);
+
+			const lowerKey = key.toLowerCase();
+
+			if(!name)
+			{
+				name = key;
+				cookie.name = key;
+				cookie.value = value;
+			}
+			else if(lowerKey === 'expires')
+			{
+				cookie[lowerKey] = new Date(value).getTime();
+			}
+			else if(lowerKey === 'max-age')
+			{
+				cookie[lowerKey] = 1000 * Number(value);
+			}
+			else
+			{
+				cookie[lowerKey] = value;
+			}
+		}
+
+		if(cookie.expires && cookie.created >= cookie.expires)
+		{
+			this.cookies.delete(cookie.name);
+		}
+		else
+		{
+			this.cookies.set(cookie.name, cookie);
+		}
+	}
+
+	retrieve(path = null)
+	{
+		const cookies = [];
+
+		const now = Date.now();
+
+		for(const cookie of this.cookies.values())
+		{
+			if(cookie.expires && cookie.expires <= now)
+			{
+				this.cookies.delete(cookie.name);
+				continue;
+			}
+
+			if(cookie['max-age'] && cookie['max-age'] >= now - cookie.created)
+			{
+				this.cookies.delete(cookie.name);
+				continue;
+			}
+
+			if(path === null || !cookie.path || cookie.path === path.substr(0, cookie.path.length))
+			{
+				cookies.push(cookie);
+			}
+		}
+
+		return cookies;
+	}
+
+	dump(path = null)
+	{
+		return this.retrieve(path).map(c => c.raw).join('\n');
+	}
+
+	load(rawCookies)
+	{
+		rawCookies.trim().split('\n').map(line => this.store(line));
+	}
+
+	toEnv(path = null)
+	{
+		return this.retrieve(path).map(e => `${e.name}=${e.value}`).join(';');
+	}
+}
 
 export class PhpCgiBase
 {
@@ -110,7 +192,7 @@ export class PhpCgiBase
 		this.exclude    = exclude    || this.exclude;
 		this.rewrite    = rewrite    || this.rewrite;
 		this.entrypoint = entrypoint || this.entrypoint;
-		this.cookies    = cookies    || new Map;
+		this.cookieJar  = new CookieJar(cookies);
 		this.types      = types      || this.types;
 		this.onRequest  = onRequest  || this.onRequest;
 		this.notFound   = notFound   || this.notFound;
@@ -118,7 +200,7 @@ export class PhpCgiBase
 		this.files      = files      || this.files;
 		this.extraActions = actions  || {};
 
-		this.phpArgs   = args;
+		this.phpArgs = args;
 
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
@@ -209,8 +291,8 @@ export class PhpCgiBase
 
 	handleFetchEvent(event)
 	{
-		const url     = new URL(event.request.url);
-		const prefix  = this.prefix;
+		const url = new URL(event.request.url);
+		const prefix = this.prefix;
 
 		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
 
@@ -295,7 +377,7 @@ export class PhpCgiBase
 		const phpArgs = {
 			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
 			, ...this.phpArgs
-			, stdin: () =>  this.input
+			, stdin: () => this.input
 				? String(this.input.shift()).charCodeAt(0)
 				: null
 			, stdout: x => this.output.push(x)
@@ -344,6 +426,13 @@ export class PhpCgiBase
 				, {async: true}
 			);
 
+			const cookieStat = php.FS.analyzePath('/config/.cookies');
+
+			if(cookieStat.exists)
+			{
+				this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
+			}
+
 			await this.loadInit(php);
 
 			return php;
@@ -368,10 +457,8 @@ export class PhpCgiBase
 
 		if(globalThis.caches)
 		{
-			const cache  = await caches.open('static-v1');
+			const cache = await caches.open('static-v1');
 			const cached = await cache.match(url);
-
-			// this.maxRequestAge
 
 			if(cached)
 			{
@@ -415,13 +502,22 @@ export class PhpCgiBase
 		else
 		{
 
-			path = docroot + '/' + rewrite.substr((vHostPrefix || this.prefix).length);
+			path = joinPaths(docroot, rewrite.substr((vHostPrefix || this.prefix).length));
 			scriptName = path;
 		}
 
+		const aboutPath = php.FS.analyzePath(path);
+
 		if(vHostEntrypoint)
 		{
-			scriptName = vHostPrefix + '/' + vHostEntrypoint;
+			if(!aboutPath.exists || aboutPath.object.isFolder) // Rewrite SCRIPT_NAME to the entrypoint if we don't have a php file...
+			{
+				scriptName = joinPaths(vHostPrefix, vHostEntrypoint);
+			}
+			else
+			{
+				scriptName = joinPaths(vHostPrefix, rewrite.substr(vHostPrefix.length));
+			}
 		}
 
 		let originalPath = url.pathname;
@@ -430,11 +526,9 @@ export class PhpCgiBase
 
 		if(extension !== 'php' && extension !== 'phar')
 		{
-			const aboutPath = php.FS.analyzePath(path);
-
-			// Return static file
 			if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
 			{
+				// Return static file
 				const response = new Response(php.FS.readFile(path, { encoding: 'binary', url }), {});
 				response.headers.append('x-php-wasm-cache-time', new Date().getTime());
 				if(extension in this.types)
@@ -443,24 +537,23 @@ export class PhpCgiBase
 				}
 				if(globalThis.caches)
 				{
-					const cache  = await caches.open('static-v1');
+					const cache = await caches.open('static-v1');
 					cache.put(url, response.clone());
 				}
 				this.onRequest(request, response);
 				return response;
 			}
-			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length  ])
+			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length ])
 			{
 				originalPath += '/'
 			}
 
 			// Rewrite to index
-			path = docroot + '/index.php';
+			path = joinPaths(docroot, 'index.php');
 		}
 
 		// Ensure query parameters are preserved.
 		originalPath += url.search
-
 
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
@@ -469,9 +562,8 @@ export class PhpCgiBase
 			return response;
 		}
 
-		const aboutPath = php.FS.analyzePath(path);
-
-		if(!aboutPath.exists)
+		// path may have changed, so re-check it:
+		if(!php.FS.analyzePath(path).exists)
 		{
 			const rawResponse = this.notFound
 				? this.notFound(request)
@@ -485,9 +577,9 @@ export class PhpCgiBase
 			}
 		}
 
-		this.input  = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
+		this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
 		this.output = [];
-		this.error  = [];
+		this.error = [];
 
 		const selfUrl = new URL(globalThis.location || request.url);
 
@@ -516,7 +608,7 @@ export class PhpCgiBase
 		putEnv(php, 'PATH_TRANSLATED', path);
 
 		putEnv(php, 'QUERY_STRING', get);
-		putEnv(php, 'HTTP_COOKIE', [...this.cookies.entries()].map(e => `${e[0]}=${e[1]}`).join(';') );
+		putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
 		putEnv(php, 'REDIRECT_STATUS', '200');
 		putEnv(php, 'CONTENT_TYPE', contentType);
 		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
@@ -532,6 +624,49 @@ export class PhpCgiBase
 				, []
 				, {async: true}
 			);
+
+			++this.count;
+
+			const parsedResponse = parseResponse(this.output);
+
+			let status = 200;
+
+			if(parsedResponse.headers.has('Status'))
+			{
+				status = parsedResponse.headers.get('Status').substr(0, 3);
+			}
+
+			for(const rawCookie of parsedResponse.headers.getSetCookie())
+			{
+				this.cookieJar.store(rawCookie);
+			}
+
+			php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
+
+			const headers = new Headers(parsedResponse.headers);
+
+			if(!headers.has('Content-type'))
+			{
+				if(extension in this.types)
+				{
+					headers.set('Content-type', this.types[extension]);
+				}
+				else
+				{
+					headers.set('Content-type', 'text/html; charset=utf-8');
+				}
+			}
+
+			if(parsedResponse.headers.has('Location'))
+			{
+				headers.set('Location', parsedResponse.headers.get('Location'));
+			}
+
+			const response = new Response(parsedResponse.body || '', { status, headers, url });
+
+			this.onRequest(request, response);
+
+			return response;
 		}
 		catch (error)
 		{
@@ -569,55 +704,6 @@ export class PhpCgiBase
 				this.refresh();
 			}
 		}
-
-		++this.count;
-
-		const parsedResponse = parseResponse(this.output);
-
-		let status = 200;
-
-		for(const [name, value] of Object.entries(parsedResponse.headers))
-		{
-			if(name === 'Status')
-			{
-				status = value.substr(0, 3);
-			}
-		}
-
-		if(parsedResponse.headers['Set-Cookie'])
-		{
-			const raw = parsedResponse.headers['Set-Cookie'];
-			const semi  = raw.indexOf(';');
-			const equal = raw.indexOf('=');
-			const key   = raw.substr(0, equal);
-			const value = raw.substr(1 + equal, -1 + semi - equal);
-
-			this.cookies.set(key, value,);
-		}
-
-		const headers = {...parsedResponse.headers};
-
-		// delete headers['Set-Cookie'];
-
-		if(extension in this.types)
-		{
-			// headers["Content-type"] = this.types[extension];
-		}
-		else
-		{
-			headers["Content-type"] = headers["Content-type"] ?? 'text/html; charset=utf-8';
-		}
-
-		if(parsedResponse.headers.Location)
-		{
-			headers.Location = parsedResponse.headers.Location;
-		}
-
-		const response = new Response(parsedResponse.body || '', { headers, status, url });
-
-		this.onRequest(request, response);
-
-		return response;
 	}
 
 	analyzePath(path)

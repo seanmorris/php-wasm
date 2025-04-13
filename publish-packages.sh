@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 NPM_TAG=${1};
+OTP=${2};
 
 if [ -z "${NPM_TAG}" ]; then {
 	echo "A tag is required.";
@@ -58,13 +59,21 @@ ls packages | while read PACKAGE; do {
 	cd "packages/${PACKAGE}"
 	echo -e "\033[33mChanged files in \033[1m${PACKAGE}:\033[0m";
 	npm diff --tag ${NPM_TAG} --diff-name-only || ( cd ../.. && continue )
+	cd "../.."
+}; done;
+
+ls packages | while read PACKAGE; do {
+	if [[ ${PACKAGE} == "sdl" ]]; then
+		continue;
+	fi;
+	cd "packages/${PACKAGE}"
 	if [[ "${NOT_DRY_RUN:-}" == "real" ]]; then
 		set -x
-		npm publish --tag ${NPM_TAG}
+		npm publish --tag ${NPM_TAG} --otp ${OTP} &
 		set +x
 	else
 		set -x
-		npm publish --tag ${NPM_TAG} --dry-run
+		npm publish --tag ${NPM_TAG} --dry-run &
 		set +x
 	fi
 	cd "../.."

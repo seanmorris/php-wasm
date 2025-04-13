@@ -547,3 +547,19 @@ describe('Can take an object param from PHP with a "length" property.', async ()
 	assert.equal(stdErr, '');
 });
 
+describe('Can call Math.random on globalThis.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`function(){ return (new Vrzno())->Math->random(); }`;
+
+	// assert.equal(returnValue, 0);
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
