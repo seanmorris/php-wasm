@@ -70,6 +70,8 @@ jobs:
     machine:
       image: ubuntu-2204:2024.05.1
     resource_class: xlarge
+    environment:
+      PS1: ">"
     steps:
       - checkout
       - run: npm install
