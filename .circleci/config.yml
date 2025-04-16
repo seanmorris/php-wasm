@@ -118,6 +118,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.4.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-4-shared:
@@ -130,6 +131,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-4-dynamic:
@@ -142,6 +144,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-3-static:
@@ -154,6 +157,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.4.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-3-shared:
@@ -166,6 +170,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-3-dynamic:
@@ -178,6 +183,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-2-static:
@@ -190,6 +196,7 @@ jobs:
             at: ~/
       - run: cp .circleci/.env_8.2.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-2-shared:
@@ -202,6 +209,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-2-dynamic:
@@ -214,6 +222,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-1-static:
@@ -226,6 +235,7 @@ jobs:
             at: ~/
       - run: cp .circleci/.env_8.1.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-1-shared:
@@ -238,6 +248,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-1-dynamic:
@@ -250,6 +261,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-0-static:
@@ -262,6 +274,7 @@ jobs:
             at: ~/
       - run: cp .circleci/.env_8.0.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-0-shared:
@@ -274,6 +287,7 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
 
   make-test-8-0-dynamic:
@@ -286,4 +300,5 @@ jobs:
           at: ~/
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: find . -type f -name "*.a" -exec touch {} +
+      - run: npm install -g deno
       - run: time make test
