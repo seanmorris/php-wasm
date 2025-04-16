@@ -949,11 +949,11 @@ run:
 	${DOCKER_ENV} emscripten-builder bash
 
 all-versions:
-	${MAKE} PHP_VERSION=8.0 all cgi-all
-	${MAKE} PHP_VERSION=8.1 all cgi-all
-	${MAKE} PHP_VERSION=8.2 all cgi-all
-	${MAKE} PHP_VERSION=8.3 all cgi-all
-	${MAKE} PHP_VERSION=8.4 all cgi-all
+	${MAKE} PHP_VERSION=8.0
+	${MAKE} PHP_VERSION=8.1
+	${MAKE} PHP_VERSION=8.2
+	${MAKE} PHP_VERSION=8.3
+	${MAKE} PHP_VERSION=8.4
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
