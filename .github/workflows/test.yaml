@@ -33,6 +33,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-3-static:
@@ -46,6 +47,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-2-static:
@@ -59,6 +61,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.2
 
   test-8-1-static:
@@ -72,6 +75,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.1
 
   test-8-0-static:
@@ -85,6 +89,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.0
 
 
@@ -99,6 +104,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-3-dynamic:
@@ -112,6 +118,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-2-dynamic:
@@ -125,6 +132,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.2
 
   test-8-1-dynamic:
@@ -138,6 +146,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.1
 
   test-8-0-dynamic:
@@ -151,6 +160,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.0
 
 
@@ -165,6 +175,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-3-shared:
@@ -178,6 +189,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test
 
   test-8-2-shared:
@@ -191,6 +203,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.2
 
   test-8-1-shared:
@@ -204,6 +217,7 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.1
 
   test-8-0-shared:
@@ -217,4 +231,5 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image
+      - run: docker network create phpwasm_default
       - run: make test PHP_VERSION=8.0
