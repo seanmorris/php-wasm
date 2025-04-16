@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { env } from 'node:process';
 
 test('OpenSSL Extension is enabled.', async () => {
-	const php = process.env.WITH_OPENSSL === 'dynamic'
+	const php = env.WITH_OPENSSL === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-openssl.so`]})
 		: new PhpNode;
 	let stdOut = '', stdErr = '';
@@ -22,7 +23,7 @@ test('OpenSSL Extension is enabled.', async () => {
 });
 
 test('OpenSSL can generate SHA-256 hashes.', async () => {
-	const php = process.env.WITH_OPENSSL === 'dynamic'
+	const php = env.WITH_OPENSSL === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-openssl.so`]})
 		: new PhpNode;
 

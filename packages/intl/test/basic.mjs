@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { env } from 'node:process';
 
 test('Intl Extension is enabled. (explicit)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
+	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({
 			sharedLibs: [`php${PhpNode.phpVersion}-intl.so`]
 			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'}]

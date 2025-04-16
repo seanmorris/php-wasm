@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { env } from 'node:process';
 
 test('SimpleXML Extension is enabled.', async () => {
-	const php = process.env.WITH_SIMPLEXML === 'dynamic'
+	const php = env.WITH_SIMPLEXML === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-simplexml.so`]})
 		: new PhpNode;
 

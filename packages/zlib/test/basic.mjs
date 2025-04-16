@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { env } from 'node:process';
 
 test('Zlib Extension is enabled.', async () => {
-	const php = process.env.WITH_ZLIB === 'dynamic'
+	const php = env.WITH_ZLIB === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-zlib.so`]})
 		: new PhpNode;
 
