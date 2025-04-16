@@ -1,4 +1,4 @@
-import { test, describe } from 'node:test';
+import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
@@ -101,48 +101,45 @@ test('Can access PHP integers via php.x function.', async () => {
 	assert.equal(returnValueIFFE, scalarInt);
 	assert.equal(stdErr, '');
 });
+test('Can access PHP floats via php.x function: One float', async () => {
+	const php = new PhpNode();
 
-describe('Can access PHP floats via php.x function.', async () => {
-	test('One float', async () => {
-		const php = new PhpNode();
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		let stdOut = '', stdErr = '';
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	await php.binary;
 
-		await php.binary;
+	const scalarFloat = 321.123;
 
-		const scalarFloat = 321.123;
+	const returnValue = await php.x`${scalarFloat}`;
+	assert.equal(returnValue, scalarFloat);
 
-		const returnValue = await php.x`${scalarFloat}`;
-		assert.equal(returnValue, scalarFloat);
+	const returnValueIFFE = await php.x`(function() { return ${scalarFloat} ; })()`;
+	assert.equal(returnValueIFFE, scalarFloat);
 
-		const returnValueIFFE = await php.x`(function() { return ${scalarFloat} ; })()`;
-		assert.equal(returnValueIFFE, scalarFloat);
+	assert.equal(stdErr, '');
+});
 
-		assert.equal(stdErr, '');
-	});
+test('Can access PHP floats via php.x function: Two floats', async () => {
+	const php = new PhpNode();
 
-	test('Two floats', async () => {
-		const php = new PhpNode();
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		let stdOut = '', stdErr = '';
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	await php.binary;
 
-		await php.binary;
+	const scalarFloatA = 1.5;
+	const scalarFloatB = 2.1;
 
-		const scalarFloatA = 1.5;
-		const scalarFloatB = 2.1;
+	const returnValue = await php.x`${scalarFloatA} + ${scalarFloatB}`;
+	assert.equal(returnValue, scalarFloatA + scalarFloatB);
 
-		const returnValue = await php.x`${scalarFloatA} + ${scalarFloatB}`;
-		assert.equal(returnValue, scalarFloatA + scalarFloatB);
+	const returnValueIFFE = await php.x`(function() { return ${scalarFloatA} + ${scalarFloatB} ; })()`;
+	assert.equal(returnValueIFFE, scalarFloatA + scalarFloatB);
 
-		const returnValueIFFE = await php.x`(function() { return ${scalarFloatA} + ${scalarFloatB} ; })()`;
-		assert.equal(returnValueIFFE, scalarFloatA + scalarFloatB);
-
-		assert.equal(stdErr, '');
-	});
+	assert.equal(stdErr, '');
 });
 
 test('Can access JS callbacks via php.r function.', async () => {
@@ -165,82 +162,75 @@ test('Can access JS callbacks via php.r function.', async () => {
 	assert.equal(stdErr, '');
 });
 
-describe('Can access JS classes via php.r function.', async () => {
+test('Can access JS classes via php.r function: Can access native JS classes via php.r function.', async () => {
+	const php = new PhpNode();
 
-	test('Can access native JS classes via php.r function.', async () => {
-		const php = new PhpNode();
+	let stdOut = '', stdErr = '';
 
-		let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	await php.binary;
 
-		await php.binary;
+	const exitCode = await php.r`<?php var_dump( (new ${ Date })->getFullYear() );`;
 
-		const exitCode = await php.r`<?php var_dump( (new ${ Date })->getFullYear() );`;
-
-		assert.equal(exitCode, 0);
-		assert.equal(stdOut, `int(${ (new Date).getFullYear() })\n`);
-		assert.equal(stdErr, '');
-	});
-
-	test('Can access JS user-classes via php.r function.', async () => {
-		const php = new PhpNode();
-		await php.binary;
-
-		let stdOut = '', stdErr = '';
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-		class Thing { getString(){ return "This is a value." } }; // This is a Javascript class
-
-		const exitCode = await php.r`<?php var_dump( (new ${ Thing })->getString() );`;
-
-		assert.equal(exitCode, 0);
-		assert.equal(stdOut, `string(16) "This is a value."\n`);
-		assert.equal(stdErr, '');
-	});
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `int(${ (new Date).getFullYear() })\n`);
+	assert.equal(stdErr, '');
 });
 
-describe('Can access JS classes via php.x function.', async () => {
+test('Can access JS classes via php.r function: Can access JS user-classes via php.r function.', async () => {
+	const php = new PhpNode();
+	await php.binary;
 
-	test('Can access native JS classes via php.x function.', async () => {
-		const php = new PhpNode();
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		let stdOut = '', stdErr = '';
+	class Thing { getString(){ return "This is a value." } }; // This is a Javascript class
 
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	const exitCode = await php.r`<?php var_dump( (new ${ Thing })->getString() );`;
 
-		await php.binary;
-
-		const returnValue = await php.x`(new ${ Date })->getFullYear()`;
-
-		assert.equal(returnValue, (new Date).getFullYear());
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
-	});
-
-	test('Can access JS user-classes via php.x function.', async () => {
-		const php = new PhpNode();
-
-		let stdOut = '', stdErr = '';
-
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-		await php.binary;
-
-		class Thing { getString(){ return "This is a value." } }; // This is a Javascript class
-
-		const returnValue = await php.x`(new ${ Thing })->getString()`;
-
-		assert.equal(returnValue, 'This is a value.');
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
-	});
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `string(16) "This is a value."\n`);
+	assert.equal(stdErr, '');
 });
 
+test('Can access JS classes via php.x function: native classes.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`(new ${ Date })->getFullYear()`;
+
+	assert.equal(returnValue, (new Date).getFullYear());
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
+
+test('Can access JS classes via php.x function: user-classes.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	class Thing { getString(){ return "This is a value." } }; // This is a Javascript class
+
+	const returnValue = await php.x`(new ${ Thing })->getString()`;
+
+	assert.equal(returnValue, 'This is a value.');
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
 test('Can access PHP callbacks that return integers via php.x function.', async () => {
 	const php = new PhpNode();
 
@@ -259,50 +249,48 @@ test('Can access PHP callbacks that return integers via php.x function.', async 
 	assert.equal(stdErr, '');
 });
 
-describe('Can access PHP callbacks that return floats via php.x function.', async () => {
-	test('One callback.', async () => {
-		const php = new PhpNode();
+test('Can access PHP callbacks that return floats via php.x function: One callback.', async () => {
+	const php = new PhpNode();
 
-		let stdOut = '', stdErr = '';
+	let stdOut = '', stdErr = '';
 
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		await php.binary;
+	await php.binary;
 
-		const callback = await php.x`function() { return 321.123; }`;
+	const callback = await php.x`function() { return 321.123; }`;
 
-		const returnValue = callback();
+	const returnValue = callback();
 
-		assert.equal(returnValue, 321.123);
-		assert.equal(stdErr, '');
-	});
+	assert.equal(returnValue, 321.123);
+	assert.equal(stdErr, '');
+});
 
-	test('Two callbacks.', async () => {
-		const php = new PhpNode();
+test('Can access PHP callbacks that return floats via php.x function: Two callbacks.', async () => {
+	const php = new PhpNode();
 
-		let stdOut = '', stdErr = '';
+	let stdOut = '', stdErr = '';
 
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		await php.binary;
+	await php.binary;
 
 
-		const callbackB = await php.x`function($a) { return $a + 2; }`;
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
+	const callbackB = await php.x`function($a) { return $a + 2; }`;
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
 
-		const callbackA = await php.x`function($a) { return $a + 1; }`;
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
+	const callbackA = await php.x`function($a) { return $a + 1; }`;
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
 
-		const returnValueA = callbackA(0);
-		const returnValueB = callbackB(returnValueA);
+	const returnValueA = callbackA(0);
+	const returnValueB = callbackB(returnValueA);
 
-		assert.equal(returnValueA, 1);
-		assert.equal(returnValueB, 3);
-	});
+	assert.equal(returnValueA, 1);
+	assert.equal(returnValueB, 3);
 });
 
 test('Can access PHP callbacks that return single-character strings via php.x function.', async () => {
@@ -342,40 +330,38 @@ test('Can access PHP callbacks that return multi-character strings via php.x fun
 	assert.equal(stdErr, '');
 });
 
-describe('Can access PHP callbacks that return objects via php.x function.', async () => {
-	test('One level deep.', async () => {
-		const php = new PhpNode();
+test('Can access PHP callbacks that return objects via php.x function: One level deep.', async () => {
+	const php = new PhpNode();
 
-		let stdOut = '', stdErr = '';
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		await php.binary;
+	await php.binary;
 
-		const callback = await php.x`function() { return (object)["a" => "abcdefg"]; }`;
-		const returnValue = callback();
+	const callback = await php.x`function() { return (object)["a" => "abcdefg"]; }`;
+	const returnValue = callback();
 
-		assert.equal(returnValue.a, "abcdefg");
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
-	});
+	assert.equal(returnValue.a, "abcdefg");
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
 
-	test('Two levels deep.', async () => {
-		const php = new PhpNode();
+test('Can access PHP callbacks that return objects via php.x function: Two levels deep.', async () => {
+	const php = new PhpNode();
 
-		let stdOut = '', stdErr = '';
-		php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-		php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
 
-		await php.binary;
+	await php.binary;
 
-		const callback = await php.x`function() { return function() { return (object)["a" => "abcdefg"]; }; }`;
-		const returnValue = callback()();
+	const callback = await php.x`function() { return function() { return (object)["a" => "abcdefg"]; }; }`;
+	const returnValue = callback()();
 
-		assert.equal(returnValue.a, "abcdefg");
-		assert.equal(stdOut, '');
-		assert.equal(stdErr, '');
-	});
+	assert.equal(returnValue.a, "abcdefg");
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
 });
 
 test('Can get the date with strtotime() and format it with date().', async () => {
@@ -525,7 +511,7 @@ test('Can use url_fopen with file_get_contents with a context. (POST) ', async (
 	assert.equal(Array.isArray(json), false);
 });
 
-describe('Can take an object param from PHP with a "length" property.', async () => {
+test('Can take an object param from PHP with a "length" property.', async () => {
 	const php = new PhpNode();
 
 	const testFunc = obj => {
@@ -547,7 +533,7 @@ describe('Can take an object param from PHP with a "length" property.', async ()
 	assert.equal(stdErr, '');
 });
 
-describe('Can call Math.random on globalThis.', async () => {
+test('Can call Math.random on globalThis.', async () => {
 	const php = new PhpNode();
 
 	let stdOut = '', stdErr = '';

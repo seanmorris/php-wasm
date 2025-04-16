@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import http from 'http';
+import http from 'node:http';
 import { PhpCgiNode } from 'php-cgi-wasm/PhpCgiNode.mjs';
 
 const php = new PhpCgiNode({
