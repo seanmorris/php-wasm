@@ -23,6 +23,7 @@ const sharedLibs = [
 	// `php${PhpWeb.phpVersion}-phar.so`,
 	`php${PhpWeb.phpVersion}-xml.so`,
 	`php${PhpWeb.phpVersion}-simplexml.so`,
+	`php${PhpWeb.phpVersion}-sdl.so`,
 	{url: `libxml2.so`, ini:false},
 ];
 
@@ -47,6 +48,7 @@ function Embedded() {
 	const input = useRef('');
 	const persist = useRef('');
 	const single  = useRef('');
+	const canvas  = useRef(null);
 	// const stdin  = useRef('');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -70,7 +72,8 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+
+		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}], canvas: canvas.current });
 
 		const php = phpRef.current;
 
@@ -431,6 +434,7 @@ function Embedded() {
 					<section id = "example-wrapper">
 						<div id = "example"></div>
 					</section>
+					<canvas ref={canvas} />
 					<div id = "ret">
 						<div className = "cols">
 							<label tabIndex="-1">return</label>

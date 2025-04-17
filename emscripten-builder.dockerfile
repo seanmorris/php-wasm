@@ -55,4 +55,6 @@ RUN cd /emsdk/upstream && {\
 	emscripten/bootstrap; \
 }
 
+RUN embuilder build USER
+
 RUN emcc --check

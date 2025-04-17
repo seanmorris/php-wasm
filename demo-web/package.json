@@ -25,6 +25,7 @@
     "php-wasm-xml": "../packages/xml",
     "php-wasm-yaml": "../packages/libyaml",
     "php-wasm-zlib": "../packages/zlib",
+    "php-wasm-sdl": "../packages/sdl",
     "react": "^18.3.1",
     "react-ace-builds": "^7.4.1",
     "react-dom": "^18.3.1",

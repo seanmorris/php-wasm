@@ -354,7 +354,7 @@ SAPI_PHPDBG_PATH=sapi/phpdbg/php-dbg-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 MAIN_MODULE?=1
 ASYNCIFY?=1
 
-BUILD_FLAGS=-f ../../php.mk \
+BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
@@ -829,7 +829,7 @@ php-clean:
 		packages/php-cgi-wasm/php-*.wasm \
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
-	- ${DOCKER_RUN_IN_PHP} make clean
+	- ${DOCKER_RUN_IN_PHP} make clean distclean
 
 clean:
 	${DOCKER_RUN} rm -rf \

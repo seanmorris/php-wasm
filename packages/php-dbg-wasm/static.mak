@@ -167,7 +167,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-web.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-web.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-web.js.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-web.js.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: ENVIRONMENT=web
@@ -185,7 +185,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-web.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-web.mjs.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-web.mjs.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: ENVIRONMENT=worker
@@ -204,7 +204,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-worker.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-worker.js.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-worker.js.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: ENVIRONMENT=worker
@@ -222,7 +222,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-worker.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-worker.mjs.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-worker.mjs.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js: ENVIRONMENT=node
@@ -241,7 +241,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-node.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-node.js.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-node.js.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: ENVIRONMENT=node
@@ -258,7 +258,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-node.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-node.mjs.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-node.mjs.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: ENVIRONMENT=webview
@@ -277,7 +277,7 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-webview.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-webview.js.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-webview.js.wasm.map ${PHP_DBG_DIST_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: ENVIRONMENT=webview
@@ -295,4 +295,4 @@ ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php-dbg-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php-dbg-webview.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/dbg/php-dbg-webview.mjs.wasm.map ${PHP_DBG_DIST_DIR}
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/phpdbg/php-dbg-webview.mjs.wasm.map ${PHP_DBG_DIST_DIR}

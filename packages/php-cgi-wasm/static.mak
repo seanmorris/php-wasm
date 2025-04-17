@@ -228,7 +228,7 @@ ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map: ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
+${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 
 ${PHP_CGI_DIST_DIR}/php-cgi-node.js: BUILD_TYPE=js
