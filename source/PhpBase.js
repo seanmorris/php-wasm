@@ -83,6 +83,21 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
+			// Make sure folder structure exists before preloading files
+			files.forEach(fileDef => {
+			    const segments = fileDef.parent.split('/');
+			    let currentPath = '';
+			    for (const segment of segments) {
+			        if (!segment) continue;
+			
+			        currentPath += segment + '/';
+			        if (!php.FS.analyzePath(currentPath).exists) {
+			            console.log("create dir " + currentPath);
+			            php.FS.mkdir(currentPath);
+			        }
+			    }
+			});
+			
 			await Promise.all(files.concat(extraFiles).map(
 				fileDef => new Promise(accept => php.FS.createPreloadedFile(
 					fileDef.parent,
