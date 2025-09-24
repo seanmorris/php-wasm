@@ -693,6 +693,7 @@ ${PHP_DIST_DIR}/php-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|from '\''module'\''|from '\''node:module'\''|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php-${ENVIRONMENT}${PHP_SUFFIX}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php-node.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/php-node.mjs
@@ -942,17 +943,17 @@ test-deno:
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
 
 all-versions:
-	${MAKE} PHP_VERSION=8.0 all cgi-all
-	${MAKE} PHP_VERSION=8.1 all cgi-all
-	${MAKE} PHP_VERSION=8.2 all cgi-all
-	${MAKE} PHP_VERSION=8.3 all cgi-all
-	${MAKE} PHP_VERSION=8.4 all cgi-all
+	${MAKE} PHP_VERSION=8.0
+	${MAKE} PHP_VERSION=8.1
+	${MAKE} PHP_VERSION=8.2
+	${MAKE} PHP_VERSION=8.3
+	${MAKE} PHP_VERSION=8.4
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
