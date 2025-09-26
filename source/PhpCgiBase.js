@@ -577,96 +577,101 @@ export class PhpCgiBase
 			}
 		}
 
-		this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
-		this.output = [];
-		this.error = [];
-
-		const selfUrl = new URL(globalThis.location || request.url);
-
-		putEnv(php, 'PHP_VERSION', phpVersion);
-		putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
-		putEnv(php, 'PHPRC', '/php.ini');
-
-		for(const [name, value] of Object.entries(this.env))
-		{
-			putEnv(php, name, value);
-		}
-
-		const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
-
-		putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
-		putEnv(php, 'REQUEST_METHOD', method);
-		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
-		putEnv(php, 'HTTP_HOST', selfUrl.host);
-		putEnv(php, 'REQUEST_SCHEME', protocol);
-		putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
-
-		putEnv(php, 'DOCUMENT_ROOT', docroot);
-		putEnv(php, 'REQUEST_URI', originalPath);
-		putEnv(php, 'SCRIPT_NAME', scriptName);
-		putEnv(php, 'SCRIPT_FILENAME', path);
-		putEnv(php, 'PATH_TRANSLATED', path);
-
-		putEnv(php, 'QUERY_STRING', get);
-		putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
-		putEnv(php, 'REDIRECT_STATUS', '200');
-		putEnv(php, 'CONTENT_TYPE', contentType);
-		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
-
 		let exitCode = -1;
 
 		try
 		{
-			exitCode = await php.ccall(
-				'main'
-				, 'number'
-				, ['number', 'string']
-				, []
-				, {async: true}
-			);
+			// We need "return await" otherwise the finally block will run before the lock releases.
+			return await navigator.locks.request('php-wasm-request-lock', async () => {
+				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
+				this.output = [];
+				this.error = [];
 
-			++this.count;
+				const selfUrl = new URL(globalThis.location || request.url);
 
-			const parsedResponse = parseResponse(this.output);
+				putEnv(php, 'PHP_VERSION', phpVersion);
+				putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
+				putEnv(php, 'PHPRC', '/php.ini');
 
-			let status = 200;
-
-			if(parsedResponse.headers.has('Status'))
-			{
-				status = parsedResponse.headers.get('Status').substr(0, 3);
-			}
-
-			for(const rawCookie of parsedResponse.headers.getSetCookie())
-			{
-				this.cookieJar.store(rawCookie);
-			}
-
-			php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
-
-			const headers = new Headers(parsedResponse.headers);
-
-			if(!headers.has('Content-type'))
-			{
-				if(extension in this.types)
+				for(const [name, value] of Object.entries(this.env))
 				{
-					headers.set('Content-type', this.types[extension]);
+					putEnv(php, name, value);
 				}
-				else
+
+				const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
+
+				putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
+				putEnv(php, 'REQUEST_METHOD', method);
+				putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
+				putEnv(php, 'HTTP_HOST', selfUrl.host);
+				putEnv(php, 'REQUEST_SCHEME', protocol);
+				putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
+
+				putEnv(php, 'DOCUMENT_ROOT', docroot);
+				putEnv(php, 'REQUEST_URI', originalPath);
+				putEnv(php, 'SCRIPT_NAME', scriptName);
+				putEnv(php, 'SCRIPT_FILENAME', path);
+				putEnv(php, 'PATH_TRANSLATED', path);
+
+				putEnv(php, 'QUERY_STRING', get);
+				putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
+				putEnv(php, 'REDIRECT_STATUS', '200');
+				putEnv(php, 'CONTENT_TYPE', contentType);
+				putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
+
+				this.output = [];
+
+				exitCode = await php.ccall(
+					'main'
+					, 'number'
+					, ['number', 'string']
+					, []
+					, {async: true}
+				);
+
+				++this.count;
+
+				const parsedResponse = parseResponse(this.output);
+
+				let status = 200;
+
+				if(parsedResponse.headers.has('Status'))
 				{
-					headers.set('Content-type', 'text/html; charset=utf-8');
+					status = parsedResponse.headers.get('Status').substr(0, 3);
 				}
-			}
 
-			if(parsedResponse.headers.has('Location'))
-			{
-				headers.set('Location', parsedResponse.headers.get('Location'));
-			}
+				for(const rawCookie of parsedResponse.headers.getSetCookie())
+				{
+					this.cookieJar.store(rawCookie);
+				}
 
-			const response = new Response(parsedResponse.body || '', { status, headers, url });
+				php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
 
-			this.onRequest(request, response);
+				const headers = new Headers(parsedResponse.headers);
 
-			return response;
+				if(!headers.has('Content-type'))
+				{
+					if(extension in this.types)
+					{
+						headers.set('Content-type', this.types[extension]);
+					}
+					else
+					{
+						headers.set('Content-type', 'text/html; charset=utf-8');
+					}
+				}
+
+				if(parsedResponse.headers.has('Location'))
+				{
+					headers.set('Location', parsedResponse.headers.get('Location'));
+				}
+
+				const response = new Response(parsedResponse.body || '', { status, headers, url });
+
+				this.onRequest(request, response);
+
+				return response;
+			});
 		}
 		catch (error)
 		{
