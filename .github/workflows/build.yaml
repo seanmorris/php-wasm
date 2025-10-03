@@ -1,8 +1,6 @@
 name: Build Artifacts
 on: [push]
 jobs:
-  make-libs:
-
   build-8-4:
     name: Build 8.4
     runs-on: ubuntu-latest
