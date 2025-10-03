@@ -8,12 +8,6 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: php-wasm-libs
-          path: ./
-
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
 
