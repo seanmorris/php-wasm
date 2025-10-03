@@ -10,7 +10,7 @@ jobs:
      
       - run: npm install
       - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: cp .circleci/.env_8.3.ci .env
       
       - run: time make image
       - run: docker network create phpwasm_default
