@@ -1,14 +1,40 @@
 name: Build Artifacts
 on: [push]
 jobs:
+  make-archives:
+    name: Make Archives
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+     
+      - run: npm install
+      - run: npm install -g deno
+      - run: cp .circleci/.env_8.3.ci .env
+      - run: time make archives
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-archives
+          path: /
+
   build-8-4:
     name: Build 8.4
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+          uses: actions/checkout@v4
+
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-wasm-archives
+            path: ./
 
       - run: npm install
+      - run: find . -type f -name "*.a" -exec touch {} +
+
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
 
@@ -29,6 +55,12 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
+
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-wasm-archives
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -52,6 +84,12 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-wasm-archives
+            path: ./
+
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.2-dynamic.ci .env
@@ -74,6 +112,12 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-wasm-archives
+            path: ./
+
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.1-dynamic.ci .env
@@ -95,6 +139,12 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
+
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-wasm-archives
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
