@@ -2,27 +2,26 @@ name: Build Artifacts
 on: [push]
 jobs:
   make-archives:
-    name: Make Archives
+    name: Make Shared Libs
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
      
       - run: npm install
-      - run: npm install -g deno
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       
-      - run: make image
+      - run: time make image
       - run: docker network create phpwasm_default
 
-      - run: time make archives
+      - run: time make shared
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm-archives
-          path: /
+          name: php-wasm-shared-libs
+          path: ./
 
   build-8-4:
     name: Build 8.4
@@ -44,10 +43,10 @@ jobs:
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
 
-      - run: make image
+      - run: time make image
       - run: docker network create phpwasm_default
 
-      - run: make PHP_VERSION=8.4
+      - run: time make PHP_VERSION=8.4
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -73,10 +72,10 @@ jobs:
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.3-dynamic.ci .env
 
-        - run: make image
+        - run: time make image
         - run: docker network create phpwasm_default
 
-        - run: make PHP_VERSION=8.3
+        - run: time make PHP_VERSION=8.3
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -102,10 +101,10 @@ jobs:
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.2-dynamic.ci .env
 
-        - run: make image
+        - run: time make image
         - run: docker network create phpwasm_default
 
-        - run: make PHP_VERSION=8.2
+        - run: time make PHP_VERSION=8.2
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -131,10 +130,10 @@ jobs:
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.1-dynamic.ci .env
 
-        - run: make image
+        - run: time make image
         - run: docker network create phpwasm_default
 
-        - run: make PHP_VERSION=8.1
+        - run: time make PHP_VERSION=8.1
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -160,10 +159,10 @@ jobs:
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.0-dynamic.ci .env
 
-        - run: make image
+        - run: time make image
         - run: docker network create phpwasm_default
 
-        - run: make PHP_VERSION=8.0
+        - run: time make PHP_VERSION=8.0
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -183,7 +182,7 @@ jobs:
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.4-dynamic.ci .env
 
-        - run: make image
+        - run: time make image
         - run: docker network create phpwasm_default
 
         - name: Download artifact
