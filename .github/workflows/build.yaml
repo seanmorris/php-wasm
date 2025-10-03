@@ -1,8 +1,8 @@
-name: Test
+name: Build Artifacts
 on: [push]
 jobs:
   build:
-    name: Test 8.4 Static
+    name: Build Artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
