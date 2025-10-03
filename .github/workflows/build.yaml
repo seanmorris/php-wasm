@@ -10,6 +10,7 @@ jobs:
      
       - run: npm install
       - run: npm install -g deno
+      - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: time make archives
 
