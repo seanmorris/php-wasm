@@ -10,7 +10,7 @@ jobs:
 
       - run: npm install
       - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .circleci/.env_8.4.ci .env
+      - run: cp .circleci/.env_8.4-dynamic.ci .env
 
       - run: make image
       - run: docker network create phpwasm_default
@@ -32,7 +32,7 @@ jobs:
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.3.ci .env
+        - run: cp .circleci/.env_8.3-dynamic.ci .env
 
         - run: make image
         - run: docker network create phpwasm_default
@@ -54,7 +54,7 @@ jobs:
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.2.ci .env
+        - run: cp .circleci/.env_8.2-dynamic.ci .env
 
         - run: make image
         - run: docker network create phpwasm_default
@@ -76,7 +76,7 @@ jobs:
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.1.ci .env
+        - run: cp .circleci/.env_8.1-dynamic.ci .env
 
         - run: make image
         - run: docker network create phpwasm_default
@@ -98,7 +98,7 @@ jobs:
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.0.ci .env
+        - run: cp .circleci/.env_8.0-dynamic.ci .env
 
         - run: make image
         - run: docker network create phpwasm_default
@@ -121,7 +121,7 @@ jobs:
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.4.ci .env
+        - run: cp .circleci/.env_8.4-dynamic.ci .env
 
         - run: make image
         - run: docker network create phpwasm_default
