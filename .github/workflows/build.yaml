@@ -38,12 +38,6 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-wasm-libs
-            path: ./
-
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.3-dynamic.ci .env
@@ -65,12 +59,6 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
-
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-wasm-libs
-            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -94,12 +82,6 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-wasm-libs
-            path: ./
-
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
         - run: cp .circleci/.env_8.1-dynamic.ci .env
@@ -121,12 +103,6 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
-
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-wasm-libs
-            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
