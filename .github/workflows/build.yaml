@@ -24,7 +24,7 @@ jobs:
           path: packages/
 
   build-8-3:
-    - name: Build 8.3
+      name: Build 8.3
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
@@ -46,7 +46,7 @@ jobs:
             path: packages/
   
   build-8-2:
-    - name: Build 8.2
+      name: Build 8.2
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
@@ -68,7 +68,7 @@ jobs:
             path: packages/
 
   build-8-1:
-    - name: Build 8.1
+      name: Build 8.1
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
@@ -90,7 +90,7 @@ jobs:
             path: packages/
   
   build-8-0:
-    - name: Build 8.0
+      name: Build 8.0
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
@@ -112,7 +112,7 @@ jobs:
             path: packages/
 
   build-7-4:
-    - name: Build 7.4
+      name: Build 7.4
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
@@ -134,7 +134,7 @@ jobs:
             path: packages/
   
   Collect:
-    - name: Collect Artifacts
+      name: Collect Artifacts
       runs-on: ubuntu-latest
       steps:
         - name: Check out repository code
