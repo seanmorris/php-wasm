@@ -1,0 +1,29 @@
+name: Test
+on: [push]
+jobs:
+  build:
+    name: Test 8.4 Static
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+      
+      - run: make PHP_VERSION=8.4
+      - run: make PHP_VERSION=8.3
+      - run: make PHP_VERSION=8.2
+      - run: make PHP_VERSION=8.1
+      - run: make PHP_VERSION=8.0
+      - run: make PHP_VERSION=7.4
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm
+          path: packages/
