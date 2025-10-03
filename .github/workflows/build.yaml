@@ -2,7 +2,7 @@ name: Build Artifacts
 on: [push]
 jobs:
   make-archives:
-    name: Make Shared Libs
+    name: Make Archives
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -15,12 +15,12 @@ jobs:
       - run: time make image
       - run: docker network create phpwasm_default
 
-      - run: time make shared
+      - run: time make -j1 archives
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm-shared-libs
+          name: php-wasm-archives
           path: ./
 
   build-8-4:
