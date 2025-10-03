@@ -2,28 +2,183 @@ name: Build Artifacts
 on: [push]
 jobs:
   build:
-    name: Build Artifacts
+    name: Build 8.4
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      
+
       - run: npm install
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4.ci .env
 
       - run: make image
       - run: docker network create phpwasm_default
-      
+
       - run: make PHP_VERSION=8.4
-      - run: make PHP_VERSION=8.3
-      - run: make PHP_VERSION=8.2
-      - run: make PHP_VERSION=8.1
-      - run: make PHP_VERSION=8.0
-      - run: make PHP_VERSION=7.4
-      
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm
+          name: php-wasm-8.4
+          path: packages/
+
+    name: Build 8.3
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - run: make PHP_VERSION=8.3
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-8.3
+          path: packages/
+
+    name: Build 8.2
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - run: make PHP_VERSION=8.43
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-8.2
+          path: packages/
+
+    name: Build 8.1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - run: make PHP_VERSION=8.1
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-8.1
+          path: packages/
+
+    name: Build 8.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - run: make PHP_VERSION=8.0
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-8.0
+          path: packages/
+
+    name: Build 7.4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - run: make PHP_VERSION=7.4
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-7.4
+          path: packages/
+
+    name: Collect Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: npm install
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.4.ci .env
+
+      - run: make image
+      - run: docker network create phpwasm_default
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-8.4
+          path: packages/
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-8.3
+          path: packages/
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-8.2
+          path: packages/
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-8.1
+          path: packages/
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-8.0
+          path: packages/
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-wasm-7.4
+          path: packages/
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-shared-files
           path: packages/
