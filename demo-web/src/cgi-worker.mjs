@@ -2,6 +2,19 @@
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
 
+import libxml from 'php-wasm-libxml';
+import dom from 'php-wasm-dom';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+import gd from 'php-wasm-gd';
+import iconv from 'php-wasm-iconv';
+import intl from 'php-wasm-intl';
+import openssl from 'php-wasm-openssl';
+import mbstring from 'php-wasm-mbstring';
+import sqlite from 'php-wasm-sqlite';
+import xml from 'php-wasm-xml';
+import simplexml from 'php-wasm-simplexml';
+
 // Log requests
 const onRequest = (request, response) => {
 	const url = new URL(request.url);
@@ -21,19 +34,18 @@ const notFound = request => {
 };
 
 const sharedLibs = [
-	`php\${PHP_VERSION}-zlib.so`,
-	`php\${PHP_VERSION}-zip.so`,
-	`php\${PHP_VERSION}-gd.so`,
-	`php\${PHP_VERSION}-iconv.so`,
-	`php\${PHP_VERSION}-intl.so`,
-	`php\${PHP_VERSION}-openssl.so`,
-	`php\${PHP_VERSION}-dom.so`,
-	`php\${PHP_VERSION}-mbstring.so`,
-	`php\${PHP_VERSION}-sqlite.so`,
-	`php\${PHP_VERSION}-pdo-sqlite.so`,
-	`php\${PHP_VERSION}-xml.so`,
-	`php\${PHP_VERSION}-simplexml.so`,
-	{url: `libxml2.so`, ini: false},
+	libxml,
+	dom,
+	zlib,
+	libzip,
+	gd,
+	iconv,
+	intl,
+	openssl,
+	mbstring,
+	sqlite,
+	xml,
+	simplexml,
 ];
 
 const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }];
@@ -53,7 +65,9 @@ const actions = {
 
 // Spawn the PHP-CGI binary
 const php = new PhpCgiWorker({
-	onRequest, notFound
+	version: '8.3'
+	, onRequest
+	, notFound
 	, sharedLibs
 	, files
 	, PGlite

@@ -184,9 +184,10 @@ export class PhpCgiBase
 	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
 	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
 	 */
-	constructor(phpBinLoader, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
+	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
 	{
 		this.binLoader  = phpBinLoader;
+		this.phpVersion = version;
 		this.docroot    = docroot    || this.docroot;
 		this.prefix     = prefix     || this.prefix;
 		this.exclude    = exclude    || this.exclude;

@@ -33,6 +33,7 @@ export class PhpBase extends EventTarget
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
+		this.phpVersion = args.version;
 		this.shared = args.shared = ('shared' in args) ? args.shared : {};
 
 		this.phpArgs = args;
@@ -58,9 +59,8 @@ export class PhpBase extends EventTarget
 		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
 		args.locateFile = (path, directory) => {
-			console.log({path, directory});
 			let located = userLocateFile(path, directory);
-			console.log({located}, urlLibs[path]);
+			// console.log(urlLibs, path, directory, located);
 			if(located !== undefined)
 			{
 				return located;

@@ -9,21 +9,38 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 
+import libxml from 'php-wasm-libxml';
+import dom from 'php-wasm-dom';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+import gd from 'php-wasm-gd';
+import iconv from 'php-wasm-iconv';
+import intl from 'php-wasm-intl';
+import openssl from 'php-wasm-openssl';
+import mbstring from 'php-wasm-mbstring';
+import sqlite from 'php-wasm-sqlite';
+import xml from 'php-wasm-xml';
+import simplexml from 'php-wasm-simplexml';
+
+// import phar from 'php-wasm-phar';
+// import tidy from 'php-wasm-tidy';
+
 const sharedLibs = [
-	`php${PhpWeb.phpVersion}-zlib.so`,
-	`php${PhpWeb.phpVersion}-zip.so`,
-	`php${PhpWeb.phpVersion}-gd.so`,
-	`php${PhpWeb.phpVersion}-iconv.so`,
-	`php${PhpWeb.phpVersion}-intl.so`,
-	`php${PhpWeb.phpVersion}-openssl.so`,
-	`php${PhpWeb.phpVersion}-dom.so`,
-	`php${PhpWeb.phpVersion}-mbstring.so`,
-	`php${PhpWeb.phpVersion}-sqlite.so`,
-	`php${PhpWeb.phpVersion}-pdo-sqlite.so`,
-	// `php${PhpWeb.phpVersion}-phar.so`,
-	`php${PhpWeb.phpVersion}-xml.so`,
-	`php${PhpWeb.phpVersion}-simplexml.so`,
-	{url: `libxml2.so`, ini:false},
+	libxml,
+	dom,
+	zlib,
+	libzip,
+	gd,
+	iconv,
+	intl,
+	openssl,
+	mbstring,
+	sqlite,
+	xml,
+	simplexml,
+	
+	// phar,
+	// tidy,
 ];
 
 const files = [
@@ -70,7 +87,7 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		phpRef.current = new PhpWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		phpRef.current = new PhpWeb({version: '8.4', sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
 

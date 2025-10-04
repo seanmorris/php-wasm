@@ -1,13 +1,13 @@
 import { PhpBase } from './PhpBase';
 import { commitTransaction, startTransaction } from './webTransactions';
 
-const version = '8.4';
+const defaultVersion = '8.4';
 
 export class PhpWeb extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(import(`./php${version}-web.mjs`), args);
+		super(import(`./php${args.version ?? defaultVersion}-web.mjs`), args);
 	}
 
 	startTransaction()

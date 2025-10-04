@@ -7,23 +7,34 @@ import loading from './loading.svg';
 
 import Convert from 'ansi-to-html';
 
+import libxml from 'php-wasm-libxml';
+import dom from 'php-wasm-dom';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+import gd from 'php-wasm-gd';
+import iconv from 'php-wasm-iconv';
+import intl from 'php-wasm-intl';
+import openssl from 'php-wasm-openssl';
+import mbstring from 'php-wasm-mbstring';
+import sqlite from 'php-wasm-sqlite';
+import xml from 'php-wasm-xml';
+import simplexml from 'php-wasm-simplexml';
+
 const parser = new Convert;
 
 const sharedLibs = [
-	`php${PhpDbgWeb.phpVersion}-zlib.so`,
-	`php${PhpDbgWeb.phpVersion}-zip.so`,
-	`php${PhpDbgWeb.phpVersion}-gd.so`,
-	`php${PhpDbgWeb.phpVersion}-iconv.so`,
-	`php${PhpDbgWeb.phpVersion}-intl.so`,
-	`php${PhpDbgWeb.phpVersion}-openssl.so`,
-	`php${PhpDbgWeb.phpVersion}-dom.so`,
-	`php${PhpDbgWeb.phpVersion}-mbstring.so`,
-	`php${PhpDbgWeb.phpVersion}-sqlite.so`,
-	`php${PhpDbgWeb.phpVersion}-pdo-sqlite.so`,
-	// `php${PhpDbgWeb.phpVersion}-phar.so`,
-	`php${PhpDbgWeb.phpVersion}-xml.so`,
-	`php${PhpDbgWeb.phpVersion}-simplexml.so`,
-	{url: `libxml2.so`, ini:false},
+	libxml,
+	dom,
+	zlib,
+	libzip,
+	gd,
+	iconv,
+	intl,
+	openssl,
+	mbstring,
+	sqlite,
+	xml,
+	simplexml,
 ];
 
 const files = [
@@ -123,7 +134,7 @@ export default forwardRef(function Debugger({
 
 	const refreshPhp = useCallback(init => {
 		setStatusMessage && setStatusMessage('loading...');
-		phpRef.current = new PhpDbgWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		phpRef.current = new PhpDbgWeb({version: '8.3', sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
 

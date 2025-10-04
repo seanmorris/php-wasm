@@ -4,13 +4,13 @@ import { commitTransaction, startTransaction } from './webTransactions';
 const NUM = 'number';
 const STR = 'string';
 
-const version = '8.4';
+const defaultVersion = '8.4';
 
 export class PhpDbgWeb extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(import(`./php${version}-dbg-web`), args, 'phpdbg');
+		super(import(`./php${args.version ?? defaultVersion}-dbg-web.mjs`), args, 'phpdbg');
 
 		this.running = false;
 		this.paused = false;

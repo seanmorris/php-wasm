@@ -1,13 +1,13 @@
 import { PhpCgiWebBase } from './PhpCgiWebBase';
 
-version = '8.4';
+defaultVersion = '8.4';
 
 export class PhpCgiWeb extends PhpCgiWebBase
 {
-	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
+	constructor({version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
 		super(
-			import(`./php${version}-cgi-web`)
+			import(`./php${version ?? defaultVersion}-cgi-web.mjs`)
 			, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args}
 		);
 	}
