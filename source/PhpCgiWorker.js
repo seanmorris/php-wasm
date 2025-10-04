@@ -1,10 +1,14 @@
 import { PhpCgiWebBase } from './PhpCgiWebBase';
-import PHP from './php-cgi-worker';
+
+const version = '8.4';
 
 export class PhpCgiWorker extends PhpCgiWebBase
 {
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args});
+		super(
+			import(`./php${version}-cgi-worker`)
+			, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args}
+		);
 	}
 }

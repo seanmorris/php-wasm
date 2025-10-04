@@ -1,5 +1,6 @@
 import { phpVersion } from './config';
 import { phpVersionFull } from './config';
+
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
@@ -10,7 +11,7 @@ const NUM = 'number';
 
 export class PhpBase extends EventTarget
 {
-	constructor(PhpBinary, args = {}, sapi = 'embed')
+	constructor(phpBinLoader, args = {}, sapi = 'embed')
 	{
 		super();
 
@@ -57,7 +58,9 @@ export class PhpBase extends EventTarget
 		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
 
 		args.locateFile = (path, directory) => {
+			console.log({path, directory});
 			let located = userLocateFile(path, directory);
+			console.log({located}, urlLibs[path]);
 			if(located !== undefined)
 			{
 				return located;
@@ -70,7 +73,9 @@ export class PhpBase extends EventTarget
 
 		this.valueIndex = 0;
 
-		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
+		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
+
+		this.binary = phpBinLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
 			php.ccall(
 				'pib_storage_init'
 				, NUM

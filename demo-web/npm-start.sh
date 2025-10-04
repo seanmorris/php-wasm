@@ -10,7 +10,7 @@ if [ -d 'public/static/media/mapped' ]; then {
 }
 fi
 
-PHP_VERSION=8.3
+PHP_VERSION=8.4
 
 ls node_modules/*/*.so node_modules/php-wasm-intl/icudt72l.dat | while read FILE; do {
 	BASENAME=`basename ${FILE}`;

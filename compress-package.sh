@@ -13,9 +13,9 @@ fi
 # THIS SCRIPT SHOULD QUIT IMMEDIATELY UPON ERRORS
 set -euo pipefail
 
-rm -f [0123456789abcdef]*.wasm
+# rm -f [0123456789abcdef]*.wasm
 
-ls php-*.wasm | while read FILENAME; do
+ls php*.wasm | while read FILENAME; do
 	SHA_HASH=`sha1sum $FILENAME | cut -f1 -d' '`
 	HASHNAME=${SHA_HASH}.wasm
 

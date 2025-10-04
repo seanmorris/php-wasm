@@ -166,7 +166,7 @@ export class PhpCgiBase
 
 	/**
 	 * Creates a new PHP instance (async)
-	 * @param {*} PHP
+	 * @param {*} binLoader
 	 * @param {string} options.prefix The URL path prefix to look for when routing to PHP.
 	 * @param {string} options.docroot The internal directory to use as the public document root.
 	 * @param {string[]} options.exclude Array of URL prefixes to exclude from routing to PHP.
@@ -184,9 +184,9 @@ export class PhpCgiBase
 	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
 	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
 	 */
-	constructor(PHP, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
+	constructor(phpBinLoader, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
 	{
-		this.PHP        = PHP;
+		this.binLoader  = phpBinLoader;
 		this.docroot    = docroot    || this.docroot;
 		this.prefix     = prefix     || this.prefix;
 		this.exclude    = exclude    || this.exclude;
@@ -385,7 +385,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		return this.binary = new this.PHP(phpArgs).then(async php => {
+		return this.binary = this.binLoader.then({default: PHP}).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM

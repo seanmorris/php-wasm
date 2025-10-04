@@ -1,12 +1,13 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-web';
 import { commitTransaction, startTransaction } from './webTransactions';
+
+const version = '8.4';
 
 export class PhpWeb extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(PhpBinary, args);
+		super(import(`./php${version}-web.mjs`), args);
 	}
 
 	startTransaction()

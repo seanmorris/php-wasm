@@ -20,14 +20,14 @@ CGI_CJS_HELPERS=breakoutRequest.js  parseResponse.js  msg-bus.js config.js
 CGI_MJS_HELPERS_WEB=${CGI_MJS_HELPERS} msg-bus.mjs
 CGI_CJS_HELPERS_WEB=${CGI_CJS_HELPERS} msg-bus.js
 
-WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php-cgi-web.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
-WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js php-cgi-web.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
-WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWorker.mjs php-cgi-worker.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
-WORKER_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWorker.js php-cgi-worker.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
-WEBVIEW_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWebview.mjs php-cgi-webview.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
-WEBVIEW_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWebview.js php-cgi-webview.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
-NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs php-cgi-node.mjs ${CGI_MJS_HELPERS} ${MJS_HELPERS})
-NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js php-cgi-node.js ${CGI_CJS_HELPERS} ${CJS_HELPERS})
+WEB_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWeb.mjs php${PHP_VERSION}-cgi-web.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WEB_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWeb.js php${PHP_VERSION}-cgi-web.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWorker.mjs php${PHP_VERSION}-cgi-worker.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WORKER_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWorker.js php${PHP_VERSION}-cgi-worker.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+WEBVIEW_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWebview.mjs php${PHP_VERSION}-cgi-webview.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+WEBVIEW_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWebview.js php${PHP_VERSION}-cgi-webview.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
+NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs php${PHP_VERSION}-cgi-node.mjs ${CGI_MJS_HELPERS} ${MJS_HELPERS})
+NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js php${PHP_VERSION}-cgi-node.js ${CGI_CJS_HELPERS} ${CJS_HELPERS})
 
 WEB_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
 WEB_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST})
@@ -50,14 +50,14 @@ NODE_CGI_JS_ASSETS+= ${ENV_DIR}/${PHP_CGI_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
 
 ifeq (${WITH_SOURCEMAPS},1)
-WEB_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs.wasm.map.MAPPED
-WEB_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-web.js.wasm.map.MAPPED
-WORKER_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
-WORKER_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED
-WEBVIEW_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs.wasm.map.MAPPED
-WEBVIEW_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-webview.js.wasm.map.MAPPED
-NODE_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs.wasm.map.MAPPED
-NODE_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php-cgi-node.js.wasm.map.MAPPED
+WEB_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs.wasm.map.MAPPED
+WEB_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js.wasm.map.MAPPED
+WORKER_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs.wasm.map.MAPPED
+WORKER_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs.wasm.map.MAPPED
+WEBVIEW_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs.wasm.map.MAPPED
+WEBVIEW_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js.wasm.map.MAPPED
+NODE_CGI_MJS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs.wasm.map.MAPPED
+NODE_CGI_JS_ASSETS+= ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js.wasm.map.MAPPED
 endif
 
 web-cgi-mjs:
@@ -157,149 +157,149 @@ ${PHP_CGI_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
 	perl -pi -w -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
-${PHP_CGI_DIST_DIR}/php-cgi-web.js: BUILD_TYPE=js
-${PHP_CGI_DIST_DIR}/php-cgi-web.js: ENVIRONMENT=web
-${PHP_CGI_DIST_DIR}/php-cgi-web.js: FS_TYPE=${WEB_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js: BUILD_TYPE=js
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js: ENVIRONMENT=web
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js: FS_TYPE=${WEB_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-web.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-web.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.js.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.js
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-web.js.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: BUILD_TYPE=mjs
-${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ENVIRONMENT=web
-${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: FS_TYPE=${WEB_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs: BUILD_TYPE=mjs
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs: ENVIRONMENT=web
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs: FS_TYPE=${WEB_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-web.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-web.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-web.mjs.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-web.mjs
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-web.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-worker.js: BUILD_TYPE=js
-${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ENVIRONMENT=worker
-${PHP_CGI_DIST_DIR}/php-cgi-worker.js: FS_TYPE=${WORKER_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js: BUILD_TYPE=js
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js: ENVIRONMENT=worker
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js: FS_TYPE=${WORKER_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-worker.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-worker.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.js.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.js
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-worker.js.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: BUILD_TYPE=mjs
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ENVIRONMENT=worker
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs: BUILD_TYPE=mjs
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs: ENVIRONMENT=worker
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-worker.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-worker.mjs.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-worker.mjs
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-worker.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-node.js: BUILD_TYPE=js
-${PHP_CGI_DIST_DIR}/php-cgi-node.js: ENVIRONMENT=node
-${PHP_CGI_DIST_DIR}/php-cgi-node.js: FS_TYPE=${NODE_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js: BUILD_TYPE=js
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js: ENVIRONMENT=node
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js: FS_TYPE=${NODE_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-node.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-node.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.js.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.js
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-node.js.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: BUILD_TYPE=mjs
-${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ENVIRONMENT=node
-${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: FS_TYPE=${NODE_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs: BUILD_TYPE=mjs
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs: ENVIRONMENT=node
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs: FS_TYPE=${NODE_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-node.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-node.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-node.mjs.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-node.mjs
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-node.mjs.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-webview.js: BUILD_TYPE=js
-${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ENVIRONMENT=webview
-${PHP_CGI_DIST_DIR}/php-cgi-webview.js: FS_TYPE=${WEB_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js: BUILD_TYPE=js
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js: ENVIRONMENT=webview
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js: FS_TYPE=${WEB_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
 	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-webview.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-webview.js
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.js.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.js
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-webview.js.wasm.map ${PHP_CGI_DIST_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: BUILD_TYPE=mjs
-${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ENVIRONMENT=webview
-${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
-${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs: BUILD_TYPE=mjs
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs: ENVIRONMENT=webview
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP-CGI for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make cgi install-cgi install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cgi WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
-		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
-	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
+		/src/third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}
+	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	- cp -Lprf ${PHP_CGI_DIST_DIR}/php-cgi-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
+	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
-${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php-cgi-webview.mjs
-	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php-cgi-webview.mjs.wasm.map ${PHP_CGI_DIST_DIR}
+${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_VERSION}-cgi-webview.mjs
+	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php8.3-src/sapi/cgi/php${PHP_VERSION}-cgi-webview.mjs.wasm.map ${PHP_CGI_DIST_DIR}
