@@ -187,7 +187,7 @@ $(addsuffix /php${PHP_VERSION}-gd.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd
 
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
-	${DOCKER_RUN} wget -q https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+	${DOCKER_RUN} wget -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 
