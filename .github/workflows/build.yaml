@@ -2,37 +2,37 @@ name: Build Artifacts
 on: [push]
 jobs:
   # build-libs:
-    name: Build Shared Objects
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+    # name: Build Shared Objects
+    # runs-on: ubuntu-latest
+    # steps:
+    #   - name: Check out repository code
+    #     uses: actions/checkout@v4
 
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
+    #   - name: Disable man-db auto-update
+    #     run: |
+    #       echo "set man-db/auto-update false" | sudo debconf-communicate
+    #       sudo dpkg-reconfigure man-db
 
-      - run: npm install
-      - run: find . -type f -name "*.a" -exec touch {} +
+    #   - run: npm install
+    #   - run: find . -type f -name "*.a" -exec touch {} +
 
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .circleci/.env_8.4-dynamic.ci .env
+    #   - run: sudo apt update && sudo apt install docker-compose -y
+    #   - run: cp .circleci/.env_8.4-dynamic.ci .env
 
-      - run: time make image
-      - run: docker network create phpwasm_default
+    #   - run: time make image
+    #   - run: docker network create phpwasm_default
 
-      - run: time make dynamic
+    #   - run: time make dynamic
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-dependencies
-          include-hidden-files: true
-          path: |
-            third_party
-            lib
-            packages
+    #   - name: Upload artifact
+    #     uses: actions/upload-artifact@v4
+    #     with:
+    #       name: php-dependencies
+    #       include-hidden-files: true
+    #       path: |
+    #         third_party
+    #         lib
+    #         packages
 
   build-8-4:
     name: Build 8.4
@@ -47,11 +47,11 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: php-dependencies
-          path: ./
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: php-dependencies
+      #     path: ./
 
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
@@ -84,11 +84,11 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-dependencies
-            path: ./
+        # - name: Download artifact
+        #   uses: actions/download-artifact@v4
+        #   with:
+        #     name: php-dependencies
+        #     path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -119,11 +119,11 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-dependencies
-            path: ./
+        # - name: Download artifact
+        #   uses: actions/download-artifact@v4
+        #   with:
+        #     name: php-dependencies
+        #     path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -154,11 +154,11 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-dependencies
-            path: ./
+        # - name: Download artifact
+        #   uses: actions/download-artifact@v4
+        #   with:
+        #     name: php-dependencies
+        #     path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -189,11 +189,11 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            name: php-dependencies
-            path: ./
+        # - name: Download artifact
+        #   uses: actions/download-artifact@v4
+        #   with:
+        #     name: php-dependencies
+        #     path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
