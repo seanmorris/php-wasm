@@ -779,7 +779,7 @@ deps:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
 
 dynamic:
-	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS} ${PHP_CONFIGURE_DEPS}
+	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
 
 PHPIZE: ${PHPIZE}
 
@@ -952,11 +952,11 @@ run:
 	${DOCKER_ENV} emscripten-builder bash
 
 all-versions:
-	${MAKE} PHP_VERSION=8.0
-	${MAKE} PHP_VERSION=8.1
-	${MAKE} PHP_VERSION=8.2
-	${MAKE} PHP_VERSION=8.3
 	${MAKE} PHP_VERSION=8.4
+	${MAKE} PHP_VERSION=8.3
+	${MAKE} PHP_VERSION=8.2
+	${MAKE} PHP_VERSION=8.1
+	${MAKE} PHP_VERSION=8.0
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
@@ -964,4 +964,8 @@ reconfigure:
 rebuild:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
-# .NOTPARALLEL: ${NOTPARALLEL}
+demo: web-mjs worker-cgi-mjs web-dbj-mjs
+	npm run build --prefix ./demo-web
+
+serve-demo: web-mjs worker-cgi-mjs web-dbj-mjs
+	npm run start --prefix ./demo-web
