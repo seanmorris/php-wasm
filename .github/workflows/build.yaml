@@ -8,6 +8,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
 
@@ -36,6 +41,11 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -69,6 +79,11 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
+        - name: Disable man-db auto-update
+          run: |
+            echo "set man-db/auto-update false" | sudo debconf-communicate
+            sudo dpkg-reconfigure man-db
+
         - name: Download artifact
           uses: actions/download-artifact@v4
           with:
@@ -90,7 +105,7 @@ jobs:
             name: php-wasm-8.3
             include-hidden-files: true
             path: packages/
-  
+
   build-8-2:
       name: Build 8.2
       runs-on: ubuntu-latest
@@ -98,6 +113,11 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
+
+        - name: Disable man-db auto-update
+          run: |
+            echo "set man-db/auto-update false" | sudo debconf-communicate
+            sudo dpkg-reconfigure man-db
 
         - name: Download artifact
           uses: actions/download-artifact@v4
@@ -129,6 +149,11 @@ jobs:
         - name: Check out repository code
           uses: actions/checkout@v4
 
+        - name: Disable man-db auto-update
+          run: |
+            echo "set man-db/auto-update false" | sudo debconf-communicate
+            sudo dpkg-reconfigure man-db
+
         - name: Download artifact
           uses: actions/download-artifact@v4
           with:
@@ -150,7 +175,7 @@ jobs:
             name: php-wasm-8.1
             include-hidden-files: true
             path: packages/
-  
+
   build-8-0:
       name: Build 8.0
       runs-on: ubuntu-latest
@@ -158,6 +183,11 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
+
+        - name: Disable man-db auto-update
+          run: |
+            echo "set man-db/auto-update false" | sudo debconf-communicate
+            sudo dpkg-reconfigure man-db
 
         - name: Download artifact
           uses: actions/download-artifact@v4
@@ -188,6 +218,11 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
+
+        - name: Disable man-db auto-update
+          run: |
+            echo "set man-db/auto-update false" | sudo debconf-communicate
+            sudo dpkg-reconfigure man-db
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -225,11 +260,11 @@ jobs:
           with:
             name: php-wasm-8.0
             path: packages/
-       
+
         - run: ./compress-package.sh packages/php-wasm
         - run: ./compress-package.sh packages/php-cgi-wasm
         - run: ./compress-package.sh packages/php-dbg-wasm
-        
+
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
