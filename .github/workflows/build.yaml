@@ -2,7 +2,7 @@ name: Build Artifacts
 on: [push]
 jobs:
   build-libs:
-    name: Build Share Objects
+    name: Build Shared Objects
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: php-dependencies
-          path: packages/
+          path: ./
 
   build-8-4:
     name: Build 8.4
@@ -37,7 +37,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-dependencies
-          path: packages/
+          path: ./
 
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
@@ -68,7 +68,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: php-dependencies
-            path: packages/
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -97,7 +97,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: php-dependencies
-            path: packages/
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -126,7 +126,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: php-dependencies
-            path: packages/
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -155,7 +155,7 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: php-dependencies
-            path: packages/
+            path: ./
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
