@@ -34,6 +34,7 @@ ifeq (${WITH_ICONV},dynamic)
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+DYNAMIC_LIBS+= packages/iconv/libiconv.so
 SKIP_LIBS+= -liconv
 endif
 

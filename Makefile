@@ -778,6 +778,9 @@ assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_
 deps:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
 
+dynamic:
+	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS} ${PHP_CONFIGURE_DEPS}
+
 PHPIZE: ${PHPIZE}
 
 ${PHPIZE}: third_party/php${PHP_VERSION}-src/scripts/phpize-built

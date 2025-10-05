@@ -31,6 +31,7 @@ endif
 
 ifeq (${WITH_LIBZIP},dynamic)
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
+DYNAMIC_LIBS+= packages/libzip/libzip.so
 SKIP_LIBS+= -lzip
 PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
 endif
