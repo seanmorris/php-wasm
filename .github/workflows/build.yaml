@@ -24,7 +24,7 @@ jobs:
         with:
           name: php-dependencies
           include-hidden-files: true
-          path: ./
+          path: ./third_party ./lib ./packages
 
   build-8-4:
     name: Build 8.4
