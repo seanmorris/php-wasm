@@ -23,6 +23,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: php-dependencies
+          include-hidden-files: true
           path: ./
 
   build-8-4:
@@ -54,6 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: php-wasm-8.4
+          include-hidden-files: true
           path: packages/
 
   build-8-3:
@@ -83,6 +85,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: php-wasm-8.3
+            include-hidden-files: true
             path: packages/
   
   build-8-2:
@@ -112,6 +115,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: php-wasm-8.2
+            include-hidden-files: true
             path: packages/
 
   build-8-1:
@@ -141,6 +145,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: php-wasm-8.1
+            include-hidden-files: true
             path: packages/
   
   build-8-0:
@@ -170,6 +175,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: php-wasm-8.0
+            include-hidden-files: true
             path: packages/
 
   Collect:
@@ -216,9 +222,14 @@ jobs:
           with:
             name: php-wasm-8.0
             path: packages/
+       
+        - run: ./compress-package.sh packages/php-wasm
+        - run: ./compress-package.sh packages/php-cgi-wasm
+        - run: ./compress-package.sh packages/php-dbg-wasm
         
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
             name: my-shared-files
+            include-hidden-files: true
             path: packages/
