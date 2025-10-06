@@ -10,6 +10,9 @@ jobs:
       - run: npm install
       - run: npm install -g deno
       - run: npm i -g cv3-test netcat
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
       - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
@@ -30,6 +33,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4.ci .env
       - run: make image
@@ -44,6 +50,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image
@@ -58,6 +67,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image
@@ -72,6 +84,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image
@@ -86,6 +101,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image
@@ -101,6 +119,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: make image
@@ -115,6 +136,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
@@ -129,6 +153,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image
@@ -143,6 +170,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image
@@ -157,6 +187,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image
@@ -172,6 +205,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: make image
@@ -186,6 +222,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image
@@ -214,6 +253,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image
@@ -228,6 +270,9 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image

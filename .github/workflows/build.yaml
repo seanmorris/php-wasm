@@ -24,7 +24,7 @@ jobs:
 
       - run: time make dynamic
 
-      - run: find ./third_party -type f -executable -print > ./cache/executables.list
+      - run: find ./third_party -type f -executable -print > ./.cache/executables.list
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -56,7 +56,7 @@ jobs:
           name: php-dependencies
           path: ./
 
-      - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
+      - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
@@ -95,7 +95,7 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
+        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -132,7 +132,7 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
+        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -169,7 +169,7 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
+        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
@@ -206,7 +206,7 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
+        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
