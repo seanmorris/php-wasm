@@ -13,18 +13,26 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - run: npm install
-      - run: find . -type f -name "*.a" -exec touch {} +
+      - name: Install NPM packages
+        run: npm install
 
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .github/.env_8.4.ci .env
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
 
-      - run: time make image
-      - run: docker network create phpwasm_default
+      - name: Import configuration
+        run: cp .github/.env_8.4.ci .env
 
-      - run: time make dynamic
+      - name: Create build-environment image
+        run: time make image
 
-      - run: find ./third_party -type f -executable -print > ./.cache/executables.list
+      - name: Spin up docker-network
+        run: docker network create phpwasm_default
+
+      - name: Build shared libraries
+        run: time make dynamic
+
+      - name: Cache executables
+        run: find ./third_party -type f -executable -print > ./.cache/executables.list
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -56,18 +64,26 @@ jobs:
           name: php-dependencies
           path: ./
 
-      - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+      - name: Apply executable cache
+        run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
-      - run: npm install
-      - run: find . -type f -name "*.a" -exec touch {} +
+      - name: Install NPM packages
+        run: npm install
 
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .github/.env_8.4.ci .env
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
 
-      - run: time make image
-      - run: docker network create phpwasm_default
+      - name: Import configuration
+        run: cp .github/.env_8.4.ci .env
 
-      - run: time make PHP_VERSION=8.4
+      - name: Create build-environment image
+        run: time make image
+
+      - name: Spin up docker network
+        run: docker network create phpwasm_default
+
+      - name: Build PHP
+        run: time make PHP_VERSION=8.4
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -95,16 +111,26 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+        - name: Apply executable cache
+          run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
-        - run: npm install
-        - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .github/.env_8.3.ci .env
+        - name: Install NPM packages
+          run: npm install
 
-        - run: time make image
-        - run: docker network create phpwasm_default
+        - name: Install docker-compose
+          run: sudo apt update && sudo apt install docker-compose -y
 
-        - run: time make PHP_VERSION=8.3
+        - name: Import configuration
+          run: cp .github/.env_8.3.ci .env
+
+        - name: Create build-environment image
+          run: time make image
+
+        - name: Spin up docker network
+          run: docker network create phpwasm_default
+
+        - name: Build PHP
+          run: time make PHP_VERSION=8.3
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -132,16 +158,26 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+        - name: Apply executable cache
+          run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
-        - run: npm install
-        - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .github/.env_8.2.ci .env
+        - name: Install NPM packages
+          run: npm install
 
-        - run: time make image
-        - run: docker network create phpwasm_default
+        - name: Install docker-compose
+          run: sudo apt update && sudo apt install docker-compose -y
 
-        - run: time make PHP_VERSION=8.2
+        - name: Import configuration
+          run: cp .github/.env_8.2.ci .env
+
+        - name: Create build-environment image
+          run: time make image
+
+        - name: Spin up docker network
+          run: docker network create phpwasm_default
+
+        - name: Build PHP
+          run: time make PHP_VERSION=8.2
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -169,16 +205,26 @@ jobs:
             name: php-dependencies
             path: ./
 
-        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+        - name: Apply executable cache
+          run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
-        - run: npm install
-        - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .github/.env_8.1.ci .env
+        - name: Install NPM packages
+          run: npm install
 
-        - run: time make image
-        - run: docker network create phpwasm_default
+        - name: Install docker-compose
+          run: sudo apt update && sudo apt install docker-compose -y
 
-        - run: time make PHP_VERSION=8.1
+        - name: Import configuration
+          run: cp .github/.env_8.1.ci .env
+
+        - name: Create build-environment image
+          run: time make image
+
+        - name: Spin up docker network
+          run: docker network create phpwasm_default
+
+        - name: Build PHP
+          run: time make PHP_VERSION=8.1
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -198,24 +244,34 @@ jobs:
         - name: Disable man-db auto-update
           run: |
             echo "set man-db/auto-update false" | sudo debconf-communicate
-            sudo dpkg-reconfigure man-db
 
+            sudo dpkg-reconfigure man-db
         - name: Download artifact
           uses: actions/download-artifact@v4
           with:
             name: php-dependencies
             path: ./
 
-        - run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+        - name: Apply executable cache
+          run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
 
-        - run: npm install
-        - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .github/.env_8.0.ci .env
+        - name: Install NPM packages
+          run: npm install
 
-        - run: time make image
-        - run: docker network create phpwasm_default
+        - name: Install docker-compose
+          run: sudo apt update && sudo apt install docker-compose -y
 
-        - run: time make PHP_VERSION=8.0
+        - name: Import configuration
+          run: cp .github/.env_8.0.ci .env
+
+        - name: Create build-environment image
+          run: time make image
+
+        - name: Spin up docker network
+          run: docker network create phpwasm_default
+
+        - name: Build PHP
+          run: time make PHP_VERSION=8.0
 
         - name: Upload artifact
           uses: actions/upload-artifact@v4
@@ -231,18 +287,6 @@ jobs:
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
-
-        - name: Disable man-db auto-update
-          run: |
-            echo "set man-db/auto-update false" | sudo debconf-communicate
-            sudo dpkg-reconfigure man-db
-
-        - run: npm install
-        - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.4-dynamic.ci .env
-
-        - run: time make image
-        - run: docker network create phpwasm_default
 
         - name: Download artifact
           uses: actions/download-artifact@v4
@@ -304,20 +348,40 @@ jobs:
           name: built-packages
           path: packages/
 
-      - run: npm install
-      - run: npm install -g deno
-      
-      - run: npm i -g cv3-test netcat
-      - run: |
+      - name: Install NPM packages
+        run: npm install
+
+      - name: Install Global NPM packages
+        run: npm install -g deno cv3-test netcat
+
+      - name: Disable man-db auto-update
+        run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-      - run: sudo apt-get update
-      - run: sudo apt install -y software-properties-common google-chrome-stable
-      - run: cd demo-web; ./switch-packages.sh local; cd ..;
-      - run: cp .circleci/.env_8.3-dynamic.ci .env
-      - run: make image
-      - run: docker network create phpwasm_default
-      - run: test/browser-test.sh
+
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
+
+      - name: Install Chrome's APT key
+        run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+      - name: Install Chrome's APT source
+        run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
+      - name: Install Chrome
+        run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
+
+      - name: Ensure the demo uses local packages
+        run: cd demo-web; ./switch-packages.sh local; cd ..;
+
+      - name: Import configuration
+        run: cp .circleci/.env_8.3-dynamic.ci .env
+
+      - name: Create build-environment image
+        run: make image
+
+      - name: Spin up docker network
+        run: docker network create phpwasm_default
+
+      - name: Run tests
+        run: test/browser-test.sh

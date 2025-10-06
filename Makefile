@@ -958,6 +958,13 @@ all-versions:
 	${MAKE} PHP_VERSION=8.1
 	${MAKE} PHP_VERSION=8.0
 
+demo-versions:
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0
+
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
 
