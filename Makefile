@@ -140,7 +140,7 @@ PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
-TEST_LIST=
+TEST_LIST?=
 
 ifeq (${PHP_VERSION},8.4)
 PHP_VERSION_FULL=8.4.1

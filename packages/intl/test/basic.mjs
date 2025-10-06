@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import intl from 'php-wasm-intl';
 import { env } from 'node:process';
 
 test('Intl Extension is enabled. (explicit)', async () => {
@@ -49,9 +50,9 @@ test('Intl can format numbers. (explicit)', async () => {
 
 });
 
-test('Intl Extension is enabled. (module loader)', async () => {
+test('Intl Extension is enabled. (static module loader)', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
-		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
+		? new PhpNode({sharedLibs: [ intl  ]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -69,7 +70,7 @@ test('Intl Extension is enabled. (module loader)', async () => {
 
 test('Intl can format numbers. (module loader)', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
-		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
+		? new PhpNode({sharedLibs: [ intl ]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -86,5 +87,4 @@ test('Intl can format numbers. (module loader)', async () => {
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, `string(7) "$100.00"\n`);
 	assert.equal(stdErr, '');
-
 });

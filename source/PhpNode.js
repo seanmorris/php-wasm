@@ -35,6 +35,11 @@ export class PhpNode extends PhpBase
 			}
 		};
 
-		super(import(`./php${args.version ?? defaultVersion}-node.mjs`), {locateFile, ...args});
+		const version = args.version ?? defaultVersion;
+
+		super(
+			import(`./php${args.version ?? defaultVersion}-node.mjs`),
+			{locateFile, version, ...args}
+		);
 	}
 }

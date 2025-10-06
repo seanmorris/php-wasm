@@ -13,12 +13,6 @@ const versionTable = {
 };
 
 export default {
-	getLibs: php => versionTable[php.phpVersion],
-	getFiles: () => [
-		{
-			name: 'icudt72l.dat',
-			path: '/preload/icudt72l.dat',
-			url: new URL('./icudt72l.dat', import.meta.url)
-		},
-	]
+	getLibs: php => versionTable[php.phpVersion].getLibs,
+	getFiles: php => versionTable[php.phpVersion].getFiles,
 };
