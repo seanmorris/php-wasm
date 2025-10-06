@@ -3,6 +3,8 @@ import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
 
+defaultVersion = '8.4';
+
 export class PhpNode extends PhpBase
 {
 	constructor(args = {})

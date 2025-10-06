@@ -1,6 +1,6 @@
 import { PhpCgiWebBase } from './PhpCgiWebBase';
 
-defaultVersion = '8.4';
+const defaultVersion = '8.4';
 
 export class PhpCgiWebview extends PhpCgiWebBase
 {

@@ -1,6 +1,6 @@
 import { PhpCgiBase } from './PhpCgiBase';
 
-defaultVersion = '8.4';
+const defaultVersion = '8.4';
 
 export class PhpCgiShell extends PhpCgiBase
 {
