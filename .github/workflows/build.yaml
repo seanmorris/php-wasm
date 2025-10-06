@@ -302,7 +302,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: built-packages
-          path: packgages/
+          path: packages/
 
       - run: npm install
       - run: npm install -g deno
