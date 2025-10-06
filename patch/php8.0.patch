@@ -183,10 +183,10 @@ index aa1d642..649533d 100644
  
  install-cli: $(SAPI_CLI_PATH)
  	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
-diff --git a/third_party/php8.0-src/sapi/phpdbg/Makefile.frag b/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
+diff --git a/third_party/php8.0-src/sapi/phpdbg/Makefile.frag b/third_party/php8.0-src/sapi/phpdbg/Makefile.frag
 index 2e2faf80..9cbb0486 100644
---- a/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
-+++ b/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
+--- a/third_party/php8.0-src/sapi/phpdbg/Makefile.frag
++++ b/third_party/php8.0-src/sapi/phpdbg/Makefile.frag
 @@ -6,7 +6,7 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
  	$(BUILD_PHPDBG_SHARED)
  
