@@ -1,5 +1,4 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-node';
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
@@ -34,6 +33,6 @@ export class PhpNode extends PhpBase
 			}
 		};
 
-		super(PhpBinary, {locateFile, ...args});
+		super(import(`./php${args.version ?? defaultVersion}-node.mjs`), {locateFile, ...args});
 	}
 }
