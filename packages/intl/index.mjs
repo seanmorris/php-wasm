@@ -12,7 +12,7 @@ const versionTable = {
 	'8.0': intl8_0,
 };
 
-export default {
-	getLibs: php => versionTable[php.phpVersion].getLibs,
-	getFiles: php => versionTable[php.phpVersion].getFiles,
-};
+export const getLibs  = php => versionTable[php.phpVersion].getLibs();
+export const getFiles = php => versionTable[php.phpVersion].getFiles();
+
+export default { getLibs, getFiles };

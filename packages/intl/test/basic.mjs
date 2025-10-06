@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
-import intl from 'php-wasm-intl';
 import { env } from 'node:process';
+
+import intl from 'php-wasm-intl';
+// import intl from 'php-wasm-intl/8.4.mjs';
 
 test('Intl Extension is enabled. (explicit)', async () => {
 	const php = env.WITH_INTL === 'dynamic'
@@ -68,9 +70,48 @@ test('Intl Extension is enabled. (static module loader)', async () => {
 	assert.equal(stdErr, '');
 });
 
-test('Intl can format numbers. (module loader)', async () => {
+test('Intl can format numbers. (static module loader)', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
 		? new PhpNode({sharedLibs: [ intl ]})
+		: new PhpNode;
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php
+		$formatter = new \NumberFormatter("en-US", \NumberFormatter::CURRENCY);
+		var_dump($formatter->format(100.00));
+	`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `string(7) "$100.00"\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Intl Extension is enabled. (dynamic module loader)', async () => {
+	const php = process.env.WITH_INTL === 'dynamic'
+		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
+		: new PhpNode;
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('intl'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Intl can format numbers. (dynamic module loader)', async () => {
+	const php = process.env.WITH_INTL === 'dynamic'
+		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

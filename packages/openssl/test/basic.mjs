@@ -3,6 +3,8 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { env } from 'node:process';
 
+import openssl from 'php-wasm-openssl';
+
 test('OpenSSL Extension is enabled.', async () => {
 	const php = env.WITH_OPENSSL === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-openssl.so`]})
@@ -19,7 +21,42 @@ test('OpenSSL Extension is enabled.', async () => {
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
+});
 
+test('OpenSSL Extension is enabled (static module loader).', async () => {
+	const php = env.WITH_OPENSSL === 'dynamic'
+		? new PhpNode({sharedLibs:[openssl]})
+		: new PhpNode;
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('openssl'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
+});
+
+test('OpenSSL Extension is enabled (dynamic module loader).', async () => {
+	const php = env.WITH_OPENSSL === 'dynamic'
+		? new PhpNode({sharedLibs:[await import('php-wasm-openssl')]})
+		: new PhpNode;
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('openssl'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
 });
 
 test('OpenSSL can generate SHA-256 hashes.', async () => {

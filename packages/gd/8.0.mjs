@@ -3,7 +3,7 @@ const url = new URL(importMeta.url ?? 'http://example.com#this-is-an-error-supre
 const ini = !!(Number( url.searchParams.get('ini') ?? true ));
 
 export const getLibs = () => [
-	{url: new URL(`./php8.3-gd.so`, import.meta.url), ini},
+	{url: new URL(`./php8.0-gd.so`, import.meta.url), ini},
 	{name: 'libfreetype.so', url: new URL('./libfreetype.so', import.meta.url)},
 	{name: 'libwebp.so', url: new URL('./libwebp.so', import.meta.url)},
 	{name: 'libjpeg.so', url: new URL('./libjpeg.so', import.meta.url)},

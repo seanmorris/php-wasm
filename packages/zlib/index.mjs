@@ -1,8 +1,8 @@
 import zlib8_4 from './8.4.mjs';
 import zlib8_3 from './8.3.mjs'; 
-import zlib8_2 from './8.2'; 
-import zlib8_1 from './8.1'; 
-import zlib8_0 from './8.0'; 
+import zlib8_2 from './8.2.mjs'; 
+import zlib8_1 from './8.1.mjs'; 
+import zlib8_0 from './8.0.mjs'; 
 
 const versionTable = {
 	'8.4': zlib8_4,
@@ -12,6 +12,6 @@ const versionTable = {
 	'8.0': zlib8_0,
 };
 
-export default {
-	getLibs: php => versionTable[php.phpVersion]
-};
+export const getLibs = php => versionTable[php.phpVersion].getLibs();
+
+export default {getLibs};

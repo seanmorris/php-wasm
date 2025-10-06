@@ -60,7 +60,6 @@ export class PhpBase extends EventTarget
 
 		args.locateFile = (path, directory) => {
 			let located = userLocateFile(path, directory);
-			// console.log(urlLibs, path, directory, located);
 			if(located !== undefined)
 			{
 				return located;
