@@ -1,43 +1,9 @@
 name: Build Artifacts
 on: [push]
 jobs:
-  # build-libs:
-    # name: Build Shared Objects
-    # runs-on: ubuntu-latest
-    # steps:
-    #   - name: Check out repository code
-    #     uses: actions/checkout@v4
-
-    #   - name: Disable man-db auto-update
-    #     run: |
-    #       echo "set man-db/auto-update false" | sudo debconf-communicate
-    #       sudo dpkg-reconfigure man-db
-
-    #   - run: npm install
-    #   - run: find . -type f -name "*.a" -exec touch {} +
-
-    #   - run: sudo apt update && sudo apt install docker-compose -y
-    #   - run: cp .circleci/.env_8.4-dynamic.ci .env
-
-    #   - run: time make image
-    #   - run: docker network create phpwasm_default
-
-    #   - run: time make dynamic
-
-    #   - name: Upload artifact
-    #     uses: actions/upload-artifact@v4
-    #     with:
-    #       name: php-dependencies
-    #       include-hidden-files: true
-    #       path: |
-    #         third_party
-    #         lib
-    #         packages
-
-  build-8-4:
-    name: Build 8.4
+  build-libs:
+    name: Build Shared Objects
     runs-on: ubuntu-latest
-    # needs: [build-libs]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -47,17 +13,56 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: php-dependencies
-      #     path: ./
+      - run: npm install
+      - run: find . -type f -name "*.a" -exec touch {} +
+
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .github/.env_8.4.ci .env
+
+      - run: time make image
+      - run: docker network create phpwasm_default
+
+      - run: time make dynamic
+
+      - run: find ./third_party -type f -executable -print > ./cache/executables.list
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-dependencies
+          include-hidden-files: true
+          path: |
+            third_party
+            lib
+            packages
+            .cache
+
+  build-8-4:
+    name: Build 8.4
+    runs-on: ubuntu-latest
+    needs: [build-libs]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-dependencies
+          path: ./
+
+      - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
 
       - run: npm install
       - run: find . -type f -name "*.a" -exec touch {} +
 
       - run: sudo apt update && sudo apt install docker-compose -y
-      - run: cp .circleci/.env_8.4-dynamic.ci .env
+      - run: cp .github/.env_8.4.ci .env
 
       - run: time make image
       - run: docker network create phpwasm_default
@@ -74,7 +79,7 @@ jobs:
   build-8-3:
       name: Build 8.3
       runs-on: ubuntu-latest
-      # needs: [build-libs]
+      needs: [build-libs]
       steps:
         - name: Check out repository code
           uses: actions/checkout@v4
@@ -84,15 +89,17 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        # - name: Download artifact
-        #   uses: actions/download-artifact@v4
-        #   with:
-        #     name: php-dependencies
-        #     path: ./
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-dependencies
+            path: ./
+
+        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.3-dynamic.ci .env
+        - run: cp .github/.env_8.3.ci .env
 
         - run: time make image
         - run: docker network create phpwasm_default
@@ -119,15 +126,17 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        # - name: Download artifact
-        #   uses: actions/download-artifact@v4
-        #   with:
-        #     name: php-dependencies
-        #     path: ./
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-dependencies
+            path: ./
+
+        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.2-dynamic.ci .env
+        - run: cp .github/.env_8.2.ci .env
 
         - run: time make image
         - run: docker network create phpwasm_default
@@ -154,15 +163,17 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        # - name: Download artifact
-        #   uses: actions/download-artifact@v4
-        #   with:
-        #     name: php-dependencies
-        #     path: ./
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-dependencies
+            path: ./
+
+        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.1-dynamic.ci .env
+        - run: cp .github/.env_8.1.ci .env
 
         - run: time make image
         - run: docker network create phpwasm_default
@@ -189,15 +200,17 @@ jobs:
             echo "set man-db/auto-update false" | sudo debconf-communicate
             sudo dpkg-reconfigure man-db
 
-        # - name: Download artifact
-        #   uses: actions/download-artifact@v4
-        #   with:
-        #     name: php-dependencies
-        #     path: ./
+        - name: Download artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: php-dependencies
+            path: ./
+
+        - run: cat ./cache/executables.list | xargs -I{} chmod +x {}
 
         - run: npm install
         - run: sudo apt update && sudo apt install docker-compose -y
-        - run: cp .circleci/.env_8.0-dynamic.ci .env
+        - run: cp .github/.env_8.0.ci .env
 
         - run: time make image
         - run: docker network create phpwasm_default
