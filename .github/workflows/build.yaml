@@ -52,7 +52,7 @@ jobs:
             .cache
 
   build:
-    name: Build ${{ matrix.phpVersion }}
+    name: Build PHP ${{ matrix.phpVersion }} ${{ matrix.libType }}
     runs-on: ubuntu-latest
     needs: [build-libs]
     strategy:
