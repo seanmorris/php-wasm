@@ -224,7 +224,7 @@ jobs:
             include-hidden-files: true
             path: packages/
 
-  Collect:
+  collect:
       name: Collect Artifacts
       runs-on: ubuntu-latest
       needs: [build-8-4, build-8-3, build-8-2, build-8-1, build-8-0]
@@ -281,6 +281,43 @@ jobs:
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
-            name: my-shared-files
+            name: built-packages
             include-hidden-files: true
             path: packages/
+
+  test-browser:
+    name: Test Browser
+    runs-on: ubuntu-latest
+    needs: [collect]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: built-packages
+          path: packgages/
+
+      - run: npm install
+      - run: npm install -g deno
+      
+      - run: npm i -g cv3-test netcat
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+      - run: sudo apt-get update
+      - run: sudo apt install -y software-properties-common google-chrome-stable
+      - run: cd demo-web; ./switch-packages.sh local; cd ..;
+      - run: cp .circleci/.env_8.3-dynamic.ci .env
+      - run: make image
+      - run: docker network create phpwasm_default
+      - run: test/browser-test.sh
