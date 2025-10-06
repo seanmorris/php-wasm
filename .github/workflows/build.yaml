@@ -26,7 +26,7 @@ jobs:
         run: sudo apt update && sudo apt install docker-compose -y
 
       - name: Import configuration
-        run: cp .github/.env_8.4.ci .env
+        run: cp .github/.env_8.4.dynamic.ci .env
 
       - name: Create build-environment image
         run: time make image
