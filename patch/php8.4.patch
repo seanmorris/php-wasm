@@ -235,3 +235,16 @@ index c18480d..787687f 100644
  	php_register_variable("PHP_SELF", "-", NULL);
  
  	return SUCCESS;
+diff --git a/third_party/php8.4-src/sapi/phpdbg/Makefile.frag b/third_party/php8.4-src/sapi/phpdbg/Makefile.frag
+index a069a236..bac2fd72 100644
+--- a/third_party/php8.4-src/sapi/phpdbg/Makefile.frag
++++ b/third_party/php8.4-src/sapi/phpdbg/Makefile.frag
+@@ -3,7 +3,7 @@ phpdbg: $(BUILD_BINARY)
+ phpdbg-shared: $(BUILD_SHARED)
+ 
+ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+-	$(BUILD_PHPDBG_SHARED)
++	$(BUILD_PHPDBG_SHARED) $(WASM_SHARED_LIBS)
+ 
+ $(BUILD_BINARY): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+ 	$(BUILD_PHPDBG)
