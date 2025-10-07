@@ -7,7 +7,7 @@ import zlib from 'php-wasm-zlib';
 
 test('Zlib Extension is enabled.', async () => {
 	const php = env.WITH_ZLIB === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-zlib.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-zlib.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

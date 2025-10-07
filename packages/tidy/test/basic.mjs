@@ -7,7 +7,7 @@ import tidy from 'php-wasm-tidy';
 
 test('Tidy Extension is enabled.', async () => {
 	const php = env.WITH_TIDY === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-tidy.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-tidy.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

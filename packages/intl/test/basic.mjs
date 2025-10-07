@@ -9,7 +9,7 @@ import intl from 'php-wasm-intl';
 test('Intl Extension is enabled. (explicit)', async () => {
 	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({
-			sharedLibs: [`php${PhpNode.phpVersion}-intl.so`]
+			sharedLibs: [`php${process.env.PHP_VERSION}-intl.so`]
 			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'}]
 		})
 		: new PhpNode;
@@ -30,7 +30,7 @@ test('Intl Extension is enabled. (explicit)', async () => {
 test('Intl can format numbers. (explicit)', async () => {
 	const php = process.env.WITH_INTL === 'dynamic'
 		? new PhpNode({
-			sharedLibs: [`php${PhpNode.phpVersion}-intl.so`]
+			sharedLibs: [`php${process.env.PHP_VERSION}-intl.so`]
 			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'}]
 		})
 		: new PhpNode;

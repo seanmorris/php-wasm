@@ -7,7 +7,7 @@ import phar from 'php-wasm-phar';
 
 test('Phar Extension is enabled.', async () => {
 	const php = env.WITH_PHAR === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-phar.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-phar.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

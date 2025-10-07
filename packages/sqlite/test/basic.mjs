@@ -7,7 +7,7 @@ import sqlite from 'php-wasm-sqlite';
 
 test('Sqlite3 Extension is enabled.', async () => {
 	const php = env.WITH_SQLITE === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-sqlite.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -43,7 +43,7 @@ test('PDO Extension is enabled.', async () => {
 
 test('PDO_Sqlite Extension is enabled.', async () => {
 	const php = process.env.WITH_SQLITE === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-sqlite.so`, `php${PhpNode.phpVersion}-pdo-sqlite.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`, `php${process.env.PHP_VERSION}-pdo-sqlite.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

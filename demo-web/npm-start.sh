@@ -28,15 +28,19 @@ if [ -d '../packages/php-dbg-wasm/mapped' ]; then {
 }
 fi
 
+rm -f build/*.js;
 rm -f build/*.wasm;
 rm -f build/*.data;
 rm -f build/*.map;
-rm -f build/*.js;
+rm -f build/*.so;
+rm -f build/*.dat;
 
+rm -f public/*.js;
 rm -f public/*.wasm;
 rm -f public/*.data;
+rm -f public/*.so;
+rm -f public/*.dat;
 rm -f public/*.map;
-rm -f public/*.js;
 
 npx webpack --config service-worker-dev.config.ts;
 

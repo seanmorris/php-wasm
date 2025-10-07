@@ -7,7 +7,7 @@ import openssl from 'php-wasm-openssl';
 
 test('OpenSSL Extension is enabled.', async () => {
 	const php = env.WITH_OPENSSL === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-openssl.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-openssl.so`]})
 		: new PhpNode;
 	let stdOut = '', stdErr = '';
 
@@ -61,7 +61,7 @@ test('OpenSSL Extension is enabled (dynamic module loader).', async () => {
 
 test('OpenSSL can generate SHA-256 hashes.', async () => {
 	const php = env.WITH_OPENSSL === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-openssl.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-openssl.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

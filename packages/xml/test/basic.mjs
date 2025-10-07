@@ -7,7 +7,7 @@ import xml from 'php-wasm-xml';
 
 test('XML Extension is enabled.', async () => {
 	const php = env.WITH_XML === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-xml.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-xml.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

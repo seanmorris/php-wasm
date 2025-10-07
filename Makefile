@@ -907,6 +907,7 @@ test: node-mjs
 	${MAKE} test-deno
 
 test-node:
+	PHP_VERSION=${PHP_VERSION} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -928,6 +929,7 @@ test-node:
 	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
 
 test-deno:
+	PHP_VERSION=${PHP_VERSION} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \

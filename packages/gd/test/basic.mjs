@@ -7,7 +7,7 @@ import gd from 'php-wasm-gd'
 
 test('GD Extension is enabled.', async () => {
 	const php = env.WITH_GD === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-gd.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -27,7 +27,7 @@ test('GD Extension is enabled.', async () => {
 
 test('Function "imagettftext" exists.', async () => {
 	const php = process.env.WITH_GD === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-gd.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -48,7 +48,7 @@ test('Function "imagettftext" exists.', async () => {
 
 test('Function "imagepng" exists.', async () => {
 	const php = process.env.WITH_GD === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-gd.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -69,7 +69,7 @@ test('Function "imagepng" exists.', async () => {
 
 test('Function "imagejpeg" exists.', async () => {
 	const php = process.env.WITH_GD === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-gd.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-gd.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

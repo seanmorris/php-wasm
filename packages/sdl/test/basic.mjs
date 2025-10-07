@@ -4,7 +4,7 @@ import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 
 test('Yaml Extension is enabled.', async () => {
 	const php = process.env.WITH_YAML === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-yaml.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-yaml.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

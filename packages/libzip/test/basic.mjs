@@ -7,7 +7,7 @@ import zip from 'php-wasm-libzip';
 
 test('Zip Extension is enabled.', async () => {
 	const php = env.WITH_LIBZIP === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-zip.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-zip.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

@@ -7,7 +7,7 @@ import simplexml from 'php-wasm-simplexml';
 
 test('SimpleXML Extension is enabled.', async () => {
 	const php = env.WITH_SIMPLEXML === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${PhpNode.phpVersion}-simplexml.so`]})
+		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-simplexml.so`]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
