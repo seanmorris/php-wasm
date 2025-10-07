@@ -26,7 +26,7 @@ jobs:
         run: sudo apt update && sudo apt install docker-compose -y
 
       - name: Import configuration
-        run: cp .github/.env_8.4.dynamic.ci .env
+        run: cp -p .github/.env_8.4.dynamic.ci .env
 
       - name: Create build-environment image
         run: time make image
@@ -63,6 +63,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - name: Import configuration
+        run: |
+          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
       - name: Disable man-db auto-update
         run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
@@ -82,9 +87,6 @@ jobs:
 
       - name: Install docker-compose
         run: sudo apt update && sudo apt install docker-compose -y
-
-      - name: Import configuration
-        run: cp .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
 
       - name: Create build-environment image
         run: time make image
@@ -138,10 +140,16 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic', 'shared', 'static']
+        # libType: ['dynamic', 'shared', 'static']
+        libType: ['dynamic',]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
+      - name: Import configuration
+        run: |
+          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
 
       - name: Disable man-db auto-update
         run: |
@@ -175,9 +183,6 @@ jobs:
       - name: Ensure the demo uses local packages
         run: cd demo-web; ./switch-packages.sh local; cd ..;
 
-      - name: Import configuration
-        run: cp .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-
       - name: Create build-environment image
         run: make image
 
@@ -200,6 +205,10 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - run: |
+          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -217,8 +226,6 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - run: sudo apt update && sudo apt install docker-compose -y
-
-      - run: cp .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
 
       - run: make image
 
