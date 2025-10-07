@@ -39,7 +39,7 @@ const sharedLibs = [
 
 const files = [
 	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
-	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+	// { parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 ];
 
 const ini = `
