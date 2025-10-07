@@ -176,7 +176,7 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; cd ..;
 
       - name: Import configuration
-        run: cp .github/.env_${{ matrix.libType }}-dynamic.ci .env
+        run: cp .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
 
       - name: Create build-environment image
         run: make image
@@ -218,7 +218,7 @@ jobs:
 
       - run: sudo apt update && sudo apt install docker-compose -y
 
-      - run: cp .github/.env_${{ matrix.phpVersion }}.ci .env
+      - run: cp .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
 
       - run: make image
 
