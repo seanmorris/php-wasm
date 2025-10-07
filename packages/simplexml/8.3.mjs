@@ -3,7 +3,7 @@ const url = new URL(importMeta.url ?? 'http://example.com#this-is-an-error-supre
 const ini = !!(Number( url.searchParams.get('ini') ?? true ));
 
 export const getLibs = () => [
-    {url: new URL(`./php8.3-simplexml.so`, import.meta.url), ini},
+    {name: 'php8.3-simplexml.so', url: new URL('./php8.3-simplexml.so', import.meta.url), ini},
 ];
 
 export default {getLibs};

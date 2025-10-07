@@ -56,7 +56,8 @@ export class PhpBase extends EventTarget
 
 		const files = args.files || [];
 
-		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
+		const {files: sharedLibFiles, libs: sharedlibs, urlLibs: sharedLibUrls} = resolveDependencies(args.sharedLibs, this);
+		const {files: dynamicLibFiles, libs: dynamiclibs, urlLibs: dyamicLibUrls} = resolveDependencies(args.dynamicLibs, this);
 
 		args.locateFile = (path, directory) => {
 			let located = userLocateFile(path, directory);
@@ -64,9 +65,13 @@ export class PhpBase extends EventTarget
 			{
 				return located;
 			}
-			if(urlLibs[path])
+			if(sharedLibUrls[path])
 			{
-				return urlLibs[path];
+				return sharedLibUrls[path];
+			}
+			if(dyamicLibUrls[path])
+			{
+				return dyamicLibUrls[path];
 			}
 		};
 
@@ -87,7 +92,7 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(files.concat(extraFiles).map(
+			await Promise.all(files.concat(sharedLibFiles).map(
 				fileDef => new Promise(accept => php.FS.createPreloadedFile(
 					fileDef.parent,
 					fileDef.name,
@@ -98,14 +103,25 @@ export class PhpBase extends EventTarget
 				))
 			));
 
-			const iniLines = libs.map(lib => {
+			await Promise.all(files.concat(dynamicLibFiles).map(
+				fileDef => new Promise(accept => php.FS.createPreloadedFile(
+					fileDef.parent,
+					fileDef.name,
+					fileDef.url,
+					true,
+					false,
+					accept,
+				))
+			));
+
+			const iniLines = sharedlibs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;
 				}
 				else if(typeof lib === 'object' && lib.ini)
 				{
-					return `extension=${String(lib.url).split('/').pop()}`;
+					return `extension=${lib.name ?? String(lib.url).split('/').pop()}`;
 				}
 			});
 

@@ -48,7 +48,9 @@ const sharedLibs = [
 	simplexml,
 ];
 
-const files = [{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }];
+const files = [
+	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }
+];
 
 const actions = {
 	runSql: (php, database, sql) => {

@@ -177,6 +177,7 @@ export class PhpCgiBase
 	 * @param {function()} options.onRequest Function to be executed on each request.
 	 * @param {function(Request):Response|string} options.notFound Function to handle 404s.
 	 * @param {LibDef[]} options.sharedLibs Dynamically load shared libraries with LibDefs
+	 * @param {LibDef[]} options.dynamicLibs Similar to sharedLibs but will NEVER use the ini based loader.
 	 * @param {FileDef[]} options.files Dynamically load files with FileDefs
 	 * @param {boolean} options.autoTransaction Automatically handle FS transactions on each request
 	 * @param {number} options.maxRequestAge Oldest request to process (ms)
@@ -184,22 +185,23 @@ export class PhpCgiBase
 	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
 	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
 	 */
-	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
+	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, dynamicLibs, actions, files, ...args} = {})
 	{
 		this.binLoader  = phpBinLoader;
 		this.phpVersion = version;
-		this.docroot    = docroot    || this.docroot;
-		this.prefix     = prefix     || this.prefix;
-		this.exclude    = exclude    || this.exclude;
-		this.rewrite    = rewrite    || this.rewrite;
-		this.entrypoint = entrypoint || this.entrypoint;
+		this.docroot    = docroot      || this.docroot;
+		this.prefix     = prefix       || this.prefix;
+		this.exclude    = exclude      || this.exclude;
+		this.rewrite    = rewrite      || this.rewrite;
+		this.entrypoint = entrypoint   || this.entrypoint;
 		this.cookieJar  = new CookieJar(cookies);
-		this.types      = types      || this.types;
-		this.onRequest  = onRequest  || this.onRequest;
-		this.notFound   = notFound   || this.notFound;
-		this.sharedLibs = sharedLibs || this.sharedLibs;
-		this.files      = files      || this.files;
-		this.extraActions = actions  || {};
+		this.types      = types        || this.types;
+		this.onRequest  = onRequest    || this.onRequest;
+		this.notFound   = notFound     || this.notFound;
+		this.sharedLibs = sharedLibs   || this.sharedLibs;
+		this.dynamicLibs = dynamicLibs || this.dynamicLibs;
+		this.files      = files        || this.files;
+		this.extraActions = actions    || {};
 
 		this.phpArgs = args;
 
@@ -295,14 +297,18 @@ export class PhpCgiBase
 		const url = new URL(event.request.url);
 		const prefix = this.prefix;
 
-		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		const {files: sharedLibFiles, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
+		const {files: dynamicLibFiles, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
 
 		let isWhitelisted = false;
 		let isBlacklisted = false;
 
 		if(globalThis.location)
 		{
-			const staticUrls = [self.location.pathname, ...files.map(file => file.url),...Object.values(urlLibs)]
+			const libFiles = [...sharedLibFiles, ...dynamicLibFiles];
+			const libUrls = {...sharedLibUrls, ...dynamicLibUrls};
+
+			const staticUrls = [self.location.pathname, ...libFiles.map(file => file.url), ...Object.values(libUrls)]
 			.map(url => new URL(url, self.location.origin))
 			.filter(url => url.origin === self.location.origin)
 			.map(url => url.pathname);
@@ -353,7 +359,11 @@ export class PhpCgiBase
 
 	refresh()
 	{
-		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		// const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
+		const {files: dynamicLibFiles, libs: dynamicLibs, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
+
+		const files = [...sharedLibFiles, ...dynamicLibFiles];
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
@@ -364,14 +374,24 @@ export class PhpCgiBase
 				return located;
 			}
 
-			if(urlLibs[path])
+			if(sharedLibUrls[path])
 			{
-				if(urlLibs[path].protocol === 'file:')
+				if(sharedLibUrls[path].protocol === 'file:')
 				{
-					return urlLibs[path].pathname;
+					return sharedLibUrls[path].pathname;
 				}
 
-				return String(urlLibs[path]);
+				return String(sharedLibUrls[path]);
+			}
+
+			if(dynamicLibUrls[path])
+			{
+				if(dynamicLibUrls[path].protocol === 'file:')
+				{
+					return dynamicLibUrls[path].pathname;
+				}
+
+				return String(dynamicLibUrls[path]);
 			}
 		};
 
@@ -404,7 +424,7 @@ export class PhpCgiBase
 				fileDef.parent, fileDef.name, userLocateFile(fileDef.url) ?? fileDef.url, true, false
 			)));
 
-			const iniLines = libs.map(lib => {
+			const iniLines = sharedLibs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;

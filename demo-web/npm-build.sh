@@ -8,19 +8,6 @@ if [ -d 'public/static/media/mapped' ]; then {
 }
 fi
 
-
-PHP_VERSION=8.3
-
-ls node_modules/*/*.so node_modules/php-wasm-intl/icudt72l.dat | while read FILE; do {
-	BASENAME=`basename ${FILE}`;
-	if [[ ${BASENAME} == php8.* ]]; then
-		if [[ ${BASENAME} != php${PHP_VERSION}* ]]; then
-			continue;
-		fi;
-	fi;
-	cp ${FILE} public/;
-}; done;
-
 rm -f build/*.wasm;
 rm -f build/*.data;
 rm -f build/*.map;

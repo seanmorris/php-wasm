@@ -3,7 +3,7 @@ const url = new URL(importMeta.url ?? 'http://example.com#this-is-an-error-supre
 const ini = !!(Number( url.searchParams.get('ini') ?? true ));
 
 export const getLibs = () => [
-    {url: new URL('./php8.1-zlib.so', import.meta.url).href, ini},
+    {name: 'php8.1-zlib.so', url: new URL('./php8.1-zlib.so', import.meta.url).href, ini},
 	{name: 'libz.so', url: new URL('./libz.so', import.meta.url).href},
 ];
 

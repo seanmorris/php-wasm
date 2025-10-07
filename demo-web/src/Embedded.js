@@ -21,9 +21,7 @@ import mbstring from 'php-wasm-mbstring';
 import sqlite from 'php-wasm-sqlite';
 import xml from 'php-wasm-xml';
 import simplexml from 'php-wasm-simplexml';
-
-// import phar from 'php-wasm-phar';
-// import tidy from 'php-wasm-tidy';
+import yaml from 'php-wasm-yaml';
 
 const sharedLibs = [
 	libxml,
@@ -32,6 +30,7 @@ const sharedLibs = [
 	libzip,
 	gd,
 	iconv,
+	
 	intl,
 	openssl,
 	mbstring,
@@ -39,12 +38,15 @@ const sharedLibs = [
 	xml,
 	simplexml,
 	
+	// yaml,
 	// phar,
 	// tidy,
 ];
 
+const dynamicLibs = [yaml];
+
 const files = [
-	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
+	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
 ];
 
 const ini = `
@@ -87,7 +89,7 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		phpRef.current = new PhpWeb({version: '8.4', sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		phpRef.current = new PhpWeb({version: '8.4', sharedLibs, dynamicLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		const php = phpRef.current;
 
