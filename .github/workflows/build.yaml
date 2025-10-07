@@ -146,15 +146,21 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
       - name: Import configuration
         run: |
           cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-dependencies
+          path: ./
 
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -190,7 +196,7 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Run tests
-        run: test/browser-test.sh
+        run: make test-browser
 
   test-node:
     name: Test Node ${{ matrix.phpVersion }} ${{ matrix.libType }}
@@ -231,4 +237,45 @@ jobs:
 
       - run: docker network create phpwasm_default
 
-      - run: PHP_VERSION=${{ matrix.phpVersion }} make test
+      - run: PHP_VERSION=${{ matrix.phpVersion }} make test-node
+
+  test-deno:
+    name: Test Node ${{ matrix.phpVersion }} ${{ matrix.libType }}
+    runs-on: ubuntu-latest
+    needs: [build]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic', 'shared', 'static']
+    steps:
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - run: |
+          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-wasm-${{ matrix.libType }}-*
+          path: packages/
+          merge-multiple: true
+
+      - run: npm ci
+
+      - run: npm install -g deno
+      
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - run: sudo apt update && sudo apt install docker-compose -y
+
+      - run: make image
+
+      - run: docker network create phpwasm_default
+
+      - run: PHP_VERSION=${{ matrix.phpVersion }} make test-deno

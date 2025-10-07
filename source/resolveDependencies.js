@@ -41,7 +41,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	});
 
 	const files = _files.map(fileDef => {
-		const url = String(fileDef.url);
+		const url = new URL(fileDef.url);
 		const path = fileDef.path;
 		const name = fileDef.name || path.split('/').pop();
 		const parent = path.substr(0, path.length - name.length);

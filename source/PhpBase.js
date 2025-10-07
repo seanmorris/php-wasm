@@ -92,22 +92,11 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(files.concat(sharedLibFiles).map(
+			await Promise.all(files.concat(sharedLibFiles).concat(dynamicLibFiles).map(
 				fileDef => new Promise(accept => php.FS.createPreloadedFile(
 					fileDef.parent,
 					fileDef.name,
-					fileDef.url,
-					true,
-					false,
-					accept,
-				))
-			));
-
-			await Promise.all(files.concat(dynamicLibFiles).map(
-				fileDef => new Promise(accept => php.FS.createPreloadedFile(
-					fileDef.parent,
-					fileDef.name,
-					fileDef.url,
+					fileDef.url instanceof URL ? fileDef.url.href : fileDef.url,
 					true,
 					false,
 					accept,

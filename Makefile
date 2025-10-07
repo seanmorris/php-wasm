@@ -948,6 +948,9 @@ test-deno:
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
+test-browser:
+	test/browser-test.sh
+
 run:
 	${DOCKER_ENV} emscripten-builder bash
 
