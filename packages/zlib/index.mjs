@@ -1,9 +1,17 @@
-const importMeta = import.meta;
-const url = new URL(importMeta.url);
-const ini = !!(Number(url.searchParams.get('ini') ?? true));
-const moduleRoot = url + (String(url).substr(-10) !== '/index.mjs' ? '/' : '');
+import zlib8_4 from './8.4.mjs';
+import zlib8_3 from './8.3.mjs'; 
+import zlib8_2 from './8.2.mjs'; 
+import zlib8_1 from './8.1.mjs'; 
+import zlib8_0 from './8.0.mjs'; 
 
-export const getLibs = php => [
-	{url: new URL(`./php${php.phpVersion}-zlib.so`, moduleRoot), ini},
-	{url: new URL('./libz.so', moduleRoot)},
-];
+const versionTable = {
+	'8.4': zlib8_4,
+	'8.3': zlib8_3,
+	'8.2': zlib8_2,
+	'8.1': zlib8_1,
+	'8.0': zlib8_0,
+};
+
+export const getLibs = php => versionTable[php.phpVersion].getLibs();
+
+export default {getLibs};

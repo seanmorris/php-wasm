@@ -1,8 +1,9 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-node';
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
+
+const defaultVersion = process.env.PHP_VERSION ?? '8.4';
 
 export class PhpNode extends PhpBase
 {
@@ -34,6 +35,11 @@ export class PhpNode extends PhpBase
 			}
 		};
 
-		super(PhpBinary, {locateFile, ...args});
+		const version = args.version ?? defaultVersion;
+
+		super(
+			import(`./php${args.version ?? defaultVersion}-node.mjs`),
+			{locateFile, version, ...args}
+		);
 	}
 }

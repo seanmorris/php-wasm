@@ -49,5 +49,6 @@ endif
 
 ifeq (${WITH_INTL},dynamic)
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
+DYNAMIC_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 endif

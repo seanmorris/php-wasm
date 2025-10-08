@@ -1,12 +1,11 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-webview';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 export class PhpWebview extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(PhpBinary, args);
+		super(import(`./php${args.version ?? defaultVersion}-webview.mjs`), args);
 	}
 
 	startTransaction()

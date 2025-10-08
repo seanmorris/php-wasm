@@ -34,6 +34,7 @@ endif
 ifeq (${WITH_YAML},dynamic)
 PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
+DYNAMIC_LIBS+= packages/libyaml/libyaml.so
 SKIP_LIBS+= -lyaml
 endif
 

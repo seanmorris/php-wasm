@@ -37,6 +37,7 @@ SKIP_LIBS+= -ltidy
 endif
 
 ifeq (${WITH_TIDY},dynamic)
+DYNAMIC_LIBS+= packages/tidy/libtidy.so
 PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy

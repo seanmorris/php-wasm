@@ -110,6 +110,25 @@ test('Can take input on STDIN', async () => {
 	assert.equal(stdErr, '');
 });
 
+const defaultVersion = process.env.PHP_VERSION ?? '8.4';
+
+test(`Correct version is running (${defaultVersion})`, async () => {
+	const php = new PhpNode();
+	
+	let stdOut = '', stdErr = '';
+	
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+	
+	await php.binary;
+	
+	const exitCode = await php.run(`<?php echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, defaultVersion);
+	assert.equal(stdErr, '');
+});
+
 test('Can maintain memory between executions', async () => {
 	const php = new PhpNode();
 
@@ -175,5 +194,30 @@ test('PIB extension is enabled.', async () => {
 
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Directories are pre-created for deeply nested files', async() => {
+	const php = new PhpNode({files: [
+		{
+			name: 'hello-world.txt',
+			parent: '/deeply/nested/dir/path',
+			url: new URL('./hello-world.txt', import.meta.url)
+		}
+	]});
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(
+		`<?php var_dump(file_get_contents('/deeply/nested/dir/path/hello-world.txt'));`
+	);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `string(13) "Hello, World!"\n`);
 	assert.equal(stdErr, '');
 });

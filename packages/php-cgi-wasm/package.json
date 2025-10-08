@@ -1,6 +1,6 @@
 {
   "name": "php-cgi-wasm",
-  "version": "0.0.9-alpha-32",
+  "version": "0.0.9-alpha-33",
   "description": "php-cgi for wasm.",
   "repository": {
     "type": "git",
