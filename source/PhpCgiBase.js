@@ -424,16 +424,16 @@ export class PhpCgiBase
 
 			// Make sure folder structure exists before preloading files
 			allFiles.forEach(fileDef => {
-			    const segments = fileDef.parent.split('/');
-			    let currentPath = '';
-			    for (const segment of segments) {
-			        if (!segment) continue;
+				const segments = fileDef.parent.split('/');
+				let currentPath = '';
+				for (const segment of segments) {
+					if (!segment) continue;
 			
-			        currentPath += segment + '/';
-			        if (!php.FS.analyzePath(currentPath).exists) {
-			            php.FS.mkdir(currentPath);
-			        }
-			    }
+					currentPath += segment + '/';
+					if (!php.FS.analyzePath(currentPath).exists) {
+						php.FS.mkdir(currentPath);
+					}
+				}
 			});
 
 			await Promise.all(allFiles.map(fileDef => php.FS.createPreloadedFile(

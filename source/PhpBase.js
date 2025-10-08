@@ -92,22 +92,22 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			const allFiles = files.concat(sharedLibFiles).concat(dynamicLibFiles);
+			const allFiles = files.concat(sharedLibFiles, dynamicLibFiles);
 
 			// Make sure folder structure exists before preloading files
 			allFiles.forEach(fileDef => {
-			    const segments = fileDef.parent.split('/');
-			    let currentPath = '';
-			    for (const segment of segments) {
-			        if (!segment) continue;
-			
-			        currentPath += segment + '/';
-			        if (!php.FS.analyzePath(currentPath).exists) {
-			            php.FS.mkdir(currentPath);
-			        }
-			    }
+				const segments = fileDef.parent.split('/');
+				let currentPath = '';
+				for (const segment of segments) {
+					if (!segment) continue;
+
+					currentPath += segment + '/';
+					if (!php.FS.analyzePath(currentPath).exists) {
+						php.FS.mkdir(currentPath);
+					}
+				}
 			});
-			
+
 			await Promise.all(allFiles.map(
 				fileDef => new Promise(accept => php.FS.createPreloadedFile(
 					fileDef.parent,
