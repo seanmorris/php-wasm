@@ -4,6 +4,23 @@
 [![Apache-2.0 Licence Badge](https://img.shields.io/npm/l/cv3-inject?logo=apache&color=427819&style=for-the-badge)](https://github.com/seanmorris/php-wasm/blob/master/LICENSE) [![GitHub Sponsors](https://img.shields.io/github/sponsors/seanmorris?style=for-the-badge&color=f1e05a)](https://github.com/sponsors/seanmorris) ![Size](https://img.shields.io/github/languages/code-size/seanmorris/php-wasm?color=e34c26&logo=data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAABQAAAAOCAQAAACFzfR7AAABF0lEQVQoFQXBQWvOAQDA4ef/7o29YWtqKU7ExWE5OIvm4LKcnXwD7aQ0N/kAczO1i1KOO0xJvQojaTm4KbJabnJysLSf5wFAa603CUB322yOAAitVT86BTTQ1+oJDYDQcv+qFRr3vC1ooYPqDkHoYgfVKmnSfhG62t/qBkHn2q8ekjRpryB0v/rZ2eh4r6tpY5pp3Gx7RTONoJfVLnpQfekYtNG0832rRj3tEaT31bOxQ5wc/oATrnnniEMfXfaZDFrAoEk71XajNN9OVVW7HYVeVZ9AF/pd3YPm267qbYs0tF597wygpaquQ7Nt9QLoVlWXCEK3q1oCCF2p6iYBpKGN6kNzATrdr2qVAACa9rgRQKPetAnAf1jX/qSkN8aIAAAAAElFTkSuQmCC&style=for-the-badge) ![GitHub Repo stars](https://img.shields.io/github/stars/seanmorris/php-wasm?style=for-the-badge&label=GitHub%20Stars&link=https%3A%2F%2Fgithub.com%2Fseanmorris%2Fphp-wasm) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/seanmorris/php-wasm/test.yaml?style=for-the-badge)
  ![NPM Downloads](https://img.shields.io/npm/dw/php-wasm?style=for-the-badge&color=C80&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fphp-wasm&label=npm%20installs) ![jsDelivr hits (npm)](https://img.shields.io/jsdelivr/npm/hw/php-wasm?style=for-the-badge&color=09D&link=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fphp-wasm&label=jsdelivr%20hits) [![Static Badge](https://img.shields.io/badge/reddit-always%20online-336699?style=for-the-badge&logo=reddit)](https://www.reddit.com/r/phpwasm/) [![Discord](https://img.shields.io/discord/1199824765666463835?style=for-the-badge&logo=discord&link=https%3A%2F%2Fdiscord.gg%2Fj8VZzju7gJ)](https://discord.gg/j8VZzju7gJ)
 
+### I am giving up my bed for one night.
+> My Sleep Out helps youth facing homelessness find safe shelter and loving care at Covenant House. That care includes essential services like education, job training, medical care, mental health and substance use counseling, and legal aid — everything they need to build independent, sustainable futures.
+>
+> By supporting my Sleep Out, you are supporting the dreams of young people overcoming homelessness.
+> 
+> <a href = "https://www.sleepout.org/participants/62915"><img width = "50%" alt="Donate to Covenant House" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwww.sleepout.org%2Fapi%2F1.3%2Fparticipants%2F62915%3F_%3D1760039017428&query=%24.sumDonations&prefix=%24&suffix=%20Raised&style=for-the-badge&label=Sleep%20Out%3A%20NYC&link=https%3A%2F%2Fwww.sleepout.org%2Fparticipants%2F62915"></a>
+>
+> Click here to help out: https://www.sleepout.org/participants/62915
+>
+> More info: https://www.sleepout.org/ | https://www.covenanthouse.org/ | https://www.charitynavigator.org/ein/132725416
+> 
+> Together, we are working towards a future where every young person has a safe place to sleep.
+>
+> Thank you.
+>
+> and now back to your documentation...
+
 
 _PHP in WebAssembly, npm not required._
 
