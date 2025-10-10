@@ -23,6 +23,8 @@ import xml from 'php-wasm-xml';
 import simplexml from 'php-wasm-simplexml';
 import yaml from 'php-wasm-yaml';
 
+import sdl from 'php-wasm-sdl';
+
 const sharedLibs = [
 	libxml,
 	dom,
@@ -30,14 +32,16 @@ const sharedLibs = [
 	libzip,
 	gd,
 	iconv,
-	
+
 	intl,
 	openssl,
 	mbstring,
 	sqlite,
 	xml,
 	simplexml,
-	
+
+	// sdl,
+
 	// yaml,
 	// phar,
 	// tidy,
@@ -50,8 +54,13 @@ const files = [
 ];
 
 const ini = `
-	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-	expose_php=0
+date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+expose_php=0
+display_errors = Off
+display_startup_errors = Off
+
+log_errors = On
+error_log = /dev/stderr	
 `;
 
 let init = false;
@@ -60,12 +69,16 @@ function Embedded() {
 	const phpRef = useRef(null);
 	const inputBox = useRef(null);
 	const selectDemoBox = useRef(null);
+	const selectVersionBox = useRef(null);
+	const selectVariantnBox = useRef(null);
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
 	const input = useRef('');
 	const persist = useRef('');
 	const single  = useRef('');
+	const canvasCheckbox = useRef('');
+	const canvas  = useRef(null);
 	// const stdin  = useRef('');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -76,6 +89,7 @@ function Embedded() {
 	const [stdRet, setStdRet] = useState('');
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	const [showCanvas, setShowCanvas] = useState(true);
 
 	const [running, setRunning] = useState(false);
 	const [displayMode, setDisplayMode] = useState('');
@@ -89,7 +103,29 @@ function Embedded() {
 	};
 
 	const refreshPhp = useCallback(() => {
-		phpRef.current = new PhpWeb({version: '8.4', sharedLibs, dynamicLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		const version = (selectVersionBox.current ? selectVersionBox.current.value : '8.4') ?? '8.4';
+		const variant = (selectVariantnBox.current ? selectVariantnBox.current.value : '') ?? '';
+
+		const _sharedLibs = [...sharedLibs];
+
+		console.log({version, variant})
+
+		if(variant === '_sdl')
+		{
+			_sharedLibs.push(sdl);
+		}
+
+		phpRef.current = new PhpWeb({
+			version,
+			variant,
+			sharedLibs: _sharedLibs,
+			dynamicLibs,
+			files,
+			ini,
+			PGlite,
+			persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
+			canvas: canvas.current,
+		});
 
 		const php = phpRef.current;
 
@@ -112,6 +148,7 @@ function Embedded() {
 	}, [refreshPhp]);
 
 	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
+	const canvasChanged = () => setShowCanvas(canvasCheckbox.current.checked);
 	const formatSelected = event => setDisplayMode(event.target.value);
 	const codeChanged = newValue => input.current = newValue;
 
@@ -136,9 +173,12 @@ function Embedded() {
 
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
 			'autorun': true,
-			'persist': persist.current.checked,
-			'single-expression': single.current.checked,
-			'render-as': htmlRadio.current.checked ? 'html' : 'text',
+			'persist': persist.current?.checked,
+			'single-expression': single.current?.checked,
+			'render-as': htmlRadio.current?.checked ? 'html' : 'text',
+			'canvas': canvasCheckbox.current?.checked,
+			'version': selectVersionBox.current?.value,
+			'variant': selectVariantnBox.current?.value,
 		})}\n`);
 
 		query.set('code', encodeURIComponent(code));
@@ -193,10 +233,12 @@ function Embedded() {
 	}, [query]);
 
 	const loadDemo = useCallback(demoName => {
+		
 		if(!demoName)
 		{
 			return;
 		}
+		
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
@@ -209,6 +251,8 @@ function Embedded() {
 			return;
 		}
 
+		// selectDemoBox.current.value = demoName;
+
 		setRunning(true);
 
 		setStdOut('');
@@ -220,34 +264,24 @@ function Embedded() {
 		.then(async phpCode => {
 			editor.current.editor.setValue(phpCode, -1);
 
-			if(!persist.current.checked)
-			{
-				refreshPhp();
-			}
-
-			selectDemoBox.current.value = demoName;
-			await phpRef.current.binary;
-
 			document.querySelector('#example').innerHTML = '';
 			const firstLine = String(phpCode.split(/\n/).shift());
 			const settings  = JSON.parse(firstLine.split('//').pop()) || {};
 
 			persist.current.checked = settings.persist ?? persist.current.checked;
 			single.current.checked = settings['single-expression'] ?? single.current.checked;
+			canvasCheckbox.current.checked = settings['canvas'] ?? false;
+			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? '8.4';
+			selectVariantnBox.current.value = settings['variant'] ?? selectVariantnBox.current.value ?? '';
+			
+			// selectDemoBox.current.value = demoName;
+			await phpRef.current.binary;
 
 			if(settings['render-as'])
 			{
 				setDisplayMode(settings['render-as']);
 				htmlRadio.current.checked = settings['render-as'] === 'html';
 				textRadio.current.checked = settings['render-as'] !== 'html';
-			}
-
-			setOutputMode(single.current.checked ? 'single' : 'normal');
-
-			if(settings.autorun)
-			{
-				setStatusMessage('Executing...');
-				runCode();
 			}
 
 			query.set('persist', persist.current.checked ? 1 : 0);
@@ -259,6 +293,18 @@ function Embedded() {
 			}
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
+
+			await phpRef.current.refresh();
+			refreshPhp();
+
+			if(settings.autorun)
+			{
+				setStatusMessage('Executing...');
+				runCode();
+			}
+
+			setShowCanvas(canvasCheckbox.current.checked);
+			setOutputMode(single.current.checked ? 'single' : 'normal');
 		});
 	}, [query, refreshPhp, runCode]);
 
@@ -303,7 +349,12 @@ function Embedded() {
 
 		persist.current.checked = settings.persist ?? persist.current.checked;
 		single.current.checked = settings['single-expression'] ?? single.current.checked;
+		canvasCheckbox.current.checked = settings['canvas'] ?? canvasCheckbox.current.checked;
+
 		setOutputMode(single.current.checked ? 'single' : 'normal');
+		setShowCanvas(canvasCheckbox.current.checked);
+
+		console.log(canvasCheckbox.current.checked);
 
 		if(settings['render-as'])
 		{
@@ -355,7 +406,7 @@ function Embedded() {
 
 	const topBar = (<div className = "row header toolbar">
 		<div className = "cols">
-			<div className = "row start">
+			<div className = "row start selects">
 				{isIframe || <span className = "contents">
 					<a href = { process.env.PUBLIC_URL || "/" }>
 						<img src = "sean-icon.png" alt = "sean" />
@@ -363,30 +414,54 @@ function Embedded() {
 					<h1><a href = { process.env.PUBLIC_URL || "/" }>php-wasm</a></h1>
 					<hr />
 				</span>}
-				<select data-select-demo ref = {selectDemoBox}>
-					<option value = "">Select a Demo</option>
-					<option value = "hello-world.php">Hello, World!</option>
-					<option value = "dynamic-extension.php">Dynamic Extension Loading</option>
-					<option value = "callbacks.php">Javascript Callbacks</option>
-					<option value = "import.php">Import Javascript Modules</option>
-					<option value = "curvature.php">Curvature</option>
-					<option value = "phpinfo.php">phpinfo();</option>
-					<option value = "fetch.php">Fetch</option>
-					<option value = "promise.php">Promise</option>
-					<option value = "persistent-memory.php">Persistent Memory</option>
-					{isIframe || <option value = "dom-access.php">DOM Access</option>}
-					<option value = "goto.php">GoTo</option>
-					<option value = "stdio.php">StdOut, StdIn, & Return</option>
-					<option value = "postgres.php">PostgreSQL</option>
-					<option value = "sqlite.php">SQLite</option>
-					<option value = "sqlite-pdo.php">SQLite (PDO)</option>
-					<option value = "json.php">JSON</option>
-					<option value = "closures.php">Closures</option>
-					<option value = "files.php">Files</option>
-					<option value = "zend-benchmark.php">Zend Benchmark</option>
-					{isIframe || <option value = "drupal.php">Drupal 7</option>}
-				</select>
-				<button data-load-demo onClick = {demoSelected}>load</button>
+				<label>
+					<span>Demo:</span>
+					<select data-select-demo ref = {selectDemoBox}>
+						<option value = "">Select a Demo</option>
+						<option value = "hello-world.php">Hello, World!</option>
+						<option value = "dynamic-extension.php">Dynamic Extension Loading</option>
+						<option value = "callbacks.php">Javascript Callbacks</option>
+						<option value = "import.php">Import Javascript Modules</option>
+						<option value = "curvature.php">Curvature</option>
+						<option value = "phpinfo.php">phpinfo();</option>
+						<option value = "fetch.php">Fetch</option>
+						<option value = "promise.php">Promise</option>
+						<option value = "persistent-memory.php">Persistent Memory</option>
+						{isIframe || <option value = "dom-access.php">DOM Access</option>}
+						<option value = "goto.php">GoTo</option>
+						<option value = "stdio.php">StdOut, StdIn, & Return</option>
+						<option value = "postgres.php">PostgreSQL</option>
+						<option value = "sqlite.php">SQLite</option>
+						<option value = "sqlite-pdo.php">SQLite (PDO)</option>
+						<option value = "json.php">JSON</option>
+						<option value = "closures.php">Closures</option>
+						<option value = "files.php">Files</option>
+						<option value = "sdl-sine.php">SDL</option>
+						<option value = "zend-benchmark.php">Zend Benchmark</option>
+						{isIframe || <option value = "drupal.php">Drupal 7</option>}
+					</select>
+				</label>
+				<label>
+					<span>Version:</span>
+						<select data-select-demo ref = {selectVersionBox}>
+							<option value = "8.4">8.4</option>
+							<option value = "8.3">8.3</option>
+							<option value = "8.2">8.2</option>
+							<option value = "8.1">8.1</option>
+							<option value = "8.0">8.0</option>
+						</select>
+				</label>
+				<label>
+					<span>Variant:</span>
+						<select data-select-demo ref = {selectVariantnBox}>
+						<option value = "">base</option>
+						<option value = "_sdl">sdl</option>
+					</select>
+				</label>
+				<label>
+					<span>&nbsp;</span>
+					<button data-load-demo onClick = {demoSelected}>load</button>
+				</label>
 			</div>
 		</div>
 		<div className = "separator"></div>
@@ -411,6 +486,10 @@ function Embedded() {
 				<label>
 					<span>Single Expression</span>
 					<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
+				</label>
+				<label>
+					<span>Show Canvas</span>
+					<input type = "checkbox" id = "singleExpression" ref = { canvasCheckbox } onChange = {canvasChanged} />
 				</label>
 			</div>
 			<button data-ui data-refresh onClick = { refreshMem }><span>refresh</span></button>
@@ -450,6 +529,16 @@ function Embedded() {
 					<section id = "example-wrapper">
 						<div id = "example"></div>
 					</section>
+					<div style = {showCanvas ? {} : {display: "none"}}>
+						<div className = "cols">
+							<label tabIndex="-1">canvas</label>
+						</div>
+						<div className = "canvas output liquid" >
+							<div className = "column">
+								<canvas ref={canvas} />
+							</div>
+						</div>
+					</div>
 					<div id = "ret">
 						<div className = "cols">
 							<label tabIndex="-1">return</label>

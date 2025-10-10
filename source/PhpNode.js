@@ -4,6 +4,7 @@ import url from 'node:url';
 import fs from 'node:fs';
 
 const defaultVersion = process.env.PHP_VERSION ?? '8.4';
+const defaultVariant = process.env.PHP_VARIANT ?? '';
 
 export class PhpNode extends PhpBase
 {
@@ -36,10 +37,9 @@ export class PhpNode extends PhpBase
 		};
 
 		const version = args.version ?? defaultVersion;
+		const variant = args.variant ?? defaultVariant;
+		const vvId = version + variant;
 
-		super(
-			import(`./php${args.version ?? defaultVersion}-node.mjs`),
-			{locateFile, version, ...args}
-		);
+		super(import(`./php${vvId}-node.mjs`), {locateFile, version, variant, ...args});
 	}
 }

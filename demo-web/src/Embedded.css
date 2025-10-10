@@ -378,7 +378,7 @@ body:not(.loading) .loader {
 	display: none;
 }
 
-.Embedded[data-display-mode="html"] .stdout div.scroller ,
+/* .Embedded[data-display-mode="html"] .stdout div.scroller ,
 .Embedded[data-display-mode="html"] .stderr div.scroller ,
 .Embedded[data-display-mode="html"] .stdret div.scroller {
 	display: none;
@@ -388,8 +388,18 @@ body:not(.loading) .loader {
 .Embedded[data-display-mode="html"] .stderr iframe.scroller,
 .Embedded[data-display-mode="html"] .stdret iframe.scroller {
 	display: initial;
+} */
+
+.Embedded[data-display-mode="html"] .stdout div.scroller ,
+.Embedded[data-display-mode="html"] .stdret div.scroller {
+	display: none;
 }
 
+.Embedded[data-display-mode="html"] .stdout iframe.scroller,
+.Embedded .stderr iframe.scroller,
+.Embedded[data-display-mode="html"] .stdret iframe.scroller {
+	display: initial;
+}
 .Embedded[data-output-mode="normal"] #ret {
 	display: none;
 }
@@ -419,4 +429,21 @@ body:not(.loading) .loader {
 
 .stdout input {
 	display: inline;
+}
+
+.header .selects label {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.header .selects label {
+	margin-right: 1rem;
+}
+
+.header .selects label select,
+.header .selects label button {
+	padding: 0 0.5rem;
+	flex-grow: 1;
+	min-width: 100%;
 }

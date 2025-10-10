@@ -34,6 +34,8 @@ export class PhpBase extends EventTarget
 		this.transactionStarted = false;
 
 		this.phpVersion = args.version;
+		this.phpVariant = args.variant;
+		
 		this.shared = args.shared = ('shared' in args) ? args.shared : {};
 
 		this.phpArgs = args;

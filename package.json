@@ -38,6 +38,7 @@
     "php-wasm-xml": "packages/php-wasm-xml",
     "php-wasm-yaml": "packages/php-wasm-yaml",
     "php-wasm-zlib": "packages/php-wasm-zlib",
+    "php-wasm-sdl": "packages/php-wasm-sdl",
     "pobot": "^0.1.5",
     "vrzno": "packages/vrzno"
   },
@@ -59,7 +60,8 @@
     "packages/tidy",
     "packages/vrzno",
     "packages/xml",
-    "packages/zlib"
+    "packages/zlib",
+    "packages/sdl"
   ],
   "contributors": [
     {

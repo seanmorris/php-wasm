@@ -111,8 +111,9 @@ test('Can take input on STDIN', async () => {
 });
 
 const defaultVersion = process.env.PHP_VERSION ?? '8.4';
+const defaultVariant = process.env.PHP_VARIANT ?? '';
 
-test(`Correct version is running (${defaultVersion})`, async () => {
+test(`Correct version is running (${defaultVersion}${defaultVariant})`, async () => {
 	const php = new PhpNode();
 	
 	let stdOut = '', stdErr = '';

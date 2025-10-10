@@ -12,6 +12,7 @@ ENV_FILE?=.env
 ## PHP Version
 PHP_VERSION_DEFAULT=8.4
 PHP_VERSION?=${PHP_VERSION_DEFAULT}
+PHP_VARIANT?=
 
 -include ${ENV_FILE}.${PHP_VERSION}
 
@@ -97,7 +98,6 @@ ASSERTIONS     ?=0
 SYMBOLS        ?=0
 OPTIMIZE       ?=3
 SUB_OPTIMIZE   ?=${OPTIMIZE}
-PHP_SUFFIX ?=${PHP_VERSION}
 WITH_SOURCEMAPS?=0
 
 ## End of defaults
@@ -210,6 +210,8 @@ endif
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-dbg-wasm/static.mak
+
+PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
 ########### Collect & patch the source code. ###########
 
@@ -354,7 +356,7 @@ SAPI_PHPDBG_PATH=sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.$
 MAIN_MODULE?=1
 ASYNCIFY?=1
 
-BUILD_FLAGS=-f ../../php.mk \
+BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
@@ -721,7 +723,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: BUILD_TYPE=mjs
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: ENVIRONMENT=webview
-${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: FS_TYPE=${WEB_FS_TYPE}
+${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} scripts/dev/credits
@@ -832,7 +834,7 @@ php-clean:
 		packages/php-cgi-wasm/php-*.wasm \
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
-	- ${DOCKER_RUN_IN_PHP} make clean
+	- ${DOCKER_RUN_IN_PHP} make clean distclean
 
 clean:
 	${DOCKER_RUN} rm -rf \
@@ -908,6 +910,7 @@ test: node-mjs
 
 test-node:
 	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -926,10 +929,12 @@ test-node:
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
 
 test-deno:
 	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -948,10 +953,11 @@ test-deno:
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
 test-browser:
-	test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} test/browser-test.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
@@ -962,6 +968,27 @@ all-versions:
 	${MAKE} PHP_VERSION=8.2
 	${MAKE} PHP_VERSION=8.1
 	${MAKE} PHP_VERSION=8.0
+
+test-all-versions:
+	${MAKE} test PHP_VERSION=8.4
+	${MAKE} test PHP_VERSION=8.3
+	${MAKE} test PHP_VERSION=8.2
+	${MAKE} test PHP_VERSION=8.1
+	${MAKE} test PHP_VERSION=8.0
+
+x-all-versions:
+	${MAKE} ${X} PHP_VERSION=8.4
+	${MAKE} ${X} PHP_VERSION=8.3
+	${MAKE} ${X} PHP_VERSION=8.2
+	${MAKE} ${X} PHP_VERSION=8.1
+	${MAKE} ${X} PHP_VERSION=8.0
+
+php-clean-all-versions:
+	${MAKE} php-clean PHP_VERSION=8.4
+	${MAKE} php-clean PHP_VERSION=8.3
+	${MAKE} php-clean PHP_VERSION=8.2
+	${MAKE} php-clean PHP_VERSION=8.1
+	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4
