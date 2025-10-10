@@ -207,11 +207,11 @@ ORDER_ONLY+=.cache/preload-collected
 EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/preload@/preload
 endif
 
+PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
+
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-dbg-wasm/static.mak
-
-PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
 ########### Collect & patch the source code. ###########
 
@@ -288,7 +288,7 @@ endif
 DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES}
 
 third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c
-	@ echo -e "\e[33;4mConfiguring PHP\e[0m"
+	@ echo -e "\e[33;4mConfiguring PHP ${PHP_SUFFIX}\e[0m"
 	${DOCKER_RUN_IN_PHP} which autoconf
 	${DOCKER_RUN_IN_PHP} emconfigure ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
