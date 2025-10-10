@@ -11,6 +11,10 @@ import BackIcon from './icons/back-icon-32.png'
 import WwwIcon from './icons/www-icon-32.png'
 import editorIcon from './icons/editor-icon-32.png';
 
+import libxml from 'php-wasm-libxml';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+
 navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 
 const params = new URLSearchParams(window.location.search);
@@ -75,7 +79,7 @@ const packages = {
 	}
 };
 
-const sharedLibs = [`php${PhpWeb.phpVersion}-zip.so`, `php${PhpWeb.phpVersion}-zlib.so`];
+const sharedLibs = [libxml, zlib, libzip];
 
 const installDemo = async (overwrite = false) => {
 
@@ -138,7 +142,7 @@ const installDemo = async (overwrite = false) => {
 		await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
 		await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 
-		const php = new PhpWeb({sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		const php = new PhpWeb({version: '8.3', sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
 
 		php.addEventListener('output', event => console.log(event.detail));
 		php.addEventListener('error', event => console.log(event.detail));

@@ -18,6 +18,7 @@ const config: webpack.Configuration = {
   output: {
     path: path.resolve(__dirname, 'public'),
     filename: 'cgi-worker.js',
+    publicPath: '/',
   },
   target: 'webworker',
   devtool: 'source-map'

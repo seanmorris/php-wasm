@@ -13,15 +13,15 @@ $(error WITH_SDL MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SET
 endif
 
 ifeq (${WITH_SDL},1)
-WITH_SDL=static
+WITH_SDL=dynamic
 endif
 
 ifeq (${WITH_SDL},static)
 CONFIGURE_FLAGS+= --with-sdl
-EXTRA_CFLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL -lSDL2
+# EXTRA_CFLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL -lSDL2
 PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl/config.m4
 # TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-# ARCHIVES+= lib/lib/libSDL2.a libGL.so
+ARCHIVES+= lib/lib/libSDL2.a 
 # SKIP_LIBS+= -lsdl -lgl
 endif
 

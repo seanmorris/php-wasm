@@ -47,3 +47,5 @@ packages/php-cgi-wasm/build.log
 
 docs/static/media/mapped/*
 demo-web/public/static/media/mapped/*
+
+.DS_Store

@@ -1,5 +1,4 @@
 import { PhpCgiBase } from './PhpCgiBase';
-import PHP from './php-cgi-node';
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
@@ -34,7 +33,10 @@ export class PhpCgiNode extends PhpCgiBase
 			}
 		};
 
-		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, locateFile, ...args});
+		super(
+			import(`./php${version ?? defaultVersion}-cgi-node.mjs`)
+			, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, locateFile, ...args}
+		);
 	}
 
 	async request(request)

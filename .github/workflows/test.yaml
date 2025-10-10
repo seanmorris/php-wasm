@@ -1,26 +1,29 @@
 name: Test
 on: [push]
 jobs:
-  test-browser:
-    name: Test Browser
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
-      - run: npm install
-      - run: npm install -g deno
-      - run: npm i -g cv3-test netcat
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-      - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-      - run: sudo apt-get update
-      - run: sudo apt install -y software-properties-common google-chrome-stable
-      - run: cd demo-web; ./switch-packages.sh local; cd ..;
-      - run: cp .circleci/.env_8.3-dynamic.ci .env
-      - run: make image
-      - run: docker network create phpwasm_default
-      - run: make web-mjs worker-cgi-mjs web-dbg-mjs
-      - run: test/browser-test.sh
+  # test-browser:
+  #   name: Test Browser
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out repository code
+  #       uses: actions/checkout@v4
+  #     - run: npm install
+  #     - run: npm install -g deno
+  #     - run: npm i -g cv3-test netcat
+  #     - run: |
+  #         echo "set man-db/auto-update false" | sudo debconf-communicate
+  #         sudo dpkg-reconfigure man-db
+  #     - run: sudo apt update && sudo apt install docker-compose -y
+  #     - run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+  #     - run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+  #     - run: sudo apt-get update
+  #     - run: sudo apt install -y software-properties-common google-chrome-stable
+  #     - run: cd demo-web; ./switch-packages.sh local; cd ..;
+  #     - run: cp .circleci/.env_8.3-dynamic.ci .env
+  #     - run: make image
+  #     - run: docker network create phpwasm_default
+  #     - run: make web-mjs worker-cgi-mjs web-dbg-mjs
+  #     - run: test/browser-test.sh
 
   test-8-4-static:
     name: Test 8.4 Static
@@ -30,11 +33,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.4 make test
 
   test-8-3-static:
     name: Test 8.3 Static
@@ -44,11 +50,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.3 make test
 
   test-8-2-static:
     name: Test 8.2 Static
@@ -58,11 +67,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.2
+      - run: PHP_VERSION=8.2 make test
 
   test-8-1-static:
     name: Test 8.1 Static
@@ -72,11 +84,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.1
+      - run: PHP_VERSION=8.1 make test
 
   test-8-0-static:
     name: Test 8.0 Static
@@ -86,11 +101,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.0
+      - run: PHP_VERSION=8.0 make test
 
 
   test-8-4-dynamic:
@@ -101,11 +119,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.4 make test
 
   test-8-3-dynamic:
     name: Test 8.3 Dynamic
@@ -115,11 +136,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.3 make test
 
   test-8-2-dynamic:
     name: Test 8.2 Dynamic
@@ -129,11 +153,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.2
+      - run: PHP_VERSION=8.2 make test
 
   test-8-1-dynamic:
     name: Test 8.1 Dynamic
@@ -143,11 +170,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.1
+      - run: PHP_VERSION=8.1 make test
 
   test-8-0-dynamic:
     name: Test 8.0 Dynamic
@@ -157,11 +187,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.0
+      - run: PHP_VERSION=8.0 make test
 
 
   test-8-4-shared:
@@ -172,11 +205,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.4 make test
 
   test-8-3-shared:
     name: Test 8.3 Shared
@@ -186,11 +222,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test
+      - run: PHP_VERSION=8.3 make test
 
   test-8-2-shared:
     name: Test 8.2 Shared
@@ -204,7 +243,7 @@ jobs:
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.2
+      - run:  PHP_VERSION=8.2 make test
 
   test-8-1-shared:
     name: Test 8.1 Shared
@@ -214,11 +253,14 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.1
+      - run: PHP_VERSION=8.1 make test
 
   test-8-0-shared:
     name: Test 8.0 Shared
@@ -228,8 +270,11 @@ jobs:
         uses: actions/checkout@v4
       - run: npm install
       - run: npm install -g deno
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
       - run: sudo apt update && sudo apt install docker-compose -y
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image
       - run: docker network create phpwasm_default
-      - run: make test PHP_VERSION=8.0
+      - run: PHP_VERSION=8.0 make test

@@ -54,6 +54,7 @@ SKIP_LIBS+= -lonig
 endif
 
 ifeq (${WITH_ONIGURUMA},dynamic)
+DYNAMIC_LIBS+= packages/mbstring/libonig.so
 SKIP_LIBS+= -lonig
 PHP_ASSET_LIST+= libonig.so
 endif

@@ -34,6 +34,8 @@ GD_FLAGS+= --with-freetype=/src/lib
 GD_LIBS+= packages/gd/libfreetype.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libfreetype.so
+else ifeq (${WITH_GD}, dynamic)
+DYNAMIC_LIBS+= packages/gd/libfreetype.so
 endif
 endif
 
@@ -42,6 +44,8 @@ GD_FLAGS+= --with-jpeg=/src/lib
 GD_LIBS+= packages/gd/libjpeg.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libjpeg.so
+else ifeq (${WITH_GD}, dynamic)
+DYNAMIC_LIBS+= packages/gd/libjpeg.so
 endif
 endif
 
@@ -49,6 +53,8 @@ ifeq (${WITH_LIBPNG},shared)
 GD_LIBS+= packages/gd/libpng.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libpng.so
+else ifeq (${WITH_GD}, dynamic)
+DYNAMIC_LIBS+= packages/gd/libpng.so
 endif
 endif
 
@@ -57,6 +63,8 @@ GD_FLAGS+= --with-webp=/src/lib
 GD_LIBS+= packages/gd/libwebp.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libwebp.so
+else ifeq (${WITH_GD}, dynamic)
+DYNAMIC_LIBS+= packages/gd/libwebp.so
 endif
 endif
 
@@ -179,7 +187,7 @@ $(addsuffix /php${PHP_VERSION}-gd.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd
 
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
-	${DOCKER_RUN} wget -q https://download.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+	${DOCKER_RUN} wget -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 

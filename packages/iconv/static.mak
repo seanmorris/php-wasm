@@ -2,7 +2,9 @@
 
 WITH_ICONV?=dynamic
 
-ICONV_TAG?=v1.17
+ICONV_VERSION?=1.17
+ICONV_TAG=v${ICONV_VERSION}
+
 DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libiconv-1.17/ emscripten-builder
 DOCKER_RUN_IN_EXT_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-iconv/ emscripten-builder
 
@@ -34,12 +36,16 @@ ifeq (${WITH_ICONV},dynamic)
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+DYNAMIC_LIBS+= packages/iconv/libiconv.so
 SKIP_LIBS+= -liconv
 endif
 
+# ICONV_URL?=https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz
+ICONV_URL?=https://mirrors.ocf.berkeley.edu/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz
+
 third_party/libiconv-1.17/README:
 	@ echo -e "\e[33;4mDownloading Iconv\e[0m"
-	${DOCKER_RUN} wget -q https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.17.tar.gz
+	${DOCKER_RUN} wget -q ${ICONV_URL}
 	${DOCKER_RUN} tar -xvzf libiconv-1.17.tar.gz -C third_party
 	${DOCKER_RUN} rm libiconv-1.17.tar.gz
 
