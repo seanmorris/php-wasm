@@ -156,11 +156,12 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-    uses: ./test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: dynamic
-        testType: ${{ matix.testType }}
+    steps:
+      - uses: ./test-node-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: dynamic
+          testType: ${{ matix.testType }}
 
   test-node-shared:
     name: Test ${{ matix.testType }} ${{ matrix.phpVersion }} w/shared libs
@@ -170,11 +171,12 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-    uses: ./test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: shared
-        testType: ${{ matix.testType }}
+    steps:
+      - uses: ./test-node-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: shared
+          testType: ${{ matix.testType }}
 
   test-node-static:
     name: Test ${{ matix.testType }} ${{ matrix.phpVersion }} w/static libs
@@ -184,8 +186,9 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-    uses: ./test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: static
-        testType: ${{ matix.testType }}
+    steps:
+      - uses: ./test-node-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: static
+          testType: ${{ matix.testType }}
