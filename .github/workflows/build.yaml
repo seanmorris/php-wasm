@@ -116,13 +116,6 @@ jobs:
           path: packages/
           merge-multiple: true
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: built-packages-${{ matrix.libType }}
-          include-hidden-files: true
-          path: packages/
-
       - name: Install NPM packages
         run: npm ci
 
