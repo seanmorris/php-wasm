@@ -13,6 +13,7 @@ on:
         required: true
         type: string
 
+jobs:
   test:
     name: Test ${{ inputs.testType }} ${{ inputs.phpVersion }} ${{ inputs.libType }}
     runs-on: ubuntu-latest

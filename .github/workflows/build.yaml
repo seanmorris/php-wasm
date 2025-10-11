@@ -56,30 +56,33 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-    uses: ./build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: dynamic
+    steps:
+      - uses: ./build-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: dynamic
 
   build-php-shared:
     needs: [build-libs]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-    uses: ./build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: shared
+    steps:
+      - uses: ./build-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: shared
 
   build-php-static:
     needs: [build-libs]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-    uses: ./build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: static
+    steps:
+      - uses: ./build-step.yaml
+        with:
+          phpVersion: ${{ matrix.phpVersion }}
+          libType: static
 
   test-browser:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}

@@ -10,6 +10,7 @@ on:
         required: true
         type: string
 
+jobs:
   build:
     name: Build PHP ${{ inputs.phpVersion }} ${{ inputs.libType }}
     runs-on: ubuntu-latest
