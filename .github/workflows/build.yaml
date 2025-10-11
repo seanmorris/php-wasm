@@ -53,7 +53,6 @@ jobs:
 
   build-php-dynamic:
     needs: [build-libs]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -64,7 +63,6 @@ jobs:
 
   build-php-shared:
     needs: [build-libs]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -75,7 +73,6 @@ jobs:
 
   build-php-static:
     needs: [build-libs]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -150,7 +147,6 @@ jobs:
 
   test-node-dynamic:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
-    runs-on: ubuntu-latest
     needs: [build-php-dynamic]
     strategy:
       matrix:
@@ -164,7 +160,6 @@ jobs:
 
   test-node-shared:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
-    runs-on: ubuntu-latest
     needs: [build-php-shared]
     strategy:
       matrix:
@@ -178,7 +173,6 @@ jobs:
 
   test-node-static:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
-    runs-on: ubuntu-latest
     needs: [build-php-static]
     strategy:
       matrix:
