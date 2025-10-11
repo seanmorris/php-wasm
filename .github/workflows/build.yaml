@@ -35,7 +35,7 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build shared libraries
-        run: time make dynamic packages/sdl/libSDL2.so
+        run: time make dynamic packages/sdl/libSDL2.so packages/sdl/libGL.so
 
       - name: Cache executables
         run: find ./third_party -type f -executable -print > ./.cache/executables.list
