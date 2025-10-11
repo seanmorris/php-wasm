@@ -137,12 +137,6 @@ jobs:
       - name: Ensure the demo uses local packages
         run: cd demo-web; ./switch-packages.sh local; cd ..;
 
-      - name: Create build-environment image
-        run: make image
-
-      - name: Spin up docker network
-        run: docker network create phpwasm_default
-
       - name: Run tests
         run: make test-browser
 
