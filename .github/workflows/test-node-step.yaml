@@ -31,11 +31,4 @@ jobs:
           merge-multiple: true
       - run: npm ci
       - run: npm install -g deno
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
-      - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=${{ inputs.phpVersion }} make test-${{ inputs.testType }}

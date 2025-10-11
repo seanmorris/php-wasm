@@ -42,9 +42,23 @@ jobs:
 
       - name: Install docker-compose
         run: sudo apt update && sudo apt install docker-compose -y
+      
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
 
-      - name: Create build-environment image
-        run: time make image
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Spin up docker network
         run: docker network create phpwasm_default
@@ -53,7 +67,7 @@ jobs:
         run: time make mjs PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
-        run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
