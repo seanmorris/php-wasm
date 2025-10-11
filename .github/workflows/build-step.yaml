@@ -1,0 +1,59 @@
+name: Build Step
+
+on:
+  workflow_call:
+    inputs:
+      phpVersion:
+        required: true
+        type: string
+      libType:
+        required: true
+        type: string
+
+  build:
+    name: Build PHP ${{ inputs.phpVersion }} ${{ inputs.libType }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Import configuration
+        run: |
+          cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-dependencies
+          path: ./
+
+      - name: Apply executable cache
+        run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+
+      - name: Install NPM packages
+        run: npm ci
+
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
+
+      - name: Create build-environment image
+        run: time make image
+
+      - name: Spin up docker network
+        run: docker network create phpwasm_default
+
+      - name: Build PHP
+        run: time make PHP_VERSION=${{ inputs.phpVersion }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-wasm-${{ inputs.libType }}-${{ inputs.phpVersion }}
+          include-hidden-files: true
+          path: packages/

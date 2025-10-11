@@ -35,7 +35,7 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build shared libraries
-        run: time make dynamic
+        run: time make dynamic packages/sdl/libSDL2.so
 
       - name: Cache executables
         run: find ./third_party -type f -executable -print > ./.cache/executables.list
@@ -51,96 +51,43 @@ jobs:
             packages
             .cache
 
-  build:
-    name: Build PHP ${{ matrix.phpVersion }} ${{ matrix.libType }}
-    runs-on: ubuntu-latest
+  build-php-dynamic:
     needs: [build-libs]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic', 'shared', 'static']
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+    uses: ./build-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: dynamic
 
-      - name: Import configuration
-        run: |
-          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-          touch -d '1970-01-01 00:00:00 UTC' .env
+  build-php-shared:
+    needs: [build-libs]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./build-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: shared
 
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: php-dependencies
-          path: ./
-
-      - name: Apply executable cache
-        run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
-
-      - name: Install NPM packages
-        run: npm ci
-
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
-
-      - name: Create build-environment image
-        run: time make image
-
-      - name: Spin up docker network
-        run: docker network create phpwasm_default
-
-      - name: Build PHP
-        run: time make PHP_VERSION=${{ matrix.phpVersion }}
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-wasm-${{ matrix.libType }}-${{ matrix.phpVersion }}
-          include-hidden-files: true
-          path: packages/
-
-  collect:
-      name: Collect Artifacts
-      runs-on: ubuntu-latest
-      needs: [build]
-      strategy:
-        matrix:
-          libType: ['dynamic', 'shared', 'static']
-      steps:
-        - name: Check out repository code
-          uses: actions/checkout@v4
-
-        - name: Download artifact
-          uses: actions/download-artifact@v4
-          with:
-            pattern: php-wasm-${{ matrix.libType }}-*
-            path: packages/
-            merge-multiple: true
-
-        - run: ./compress-package.sh packages/php-wasm
-        - run: ./compress-package.sh packages/php-cgi-wasm
-        - run: ./compress-package.sh packages/php-dbg-wasm
-
-        - name: Upload artifacts
-          uses: actions/upload-artifact@v4
-          with:
-            name: built-packages-${{ matrix.libType }}
-            include-hidden-files: true
-            path: packages/
+  build-php-static:
+    needs: [build-libs]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./build-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: static
 
   test-browser:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
     runs-on: ubuntu-latest
-    needs: [collect]
+    needs: [build-php-dynamic]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        # libType: ['dynamic', 'shared', 'static']
         libType: ['dynamic',]
     steps:
       - name: Check out repository code
@@ -198,84 +145,44 @@ jobs:
       - name: Run tests
         run: make test-browser
 
-  test-node:
-    name: Test Node ${{ matrix.phpVersion }} ${{ matrix.libType }}
+  test-node-dynamic:
+    name: Test ${{ matix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-php-dynamic]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic', 'shared', 'static']
-    steps:
+        testType: ['node', 'deno']
+    uses: ./test-node-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: dynamic
+        testType: ${{ matix.testType }}
 
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - run: |
-          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-          touch -d '1970-01-01 00:00:00 UTC' .env
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-wasm-${{ matrix.libType }}-*
-          path: packages/
-          merge-multiple: true
-
-      - run: npm ci
-
-      - run: npm install -g deno
-      
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
-
-      - run: sudo apt update && sudo apt install docker-compose -y
-
-      - run: make image
-
-      - run: docker network create phpwasm_default
-
-      - run: PHP_VERSION=${{ matrix.phpVersion }} make test-node
-
-  test-deno:
-    name: Test Node ${{ matrix.phpVersion }} ${{ matrix.libType }}
+  test-node-shared:
+    name: Test ${{ matix.testType }} ${{ matrix.phpVersion }} w/shared libs
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-php-shared]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic', 'shared', 'static']
-    steps:
+        testType: ['node', 'deno']
+    uses: ./test-node-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: shared
+        testType: ${{ matix.testType }}
 
-      - name: Check out repository code
-        uses: actions/checkout@v4
-
-      - run: |
-          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-          touch -d '1970-01-01 00:00:00 UTC' .env
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-wasm-${{ matrix.libType }}-*
-          path: packages/
-          merge-multiple: true
-
-      - run: npm ci
-
-      - run: npm install -g deno
-      
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
-
-      - run: sudo apt update && sudo apt install docker-compose -y
-
-      - run: make image
-
-      - run: docker network create phpwasm_default
-
-      - run: PHP_VERSION=${{ matrix.phpVersion }} make test-deno
+  test-node-static:
+    name: Test ${{ matix.testType }} ${{ matrix.phpVersion }} w/static libs
+    runs-on: ubuntu-latest
+    needs: [build-php-static]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        testType: ['node', 'deno']
+    uses: ./test-node-step.yaml
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: static
+        testType: ${{ matix.testType }}
