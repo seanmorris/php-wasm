@@ -51,6 +51,7 @@ jobs:
 
       - name: Build PHP
         run: time make PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
