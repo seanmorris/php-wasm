@@ -57,11 +57,10 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-    steps:
-      uses: ./.github/workflows/build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: dynamic
+    uses: ./.github/workflows/build-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: dynamic
 
   build-php-shared:
     needs: [build-libs]
