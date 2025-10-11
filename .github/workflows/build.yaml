@@ -59,9 +59,9 @@ jobs:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
     steps:
       uses: ./.github/workflows/build-step.yaml
-        with:
-          phpVersion: ${{ matrix.phpVersion }}
-          libType: dynamic
+      with:
+        phpVersion: ${{ matrix.phpVersion }}
+        libType: dynamic
 
   build-php-shared:
     needs: [build-libs]
@@ -70,9 +70,9 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: shared
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: shared
 
   build-php-static:
     needs: [build-libs]
@@ -81,9 +81,9 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: static
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: static
 
   test-browser:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
@@ -158,10 +158,10 @@ jobs:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
     uses: ./.github/workflows/test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: dynamic
-        testType: ${{ matrix.testType }}
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: dynamic
+      testType: ${{ matrix.testType }}
 
   test-node-shared:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
@@ -172,10 +172,10 @@ jobs:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
     uses: ./.github/workflows/test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: shared
-        testType: ${{ matrix.testType }}
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: shared
+      testType: ${{ matrix.testType }}
 
   test-node-static:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
@@ -186,7 +186,7 @@ jobs:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
     uses: ./.github/workflows/test-node-step.yaml
-      with:
-        phpVersion: ${{ matrix.phpVersion }}
-        libType: static
-        testType: ${{ matrix.testType }}
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: static
+      testType: ${{ matrix.testType }}
