@@ -130,7 +130,7 @@ ifneq (${PRE_JS_FILES},)
 DBG_DEPENDENCIES+= .cache/pre.js
 endif
 
-DBG_DEPENDENCIES+= third_party/php${PHP_SUFFIX}-src/configured
+DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
 ${PHP_DBG_DIST_DIR}/config.mjs: .env
 	echo '' > $@

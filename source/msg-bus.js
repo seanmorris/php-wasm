@@ -2,18 +2,47 @@ const incomplete = new Map();
 
 /**
  * Create a sendMessage function given a service worker URL.
- * @param {*} serviceWorkerUrl The URL to the service worker.
+ * @param {*} serviceWorker The ServieWorker object or URL to the service worker.
  * @returns sendMessage function for the service workrer.
  */
-export const sendMessageFor = (serviceWorkerUrl) => async (action, params = []) => {
+export const sendMessageFor = (serviceWorker) => async (action, params = []) => {
 	const token = window.crypto.randomUUID();
 	let accept, reject;
 	const ret = new Promise((_accept, _reject) => [accept, reject] = [_accept, _reject]);
 	incomplete.set(token, [accept, reject, action, params]);
 
-	navigator.serviceWorker
-	.getRegistration(serviceWorkerUrl)
-	.then(registration => registration.active.postMessage({action, params, token}));
+	if(serviceWorker instanceof ServiceWorker)
+	{
+		serviceWorker.postMessage({action, params, token});
+	}
+	else
+	{
+		navigator.serviceWorker
+		.getRegistration(serviceWorker)
+		.then(registration => {
+			if(registration.active)
+			{
+				registration.active.postMessage({action, params, token});
+			}
+			else
+			{
+				console.log(registration);
+				registration.addEventListener('updatefound', () => {
+					const worker = registration.installing;
+					if(worker)
+					{
+						worker.addEventListener('statechange', () => {
+							if(worker.state === 'activated')
+							{
+								worker.postMessage({action, params, token});
+							}
+						}, {once: true});
+					}
+				}, {once: true});
+			}
+		});
+	}
+
 
 	return ret;
 };

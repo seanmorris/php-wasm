@@ -29,7 +29,10 @@ if(!params.has('no-service-worker'))
 	}, 350);
 }
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+console.log(navigator.serviceWorker.controller);
+
+// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const packages = {
 	'drupal-7': {

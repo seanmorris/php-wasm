@@ -991,11 +991,16 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=1
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure

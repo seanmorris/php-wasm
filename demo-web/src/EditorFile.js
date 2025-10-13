@@ -21,7 +21,8 @@ import deleteIcon from './icons/delete-icon-16.png';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const icons = {
 	php: filePhpIcon
