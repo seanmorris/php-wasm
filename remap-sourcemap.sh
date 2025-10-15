@@ -49,3 +49,4 @@ jq -c --slurpfile sources sources.json '.sources = $sources[0]' ${ORIGINAL} > ${
 cp -rfv mapped/ ${DEST_DIR_REALPATH}
 cp -rfv ${MAPPED} ${DEST_DIR_REALPATH}/${SOURCE_MAP_BASENAME}
 
+chown -R ${OUTER_UID} mapped/

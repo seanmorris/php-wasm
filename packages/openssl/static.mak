@@ -42,6 +42,7 @@ endif
 
 ifeq (${WITH_OPENSSL},dynamic)
 PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
+DYNAMIC_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SKIP_LIBS+= -lssl -lcrypto
 endif
 

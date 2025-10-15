@@ -18,7 +18,8 @@ import DoWithFile from './DoWithFile';
 import ErrorDialog from './ErrorDialog';
 import Confirm from './Confirm';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+// const sendMessage = sendMessageFor(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller)
 
 function SelectFramework() {
 

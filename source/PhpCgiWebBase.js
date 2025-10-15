@@ -83,7 +83,9 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 		this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
 
-			const php = await new this.PHP(phpArgs);
+			const {default: PHP} = await this.binLoader;
+
+			const php = await new PHP(phpArgs);
 
 			await php.ccall(
 				'pib_storage_init'

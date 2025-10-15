@@ -1,0 +1,194 @@
+name: Build Artifacts
+
+on: [push]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-libs:
+    name: Build Shared Objects
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Install NPM packages
+        run: npm ci
+
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
+
+      - name: Import configuration
+        run: cp -p .github/.env_8.4.dynamic.ci .env
+
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
+      - name: Spin up docker-network
+        run: docker network create phpwasm_default
+
+      - name: Build shared libraries
+        run: time make dynamic packages/sdl/libSDL2.so packages/sdl/libGL.so
+
+      - name: Cache executables
+        run: find ./third_party -type f -executable -print > ./.cache/executables.list
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-dependencies
+          include-hidden-files: true
+          path: |
+            third_party
+            lib
+            packages
+            .cache
+
+  build-php-dynamic:
+    needs: [build-libs]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./.github/workflows/build-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: dynamic
+
+  build-php-shared:
+    needs: [build-libs]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./.github/workflows/build-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: shared
+
+  build-php-static:
+    needs: [build-libs]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./.github/workflows/build-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: static
+
+  test-browser:
+    name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
+    runs-on: ubuntu-latest
+    needs: [build-php-dynamic]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic',]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Import configuration
+        run: |
+          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: php-dependencies
+          path: ./
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-wasm-${{ matrix.libType }}-*
+          path: packages/
+          merge-multiple: true
+
+      - name: Install NPM packages
+        run: npm ci
+
+      - name: Install Global NPM packages
+        run: npm install -g deno cv3-test netcat
+
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
+
+      - name: Install Chrome's APT key
+        run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+      - name: Install Chrome's APT source
+        run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
+      - name: Install Chrome
+        run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
+
+      - name: Ensure the demo uses local packages
+        run: cd demo-web; ./switch-packages.sh local; cd ..;
+
+      - name: Run tests
+        run: make test-browser
+
+  test-node-dynamic:
+    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
+    needs: [build-php-dynamic]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        testType: ['node', 'deno']
+    uses: ./.github/workflows/test-node-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: dynamic
+      testType: ${{ matrix.testType }}
+
+  test-node-shared:
+    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
+    needs: [build-php-shared]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        testType: ['node', 'deno']
+    uses: ./.github/workflows/test-node-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: shared
+      testType: ${{ matrix.testType }}
+
+  test-node-static:
+    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
+    needs: [build-php-static]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        testType: ['node', 'deno']
+    uses: ./.github/workflows/test-node-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: static
+      testType: ${{ matrix.testType }}

@@ -9,7 +9,8 @@ import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
 import loader from './tail-spin.svg';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const pathStates = new Map();
 

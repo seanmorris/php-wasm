@@ -1,10 +1,13 @@
-#include "sapi/embed/php_embed.h"
-#include "sapi/phpdbg/phpdbg.h"
-#include "ext/session/php_session.h"
-#include "main/php_output.h"
-#include "SAPI.h"
 #include <emscripten.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+#include "SAPI.h"
+#include "main/php_output.h"
+
+#include "sapi/phpdbg/phpdbg.h"
+#include "sapi/embed/php_embed.h"
+#include "ext/session/php_session.h"
 
 #include "zend_globals_macros.h"
 #include "zend_exceptions.h"
@@ -14,7 +17,6 @@
 #include "../json/php_json_encoder.h"
 #include "../json/php_json_parser.h"
 
-#include <stdbool.h>
 
 #ifdef WITH_VRZNO
 #include "../vrzno/php_vrzno.h"
@@ -29,6 +31,10 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
+#ifdef WITH_SDL
+#include <SDL_hints.h>
+#endif
+
 #define STRINGIFY_INTERNAL(MACRO) #MACRO
 #define STRINGIFY(MACRO)  STRINGIFY_INTERNAL(MACRO)
 
@@ -42,6 +48,9 @@ char *_sapi_name = NULL;
  */
 int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 {
+#ifdef WITH_SDL
+	SDL_SetHint(SDL_HINT_EMSCRIPTEN_ASYNCIFY, "0");
+#endif
 	if(!_sapi_name)
 	{
 		_sapi_name = malloc(strlen(__sapi_name) + 1);

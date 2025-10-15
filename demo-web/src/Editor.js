@@ -19,7 +19,8 @@ import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
 import Debugger from './Debugger';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`))
+// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const openFilesMap = new Map();
 const sessionsMap = new WeakMap;
