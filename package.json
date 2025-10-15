@@ -1,7 +1,7 @@
 {
   "name": "php-wasm-builder",
   "version": "0.0.9-alpha-32",
-  "description": "Builds php-wasm, php-cgi-wasm & dependencies.",
+  "description": "Builds php-wasm, php-cgi-wasm, php-cli-wasm, php-dbg-wasm & dependencies.",
   "repository": "https://github.com/seanmorris/php-wasm",
   "author": "Sean Morris<php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
@@ -40,6 +40,7 @@
     "php-wasm-zlib": "packages/php-wasm-zlib",
     "php-wasm-sdl": "packages/php-wasm-sdl",
     "pobot": "^0.1.5",
+    "waitline": "packages/waitline",
     "vrzno": "packages/vrzno"
   },
   "workspaces": [
@@ -59,6 +60,7 @@
     "packages/sqlite",
     "packages/tidy",
     "packages/vrzno",
+    "packages/waitline",
     "packages/xml",
     "packages/zlib",
     "packages/sdl"

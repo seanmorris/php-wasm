@@ -35,7 +35,7 @@ endif
 # endif
 
 ifeq (${WITH_SDL},dynamic)
-EXTRA_CFLAGS+= --use-port=sdl2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
+EXTRA_CFLAGS+= --use-port=sdl2 -lGL -lEGL
 PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 SKIP_LIBS+= -lsdl -lgl

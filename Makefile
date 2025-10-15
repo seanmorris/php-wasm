@@ -1,5 +1,5 @@
 #!/usr/bin/env make
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets rebuild reconfigure packages/php-wasm/config.mjs packages/php-cg-wasm/config.mjs
+.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets rebuild reconfigure packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables --shuffle=random
 
@@ -61,18 +61,6 @@ endif
 
 ifeq ($(filter ${WITH_NETWORKING},0 1),)
 $(error WITH_NETWORKING MUST BE 0, 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
-endif
-
-## Compression
-GZIP   ?=0
-BROTLI ?=0
-
-ifeq ($(filter ${GZIP},0 1),)
-$(error GZIP MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
-endif
-
-ifeq ($(filter ${BROTLI},0 1),)
-$(error BROTLI MUST BE 0, 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ## PHP Version
@@ -197,6 +185,7 @@ all:
 	$(MAKE) _all
 
 -include packages/php-cgi-wasm/pre.mak
+-include packages/php-cli-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
 -include $(addsuffix /pre.mak,$(shell npm ls -p))
 
@@ -209,6 +198,7 @@ endif
 
 -include $(addsuffix /static.mak,$(shell npm ls -p))
 -include packages/php-cgi-wasm/static.mak
+-include packages/php-cli-wasm/static.mak
 -include packages/php-dbg-wasm/static.mak
 
 ########### Collect & patch the source code. ###########
@@ -350,6 +340,7 @@ PRELOAD_METHOD=--preload-file
 SAPI_CLI_PATH=sapi/cli/php-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 SAPI_CGI_PATH=sapi/cgi/php-cgi-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
 SAPI_PHPDBG_PATH=sapi/phpdbg/php-dbg-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE}
+PHP_CLI_OBJS=sapi/embed/php_embed.lo
 
 MAIN_MODULE?=1
 ASYNCIFY?=1
@@ -361,7 +352,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CLI_PATH}'\
 	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
-	PHP_CLI_OBJS='sapi/embed/php_embed.lo' \
+	PHP_CLI_OBJS='${PHP_CLI_OBJS}' \
 	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
@@ -545,6 +536,7 @@ cjs: tags
 common-web:
 	$(MAKE) web-mjs
 	$(MAKE) worker-cgi-mjs
+	$(MAKE) web-cli-mjs
 	$(MAKE) web-dbg-mjs
 
 common:

@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "pdo-pglite": "../packages/pdo-pglite",
     "php-cgi-wasm": "../packages/php-cgi-wasm",
+    "php-cli-wasm": "../packages/php-cli-wasm",
     "php-wasm": "../packages/php-wasm",
     "php-wasm-dom": "../packages/dom",
     "php-wasm-gd": "../packages/gd",

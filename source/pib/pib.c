@@ -31,8 +31,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#include <SDL_hints.h>
-
 #define STRINGIFY_INTERNAL(MACRO) #MACRO
 #define STRINGIFY(MACRO)  STRINGIFY_INTERNAL(MACRO)
 
@@ -46,8 +44,6 @@ char *_sapi_name = NULL;
  */
 int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 {
-	SDL_SetHint(SDL_HINT_EMSCRIPTEN_ASYNCIFY, "0");
-
 	if(!_sapi_name)
 	{
 		_sapi_name = malloc(strlen(__sapi_name) + 1);
