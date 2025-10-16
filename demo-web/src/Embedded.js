@@ -105,8 +105,6 @@ function Embedded() {
 
 		const _sharedLibs = [...sharedLibs];
 
-		console.log({version, variant})
-
 		if(variant === '_sdl')
 		{
 			_sharedLibs.push(sdl);
