@@ -196,9 +196,11 @@ NOTPARALLEL=
 all:
 	$(MAKE) _all
 
+TOP_LEVEL=packages/php-wasm packages/php-cgi-wasm packages/php-dbg-wasm
+
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
--include $(addsuffix /pre.mak,$(shell npm ls -p))
+-include $(addsuffix /pre.mak,$(filter-out ${TOP_LEVEL},$(shell npm ls -p)))
 
 ifneq (${PRELOAD_ASSETS},)
 # DEPENDENCIES+=
@@ -209,7 +211,7 @@ endif
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
--include $(addsuffix /static.mak,$(shell npm ls -p))
+-include $(addsuffix /static.mak,$(filter-out ${TOP_LEVEL},$(shell npm ls -p)))
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-dbg-wasm/static.mak
 
@@ -991,16 +993,16 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=1
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=1
 	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=1
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure

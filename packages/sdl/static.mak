@@ -17,7 +17,6 @@ ifeq (${WITH_SDL},static)
 CONFIGURE_FLAGS+= --with-sdl
 PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl/config.m4
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-PHP_VARIANT:=${PHP_VARIANT}_sdl
 # ARCHIVES+= lib/lib/libSDL2.a libGL.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
@@ -26,7 +25,6 @@ ifeq (${WITH_SDL},shared)
 CONFIGURE_FLAGS+= --with-sdl
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 packages/sdl/libSDL2.so packages/sdl/libGL.so
 SHARED_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
-PHP_VARIANT:=${PHP_VARIANT}_sdl
 # PHP_ASSET_LIST+= libSDL2.so libGL.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
@@ -34,7 +32,6 @@ endif
 ifeq (${WITH_SDL},dynamic)
 PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-PHP_VARIANT:=${PHP_VARIANT}_sdl
 # SKIP_LIBS+= -lsdl -lgl
 endif
 
@@ -101,7 +98,7 @@ packages/sdl/php${PHP_VERSION}-sdl.so: ${PHPIZE} third_party/php${PHP_VERSION}-s
 	${DOCKER_RUN_IN_EXT_SDL} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SDL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_SDL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -sASYNCIFY -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/sdl.a
-#	${DOCKER_RUN_IN_EXT_SDL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -sASYNCIFY -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/sdl.a --use-port=sdl2 -sLEGACY_GL_EMULATION  
+#	${DOCKER_RUN_IN_EXT_SDL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -sASYNCIFY -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/sdl.a --use-port=sdl2 -sLEGACY_GL_EMULATION
 
 $(addsuffix /php${PHP_VERSION}-sdl.so,$(sort ${SHARED_ASSET_PATHS})): packages/sdl/php${PHP_VERSION}-sdl.so
 	cp -Lp $^ $@

@@ -60,7 +60,7 @@ display_errors = Off
 display_startup_errors = Off
 
 log_errors = On
-error_log = /dev/stderr	
+error_log = /dev/stderr
 `;
 
 let init = false;
@@ -97,10 +97,7 @@ function Embedded() {
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
 	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
-	const onError  = event => {
-		setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
-		console.log(event.detail.join(''));
-	};
+	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
 		const version = (selectVersionBox.current ? selectVersionBox.current.value : '8.4') ?? '8.4';
@@ -233,12 +230,12 @@ function Embedded() {
 	}, [query]);
 
 	const loadDemo = useCallback(demoName => {
-		
+
 		if(!demoName)
 		{
 			return;
 		}
-		
+
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
@@ -250,8 +247,6 @@ function Embedded() {
 			/>);
 			return;
 		}
-
-		// selectDemoBox.current.value = demoName;
 
 		setRunning(true);
 
@@ -273,8 +268,7 @@ function Embedded() {
 			canvasCheckbox.current.checked = settings['canvas'] ?? false;
 			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? '8.4';
 			selectVariantnBox.current.value = settings['variant'] ?? selectVariantnBox.current.value ?? '';
-			
-			// selectDemoBox.current.value = demoName;
+
 			await phpRef.current.binary;
 
 			if(settings['render-as'])
@@ -370,7 +364,9 @@ function Embedded() {
 		}
 		else if(query.has('demo'))
 		{
-			loadDemo(query.get('demo'));
+			const demoName = query.get('demo');
+			selectDemoBox.current.value = demoName;
+			loadDemo(demoName);
 			query.delete('demo');
 		}
 
