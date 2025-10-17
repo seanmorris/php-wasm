@@ -12,6 +12,7 @@ import Editor from './Editor';
 import DbgPreview from './DbgPreview';
 import MultiIframeTest from './MultiIframeTest';
 import { onMessage } from 'php-cgi-wasm/msg-bus';
+import VSCodeEditor from './VSCodeEditor';
 
 const params = new URLSearchParams(window.location.search);
 
@@ -68,6 +69,7 @@ root.render(<React.StrictMode>
 				element = { <Navigate to = {process.env.PUBLIC_URL + '/install-demo.html?framework=laravel-11'} /> }
 			/>
 			<Route path = "/iframe-test.html" element = { <MultiIframeTest /> } />
+			<Route path = "/vscode.html" element = { <VSCodeEditor /> } />
 		</Routes>
 	</BrowserRouter>
 </React.StrictMode>

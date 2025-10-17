@@ -10,8 +10,10 @@ import reactIcon from './react-icon.svg';
 
 // import rolodexIcon from './icons/rolodex-icon-32.png';
 import editorIcon from './icons/editor-icon-32.png';
+import vscodeIcon from './icons/vscode-32.png';
 import donateIcon from './icons/donate-icon-32.png';
 import githubIcon from './icons/github-icon-32.png';
+import seanIcon from './icons/sean-icon-32.png';
 
 import sunburstIcon from './icons/sunburst.png';
 import netscapeIcon from './icons/netscape.png';
@@ -92,22 +94,34 @@ function Home() {
 				</div>
 
 				<div className = "inset button-bar">
-					<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor.html'}>
-						<img src = {editorIcon} className = "icon" alt = "Code Editor" />
-						Code Editor
-					</button>
-					{/* <button>
-						<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
-						SQL Editor
-					</button> */}
-					<button onClick = {() => window.open('https://github.com/sponsors/seanmorris')}>
-						<img src = {donateIcon} className = "icon" alt = "Donate" />
-						Donate
-					</button>
-					<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
-						<img src = {githubIcon} className = "icon" alt = "Github" />
-						Github
-					</button>
+					<div class = "row">
+						<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor.html'}>
+							<img src = {editorIcon} className = "icon" alt = "Code Editor" />
+							Lightweight Code Editor
+						</button>
+						<button onClick = {() => window.location = process.env.PUBLIC_URL + '/vscode.html'}>
+							<img src = {vscodeIcon} className = "icon" alt = "Code Editor" />
+							VSCode
+						</button>
+						{/* <button>
+							<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
+							SQL Editor
+						</button> */}
+					</div>
+					<div>
+						<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
+							<img src = {githubIcon} className = "icon" alt = "Github" />
+							Github
+						</button>
+						<button onClick = {() => window.open('https://github.com/sponsors/seanmorris')}>
+							<img src = {donateIcon} className = "icon" alt = "Donate" />
+							Donate
+						</button>
+						<button onClick = {() => window.open('https://seanmorr.is')}>
+							<img src = {seanIcon} alt = "sean" />
+							Sean Morris
+						</button>
+					</div>
 				</div>
 
 				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
