@@ -62,8 +62,13 @@ button.padded {
 
 .button-bar {
 	display: flex;
-	flex-direction: row;
+	flex-direction: column;
 	margin-top: 0.5rem;
+}
+
+.button-bar > div {
+	display: flex;
+	flex-direction: row;
 }
 
 .button-bar button {

@@ -36,14 +36,22 @@ packages/**/*.so
 packages/**/*.dat
 emscripten/
 **.generated.mjs
-packages/php-wasm/mapped
-packages/php-cgi-wasm/mapped
+
 packages/php-wasm/*.map
 packages/php-wasm/*.map.BAK
+packages/php-wasm/build.log
+
+packages/php-cli-wasm/*.map
+packages/php-cli-wasm/*.map.BAK
+packages/php-cli-wasm/build.log
+
 packages/php-cgi-wasm/*.map
 packages/php-cgi-wasm/*.map.BAK
-packages/php-wasm/build.log
 packages/php-cgi-wasm/build.log
+
+packages/php-wasm/mapped
+packages/php-cli-wasm/mapped
+packages/php-cgi-wasm/mapped
 
 docs/static/media/mapped/*
 demo-web/public/static/media/mapped/*
