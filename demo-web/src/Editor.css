@@ -136,3 +136,7 @@
 	/* background-blend-mode: luminosity; */
 	/* background-blend-mode: exclusion; */
 }
+
+.editor iframe {
+	flex-grow: 1;
+}
