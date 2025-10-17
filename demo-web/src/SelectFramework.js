@@ -185,23 +185,25 @@ function SelectFramework() {
 						</div>
 					</div>
 					<h2>Filesystem Operations:</h2>
-					<div className = "inset button-bar">
-						<button onClick = {backupSite}>
-							<img alt = "Backup" src = {cabinetIcon} className = "icon" />
-							Backup
-						</button>
-						<button onClick = {restoreSite}>
-							<img alt = "Restore" src = {floppyIcon} className = "icon" />
-							Restore
+					{isIframe || <>
+						<div className = "inset button-bar row">
+							<button onClick = {backupSite}>
+								<img alt = "Backup" src = {cabinetIcon} className = "icon" />
+								Backup
 							</button>
-						<button onClick = {clearFilesystem}>
-							<img alt = "Clear" src = {nukeIcon} className = "icon" />
-							Clear
-						</button>
-					</div>
-					{isIframe || (<div className = "inset right demo-bar">
-						<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
-					</div>)}
+							<button onClick = {restoreSite}>
+								<img alt = "Restore" src = {floppyIcon} className = "icon" />
+								Restore
+								</button>
+							<button onClick = {clearFilesystem}>
+								<img alt = "Clear" src = {nukeIcon} className = "icon" />
+								Clear
+							</button>
+						</div>
+						<div className = "inset right demo-bar">
+							<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+						</div>
+					</>}
 				</div>
 			</div>
 			<div className = "overlay">{overlay}</div>
