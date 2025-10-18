@@ -1,4 +1,4 @@
-import { PhpBase } from 'php-wasm/PhpBase';
+import { PhpBase } from './PhpBase';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 const NUM = 'number';
@@ -46,9 +46,25 @@ export class PhpCliWeb extends PhpBase
 		return commitTransaction(this, readOnly);
 	}
 
-	run()
+	run(flags = [])
 	{
-		return this._main();
+		// const flags = ['-c', '/php.ini'];
+		// const flags = [];
+
+		if(this.interactive)
+		{
+			flags.push('-a');
+		}
+		else if(this.script)
+		{
+			flags.push('-f', this.script);
+		}
+		else if(this.code)
+		{
+			flags.push('-r', this.code);
+		}
+
+		return this._main(flags);
 	}
 
 	async provideInput(line)
@@ -65,24 +81,9 @@ export class PhpCliWeb extends PhpBase
 		}
 	}
 
-	async _main()
+	async _main(flags = [])
 	{
 		const php = (await this.binary);
-
-		const flags = [];
-
-		if(this.interactive)
-		{
-			flags.push('-a');
-		}
-		else if(this.script)
-		{
-			flags.push('-f', this.script);
-		}
-		else if(this.code)
-		{
-			flags.push('-r', this.code);
-		}
 
 		const cmd = ['php', ...flags];
 
@@ -125,8 +126,8 @@ export class PhpCliWeb extends PhpBase
 		finally
 		{
 			this.flush();
-			ptrs.forEach(p => php._free(p));
-			php._free(arLoc);
+			// ptrs.forEach(p => php._free(p));
+			// php._free(arLoc);
 		}
 	}
 

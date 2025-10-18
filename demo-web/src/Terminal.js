@@ -20,33 +20,40 @@ import mbstring from 'php-wasm-mbstring';
 import sqlite from 'php-wasm-sqlite';
 import xml from 'php-wasm-xml';
 import simplexml from 'php-wasm-simplexml';
+import yaml from 'php-wasm-yaml';
 
 const parser = new Convert;
 
 const sharedLibs = [
 	libxml,
-	dom,
-	zlib,
-	libzip,
-	gd,
-	iconv,
-	intl,
-	openssl,
-	mbstring,
-	sqlite,
-	xml,
-	simplexml,
+	// dom,
+	// zlib,
+	// libzip,
+	// gd,
+	// iconv,
+	// intl,
+	// openssl,
+	// mbstring,
+	// sqlite,
+	// xml,
+	// simplexml,
+	yaml,
 ];
+
+const ini = `
+date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
+expose_php=0
+display_errors = Off
+display_startup_errors = Off
+
+log_errors = On
+error_log = /dev/stderr
+`;
 
 const files = [
 	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 	{ parent: '/preload/', name: 'phpinfo.php',     url: './scripts/phpinfo.php' },
 ];
-
-const ini = `
-	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-	expose_php=0
-`;
 
 const escapeHtml = s => s
 	.replace(/&/g, "&amp;")
@@ -178,17 +185,21 @@ export default forwardRef(function Terminal({
 			setStatusMessage && setStatusMessage('php-cli-wasm running...');
 		}
 
-		php.run().then((ret) => {
-			if(interactive)
-			{
-				setStatusMessage && setStatusMessage('php-cli-wasm ready!');
-			}
-			else
-			{
-				setStatusMessage && setStatusMessage('php-cli-wasm done.');
-				setExitCode && setExitCode('exit code: ' + ret);
-			}
-		});
+		(async () => {
+			await php.binary;
+			php.run(['-dextension=php8.3-yaml.so']).then((ret) => {
+				if(interactive)
+				{
+					setStatusMessage && setStatusMessage('php-cli-wasm ready!');
+				}
+				else
+				{
+					setStatusMessage && setStatusMessage('php-cli-wasm done.');
+					setExitCode && setExitCode('exit code: ' + ret);
+				}
+			});
+		})();
+
 
 		return () => {
 			php.removeEventListener('output', onOutput);
