@@ -3,7 +3,31 @@
 PACKAGE_DIR=${1}
 cd ${PACKAGE_DIR}/
 set -euo pipefail
-ls *.wasm | while read FILENAME; do
-	brotli -fq 11 ${FILENAME}
-	gzip -fkv9 ${FILENAME}
+
+# rm -f [0123456789abcdef]*.wasm
+
+ls php*.wasm | while read FILENAME; do
+	SHA_HASH=`sha1sum $FILENAME | cut -f1 -d' '`
+	HASHNAME=${SHA_HASH}.wasm
+
+	echo ${FILENAME}
+	echo ${SHA_HASH}
+
+	if [ -e "${HASHNAME}" ]; then
+		echo EXISTS ${FILENAME} ${HASHNAME}
+		echo ${SHA_HASH} ${FILENAME} | sha1sum -c -
+		echo ${SHA_HASH} ${HASHNAME} | sha1sum -c -
+	fi
+
+	echo MOVING ${FILENAME} ${HASHNAME}
+	mv ${FILENAME} ${HASHNAME}
+
+	JS_FILE=${FILENAME::-5}
+
+	cp ${JS_FILE} ${JS_FILE}.tmp
+
+	perl -pi -w -e 's|'${FILENAME}'|'${HASHNAME}'|g' ${JS_FILE}.tmp
+
+	mv ${JS_FILE}.tmp ${JS_FILE}
+
 done;

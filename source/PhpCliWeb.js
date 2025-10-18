@@ -1,15 +1,16 @@
 import { PhpBase } from 'php-wasm/PhpBase';
-import PhpBinary from './php-cli-web';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 const NUM = 'number';
 const STR = 'string';
 
+const defaultVersion = '8.3';
+
 export class PhpCliWeb extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(PhpBinary, args, 'cli');
+		super(import(`./php${args.version ?? defaultVersion}-cli-web.mjs`), args, 'cli');
 
 		this.binary = this.binary.then((php) => {
 			console.log(php);

@@ -1,10 +1,12 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-shell';
+
+const defaultVersion = '8.4';
 
 export class PhpShell extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(PhpBinary, args);
+		super(import(`./php${args.version ?? defaultVersion}-node.mjs`), args);
+
 	}
 }

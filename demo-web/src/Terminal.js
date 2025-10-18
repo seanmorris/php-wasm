@@ -3,32 +3,46 @@ import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb';
 import { PGlite } from '@electric-sql/pglite';
 
 import './dbg-preview.css';
+
 import loading from './loading.svg';
 
 import Convert from 'ansi-to-html';
 
+import libxml from 'php-wasm-libxml';
+import dom from 'php-wasm-dom';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+import gd from 'php-wasm-gd';
+import iconv from 'php-wasm-iconv';
+import intl from 'php-wasm-intl';
+import openssl from 'php-wasm-openssl';
+import mbstring from 'php-wasm-mbstring';
+import sqlite from 'php-wasm-sqlite';
+import xml from 'php-wasm-xml';
+import simplexml from 'php-wasm-simplexml';
+
 const parser = new Convert;
 
+console.log(dom);
+
 const sharedLibs = [
-	`php${PhpCliWeb.phpVersion}-zlib.so`,
-	`php${PhpCliWeb.phpVersion}-zip.so`,
-	`php${PhpCliWeb.phpVersion}-gd.so`,
-	`php${PhpCliWeb.phpVersion}-iconv.so`,
-	`php${PhpCliWeb.phpVersion}-intl.so`,
-	`php${PhpCliWeb.phpVersion}-openssl.so`,
-	`php${PhpCliWeb.phpVersion}-dom.so`,
-	`php${PhpCliWeb.phpVersion}-mbstring.so`,
-	`php${PhpCliWeb.phpVersion}-sqlite.so`,
-	`php${PhpCliWeb.phpVersion}-pdo-sqlite.so`,
-	// `php${PhpCliWeb.phpVersion}-phar.so`,
-	`php${PhpCliWeb.phpVersion}-xml.so`,
-	`php${PhpCliWeb.phpVersion}-simplexml.so`,
-	{url: `libxml2.so`, ini:false},
+	libxml,
+	dom,
+	zlib,
+	libzip,
+	gd,
+	iconv,
+	intl,
+	openssl,
+	mbstring,
+	sqlite,
+	xml,
+	simplexml,
 ];
 
 const files = [
-	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
-	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
+	// { parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 ];
 
 const ini = `
@@ -112,7 +126,14 @@ export default forwardRef(function Terminal({
 
 	const refreshPhp = useCallback(init => {
 		setStatusMessage && setStatusMessage('loading...');
-		phpRef.current = new PhpCliWeb({sharedLibs, files, ini, PGlite, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+		phpRef.current = new PhpCliWeb({
+			version: '8.3',
+			sharedLibs,
+			files,
+			ini,
+			PGlite,
+			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]}
+		);
 
 		const php = phpRef.current;
 

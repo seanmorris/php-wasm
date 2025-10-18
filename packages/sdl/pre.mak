@@ -12,17 +12,23 @@ ifeq ($(filter ${WITH_SDL},0 1 shared static dynamic),)
 $(error WITH_SDL MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-ifeq (${WITH_SDL},1)
-WITH_SDL=static
+ifneq ($(filter ${WITH_SDL},1 dynamic),)
+WITH_SDL=dynamic
+EXTRA_CFLAGS+= --use-port=sdl2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
+PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
+SKIP_LIBS+= -lsdl -lgl
+PHP_VARIANT:=${PHP_VARIANT}_sdl
 endif
 
 ifeq (${WITH_SDL},static)
 CONFIGURE_FLAGS+= --with-sdl
-EXTRA_CFLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL -lSDL2
+# EXTRA_CFLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL -lSDL2
 PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl/config.m4
 # TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-# ARCHIVES+= lib/lib/libSDL2.a libGL.so
+ARCHIVES+= lib/lib/libSDL2.a
 # SKIP_LIBS+= -lsdl -lgl
+PHP_VARIANT:=${PHP_VARIANT}_sdl
 endif
 
 # ifeq (${WITH_SDL},shared)
@@ -33,10 +39,3 @@ endif
 # # PHP_ASSET_LIST+= libSDL2.so libGL.so
 # # SKIP_LIBS+= -lsdl -lgl
 # endif
-
-ifeq (${WITH_SDL},dynamic)
-EXTRA_CFLAGS+= --use-port=sdl2 -lGL -lEGL
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
-TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-SKIP_LIBS+= -lsdl -lgl
-endif

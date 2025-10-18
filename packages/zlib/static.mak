@@ -32,6 +32,7 @@ endif
 
 ifeq (${WITH_ZLIB},dynamic)
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
+DYNAMIC_LIBS+= packages/zlib/libz.so
 PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 SKIP_LIBS+= -lz
 endif

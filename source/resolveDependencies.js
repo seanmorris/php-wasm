@@ -17,12 +17,12 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	const _files = [];
 	const _libs = [];
 
-	(sharedLibs || []).forEach(libDef => {
+	(sharedLibs || []).flat().forEach(libDef => {
 		if(typeof libDef === 'object')
 		{
 			if(typeof libDef.getLibs === 'function')
 			{
-				_libs.push(...libDef.getLibs(wrapper.constructor));
+				_libs.push(...libDef.getLibs(wrapper));
 			}
 			else
 			{
@@ -31,7 +31,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 
 			if(typeof libDef.getFiles === 'function')
 			{
-				_files.push(...libDef.getFiles(wrapper.constructor));
+				_files.push(...libDef.getFiles(wrapper));
 			}
 		}
 		else
@@ -41,7 +41,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	});
 
 	const files = _files.map(fileDef => {
-		const url = String(fileDef.url);
+		const url = new URL(fileDef.url);
 		const path = fileDef.path;
 		const name = fileDef.name || path.split('/').pop();
 		const parent = path.substr(0, path.length - name.length);

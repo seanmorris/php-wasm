@@ -1,5 +1,6 @@
 import { phpVersion } from './config';
 import { phpVersionFull } from './config';
+
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
@@ -10,7 +11,7 @@ const NUM = 'number';
 
 export class PhpBase extends EventTarget
 {
-	constructor(PhpBinary, args = {}, sapi = 'embed')
+	constructor(phpBinLoader, args = {}, sapi = 'embed')
 	{
 		super();
 
@@ -32,6 +33,9 @@ export class PhpBase extends EventTarget
 		this.autoTransaction = ('autoTransaction' in args) ? args.autoTransaction : true;
 		this.transactionStarted = false;
 
+		this.phpVersion = args.version;
+		this.phpVariant = args.variant;
+		
 		this.shared = args.shared = ('shared' in args) ? args.shared : {};
 
 		this.phpArgs = args;
@@ -54,7 +58,8 @@ export class PhpBase extends EventTarget
 
 		const files = args.files || [];
 
-		const {files: extraFiles, libs, urlLibs} = resolveDependencies(args.sharedLibs, this);
+		const {files: sharedLibFiles, libs: sharedlibs, urlLibs: sharedLibUrls} = resolveDependencies(args.sharedLibs, this);
+		const {files: dynamicLibFiles, libs: dynamiclibs, urlLibs: dyamicLibUrls} = resolveDependencies(args.dynamicLibs, this);
 
 		args.locateFile = (path, directory) => {
 			let located = userLocateFile(path, directory);
@@ -62,15 +67,21 @@ export class PhpBase extends EventTarget
 			{
 				return located;
 			}
-			if(urlLibs[path])
+			if(sharedLibUrls[path])
 			{
-				return urlLibs[path];
+				return sharedLibUrls[path];
+			}
+			if(dyamicLibUrls[path])
+			{
+				return dyamicLibUrls[path];
 			}
 		};
 
 		this.valueIndex = 0;
 
-		this.binary = new PhpBinary(Object.assign({}, defaults, phpSettings, args, fixed)).then(async php => {
+		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
+
+		this.binary = phpBinLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
 			php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -83,25 +94,41 @@ export class PhpBase extends EventTarget
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(files.concat(extraFiles).map(
+			const allFiles = files.concat(sharedLibFiles, dynamicLibFiles);
+
+			// Make sure folder structure exists before preloading files
+			allFiles.forEach(fileDef => {
+				const segments = fileDef.parent.split('/');
+				let currentPath = '';
+				for (const segment of segments) {
+					if (!segment) continue;
+
+					currentPath += segment + '/';
+					if (!php.FS.analyzePath(currentPath).exists) {
+						php.FS.mkdir(currentPath);
+					}
+				}
+			});
+
+			await Promise.all(allFiles.map(
 				fileDef => new Promise(accept => php.FS.createPreloadedFile(
 					fileDef.parent,
 					fileDef.name,
-					fileDef.url,
+					fileDef.url instanceof URL ? fileDef.url.href : fileDef.url,
 					true,
 					false,
 					accept,
 				))
 			));
 
-			const iniLines = libs.map(lib => {
+			const iniLines = sharedlibs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;
 				}
 				else if(typeof lib === 'object' && lib.ini)
 				{
-					return `extension=${String(lib.url).split('/').pop()}`;
+					return `extension=${lib.name ?? String(lib.url).split('/').pop()}`;
 				}
 			});
 

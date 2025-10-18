@@ -1,10 +1,14 @@
 import { PhpCgiBase } from './PhpCgiBase';
-import PHP from './php-cgi-shell';
+
+const defaultVersion = '8.4';
 
 export class PhpCgiShell extends PhpCgiBase
 {
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		super(PHP, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args});
+		super(
+			import(`./php${version ?? defaultVersion}-cgi-shell.mjs`)
+			, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args}
+		);
 	}
 }

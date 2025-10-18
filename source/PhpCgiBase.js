@@ -166,7 +166,7 @@ export class PhpCgiBase
 
 	/**
 	 * Creates a new PHP instance (async)
-	 * @param {*} PHP
+	 * @param {*} binLoader
 	 * @param {string} options.prefix The URL path prefix to look for when routing to PHP.
 	 * @param {string} options.docroot The internal directory to use as the public document root.
 	 * @param {string[]} options.exclude Array of URL prefixes to exclude from routing to PHP.
@@ -177,6 +177,7 @@ export class PhpCgiBase
 	 * @param {function()} options.onRequest Function to be executed on each request.
 	 * @param {function(Request):Response|string} options.notFound Function to handle 404s.
 	 * @param {LibDef[]} options.sharedLibs Dynamically load shared libraries with LibDefs
+	 * @param {LibDef[]} options.dynamicLibs Similar to sharedLibs but will NEVER use the ini based loader.
 	 * @param {FileDef[]} options.files Dynamically load files with FileDefs
 	 * @param {boolean} options.autoTransaction Automatically handle FS transactions on each request
 	 * @param {number} options.maxRequestAge Oldest request to process (ms)
@@ -184,21 +185,23 @@ export class PhpCgiBase
 	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
 	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
 	 */
-	constructor(PHP, {docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, actions, files, ...args} = {})
+	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, dynamicLibs, actions, files, ...args} = {})
 	{
-		this.PHP        = PHP;
-		this.docroot    = docroot    || this.docroot;
-		this.prefix     = prefix     || this.prefix;
-		this.exclude    = exclude    || this.exclude;
-		this.rewrite    = rewrite    || this.rewrite;
-		this.entrypoint = entrypoint || this.entrypoint;
+		this.binLoader  = phpBinLoader;
+		this.phpVersion = version;
+		this.docroot    = docroot      || this.docroot;
+		this.prefix     = prefix       || this.prefix;
+		this.exclude    = exclude      || this.exclude;
+		this.rewrite    = rewrite      || this.rewrite;
+		this.entrypoint = entrypoint   || this.entrypoint;
 		this.cookieJar  = new CookieJar(cookies);
-		this.types      = types      || this.types;
-		this.onRequest  = onRequest  || this.onRequest;
-		this.notFound   = notFound   || this.notFound;
-		this.sharedLibs = sharedLibs || this.sharedLibs;
-		this.files      = files      || this.files;
-		this.extraActions = actions  || {};
+		this.types      = types        || this.types;
+		this.onRequest  = onRequest    || this.onRequest;
+		this.notFound   = notFound     || this.notFound;
+		this.sharedLibs = sharedLibs   || this.sharedLibs;
+		this.dynamicLibs = dynamicLibs || this.dynamicLibs;
+		this.files      = files        || this.files;
+		this.extraActions = actions    || {};
 
 		this.phpArgs = args;
 
@@ -294,14 +297,18 @@ export class PhpCgiBase
 		const url = new URL(event.request.url);
 		const prefix = this.prefix;
 
-		const {files, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		const {files: sharedLibFiles, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
+		const {files: dynamicLibFiles, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
 
 		let isWhitelisted = false;
 		let isBlacklisted = false;
 
 		if(globalThis.location)
 		{
-			const staticUrls = [self.location.pathname, ...files.map(file => file.url),...Object.values(urlLibs)]
+			const libFiles = [...sharedLibFiles, ...dynamicLibFiles];
+			const libUrls = {...sharedLibUrls, ...dynamicLibUrls};
+
+			const staticUrls = [self.location.pathname, ...libFiles.map(file => file.url), ...Object.values(libUrls)]
 			.map(url => new URL(url, self.location.origin))
 			.filter(url => url.origin === self.location.origin)
 			.map(url => url.pathname);
@@ -352,7 +359,11 @@ export class PhpCgiBase
 
 	refresh()
 	{
-		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		// const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
+		const {files: dynamicLibFiles, libs: dynamicLibs, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
+
+		const files = [...sharedLibFiles, ...dynamicLibFiles];
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
@@ -363,14 +374,24 @@ export class PhpCgiBase
 				return located;
 			}
 
-			if(urlLibs[path])
+			if(sharedLibUrls[path])
 			{
-				if(urlLibs[path].protocol === 'file:')
+				if(sharedLibUrls[path].protocol === 'file:')
 				{
-					return urlLibs[path].pathname;
+					return sharedLibUrls[path].pathname;
 				}
 
-				return String(urlLibs[path]);
+				return String(sharedLibUrls[path]);
+			}
+
+			if(dynamicLibUrls[path])
+			{
+				if(dynamicLibUrls[path].protocol === 'file:')
+				{
+					return dynamicLibUrls[path].pathname;
+				}
+
+				return String(dynamicLibUrls[path]);
 			}
 		};
 
@@ -385,7 +406,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		return this.binary = new this.PHP(phpArgs).then(async php => {
+		return this.binary = this.binLoader.then({default: PHP}).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -399,11 +420,27 @@ export class PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(this.files.concat(files).map(fileDef => php.FS.createPreloadedFile(
+			const allFiles = this.files.concat(files).concat(sharedLibFiles).concat(dynamicLibFiles);
+
+			// Make sure folder structure exists before preloading files
+			allFiles.forEach(fileDef => {
+				const segments = fileDef.parent.split('/');
+				let currentPath = '';
+				for (const segment of segments) {
+					if (!segment) continue;
+			
+					currentPath += segment + '/';
+					if (!php.FS.analyzePath(currentPath).exists) {
+						php.FS.mkdir(currentPath);
+					}
+				}
+			});
+
+			await Promise.all(allFiles.map(fileDef => php.FS.createPreloadedFile(
 				fileDef.parent, fileDef.name, userLocateFile(fileDef.url) ?? fileDef.url, true, false
 			)));
 
-			const iniLines = libs.map(lib => {
+			const iniLines = sharedLibs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;
@@ -577,96 +614,101 @@ export class PhpCgiBase
 			}
 		}
 
-		this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
-		this.output = [];
-		this.error = [];
-
-		const selfUrl = new URL(globalThis.location || request.url);
-
-		putEnv(php, 'PHP_VERSION', phpVersion);
-		putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
-		putEnv(php, 'PHPRC', '/php.ini');
-
-		for(const [name, value] of Object.entries(this.env))
-		{
-			putEnv(php, name, value);
-		}
-
-		const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
-
-		putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
-		putEnv(php, 'REQUEST_METHOD', method);
-		putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
-		putEnv(php, 'HTTP_HOST', selfUrl.host);
-		putEnv(php, 'REQUEST_SCHEME', protocol);
-		putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
-
-		putEnv(php, 'DOCUMENT_ROOT', docroot);
-		putEnv(php, 'REQUEST_URI', originalPath);
-		putEnv(php, 'SCRIPT_NAME', scriptName);
-		putEnv(php, 'SCRIPT_FILENAME', path);
-		putEnv(php, 'PATH_TRANSLATED', path);
-
-		putEnv(php, 'QUERY_STRING', get);
-		putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
-		putEnv(php, 'REDIRECT_STATUS', '200');
-		putEnv(php, 'CONTENT_TYPE', contentType);
-		putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
-
 		let exitCode = -1;
 
 		try
 		{
-			exitCode = await php.ccall(
-				'main'
-				, 'number'
-				, ['number', 'string']
-				, []
-				, {async: true}
-			);
+			// We need "return await" otherwise the finally block will run before the lock releases.
+			return await navigator.locks.request('php-wasm-request-lock', async () => {
+				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? post.split('') : [];
+				this.output = [];
+				this.error = [];
 
-			++this.count;
+				const selfUrl = new URL(globalThis.location || request.url);
 
-			const parsedResponse = parseResponse(this.output);
+				putEnv(php, 'PHP_VERSION', phpVersion);
+				putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
+				putEnv(php, 'PHPRC', '/php.ini');
 
-			let status = 200;
-
-			if(parsedResponse.headers.has('Status'))
-			{
-				status = parsedResponse.headers.get('Status').substr(0, 3);
-			}
-
-			for(const rawCookie of parsedResponse.headers.getSetCookie())
-			{
-				this.cookieJar.store(rawCookie);
-			}
-
-			php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
-
-			const headers = new Headers(parsedResponse.headers);
-
-			if(!headers.has('Content-type'))
-			{
-				if(extension in this.types)
+				for(const [name, value] of Object.entries(this.env))
 				{
-					headers.set('Content-type', this.types[extension]);
+					putEnv(php, name, value);
 				}
-				else
+
+				const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
+
+				putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
+				putEnv(php, 'REQUEST_METHOD', method);
+				putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
+				putEnv(php, 'HTTP_HOST', selfUrl.host);
+				putEnv(php, 'REQUEST_SCHEME', protocol);
+				putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
+
+				putEnv(php, 'DOCUMENT_ROOT', docroot);
+				putEnv(php, 'REQUEST_URI', originalPath);
+				putEnv(php, 'SCRIPT_NAME', scriptName);
+				putEnv(php, 'SCRIPT_FILENAME', path);
+				putEnv(php, 'PATH_TRANSLATED', path);
+
+				putEnv(php, 'QUERY_STRING', get);
+				putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
+				putEnv(php, 'REDIRECT_STATUS', '200');
+				putEnv(php, 'CONTENT_TYPE', contentType);
+				putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
+
+				this.output = [];
+
+				exitCode = await php.ccall(
+					'main'
+					, 'number'
+					, ['number', 'string']
+					, []
+					, {async: true}
+				);
+
+				++this.count;
+
+				const parsedResponse = parseResponse(this.output);
+
+				let status = 200;
+
+				if(parsedResponse.headers.has('Status'))
 				{
-					headers.set('Content-type', 'text/html; charset=utf-8');
+					status = parsedResponse.headers.get('Status').substr(0, 3);
 				}
-			}
 
-			if(parsedResponse.headers.has('Location'))
-			{
-				headers.set('Location', parsedResponse.headers.get('Location'));
-			}
+				for(const rawCookie of parsedResponse.headers.getSetCookie())
+				{
+					this.cookieJar.store(rawCookie);
+				}
 
-			const response = new Response(parsedResponse.body || '', { status, headers, url });
+				php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
 
-			this.onRequest(request, response);
+				const headers = new Headers(parsedResponse.headers);
 
-			return response;
+				if(!headers.has('Content-type'))
+				{
+					if(extension in this.types)
+					{
+						headers.set('Content-type', this.types[extension]);
+					}
+					else
+					{
+						headers.set('Content-type', 'text/html; charset=utf-8');
+					}
+				}
+
+				if(parsedResponse.headers.has('Location'))
+				{
+					headers.set('Location', parsedResponse.headers.get('Location'));
+				}
+
+				const response = new Response(parsedResponse.body || '', { status, headers, url });
+
+				this.onRequest(request, response);
+
+				return response;
+			});
 		}
 		catch (error)
 		{

@@ -36,6 +36,7 @@ endif
 ifeq (${WITH_SQLITE},dynamic)
 CONFIGURE_FLAGS+=  --enable-pdo
 PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
+DYNAMIC_LIBS+= packages/sqlite/libsqlite3.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
 endif

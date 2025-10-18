@@ -1,15 +1,16 @@
 import { PhpBase } from 'php-wasm/PhpBase';
-import PhpBinary from './php-dbg-web';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 const NUM = 'number';
 const STR = 'string';
 
+const defaultVersion = '8.4';
+
 export class PhpDbgWeb extends PhpBase
 {
 	constructor(args = {})
 	{
-		super(PhpBinary, args, 'phpdbg');
+		super(import(`./php${args.version ?? defaultVersion}-dbg-web.mjs`), args, 'phpdbg');
 
 		this.running = false;
 		this.paused = false;

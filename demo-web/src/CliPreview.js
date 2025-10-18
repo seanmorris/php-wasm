@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from 'react';
 import './dbg-preview.css';
-
 import Terminal from './Terminal';
 
 export default function CliPreview() {

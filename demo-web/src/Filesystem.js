@@ -7,7 +7,8 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
-const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const backupSite = async () => {
 	const persistFile = await sendMessage('readdir', ['/persist']);

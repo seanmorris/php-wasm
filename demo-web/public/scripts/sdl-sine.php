@@ -1,21 +1,17 @@
-<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"text"}
+<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"html","canvas":true,"variant":"_sdl"}
 
 error_reporting(E_ALL);
 
-if (!extension_loaded('sdl')) {
-    printf("The sdl extension is not loaded. Make sure it is in the system and there is a line for it on the php.ini file (eg \"extension=sdl.so\")");
+if(!extension_loaded('sdl'))
+{
+    printf("The SDL extension is not loaded. Make sure it is in the system and there is a line for it on the php.ini file (eg \"extension=sdl.so\")");
     exit(1);
 }
 
-function initSDLOrExit() {
-	if(SDL_Init(SDL_INIT_EVERYTHING) !== 0) {
-		printSdlErrorAndExit();
-	}
-}
-
-function printSdlErrorAndExit() {
-	printf("ERROR: %s\n", SDL_GetError());
-	exit(1);
+if(!extension_loaded('vrzno'))
+{
+    printf("The VRZNO extension is not loaded. VRZNO is required for this demo and requires PHP >=8.2.");
+    exit(1);
 }
 
 ############
@@ -47,13 +43,14 @@ $render = function() use(&$render, $renderer, &$j, $window) {
 
     for ($i = 0; $i < WINDOW_WIDTH; ++$i) {
         SDL_RenderDrawPoint($renderer, $i, 75 + (int)( sin($j+$i/100) * 15 ));
-        $j += 0.001;
+        $j += 0.00025;
     }
-    SDL_RenderPresent($renderer);
+
     $window->requestAnimationFrame($render);
 };
 
-$render();
+phpinfo();
 
+$render();
 
 
