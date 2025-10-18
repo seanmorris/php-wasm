@@ -217,7 +217,6 @@ export default function Editor() {
 	};
 
 	useEffect(() => {
-		console.log(aceRef.current);
 		if(aceRef.current)
 		{
 			const onGutter = async event => {

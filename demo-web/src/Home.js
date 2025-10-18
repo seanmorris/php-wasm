@@ -94,7 +94,7 @@ function Home() {
 				</div>
 
 				<div className = "inset button-bar">
-					<div class = "row">
+					<div className = "row">
 						<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor.html'}>
 							<img src = {editorIcon} className = "icon" alt = "Code Editor" />
 							Lightweight Code Editor

@@ -10,6 +10,7 @@ export default function CliPreview() {
 	const [line, setCurrentLine] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	const [exitCode, setExitCode] = useState();
 
 	const startPath = query.has('path') ? query.get('path') : false;
 
@@ -27,17 +28,14 @@ export default function CliPreview() {
 			</div>
 			<div className = "separator"></div>
 			<div>
-				<h1>php-cli-wasm</h1>
+				<h1>php-cli-wasm preview</h1>
 			</div>
 		</div>
 	</div>);
 
 	const statusBar = (<div className = "row status">
-		<div className = "row start toolbar" data-status>
-			<span className='file'>{file}</span>
-			<span className='line'>{line}</span>
-		</div>
 		<div className = "row start wide toolbar" data-status>{statusMessage}</div>
+		<div className = "row start toolbar" data-status>{exitCode}</div>
 	</div>);
 
 	return (<div className = "dbg-preview margined">
@@ -49,6 +47,7 @@ export default function CliPreview() {
 					setCurrentFile = {setCurrentFile}
 					setCurrentLine = {setCurrentLine}
 					setStatusMessage = {setStatusMessage}
+					setExitCode = {setExitCode}
 					localEcho = {true}
 				/>
 			</div>

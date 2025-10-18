@@ -14,7 +14,7 @@ NOTPARALLEL+=\
 	webview-cli-js \
 	node-cli-js
 
-WEB_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWeb.mjs php${PHP_SUFFIX}-cli-web.mjs ${MJS_HELPERS_WEB})
+WEB_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWeb.mjs PhpBase.mjs php${PHP_SUFFIX}-cli-web.mjs ${MJS_HELPERS_WEB})
 WEB_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWeb.js php${PHP_SUFFIX}-cli-web.js ${CJS_HELPERS_WEB})
 WORKER_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWorker.mjs php${PHP_SUFFIX}-cli-worker.mjs ${MJS_HELPERS_WEB})
 WORKER_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWorker.js php${PHP_SUFFIX}-cli-worker.js ${CJS_HELPERS_WEB})

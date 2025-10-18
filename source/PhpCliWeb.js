@@ -12,8 +12,22 @@ export class PhpCliWeb extends PhpBase
 	{
 		super(import(`./php${args.version ?? defaultVersion}-cli-web.mjs`), args, 'cli');
 
+		this.interactive = false;
+
+		if(args.interactive)
+		{
+			this.interactive = true;
+		}
+		else if(args.script)
+		{
+			this.script = args.script;
+		}
+		else if(args.code)
+		{
+			this.code = args.code;
+		}
+
 		this.binary = this.binary.then((php) => {
-			console.log(php);
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
 			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
@@ -55,8 +69,22 @@ export class PhpCliWeb extends PhpBase
 	{
 		const php = (await this.binary);
 
-		// const cmd = ['php', '-r', 'phpinfo();'];
-		const cmd = ['php', '-a'];
+		const flags = [];
+
+		if(this.interactive)
+		{
+			flags.push('-a');
+		}
+		else if(this.script)
+		{
+			flags.push('-f', this.script);
+		}
+		else if(this.code)
+		{
+			flags.push('-r', this.code);
+		}
+
+		const cmd = ['php', ...flags];
 
 		const ptrs = cmd.map(part => {
 			const len = php.lengthBytesUTF8(part) + 1;
@@ -72,8 +100,6 @@ export class PhpCliWeb extends PhpBase
 			php.setValue(arLoc + 4 * i, ptrs[i], '*');
 		}
 
-		console.log(arLoc, ptrs);
-
 		try
 		{
 			const process = php.ccall(
@@ -84,14 +110,17 @@ export class PhpCliWeb extends PhpBase
 				, {async: true}
 			);
 
-			return process;
+			// return process;
+			return 0;
 		}
 		catch(error)
 		{
-			if(!('status' in error ) || error.status !== 0)
-			{
-				throw error;
-			}
+			// if(!('status' in error ) || error.status !== 0)
+			// {
+			// 	throw error;
+			// }
+
+			return error.status;
 		}
 		finally
 		{

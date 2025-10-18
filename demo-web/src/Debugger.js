@@ -101,7 +101,9 @@ export default forwardRef(function Debugger({
 			clearTimeout(timeout);
 		}
 
-		timeout = setTimeout(() => stdIn.current.scrollIntoView(), 32);
+		timeout = setTimeout(() => stdIn.current.scrollIntoView({
+			behavior: 'smooth'
+		}), 32);
 	};
 
 	const onOutput = async event => {
@@ -287,23 +289,47 @@ export default forwardRef(function Debugger({
 	}
 
 	const focusInput = event => {
+		if(window.getSelection().toString() !== '')
+		{
+			return;
+		}
+
+		if(!phpRef.current.interactive)
+		{
+			scrollToEnd();
+			return;
+		}
 		if(window.getSelection().toString() === '')
 		{
 			stdIn.current && stdIn.current.focus();
 		}
 	};
 
-	return (<div className='phpdbg-console' ref = {terminal} onMouseUp={focusInput}>
-		<div className='scroll-to-bottom' onClick={focusInput}>&#x1F847;</div>
+	const handleTerminalClicked = () => {
+
+		if(!phpRef.current.interactive)
+		{
+			return;
+		}
+
+		focusInput();
+	};
+
+	const handleScrollToBottom = () => {
+		scrollToEnd();
+	};
+
+	return (<div className='phpdbg-console' ref = {terminal} onMouseUp={handleTerminalClicked}>
+		<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
 		<div className='console-output'>
 			<span className = "warning">⚠️ <i>This is in VERY early alpha!</i> ⚠️</span>
 			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
-		</div>
-		<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-			{!ready && (<img src = {loading} />)}
-			<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
-			<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
-			<button onClick = {runCommand}>&gt;</button>
+			<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
+				{!ready && (<img src = {loading} />)}
+				<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
+				<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+				<button onClick = {runCommand}>&gt;</button>
+			</div>
 		</div>
 	</div>);
 });

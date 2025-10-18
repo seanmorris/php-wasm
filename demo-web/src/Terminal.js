@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState, forwardRef } from 'react';
 import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb';
 import { PGlite } from '@electric-sql/pglite';
 
@@ -23,8 +23,6 @@ import simplexml from 'php-wasm-simplexml';
 
 const parser = new Convert;
 
-console.log(dom);
-
 const sharedLibs = [
 	libxml,
 	dom,
@@ -41,8 +39,8 @@ const sharedLibs = [
 ];
 
 const files = [
-	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
-	// { parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+	{ parent: '/preload/', name: 'phpinfo.php',     url: './scripts/phpinfo.php' },
 ];
 
 const ini = `
@@ -59,8 +57,20 @@ const escapeHtml = s => s
 
 let lastCommand = null;
 
+const phpArgs = {
+	version: '8.3',
+	sharedLibs,
+	files,
+	ini,
+	PGlite,
+	persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
+	// script: '/preload/hello-world.php'
+	// code: 'echo "Hello, PHP-CLI!";',
+	// interactive: false,
+};
+
 export default forwardRef(function Terminal({
-	setStatusMessage, localEcho = true, initCommands = [], onStdIn
+	setStatusMessage, setExitCode, localEcho = true, initCommands = [], onStdIn
 }, ref) {
 	const phpRef = useRef(null);
 
@@ -72,7 +82,6 @@ export default forwardRef(function Terminal({
 
 	const [ready, setReady] = useState(false);
 	const [output, setOutput] = useState([]);
-	const [exitCode, setExitCode] = useState('');
 
 	const init = useRef(true);
 	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> ')));
@@ -80,11 +89,23 @@ export default forwardRef(function Terminal({
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
 
+	const [interactive, setInteractive] = useState(!query.has('path') && !query.has('code'));
+	const [script, setScript] = useState(query.get('path'));
+	const [code, setCode] = useState(query.get('code'));
+
 	let timeout = null;
 
 	const scrollToEnd = () => {
 		if(!stdIn.current)
 		{
+			timeout = setTimeout(() => {
+				terminal.current.scrollTo({
+					top: terminal.current.scrollHeight,
+					behavior: 'smooth',
+				});
+
+			}, 32);
+
 			return;
 		}
 
@@ -126,14 +147,8 @@ export default forwardRef(function Terminal({
 
 	const refreshPhp = useCallback(init => {
 		setStatusMessage && setStatusMessage('loading...');
-		phpRef.current = new PhpCliWeb({
-			version: '8.3',
-			sharedLibs,
-			files,
-			ini,
-			PGlite,
-			persist: [{mountPath:'/persist'}, {mountPath:'/config'}]}
-		);
+
+		phpRef.current = new PhpCliWeb({...phpArgs, interactive, script, code});
 
 		const php = phpRef.current;
 
@@ -143,18 +158,7 @@ export default forwardRef(function Terminal({
 		setReady(true);
 
 		const firstInput = async () => {
-
-			// if(init && startPath)
-			// {
-			// 	setReady(false);
-			// 	await runCommand(null, `exec ${startPath}`);
-			// }
-
-			// await Promise.all( initCommands.map(async cmd => runCommand(null, cmd, true)) );
-
-			// await runCommand(null, 'set pagination off', true);
-
-			setStatusMessage && setStatusMessage('php-dbg-wasm ready!');
+			setStatusMessage && setStatusMessage('php-cli-wasm ready!');
 			setReady(true);
 			await new Promise(a => setTimeout(a, 10));
 			focusInput();
@@ -164,16 +168,37 @@ export default forwardRef(function Terminal({
 
 		const once = {once: true};
 
-		php.addEventListener('stdin-request', onStdInHandler);
-		// php.addEventListener('stdin-request', firstInput, once);
+		if(interactive)
+		{
+			php.addEventListener('stdin-request', onStdInHandler);
+			php.addEventListener('stdin-request', firstInput, once);
+		}
+		else
+		{
+			setStatusMessage && setStatusMessage('php-cli-wasm running...');
+		}
 
-		php.run();
+		php.run().then((ret) => {
+			if(interactive)
+			{
+				setStatusMessage && setStatusMessage('php-cli-wasm ready!');
+			}
+			else
+			{
+				setStatusMessage && setStatusMessage('php-cli-wasm done.');
+				setExitCode && setExitCode('exit code: ' + ret);
+			}
+		});
 
 		return () => {
 			php.removeEventListener('output', onOutput);
 			php.removeEventListener('error', onError);
-			php.removeEventListener('stdin-request', onStdInHandler);
-			// php.removeEventListener('stdin-request', firstInput, once);
+
+			if(interactive)
+			{
+				php.removeEventListener('stdin-request', onStdInHandler);
+				php.removeEventListener('stdin-request', firstInput, once);
+			}
 		};
 	}, []);
 
@@ -272,25 +297,46 @@ export default forwardRef(function Terminal({
 		lastCommand = inputValue || lastCommand;
 
 		stdIn.current && stdIn.current.focus();
-	}
+	};
 
 	const focusInput = event => {
+		if(!phpRef.current.interactive)
+		{
+			scrollToEnd();
+			return;
+		}
 		if(window.getSelection().toString() === '')
 		{
 			stdIn.current && stdIn.current.focus();
 		}
 	};
 
-	return (<div className='phpdbg-console' ref = {terminal} onMouseUp={focusInput}>
-		<div className='scroll-to-bottom' onClick={focusInput}>&#x1F847;</div>
-		<div className='console-output'>
+	const handleTerminalClicked = () => {
+
+		if(!phpRef.current.interactive)
+		{
+			return;
+		}
+
+		focusInput();
+	};
+
+	const handleScrollToBottom = () => {
+		scrollToEnd();
+	};
+
+	return (<div className='phpdbg-console inset' onMouseUp={handleTerminalClicked}>
+		<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
+		<div className='console-output' ref = {terminal}>
 			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
-		</div>
-		<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-			{!ready && (<img src = {loading} />)}
-			<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
-			<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
-			<button onClick = {runCommand}>&gt;</button>
+			{interactive && (
+				<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
+					{!ready && (<img src = {loading} />)}
+					<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
+					<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+					<button onClick = {runCommand}>&gt;</button>
+				</div>
+			)}
 		</div>
 	</div>);
 });
