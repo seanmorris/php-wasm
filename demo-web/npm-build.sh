@@ -28,13 +28,16 @@ npx webpack --config service-worker-prod.config.ts;
 npx react-scripts build;
 
 cat aphex.txt >> build/index.html;
+
 cp build/index.html build/404.html;
-cp build/index.html build/home.html;
-cp build/index.html build/embedded-php.html;
-cp build/index.html build/select-framework.html;
-cp build/index.html build/install-demo.html;
 cp build/index.html build/code-editor.html;
 cp build/index.html build/dbg-preview.html;
+cp build/index.html build/embedded-php.html;
+cp build/index.html build/home.html;
+cp build/index.html build/install-demo.html;
+cp build/index.html build/select-framework.html;
+cp build/index.html build/vscode.html;
+
 git add \
 	../docs/*.js \
 	../docs/*.html \

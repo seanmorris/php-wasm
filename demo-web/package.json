@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "pdo-pglite": "../packages/pdo-pglite",
     "php-cgi-wasm": "../packages/php-cgi-wasm",
+    "php-cli-wasm": "../packages/php-cli-wasm",
     "php-dbg-wasm": "../packages/php-dbg-wasm",
     "php-wasm": "../packages/php-wasm",
     "php-wasm-dom": "../packages/dom",
@@ -33,7 +34,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.0",
     "react-scripts": "5.0.1",
-    "vscode-react": "^0.1.3",
+    "vscode-react": "^0.1.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

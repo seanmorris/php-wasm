@@ -1,0 +1,48 @@
+{
+  "name": "php-cli-wasm",
+  "version": "0.0.9-alpha-32",
+  "description": "php-cli for wasm.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "license": "Apache-2.0",
+  "contributors": [
+    {
+      "name": "Sean Morris",
+      "email": "php-wasm@seanmorr.is",
+      "url": "https://seanmorr.is"
+    }
+  ],
+  "scripts": {
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-cli-wasm/$FILENAME; echo; done;"
+  },
+  "keywords": [
+    "php",
+    "wasm",
+    "php-wasm",
+    "php-cli-wasm",
+    "vrzno"
+  ],
+  "files": [
+    "*.wasm",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "package.json",
+    "libxml2.so",
+    "PhpCliWeb.js",
+    "PhpCliWeb.mjs",
+    "php-cli-web.js",
+    "php-cli-web.mjs",
+    "config.js",
+    "config.mjs",
+    "fsOps.js",
+    "fsOps.mjs",
+    "webTransactions.js",
+    "webTransactions.mjs",
+    "resolveDependencies.js",
+    "resolveDependencies.mjs"
+  ]
+}

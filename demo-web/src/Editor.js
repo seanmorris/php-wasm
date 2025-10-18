@@ -17,6 +17,8 @@ import reactIcon from './react-icon.svg';
 import redCircle from './circle-red.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
+import vsCodeIcon from './icons/vscode-16.png';
+
 import Debugger from './Debugger';
 
 // const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
@@ -73,6 +75,13 @@ export default function Editor() {
 
 			const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
 			setOpenFiles(openFilesList);
+		}
+	};
+
+	const handleOpenVsCode = async () => {
+		if(currentPath.current)
+		{
+			window.location.href = process.env.PUBLIC_URL + '/vscode.html?path=' + currentPath.current;
 		}
 	};
 
@@ -208,7 +217,6 @@ export default function Editor() {
 	};
 
 	useEffect(() => {
-		console.log(aceRef.current);
 		if(aceRef.current)
 		{
 			const onGutter = async event => {
@@ -348,6 +356,9 @@ export default function Editor() {
 					</button>
 					<button className='square' onClick = {handleSave}>
 						<img src = {saveIcon} />
+					</button>
+					<button className='square' onClick = {handleOpenVsCode}>
+						<img src = {vsCodeIcon} />
 					</button>
 					{!phpdbg ? (
 						<button className='square' title = "Debugger" onClick = {handleStartDebugger}>

@@ -1,59 +1,65 @@
 import './Common.css';
 import './Editor.css';
 import Header from './Header';
-import VSCode from 'vscode-react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+
+import { useVSCode } from 'vscode-react';
+import { useMemo } from 'react';
 
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 export default function VSCodeEditor() {
-	return (
-		<div className = "editor">
-			<div className='bevel'>
-				<Header />
-				<VSCode
-					className='inset'
-					url='https://oss-code.pages.dev'
-					// ossCodeUrl='http://localhost:8081'
-					fsHandlers={{
-						readdir(...args) {
-							return sendMessage('readdir', args);
-						},
 
-						async readFile(...args) {
-							return Array.from(await sendMessage('readFile', args));
-						},
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+	const path = query.has('path') ? query.get('path') : false;
 
-						analyzePath(...args) {
-							return sendMessage('analyzePath', args);
-						},
+	const {VSCode, executeCommand, openFile} = useVSCode({
+		url: 'https://oss-code.pages.dev',
+		// url: 'http://localhost:8081',
+		fsHandlers: {
+			readdir(...args) {
+				return sendMessage('readdir', args);
+			},
 
-						writeFile(path, contents) {
-							return sendMessage('writeFile', [path, new Uint8Array(contents)]);
-						},
+			async readFile(...args) {
+				return Array.from(await sendMessage('readFile', args));
+			},
 
-						rename(...args) {
-							return sendMessage('rename', args);
-						},
+			analyzePath(...args) {
+				return sendMessage('analyzePath', args);
+			},
 
-						mkdir: (...args) => {
-							return sendMessage('mkdir', args);
-						},
+			writeFile(path, contents) {
+				return sendMessage('writeFile', [path, new Uint8Array(contents)]);
+			},
 
-						unlink: (...args) => {
-							return sendMessage('unlink', args);
-						},
+			rename(...args) {
+				return sendMessage('rename', args);
+			},
 
-						rmdir: (...args) => {
-							return sendMessage('rmdir', args);
-						},
+			mkdir: (...args) => {
+				return sendMessage('mkdir', args);
+			},
 
-						activate: (...args) => {
-							console.log('activate', ...args);
-						},
-					}}
-				/>
-			</div>
+			unlink: (...args) => {
+				return sendMessage('unlink', args);
+			},
+
+			rmdir: (...args) => {
+				return sendMessage('rmdir', args);
+			},
+
+			activate: (...args) => {
+				console.log('activate', ...args);
+				path && openFile(path);
+			},
+		},
+	});
+
+	return (<div className = "editor">
+		<div className='bevel'>
+			<Header />
+			<VSCode className='inset'/>
 		</div>
-	);
+	</div>);
 }
