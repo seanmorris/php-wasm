@@ -184,8 +184,8 @@ function SelectFramework() {
 							</span>)}
 						</div>
 					</div>
-					<h2>Filesystem Operations:</h2>
 					{isIframe || <>
+						<h2>Filesystem Operations:</h2>
 						<div className = "inset button-bar row">
 							<button onClick = {backupSite}>
 								<img alt = "Backup" src = {cabinetIcon} className = "icon" />
