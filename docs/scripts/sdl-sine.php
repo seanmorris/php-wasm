@@ -35,7 +35,6 @@ $canvas = SDL_CreateWindow(
 $renderer = SDL_CreateRenderer($canvas, 0, SDL_RENDERER_ACCELERATED);
 
 $j = 0;
-
 $render = function() use(&$render, $renderer, &$j, $window) {
     SDL_SetRenderDrawColor($renderer, 100, 0, 0, 0);
     SDL_RenderClear($renderer);

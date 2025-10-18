@@ -10,6 +10,7 @@ import Home from './Home';
 import InstallDemo from './InstallDemo';
 import Editor from './Editor';
 import DbgPreview from './DbgPreview';
+import CliPreview from './CliPreview';
 import MultiIframeTest from './MultiIframeTest';
 import { onMessage } from 'php-cgi-wasm/msg-bus';
 import VSCodeEditor from './VSCodeEditor';
@@ -37,6 +38,7 @@ root.render(<React.StrictMode>
 			<Route path = "/home.html" element = { <Home /> } />
 			<Route path = "/embedded-php.html" element = { <Embedded /> } />
 			<Route path = "/dbg-preview.html" element = { <DbgPreview /> } />
+			<Route path = "/cli-preview.html" element = { <CliPreview /> } />
 			<Route path = "/select-framework.html" element = { <SelectFramework /> } />
 			<Route path = "/install-demo.html" element = { <InstallDemo /> } />
 			<Route path = "/code-editor.html" element = { <Editor /> } />

@@ -2,15 +2,6 @@
 
 PACKAGE_DIR=${1}
 cd ${PACKAGE_DIR}/
-
-ORIGINAL_COUNT=`ls php-*.wasm 2> /dev/null | wc -l`
-HASHED_COUNT=`ls [0123456789abcdef]*.wasm 2> /dev/null | wc -l`
-
-if [[ ${ORIGINAL_COUNT} == "0" ]]; then
-	echo "${ORIGINAL_COUNT} original, ${HASHED_COUNT} hashed files found, is this package (${PACKAGE_DIR}) already compressed?"
-fi
-
-# THIS SCRIPT SHOULD QUIT IMMEDIATELY UPON ERRORS
 set -euo pipefail
 
 # rm -f [0123456789abcdef]*.wasm

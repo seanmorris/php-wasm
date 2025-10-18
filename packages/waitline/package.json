@@ -1,0 +1,15 @@
+{
+  "name": "waitline",
+  "description": "waitline for phpwasm.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "version": "0.0.9-alpha-32",
+  "files": [
+    "README.md",
+    "pre.mak",
+    "static.mak"
+  ]
+}

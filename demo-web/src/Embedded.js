@@ -346,8 +346,6 @@ function Embedded() {
 		setOutputMode(single.current.checked ? 'single' : 'normal');
 		setShowCanvas(canvasCheckbox.current.checked);
 
-		console.log(canvasCheckbox.current.checked);
-
 		if(settings['render-as'])
 		{
 			setDisplayMode(settings['render-as']);

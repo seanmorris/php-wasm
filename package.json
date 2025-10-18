@@ -40,6 +40,7 @@
     "php-wasm-zlib": "packages/php-wasm-zlib",
     "php-wasm-sdl": "packages/php-wasm-sdl",
     "pobot": "^0.1.5",
+    "waitline": "packages/waitline",
     "vrzno": "packages/vrzno"
   },
   "workspaces": [
@@ -59,6 +60,7 @@
     "packages/sqlite",
     "packages/tidy",
     "packages/vrzno",
+    "packages/waitline",
     "packages/xml",
     "packages/zlib",
     "packages/sdl"
