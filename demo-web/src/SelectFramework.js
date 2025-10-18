@@ -204,6 +204,14 @@ function SelectFramework() {
 							<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
 						</div>
 					</>}
+					{isIframe && <div className = "inset center">
+						<h2 style = {{marginBottom: "0"}}><a
+							style = {{padding: "1rem"}}
+							href = "#"
+							onClick = {() => window.open(process.env.PUBLIC_URL + '/')}>
+								Open Full Demo
+						</a></h2>
+					</div>}
 				</div>
 			</div>
 			<div className = "overlay">{overlay}</div>
