@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/php-wasm/static/css/main.aa1a4811.css",
-    "main.js": "/php-wasm/static/js/main.09d8c955.js",
+    "main.js": "/php-wasm/static/js/main.9fbeb252.js",
     "static/js/533.4a0e7702.chunk.js": "/php-wasm/static/js/533.4a0e7702.chunk.js",
     "static/js/271.9bb5f274.chunk.js": "/php-wasm/static/js/271.9bb5f274.chunk.js",
     "static/js/260.bc0f300e.chunk.js": "/php-wasm/static/js/260.bc0f300e.chunk.js",
@@ -631,7 +631,7 @@
     "d.js": "/php-wasm/c98e74fc97b04fe8bf43dcdff549afcf.js",
     "mode-text.js": "/php-wasm/0ffb18fb70c87335edee31a479f58a43.js",
     "main.aa1a4811.css.map": "/php-wasm/static/css/main.aa1a4811.css.map",
-    "main.09d8c955.js.map": "/php-wasm/static/js/main.09d8c955.js.map",
+    "main.9fbeb252.js.map": "/php-wasm/static/js/main.9fbeb252.js.map",
     "533.4a0e7702.chunk.js.map": "/php-wasm/static/js/533.4a0e7702.chunk.js.map",
     "271.9bb5f274.chunk.js.map": "/php-wasm/static/js/271.9bb5f274.chunk.js.map",
     "260.bc0f300e.chunk.js.map": "/php-wasm/static/js/260.bc0f300e.chunk.js.map",
@@ -655,6 +655,6 @@
   },
   "entrypoints": [
     "static/css/main.aa1a4811.css",
-    "static/js/main.09d8c955.js"
+    "static/js/main.9fbeb252.js"
   ]
 }

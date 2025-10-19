@@ -70,7 +70,7 @@ function Home() {
 				<Header />
 				<h2>Select a demo:</h2>
 				<div className='row'>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded-php.html?demo=phpinfo.php'}>
+					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded-php.html?demo=sdl-sine.php'}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
