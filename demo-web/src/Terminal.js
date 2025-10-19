@@ -26,17 +26,17 @@ const parser = new Convert;
 
 const sharedLibs = [
 	libxml,
-	// dom,
-	// zlib,
-	// libzip,
-	// gd,
-	// iconv,
-	// intl,
-	// openssl,
-	// mbstring,
-	// sqlite,
-	// xml,
-	// simplexml,
+	dom,
+	zlib,
+	libzip,
+	gd,
+	iconv,
+	intl,
+	openssl,
+	mbstring,
+	sqlite,
+	xml,
+	simplexml,
 	yaml,
 ];
 
@@ -187,7 +187,7 @@ export default forwardRef(function Terminal({
 
 		(async () => {
 			await php.binary;
-			php.run(['-dextension=php8.3-yaml.so']).then((ret) => {
+			php.run().then((ret) => {
 				if(interactive)
 				{
 					setStatusMessage && setStatusMessage('php-cli-wasm ready!');

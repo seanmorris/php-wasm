@@ -85,7 +85,7 @@ export class PhpCliWeb extends PhpBase
 	{
 		const php = (await this.binary);
 
-		const cmd = ['php', ...flags];
+		const cmd = ['php', '-c', '/php.ini', ...flags];
 
 		const ptrs = cmd.map(part => {
 			const len = php.lengthBytesUTF8(part) + 1;
@@ -103,16 +103,13 @@ export class PhpCliWeb extends PhpBase
 
 		try
 		{
-			const process = php.ccall(
+			return await php.ccall(
 				'main'
 				, NUM
 				, [NUM, NUM]
 				, [ptrs.length, arLoc]
 				, {async: true}
 			);
-
-			// return process;
-			return 0;
 		}
 		catch(error)
 		{

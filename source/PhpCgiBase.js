@@ -585,8 +585,8 @@ export class PhpCgiBase
 				originalPath += '/'
 			}
 
-			// Rewrite to index
-			path = joinPaths(docroot, 'index.php');
+			// Rewrite to entrypoint or index.php
+			path = joinPaths(docroot, vHostEntrypoint ?? 'index.php');
 		}
 
 		// Ensure query parameters are preserved.

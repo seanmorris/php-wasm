@@ -126,9 +126,9 @@ function Home() {
 
 				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
-					<a target = "_blank" href = {process.env.PUBLIC_URL + '/dbg-preview.html'} className="icon-box">
-						<img src = {cmdIcon} alt = "PHP-DBG Preview" />
-						<span>PHP-DBG Preview</span>
+					<a target = "_blank" href = {process.env.PUBLIC_URL + '/cli-preview.html'} className="icon-box">
+						<img src = {cmdIcon} alt = "PHP-CLI Preview" />
+						<span>PHP-CLI Preview</span>
 					</a>
 
 					<a target = "_blank" href = {process.env.PUBLIC_URL + '/forecast.html'} className="icon-box">
