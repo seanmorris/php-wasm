@@ -15,7 +15,7 @@ export default function MultiIframeTest() {
         {frames.map(i => (
           <iframe
             key={i}
-            src={`/php-wasm/cgi-bin/hello-world.php?frame=${i}`}
+            src={`/php-wasm/cgi-bin/test?frame=${i}`}
             width="300"
             height="150"
             title={`PHP iframe ${i}`}

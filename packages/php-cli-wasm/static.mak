@@ -185,7 +185,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs: ${CLI_DEPENDENCIES} | ${ORDER_
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs
+	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs
@@ -226,7 +226,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs: ${CLI_DEPENDENCIES} | ${ORD
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs
+	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs
@@ -307,7 +307,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs: ${CLI_DEPENDENCIES} | ${OR
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs
+	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs

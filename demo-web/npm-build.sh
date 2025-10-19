@@ -32,6 +32,7 @@ cat aphex.txt >> build/index.html;
 cp build/index.html build/404.html;
 cp build/index.html build/code-editor.html;
 cp build/index.html build/dbg-preview.html;
+cp build/index.html build/cli-preview.html;
 cp build/index.html build/embedded-php.html;
 cp build/index.html build/home.html;
 cp build/index.html build/install-demo.html;

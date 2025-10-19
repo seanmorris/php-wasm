@@ -54,7 +54,8 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	refresh()
 	{
-		const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
+		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
+		const {files: dynamicLibFiles, libs: dynamicLibs, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
@@ -64,9 +65,13 @@ export class PhpCgiWebBase extends PhpCgiBase
 			{
 				return located;
 			}
-			if(urlLibs[path])
+			if(sharedLibUrls[path])
 			{
-				return urlLibs[path];
+				return sharedLibUrls[path];
+			}
+			if(dynamicLibUrls[path])
+			{
+				return dynamicLibUrls[path];
 			}
 		};
 
@@ -100,11 +105,27 @@ export class PhpCgiWebBase extends PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			await Promise.all(this.files.concat(files).map(
+			const allFiles = this.files.concat(sharedLibFiles, dynamicLibFiles);
+
+			// Make sure folder structure exists before preloading files
+			allFiles.forEach(fileDef => {
+				const segments = fileDef.parent.split('/');
+				let currentPath = '';
+				for (const segment of segments) {
+					if (!segment) continue;
+
+					currentPath += segment + '/';
+					if (!php.FS.analyzePath(currentPath).exists) {
+						php.FS.mkdir(currentPath);
+					}
+				}
+			});
+
+			await Promise.all(allFiles.map(
 				fileDef => php.FS.createPreloadedFile(fileDef.parent, fileDef.name, fileDef.url, true, false)
 			));
 
-			const iniLines = libs.map(lib => {
+			const iniLines = sharedLibs.map(lib => {
 				if(typeof lib === 'string' || lib instanceof URL)
 				{
 					return `extension=${lib}`;

@@ -41,7 +41,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	});
 
 	const files = _files.map(fileDef => {
-		const url = new URL(fileDef.url);
+		const url = new URL(fileDef.url).href;
 		const path = fileDef.path;
 		const name = fileDef.name || path.split('/').pop();
 		const parent = path.substr(0, path.length - name.length);
@@ -60,7 +60,7 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 			){
 				const name = String(libDef).split('/').pop();
 				const url  = libDef
-				urlLibs[ name ] = url;
+				urlLibs[ name ] = String(url);
 
 				return {name, url, ini: true};
 			}
@@ -70,8 +70,8 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 		else if(typeof libDef === 'object')
 		{
 			const name = libDef.name ?? String(libDef.url).split('/').pop();
-			urlLibs[ name ] = libDef.url;
-
+			urlLibs[ name ] = String(libDef.url);
+			libDef.url = String(libDef.url);
 			return libDef;
 		}
 	});
