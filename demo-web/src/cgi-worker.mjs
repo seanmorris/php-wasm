@@ -49,7 +49,8 @@ const sharedLibs = [
 ];
 
 const files = [
-	// { parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' }
+	{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+	{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },
 ];
 
 const actions = {
@@ -84,7 +85,14 @@ const php = new PhpCgiWorker({
 		, gif: 'image/gif'
 		, png: 'image/png'
 		, svg: 'image/svg+xml'
-	}
+	},
+	vHosts: [
+		{
+			"pathPrefix": "/php-wasm/cgi-bin/test",
+			"directory": "/preload/test_www",
+			"entrypoint": "hello-world.php"
+		},
+	]
 });
 
 // Set up the event handlers

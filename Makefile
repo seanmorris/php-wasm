@@ -531,6 +531,7 @@ _all: tags
 	$(MAKE) webview-js
 	$(MAKE) node-js
 	$(MAKE) cgi-all
+	$(MAKE) cli-all
 	$(MAKE) dbg-all
 
 mjs: tags
@@ -539,6 +540,7 @@ mjs: tags
 	$(MAKE) webview-mjs
 	$(MAKE) node-mjs
 	$(MAKE) cgi-mjs
+	$(MAKE) cli-mjs
 	$(MAKE) dbg-mjs
 
 cjs: tags
@@ -547,6 +549,7 @@ cjs: tags
 	$(MAKE) webview-js
 	$(MAKE) node-js
 	$(MAKE) cgi-js
+	$(MAKE) cli-js
 	$(MAKE) dbg-js
 
 common-web:
@@ -558,6 +561,7 @@ common-web:
 common:
 	$(MAKE) web-mjs
 	$(MAKE) worker-cgi-mjs
+	$(MAKE) web-cli-mjs
 	$(MAKE) web-dbg-mjs
 	$(MAKE) node-mjs
 
@@ -853,6 +857,10 @@ clean:
 		packages/php-cgi-wasm/*.mjs \
 		packages/php-cgi-wasm/*.map \
 		packages/php-cgi-wasm/mapped \
+		packages/php-cli-wasm/*.js \
+		packages/php-cli-wasm/*.mjs \
+		packages/php-cli-wasm/*.map \
+		packages/php-cli-wasm/mapped \
 		packages/php-dbg-wasm/*.js \
 		packages/php-dbg-wasm/*.mjs \
 		packages/php-dbg-wasm/*.map \
@@ -869,6 +877,8 @@ clean:
 		packages/php-wasm/*.mjs* \
 		packages/php-cgi-wasm/*.data \
 		packages/php-cgi-wasm/*.mjs* \
+		packages/php-cli-wasm/*.data \
+		packages/php-cli-wasm/*.mjs* \
 		third_party/php${PHP_VERSION}-src/configured \
 		third_party/preload \
 		.cache/pre.js \
@@ -997,16 +1007,17 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=1
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
+	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
+	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
+	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
+	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
+	${MAKE} web-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=1
+	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
+	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=1
+	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=1
+
 
 reconfigure:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configure
