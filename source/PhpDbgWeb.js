@@ -66,7 +66,7 @@ export class PhpDbgWeb extends PhpBase
 	{
 		const php = (await this.binary);
 
-		const cmd = ['phpdbg', '-e'];
+	const cmd = ['phpdbg', '-c', '/php.ini', '-e'];
 
 		const ptrs = cmd.map(part => {
 			const len = php.lengthBytesUTF8(part) + 1;

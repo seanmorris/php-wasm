@@ -210,6 +210,12 @@ ORDER_ONLY+=.cache/preload-collected
 EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/preload@/preload
 endif
 
+MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
+CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
+
+MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
+CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
+
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
 -include $(addsuffix /static.mak,$(filter-out ${TOP_LEVEL},$(shell npm ls -p)))
@@ -408,12 +414,6 @@ BUILD_TYPE ?=js
 ifneq (${PRE_JS_FILES},)
 DEPENDENCIES+= .cache/pre.js
 endif
-
-MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
-CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
-
-MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
-CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
 
 EXTRA_MODULES=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 

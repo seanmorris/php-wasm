@@ -29,7 +29,7 @@ if(!params.has('no-service-worker'))
 	}, 350);
 }
 
-// console.log(navigator.serviceWorker.controller);
+console.log(navigator.serviceWorker.controller);
 // const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
@@ -115,9 +115,13 @@ const installDemo = async (overwrite = false) => {
 	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
 	await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
 
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Acquiring Lock...'}));
+	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading init script...'}));
 
 	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
+
+	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Acquiring Lock...'}));
+
+	console.log( await navigator.locks.query('php-wasm-fs-lock', console.log) );
 
 	await navigator.locks.request('php-wasm-demo-install', async () => {
 

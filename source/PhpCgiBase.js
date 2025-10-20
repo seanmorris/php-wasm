@@ -254,6 +254,8 @@ export class PhpCgiBase
 			'storeInit',
 		];
 
+		await this.binary;
+
 		if(actions.includes(action))
 		{
 			let result, error;
@@ -428,7 +430,7 @@ export class PhpCgiBase
 				let currentPath = '';
 				for (const segment of segments) {
 					if (!segment) continue;
-			
+
 					currentPath += segment + '/';
 					if (!php.FS.analyzePath(currentPath).exists) {
 						php.FS.mkdir(currentPath);

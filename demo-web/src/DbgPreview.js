@@ -1,54 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
-import { PGlite } from '@electric-sql/pglite';
-
+import React, { useMemo, useState } from 'react';
 import './dbg-preview.css';
-import loading from './loading.svg';
-
-import Convert from 'ansi-to-html';
 import Debugger from './Debugger';
-
-// const parser = new Convert;
-
-// const sharedLibs = [
-// 	`php${PhpDbgWeb.phpVersion}-zlib.so`,
-// 	`php${PhpDbgWeb.phpVersion}-zip.so`,
-// 	`php${PhpDbgWeb.phpVersion}-gd.so`,
-// 	`php${PhpDbgWeb.phpVersion}-iconv.so`,
-// 	`php${PhpDbgWeb.phpVersion}-intl.so`,
-// 	`php${PhpDbgWeb.phpVersion}-openssl.so`,
-// 	`php${PhpDbgWeb.phpVersion}-dom.so`,
-// 	`php${PhpDbgWeb.phpVersion}-mbstring.so`,
-// 	`php${PhpDbgWeb.phpVersion}-sqlite.so`,
-// 	`php${PhpDbgWeb.phpVersion}-pdo-sqlite.so`,
-// 	// `php${PhpDbgWeb.phpVersion}-phar.so`,
-// 	`php${PhpDbgWeb.phpVersion}-xml.so`,
-// 	`php${PhpDbgWeb.phpVersion}-simplexml.so`,
-// 	{url: `libxml2.so`, ini:false},
-// ];
-
-// const files = [
-// 	{ parent: '/preload/', name: 'icudt72l.dat', url: './icudt72l.dat' },
-// 	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
-// ];
-
-// const ini = `
-// 	date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
-// 	expose_php=0
-// `;
-
-// const escapeHtml = s => s
-// 	.replace(/&/g, "&amp;")
-// 	.replace(/</g, "&lt;")
-// 	.replace(/>/g, "&gt;")
-// 	.replace(/"/g, "&quot;")
-// 	.replace(/'/g, "&#039;");
-
-// let init = true;
-// let lastCommand = null;
-// let localEcho = true;
-
-// const delay = d => new Promise(a => setTimeout(a, d));
 
 export default function DbgPreview() {
 
@@ -60,8 +12,6 @@ export default function DbgPreview() {
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
 
 	const startPath = query.has('path') ? query.get('path') : false;
-
-
 	const topBar = (<div className = "row header toolbar">
 		<div className = "cols">
 			<div className = "row start">
