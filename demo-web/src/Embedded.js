@@ -276,8 +276,6 @@ function Embedded() {
 			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? '8.4';
 			selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
-			await phpRef.current.binary;
-
 			if(settings['render-as'])
 			{
 				setDisplayMode(settings['render-as']);
@@ -295,7 +293,6 @@ function Embedded() {
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
 
-			await phpRef.current.refresh();
 			refreshPhp();
 
 			if(settings.autorun)
