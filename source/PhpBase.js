@@ -82,11 +82,12 @@ export class PhpBase extends EventTarget
 		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
 
 		this.binary = phpBinLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
-			php.ccall(
+			await php.ccall(
 				'pib_storage_init'
 				, NUM
 				, []
 				, []
+				, {async: true}
 			);
 
 			if(!php.FS.analyzePath('/preload').exists)

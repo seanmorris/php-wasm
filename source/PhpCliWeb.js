@@ -46,27 +46,6 @@ export class PhpCliWeb extends PhpBase
 		return commitTransaction(this, readOnly);
 	}
 
-	run(flags = [])
-	{
-		// const flags = ['-c', '/php.ini'];
-		// const flags = [];
-
-		if(this.interactive)
-		{
-			flags.push('-a');
-		}
-		else if(this.script)
-		{
-			flags.push('-f', this.script);
-		}
-		else if(this.code)
-		{
-			flags.push('-r', this.code);
-		}
-
-		return this._main(flags);
-	}
-
 	async provideInput(line)
 	{
 		const php = await this.binary;
@@ -81,7 +60,25 @@ export class PhpCliWeb extends PhpBase
 		}
 	}
 
-	async _main(flags = [])
+	run(flags = [])
+	{
+		if(this.interactive)
+		{
+			flags.push('-a');
+		}
+		else if(this.script)
+		{
+			flags.push('-f', this.script);
+		}
+		else if(this.code)
+		{
+			flags.push('-r', this.code);
+		}
+
+		return this._enqueue(phpCode => this._run(phpCode), [flags]);
+	}
+
+	async _run(flags = [])
 	{
 		const php = (await this.binary);
 
@@ -130,7 +127,7 @@ export class PhpCliWeb extends PhpBase
 
 	async refresh()
 	{
-		// super.refresh();
+		super.refresh();
 		// const php = await this.binary;
 		// await navigator.locks.request('php-wasm-fs-lock', () => {
 		// 	return new Promise((accept, reject) => {

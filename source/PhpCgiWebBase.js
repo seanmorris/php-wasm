@@ -22,7 +22,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 		if(!this.initialized)
 		{
 			const php = await this.binary;
-			await this.loadInit(php);
+			this.loadInit(php);
 			await navigator.locks.request('php-wasm-fs-lock', () => {
 				return new Promise((accept,reject) => php.FS.syncfs(true, err => {
 					if(err) reject(err);
@@ -162,7 +162,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 				this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
 			}
 
-			await this.loadInit(php);
+			this.loadInit(php);
 
 			return php;
 

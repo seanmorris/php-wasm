@@ -1007,16 +1007,25 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
+	rm third_party/php8.4-src/configured
+	rm third_party/php8.3-src/configured
+	rm third_party/php8.2-src/configured
+	rm third_party/php8.1-src/configured
+	rm third_party/php8.0-src/configured
+
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
-	${MAKE} web-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=1
+	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=1
+
+	${MAKE} worker-cgi-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
+
+	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=0
 
 
 reconfigure:

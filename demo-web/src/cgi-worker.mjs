@@ -51,6 +51,7 @@ const sharedLibs = [
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 	{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },
+	{ parent: '/preload/', name: 'list-extensions.php', url: './scripts/list-extensions.php' },
 ];
 
 const actions = {

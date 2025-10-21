@@ -4,6 +4,10 @@ import './InstallDemo.css';
 import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
+import libxml from 'php-wasm-libxml';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+
 import { useEffect, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
@@ -19,7 +23,11 @@ const backupSite = async () => {
 		throw `Filesystem is empty!`;
 	}
 
-	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({
+		persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
+		sharedLibs: [libxml, zlib, libzip],
+	});
+
 	await php.binary;
 	const backupPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/backup.php')).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
@@ -40,7 +48,10 @@ const restoreSite = async ({fileInput}) => {
 	{
 		throw `No file provided.`;
 	}
-	const php = new PhpWeb({persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
+	const php = new PhpWeb({
+		persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
+		sharedLibs: [libxml, zlib, libzip],
+	});
 	const zipContents = await fileInput.files[0].arrayBuffer();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
 	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);

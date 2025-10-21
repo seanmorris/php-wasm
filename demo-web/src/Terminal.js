@@ -1,44 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, forwardRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState, forwardRef } from 'react';
 import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb';
 import { PGlite } from '@electric-sql/pglite';
-
 import './dbg-preview.css';
 
 import loading from './loading.svg';
-
 import Convert from 'ansi-to-html';
-
 import libxml from 'php-wasm-libxml';
-import dom from 'php-wasm-dom';
-import zlib from 'php-wasm-zlib';
-import libzip from 'php-wasm-libzip';
-import gd from 'php-wasm-gd';
-import iconv from 'php-wasm-iconv';
-import intl from 'php-wasm-intl';
-import openssl from 'php-wasm-openssl';
-import mbstring from 'php-wasm-mbstring';
-import sqlite from 'php-wasm-sqlite';
-import xml from 'php-wasm-xml';
-import simplexml from 'php-wasm-simplexml';
-import yaml from 'php-wasm-yaml';
 
-const parser = new Convert;
+const parser = new Convert();
 
-const sharedLibs = [
-	libxml,
-	dom,
-	zlib,
-	libzip,
-	gd,
-	iconv,
-	intl,
-	openssl,
-	mbstring,
-	sqlite,
-	xml,
-	simplexml,
-	yaml,
-];
+const defaultSharedLibs = [libxml];
 
 const ini = `
 date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
@@ -49,11 +20,6 @@ display_startup_errors = Off
 log_errors = On
 error_log = /dev/stderr
 `;
-
-const files = [
-	{ parent: '/preload/', name: 'hello-world.php', url: './scripts/hello-world.php' },
-	{ parent: '/preload/', name: 'phpinfo.php',     url: './scripts/phpinfo.php' },
-];
 
 const escapeHtml = s => s
 	.replace(/&/g, "&amp;")
@@ -66,8 +32,6 @@ let lastCommand = null;
 
 const phpArgs = {
 	version: '8.3',
-	sharedLibs,
-	files,
 	ini,
 	PGlite,
 	persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
@@ -76,9 +40,19 @@ const phpArgs = {
 	// interactive: false,
 };
 
-export default forwardRef(function Terminal({
-	setStatusMessage, setExitCode, localEcho = true, initCommands = [], onStdIn
-}, ref) {
+export default function Terminal({
+	setStatusMessage = () => {},
+	setExitCode = () => {},
+	localEcho = true,
+	initCommands = [],
+	onStdIn,
+	sharedLibs = [],
+	files = [],
+	interactive,
+	script,
+	code,
+	extras,
+}) {
 	const phpRef = useRef(null);
 
 	const cmdStack = useRef(['']);
@@ -91,21 +65,16 @@ export default forwardRef(function Terminal({
 	const [output, setOutput] = useState([]);
 
 	const init = useRef(true);
-	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> ')));
+	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> '))); // @TODO: get the prompt from PHP
 
-	const query = useMemo(() => new URLSearchParams(window.location.search), []);
-	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	interactive = interactive && !script && !code;
 
-	const [interactive, setInteractive] = useState(!query.has('path') && !query.has('code'));
-	const [script, setScript] = useState(query.get('path'));
-	const [code, setCode] = useState(query.get('code'));
+	let timeout = useRef();
 
-	let timeout = null;
-
-	const scrollToEnd = () => {
+	const scrollToEnd = useCallback(() => {
 		if(!stdIn.current)
 		{
-			timeout = setTimeout(() => {
+			timeout.current = setTimeout(() => {
 				terminal.current.scrollTo({
 					top: terminal.current.scrollHeight,
 					behavior: 'smooth',
@@ -116,46 +85,66 @@ export default forwardRef(function Terminal({
 			return;
 		}
 
-		if(timeout)
+		if(timeout.current)
 		{
-			clearTimeout(timeout);
+			clearTimeout(timeout.current);
 		}
 
-		timeout = setTimeout(() => stdIn.current.scrollIntoView(), 32);
-	};
+		timeout.current = setTimeout(() => stdIn.current.scrollIntoView(), 32);
+	}, []);
 
-	const onOutput = async event => {
-		const newOutput = event.detail.map(text => text
-			.replace('\n', '\u240A\n')
-			.replace('\r', '\u240D'));
-
-		const ansi = newOutput.map(line => {
-			return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) }
-			// return { type: 'stdout', text: escapeHtml(line) }
-		});
-
-		setOutput(output => [...output, ...ansi]);
-		scrollToEnd();
-	};
-
-	const onError  = async event => {
-		const newOutput = event.detail.map(text => text
-			.replace('\n', '\u240A\n')
-			.replace('\r', '\u240D'));
-
-		const ansi = newOutput.map(line => {
-			return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) }
-			// return { type: 'stderr', text: escapeHtml(line) }
-		});
-
-		setOutput(output => [...output, ...ansi]);
-		scrollToEnd();
-	};
+	const focusInput = useCallback(event => {
+		if(!phpRef.current.interactive)
+		{
+			scrollToEnd();
+			return;
+		}
+		if(window.getSelection().toString() === '')
+		{
+			stdIn.current && stdIn.current.focus();
+		}
+	}, [scrollToEnd]);
 
 	const refreshPhp = useCallback(init => {
+
 		setStatusMessage && setStatusMessage('loading...');
 
-		phpRef.current = new PhpCliWeb({...phpArgs, interactive, script, code});
+		const onOutput = async event => {
+			const newOutput = event.detail.map(text => text
+				.replace('\n', '\u240A\n')
+				.replace('\r', '\u240D'));
+
+			const ansi = newOutput.map(line => {
+				return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) }
+			});
+
+			setOutput(output => [...output, ...ansi]);
+			scrollToEnd();
+		};
+
+		const onError  = async event => {
+			const newOutput = event.detail.map(text => text
+				.replace('\n', '\u240A\n')
+				.replace('\r', '\u240D'));
+
+			const ansi = newOutput.map(line => {
+				return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) }
+			});
+
+			console.log(ansi);
+
+			setOutput(output => [...output, ...ansi]);
+			scrollToEnd();
+		};
+
+		phpRef.current = new PhpCliWeb({
+			...extras,
+			...phpArgs,
+			sharedLibs: [...sharedLibs, ...defaultSharedLibs],
+			interactive,
+			script,
+			code,
+		});
 
 		const php = phpRef.current;
 
@@ -187,7 +176,7 @@ export default forwardRef(function Terminal({
 
 		(async () => {
 			await php.binary;
-			php.run().then((ret) => {
+			php.run(['-c', '/php.ini']).then((ret) => {
 				if(interactive)
 				{
 					setStatusMessage && setStatusMessage('php-cli-wasm ready!');
@@ -195,11 +184,10 @@ export default forwardRef(function Terminal({
 				else
 				{
 					setStatusMessage && setStatusMessage('php-cli-wasm done.');
-					setExitCode && setExitCode('exit code: ' + ret);
+					setExitCode && setExitCode(ret);
 				}
 			});
 		})();
-
 
 		return () => {
 			php.removeEventListener('output', onOutput);
@@ -211,9 +199,10 @@ export default forwardRef(function Terminal({
 				php.removeEventListener('stdin-request', firstInput, once);
 			}
 		};
-	}, []);
+	}, [code, extras, focusInput, interactive, onStdIn, script, scrollToEnd, setExitCode, setStatusMessage, sharedLibs]);
 
 	useEffect(() => {
+		console.log(init.current);
 		if(init.current)
 		{
 			refreshPhp(init.current);
@@ -310,18 +299,6 @@ export default forwardRef(function Terminal({
 		stdIn.current && stdIn.current.focus();
 	};
 
-	const focusInput = event => {
-		if(!phpRef.current.interactive)
-		{
-			scrollToEnd();
-			return;
-		}
-		if(window.getSelection().toString() === '')
-		{
-			stdIn.current && stdIn.current.focus();
-		}
-	};
-
 	const handleTerminalClicked = () => {
 
 		if(!phpRef.current.interactive)
@@ -342,7 +319,7 @@ export default forwardRef(function Terminal({
 			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
 			{interactive && (
 				<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-					{!ready && (<img src = {loading} />)}
+					{!ready && (<img src = {loading} alt = "loading" />)}
 					<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
 					<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
 					<button onClick = {runCommand}>&gt;</button>
@@ -350,4 +327,4 @@ export default forwardRef(function Terminal({
 			)}
 		</div>
 	</div>);
-});
+};

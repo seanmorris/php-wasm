@@ -78,6 +78,7 @@
 	padding: 1rem;
 	min-height: 100%;
 	box-sizing: border-box;
+	text-align: left;
 }
 
 .phpdbg-console .console-input span {

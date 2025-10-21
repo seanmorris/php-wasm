@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "html"}
+<?php
 
 $stdErr = fopen('php://stderr', 'w');
 
@@ -24,13 +24,15 @@ if($zip->open('/persist/restore.zip', ZipArchive::RDONLY) === TRUE)
 	$percent = 0;
 	for($i = 0; $i < $total; $i++)
 	{
-		$zip->extractTo($docroot, $zip->getNameIndex($i));
-		$newPercent = ((1+$i) / $total);
+		$name = $zip->getNameIndex($i);
+		$zip->extractTo($docroot, $name);
+		$newPercent = 100 * (1+$i) / $total;
 
 		if($newPercent - $percent >= 0.01)
 		{
-			print $newPercent . PHP_EOL;
+			printf('[ %3.2f ] %s'. PHP_EOL, $newPercent, $name);
 			$percent = $newPercent;
+
 		}
 	}
 
