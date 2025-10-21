@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { microtime, date, sprintf, json_decode } from '../packages/php-wasm/stdlib/8.2-node.mjs';
+
+const phpVersion = process.env.PHP_VERSION ?? '8.4';
+const { microtime, date, sprintf, json_decode } = await import(`../packages/php-wasm/stdlib/${phpVersion}-node.mjs`);
 
 test('Can use PHP functions that return NUMBERS in JS', () => {
 	assert.equal( microtime(true), Date.now() / 1000 );
