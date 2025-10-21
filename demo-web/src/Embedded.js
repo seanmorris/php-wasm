@@ -64,14 +64,13 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
-let init = false;
-
 function Embedded() {
+	const init = useRef(false);
 	const phpRef = useRef(null);
 	const inputBox = useRef(null);
 	const selectDemoBox = useRef(null);
 	const selectVersionBox = useRef(null);
-	const selectVariantnBox = useRef(null);
+	const selectVariantBox = useRef(null);
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
@@ -102,7 +101,7 @@ function Embedded() {
 
 	const refreshPhp = useCallback(() => {
 		const version = (selectVersionBox.current ? selectVersionBox.current.value : '8.4') ?? '8.4';
-		const variant = (selectVariantnBox.current ? selectVariantnBox.current.value : '') ?? '';
+		const variant = (selectVariantBox.current ? selectVariantBox.current.value : '') ?? '';
 
 		const _sharedLibs = [...sharedLibs];
 
@@ -135,12 +134,16 @@ function Embedded() {
 	}, []);
 
 	useEffect(() => {
-		if(!init)
+		persist.current.checked = !!query.get('persist') ?? '';
+		single.current.checked = !!Number(query.get('single-expression')) ?? '';
+		selectVersionBox.current.value = query.get('version') ?? '8.4';
+		selectVariantBox.current.value = query.get('variant') ?? '';
+
+		if(!init.current && !query.has('demo'))
 		{
 			refreshPhp();
-
-			init = true;
 		}
+		init.current = true;
 	}, [refreshPhp]);
 
 	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
@@ -167,17 +170,22 @@ function Embedded() {
 
 		let code = editor.current.editor.getValue();
 
+		const version = selectVersionBox.current?.value;
+		const variant = selectVariantBox.current?.value;
+
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
 			'autorun': true,
 			'persist': persist.current?.checked,
 			'single-expression': single.current?.checked,
 			'render-as': htmlRadio.current?.checked ? 'html' : 'text',
 			'canvas': canvasCheckbox.current?.checked,
-			'version': selectVersionBox.current?.value,
-			'variant': selectVariantnBox.current?.value,
+			'version': version,
+			'variant': variant,
 		})}\n`);
 
 		query.set('code', encodeURIComponent(code));
+		query.set('version', encodeURIComponent(version));
+		query.set('variant', encodeURIComponent(variant));
 
 		window.history.replaceState({}, document.title, "?" + query.toString());
 
@@ -266,7 +274,7 @@ function Embedded() {
 			single.current.checked = settings['single-expression'] ?? single.current.checked;
 			canvasCheckbox.current.checked = settings['canvas'] ?? false;
 			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? '8.4';
-			selectVariantnBox.current.value = settings['variant'] ?? selectVariantnBox.current.value ?? '';
+			selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
 			await phpRef.current.binary;
 
@@ -311,9 +319,6 @@ function Embedded() {
 
 		const inputRoot = createRoot(inputBox.current);
 		const queryCode = query.get('code') || '';
-
-		persist.current.checked = !!query.get('persist');
-		single.current.checked  = !!query.get('single-expression');
 
 		const decodedCode = decodeURIComponent(queryCode);
 
@@ -446,7 +451,7 @@ function Embedded() {
 				</label>
 				<label>
 					<span>Variant:</span>
-						<select data-select-demo ref = {selectVariantnBox}>
+						<select data-select-demo ref = {selectVariantBox}>
 						<option value = "">base</option>
 						<option value = "_sdl">sdl</option>
 					</select>
