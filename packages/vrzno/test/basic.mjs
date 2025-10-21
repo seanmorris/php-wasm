@@ -101,6 +101,7 @@ test('Can access PHP integers via php.x function.', async () => {
 	assert.equal(returnValueIFFE, scalarInt);
 	assert.equal(stdErr, '');
 });
+
 test('Can access PHP floats via php.x function: One float', async () => {
 	const php = new PhpNode();
 
@@ -231,6 +232,7 @@ test('Can access JS classes via php.x function: user-classes.', async () => {
 	assert.equal(stdOut, '');
 	assert.equal(stdErr, '');
 });
+
 test('Can access PHP callbacks that return integers via php.x function.', async () => {
 	const php = new PhpNode();
 
