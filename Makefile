@@ -777,16 +777,16 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 
 stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
 
-packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 ########### Clerical stuff. ###########
