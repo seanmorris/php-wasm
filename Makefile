@@ -1001,6 +1001,11 @@ all-versions:
 	${MAKE} PHP_VERSION=8.1
 	${MAKE} PHP_VERSION=8.0
 
+all-stdlibs:
+	${MAKE} stdlib PHP_VERSION=8.4
+	${MAKE} stdlib PHP_VERSION=8.3
+	${MAKE} stdlib PHP_VERSION=8.2
+
 test-all-versions:
 	${MAKE} test PHP_VERSION=8.4
 	${MAKE} test PHP_VERSION=8.3

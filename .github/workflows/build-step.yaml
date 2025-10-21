@@ -42,7 +42,7 @@ jobs:
 
       - name: Install docker-compose
         run: sudo apt update && sudo apt install docker-compose -y
-      
+
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
@@ -64,7 +64,7 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build PHP
-        run: time make mjs PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make mjs stdlib PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
