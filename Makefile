@@ -936,7 +936,7 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test: node-mjs
+test: node-mjs stdlib
 	${MAKE} test-node
 	${MAKE} test-deno
 
