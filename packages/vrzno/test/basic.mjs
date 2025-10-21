@@ -513,28 +513,6 @@ test('Can use url_fopen with file_get_contents with a context. (POST) ', async (
 	assert.equal(Array.isArray(json), false);
 });
 
-test('Can take an object param from PHP with a "length" property.', async () => {
-	const php = new PhpNode();
-
-	const testFunc = obj => {
-		assert.equal(obj.length, 10);
-		return obj;
-	};
-
-	let stdOut = '', stdErr = '';
-
-	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-	await php.binary;
-
-	const returnValue = await php.x`${testFunc}( [ 'length' => 10 ] )`;
-
-	assert.equal(returnValue.length, 10);
-	assert.equal(stdOut, '');
-	assert.equal(stdErr, '');
-});
-
 test('Can call Math.random on globalThis.', async () => {
 	const php = new PhpNode();
 

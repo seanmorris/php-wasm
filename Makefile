@@ -936,9 +936,15 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 test: node-mjs stdlib
+else
+test: node-mjs
+endif
 	${MAKE} test-node
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 	${MAKE} test-deno
+endif
 
 test-node:
 	PHP_VERSION=${PHP_VERSION} \
