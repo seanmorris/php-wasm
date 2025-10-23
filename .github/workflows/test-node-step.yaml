@@ -23,6 +23,8 @@ jobs:
       - run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
