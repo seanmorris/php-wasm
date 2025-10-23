@@ -22,15 +22,15 @@ jobs:
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Import configuration
-        run: cp -p .github/.env_8.4.dynamic.ci .env
-
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Import configuration
+        run: cp -p .github/.env_8.4.dynamic.ci .env
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
