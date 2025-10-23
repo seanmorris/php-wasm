@@ -1,5 +1,18 @@
 #!/usr/bin/env make
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets rebuild reconfigure packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs
+.PHONY: all web js cjs mjs \
+	web-mjs web-js \
+	worker-mjs worker-js node-mjs \
+	webnode-js webview-mjs webview-js \
+	clean php-clean deep-clean show-ports show-versions show-files \
+	hooks image push-image pull-image \
+	dist demo serve-demo scripts run \
+	test test-node test-deno test-browser \
+	all-versions all-versions all-stdlibs \
+	test-all-versions x-all-versions php-clean-all-versions \
+	demo-versions null \
+	archives assets rebuild reconfigure \
+	packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs \
+	dynamic dynamic-libs.json
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables --shuffle=random
 
@@ -789,16 +802,16 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 
 stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
 
-packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.js
+packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 ########### Clerical stuff. ###########
@@ -820,6 +833,9 @@ deps:
 
 dynamic:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
+
+dynamic-libs.json:
+	echo ${DYNAMIC_LIBS} | jq -R 'split(" ")' > dynamic-libs.json
 
 PHPIZE: ${PHPIZE}
 
@@ -1074,3 +1090,5 @@ demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
 
 serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
 	npm run start --prefix ./demo-web
+
+null:
