@@ -93,6 +93,6 @@ jobs:
           include-hidden-files: true
           path: |
             third_party
-            lib
             packages
+            lib
             .cache
