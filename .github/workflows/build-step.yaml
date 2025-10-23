@@ -70,7 +70,7 @@ jobs:
           done < ./.cache/.mtimes
 
       - name: Build PHP
-        run: time make node-mjs
+        run: time make mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}

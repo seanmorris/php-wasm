@@ -954,11 +954,7 @@ ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 	${MAKE} test-deno
 endif
 
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
-test-node: node-mjs stdlib
-else
 test-node: node-mjs
-endif
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
@@ -982,11 +978,7 @@ endif
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
 
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
-test-deno: node-mjs stdlib
-else
 test-deno: node-mjs
-endif
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
