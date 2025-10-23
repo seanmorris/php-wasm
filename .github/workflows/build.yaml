@@ -19,7 +19,7 @@ jobs:
         id: set-matrix
         run: |
           make dynamic-libs.json WITH_SDL=dynamic
-          echo "libgroups=$(cat dynamic-libs.json)" >> "$GITHUB_OUTPUT"
+          echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Docker image
         id: cache-docker-image
@@ -27,10 +27,6 @@ jobs:
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
-
-      - name: Load builder image if cached
-        if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'

@@ -54,18 +54,11 @@ jobs:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
 
-      - name: Load builder image if cached
-        if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
-
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
           time make image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-
-      - name: Spin up docker network
-        run: docker network create phpwasm_default
 
       - name: Apply mtime cache
         run: |
