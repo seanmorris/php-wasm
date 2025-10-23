@@ -15,15 +15,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Install NPM packages
+        run: npm ci
+
       - name: Generate JSON array of directories
         id: set-matrix
         run: |
           make dynamic-libs.json WITH_SDL=dynamic
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Install NPM packages
-        run: npm ci
 
       - name: Cache Docker image
         id: cache-docker-image
