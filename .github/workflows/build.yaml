@@ -73,9 +73,11 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        envTarget: ['node', 'web', 'worker', 'webview']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
+      envTarget: ${{ matrix.envTarget }}
       libType: dynamic
 
   build-php-shared:
@@ -83,9 +85,11 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        envTarget: ['node', 'web', 'worker', 'webview']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
+      envTarget: ${{ matrix.envTarget }}
       libType: shared
 
   build-php-static:
@@ -93,9 +97,11 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        envTarget: ['node', 'web', 'worker', 'webview']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
+      envTarget: ${{ matrix.envTarget }}
       libType: static
 
   test-browser:

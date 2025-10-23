@@ -6,6 +6,9 @@ on:
       phpVersion:
         required: true
         type: string
+      envTarget:
+        required: true
+        type: string
       libType:
         required: true
         type: string
@@ -70,7 +73,7 @@ jobs:
           done < ./.cache/.mtimes
 
       - name: Build PHP
-        run: time make mjs
+        run: time make ${{ inputs.envTarget }}-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
@@ -83,7 +86,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm-${{ inputs.libType }}-${{ inputs.phpVersion }}
+          name: php-wasm-${{ inputs.libType }}-${{ inputs.envTarget }}-${{ inputs.phpVersion }}
           include-hidden-files: true
           path: |
             third_party
