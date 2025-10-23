@@ -39,7 +39,10 @@ jobs:
           path: ./
 
       - name: Apply executable cache
-        run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+        run: |
+          ls ./.cache/executables* | while read -r CACHE; do
+            cat ${CACHE} | xargs -I{} chmod +x {}
+          done
 
       - name: Install NPM packages
         run: npm ci
@@ -63,7 +66,7 @@ jobs:
       - name: Apply mtime cache
         run: |
           set -euxo pipefail
-          ls ./.cache/.mtimes | while read -r CACHE; do
+          ls ./.cache/.mtimes* | while read -r CACHE; do
             while read -r PATH MTIME; do
               [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
             done < ${CACHE}

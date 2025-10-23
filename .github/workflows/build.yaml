@@ -91,7 +91,7 @@ jobs:
         run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
-        run: find ./third_party -type f -executable -print > ./.cache/executables.list
+        run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
       - name: Cache mtimes
         run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-${{ matrix.libgroup }}
