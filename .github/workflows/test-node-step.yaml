@@ -33,4 +33,5 @@ jobs:
           merge-multiple: true
       - run: npm ci
       - run: npm install -g deno
+      - run: make -t node-mjs PHP_VERSION=${{ inputs.phpVersion }}
       - run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
