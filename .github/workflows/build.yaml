@@ -19,6 +19,7 @@ jobs:
         id: set-matrix
         run: |
           make dynamic-libs.json WITH_SDL=dynamic
+          jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Docker image
