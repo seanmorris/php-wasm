@@ -219,17 +219,17 @@ export class PhpBase extends EventTarget
 		return this._enqueue(phpCode => this._run(phpCode), [phpCode]);
 	}
 
-	async _run(phpCode)
+	_run(phpCode)
 	{
-		const call = (await this.binary).ccall(
-			'pib_run'
-			, NUM
-			, [STR]
-			, [`?>${phpCode}`]
-			, {async: true}
-		);
-
-		return call.finally(() => this.flush());
+		return this.binary.then(php => {
+			return php.ccall(
+				'pib_run'
+				, NUM
+				, [STR]
+				, [`?>${phpCode}`]
+			);
+		})
+		.finally(() => this.flush())
 	}
 
 	exec(phpCode)

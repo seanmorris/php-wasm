@@ -64,7 +64,7 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build PHP
-        run: time make mjs stdlib PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}

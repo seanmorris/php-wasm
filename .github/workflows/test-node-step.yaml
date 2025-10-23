@@ -31,4 +31,4 @@ jobs:
           merge-multiple: true
       - run: npm ci
       - run: npm install -g deno
-      - run: PHP_VERSION=${{ inputs.phpVersion }} make test-${{ inputs.testType }}
+      - run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
