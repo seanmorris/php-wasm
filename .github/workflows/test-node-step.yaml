@@ -23,15 +23,27 @@ jobs:
       - run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
+
       - name: Install docker-compose
         run: sudo apt update && sudo apt install docker-compose -y
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-wasm-${{ inputs.libType }}-*
           path: packages/
           merge-multiple: true
-      - run: npm ci
-      - run: npm install -g deno
-      - run: make -t node-mjs PHP_VERSION=${{ inputs.phpVersion }}
-      - run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+
+      - name: npm install
+        run: |
+          npm ci
+          npm install -g deno
+
+      - name: Apply mtime cache
+        run: |
+          while read -r PATH MTIME; do
+            [[ -f "${PATH}" ]] && touch -d "@${MTIME}" "${PATH}"
+          done < ./.cache/.mtimes
+
+      - name: Run tests
+        run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}

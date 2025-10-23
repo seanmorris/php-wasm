@@ -54,6 +54,9 @@ jobs:
       - name: Cache executables
         run: find ./third_party -type f -executable -print > ./.cache/executables.list
 
+      - name: Cache mtimes
+        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

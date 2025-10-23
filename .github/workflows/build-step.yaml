@@ -63,15 +63,28 @@ jobs:
       - name: Spin up docker network
         run: docker network create phpwasm_default
 
+      - name: Apply mtime cache
+        run: |
+          while read -r PATH MTIME; do
+            [[ -f "${PATH}" ]] && touch -d "@${MTIME}" "${PATH}"
+          done < ./.cache/.mtimes
+
       - name: Build PHP
         run: time make mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
+      - name: Cache mtimes
+        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-wasm-${{ inputs.libType }}-${{ inputs.phpVersion }}
           include-hidden-files: true
-          path: packages/
+          path: |
+            third_party
+            lib
+            packages
+            .cache
