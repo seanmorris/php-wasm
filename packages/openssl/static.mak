@@ -43,8 +43,11 @@ endif
 ifeq (${WITH_OPENSSL},dynamic)
 PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 DYNAMIC_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
+DYNAMIC_LIBS_GROUPED+= openssl-libs
 SKIP_LIBS+= -lssl -lcrypto
 endif
+
+openssl-libs: packages/openssl/libssl.so packages/openssl/libcrypto.so
 
 third_party/openssl/.gitignore:
 	@ echo -e "\e[33;4mDownloading OpenSSL\e[0m"

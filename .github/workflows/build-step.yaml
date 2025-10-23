@@ -34,7 +34,8 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: php-dependencies
+          pattern: php-dependencies-*
+          merge-multiple: true
           path: ./
 
       - name: Apply executable cache
@@ -68,9 +69,12 @@ jobs:
 
       - name: Apply mtime cache
         run: |
-          while read -r PATH MTIME; do
-            [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-          done < ./.cache/.mtimes
+          set -euxo pipefail
+          ls ./.cache/.mtimes | while read -r CACHE; do
+            while read -r PATH MTIME; do
+              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
+            done < ${CACHE}
+          done
 
       - name: Build PHP
         run: time make ${{ inputs.envTarget }}-mjs
@@ -86,7 +90,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm-${{ inputs.libType }}-${{ inputs.envTarget }}-${{ inputs.phpVersion }}
+          name: php${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
           include-hidden-files: true
           path: |
             third_party

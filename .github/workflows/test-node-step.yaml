@@ -30,7 +30,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-wasm-${{ inputs.libType }}-*
+          pattern: php${{ inputs.phpVersion }}-${{ inputs.libType }}-*
           path: ./
           merge-multiple: true
 

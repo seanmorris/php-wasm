@@ -31,9 +31,13 @@ endif
 
 ifeq (${WITH_SDL},dynamic)
 PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+DYNAMIC_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
+DYNAMIC_LIBS_GROUPED+= sdl-libs
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 # SKIP_LIBS+= -lsdl -lgl
 endif
+
+sdl-libs: packages/sdl/libSDL2.so packages/sdl/libGL.so
 
 third_party/php${PHP_VERSION}-sdl/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-sdl\e[0m"

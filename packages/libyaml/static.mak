@@ -35,8 +35,11 @@ ifeq (${WITH_YAML},dynamic)
 PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 DYNAMIC_LIBS+= packages/libyaml/libyaml.so
+DYNAMIC_LIBS_GROUPED+= libyaml-libs
 SKIP_LIBS+= -lyaml
 endif
+
+libyaml-libs: packages/libyaml/libyaml.so
 
 third_party/libyaml/.gitignore:
 	@ echo -e "\e[33;4mDownloading libyaml\e[0m"

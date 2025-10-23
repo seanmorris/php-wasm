@@ -24,10 +24,13 @@ ifeq (${WITH_GD}, dynamic)
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
+DYNAMIC_LIBS_GROUPED+= gd-libs
 endif
 
 GD_FLAGS=
 GD_LIBS=
+
+gd-libs: ${GD_LIBS}
 
 ifeq (${WITH_FREETYPE},shared)
 GD_FLAGS+= --with-freetype=/src/lib

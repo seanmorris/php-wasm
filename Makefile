@@ -98,6 +98,8 @@ ifeq ($(filter ${PHP_VERSION},8.4 8.3 8.2 8.1 8.0),)
 $(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
+DYNAMIC_LIBS_GROUPED=
+
 ## More Options
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
@@ -835,7 +837,7 @@ dynamic:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
 
 dynamic-libs.json:
-	echo ${DYNAMIC_LIBS} | jq -R 'split(" ")' > dynamic-libs.json
+	echo ${DYNAMIC_LIBS_GROUPED} | jq -Rc 'split(" ")' > $@
 
 PHPIZE: ${PHPIZE}
 

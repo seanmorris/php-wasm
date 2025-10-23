@@ -38,10 +38,13 @@ endif
 
 ifeq (${WITH_TIDY},dynamic)
 DYNAMIC_LIBS+= packages/tidy/libtidy.so
+DYNAMIC_LIBS_GROUPED+= tidy-libs
 PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
 endif
+
+tidy-libs: packages/tidy/libtidy.so
 
 third_party/tidy-html5/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibTidy\e[0m"

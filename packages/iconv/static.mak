@@ -37,8 +37,11 @@ PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 DYNAMIC_LIBS+= packages/iconv/libiconv.so
+DYNAMIC_LIBS_GROUPED+= iconv-libs
 SKIP_LIBS+= -liconv
 endif
+
+iconv-libs: packages/iconv/libiconv.so
 
 # ICONV_URL?=https://ftp.gnu.org/pub/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz
 ICONV_URL?=https://mirrors.ocf.berkeley.edu/gnu/libiconv/libiconv-${ICONV_VERSION}.tar.gz

@@ -7,9 +7,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+
+  generate-lib-group-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.libgroups }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Generate JSON array of directories
+        id: set-matrix
+        run: |
+          make dynamic-libs.json WITH_SDL=dynamic
+          echo "libgroups=$(cat dynamic-libs.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
   build-libs:
     name: Build Shared Objects
     runs-on: ubuntu-latest
+    needs: [generate-lib-group-matrix]
+    strategy:
+      matrix:
+        libgroup: ${{ fromJSON(needs.generate-lib-group-matrix.outputs.matrix) }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -49,18 +84,18 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build shared libraries
-        run: time make dynamic packages/sdl/libSDL2.so packages/sdl/libGL.so
+        run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
         run: find ./third_party -type f -executable -print > ./.cache/executables.list
 
       - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-${{ matrix.libgroup }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-dependencies
+          name: php-dependencies-${{ matrix.libgroup }}
           include-hidden-files: true
           path: |
             third_party
@@ -73,7 +108,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker', 'webview']
+        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -85,7 +120,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker', 'webview']
+        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -97,7 +132,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker', 'webview']
+        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -164,11 +199,12 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
+        libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      libType: dynamic
       testType: ${{ matrix.testType }}
+      libType: ${{ matrix.libType }}
 
   test-node-shared:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
@@ -177,11 +213,12 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
+        libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      libType: shared
       testType: ${{ matrix.testType }}
+      libType: ${{ matrix.libType }}
 
   test-node-static:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
@@ -190,8 +227,9 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
+        libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      libType: static
       testType: ${{ matrix.testType }}
+      libType: ${{ matrix.libType }}
