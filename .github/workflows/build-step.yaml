@@ -76,7 +76,9 @@ jobs:
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+        run: |
+          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+          sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
