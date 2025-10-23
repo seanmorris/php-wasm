@@ -30,8 +30,6 @@ endif
 GD_FLAGS=
 GD_LIBS=
 
-gd-libs: ${GD_LIBS}
-
 ifeq (${WITH_FREETYPE},shared)
 GD_FLAGS+= --with-freetype=/src/lib
 GD_LIBS+= packages/gd/libfreetype.so
@@ -70,6 +68,8 @@ else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libwebp.so
 endif
 endif
+
+gd-libs: ${GD_LIBS}
 
 DOCKER_RUN_IN_EXT_GD=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-gd/ emscripten-builder
 

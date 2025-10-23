@@ -191,7 +191,7 @@ jobs:
         run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
 
       - name: Ensure the demo uses local packages
-        run: cd demo-web; ./switch-packages.sh local; npm ci cd ..;
+        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
       - name: Run tests
         run: make test-browser
