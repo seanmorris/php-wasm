@@ -38,10 +38,15 @@ jobs:
           merge-multiple: true
           path: ./
 
-      - name: Apply executable cache
+      - name: Apply executable & mtime caches
         run: |
           ls ./.cache/executables* | while read -r CACHE; do
             cat ${CACHE} | xargs -I{} chmod +x {}
+          done
+          ls ./.cache/.mtimes* | while read -r CACHE; do
+            while read -r PATH MTIME; do
+              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
+            done < ${CACHE}
           done
 
       - name: Install NPM packages
@@ -57,20 +62,18 @@ jobs:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
 
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar
+
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
           time make image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
-      - name: Apply mtime cache
-        run: |
-          set -euxo pipefail
-          ls ./.cache/.mtimes* | while read -r CACHE; do
-            while read -r PATH MTIME; do
-              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-            done < ${CACHE}
-          done
+      - name: Spin up docker-network
+        run: docker network create phpwasm_default
 
       - name: Build PHP
         run: time make ${{ inputs.envTarget }}-mjs
