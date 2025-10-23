@@ -54,6 +54,7 @@ third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSIO
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
+	${DOCKER_RUN} embuilder.py build sdl2
 #	${DOCKER_RUN} embuilder --pic --lto build sdl2
 #	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libSDL2.a lib/lib/libSDL2.a
 	${DOCKER_RUN_IN_LIB_SDL} ls -al
