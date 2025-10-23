@@ -123,14 +123,8 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: php-dependencies
-          path: ./
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
           pattern: php-wasm-${{ matrix.libType }}-*
-          path: packages/
+          path: ./
           merge-multiple: true
 
       - name: Install NPM packages

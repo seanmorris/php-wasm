@@ -472,12 +472,18 @@ web-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+endif
 	@ cat ico.ans >&2
 
 worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+endif
 	@ cat ico.ans >&2
 
 worker-js:
@@ -490,6 +496,9 @@ webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+endif
 	@ cat ico.ans >&2
 
 webview-js:
@@ -502,6 +511,9 @@ node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+endif
 	@ cat ico.ans >&2
 
 node-js:

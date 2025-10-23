@@ -31,7 +31,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: php-wasm-${{ inputs.libType }}-*
-          path: packages/
+          path: ./
           merge-multiple: true
 
       - name: npm install
