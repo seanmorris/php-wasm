@@ -1,7 +1,20 @@
 #!/usr/bin/env make
-.PHONY: all web js cjs mjs clean php-clean deep-clean show-ports show-versions show-files hooks image push-image pull-image dist demo serve-demo scripts test archives assets rebuild reconfigure packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs
+.PHONY: all web js cjs mjs \
+	web-mjs web-js \
+	worker-mjs worker-js node-mjs \
+	webnode-js webview-mjs webview-js \
+	clean php-clean deep-clean show-ports show-versions show-files \
+	hooks image push-image pull-image \
+	dist demo serve-demo scripts run \
+	test test-node test-deno test-browser \
+	all-versions all-versions all-stdlibs \
+	test-all-versions x-all-versions php-clean-all-versions \
+	demo-versions null \
+	archives assets rebuild reconfigure \
+	packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs \
+	dynamic dynamic-libs.json
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables --shuffle=random
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables --shuffle=random
 
 ## Defaults:
 
@@ -84,6 +97,8 @@ endif
 ifeq ($(filter ${PHP_VERSION},8.4 8.3 8.2 8.1 8.0),)
 $(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
+
+DYNAMIC_LIBS_GROUPED=
 
 ## More Options
 ifdef PHP_BUILDER_DIR
@@ -196,7 +211,7 @@ NOTPARALLEL=
 all:
 	$(MAKE) _all
 
-TOP_LEVEL=packages/php-wasm packages/php-cgi-wasm packages/php-dbg-wasm
+TOP_LEVEL=$(addprefix ${CURDIR}/node_modules/,php-wasm php-cgi-wasm php-cli-wasm php-dbg-wasm)
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-cli-wasm/pre.mak
@@ -209,6 +224,12 @@ PHP_ASSET_LIST+= ${PRELOAD_NAME}.data
 ORDER_ONLY+=.cache/preload-collected
 EXTRA_FLAGS+= --preload-name ${PRELOAD_NAME} ${PRELOAD_METHOD} /src/third_party/preload@/preload
 endif
+
+MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
+CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
+
+MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
+CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
@@ -409,12 +430,6 @@ ifneq (${PRE_JS_FILES},)
 DEPENDENCIES+= .cache/pre.js
 endif
 
-MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
-CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
-
-MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
-CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
-
 EXTRA_MODULES=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
 WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
@@ -472,12 +487,18 @@ web-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+endif
 	@ cat ico.ans >&2
 
 worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+endif
 	@ cat ico.ans >&2
 
 worker-js:
@@ -490,6 +511,9 @@ webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+endif
 	@ cat ico.ans >&2
 
 webview-js:
@@ -502,6 +526,9 @@ node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+endif
 	@ cat ico.ans >&2
 
 node-js:
@@ -773,6 +800,22 @@ ${PHP_DIST_DIR}/php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
 ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 	cp $< $@;
 
+############### StdLibs ###############
+
+stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+
+packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
+
 ########### Clerical stuff. ###########
 
 ${ENV_FILE}:
@@ -792,6 +835,9 @@ deps:
 
 dynamic:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
+
+dynamic-libs.json:
+	echo ${DYNAMIC_LIBS_GROUPED} | jq -Rc 'split(" ")' > $@
 
 PHPIZE: ${PHPIZE}
 
@@ -920,11 +966,13 @@ NPM_PUBLISH_DRY?=--dry-run
 publish:
 	npm publish ${NPM_PUBLISH_DRY}
 
-test: node-mjs
+test:
 	${MAKE} test-node
+ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 	${MAKE} test-deno
+endif
 
-test-node:
+test-node: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
@@ -948,7 +996,7 @@ test-node:
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
 
-test-deno:
+test-deno: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
@@ -985,6 +1033,11 @@ all-versions:
 	${MAKE} PHP_VERSION=8.1
 	${MAKE} PHP_VERSION=8.0
 
+all-stdlibs:
+	${MAKE} stdlib PHP_VERSION=8.4
+	${MAKE} stdlib PHP_VERSION=8.3
+	${MAKE} stdlib PHP_VERSION=8.2
+
 test-all-versions:
 	${MAKE} test PHP_VERSION=8.4
 	${MAKE} test PHP_VERSION=8.3
@@ -1007,16 +1060,25 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.4 WITH_SDL=0
-	${MAKE} web-mjs worker-cgi-mjs web-dbg-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.2 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.1 WITH_SDL=0
-	${MAKE} web-mjs web-dbg-mjs PHP_VERSION=8.0 WITH_SDL=0
+	rm third_party/php8.4-src/configured
+	rm third_party/php8.3-src/configured
+	rm third_party/php8.2-src/configured
+	rm third_party/php8.1-src/configured
+	rm third_party/php8.0-src/configured
+
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
-	${MAKE} web-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=1
+	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=1
+
+	${MAKE} worker-cgi-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
+
+	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=0
+	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=0
 
 
 reconfigure:
@@ -1030,3 +1092,5 @@ demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
 
 serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
 	npm run start --prefix ./demo-web
+
+null:

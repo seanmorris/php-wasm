@@ -132,6 +132,9 @@ cgi-cjs:
 	$(MAKE) webview-cgi-js
 	$(MAKE) node-cgi-js
 
+cgi-helpers-mjs: $(addprefix ${PHP_CGI_DIST_DIR}/,${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
+
+cgi-helpers-cjs: $(addprefix ${PHP_CGI_DIST_DIR}/,${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
 
 ifneq (${PRE_JS_FILES},)
 CGI_DEPENDENCIES+= .cache/pre.js

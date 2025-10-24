@@ -6,6 +6,7 @@
     "start": "./index.mjs"
   },
   "dependencies": {
+    "php-wasm": "../packages/php-wasm",
     "php-cgi-wasm": "../packages/php-cgi-wasm",
     "php-wasm-dom": "../packages/dom",
     "php-wasm-gd": "../packages/gd",

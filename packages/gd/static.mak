@@ -24,6 +24,7 @@ ifeq (${WITH_GD}, dynamic)
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
+DYNAMIC_LIBS_GROUPED+= gd-libs
 endif
 
 GD_FLAGS=
@@ -67,6 +68,8 @@ else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libwebp.so
 endif
 endif
+
+gd-libs: ${GD_LIBS}
 
 DOCKER_RUN_IN_EXT_GD=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-gd/ emscripten-builder
 

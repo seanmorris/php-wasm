@@ -8,7 +8,7 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/waitline/config.m4 # 
 CONFIGURE_FLAGS+= --enable-waitline
 DEPENDENCIES+= third_party/waitline/waitline.c
 CGI_DEPENDENCIES+= third_party/waitline/waitline.c
-DBG_DEPENDENCIES+= third_party/waitline/waitline.c
+# DBG_DEPENDENCIES+= third_party/waitline/waitline.c
 # TEST_LIST+=$(shell ls packages/waitline/test/*.mjs)
 endif
 

@@ -2,18 +2,30 @@ import React, { useMemo, useState } from 'react';
 import './dbg-preview.css';
 import Terminal from './Terminal';
 
+import dom from 'php-wasm-dom';
+import zlib from 'php-wasm-zlib';
+import libzip from 'php-wasm-libzip';
+import gd from 'php-wasm-gd';
+import iconv from 'php-wasm-iconv';
+import intl from 'php-wasm-intl';
+import openssl from 'php-wasm-openssl';
+import mbstring from 'php-wasm-mbstring';
+import sqlite from 'php-wasm-sqlite';
+import xml from 'php-wasm-xml';
+import simplexml from 'php-wasm-simplexml';
+import yaml from 'php-wasm-yaml';
+
 export default function CliPreview() {
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
-	const [file, setCurrentFile] = useState('');
-	const [line, setCurrentLine] = useState('');
-	const [statusMessage, setStatusMessage] = useState('php-wasm');
-	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
 	const [exitCode, setExitCode] = useState();
+	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
-	const startPath = query.has('path') ? query.get('path') : false;
-
+	const isIframe = !!Number(query.get('iframed'));
+	const interactive = !query.has('path') && !query.has('code');
+	const script = query.get('path');
+	const code = query.get('code');
 
 	const topBar = (<div className = "row header toolbar">
 		<div className = "cols">
@@ -43,12 +55,30 @@ export default function CliPreview() {
 			{topBar}
 			<div className='inset frame'>
 				<Terminal
-					file = {startPath}
-					setCurrentFile = {setCurrentFile}
-					setCurrentLine = {setCurrentLine}
 					setStatusMessage = {setStatusMessage}
 					setExitCode = {setExitCode}
-					localEcho = {true}
+					interactive = {interactive}
+					script = {script}
+					code = {code}
+					sharedLibs = {[
+						dom,
+						zlib,
+						libzip,
+						gd,
+						iconv,
+						intl,
+						openssl,
+						mbstring,
+						sqlite,
+						xml,
+						simplexml,
+						yaml,
+					]}
+					files = {[
+						{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
+						{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },
+						{ parent: '/preload/', name: 'list-extensions.php', url: './scripts/list-extensions.php' },
+					]}
 				/>
 			</div>
 			{statusBar}

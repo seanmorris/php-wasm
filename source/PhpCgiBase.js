@@ -254,6 +254,8 @@ export class PhpCgiBase
 			'storeInit',
 		];
 
+		await this.binary;
+
 		if(actions.includes(action))
 		{
 			let result, error;
@@ -428,7 +430,7 @@ export class PhpCgiBase
 				let currentPath = '';
 				for (const segment of segments) {
 					if (!segment) continue;
-			
+
 					currentPath += segment + '/';
 					if (!php.FS.analyzePath(currentPath).exists) {
 						php.FS.mkdir(currentPath);
@@ -470,7 +472,7 @@ export class PhpCgiBase
 				this.cookieJar.load(php.FS.readFile('/config/.cookies', {encoding: 'utf8'}));
 			}
 
-			await this.loadInit(php);
+			this.loadInit(php);
 
 			return php;
 		});
@@ -844,17 +846,17 @@ export class PhpCgiBase
 		);
 	}
 
-	async loadInit(binary)
+	loadInit(binary)
 	{
 		const initPath = '/config/init.json';
-		const check = await fsOps.analyzePath(binary, initPath);
+		const check = binary.FS.analyzePath(initPath);
 
 		if(!check.exists)
 		{
 			return;
 		}
 
-		const initJson = await fsOps.readFile(binary, initPath, {encoding: 'utf8'});
+		const initJson = binary.FS.readFile(initPath, {encoding: 'utf8'});
 		const init = JSON.parse(initJson || '{}');
 		const {settings, env} = init;
 

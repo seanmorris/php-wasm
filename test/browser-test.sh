@@ -22,4 +22,4 @@ while ! nc -z localhost ${PORT}; do
 done
 set -x;
 
-npx cvtest test/BrowserTest.mjs;
+PHP_VERSION=${PHP_VERSION} npx cvtest test/BrowserTest.mjs;

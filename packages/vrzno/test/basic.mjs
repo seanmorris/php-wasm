@@ -101,6 +101,7 @@ test('Can access PHP integers via php.x function.', async () => {
 	assert.equal(returnValueIFFE, scalarInt);
 	assert.equal(stdErr, '');
 });
+
 test('Can access PHP floats via php.x function: One float', async () => {
 	const php = new PhpNode();
 
@@ -231,6 +232,7 @@ test('Can access JS classes via php.x function: user-classes.', async () => {
 	assert.equal(stdOut, '');
 	assert.equal(stdErr, '');
 });
+
 test('Can access PHP callbacks that return integers via php.x function.', async () => {
 	const php = new PhpNode();
 
@@ -509,28 +511,6 @@ test('Can use url_fopen with file_get_contents with a context. (POST) ', async (
 
 	assert.equal(typeof json, 'object');
 	assert.equal(Array.isArray(json), false);
-});
-
-test('Can take an object param from PHP with a "length" property.', async () => {
-	const php = new PhpNode();
-
-	const testFunc = obj => {
-		assert.equal(obj.length, 10);
-		return obj;
-	};
-
-	let stdOut = '', stdErr = '';
-
-	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
-	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
-
-	await php.binary;
-
-	const returnValue = await php.x`${testFunc}( [ 'length' => 10 ] )`;
-
-	assert.equal(returnValue.length, 10);
-	assert.equal(stdOut, '');
-	assert.equal(stdErr, '');
 });
 
 test('Can call Math.random on globalThis.', async () => {

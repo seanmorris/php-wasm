@@ -32,9 +32,12 @@ endif
 ifeq (${WITH_LIBZIP},dynamic)
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 DYNAMIC_LIBS+= packages/libzip/libzip.so
+DYNAMIC_LIBS_GROUPED+= libzip-libs
 SKIP_LIBS+= -lzip
 PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
 endif
+
+libzip-libs: packages/libzip/libzip.so
 
 third_party/libzip/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibZip\e[0m"

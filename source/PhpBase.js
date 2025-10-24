@@ -82,11 +82,12 @@ export class PhpBase extends EventTarget
 		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
 
 		this.binary = phpBinLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
-			php.ccall(
+			await php.ccall(
 				'pib_storage_init'
 				, NUM
 				, []
 				, []
+				, {async: true}
 			);
 
 			if(!php.FS.analyzePath('/preload').exists)
@@ -218,17 +219,17 @@ export class PhpBase extends EventTarget
 		return this._enqueue(phpCode => this._run(phpCode), [phpCode]);
 	}
 
-	async _run(phpCode)
+	_run(phpCode)
 	{
-		const call = (await this.binary).ccall(
-			'pib_run'
-			, NUM
-			, [STR]
-			, [`?>${phpCode}`]
-			, {async: true}
-		);
-
-		return call.finally(() => this.flush());
+		return this.binary.then(php => {
+			return php.ccall(
+				'pib_run'
+				, NUM
+				, [STR]
+				, [`?>${phpCode}`]
+			);
+		})
+		.finally(() => this.flush())
 	}
 
 	exec(phpCode)

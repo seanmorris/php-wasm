@@ -1,37 +1,11 @@
-import './Common.css';
-import './InstallDemo.css';
-
-import { PhpWeb } from 'php-wasm/PhpWeb';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
-
-import loader from './tail-spin.svg';
-import NextIcon from './icons/forward-icon-32.png'
-import BackIcon from './icons/back-icon-32.png'
-import WwwIcon from './icons/www-icon-32.png'
-import editorIcon from './icons/editor-icon-32.png';
-
-import libxml from 'php-wasm-libxml';
+import Terminal from './Terminal';
 import zlib from 'php-wasm-zlib';
 import libzip from 'php-wasm-libzip';
-
-navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-
-const params = new URLSearchParams(window.location.search);
-
-if(!params.has('no-service-worker'))
-{
-	setTimeout(() => {
-		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
-		{
-			window.location.reload()
-		}
-	}, 350);
-}
-
-// console.log(navigator.serviceWorker.controller);
-// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
+import loader from './tail-spin.svg';
+import './Common.css';
+import './InstallDemo.css';
 
 const packages = {
 	'drupal-7': {
@@ -81,219 +55,141 @@ const packages = {
 	}
 };
 
-const sharedLibs = [libxml, zlib, libzip];
+const informOpener = (selectedFrameworkName) => {
+	window.opener && window.opener.dispatchEvent(
+		new CustomEvent('install-complete', {detail: selectedFrameworkName})
+	);
+};
 
-const installDemo = async (overwrite = false) => {
+export default function InstallDemo() {
+	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+	const [message, setMessage] = useState('Initializing...');
+	const [terminal, setTerminal] = useState('');
 
-	const query = new URLSearchParams(window.location.search);
+	useEffect(() => void (async()=>{
+		await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+		await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
 
-	if(!query.has('framework'))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'No framework selected.'})
-		);
-		return;
-	}
-
-	const selectedFrameworkName = query.get('framework');
-
-	if(!(selectedFrameworkName in packages))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'Invalid framework selected.'})
-		);
-		return;
-	}
-
-	if(query.has('overwrite'))
-	{
-		overwrite = overwrite || query.get('overwrite');
-	}
-
-	const selectedFramework = packages[selectedFrameworkName];
-
-	await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-	await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
-
-	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Acquiring Lock...'}));
-
-	const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
-
-	await navigator.locks.request('php-wasm-demo-install', async () => {
-
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Checking for Existing Install...'}));
-
-		const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
-
-		if(!overwrite && checkPath.exists)
+		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
 		{
-			window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
-			window.dispatchEvent(new CustomEvent('install-status', {detail: 'Already installed...'}));
-			if(window.opener)
-			{
-				window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: selectedFrameworkName}));
-			}
+			setMessage('No Service Worker Detected, Reloading...');
+			await new Promise(a => setTimeout(a, 500));
+			window.location.reload();
 			return;
 		}
 
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Downloading package...'}));
+		const selectedFrameworkName = query.get('framework');
+		const overwrite = query.get('overwrite') ?? false;
 
-		const downloadZip = fetch(process.env.PUBLIC_URL + selectedFramework.file);
-		const zipContents = await (await downloadZip).arrayBuffer();
-
-		await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
-		await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
-
-		const php = new PhpWeb({version: '8.3', sharedLibs, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]});
-
-		php.addEventListener('output', event => console.log(event.detail));
-		php.addEventListener('error', event => console.log(event.detail));
-
-		await php.binary;
-
-		const settings = await sendMessage('getSettings');
-		const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
-		const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
-
-		if(!existingvHost)
+		if(!selectedFrameworkName)
 		{
-			settings.vHosts.push({
-				pathPrefix: vHostPrefix,
-				directory:  '/persist/' + selectedFramework.dir,
-				entrypoint: selectedFramework.entry
-			});
+			setMessage('No framework selected.');
+			return;
 		}
-		else
+
+		if(!(selectedFrameworkName in packages))
 		{
-			existingvHost.directory = '/persist/' + selectedFramework.dir;
-			existingvHost.entrypoint = selectedFramework.entry;
+			setMessage('Invalid framework selected.');
+			return;
 		}
 
-		await sendMessage('setSettings', [settings]);
-		await sendMessage('storeInit');
+		const selectedFramework = packages[selectedFrameworkName];
 
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
+		setMessage('Downloading init script...');
+		const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
 
-		await php.run(initPhpCode);
+		setMessage('Acquiring Lock...');
+		await navigator.locks.request('php-wasm-demo-install', async () => {
 
-		if(selectedFramework.sql)
-		{
-			window.dispatchEvent(new CustomEvent('install-status', {detail: 'Setting up PostgreSQL...'}));
-			const sqlFile = await (await fetch(selectedFramework.sql)).text();
-			await sendMessage('execSql', [`idb://host= dbname=drupal port=5432`, sqlFile]);
-			await sendMessage('runSql', [`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables']);
-		}
+			setMessage('Checking for Existing Install...');
+			const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
+			const checkPath = await sendMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
 
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
-		await sendMessage('refresh', []);
+			if(!overwrite && checkPath.exists)
+			{
+				setMessage('Already installed...');
+				informOpener(selectedFrameworkName);
+				window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+				return;
+			}
 
-		window.dispatchEvent(new CustomEvent('install-status', {detail: 'Opening site...'}));
+			setMessage(`Downloading ${selectedFramework.file}...`);
+			const zipContents = await (await fetch(process.env.PUBLIC_URL + selectedFramework.file)).arrayBuffer();
+			await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
+			await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
 
-		if(window.opener)
-		{
-			window.opener.dispatchEvent(new CustomEvent('install-complete', {detail: selectedFrameworkName}));
-		}
+			setMessage(`Setting up ${selectedFrameworkName}...`);
+			const settings = await sendMessage('getSettings');
+			const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+			const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
 
-		window.location = vHostPrefix;
-	});
-};
+			if(!existingvHost)
+			{
+				settings.vHosts.push({
+					pathPrefix: vHostPrefix,
+					directory:  '/persist/' + selectedFramework.dir,
+					entrypoint: selectedFramework.entry
+				});
+			}
+			else
+			{
+				existingvHost.directory = '/persist/' + selectedFramework.dir;
+				existingvHost.entrypoint = selectedFramework.entry;
+			}
 
-const openDemo = () => {
-	const query = new URLSearchParams(window.location.search);
+			await sendMessage('setSettings', [settings]);
+			await sendMessage('storeInit');
 
-	if(!query.has('framework'))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'No framework selected.'})
-		);
-		return;
-	}
+			setMessage(`Unpacking ${selectedFramework.file}...`);
 
-	const selectedFrameworkName = query.get('framework');
+			const onComplete = async (exitCode) => {
+				if(exitCode !== 0) return;
+				if(selectedFramework.sql)
+				{
+					setMessage('Setting up PostgreSQL...');
+					const sqlFile = await (await fetch(selectedFramework.sql)).text();
+					await sendMessage('execSql', [`idb://host= dbname=drupal port=5432`, sqlFile]);
+					await sendMessage('runSql', [`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables']);
+				}
 
-	if(!(selectedFrameworkName in packages))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'Invalid framework selected.'})
-		);
-		return;
-	}
+				setMessage('Refreshing PHP-CGI...');
+				await sendMessage('refresh', []);
 
-	const selectedFramework = packages[selectedFrameworkName];
+				setMessage(`Opening ${selectedFrameworkName}...`);
+				informOpener(selectedFrameworkName);
+				window.location = vHostPrefix;
+			};
 
-	window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
-}
-
-const openCode = () => {
-	const query = new URLSearchParams(window.location.search);
-
-	if(!query.has('framework'))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'No framework selected.'})
-		);
-		return;
-	}
-
-	const selectedFrameworkName = query.get('framework');
-
-	if(!(selectedFrameworkName in packages))
-	{
-		window.dispatchEvent(
-			new CustomEvent('install-status', {detail: 'Invalid framework selected.'})
-		);
-		return;
-	}
-
-	const selectedFramework = packages[selectedFrameworkName];
-
-	window.location = process.env.PUBLIC_URL + '/code-editor.html?path=/persist/' + selectedFramework.path;
-}
-
-export default function InstallDemo() {
-	const [message, setMessage] = useState('Initializing...');
-
-	const onStatus = event => setMessage(event.detail);
-
-	useEffect(() => {
-		window.addEventListener('install-status', onStatus);
-		return () => {
-			window.removeEventListener('install-status', onStatus);
-		}
-	}, []);
-
-	window.demoInstalling = window.demoInstalling || installDemo();
+			setTerminal(
+				<div style={{
+					position: 'relative',
+					minWidth: 'max(45rem, 90vh)',
+					minHeight: '30rem',
+					resize: 'both'
+				}}>
+					<Terminal
+						className = "inset"
+						sharedLibs = {[zlib, libzip]}
+						setExitCode = {onComplete}
+						interactive = {false}
+						code = {'?>' + initPhpCode}
+					/>
+				</div>
+			);
+		});
+	})(), [query]);
 
 	return (
 		<div className = "install-demo">
-			<div className = "center">
-				{ message !== 'Site already exists!'
-					? <img className = "loader-icon" src = {loader} alt = "loading spinner" />
-					: ''
-				}
-				<div className = "bevel">
-				<div className = "inset padded">{message}</div>
-				{ message === 'Site already exists!'
-					? <div className = 'button-bar inset'>
-						<button className = "padded" onClick = {() => window.location = process.env.PUBLIC_URL + '/select-framework.html'}>
-							<img src = {BackIcon} className = "icon" />
-							Back
-						</button>
-						<button className = "padded" onClick = {() => openDemo()}>
-							<img src = {WwwIcon} className = "icon" />
-							Open Site
-						</button>
-						<button className = "padded" onClick = {() => openCode()}>
-							<img src = {editorIcon} className = "icon" />
-							Edit Files
-						</button>
-						<button className = "padded" onClick = {() => installDemo(true)}>
-							Overwrite
-							<img src = {NextIcon} className = "icon" />
-						</button>
-					</div>
-					: ''
-				}
+			<div className = "center bevel">
+				<div className = "inset padded">
+					<h2>{message}</h2>
+					{terminal}
+					<img
+						className = "loader-icon"
+						src = {loader}
+						alt = "loading spinner"
+					/>
 				</div>
 			</div>
 		</div>

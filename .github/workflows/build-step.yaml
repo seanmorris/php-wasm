@@ -6,6 +6,9 @@ on:
       phpVersion:
         required: true
         type: string
+      envTarget:
+        required: true
+        type: string
       libType:
         required: true
         type: string
@@ -31,18 +34,27 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: php-dependencies
+          pattern: php-dependencies-*
+          merge-multiple: true
           path: ./
 
-      - name: Apply executable cache
-        run: cat ./.cache/executables.list | xargs -I{} chmod +x {}
+      - name: Apply executable & mtime caches
+        run: |
+          ls ./.cache/executables* | while read -r CACHE; do
+            cat ${CACHE} | xargs -I{} chmod +x {}
+          done
+          ls ./.cache/.mtimes* | while read -r CACHE; do
+            while read -r PATH MTIME; do
+              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
+            done < ${CACHE}
+          done
 
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
-      
+      - name: Install deps
+        run: sudo apt update && sudo apt install coreutils docker-compose -y
+
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
@@ -60,18 +72,27 @@ jobs:
           time make image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
-      - name: Spin up docker network
+      - name: Spin up docker-network
         run: docker network create phpwasm_default
 
       - name: Build PHP
-        run: time make mjs PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make ${{ inputs.envTarget }}-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
+      - name: Cache mtimes
+        run: |
+          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+          sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-wasm-${{ inputs.libType }}-${{ inputs.phpVersion }}
+          name: php${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
           include-hidden-files: true
-          path: packages/
+          path: |
+            third_party
+            packages
+            lib
+            .cache

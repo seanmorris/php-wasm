@@ -33,9 +33,12 @@ endif
 ifeq (${WITH_ZLIB},dynamic)
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 DYNAMIC_LIBS+= packages/zlib/libz.so
+DYNAMIC_LIBS_GROUPED+= zlib-libs
 PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 SKIP_LIBS+= -lz
 endif
+
+zlib-libs: packages/zlib/libz.so
 
 third_party/zlib/.gitignore:
 	@ echo -e "\e[33;4mDownloading Zlib\e[0m"

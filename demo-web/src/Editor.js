@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import EditorFolder from './EditorFolder';
@@ -82,6 +82,10 @@ export default function Editor() {
 		if(currentPath.current)
 		{
 			window.location.href = process.env.PUBLIC_URL + '/vscode.html?path=' + currentPath.current;
+		}
+		else
+		{
+			window.location.href = process.env.PUBLIC_URL + '/vscode.html';
 		}
 	};
 

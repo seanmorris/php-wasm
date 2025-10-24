@@ -37,9 +37,12 @@ ifeq (${WITH_SQLITE},dynamic)
 CONFIGURE_FLAGS+=  --enable-pdo
 PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
 DYNAMIC_LIBS+= packages/sqlite/libsqlite3.so
+DYNAMIC_LIBS_GROUPED+= libsqlite-libs
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
 endif
+
+libsqlite-libs: packages/sqlite/libsqlite3.so
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
