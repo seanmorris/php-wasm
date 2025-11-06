@@ -34,14 +34,18 @@ jobs:
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Import configuration
-        run: cp -p .github/.env_8.4.dynamic.ci .env
-
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
           time make image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
 
   build-libs:
     name: Build Shared Objects
