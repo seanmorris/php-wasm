@@ -2,6 +2,10 @@ name: Test
 
 on: [push]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
   test-8-4-static:

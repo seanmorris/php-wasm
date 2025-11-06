@@ -24,23 +24,6 @@ jobs:
       - name: Install docker-compose
         run: sudo apt update && sudo apt install docker-compose -y
 
-      - name: Cache Docker image
-        id: cache-docker-image
-        uses: actions/cache@v3
-        with:
-          path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
-
-      - name: Load builder image if cached
-        if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
-
-      - name: Create builder image (if not cached)
-        if: steps.cache-docker-image.outputs.cache-hit != 'true'
-        run: |
-          time make image
-          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-
       - name: Install NPM packages
         run: npm ci
 
@@ -50,13 +33,6 @@ jobs:
           make dynamic-libs.json WITH_SDL=dynamic
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Docker image
-        id: cache-docker-image
-        uses: actions/cache@v3
-        with:
-          path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
 
       - name: Import configuration
         run: cp -p .github/.env_8.4.dynamic.ci .env
