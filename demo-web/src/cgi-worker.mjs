@@ -2,18 +2,66 @@
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
 
-import libxml from 'php-wasm-libxml';
-import dom from 'php-wasm-dom';
-import zlib from 'php-wasm-zlib';
-import libzip from 'php-wasm-libzip';
-import gd from 'php-wasm-gd';
-import iconv from 'php-wasm-iconv';
-import intl from 'php-wasm-intl';
-import openssl from 'php-wasm-openssl';
-import mbstring from 'php-wasm-mbstring';
-import sqlite from 'php-wasm-sqlite';
-import xml from 'php-wasm-xml';
-import simplexml from 'php-wasm-simplexml';
+const buildType = process.env.BUILD_TYPE ?? 'dynamic';
+
+const sharedLibs = [];
+
+const files = [
+	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' },
+	{ parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' },
+	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' },
+];
+
+if(buildType === 'dynamic')
+{
+	sharedLibs.push(...(await Promise.all([
+		import('php-wasm-libxml'),
+		import('php-wasm-dom'),
+		import('php-wasm-zlib'),
+		import('php-wasm-libzip'),
+		import('php-wasm-gd'),
+		import('php-wasm-iconv'),
+		import('php-wasm-intl'),
+		import('php-wasm-openssl'),
+		import('php-wasm-mbstring'),
+		import('php-wasm-sqlite'),
+		import('php-wasm-xml'),
+		import('php-wasm-simplexml'),
+		import('php-wasm-tidy'),
+		import('php-wasm-yaml'),
+	])).map(m => m.default));
+}
+else if(buildType === 'shared')
+{
+	sharedLibs.push(
+		{name: 'libz.so',        url: (await import('php-wasm-zlib/libz.so'         )).default},
+		{name: 'libzip.so',      url: (await import('php-wasm-libzip/libzip.so'     )).default},
+		{name: 'libfreetype.so', url: (await import('php-wasm-gd/libfreetype.so'    )).default},
+		{name: 'libjpeg.so',     url: (await import('php-wasm-gd/libjpeg.so'        )).default},
+		{name: 'libwebp.so',     url: (await import('php-wasm-gd/libwebp.so'        )).default},
+		{name: 'libpng.so',      url: (await import('php-wasm-gd/libpng.so'         )).default},
+		{name: 'libiconv.so',    url: (await import('php-wasm-iconv/libiconv.so'    )).default},
+		{name: 'libicuuc.so',    url: (await import('php-wasm-intl/libicuuc.so'     )).default},
+		{name: 'libicutu.so',    url: (await import('php-wasm-intl/libicutu.so'     )).default},
+		{name: 'libicutest.so',  url: (await import('php-wasm-intl/libicutest.so'   )).default},
+		{name: 'libicuio.so',    url: (await import('php-wasm-intl/libicuio.so'     )).default},
+		{name: 'libicui18n.so',  url: (await import('php-wasm-intl/libicui18n.so'   )).default},
+		{name: 'libicudata.so',  url: (await import('php-wasm-intl/libicudata.so'   )).default},
+		{name: 'libcrypto.so',   url: (await import('php-wasm-openssl/libcrypto.so' )).default},
+		{name: 'libssl.so',      url: (await import('php-wasm-openssl/libssl.so'    )).default},
+		{name: 'libonig.so',     url: (await import('php-wasm-mbstring/libonig.so'  )).default},
+		{name: 'libsqlite3.so',  url: (await import('php-wasm-sqlite/libsqlite3.so' )).default},
+		{name: 'libtidy.so',     url: (await import('php-wasm-tidy/libtidy.so'      )).default},
+		{name: 'libyaml.so',     url: (await import('php-wasm-yaml/libyaml.so'      )).default},
+	);
+}
+else
+{
+	sharedLibs.push(
+		{name: 'libcrypto.so',   url: (await import(('php-wasm-openssl/libcrypto.so'))).default},
+		{name: 'libssl.so',      url: (await import(('php-wasm-openssl/libssl.so'   ))).default},
+	);
+}
 
 // Log requests
 const onRequest = (request, response) => {
@@ -33,27 +81,6 @@ const notFound = request => {
 	);
 };
 
-const sharedLibs = [
-	libxml,
-	dom,
-	zlib,
-	libzip,
-	gd,
-	iconv,
-	intl,
-	openssl,
-	mbstring,
-	sqlite,
-	xml,
-	simplexml,
-];
-
-const files = [
-	{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
-	{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },
-	{ parent: '/preload/', name: 'list-extensions.php', url: './scripts/list-extensions.php' },
-];
-
 const actions = {
 	runSql: (php, database, sql) => {
 		console.log({database});
@@ -61,7 +88,7 @@ const actions = {
 		return pglite.query(sql);
 	},
 	execSql: (php, database, sql) => {
-		console.log(database)
+		console.log({database});
 		const pglite = new PGlite(database);
 		return pglite.exec(sql);
 	}

@@ -2,18 +2,7 @@ import React, { useMemo, useState } from 'react';
 import './dbg-preview.css';
 import Terminal from './Terminal';
 
-import dom from 'php-wasm-dom';
-import zlib from 'php-wasm-zlib';
-import libzip from 'php-wasm-libzip';
-import gd from 'php-wasm-gd';
-import iconv from 'php-wasm-iconv';
-import intl from 'php-wasm-intl';
-import openssl from 'php-wasm-openssl';
-import mbstring from 'php-wasm-mbstring';
-import sqlite from 'php-wasm-sqlite';
-import xml from 'php-wasm-xml';
-import simplexml from 'php-wasm-simplexml';
-import yaml from 'php-wasm-yaml';
+const sharedLibs = [];
 
 export default function CliPreview() {
 
@@ -60,20 +49,7 @@ export default function CliPreview() {
 					interactive = {interactive}
 					script = {script}
 					code = {code}
-					sharedLibs = {[
-						dom,
-						zlib,
-						libzip,
-						gd,
-						iconv,
-						intl,
-						openssl,
-						mbstring,
-						sqlite,
-						xml,
-						simplexml,
-						yaml,
-					]}
+					sharedLibs = {sharedLibs}
 					files = {[
 						{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
 						{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },

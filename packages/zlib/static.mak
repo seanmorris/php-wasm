@@ -76,7 +76,7 @@ packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_p
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O0 -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so
+	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -s EXPORT_ALL=1 -O0 -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so
 
 $(addsuffix /php${PHP_VERSION}-zlib.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/php${PHP_VERSION}-zlib.so
 	cp -Lp $^ $@

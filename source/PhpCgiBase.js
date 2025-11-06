@@ -1,5 +1,3 @@
-import { phpVersion } from "./config";
-import { phpVersionFull } from "./config";
 import { parseResponse } from './parseResponse';
 import { breakoutRequest } from './breakoutRequest';
 import { fsOps } from './fsOps';
@@ -628,7 +626,7 @@ export class PhpCgiBase
 
 				const selfUrl = new URL(globalThis.location || request.url);
 
-				putEnv(php, 'PHP_VERSION', phpVersion);
+				putEnv(php, 'PHP_VERSION', this.phpVersion);
 				putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
 				putEnv(php, 'PHPRC', '/php.ini');
 
@@ -864,6 +862,3 @@ export class PhpCgiBase
 		this.setEnvs(env);
 	}
 }
-
-PhpCgiBase.phpVersion = phpVersion;
-PhpCgiBase.phpVersionFull = phpVersionFull;

@@ -8,9 +8,16 @@ const config: webpack.Configuration = {
   module: {
     rules: [
       {
-		test: /\.mjs$/,
-		exclude: /node_modules/,
-		use: { loader: "babel-loader" }
+        test: /\.mjs$/,
+        exclude: /node_modules/,
+        use: { loader: "babel-loader" }
+      },
+      {
+        test: /\.(so|dat)$/,
+        type: 'asset/resource',
+        generator: {
+          filename: '[name].[contenthash][ext]'
+        },
       },
     ]
   },
@@ -21,7 +28,14 @@ const config: webpack.Configuration = {
     publicPath: '/',
   },
   target: 'webworker',
-  devtool: 'source-map'
+  devtool: 'source-map',
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': JSON.stringify({
+        BUILD_TYPE: process.env.BUILD_TYPE ?? 'dynamic'
+      })
+    })
+  ],
 };
 
 export default config;
