@@ -726,7 +726,6 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|from '\''module'\''|from '\''node:module'\''|g' $@
-	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs

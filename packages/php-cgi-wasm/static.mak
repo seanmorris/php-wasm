@@ -257,7 +257,6 @@ ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-node.mjs: ${CGI_DEPENDENCIES} | ${ORDER
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-node.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-node.mjs

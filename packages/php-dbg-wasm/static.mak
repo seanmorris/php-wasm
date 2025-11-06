@@ -285,7 +285,6 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.mjs: ${DBG_DEPENDENCIES} | ${OR
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.mjs
