@@ -296,15 +296,14 @@ jobs:
       - name: Run tests
         run: make test-browser
 
-
-  test-browser:
+  test-browser-static:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
     runs-on: ubuntu-latest
-    needs: [build-php-dynamic]
+    needs: [build-php-static]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic',]
+        libType: ['static',]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
