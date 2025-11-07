@@ -241,7 +241,7 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
       - name: Run tests
-        run: make test-browser
+        run: BUILD_TYPE=${{ matrix.libType }} make test-browser
 
   test-browser-shared:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
@@ -250,7 +250,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic',]
+        libType: ['shared',]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -294,7 +294,7 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
       - name: Run tests
-        run: make test-browser
+        run: BUILD_TYPE=${{ matrix.libType }} make test-browser
 
   test-browser-static:
     name: Test Browser ${{ matrix.phpVersion }} ${{ matrix.libType }}
@@ -347,5 +347,5 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
       - name: Run tests
-        run: make test-browser
+        run: BUILD_TYPE=${{ matrix.libType }} make test-browser
 
