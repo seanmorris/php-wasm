@@ -75,8 +75,12 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
-      - name: Build PHP
-        run: time make ${{ inputs.envTarget }}-mjs
+      - name: Build PHP & PHP-CGI
+        run: time make ${{ inputs.envTarget }}-mjs ${{ inputs.envTarget }}-cgi-mjs
+
+      - name: Build PHP DBG & CLI Previews
+        if: inputs.envTarget == 'web'
+        run: time make ${{ inputs.envTarget }}-dbg-mjs ${{ inputs.envTarget }}-cli-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
