@@ -164,6 +164,14 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 		zend_eval_string(code, &retZv, "php-wasm exec expression");
 		convert_to_string(&retZv);
 		retVal = Z_STRVAL(retZv);
+#if PHP_MAJOR_VERSION >= 8 && PHP_MINOR_VERSION >= 1
+		if(EG(exception) && !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception))))
+#else
+		if(EG(exception) && !zend_is_unwind_exit(EG(exception)))
+#endif
+		{
+			zend_exception_error(EG(exception), E_ERROR);
+		}
 	}
 	zend_catch
 	{

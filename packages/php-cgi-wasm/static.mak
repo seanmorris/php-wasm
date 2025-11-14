@@ -14,8 +14,8 @@ NOTPARALLEL+=\
 	webview-cgi-js \
 	node-cgi-js
 
-CGI_MJS_HELPERS=breakoutRequest.mjs parseResponse.mjs msg-bus.mjs config.mjs
-CGI_CJS_HELPERS=breakoutRequest.js  parseResponse.js  msg-bus.js config.js
+CGI_MJS_HELPERS=breakoutRequest.mjs parseResponse.mjs msg-bus.mjs
+CGI_CJS_HELPERS=breakoutRequest.js  parseResponse.js  msg-bus.js
 
 CGI_MJS_HELPERS_WEB=${CGI_MJS_HELPERS} msg-bus.mjs
 CGI_CJS_HELPERS_WEB=${CGI_CJS_HELPERS} msg-bus.js
@@ -142,16 +142,6 @@ endif
 
 CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
-${PHP_CGI_DIST_DIR}/config.mjs: .env
-	echo '' > $@
-	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
-${PHP_CGI_DIST_DIR}/config.js: .env
-	echo 'module.exports = {};' > $@
-	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
 ${PHP_CGI_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CGI_DIST_DIR}/$(notdir $@)
@@ -191,7 +181,8 @@ ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-web.mjs: ${CGI_DEPENDENCIES} | ${ORDER_
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cgi/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-worker.mjs
+	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-web.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-web.mjs
@@ -229,6 +220,7 @@ ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-worker.mjs: ${CGI_DEPENDENCIES} | ${ORD
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-worker.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-worker.mjs
@@ -302,6 +294,7 @@ ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-webview.mjs: ${CGI_DEPENDENCIES} | ${OR
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_CGI_ASSET_DIR}
 
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-webview.mjs.wasm.map.MAPPED: ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-webview.mjs

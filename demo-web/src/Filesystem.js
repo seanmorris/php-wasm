@@ -4,9 +4,10 @@ import './InstallDemo.css';
 import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
-import libxml from 'php-wasm-libxml';
-import zlib from 'php-wasm-zlib';
-import libzip from 'php-wasm-libzip';
+
+// import libxml from 'php-wasm-libxml';
+// import zlib from 'php-wasm-zlib';
+// import libzip from 'php-wasm-libzip';
 
 import { useEffect, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
@@ -25,7 +26,7 @@ const backupSite = async () => {
 
 	const php = new PhpWeb({
 		persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
-		sharedLibs: [libxml, zlib, libzip],
+		// sharedLibs: [libxml, zlib, libzip],
 	});
 
 	await php.binary;
@@ -50,7 +51,7 @@ const restoreSite = async ({fileInput}) => {
 	}
 	const php = new PhpWeb({
 		persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
-		sharedLibs: [libxml, zlib, libzip],
+		// sharedLibs: [libxml, zlib, libzip],
 	});
 	const zipContents = await fileInput.files[0].arrayBuffer();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));

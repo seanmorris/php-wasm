@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import Terminal from './Terminal';
-import zlib from 'php-wasm-zlib';
-import libzip from 'php-wasm-libzip';
 import loader from './tail-spin.svg';
+
+// import zlib from 'php-wasm-zlib';
+// import libzip from 'php-wasm-libzip';
+
 import './Common.css';
 import './InstallDemo.css';
 
@@ -169,7 +171,7 @@ export default function InstallDemo() {
 				}}>
 					<Terminal
 						className = "inset"
-						sharedLibs = {[zlib, libzip]}
+						// sharedLibs = {[zlib, libzip]}
 						setExitCode = {onComplete}
 						interactive = {false}
 						code = {'?>' + initPhpCode}

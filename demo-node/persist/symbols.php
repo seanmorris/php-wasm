@@ -3,9 +3,7 @@ const php = new Php<?=vrzno_env('envName')?>({version: '<?=vrzno_env('version')?
 php.addEventListener('output', event => console.log(event.detail.map(line => line.replace(/\s+$/, '')).join('')));
 php.addEventListener('error', event => console.error(event.detail.map(line => line.replace(/\s+$/, '')).join('')));
 <?php foreach(get_defined_constants() as $const => $val):
-	$const = str_replace('\\', '__', $const);
-	?>export const <?=$const?> = await php.x`<?=$const?>`;
-<?php endforeach; foreach(get_defined_functions()['internal'] as $func):
-	$func = str_replace('\\', '__', $func);?>
-export const <?=$func?> = await php.x`<?=$func?>(...)`;
+	?>export const <?=str_replace('\\', '__', $const);?> = await php.x`<?=str_replace('\\', '\\\\', $const)?>`;
+<?php endforeach; foreach(get_defined_functions()['internal'] as $func):?>
+export const <?=str_replace('\\', '__', $func);?> = await php.x`<?=str_replace('\\', '\\\\', $func)?>(...)`;
 <?php endforeach; ?>

@@ -1,10 +1,9 @@
-import { phpVersion } from './config';
-import { phpVersionFull } from './config';
-
 import { OutputBuffer } from './OutputBuffer';
 import { _Event } from './_Event';
 import { fsOps } from './fsOps';
 import { resolveDependencies } from './resolveDependencies';
+
+const importMeta = import.meta;
 
 const STR = 'string';
 const NUM = 'number';
@@ -425,6 +424,3 @@ export class PhpBase extends EventTarget
 		return this._enqueue(fsOps.unlink, [this.binary, path]);
 	}
 }
-
-PhpBase.phpVersion = phpVersion;
-PhpBase.phpVersionFull = phpVersionFull;

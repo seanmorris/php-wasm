@@ -23,14 +23,14 @@ WEBVIEW_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWebview.js php${PHP_SUFFIX
 NODE_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliNode.mjs php${PHP_SUFFIX}-cli-node.mjs ${MJS_HELPERS_WEB})
 NODE_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliNode.js php${PHP_SUFFIX}-cli-node.js ${CJS_HELPERS})
 
-WEB_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.mjs
-WEB_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.js
-WORKER_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.mjs
-WORKER_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.js
-WEBVIEW_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.mjs
-WEBVIEW_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.js
-NODE_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.mjs
-NODE_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_CLI_DIST_DIR}/config.js
+WEB_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEB_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ifneq (${PRELOAD_ASSETS},)
 WEB_CLI_MJS_ASSETS+= ${ENV_DIR}/${PHP_CLI_ASSET_DIR}/${PRELOAD_NAME}.data
@@ -132,16 +132,6 @@ endif
 
 CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
-${PHP_CLI_DIST_DIR}/config.mjs: .env
-	echo '' > $@
-	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
-${PHP_CLI_DIST_DIR}/config.js: .env
-	echo 'module.exports = {};' > $@
-	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
 ${PHP_CLI_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CLI_DIST_DIR}/$(notdir $@)
@@ -186,6 +176,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs: ${CLI_DEPENDENCIES} | ${ORDER_
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE} ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs
@@ -227,6 +218,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs: ${CLI_DEPENDENCIES} | ${ORD
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs
@@ -267,6 +259,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs: ${CLI_DEPENDENCIES} | ${ORDER
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}* ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.* ${PHP_CLI_ASSET_DIR}
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs.wasm.map.MAPPED: ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs

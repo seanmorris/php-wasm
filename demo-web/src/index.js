@@ -23,9 +23,9 @@ if(!params.has('no-service-worker'))
 	setTimeout(() => {
 		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
 		{
-			window.location.reload()
+			window.location.reload();
 		}
-	}, 350);
+	}, 450);
 
 	navigator.serviceWorker.addEventListener('message', onMessage);
 }

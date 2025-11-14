@@ -23,14 +23,14 @@ WEBVIEW_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWebview.js php${PHP_SUFFIX
 NODE_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgNode.mjs php${PHP_SUFFIX}-dbg-node.mjs ${MJS_HELPERS_WEB})
 NODE_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgNode.js php${PHP_SUFFIX}-dbg-node.js ${CJS_HELPERS})
 
-WEB_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
-WEB_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-WORKER_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
-WORKER_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-WEBVIEW_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
-WEBVIEW_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
-NODE_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.mjs
-NODE_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DBG_DIST_DIR}/config.js
+WEB_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEB_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_DBG_JS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ifneq (${PRELOAD_ASSETS},)
 WEB_DBG_MJS_ASSETS+= ${ENV_DIR}/${PHP_DBG_ASSET_DIR}/${PRELOAD_NAME}.data
@@ -132,16 +132,6 @@ endif
 
 DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
-${PHP_DBG_DIST_DIR}/config.mjs: .env
-	echo '' > $@
-	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
-${PHP_DBG_DIST_DIR}/config.js: .env
-	echo 'module.exports = {};' > $@
-	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
 ${PHP_DBG_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DBG_DIST_DIR}/$(notdir $@)
@@ -182,6 +172,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE} ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs
@@ -219,6 +210,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORD
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs
@@ -255,6 +247,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs: ${DBG_DEPENDENCIES} | ${ORDER
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs

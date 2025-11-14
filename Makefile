@@ -11,7 +11,6 @@
 	test-all-versions x-all-versions php-clean-all-versions \
 	demo-versions null \
 	archives assets rebuild reconfigure \
-	packages/php-wasm/config.mjs packages/php-cgi-wasm/config.mjs packages/php-cli-wasm/config.mjs \
 	dynamic dynamic-libs.json
 
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables --shuffle=random
@@ -99,6 +98,8 @@ $(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEA
 endif
 
 DYNAMIC_LIBS_GROUPED=
+STATIC_LIB_CONFIG=
+SHARED_LIB_CONFIG=
 
 ## More Options
 ifdef PHP_BUILDER_DIR
@@ -441,14 +442,14 @@ WEBVIEW_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js php${PHP_SUFFI
 NODE_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs php${PHP_SUFFIX}-node.mjs ${MJS_HELPERS})
 NODE_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js php${PHP_SUFFIX}-node.js ${CJS_HELPERS})
 
-WEB_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WEB_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
-WORKER_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WORKER_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs
-WEBVIEW_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-WEBVIEW_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
-NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.mjs ${EXTRA_MODULES}
-NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${PHP_DIST_DIR}/config.js
+WEB_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+WEB_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
+WORKER_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+WORKER_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEBVIEW_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+WEBVIEW_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
+NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
 
 ifneq (${PRELOAD_ASSETS},)
 WEB_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
@@ -609,16 +610,6 @@ ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
 	- cp -Lprf ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_ASSET_DIR}/
 
-${PHP_DIST_DIR}/config.mjs: ${ENV_FILE}
-	echo '' > $@
-	echo 'export const phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'export const phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
-${PHP_DIST_DIR}/config.js: ${ENV_FILE}
-	echo 'module.exports = {};' > $@
-	echo 'module.exports.phpVersion = "${PHP_VERSION}";'          >> $@
-	echo 'module.exports.phpVersionFull = "${PHP_VERSION_FULL}";' >> $@
-
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: FS_TYPE=${WEB_FS_TYPE}
@@ -654,6 +645,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs
@@ -693,6 +685,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs
@@ -772,6 +765,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
+	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs
@@ -1060,11 +1054,11 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	rm third_party/php8.4-src/configured
-	rm third_party/php8.3-src/configured
-	rm third_party/php8.2-src/configured
-	rm third_party/php8.1-src/configured
-	rm third_party/php8.0-src/configured
+	rm -f third_party/php8.4-src/configured
+	rm -f third_party/php8.3-src/configured
+	rm -f third_party/php8.2-src/configured
+	rm -f third_party/php8.1-src/configured
+	rm -f third_party/php8.0-src/configured
 
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
