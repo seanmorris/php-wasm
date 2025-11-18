@@ -82,6 +82,16 @@ export class BrowserTest extends BotTest
 		await new Promise(a => setTimeout(a, 100));
 	}
 
+	async testCgiWorker()
+	{
+		await new Promise(a => setTimeout(a, 1000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/cgi-bin/test/hello-world.php`);
+		await new Promise(a => setTimeout(a, 7000));
+		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
+		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
+		await new Promise(a => setTimeout(a, 100));
+	}
+
 	// async testFetch()
 	// {
 	// 	await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=fetch.php&version=${version}`);

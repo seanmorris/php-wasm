@@ -13,6 +13,7 @@ export class PhpCliWeb extends PhpBase
 		super(import(`./php${args.version ?? defaultVersion}-cli-web.mjs`), args, 'cli');
 
 		this.interactive = false;
+		this.isVisible = false;
 
 		if(args.interactive)
 		{
@@ -30,6 +31,8 @@ export class PhpCliWeb extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
+			this.readyForInput = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
+			php.readyForInput = a;
 			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
 			this.addEventListener('stdin-request', async () => this.flush());
 			return php;
@@ -57,11 +60,27 @@ export class PhpCliWeb extends PhpBase
 		{
 			php.awaitingInput( php.inputDataQueue.shift() );
 			php.awaitingInput = null;
+			this.readyForInput = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
+			php.readyForInput = a;
+		}
+	}
+
+	async visibiliyChangeHandler(event)
+	{
+		this.isVisible = !event.target.hidden;
+
+		if(event.target.hidden)
+		{
+		}
+		else
+		{
 		}
 	}
 
 	run(flags = [])
 	{
+		flags = [...flags];
+
 		if(this.interactive)
 		{
 			flags.push('-a');
@@ -75,7 +94,29 @@ export class PhpCliWeb extends PhpBase
 			flags.push('-r', this.code);
 		}
 
-		return this._enqueue(phpCode => this._run(phpCode), [flags]);
+		return this._enqueue(f => this._run(f), [flags]);
+	}
+
+	async runAndWait(flags = [])
+	{
+		flags = [...flags];
+
+		if(this.interactive)
+		{
+			flags.push('-a');
+		}
+		else if(this.script)
+		{
+			flags.push('-f', this.script);
+		}
+		else if(this.code)
+		{
+			flags.push('-r', this.code);
+		}
+
+		const run = this._run(flags);
+
+		await Promise.race([run, this.readyForInput]);
 	}
 
 	async _run(flags = [])
