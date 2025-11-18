@@ -15,7 +15,7 @@ on:
 
 jobs:
   build:
-    name: Build PHP ${{ inputs.phpVersion }} ${{ inputs.libType }}
+    name: Build PHP ${{ inputs.phpVersion }} w/${{ inputs.libType }} libs
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -93,7 +93,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
+          name: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
           include-hidden-files: true
           path: |
             third_party
