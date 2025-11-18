@@ -158,7 +158,7 @@ jobs:
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -173,7 +173,7 @@ jobs:
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -188,7 +188,7 @@ jobs:
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -202,7 +202,7 @@ jobs:
         libType: ['dynamic',]
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -215,7 +215,7 @@ jobs:
         libType: ['shared',]
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -228,12 +228,12 @@ jobs:
         libType: ['static',]
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
   compress-packages:
-    name: Compress PHP ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
       - test-node-static
@@ -244,8 +244,7 @@ jobs:
       - test-browser-dynamic
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['static',]
+        libType: ['static','shared','dynamic']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -282,7 +281,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-compressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+          name: php-compressed-${{ matrix.libType }}
           include-hidden-files: true
           path: |
             third_party
@@ -300,7 +299,7 @@ jobs:
         libType: ['dynamic', 'static', 'shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'compressed'
+      artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -315,6 +314,6 @@ jobs:
         libType: ['dynamic', 'static', 'shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'compressed'
+      artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
