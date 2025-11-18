@@ -171,12 +171,10 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 #endif
 		{
 			zend_exception_error(EG(exception), E_ERROR);
-			retVal = 2;
 		}
 	}
 	zend_catch
 	{
-		retVal = 1; // Code died.
 	}
 	zend_end_try();
 
@@ -208,6 +206,7 @@ int EMSCRIPTEN_KEEPALIVE pib_run(char *code)
 			sapi_send_headers();
 			SG(headers_sent) = 1;
 		}
+
 #if PHP_MAJOR_VERSION >= 8 && PHP_MINOR_VERSION >= 1
 		if(EG(exception) && !(zend_is_graceful_exit(EG(exception)) || zend_is_unwind_exit(EG(exception))))
 #else
