@@ -12,6 +12,9 @@ on:
       testType:
         required: true
         type: string
+      artifactType:
+        required: true
+        type: string
 
 jobs:
   test:
@@ -30,7 +33,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php${{ inputs.phpVersion }}-node-${{ inputs.libType }}
+          pattern: php-${{ inputs.artifactType }}-${{ inputs.phpVersion }}-node-${{ inputs.libType }}
           merge-multiple: true
           path: ./
 
