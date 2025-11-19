@@ -112,6 +112,8 @@ jobs:
             lib
             .cache
 
+
+
   build-php-dynamic:
     needs: [build-libs]
     strategy:
@@ -147,6 +149,8 @@ jobs:
       phpVersion: ${{ matrix.phpVersion }}
       envTarget: ${{ matrix.envTarget }}
       libType: static
+
+
 
   test-node-dynamic:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
@@ -193,6 +197,8 @@ jobs:
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
 
+
+
   test-browser-dynamic:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-dynamic]
@@ -231,6 +237,8 @@ jobs:
       artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
+
+
 
   compress-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
@@ -288,6 +296,8 @@ jobs:
             packages
             lib
             .cache
+
+
 
   test-node-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)

@@ -15,10 +15,12 @@ endif
 
 ifeq (${WITH_MBSTRING},1)
 WITH_MBSTRING=static
+PHP_ASSET_LIST+= php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},static)
 CONFIGURE_FLAGS+= --with-mbstring
+PHP_ASSET_LIST+= php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)
@@ -43,14 +45,15 @@ ifeq (${WITH_ONIGURUMA},static)
 ARCHIVES+= lib/lib/libonig.a
 CONFIGURE_FLAGS+= --with-onig
 SKIP_LIBS+= -lonig
+PHP_ASSET_LIST+= libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},shared)
 CONFIGURE_FLAGS+= --with-onig
 PHP_CONFIGURE_DEPS+= packages/mbstring/libonig.so
 SHARED_LIBS+= packages/mbstring/libonig.so
-PHP_ASSET_LIST+= libonig.so
 SKIP_LIBS+= -lonig
+PHP_ASSET_LIST+= libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},dynamic)

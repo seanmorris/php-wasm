@@ -21,6 +21,7 @@ CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
 SKIP_LIBS+= -liconv
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 endif
 
 ifeq (${WITH_ICONV},shared)
@@ -28,17 +29,17 @@ CONFIGURE_FLAGS+= --with-iconv=/src/lib
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SHARED_LIBS+= packages/iconv/libiconv.so
-PHP_ASSET_LIST+= libiconv.so
 SKIP_LIBS+= -liconv
+PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 endif
 
 ifeq (${WITH_ICONV},dynamic)
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
-PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 DYNAMIC_LIBS+= packages/iconv/libiconv.so
 DYNAMIC_LIBS_GROUPED+= iconv-libs
 SKIP_LIBS+= -liconv
+PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 endif
 
 iconv-libs: packages/iconv/libiconv.so

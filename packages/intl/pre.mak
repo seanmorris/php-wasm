@@ -36,6 +36,7 @@ CONFIGURE_FLAGS+=--enable-intl
 EXTRA_FLAGS+=-DU_STATIC_IMPLEMENTATION
 ARCHIVES+=lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 endif
 
 ifeq (${WITH_INTL},shared)
@@ -43,8 +44,8 @@ PRELOAD_ASSETS+=${LIBICU_DATFILE}
 CONFIGURE_FLAGS+=--enable-intl
 PHP_CONFIGURE_DEPS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SHARED_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
+PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
 endif
 
 ifeq (${WITH_INTL},dynamic)

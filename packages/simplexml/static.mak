@@ -10,22 +10,22 @@ endif
 
 ifeq (${WITH_SIMPLEXML},1)
 WITH_XML=static
+PHP_ASSET_LIST+= php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},static)
 ifeq ($(filter ${WITH_LIBXML},1 static),)
 $(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 CONFIGURE_FLAGS+= --enable-simplexml
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
+PHP_ASSET_LIST+= php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
 ifeq ($(filter ${WITH_LIBXML},1 static shared),)
 $(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-simplexml.so
 endif

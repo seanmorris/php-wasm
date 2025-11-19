@@ -19,6 +19,7 @@ ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= --with-libxml
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
+PHP_ASSET_LIST+= libxml2.so
 endif
 
 ifeq (${WITH_LIBXML},shared)
@@ -26,8 +27,8 @@ SHARED_LIBS+= packages/libxml/libxml2.so
 CONFIGURE_FLAGS+= --with-libxml=/src/lib/
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-PHP_ASSET_LIST+= libxml2.so
 SKIP_LIBS+= -lxml2
+PHP_ASSET_LIST+= libxml2.so
 endif
 
 third_party/libxml2/.gitignore:

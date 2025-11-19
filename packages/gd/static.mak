@@ -18,13 +18,14 @@ ifeq (${WITH_GD}, static)
 CONFIGURE_FLAGS+= --enable-gd ${GD_FLAGS}
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
+PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 endif
 
 ifeq (${WITH_GD}, dynamic)
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
-PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
 DYNAMIC_LIBS_GROUPED+= gd-libs
+PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 endif
 
 GD_FLAGS=

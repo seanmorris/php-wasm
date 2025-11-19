@@ -25,6 +25,7 @@ CONFIGURE_FLAGS+= --with-tidy=/src/lib
 ARCHIVES+= lib/lib/libtidy.a
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
+PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 endif
 
 ifeq (${WITH_TIDY},shared)
@@ -32,16 +33,16 @@ CONFIGURE_FLAGS+= --with-tidy=/src/lib
 PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SHARED_LIBS+= packages/tidy/libtidy.so
-PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 SKIP_LIBS+= -ltidy
+PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 endif
 
 ifeq (${WITH_TIDY},dynamic)
 DYNAMIC_LIBS+= packages/tidy/libtidy.so
 DYNAMIC_LIBS_GROUPED+= tidy-libs
-PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
+PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 endif
 
 tidy-libs: packages/tidy/libtidy.so

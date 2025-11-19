@@ -16,16 +16,15 @@ ifeq (${WITH_DOM},static)
 ifeq ($(filter ${WITH_LIBXML},1 static),)
 $(error WITH_DOM=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 CONFIGURE_FLAGS+= --enable-dom
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
+PHP_ASSET_LIST+= php${PHP_VERSION}-dom.so
 endif
 
 ifeq (${WITH_DOM},dynamic)
 ifeq ($(filter ${WITH_LIBXML},1 static shared),)
 $(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
 PHP_ASSET_LIST+= php${PHP_VERSION}-dom.so
 endif
