@@ -24,8 +24,8 @@ rm -f public/*.dat;
 
 rm -rf public/static/media/*.map public/static/media/mapped
 
-npx webpack --config service-worker-prod.config.ts;
-npx react-scripts build;
+GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx webpack --config service-worker-prod.config.ts;
+GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx react-scripts build;
 
 cat aphex.txt >> build/index.html;
 

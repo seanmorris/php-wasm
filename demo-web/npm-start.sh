@@ -48,6 +48,6 @@ rm -f public/*.so;
 rm -f public/*.dat;
 rm -f public/*.map;
 
-npx webpack --config service-worker-dev.config.ts;
+NODE_OPTIONS=--max_old_space_size=4096 npx webpack --config service-worker-dev.config.ts;
 
 react-scripts start --no-cache
