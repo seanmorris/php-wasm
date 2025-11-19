@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdemo_source=self.webpackChunkdemo_source||[]).push([[2921],{2921:(e,s,b)=>{b.r(s),b.d(s,{default:()=>o,getLibs:()=>l});const l=()=>[{name:"libxml2.so",url:new URL(b(7832),b.b).href}],o={getLibs:l}},7832:(e,s,b)=>{e.exports=b.p+"libxml2.3b923445a63e04f17a96.so"}}]);

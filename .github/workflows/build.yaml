@@ -262,11 +262,6 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Import configuration
-        run: |
-          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-          touch -d '1970-01-01 00:00:00 UTC' .env
-
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
