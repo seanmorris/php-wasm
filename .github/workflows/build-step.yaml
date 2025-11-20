@@ -90,7 +90,7 @@ jobs:
 
       - name: Cache mtimes
         run: |
-          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes
+          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
           sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
 
       - name: Upload artifact

@@ -23,7 +23,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: |
+
+      - name: Import `.env` file
+        run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
@@ -62,11 +64,13 @@ jobs:
           npm ci
           npm install -g deno
 
-      - name: Apply mtime cache
+      - name: Apply mtime caches
         run: |
-          while read -r PATH MTIME; do
-            [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-          done < ./.cache/.mtimes
+          ls ./.cache/.mtimes* | while read -r CACHE; do
+            while read -r PATH MTIME; do
+              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
+            done < ${CACHE}
+          done
 
       - name: Run tests
         run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}

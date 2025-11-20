@@ -98,7 +98,7 @@ jobs:
         run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
       - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-${{ matrix.libgroup }}
+        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-libs-${{ matrix.libgroup }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -239,15 +239,11 @@ jobs:
 
 
 
-  compress-packages:
+  compress-dynamic-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
-      - test-node-static
-      - test-node-shared
       - test-node-dynamic
-      - test-browser-static
-      - test-browser-shared
       - test-browser-dynamic
     strategy:
       matrix:
@@ -291,11 +287,108 @@ jobs:
             lib
             .cache
 
+  compress-shared-packages:
+    name: Compress PHP w/${{ matrix.libType }} libs
+    runs-on: ubuntu-latest
+    needs:
+      - test-node-shared
+      - test-browser-shared
+    strategy:
+      matrix:
+        libType: ['shared',]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          merge-multiple: true
+          path: ./
+
+      - name: Compress php-wasm
+        run: ./compress-package.sh packages/php-wasm
+
+      - name: Compress php-cgi-wasm
+        run: ./compress-package.sh packages/php-cgi-wasm
+
+      - name: Compress php-cli-wasm
+        run: ./compress-package.sh packages/php-cli-wasm
+
+      - name: Compress php-dbg-wasm
+        run: ./compress-package.sh packages/php-dbg-wasm
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-compressed-${{ matrix.libType }}
+          include-hidden-files: true
+          path: |
+            third_party
+            packages
+            lib
+            .cache
+
+  compress-static-packages:
+    name: Compress PHP w/${{ matrix.libType }} libs
+    runs-on: ubuntu-latest
+    needs:
+      - test-node-static
+      - test-browser-static
+    strategy:
+      matrix:
+        libType: ['static',]
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          merge-multiple: true
+          path: ./
+
+      - name: Compress php-wasm
+        run: ./compress-package.sh packages/php-wasm
+
+      - name: Compress php-cgi-wasm
+        run: ./compress-package.sh packages/php-cgi-wasm
+
+      - name: Compress php-cli-wasm
+        run: ./compress-package.sh packages/php-cli-wasm
+
+      - name: Compress php-dbg-wasm
+        run: ./compress-package.sh packages/php-dbg-wasm
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-compressed-${{ matrix.libType }}
+          include-hidden-files: true
+          path: |
+            third_party
+            packages
+            lib
+            .cache
+
+
 
 
   test-node-dynamic-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-dynamic-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -310,7 +403,7 @@ jobs:
 
   test-node-shared-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-shared-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -325,7 +418,7 @@ jobs:
 
   test-node-static-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-static-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -342,7 +435,7 @@ jobs:
 
   test-browser-dynamic-compressed:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-dynamic-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -355,7 +448,7 @@ jobs:
 
   test-browser-shared-compressed:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-shared-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -368,7 +461,7 @@ jobs:
 
   test-browser-static-compressed:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-static-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
