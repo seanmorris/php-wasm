@@ -23,9 +23,28 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: |
+
+      - name: Import `.env` file
+        run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Install deps
         run: sudo apt update && sudo apt install coreutils docker-compose -y
@@ -37,23 +56,6 @@ jobs:
           merge-multiple: true
           path: ./
 
-      - name: Cache Docker image
-        id: cache-docker-image
-        uses: actions/cache@v3
-        with:
-          path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
-
-      - name: Load builder image if cached
-        if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
-
-      - name: Create builder image (if not cached)
-        if: steps.cache-docker-image.outputs.cache-hit != 'true'
-        run: |
-          time make image
-          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
@@ -62,11 +64,13 @@ jobs:
           npm ci
           npm install -g deno
 
-      - name: Apply mtime cache
+      - name: Apply mtime caches
         run: |
-          while read -r PATH MTIME; do
-            [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-          done < ./.cache/.mtimes
+          ls ./.cache/.mtimes* | while read -r CACHE; do
+            while read -r PATH MTIME; do
+              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
+            done < ${CACHE}
+          done
 
       - name: Run tests
         run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}

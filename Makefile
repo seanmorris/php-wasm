@@ -1020,7 +1020,6 @@ test-browser:
 update-snapshots:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
-
 run:
 	${DOCKER_ENV} emscripten-builder bash
 
