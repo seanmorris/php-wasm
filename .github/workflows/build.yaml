@@ -34,18 +34,18 @@ jobs:
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Create builder image (if not cached)
-        if: steps.cache-docker-image.outputs.cache-hit != 'true'
-        run: |
-          time make image
-          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
   build-libs:
     name: Build Shared Objects
@@ -205,7 +205,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic',]
+        libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
@@ -218,7 +218,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['shared',]
+        libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
@@ -231,7 +231,7 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['static',]
+        libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
@@ -301,7 +301,7 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-        libType: ['dynamic',]
+        libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
@@ -316,7 +316,7 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-        libType: ['shared',]
+        libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
@@ -331,7 +331,7 @@ jobs:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-        libType: ['static',]
+        libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
@@ -342,13 +342,12 @@ jobs:
 
 
   test-browser-dynamic-compressed:
-    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        testType: ['node', 'deno']
-        libType: ['dynamic',]
+        libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
@@ -356,13 +355,12 @@ jobs:
       libType: ${{ matrix.libType }}
 
   test-browser-shared-compressed:
-    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        testType: ['node', 'deno']
-        libType: ['shared',]
+        libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
@@ -370,13 +368,12 @@ jobs:
       libType: ${{ matrix.libType }}
 
   test-browser-static-compressed:
-    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        testType: ['node', 'deno']
-        libType: ['static',]
+        libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
