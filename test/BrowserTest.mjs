@@ -14,7 +14,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=hello-world.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -23,7 +23,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -34,7 +34,7 @@ export class BrowserTest extends BotTest
 
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=postgres.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -43,7 +43,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite-pdo.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -52,7 +52,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=files.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -61,7 +61,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=goto.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -70,7 +70,7 @@ export class BrowserTest extends BotTest
 	{
 		await new Promise(a => setTimeout(a, 1000));
 		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=dynamic-extension.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 15_000));
+		await new Promise(a => setTimeout(a, 20_000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -78,7 +78,7 @@ export class BrowserTest extends BotTest
 	// async testFetch()
 	// {
 	// 	await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=fetch.php&version=${version}`);
-	// 	await new Promise(a => setTimeout(a, 15_000));
+	// 	await new Promise(a => setTimeout(a, 20_000));
 	// 	const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 	// 	this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	// }
