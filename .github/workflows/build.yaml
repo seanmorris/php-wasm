@@ -340,6 +340,7 @@ jobs:
       libType: ${{ matrix.libType }}
 
 
+
   test-browser-dynamic-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-packages]
