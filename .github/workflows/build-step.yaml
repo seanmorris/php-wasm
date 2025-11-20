@@ -64,7 +64,7 @@ jobs:
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'

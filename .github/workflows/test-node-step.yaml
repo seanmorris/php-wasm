@@ -27,16 +27,6 @@ jobs:
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
-      - name: Install deps
-        run: sudo apt update && sudo apt install coreutils docker-compose -y
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ inputs.artifactPattern }}
-          merge-multiple: true
-          path: ./
-
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
@@ -46,13 +36,23 @@ jobs:
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
           time make image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
+      - name: Install deps
+        run: sudo apt update && sudo apt install coreutils docker-compose -y
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifactPattern }}
+          merge-multiple: true
+          path: ./
 
       - name: Spin up docker-network
         run: docker network create phpwasm_default
