@@ -22,7 +22,7 @@ CONFIGURE_FLAGS+=  --enable-pdo --with-sqlite3 --with-pdo-sqlite
 ARCHIVES+= lib/lib/libsqlite3.a
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
-PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
+EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
 endif
 
 ifeq (${WITH_SQLITE},shared)
@@ -31,7 +31,7 @@ PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SHARED_LIBS+= packages/sqlite/libsqlite3.so
 SKIP_LIBS+= -lsqlite3
-PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
+EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
 endif
 
 ifeq (${WITH_SQLITE},dynamic)
@@ -40,7 +40,7 @@ DYNAMIC_LIBS+= packages/sqlite/libsqlite3.so
 DYNAMIC_LIBS_GROUPED+= libsqlite-libs
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
-PHP_ASSET_LIST+= libsqlite3.so php${PHP_VERSION}-sqlite.so php${PHP_VERSION}-pdo-sqlite.so
+EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
 endif
 
 libsqlite-libs: packages/sqlite/libsqlite3.so

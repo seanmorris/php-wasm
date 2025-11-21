@@ -31,7 +31,7 @@ ifeq (${WITH_OPENSSL},static)
 CONFIGURE_FLAGS+= --with-openssl
 ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
 STATIC_LIB_CONFIG+="openssl",
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
 endif
 
 ifeq (${WITH_OPENSSL},shared)
@@ -40,14 +40,14 @@ PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SKIP_LIBS+= -lssl -lcrypto
 SHARED_LIB_CONFIG+="openssl",
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
 endif
 
 ifeq (${WITH_OPENSSL},dynamic)
 DYNAMIC_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 DYNAMIC_LIBS_GROUPED+= openssl-libs
 SKIP_LIBS+= -lssl -lcrypto
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
 endif
 
 openssl-libs: packages/openssl/libssl.so packages/openssl/libcrypto.so

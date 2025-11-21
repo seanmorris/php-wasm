@@ -471,3 +471,84 @@ jobs:
       artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
+
+
+
+  index-packages:
+    name: Create HTML Indexes
+    runs-on: ubuntu-latest
+    needs:
+      - test-browser-dynamic-compressed
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-compressed-dynamic
+          merge-multiple: true
+          path: ./
+
+      - name: Index Package Directories
+        run: ./.github/bin/index-dirs.sh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-indexed-packages
+          include-hidden-files: true
+          path: |
+            packages
+            .cache
+
+  build-demo:
+    name: Build Web Demo
+    runs-on: ubuntu-latest
+    needs:
+      - test-browser-dynamic-compressed
+      - index-packages
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Packages Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-compressed-dynamic
+          merge-multiple: true
+          path: ./
+
+      - name: Download Index Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-indexed-packages
+          merge-multiple: true
+          path: ./
+
+      - name: Ensure the demo uses local packages
+        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
+
+      - name: Build Web Demo
+        run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
+      
+      - name: Copy packages into web demo
+        run: cp -rfv packages demo-web/build/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-demo-web
+          include-hidden-files: true
+          path: |
+            demo-web/build
