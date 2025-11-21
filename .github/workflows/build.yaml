@@ -479,6 +479,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - test-browser-dynamic-compressed
+      - test-node-dynamic-compressed
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -511,8 +512,6 @@ jobs:
     name: Build Web Demo
     runs-on: ubuntu-latest
     needs:
-      - test-browser-dynamic-compressed
-      - test-node-dynamic-compressed
       - index-packages
     steps:
       - name: Check out repository code
