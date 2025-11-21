@@ -18,7 +18,7 @@ ARCHIVES+= lib/lib/libzip.a
 CONFIGURE_FLAGS+= --with-zip
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
 endif
 
 ifeq (${WITH_LIBZIP},shared)
@@ -27,7 +27,7 @@ PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SHARED_LIBS+= packages/libzip/libzip.so
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
 endif
 
 ifeq (${WITH_LIBZIP},dynamic)
@@ -35,7 +35,7 @@ TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 DYNAMIC_LIBS+= packages/libzip/libzip.so
 DYNAMIC_LIBS_GROUPED+= libzip-libs
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
 endif
 
 libzip-libs: packages/libzip/libzip.so

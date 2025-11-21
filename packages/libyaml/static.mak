@@ -20,7 +20,7 @@ PHP_CONFIGURE_DEPS+= lib/lib/libyaml.a third_party/php${PHP_VERSION}-src/ext/yam
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 ARCHIVES+= lib/lib/libyaml.a
 SKIP_LIBS+= -lyaml
-PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
 endif
 
 ifeq (${WITH_YAML},shared)
@@ -29,7 +29,7 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/yaml/config.m4 packag
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 SHARED_LIBS+= packages/libyaml/libyaml.so
 SKIP_LIBS+= -lyaml
-PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
 endif
 
 ifeq (${WITH_YAML},dynamic)
@@ -37,7 +37,7 @@ TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 DYNAMIC_LIBS+= packages/libyaml/libyaml.so
 DYNAMIC_LIBS_GROUPED+= libyaml-libs
 SKIP_LIBS+= -lyaml
-PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
 endif
 
 libyaml-libs: packages/libyaml/libyaml.so

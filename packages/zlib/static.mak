@@ -19,7 +19,7 @@ CONFIGURE_FLAGS+= --with-zlib
 ARCHIVES+= lib/lib/libz.a
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
-PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
 endif
 
 ifeq (${WITH_ZLIB},shared)
@@ -28,7 +28,7 @@ PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SHARED_LIBS+= packages/zlib/libz.so
 SKIP_LIBS+= -lz
-PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
 endif
 
 ifeq (${WITH_ZLIB},dynamic)
@@ -36,7 +36,7 @@ TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 DYNAMIC_LIBS+= packages/zlib/libz.so
 DYNAMIC_LIBS_GROUPED+= zlib-libs
 SKIP_LIBS+= -lz
-PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
 endif
 
 zlib-libs: packages/zlib/libz.so

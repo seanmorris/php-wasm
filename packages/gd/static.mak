@@ -18,14 +18,14 @@ ifeq (${WITH_GD}, static)
 CONFIGURE_FLAGS+= --enable-gd ${GD_FLAGS}
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
-PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
+EXTRA_MODULES+= packages/gd/php${PHP_VERSION}-gd.so
 endif
 
 ifeq (${WITH_GD}, dynamic)
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
 DYNAMIC_LIBS_GROUPED+= gd-libs
-PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
+EXTRA_MODULES+= packages/gd/php${PHP_VERSION}-gd.so
 endif
 
 GD_FLAGS=
@@ -104,7 +104,7 @@ SKIP_LIBS+= -lfreetype
 endif
 
 ifeq (${WITH_FREETYPE},shared)
-PHP_ASSET_LIST+= libfreetype.so
+EXTRA_MODULES+= packages/gd/libfreetype.so
 SKIP_LIBS+= -lfreetype
 endif
 
@@ -125,7 +125,7 @@ SKIP_LIBS+= -ljpeg
 endif
 
 ifeq (${WITH_LIBJPEG},shared)
-PHP_ASSET_LIST+= libjpeg.so
+EXTRA_MODULES+= packages/gd/libjpeg.so
 SKIP_LIBS+= -ljpeg
 endif
 
@@ -146,7 +146,7 @@ SKIP_LIBS+= -lpng16
 endif
 
 ifeq (${WITH_LIBPNG},shared)
-PHP_ASSET_LIST+= libpng.so
+EXTRA_MODULES+= packages/gd/libpng.so
 SKIP_LIBS+= -lpng16
 endif
 
@@ -168,7 +168,7 @@ SKIP_LIBS+= -lwebp
 endif
 
 ifeq (${WITH_LIBWEBP},shared)
-PHP_ASSET_LIST+= libwebp.so
+EXTRA_MODULES+= packages/gd/libwebp.so
 SKIP_LIBS+= -lwebp
 endif
 

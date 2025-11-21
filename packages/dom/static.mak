@@ -18,7 +18,7 @@ $(error WITH_DOM=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS 
 endif
 CONFIGURE_FLAGS+= --enable-dom
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
-PHP_ASSET_LIST+= php${PHP_VERSION}-dom.so
+EXTRA_MODULES+= packages/dom/php${PHP_VERSION}-dom.so
 endif
 
 ifeq (${WITH_DOM},dynamic)
@@ -26,7 +26,7 @@ ifeq ($(filter ${WITH_LIBXML},1 static shared),)
 $(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
-PHP_ASSET_LIST+= php${PHP_VERSION}-dom.so
+EXTRA_MODULES+= packages/dom/php${PHP_VERSION}-dom.so
 endif
 
 third_party/php${PHP_VERSION}-dom/config.m4: third_party/php${PHP_VERSION}-src/patched

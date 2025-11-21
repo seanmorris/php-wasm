@@ -36,7 +36,14 @@ CONFIGURE_FLAGS+=--enable-intl
 EXTRA_FLAGS+=-DU_STATIC_IMPLEMENTATION
 ARCHIVES+=lib/lib/libicudata.a lib/lib/libicui18n.a lib/lib/libicuio.a lib/lib/libicutest.a lib/lib/libicutu.a lib/lib/libicuuc.a
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
+EXTRA_MODULES+= packages/intl/libicudata.so \
+	packages/intl/libicui18n.so \
+	packages/intl/libicuio.so \
+	packages/intl/libicutest.so \
+	packages/intl/libicutu.so \
+	packages/intl/libicuuc.so \
+	packages/intl/php${PHP_VERSION}-intl.so \
+	packages/intl/$(notdir ${LIBICU_DATFILE})
 endif
 
 ifeq (${WITH_INTL},shared)
@@ -45,14 +52,28 @@ CONFIGURE_FLAGS+=--enable-intl
 PHP_CONFIGURE_DEPS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SHARED_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
+EXTRA_MODULES+= packages/intl/libicudata.so \
+	packages/intl/libicui18n.so \
+	packages/intl/libicuio.so \
+	packages/intl/libicutest.so \
+	packages/intl/libicutu.so \
+	packages/intl/libicuuc.so \
+	packages/intl/php${PHP_VERSION}-intl.so \
+	packages/intl/$(notdir ${LIBICU_DATFILE})
 endif
 
 ifeq (${WITH_INTL},dynamic)
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
 DYNAMIC_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 DYNAMIC_LIBS_GROUPED+= intl-libs
-PHP_ASSET_LIST+= libicudata.so libicui18n.so libicuio.so libicutest.so libicutu.so libicuuc.so php${PHP_VERSION}-intl.so $(notdir ${LIBICU_DATFILE})
+EXTRA_MODULES+= packages/intl/libicudata.so \
+	packages/intl/libicui18n.so \
+	packages/intl/libicuio.so \
+	packages/intl/libicutest.so \
+	packages/intl/libicutu.so \
+	packages/intl/libicuuc.so \
+	packages/intl/php${PHP_VERSION}-intl.so \
+	packages/intl/$(notdir ${LIBICU_DATFILE})
 endif
 
 intl-libs: packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so

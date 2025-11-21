@@ -8,18 +8,18 @@ endif
 
 ifeq (${WITH_PHAR},1)
 WITH_PHAR=static
-PHP_ASSET_LIST+= php${PHP_VERSION}-phar.so
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},static)
 CONFIGURE_FLAGS+= --enable-phar
 TEST_LIST+=packages/phar/test/basic.mjs
-PHP_ASSET_LIST+= php${PHP_VERSION}-phar.so
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},dynamic)
 TEST_LIST+=packages/phar/test/basic.mjs
-PHP_ASSET_LIST+= php${PHP_VERSION}-phar.so
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 DOCKER_RUN_IN_EXT_PHAR=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-phar/ emscripten-builder

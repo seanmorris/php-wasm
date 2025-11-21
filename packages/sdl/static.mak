@@ -19,14 +19,14 @@ PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 # ARCHIVES+= lib/lib/libSDL2.a libGL.so
 # SKIP_LIBS+= -lsdl -lgl
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 endif
 
 ifeq (${WITH_SDL},shared)
 CONFIGURE_FLAGS+= --with-sdl
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 packages/sdl/libSDL2.so packages/sdl/libGL.so
 SHARED_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
 
@@ -34,7 +34,7 @@ ifeq (${WITH_SDL},dynamic)
 DYNAMIC_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
 DYNAMIC_LIBS_GROUPED+= sdl-libs
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
 
