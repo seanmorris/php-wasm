@@ -29,16 +29,16 @@ index 73486ae2..8e19e265 100644
 +	// fprintf(stderr, "%x\n", xmlParserVersion);
 +
 +	if (xmlParserVersion == NULL) {
-+		// zend_disable_class("LibXMLError", sizeof("LibXMLError") - 1);
-+		// zend_disable_functions(
-+		//	"libxml_set_streams_context,"
-+		//	"libxml_use_internal_errors,"
-+		//	"libxml_get_last_error,"
-+		//	"libxml_get_errors,"
-+		//	"libxml_clear_errors,"
-+		//	"libxml_disable_entity_loader,"
-+		//	"libxml_set_external_entity_loader,"
-+		// );
++		zend_disable_class("LibXMLError", sizeof("LibXMLError") - 1);
++		zend_disable_functions(
++			"libxml_set_streams_context,"
++			"libxml_use_internal_errors,"
++			"libxml_get_last_error,"
++			"libxml_get_errors,"
++			"libxml_clear_errors,"
++			"libxml_disable_entity_loader,"
++			"libxml_set_external_entity_loader,"
++		);
 +		return SUCCESS;
 +	}
 +
