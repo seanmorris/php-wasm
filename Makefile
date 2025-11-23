@@ -67,7 +67,7 @@ ifeq ($(filter ${WITH_TOKENIZER},0 1),)
 $(error WITH_TOKENIZER MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-WITH_LIBXML?=shared
+WITH_LIBXML?=dynamic
 
 ## Emscripten features...
 NODE_RAW_FS ?=0
