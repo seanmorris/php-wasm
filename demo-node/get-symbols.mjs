@@ -5,8 +5,6 @@ import fs from 'node:fs';
 process.on('unhandledRejection', (reason, promise) => {
 	console.error('=== UNHANDLED REJECTION ===');
 	console.error({promise, reason});
-	console.error(reason.stack);
-	process.exit();
 });
 
 const sharedLibs = [];
@@ -15,8 +13,8 @@ const buildType = process.env.BUILD_TYPE ?? 'dynamic';
 if(buildType === 'static')
 {
     sharedLibs.push(
-        {name: 'libcrypto.so', url: new URL('node_modules/php-wasm-openssl/libcrypto.so', import.meta.url)},
-        {name: 'libssl.so',    url: new URL('node_modules/php-wasm-openssl/libssl.so',    import.meta.url)},
+        {name: 'libcrypto.so',   url: new URL('node_modules/php-wasm-openssl/libcrypto.so', import.meta.url)},
+        {name: 'libssl.so',      url: new URL('node_modules/php-wasm-openssl/libssl.so',    import.meta.url)},
     );
 }
 else if(buildType === 'shared')

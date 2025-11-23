@@ -66,7 +66,10 @@ jobs:
 
       - name: Apply mtime caches
         run: |
-          ls ./.cache/.mtimes* | while read -r CACHE; do
+          ls ./.cache/executables* | while read -r CACHE; do
+            cat ${CACHE} | xargs -I{} chmod +x {}
+          done
+          ls ./.cache/.mtimes-php* | while read -r CACHE; do
             while read -r PATH MTIME; do
               [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
             done < ${CACHE}

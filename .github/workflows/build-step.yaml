@@ -40,7 +40,7 @@ jobs:
           ls ./.cache/executables* | while read -r CACHE; do
             cat ${CACHE} | xargs -I{} chmod +x {}
           done
-          ls ./.cache/.mtimes* | while read -r CACHE; do
+          ls ./.cache/.mtimes-php* | while read -r CACHE; do
             while read -r PATH MTIME; do
               [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
             done < ${CACHE}
@@ -72,20 +72,20 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
-      - name: Build PHP & PHP-CGI
+      - name: Build PHP For Node
+        run: time make node-mjs
+
+      - name: Build PHP for Web & PHP-CGI for Worker
         run: time make web-mjs worker-cgi-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
-      - name: Build PHP (sdl)
+      - name: Build PHP (sdl) for Web
         run: time make web-mjs WITH_SDL=1
 
       - name: Build PHP DBG & CLI Previews
         run: time make web-dbg-mjs web-cli-mjs
-
-      - name: Build PHP For Node
-        run: time make node-mjs
 
       - name: Cache mtimes
         run: |
