@@ -1,6 +1,6 @@
 #!/usr/bin/env make
 
-WITH_LIBXML?=shared
+WITH_LIBXML?=dynamic
 
 LIBXML2_TAG?=v2.9.10
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder

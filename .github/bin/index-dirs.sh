@@ -30,6 +30,7 @@ ls -d */ | while read DIR; do {
 	[[ "${DIR::-1}" == "pdo-pglite" ]] && continue;
 	[[ "${DIR::-1}" == "vrzno" ]]      && continue;
 	[[ "${DIR::-1}" == "waitline" ]]   && continue;
+	[[ "${DIR::-1}" == "." ]]          && continue;
 
 	PACKAGE_NAME=$(jq -r '.name' ${DIR}/package.json)
 	tar -czvf ${DIR::-1}.tar.gz ${DIR} > /dev/null
