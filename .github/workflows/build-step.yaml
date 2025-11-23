@@ -6,9 +6,6 @@ on:
       phpVersion:
         required: true
         type: string
-      envTarget:
-        required: true
-        type: string
       libType:
         required: true
         type: string
@@ -76,27 +73,29 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build PHP & PHP-CGI
-        run: time make ${{ inputs.envTarget }}-mjs ${{ inputs.envTarget }}-cgi-mjs
+        run: time make web-mjs worker-cgi-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Build PHP (sdl)
-        run: time make ${{ inputs.envTarget }}-mjs WITH_SDL=1
+        run: time make web-mjs WITH_SDL=1
 
       - name: Build PHP DBG & CLI Previews
-        if: inputs.envTarget == 'web'
-        run: time make ${{ inputs.envTarget }}-dbg-mjs ${{ inputs.envTarget }}-cli-mjs
+        run: time make web-dbg-mjs web-cli-mjs
+
+      - name: Build PHP For Node
+        run: time make node-mjs
 
       - name: Cache mtimes
         run: |
-          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
+          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.libType }}
           sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.envTarget }}-${{ inputs.libType }}
+          name: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}
           include-hidden-files: true
           path: |
             third_party

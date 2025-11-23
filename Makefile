@@ -67,7 +67,7 @@ ifeq ($(filter ${WITH_TOKENIZER},0 1),)
 $(error WITH_TOKENIZER MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-WITH_LIBXML?=shared
+WITH_LIBXML?=dynamic
 
 ## Emscripten features...
 NODE_RAW_FS ?=0
@@ -884,6 +884,11 @@ php-clean:
 		packages/php-cgi-wasm/php-*.wasm \
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
+	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
+		cd "third_party/$${DIR}"; \
+		make clean; \
+		cd ../..; \
+	}; done;'
 	- ${DOCKER_RUN_IN_PHP} make clean distclean
 
 clean:

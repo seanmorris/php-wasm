@@ -11,7 +11,7 @@ $(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR 
 endif
 
 ifeq (${WITH_LIBXML},1)
-WITH_LIBXML=static
+WITH_LIBXML=dynamic
 endif
 
 ifeq (${WITH_LIBXML},static)
@@ -38,6 +38,7 @@ PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 EXTRA_MODULES+= packages/libxml/libxml2.so
+EXTRA_CFLAGS+= -D LIBXML_DYNAMIC_LOAD=1
 endif
 
 third_party/libxml2/.gitignore:
