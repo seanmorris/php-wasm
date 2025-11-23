@@ -23,7 +23,7 @@ EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
-ifeq ($(filter ${WITH_LIBXML},1 static shared),)
+ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
 $(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
