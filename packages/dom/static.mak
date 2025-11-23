@@ -22,7 +22,7 @@ EXTRA_MODULES+= packages/dom/php${PHP_VERSION}-dom.so
 endif
 
 ifeq (${WITH_DOM},dynamic)
-ifeq ($(filter ${WITH_LIBXML},1 static shared),)
+ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
 $(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)

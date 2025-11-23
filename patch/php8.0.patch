@@ -1,3 +1,157 @@
+diff --git a/third_party/php8.0-src/ext/libxml/libxml.c b/third_party/php8.0-src/ext/libxml/libxml.c
+index 73486ae2..8e19e265 100644
+--- a/third_party/php8.0-src/ext/libxml/libxml.c
++++ b/third_party/php8.0-src/ext/libxml/libxml.c
+@@ -43,6 +43,15 @@
+ #include "php_libxml.h"
+ #include "libxml_arginfo.h"
+ 
++__attribute__((weak)) const char *xmlParserVersion = {0};
++__attribute__((weak)) void (*xmlFree)(void *);
++__attribute__((weak)) void *(*xmlMalloc)(size_t);
++__attribute__((weak)) void *(*xmlMallocAtomic)(size_t);
++__attribute__((weak)) char *(*xmlMemStrdup)(const char *);
++__attribute__((weak)) void *(*xmlRealloc)(void *, size_t);
++__attribute__((weak)) void (*xmlGenericError)(void *, const char *, ...);
++__attribute__((weak)) void (*xmlStructuredError)(void *, xmlErrorPtr);
++
+ #define PHP_LIBXML_ERROR 0
+ #define PHP_LIBXML_CTX_ERROR 1
+ #define PHP_LIBXML_CTX_WARNING 2
+@@ -795,6 +804,26 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
+ 
+ static PHP_MINIT_FUNCTION(libxml)
+ {
++	void *handle = DL_LOAD("libxml2.so");
++
++	xmlParserVersion = (const char*)dlsym(handle, "xmlParserVersion");
++
++	// fprintf(stderr, "%x\n", xmlParserVersion);
++
++	if (xmlParserVersion == NULL) {
++		// zend_disable_class("LibXMLError", sizeof("LibXMLError") - 1);
++		// zend_disable_functions(
++		//	"libxml_set_streams_context,"
++		//	"libxml_use_internal_errors,"
++		//	"libxml_get_last_error,"
++		//	"libxml_get_errors,"
++		//	"libxml_clear_errors,"
++		//	"libxml_disable_entity_loader,"
++		//	"libxml_set_external_entity_loader,"
++		// );
++		return SUCCESS;
++	}
++
+ 	zend_class_entry ce;
+ 
+ 	php_libxml_initialize();
+@@ -903,6 +932,8 @@ static PHP_MINIT_FUNCTION(libxml)
+ 
+ static PHP_RINIT_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	if (_php_libxml_per_request_initialization) {
+ 		/* report errors via handler rather than stderr */
+ 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+@@ -921,6 +952,8 @@ static PHP_RINIT_FUNCTION(libxml)
+ 
+ static PHP_RSHUTDOWN_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
+ 
+ 	return SUCCESS;
+@@ -928,6 +961,8 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
+ 
+ static PHP_MSHUTDOWN_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	if (!_php_libxml_per_request_initialization) {
+ 		xmlSetGenericErrorFunc(NULL, NULL);
+ 
+@@ -941,6 +976,8 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
+ 
+ static zend_result php_libxml_post_deactivate(void)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	/* reset libxml generic error handling */
+ 	if (_php_libxml_per_request_initialization) {
+ 		xmlSetGenericErrorFunc(NULL, NULL);
+@@ -966,6 +1003,8 @@ static zend_result php_libxml_post_deactivate(void)
+ 
+ static PHP_MINFO_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	php_info_print_table_start();
+ 	php_info_print_table_row(2, "libXML support", "active");
+ 	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
+@@ -978,6 +1017,8 @@ static PHP_MINFO_FUNCTION(libxml)
+ /* {{{ Set the streams context for the next libxml document load or write */
+ PHP_FUNCTION(libxml_set_streams_context)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	zval *arg;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(1, 1)
+@@ -995,6 +1036,8 @@ PHP_FUNCTION(libxml_set_streams_context)
+ /* {{{ Disable libxml errors and allow user to fetch error information as needed */
+ PHP_FUNCTION(libxml_use_internal_errors)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	xmlStructuredErrorFunc current_handler;
+ 	zend_bool use_errors, use_errors_is_null = 1, retval;
+ 
+@@ -1035,6 +1078,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
+ /* {{{ Retrieve last error from libxml */
+ PHP_FUNCTION(libxml_get_last_error)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	xmlErrorPtr error;
+ 
+ 	ZEND_PARSE_PARAMETERS_NONE();
+@@ -1066,6 +1111,7 @@ PHP_FUNCTION(libxml_get_last_error)
+ /* {{{ Retrieve array of errors */
+ PHP_FUNCTION(libxml_get_errors)
+ {
++	if (xmlParserVersion == NULL) return;
+ 
+ 	xmlErrorPtr error;
+ 
+@@ -1107,6 +1153,8 @@ PHP_FUNCTION(libxml_get_errors)
+ /* {{{ Clear last error from libxml */
+ PHP_FUNCTION(libxml_clear_errors)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+ 	xmlResetLastError();
+@@ -1127,6 +1175,8 @@ PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /*
+ /* {{{ Disable/Enable ability to load external entities */
+ PHP_FUNCTION(libxml_disable_entity_loader)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	zend_bool disable = 1;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(0, 1)
+@@ -1141,6 +1191,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
+ /* {{{ Changes the default external entity loader */
+ PHP_FUNCTION(libxml_set_external_entity_loader)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	zend_fcall_info			fci;
+ 	zend_fcall_info_cache	fcc;
+ 
 diff --git a/third_party/php8.0-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.0-src/ext/pdo_sqlite/pdo_sqlite.c
 index 60cd4c3..1aceeed 100644
 --- a/third_party/php8.0-src/ext/pdo_sqlite/pdo_sqlite.c

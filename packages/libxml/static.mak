@@ -6,8 +6,8 @@ LIBXML2_TAG?=v2.9.10
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
 DOCKER_RUN_IN_EXT_LIBXML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-libxml/ emscripten-builder
 
-ifeq ($(filter ${WITH_LIBXML},0 1 static shared),)
-$(error WITH_LIBXML MUST BE 0, 1, static, OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},0 1 static shared dynamic),)
+$(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBXML},1)
@@ -24,6 +24,15 @@ endif
 
 ifeq (${WITH_LIBXML},shared)
 SHARED_LIBS+= packages/libxml/libxml2.so
+CONFIGURE_FLAGS+= --with-libxml=/src/lib/
+PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
+TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+SKIP_LIBS+= -lxml2
+EXTRA_MODULES+= packages/libxml/libxml2.so
+endif
+
+ifeq (${WITH_LIBXML},dynamic)
+# SHARED_LIBS+= packages/libxml/libxml2.so
 CONFIGURE_FLAGS+= --with-libxml=/src/lib/
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)

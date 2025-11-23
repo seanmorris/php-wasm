@@ -5,7 +5,7 @@ import { env } from 'node:process';
 
 import dom from 'php-wasm-dom';
 // import intl from 'php-wasm-dom/8.4.mjs';
-0
+
 test('DOM Extension is enabled.', async () => {
 	const php = env.WITH_DOM === 'dynamic'
 		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-dom.so`]})
