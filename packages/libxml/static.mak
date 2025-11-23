@@ -39,7 +39,10 @@ TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 EXTRA_MODULES+= packages/libxml/libxml2.so
 EXTRA_CFLAGS+= -D LIBXML_DYNAMIC_LOAD=1
+DYNAMIC_LIBS_GROUPED+= xml-libs
 endif
+
+xml-libs: packages/libxml/libxml2.so
 
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"

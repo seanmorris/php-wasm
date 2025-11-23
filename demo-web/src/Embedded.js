@@ -27,6 +27,8 @@ if(buildType === 'dynamic')
 	sharedLibs.push(...(await Promise.all([
 		import('php-wasm-libxml'),
 		import('php-wasm-dom'),
+		import('php-wasm-xml'),
+		import('php-wasm-simplexml'),
 		import('php-wasm-zlib'),
 		import('php-wasm-libzip'),
 		import('php-wasm-gd'),
@@ -35,8 +37,6 @@ if(buildType === 'dynamic')
 		import('php-wasm-openssl'),
 		import('php-wasm-mbstring'),
 		import('php-wasm-sqlite'),
-		import('php-wasm-xml'),
-		import('php-wasm-simplexml'),
 	])).map(m => m.default));
 }
 else if(buildType === 'shared')
@@ -157,7 +157,7 @@ function Embedded() {
 	}, []);
 
 	useEffect(() => {
-		persist.current.checked = !!query.get('persist') ?? '';
+		persist.current.checked = !!Number(query.get('persist')) ?? '';
 		single.current.checked = !!Number(query.get('single-expression')) ?? '';
 		selectVersionBox.current.value = query.get('version') ?? '8.4';
 		selectVariantBox.current.value = query.get('variant') ?? '';
