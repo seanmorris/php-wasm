@@ -118,11 +118,9 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: dynamic
 
   build-php-shared:
@@ -130,11 +128,9 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: shared
 
   build-php-static:
@@ -142,11 +138,9 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: static
 
 
@@ -161,7 +155,7 @@ jobs:
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -176,7 +170,7 @@ jobs:
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -191,7 +185,7 @@ jobs:
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-node-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -207,7 +201,7 @@ jobs:
         libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -220,7 +214,7 @@ jobs:
         libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -233,7 +227,7 @@ jobs:
         libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactPattern: php-uncompressed-*-*-${{ matrix.libType }}
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -247,7 +241,7 @@ jobs:
       - test-browser-dynamic
     strategy:
       matrix:
-        libType: ['dynamic',]
+        libType: ['dynamic']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -260,7 +254,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
 
@@ -295,7 +289,7 @@ jobs:
       - test-browser-shared
     strategy:
       matrix:
-        libType: ['shared',]
+        libType: ['shared']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -308,7 +302,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
 
@@ -343,7 +337,7 @@ jobs:
       - test-browser-static
     strategy:
       matrix:
-        libType: ['static',]
+        libType: ['static']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -356,7 +350,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
 

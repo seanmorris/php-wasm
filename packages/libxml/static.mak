@@ -38,6 +38,7 @@ PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 EXTRA_MODULES+= packages/libxml/libxml2.so
+EXTRA_CFLAGS+= -D LIBXML_DYNAMIC_LOAD=1
 endif
 
 third_party/libxml2/.gitignore:
