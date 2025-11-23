@@ -7,11 +7,6 @@ const buildType = process.env.BUILD_TYPE ?? 'dynamic';
 
 console.log({buildType});
 
-if(buildType === 'dynamic' || buildType === 'shared')
-{
-    sharedLibs.push( await import('php-wasm-libxml') );
-}
-
 sharedLibs.push(
     {name: 'libcrypto.so', url: new URL('node_modules/php-wasm-openssl/libcrypto.so', import.meta.url)},
     {name: 'libssl.so',    url: new URL('node_modules/php-wasm-openssl/libssl.so',    import.meta.url)},
