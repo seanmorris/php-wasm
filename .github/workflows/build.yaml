@@ -247,7 +247,7 @@ jobs:
       - test-browser-dynamic
     strategy:
       matrix:
-        libType: ['static','shared','dynamic']
+        libType: ['dynamic',]
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
