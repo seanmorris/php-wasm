@@ -2,10 +2,15 @@
 import { PhpNode } from 'php-wasm/PhpNode.mjs';
 import fs from 'node:fs';
 
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('=== UNHANDLED REJECTION ===');
+	console.error({promise, reason});
+	console.error(reason.stack);
+	process.exit();
+});
+
 const sharedLibs = [];
 const buildType = process.env.BUILD_TYPE ?? 'dynamic';
-
-console.log({buildType});
 
 if(buildType === 'static')
 {
@@ -17,7 +22,7 @@ if(buildType === 'static')
 else if(buildType === 'shared')
 {
 	sharedLibs.push(
-		{name: 'libxml2.so', url: (new URL('node_modules/php-wasm-libxml/libxml2.so',       import.meta.url))},
+		{name: 'libxml2.so',     url: new URL('node_modules/php-wasm-libxml/libxml2.so',    import.meta.url)},
 		
 		{name: 'libz.so',        url: new URL('node_modules/php-wasm-zlib/libz.so',         import.meta.url)},
 		{name: 'libzip.so',      url: new URL('node_modules/php-wasm-libzip/libzip.so',     import.meta.url)},
@@ -41,9 +46,6 @@ else if(buildType === 'shared')
 	);
 }
 const [version, envName] = process.argv.slice(2);
-
-console.log({version, envName, sharedLibs, buildType});
-
 const php = new PhpNode({version, envName, sharedLibs, buildType});
 
 php.addEventListener('output', event => console.log(event.detail.map(line => line.replace(/\s+$/, '')).join('')));

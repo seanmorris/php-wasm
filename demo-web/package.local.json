@@ -14,6 +14,7 @@
     "php-wasm-mbstring": "../packages/mbstring",
     "php-wasm-openssl": "../packages/openssl",
     "php-wasm-phar": "../packages/phar",
+    "php-wasm-sdl": "../packages/sdl",
     "php-wasm-simplexml": "../packages/simplexml",
     "php-wasm-sqlite": "../packages/sqlite",
     "php-wasm-tidy": "../packages/tidy",
