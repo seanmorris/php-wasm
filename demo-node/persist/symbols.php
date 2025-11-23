@@ -1,6 +1,6 @@
 import { Php<?=vrzno_env('envName')?> } from '../Php<?=vrzno_env('envName')?>.mjs';
 const sharedLibs = [
-<?php if(vrzno_env('buildType') === 'shared'): ?>
+<?php if(vrzno_env('buildType') === 'dynamic' || vrzno_env('buildType') === 'shared'): ?>
 	await import('php-wasm-libxml')
 <?php elseif(vrzno_env('buildType') === 'static'): ?>
 	{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)},
