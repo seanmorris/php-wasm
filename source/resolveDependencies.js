@@ -53,14 +53,18 @@ export const resolveDependencies = (sharedLibs, wrapper) => {
 	const libs = _libs.map(libDef => {
 		if(typeof libDef === 'string' || libDef instanceof URL)
 		{
+			libDef = String(libDef);
+			
 			if(libDef.substr(0, 1) == '/'
 				|| libDef.substr(0, 2) == './'
+				|| libDef.substr(0, 2) == '../'
 				|| libDef.substr(0, 8) == 'https://'
 				|| libDef.substr(0, 7) == 'http://'
+				|| libDef.substr(0, 7) == 'file://'
 			){
-				const name = String(libDef).split('/').pop();
+				const name = libDef.split('/').pop();
 				const url  = libDef
-				urlLibs[ name ] = String(url);
+				urlLibs[ name ] = url;
 
 				return {name, url, ini: true};
 			}
