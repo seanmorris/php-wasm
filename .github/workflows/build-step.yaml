@@ -72,6 +72,9 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
+      - name: Build demo-node
+        run: npm install --prefix demo-node
+
       - name: Build PHP For Node
         run: time make node-mjs
 
@@ -108,7 +111,7 @@ jobs:
         run: |
           sudo chown -R ${USER}:${USER} .
           sudo chmod -R u+rwX,go+rX .
-          tar -czf snapshot.tar.gz .
+          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
       - name: Upload artifact if failure occurred.
         uses: actions/upload-artifact@v4
