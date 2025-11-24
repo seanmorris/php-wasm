@@ -103,9 +103,17 @@ jobs:
             lib
             .cache
       
+      - name: Create Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar -czf snapshot.tar.gz .
+
       - name: Upload artifact if failure occurred.
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
           name: failure-snapshot-${{ inputs.phpVersion }}-${{ inputs.libType }}
-          path: ./
+          path: snapshot.tar.gz
+          compression-level: 0
