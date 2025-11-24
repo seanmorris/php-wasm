@@ -107,5 +107,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: failure snapshot
+          name: failure-snapshot-${{ inputs.phpVersion }}-${{ inputs.libType }}
           path: ./
