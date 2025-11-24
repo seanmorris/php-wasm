@@ -98,7 +98,7 @@ jobs:
         run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
-        run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
+        run: find ./third_party -name .git -prune -o -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
       - name: Take Snapshot
         run: |
