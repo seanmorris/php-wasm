@@ -102,6 +102,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-dependencies-${{ matrix.libgroup }}.tar.gz' \
@@ -289,6 +291,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
@@ -352,6 +356,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
@@ -415,6 +421,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
@@ -557,6 +565,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
@@ -612,6 +622,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-demo-web.tar.gz' \

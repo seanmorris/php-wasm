@@ -96,6 +96,8 @@ jobs:
 
       - name: Take Snapshot
         run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
             --exclude='php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz' \
@@ -114,7 +116,7 @@ jobs:
           path: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz
           compression-level: 0
 
-      - name: Create Failure Snapshot
+      - name: Take Failure Snapshot
         if: ${{ failure() }}
         run: |
           sudo chown -R ${USER}:${USER} .
