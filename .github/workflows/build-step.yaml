@@ -37,7 +37,7 @@ jobs:
 
       - name: Apply executable & mtime caches
         run: |
-          ls ./.cache/executables* | while read -r CACHE; do
+          ls ./.cache/executables-* | while read -r CACHE; do
             cat ${CACHE} | xargs -I{} chmod +x {}
           done
           ls ./.cache/.mtimes-* | while read -r CACHE; do
@@ -72,6 +72,9 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
+      - name: Create time reference file
+        run: touch /tmp/time-ref
+      
       - name: Build demo-node
         run: npm install --prefix demo-node
 
@@ -92,7 +95,7 @@ jobs:
 
       - name: Cache mtimes
         run: |
-          find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.libType }}
+          find . -type f -newer /tmp/time-ref -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.libType }}
           sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
 
       - name: Upload artifact

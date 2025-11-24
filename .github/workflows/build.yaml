@@ -91,6 +91,9 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
+      - name: Create time reference file
+        run: touch /tmp/time-ref
+      
       - name: Build shared libraries
         run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
 
@@ -98,7 +101,7 @@ jobs:
         run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
       - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-libs-${{ matrix.libgroup }}
+        run: find . -type f -newer /tmp/time-ref -printf '%P %T@\n' > ./.cache/.mtimes-libs-${{ matrix.libgroup }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
