@@ -91,9 +91,6 @@ jobs:
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
-      - name: Create time reference file
-        run: touch /tmp/time-ref
-      
       - name: Build shared libraries
         run: time make --debug=basic ${{ matrix.libgroup }} WITH_SDL=dynamic
 
@@ -556,7 +553,7 @@ jobs:
 
       - name: Extract Artifact
         run: |
-          for TARFILE in php-compressed-*.tar.gz; do
+          for TAR in php-compressed-*.tar.gz; do
             tar -xzf ${TAR}
           done;
 
@@ -606,7 +603,7 @@ jobs:
 
       - name: Extract Artifact
         run: |
-          for TARFILE in php-compressed-*.tar.gz; do
+          for TAR in php-compressed-*.tar.gz; do
             tar -xzf ${TAR}
           done;
 
@@ -619,7 +616,7 @@ jobs:
 
       - name: Extract Artifact
         run: |
-          for TARFILE in php-index-*.tar.gz; do
+          for TAR in php-index-*.tar.gz; do
             tar -xzf ${TAR}
           done;
 

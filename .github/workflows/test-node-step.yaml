@@ -29,6 +29,9 @@ jobs:
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
+      - name: Flatten mtimes
+        run: find . -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3

@@ -18,10 +18,13 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
 
-      - name: Import configuration
+      - name: Import `.env` file
         run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Flatten mtimes
+        run: find . -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
 
       - name: Disable man-db auto-update
         run: |
@@ -67,32 +70,29 @@ jobs:
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
-      - name: Create time reference file
-        run: touch /tmp/time-ref
-
       - name: Build demo-node
         run: npm install --prefix demo-node
 
       - name: Build PHP For Node
-        run: time make node-mjs
+        run: time make --debug=basic node-mjs
 
       - name: Build PHP for Web & PHP-CGI for Worker
-        run: time make web-mjs worker-cgi-mjs
+        run: time make --debug=basic web-mjs worker-cgi-mjs
 
       - name: Build php${{ inputs.phpVersion }}-sdl.so
-        run: time make packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
+        run: time make --debug=basic packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 
       - name: Build PHP (sdl) for Web
-        run: time make web-mjs WITH_SDL=1
+        run: time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Build PHP DBG & CLI Previews
-        run: time make web-dbg-mjs web-cli-mjs
+        run: time make --debug=basic web-dbg-mjs web-cli-mjs
 
       - name: Take Snapshot
         run: |
