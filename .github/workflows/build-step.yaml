@@ -28,22 +28,23 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-dependencies-*
           merge-multiple: true
           path: ./
 
-      - name: Apply executable & mtime caches
+      - name: Extract Artifact
+        run: |
+          for TAR in php-dependencies-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Apply executable cache
         run: |
           ls ./.cache/executables-* | while read -r CACHE; do
             cat ${CACHE} | xargs -I{} chmod +x {}
-          done
-          ls ./.cache/.mtimes-* | while read -r CACHE; do
-            while read -r PATH MTIME; do
-              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-            done < ${CACHE}
           done
 
       - name: Install NPM packages
@@ -74,7 +75,7 @@ jobs:
 
       - name: Create time reference file
         run: touch /tmp/time-ref
-      
+
       - name: Build demo-node
         run: npm install --prefix demo-node
 
@@ -93,22 +94,26 @@ jobs:
       - name: Build PHP DBG & CLI Previews
         run: time make web-dbg-mjs web-cli-mjs
 
-      - name: Cache mtimes
+      - name: Take Snapshot
         run: |
-          find . -type f -newer /tmp/time-ref -printf '%P %T@\n' > ./.cache/.mtimes-php${{ inputs.phpVersion }}-${{ inputs.libType }}
-          sudo find . -type f -exec chmod u+rw {} \; -exec chown $USER:$USER {} \;
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
-      
+          path: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz
+          compression-level: 0
+
       - name: Create Failure Snapshot
         if: ${{ failure() }}
         run: |
@@ -116,7 +121,7 @@ jobs:
           sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
-      - name: Upload artifact if failure occurred.
+      - name: Upload Failure Artifact
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:

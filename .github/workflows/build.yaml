@@ -100,19 +100,26 @@ jobs:
       - name: Cache executables
         run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
-      - name: Cache mtimes
-        run: find . -type f -newer /tmp/time-ref -printf '%P %T@\n' > ./.cache/.mtimes-libs-${{ matrix.libgroup }}
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-dependencies-${{ matrix.libgroup }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-dependencies-${{ matrix.libgroup }}.tar.gz
+          compression-level: 0
+            
 
 
 
@@ -254,12 +261,19 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+        
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -273,16 +287,25 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
   compress-shared-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
@@ -302,12 +325,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -321,16 +350,25 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
   compress-static-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
@@ -350,12 +388,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -369,16 +413,25 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
 
 
@@ -486,24 +539,39 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
           path: ./
 
+      - name: Extract Artifact
+        run: |
+          for TARFILE in php-compressed-dynamic.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
       - name: Index Package Directories
         run: ./.github/bin/index-dirs.sh
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              packages \
+              .cache
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-indexed-packages
-          include-hidden-files: true
-          path: |
-            packages
-            .cache
+          name: php-compressed-${{ matrix.libType }}
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
   build-demo:
     name: Build Web Demo
@@ -542,10 +610,20 @@ jobs:
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/
 
+      - name: Take Snapshot
+        run: |
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-demo-web.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-demo-web.tar.gz' \
+              demo-web/build
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-demo-web
-          include-hidden-files: true
-          path: |
-            demo-web/build
+          path: php-demo-web.tar.gz
+          compression-level: 0
+            

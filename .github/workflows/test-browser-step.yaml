@@ -31,12 +31,18 @@ jobs:
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: ${{ inputs.artifactPattern }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Install NPM packages
         run: npm ci
