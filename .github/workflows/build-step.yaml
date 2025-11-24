@@ -102,3 +102,10 @@ jobs:
             packages
             lib
             .cache
+      
+      - name: Upload artifact if failure occurred.
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: failure snapshot
+          path: ./
