@@ -43,7 +43,7 @@ jobs:
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Install deps
@@ -77,4 +77,4 @@ jobs:
           done
 
       - name: Run tests
-        run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+        run: make --debug=basic test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}

@@ -30,13 +30,13 @@ jobs:
       - name: Generate JSON array of directories
         id: set-matrix
         run: |
-          make dynamic-libs.json WITH_SDL=dynamic
+          make --debug=basic dynamic-libs.json WITH_SDL=dynamic
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
 
       - name: Create builder image
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Cache Docker image
@@ -85,7 +85,7 @@ jobs:
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Spin up docker-network
@@ -95,7 +95,7 @@ jobs:
         run: touch /tmp/time-ref
       
       - name: Build shared libraries
-        run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
+        run: time make --debug=basic ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
         run: find ./third_party -name .git -prune -o -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
@@ -556,7 +556,7 @@ jobs:
 
       - name: Extract Artifact
         run: |
-          for TARFILE in php-compressed-dynamic.tar.gz; do
+          for TARFILE in php-compressed-*.tar.gz; do
             tar -xzf ${TAR}
           done;
 
@@ -579,8 +579,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-compressed-${{ matrix.libType }}
-          path: php-compressed-${{ matrix.libType }}.tar.gz
+          name: php-index-${{ matrix.libType }}
+          path: php-index-${{ matrix.libType }}.tar.gz
           compression-level: 0
 
   build-demo:
@@ -597,12 +597,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download Packages Artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TARFILE in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Download Index Artifact
         uses: actions/download-artifact@v4
@@ -610,6 +616,12 @@ jobs:
           pattern: php-indexed-packages
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TARFILE in php-index-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Ensure the demo uses local packages
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
