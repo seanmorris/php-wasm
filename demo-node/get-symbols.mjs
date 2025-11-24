@@ -2,11 +2,6 @@
 import { PhpNode } from 'php-wasm/PhpNode.mjs';
 import fs from 'node:fs';
 
-process.on('unhandledRejection', (reason, promise) => {
-	console.error('=== UNHANDLED REJECTION ===');
-	console.error({promise, reason});
-});
-
 const sharedLibs = [];
 const buildType = process.env.BUILD_TYPE ?? 'dynamic';
 
