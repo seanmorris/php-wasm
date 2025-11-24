@@ -49,6 +49,11 @@ jobs:
       - name: Install deps
         run: sudo apt update && sudo apt install coreutils docker-compose -y
 
+      - name: npm install
+        run: |
+          npm ci
+          npm install -g deno
+
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
@@ -64,11 +69,6 @@ jobs:
 
       - name: Spin up docker-network
         run: docker network create phpwasm_default
-
-      - name: npm install
-        run: |
-          npm ci
-          npm install -g deno
 
       - name: Apply executable cache
         run: |
