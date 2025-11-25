@@ -30,6 +30,7 @@ TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 SHARED_LIBS+= packages/libyaml/libyaml.so
 SKIP_LIBS+= -lyaml
 EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
+PHP_ASSET_LIST+= libyaml.so
 endif
 
 ifeq (${WITH_YAML},dynamic)

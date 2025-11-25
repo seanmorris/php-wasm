@@ -31,6 +31,7 @@ TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SHARED_LIBS+= packages/iconv/libiconv.so
 SKIP_LIBS+= -liconv
 EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
+PHP_ASSET_LIST+= libiconv.so
 endif
 
 ifeq (${WITH_ICONV},dynamic)

@@ -52,6 +52,13 @@ CONFIGURE_FLAGS+=--enable-intl
 PHP_CONFIGURE_DEPS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SHARED_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SKIP_LIBS+= -licuio -licui18n -licuuc -licudata
+PHP_ASSET_LIST+= libicudata.so \
+	libicui18n.so \
+	libicuio.so \
+	libicutest.so \
+	libicutu.so \
+	libicuuc.so \
+	$(notdir ${LIBICU_DATFILE})
 EXTRA_MODULES+= packages/intl/libicudata.so \
 	packages/intl/libicui18n.so \
 	packages/intl/libicuio.so \

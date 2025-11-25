@@ -41,6 +41,7 @@ SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SKIP_LIBS+= -lssl -lcrypto
 SHARED_LIB_CONFIG+="openssl",
 EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
+PHP_ASSET_LIST+= libssl.so libcrypto.so
 endif
 
 ifeq (${WITH_OPENSSL},dynamic)

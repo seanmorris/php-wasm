@@ -54,6 +54,7 @@ PHP_CONFIGURE_DEPS+= packages/mbstring/libonig.so
 SHARED_LIBS+= packages/mbstring/libonig.so
 SKIP_LIBS+= -lonig
 EXTRA_MODULES+= packages/mbstring/libonig.so
+PHP_ASSET_LIST+= libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},dynamic)

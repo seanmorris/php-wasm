@@ -28,6 +28,7 @@ TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SHARED_LIBS+= packages/libzip/libzip.so
 SKIP_LIBS+= -lzip
 EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
+PHP_ASSET_LIST+= libzip.so
 endif
 
 ifeq (${WITH_LIBZIP},dynamic)

@@ -971,6 +971,8 @@ ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 	${MAKE} test-deno
 endif
 
+NODE_TEST_FLAGS=
+
 test-node: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
@@ -993,7 +995,7 @@ test-node: node-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `ls test/*.mjs`
 
 test-deno: node-mjs
 	PHP_VERSION=${PHP_VERSION} \

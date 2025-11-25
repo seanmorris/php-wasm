@@ -32,6 +32,7 @@ TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SHARED_LIBS+= packages/sqlite/libsqlite3.so
 SKIP_LIBS+= -lsqlite3
 EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
+PHP_ASSET_LIST+= libsqlite3.so
 endif
 
 ifeq (${WITH_SQLITE},dynamic)

@@ -29,6 +29,7 @@ TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SHARED_LIBS+= packages/zlib/libz.so
 SKIP_LIBS+= -lz
 EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
+PHP_ASSET_LIST+= libz.so
 endif
 
 ifeq (${WITH_ZLIB},dynamic)

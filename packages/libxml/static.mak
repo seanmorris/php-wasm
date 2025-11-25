@@ -29,6 +29,7 @@ PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 EXTRA_MODULES+= packages/libxml/libxml2.so
+PHP_ASSET_LIST+= libxml2.so
 endif
 
 ifeq (${WITH_LIBXML},dynamic)
