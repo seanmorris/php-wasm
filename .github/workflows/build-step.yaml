@@ -32,6 +32,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
+        if: ${{ input.libType != 'static' }}
         uses: actions/download-artifact@v4
         with:
           pattern: php-dependencies-*
@@ -39,12 +40,14 @@ jobs:
           path: ./
 
       - name: Extract Artifact
+        if: ${{ input.libType != 'static' }}
         run: |
           for TAR in php-dependencies-*.tar.gz; do
             tar -xzf ${TAR}
           done;
 
       - name: Apply executable cache
+        if: ${{ input.libType != 'static' }}
         run: |
           ls ./.cache/executables-* | while read -r CACHE; do
             cat ${CACHE} | xargs -I{} chmod +x {}

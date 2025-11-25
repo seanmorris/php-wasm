@@ -143,7 +143,7 @@ jobs:
       libType: shared
 
   build-php-static:
-    needs: [build-libs]
+    needs: []
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -625,6 +625,8 @@ jobs:
 
       - name: Build Web Demo
         run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
+        env:
+          CI: ''
       
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/

@@ -67,3 +67,18 @@ jobs:
 
       - name: Run tests
         run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-browser
+
+      - name: Take Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
+
+      - name: Upload Failure Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: failure-snapshot-browser-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
+          path: snapshot.tar.gz
+          compression-level: 0
