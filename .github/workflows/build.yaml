@@ -572,18 +572,18 @@ jobs:
           sudo chmod -R u+rwX,go+rX .
           tar --exclude=.git \
             --format=posix \
-            --exclude='php-indexed-packages-${{ matrix.libType }}.tar.gz' \
+            --exclude='php-indexed-packages.tar.gz' \
             --ignore-failed-read \
             --warning=no-file-changed \
-            -czf 'php-indexed-packages-${{ matrix.libType }}.tar.gz' \
+            -czf 'php-indexed-packages.tar.gz' \
               packages \
               .cache
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-indexed-packages-${{ matrix.libType }}
-          path: php-indexed-packages-${{ matrix.libType }}.tar.gz
+          name: php-indexed-packages
+          path: php-indexed-packages.tar.gz
           compression-level: 0
 
   build-demo:
@@ -616,13 +616,13 @@ jobs:
       - name: Download Index Artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-indexed-packages-${{ matrix.libType }}
+          pattern: php-indexed-packages
           merge-multiple: true
           path: ./
 
       - name: Extract Artifact
         run: |
-          for TAR in php-indexed-packages-${{ matrix.libType }}.tar.gz; do
+          for TAR in php-indexed-packages.tar.gz; do
             tar -xzf ${TAR}
           done;
 
@@ -647,7 +647,7 @@ jobs:
             --ignore-failed-read \
             --warning=no-file-changed \
             -czf 'php-demo-web.tar.gz' \
-              demo-web/build
+              docs
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

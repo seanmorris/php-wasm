@@ -93,6 +93,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}
         with:
-          name: failure-snapshot-node-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
+          name: failure-snapshot-${{ inputs.testType }}-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
           path: snapshot.tar.gz
           compression-level: 0
