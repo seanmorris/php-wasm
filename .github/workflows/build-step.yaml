@@ -70,6 +70,17 @@ jobs:
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
         run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
 
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v3
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
+
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
