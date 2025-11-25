@@ -30,14 +30,9 @@ jobs:
       - name: Generate JSON array of directories
         id: set-matrix
         run: |
-          make dynamic-libs.json WITH_SDL=dynamic
+          make --debug=basic dynamic-libs.json WITH_SDL=dynamic
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Create builder image
-        run: |
-          time make image
-          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Cache Docker image
         id: cache-docker-image
@@ -45,6 +40,17 @@ jobs:
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make --debug=basic image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
 
   build-libs:
     name: Build Shared Objects
@@ -85,31 +91,40 @@ jobs:
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
       - name: Build shared libraries
-        run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
+        run: time make --debug=basic ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
-        run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
+        run: find ./third_party -name .git -prune -o -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
-      - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-libs-${{ matrix.libgroup }}
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-dependencies-${{ matrix.libgroup }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-dependencies-${{ matrix.libgroup }}.tar.gz
+          compression-level: 0
+            
 
 
 
@@ -134,7 +149,7 @@ jobs:
       libType: shared
 
   build-php-static:
-    needs: [build-libs]
+    needs: []
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
@@ -251,12 +266,19 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+        
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -270,16 +292,27 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
   compress-shared-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
@@ -299,12 +332,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -318,16 +357,27 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
   compress-static-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
@@ -347,12 +397,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -366,16 +422,27 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-compressed-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
 
 
@@ -483,24 +550,41 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
           path: ./
 
+      - name: Extract Artifact
+        run: |
+          for TAR in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
       - name: Index Package Directories
         run: ./.github/bin/index-dirs.sh
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-indexed-packages.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-indexed-packages.tar.gz' \
+              packages \
+              .cache
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-indexed-packages
-          include-hidden-files: true
-          path: |
-            packages
-            .cache
+          path: php-indexed-packages.tar.gz
+          compression-level: 0
 
   build-demo:
     name: Build Web Demo
@@ -516,12 +600,18 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Download Packages Artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Download Index Artifact
         uses: actions/download-artifact@v4
@@ -530,19 +620,39 @@ jobs:
           merge-multiple: true
           path: ./
 
+      - name: Extract Artifact
+        run: |
+          for TAR in php-indexed-packages.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
       - name: Ensure the demo uses local packages
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
       - name: Build Web Demo
         run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
+        env:
+          CI: ''
       
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-demo-web.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-demo-web.tar.gz' \
+              docs
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-demo-web
-          include-hidden-files: true
-          path: |
-            demo-web/build
+          path: php-demo-web.tar.gz
+          compression-level: 0
+            

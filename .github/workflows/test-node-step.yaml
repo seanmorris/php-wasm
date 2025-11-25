@@ -29,6 +29,9 @@ jobs:
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
+      - name: Flatten mtimes
+        run: find . -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Cache Docker image
         id: cache-docker-image
         uses: actions/cache@v3
@@ -43,34 +46,53 @@ jobs:
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Install deps
         run: sudo apt update && sudo apt install coreutils docker-compose -y
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ${{ inputs.artifactPattern }}
-          merge-multiple: true
-          path: ./
-
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
 
       - name: npm install
         run: |
           npm ci
           npm install -g deno
 
-      - name: Apply mtime caches
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifactPattern }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
         run: |
-          ls ./.cache/.mtimes* | while read -r CACHE; do
-            while read -r PATH MTIME; do
-              [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-            done < ${CACHE}
+          for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Spin up docker-network
+        run: docker network create phpwasm_default
+
+      - name: Apply executable cache
+        run: |
+          ls ./.cache/executables-* | while read -r CACHE; do
+            cat ${CACHE} | xargs -I{} chmod +x {}
           done
 
       - name: Run tests
-        run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+        run: make --debug=basic test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+
+      - name: Take Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
+
+      - name: Upload Failure Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: failure-snapshot-${{ inputs.testType }}-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
+          path: snapshot.tar.gz
+          compression-level: 0
