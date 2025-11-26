@@ -41,9 +41,12 @@ if(buildType === 'dynamic')
 }
 else if(buildType === 'shared')
 {
+	files.push(
+		{ parent: '/preload/', name: 'icudt72l.dat', url: new URL('php-wasm-intl/icudt72l.dat', import.meta.url) }
+	);
+
 	sharedLibs.push(
-		// {name: 'libxml2.so', url: (new URL('php-wasm-libxml/libxml2.so', import.meta.url))},
-		
+		{name: 'libxml2.so',     url: new URL('php-wasm-libxml/libxml2.so',    import.meta.url)},
 		{name: 'libz.so',        url: new URL('php-wasm-zlib/libz.so',         import.meta.url)},
 		{name: 'libzip.so',      url: new URL('php-wasm-libzip/libzip.so',     import.meta.url)},
 		{name: 'libfreetype.so', url: new URL('php-wasm-gd/libfreetype.so',    import.meta.url)},
