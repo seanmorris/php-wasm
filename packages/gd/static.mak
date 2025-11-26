@@ -101,6 +101,7 @@ WITH_FREETYPE=static
 endif
 
 ifeq (${WITH_FREETYPE},static)
+EXTRA_MODULES+= packages/gd/libfreetype.so
 ARCHIVES+= lib/lib/libfreetype.a
 CONFIGURE_FLAGS+= --with-freetype
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
@@ -123,6 +124,7 @@ WITH_LIBJPEG=static
 endif
 
 ifeq (${WITH_LIBJPEG},static)
+EXTRA_MODULES+= packages/gd/libjpeg.so
 ARCHIVES+= lib/lib/libjpeg.a
 CONFIGURE_FLAGS+= --with-jpeg
 SKIP_LIBS+= -ljpeg
@@ -144,6 +146,7 @@ WITH_LIBPNG=static
 endif
 
 ifeq (${WITH_LIBPNG},static)
+EXTRA_MODULES+= packages/gd/libpng.so
 ARCHIVES+= lib/lib/libpng.a
 CONFIGURE_FLAGS+= --enable-png
 SKIP_LIBS+= -lpng16
@@ -166,6 +169,7 @@ WITH_LIBWEBP=static
 endif
 
 ifeq (${WITH_LIBWEBP},static)
+EXTRA_MODULES+= packages/gd/libwebp.so
 ARCHIVES+= lib/lib/libwebp.a
 CONFIGURE_FLAGS+= --with-webp
 SKIP_LIBS+= -lwebp
