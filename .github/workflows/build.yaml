@@ -564,7 +564,7 @@ jobs:
           done;
 
       - name: Index Package Directories
-        run: ./.github/bin/index-dirs.sh
+        run: ./.github/bin/index-dirs.sh packages/
 
       - name: Take Snapshot
         run: |
@@ -635,7 +635,7 @@ jobs:
           CI: ''
       
       - name: Copy packages into web demo
-        run: cp -rfv packages demo-web/build/
+        run: cp -rfv packages demo-web/build/nightly
 
       - name: Take Snapshot
         run: |
