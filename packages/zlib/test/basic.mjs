@@ -4,7 +4,6 @@ import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { env } from 'node:process';
 
 import zlib from 'php-wasm-zlib';
-console.log(`./packages/zlib/php${process.env.PHP_VERSION ?? '8.4'}-zlib.so`);
 
 test('Zlib Extension is enabled. (loaded via strings)', async () => {
 	const php = env.WITH_ZLIB === 'dynamic'

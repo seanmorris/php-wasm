@@ -14,7 +14,7 @@ $(error WITH_SQLITE MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR 
 endif
 
 ifeq (${WITH_SQLITE},1)
-WITH_SQLITE=static
+WITH_SQLITE=dynamic
 endif
 
 ifeq (${WITH_SQLITE},static)

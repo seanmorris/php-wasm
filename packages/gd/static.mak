@@ -7,11 +7,11 @@ WITH_FREETYPE?=shared
 WITH_LIBWEBP?=shared
 
 ifeq ($(filter ${WITH_GD},0 1 static dynamic),)
-$(error WITH_GD MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_GD MUST BE 0, 1, static, or dynamic. WITH_GD: '${WITH_GD}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-ifeq (${WITH_GD}, 1)
-WITH_GD=static
+ifeq (${WITH_GD},1)
+WITH_GD=shared
 endif
 
 ifeq (${WITH_GD}, static)
@@ -93,11 +93,11 @@ LIBWEBP_TAG=1.4.0
 DOCKER_RUN_IN_LIBWEBP=${DOCKER_ENV} -w /src/third_party/libwebp-${LIBWEBP_TAG}/ emscripten-builder
 
 ifeq ($(filter ${WITH_FREETYPE},0 1 shared static),)
-$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. WITH_FREETYPE: '${WITH_FREETYPE}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_FREETYPE},1)
-WITH_FREETYPE=static
+WITH_FREETYPE=shared
 endif
 
 ifeq (${WITH_FREETYPE},static)
@@ -116,11 +116,11 @@ endif
 
 
 ifeq ($(filter ${WITH_LIBJPEG},0 1 shared static),)
-$(error WITH_LIBJPEG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBJPEG MUST BE 0, 1, static OR shared. WITH_LIBJPEG: '${WITH_LIBJPEG}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBJPEG},1)
-WITH_LIBJPEG=static
+WITH_LIBJPEG=shared
 endif
 
 ifeq (${WITH_LIBJPEG},static)
@@ -138,11 +138,11 @@ endif
 
 
 ifeq ($(filter ${WITH_LIBPNG},0 1 shared static),)
-$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. WITH_LIBPNG: '${WITH_LIBPNG}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBPNG},1)
-WITH_LIBPNG=static
+WITH_LIBPNG=shared
 endif
 
 ifeq (${WITH_LIBPNG},static)
@@ -161,11 +161,11 @@ endif
 
 
 ifeq ($(filter ${WITH_LIBWEBP},0 1 shared static),)
-$(error WITH_LIBWEBP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBWEBP MUST BE 0, 1, static OR shared. WITH_LIBWEBP: '${WITH_LIBWEBP}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBWEBP},1)
-WITH_LIBWEBP=static
+WITH_LIBWEBP=shared
 endif
 
 ifeq (${WITH_LIBWEBP},static)

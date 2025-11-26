@@ -15,11 +15,11 @@ DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} \
 	emscripten-builder
 
 ifeq ($(filter ${WITH_OPENSSL},0 1 shared dynamic),)
-$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). WITH_OPENSSL: '${WITH_OPENSSL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_OPENSSL},1)
-WITH_OPENSSL=shared
+WITH_OPENSSL=dynamic
 endif
 
 ifneq ($(filter ${WITH_OPENSSL},shared dynamic),)

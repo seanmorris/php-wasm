@@ -10,7 +10,7 @@ DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 
 ## @ TODO: Implement static & shared builds
 ifeq ($(filter ${WITH_SDL},0 1 dynamic),)
-$(error WITH_SDL MUST BE 0, 1, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_SDL MUST BE 0, 1, OR dynamic. WITH_SDL: '${WITH_SDL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_SDL},static)

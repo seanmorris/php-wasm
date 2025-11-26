@@ -17,11 +17,11 @@ LIBICU_DATFILE=lib/share/icu/69.1/icudt69l.dat
 endif
 
 ifeq ($(filter ${WITH_INTL},0 1 shared static dynamic),)
-$(error WITH_INTL MUST BE 0, 1, static, shared, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_INTL MUST BE 0, 1, static, shared, or dynamic. WITH_INTL: '${WITH_INTL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_INTL},1)
-WITH_INTL=static
+WITH_INTL=dynamic
 endif
 
 ifneq ($(filter ${WITH_INTL},shared static dynamic),)

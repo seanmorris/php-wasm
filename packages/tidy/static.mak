@@ -11,12 +11,24 @@ $(error WITH_TIDY MUST BE 0, 1, static, shared OR dynamic. PLEASE CHECK YOUR SET
 endif
 
 ifeq (${WITH_TIDY},1)
-WITH_TIDY=static
+WITH_TIDY=dynamic
 endif
 
-ifneq ($(filter ${WITH_TIDY},1 shared static),)
-ifeq ($(filter ${WITH_LIBXML},1 shared static),)
-$(error TIDY REQUIRES WITH_LIBXML=[1|share|static]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq (${WITH_TIDY},static)
+ifeq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_TIDY=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+endif
+
+ifneq ($(filter ${WITH_TIDY},shared static),)
+ifeq ($(filter ${WITH_LIBXML},shared static),)
+$(error TIDY=[shared|static] REQUIRES WITH_LIBXML=[shared|static]. WITH_LIBXML: '${WITH_LIBXML}' WITH_TIDY: '${WITH_TIDY}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+endif
+
+ifneq ($(filter ${WITH_TIDY}, dynamic),)
+ifeq ($(filter ${WITH_LIBXML},1 dynamic),)
+$(error TIDY REQUIRES WITH_LIBXML=[dynamic]. WITH_LIBXML: '${WITH_LIBXML}' WITH_TIDY: '${WITH_TIDY}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 endif
 

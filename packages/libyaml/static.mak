@@ -7,11 +7,11 @@ DOCKER_RUN_IN_LIB_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZ
 DOCKER_RUN_IN_EXT_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-yaml/ emscripten-builder
 
 ifeq ($(filter ${WITH_YAML},0 1 shared static dynamic),)
-$(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. WITH_YAML: '${WITH_YAML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_YAML},1)
-WITH_YAML=static
+WITH_YAML=dynamic
 endif
 
 ifeq (${WITH_YAML},static)
