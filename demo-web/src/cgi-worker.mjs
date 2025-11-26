@@ -33,9 +33,9 @@ if(buildType === 'dynamic')
 }
 else if(buildType === 'shared')
 {
-	files.push(
-		{ parent: '/preload/', name: 'icudt72l.dat', url: (await import('php-wasm-intl/icudt72l.dat')).default }
-	);
+	// files.push(
+	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: (await import('php-wasm-intl/icudt72l.dat')).default }
+	// );
 
 	sharedLibs.push(
 		{ name: 'libxml2.so',     url: (await import('php-wasm-libxml/libxml2.so'    )).default },
