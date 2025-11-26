@@ -34,6 +34,7 @@ if(buildType === 'dynamic')
 else if(buildType === 'shared')
 {
 	sharedLibs.push(
+		{name: 'libxml2.so',     url: (await import('php-wasm-libxml/libxml2.so'    )).default},
 		{name: 'libz.so',        url: (await import('php-wasm-zlib/libz.so'         )).default},
 		{name: 'libzip.so',      url: (await import('php-wasm-libzip/libzip.so'     )).default},
 		{name: 'libfreetype.so', url: (await import('php-wasm-gd/libfreetype.so'    )).default},
