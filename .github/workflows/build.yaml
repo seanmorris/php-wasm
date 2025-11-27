@@ -124,7 +124,7 @@ jobs:
           name: php-dependencies-${{ matrix.libgroup }}
           path: php-dependencies-${{ matrix.libgroup }}.tar.gz
           compression-level: 0
-            
+
 
 
 
@@ -278,7 +278,7 @@ jobs:
           for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
             tar -xzf ${TAR}
           done;
-        
+
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -586,6 +586,32 @@ jobs:
           path: php-indexed-packages.tar.gz
           compression-level: 0
 
+      - name: Set up vars
+        run: |
+          echo "STAMP=$( date -u +'%Y%m%d%H%M%S' )" >> $GITHUB_ENV
+          echo "SHORT_SHA=$( git rev-parse --short $GITHUB_SHA )" >> $GITHUB_ENV
+
+      - name: Upload to Cloudflare
+        uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: packages
+          destination-dir: ${{ env.STAMP }}-${{ env.SHORT_SHA }}/
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Deploy Cloudflare Pages Function
+        run: |
+          cd .cloudflare/pages
+          wrangler pages deploy --branch=main --project-name=php-wasm-nightly
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+
   build-demo:
     name: Build Web Demo
     runs-on: ubuntu-latest
@@ -633,7 +659,7 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
         env:
           CI: ''
-      
+
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/nightly
 
@@ -655,4 +681,4 @@ jobs:
           name: php-demo-web
           path: php-demo-web.tar.gz
           compression-level: 0
-            
+

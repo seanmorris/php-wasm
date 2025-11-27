@@ -1,0 +1,7 @@
+name = "php-wasm-nightly"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "./dist"
+
+[[r2_buckets]]
+binding = 'NIGHTLY_BUILDS'
+bucket_name = 'php-wasm'
