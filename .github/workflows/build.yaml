@@ -612,6 +612,14 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
 
+      - name: Notify Discord on success
+        if: ${{ success() }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
   build-demo:
     name: Build Web Demo
     runs-on: ubuntu-latest
