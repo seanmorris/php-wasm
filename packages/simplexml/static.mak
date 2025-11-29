@@ -5,17 +5,17 @@ DOCKER_RUN_IN_EXT_SIMPLEXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPI
 WITH_SIMPLEXML?=dynamic
 
 ifeq ($(filter ${WITH_SIMPLEXML},0 1 static dynamic),)
-$(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_SIMPLEXML},1)
-WITH_XML=static
+WITH_SIMPLEXML=dynamic
 EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},static)
-ifeq ($(filter ${WITH_LIBXML},1 static),)
-$(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML}' WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 CONFIGURE_FLAGS+= --enable-simplexml
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
@@ -24,7 +24,7 @@ endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
 ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
-$(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. WITH_LIBXML: '${WITH_LIBXML}' WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
 EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so

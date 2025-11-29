@@ -5,8 +5,6 @@ import { env } from 'node:process';
 
 import intl from 'php-wasm-intl';
 
-console.log(`./packages/intl/php${process.env.PHP_VERSION}-intl.so`);
-
 test('Intl Extension is enabled. (loaded via strings)', async () => {
 	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({

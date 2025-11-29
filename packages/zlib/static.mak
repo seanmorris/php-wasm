@@ -11,7 +11,7 @@ $(error WITH_ZLIB MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SE
 endif
 
 ifeq (${WITH_ZLIB},1)
-WITH_ZLIB=static
+WITH_ZLIB=dynamic
 endif
 
 ifeq (${WITH_ZLIB},static)

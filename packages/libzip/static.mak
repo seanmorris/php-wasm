@@ -6,11 +6,11 @@ DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -
 DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php${PHP_VERSION}-zip/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBZIP},0 1 shared static dynamic),)
-$(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBZIP: '${WITH_LIBZIP}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBZIP},1)
-WITH_LIBZIP=static
+WITH_LIBZIP=dynamic
 endif
 
 ifeq (${WITH_LIBZIP},static)

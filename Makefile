@@ -864,6 +864,7 @@ patch/php8.0.patch:
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.0-src/|g' ./patch/php8.0.patch
 
 php-clean:
+	${DOCKER_RUN_IN_PHP} rm -f .cache/config-cache
 	${DOCKER_RUN_IN_PHP} rm -f configured
 	${DOCKER_RUN_IN_PHP} bash -c 'rm -f \
 		sapi/cli/php-*.js \

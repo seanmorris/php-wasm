@@ -9,11 +9,11 @@ DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 DOCKER_RUN_IN_EXT_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-iconv/ emscripten-builder
 
 ifeq ($(filter ${WITH_ICONV},0 1 shared static dynamic),)
-$(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. WITH_ICONV: '${WITH_ICONV}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ICONV},1)
-WITH_ICONV=static
+WITH_ICONV=dynamic
 endif
 
 ifeq (${WITH_ICONV},static)

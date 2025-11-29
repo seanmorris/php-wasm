@@ -7,7 +7,7 @@ DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto
 DOCKER_RUN_IN_EXT_LIBXML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-libxml/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBXML},0 1 static shared dynamic),)
-$(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBXML: '${WITH_LIBXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBXML},1)

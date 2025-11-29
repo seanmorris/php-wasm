@@ -5,16 +5,16 @@ DOCKER_RUN_IN_EXT_DOM =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flt
 WITH_DOM?=dynamic
 
 ifeq ($(filter ${WITH_DOM},0 1 static dynamic),)
-$(error WITH_DOM MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_DOM MUST BE 0, 1, static, OR dynamic. WITH_DOM: '${WITH_DOM}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_DOM},1)
-WITH_DOM=static
+WITH_DOM=dynamic
 endif
 
 ifeq (${WITH_DOM},static)
-ifeq ($(filter ${WITH_LIBXML},1 static),)
-$(error WITH_DOM=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_DOM=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML}' WITH_DOM: '${WITH_DOM}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 CONFIGURE_FLAGS+= --enable-dom
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
@@ -23,7 +23,7 @@ endif
 
 ifeq (${WITH_DOM},dynamic)
 ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
-$(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_DOM=dynamic REQUIRES WITH_LIBXML=[static|shared]. WITH_LIBXML: '${WITH_LIBXML}' WITH_DOM: '${WITH_DOM}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
 EXTRA_MODULES+= packages/dom/php${PHP_VERSION}-dom.so

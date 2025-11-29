@@ -1,0 +1,42 @@
+function isMissing(obj) {
+  return !obj || !obj.body || !obj.size;
+}
+
+export const onRequest = async (context) => {
+  const url = new URL(context.request.url);
+  const origPath = url.pathname;
+  let pathname = origPath;
+
+  // Try direct file
+  let key = pathname.slice(1);
+  let obj = await context.env.NIGHTLY_BUILDS.get(key);
+
+  const looksLikeDir = !origPath.includes(".");
+
+  if (isMissing(obj) && looksLikeDir) {
+
+    // If no slash → redirect
+    if (!origPath.endsWith("/")) {
+      const redirectUrl = new URL(context.request.url);
+      redirectUrl.pathname = origPath + "/";
+      return Response.redirect(redirectUrl.toString(), 302);
+    }
+
+    // Try directory index
+    key = (origPath + "index.html").slice(1);
+    obj = await context.env.NIGHTLY_BUILDS.get(key);
+  }
+
+  if (isMissing(obj)) {
+    return new Response("Not found", { status: 404 });
+  }
+
+  // return new Response(JSON.stringify({key, exists: !isMissing(obj), obj}));
+
+  return new Response(obj.body, {
+    headers: {
+      "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
+};
