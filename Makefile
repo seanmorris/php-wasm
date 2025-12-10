@@ -1077,7 +1077,7 @@ demo-versions:
 	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=1
 
-	${MAKE} worker-cgi-mjs web-cli-mjs PHP_VERSION=8.3 WITH_SDL=0
+	${MAKE} worker-cgi-mjs web-cli-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
 
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=0
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=0

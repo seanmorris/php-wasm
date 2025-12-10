@@ -55,6 +55,7 @@ jobs:
       - name: npm install
         run: |
           npm ci
+          npm ci --prefix demo-node
           npm install -g deno
 
       - name: Download Artifact
