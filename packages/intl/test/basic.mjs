@@ -4,13 +4,20 @@ import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { env } from 'node:process';
 
 import intl from 'php-wasm-intl';
-// import intl from 'php-wasm-intl/8.4.mjs';
 
-test('Intl Extension is enabled. (explicit)', async () => {
+test('Intl Extension is enabled. (loaded via strings)', async () => {
 	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({
-			sharedLibs: [`php${process.env.PHP_VERSION}-intl.so`]
-			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'}]
+			sharedLibs: [
+				{ url: `./packages/intl/libicudata.so`, ini: false },
+				{ url: `./packages/intl/libicui18n.so`, ini: false },
+				{ url: `./packages/intl/libicuio.so`, ini: false },
+				{ url: `./packages/intl/libicutest.so`, ini: false },
+				{ url: `./packages/intl/libicutu.so`, ini: false },
+				{ url: `./packages/intl/libicuuc.so`, ini: false },
+				`./packages/intl/php${process.env.PHP_VERSION}-intl.so`,
+			]
+			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './packages/intl/icudt72l.dat'}]
 		})
 		: new PhpNode;
 
@@ -27,11 +34,48 @@ test('Intl Extension is enabled. (explicit)', async () => {
 	assert.equal(stdErr, '');
 });
 
-test('Intl can format numbers. (explicit)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
+test('Intl Extension is enabled. (loaded via URL objects)', async () => {
+	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({
-			sharedLibs: [`php${process.env.PHP_VERSION}-intl.so`]
-			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'}]
+			sharedLibs: [
+				{ url: new URL(`../../intl/libicudata.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicui18n.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicuio.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicutest.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicutu.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicuuc.so`, import.meta.url), ini: false },
+				new URL(`../../intl/php${process.env.PHP_VERSION}-intl.so`, import.meta.url),
+			]
+			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './packages/intl/icudt72l.dat'}]
+		})
+		: new PhpNode;
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('intl'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Intl can format numbers. (loaded via URL objects)', async () => {
+	const php = env.WITH_INTL === 'dynamic'
+		? new PhpNode({
+			sharedLibs: [
+				{ url: new URL(`../../intl/libicudata.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicui18n.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicuio.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicutest.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicutu.so`, import.meta.url), ini: false },
+				{ url: new URL(`../../intl/libicuuc.so`, import.meta.url), ini: false },
+				new URL(`../../intl/php${process.env.PHP_VERSION}-intl.so`, import.meta.url),
+			]
+			, files: [{parent: '/preload/', name: 'icudt72l.dat', url: './packages/intl/icudt72l.dat'}]
 		})
 		: new PhpNode;
 
@@ -52,9 +96,9 @@ test('Intl can format numbers. (explicit)', async () => {
 
 });
 
-test('Intl Extension is enabled. (static module loader)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
-		? new PhpNode({sharedLibs: [ intl  ]})
+test('Intl Extension is enabled. (loaded via module)', async () => {
+	const php = env.WITH_INTL === 'dynamic'
+		? new PhpNode({sharedLibs: [intl]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -70,9 +114,9 @@ test('Intl Extension is enabled. (static module loader)', async () => {
 	assert.equal(stdErr, '');
 });
 
-test('Intl can format numbers. (static module loader)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
-		? new PhpNode({sharedLibs: [ intl ]})
+test('Intl can format numbers. (loaded via module)', async () => {
+	const php = env.WITH_INTL === 'dynamic'
+		? new PhpNode({sharedLibs: [intl]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -92,7 +136,7 @@ test('Intl can format numbers. (static module loader)', async () => {
 });
 
 test('Intl Extension is enabled. (dynamic module loader)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
+	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
 		: new PhpNode;
 
@@ -110,7 +154,7 @@ test('Intl Extension is enabled. (dynamic module loader)', async () => {
 });
 
 test('Intl can format numbers. (dynamic module loader)', async () => {
-	const php = process.env.WITH_INTL === 'dynamic'
+	const php = env.WITH_INTL === 'dynamic'
 		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
 		: new PhpNode;
 

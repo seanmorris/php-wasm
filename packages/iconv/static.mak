@@ -9,11 +9,11 @@ DOCKER_RUN_IN_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 DOCKER_RUN_IN_EXT_ICONV=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-iconv/ emscripten-builder
 
 ifeq ($(filter ${WITH_ICONV},0 1 shared static dynamic),)
-$(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. WITH_ICONV: '${WITH_ICONV}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ICONV},1)
-WITH_ICONV=static
+WITH_ICONV=dynamic
 endif
 
 ifeq (${WITH_ICONV},static)
@@ -21,6 +21,7 @@ CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
 SKIP_LIBS+= -liconv
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
+EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
 endif
 
 ifeq (${WITH_ICONV},shared)
@@ -28,17 +29,18 @@ CONFIGURE_FLAGS+= --with-iconv=/src/lib
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SHARED_LIBS+= packages/iconv/libiconv.so
-PHP_ASSET_LIST+= libiconv.so
 SKIP_LIBS+= -liconv
+EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
+PHP_ASSET_LIST+= libiconv.so
 endif
 
 ifeq (${WITH_ICONV},dynamic)
 PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
-PHP_ASSET_LIST+= libiconv.so php${PHP_VERSION}-iconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 DYNAMIC_LIBS+= packages/iconv/libiconv.so
 DYNAMIC_LIBS_GROUPED+= iconv-libs
 SKIP_LIBS+= -liconv
+EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
 endif
 
 iconv-libs: packages/iconv/libiconv.so

@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkdemo_source=self.webpackChunkdemo_source||[]).push([[47],{43047:(e,s,d)=>{d.r(s),d.d(s,{default:()=>b,getLibs:()=>t});const t=()=>[{name:"libxml2.so",url:new URL(d(67832),d.b).href}],b={getLibs:t}},67832:(e,s,d)=>{e.exports=d.p+"static/media/libxml2.f7784337bd52d3e7d7d5.so"}}]);
-//# sourceMappingURL=47.d8aa1f24.chunk.js.map

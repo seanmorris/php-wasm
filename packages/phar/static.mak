@@ -3,21 +3,23 @@
 WITH_PHAR?=dynamic
 
 ifeq ($(filter ${WITH_PHAR},0 1 static dynamic),)
-$(error WITH_PHAR MUST BE 0, 1, static, dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_PHAR MUST BE 0, 1, static, dynamic. WITH_PHAR: '${WITH_PHAR}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_PHAR},1)
-WITH_PHAR=static
+WITH_PHAR=dynamic
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},static)
 CONFIGURE_FLAGS+= --enable-phar
 TEST_LIST+=packages/phar/test/basic.mjs
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},dynamic)
-PHP_ASSET_LIST+= php${PHP_VERSION}-phar.so
 TEST_LIST+=packages/phar/test/basic.mjs
+EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 DOCKER_RUN_IN_EXT_PHAR=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-phar/ emscripten-builder

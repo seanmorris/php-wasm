@@ -11,12 +11,24 @@ $(error WITH_TIDY MUST BE 0, 1, static, shared OR dynamic. PLEASE CHECK YOUR SET
 endif
 
 ifeq (${WITH_TIDY},1)
-WITH_TIDY=static
+WITH_TIDY=dynamic
 endif
 
-ifneq ($(filter ${WITH_TIDY},1 shared static),)
-ifeq ($(filter ${WITH_LIBXML},1 shared static),)
-$(error TIDY REQUIRES WITH_LIBXML=[1|share|static]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq (${WITH_TIDY},static)
+ifeq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_TIDY=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+endif
+
+ifneq ($(filter ${WITH_TIDY},shared static),)
+ifeq ($(filter ${WITH_LIBXML},shared static),)
+$(error TIDY=[shared|static] REQUIRES WITH_LIBXML=[shared|static]. WITH_LIBXML: '${WITH_LIBXML}' WITH_TIDY: '${WITH_TIDY}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+endif
+endif
+
+ifneq ($(filter ${WITH_TIDY}, dynamic),)
+ifeq ($(filter ${WITH_LIBXML},1 dynamic),)
+$(error TIDY REQUIRES WITH_LIBXML=[dynamic]. WITH_LIBXML: '${WITH_LIBXML}' WITH_TIDY: '${WITH_TIDY}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 endif
 
@@ -25,6 +37,7 @@ CONFIGURE_FLAGS+= --with-tidy=/src/lib
 ARCHIVES+= lib/lib/libtidy.a
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
+EXTRA_MODULES+= packages/tidy/libtidy.so packages/tidy/php${PHP_VERSION}-tidy.so
 endif
 
 ifeq (${WITH_TIDY},shared)
@@ -32,16 +45,17 @@ CONFIGURE_FLAGS+= --with-tidy=/src/lib
 PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SHARED_LIBS+= packages/tidy/libtidy.so
-PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 SKIP_LIBS+= -ltidy
+EXTRA_MODULES+= packages/tidy/libtidy.so packages/tidy/php${PHP_VERSION}-tidy.so
+PHP_ASSET_LIST+= libtidy.so
 endif
 
 ifeq (${WITH_TIDY},dynamic)
 DYNAMIC_LIBS+= packages/tidy/libtidy.so
 DYNAMIC_LIBS_GROUPED+= tidy-libs
-PHP_ASSET_LIST+= libtidy.so php${PHP_VERSION}-tidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
+EXTRA_MODULES+= packages/tidy/libtidy.so packages/tidy/php${PHP_VERSION}-tidy.so
 endif
 
 tidy-libs: packages/tidy/libtidy.so

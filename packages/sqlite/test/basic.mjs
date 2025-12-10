@@ -7,7 +7,32 @@ import sqlite from 'php-wasm-sqlite';
 
 test('Sqlite3 Extension is enabled.', async () => {
 	const php = env.WITH_SQLITE === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`]})
+		? new PhpNode({sharedLibs:[
+			{ url: `./packages/sqlite/libsqlite3.so` },
+			`./packages/sqlite/php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`,
+		]})
+		: new PhpNode;
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php var_dump(extension_loaded('sqlite3'));`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, `bool(true)\n`);
+	assert.equal(stdErr, '');
+});
+
+test('Sqlite3 Extension is enabled.', async () => {
+	const php = env.WITH_SQLITE === 'dynamic'
+		? new PhpNode({sharedLibs:[
+			{ url: new URL(`../../sqlite/libsqlite3.so`, import.meta.url) },
+			new URL(`../../sqlite/php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`, import.meta.url),
+		]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -43,7 +68,11 @@ test('PDO Extension is enabled.', async () => {
 
 test('PDO_Sqlite Extension is enabled.', async () => {
 	const php = process.env.WITH_SQLITE === 'dynamic'
-		? new PhpNode({sharedLibs:[`php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`, `php${process.env.PHP_VERSION}-pdo-sqlite.so`]})
+		? new PhpNode({sharedLibs:[
+			{ url: `./packages/sqlite/libsqlite3.so` },
+			`./packages/sqlite/php${process.env.PHP_VERSION ?? '8.4'}-sqlite.so`,
+			`./packages/sqlite/php${process.env.PHP_VERSION}-pdo-sqlite.so`,
+		]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

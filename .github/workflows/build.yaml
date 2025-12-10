@@ -2,6 +2,11 @@ name: Build Artifacts
 
 on: [push]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -30,15 +35,9 @@ jobs:
       - name: Generate JSON array of directories
         id: set-matrix
         run: |
-          make dynamic-libs.json WITH_SDL=dynamic
+          make --debug=basic dynamic-libs.json WITH_SDL=dynamic
           jq -c . dynamic-libs.json
           echo "libgroups=$(jq -c . dynamic-libs.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Create builder image (if not cached)
-        if: steps.cache-docker-image.outputs.cache-hit != 'true'
-        run: |
-          time make image
-          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Cache Docker image
         id: cache-docker-image
@@ -46,6 +45,17 @@ jobs:
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make --debug=basic image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
 
   build-libs:
     name: Build Shared Objects
@@ -81,47 +91,56 @@ jobs:
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
       - name: Spin up docker-network
         run: docker network create phpwasm_default
 
       - name: Build shared libraries
-        run: time make ${{ matrix.libgroup }} WITH_SDL=dynamic
+        run: time make --debug=basic ${{ matrix.libgroup }} WITH_SDL=dynamic
 
       - name: Cache executables
-        run: find ./third_party -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
+        run: find ./third_party -name .git -prune -o -type f -executable -print > ./.cache/executables-${{ matrix.libgroup }}.list
 
-      - name: Cache mtimes
-        run: find . -type f -printf '%P %T@\n' > ./.cache/.mtimes-${{ matrix.libgroup }}
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-dependencies-${{ matrix.libgroup }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
 
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: php-dependencies-${{ matrix.libgroup }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          path: php-dependencies-${{ matrix.libgroup }}.tar.gz
+          compression-level: 0
+
+
+
 
   build-php-dynamic:
     needs: [build-libs]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: dynamic
 
   build-php-shared:
@@ -129,24 +148,22 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: shared
 
   build-php-static:
-    needs: [build-libs]
+    needs: []
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        envTarget: ['node', 'web', 'worker']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
-      envTarget: ${{ matrix.envTarget }}
       libType: static
+
+
 
   test-node-dynamic:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
@@ -158,7 +175,7 @@ jobs:
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -173,7 +190,7 @@ jobs:
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
@@ -188,10 +205,12 @@ jobs:
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
+
+
 
   test-browser-dynamic:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
@@ -199,10 +218,10 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['dynamic',]
+        libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -212,10 +231,10 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['shared',]
+        libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
@@ -225,27 +244,24 @@ jobs:
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['static',]
+        libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'uncompressed'
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
-  compress-packages:
-    name: Compress PHP ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+
+
+  compress-dynamic-packages:
+    name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
-      - test-node-static
-      - test-node-shared
       - test-node-dynamic
-      - test-browser-static
-      - test-browser-shared
       - test-browser-dynamic
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
-        libType: ['static',]
+        libType: ['dynamic']
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -255,17 +271,19 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Import configuration
-        run: |
-          cp -p .github/.env_${{ matrix.phpVersion }}.${{ matrix.libType }}.ci .env
-          touch -d '1970-01-01 00:00:00 UTC' .env
-
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          pattern: php-uncompressed-*-*-${{ matrix.libType }}
+          pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
 
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
@@ -279,42 +297,429 @@ jobs:
       - name: Compress php-dbg-wasm
         run: ./compress-package.sh packages/php-dbg-wasm
 
-      - name: Upload artifact
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: php-compressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
-          include-hidden-files: true
-          path: |
-            third_party
-            packages
-            lib
-            .cache
+          name: php-compressed-${{ matrix.libType }}
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
 
-  test-node-compressed:
+  compress-shared-packages:
+    name: Compress PHP w/${{ matrix.libType }} libs
+    runs-on: ubuntu-latest
+    needs:
+      - test-node-shared
+      - test-browser-shared
+    strategy:
+      matrix:
+        libType: ['shared']
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-uncompressed-*-${{ matrix.libType }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Compress php-wasm
+        run: ./compress-package.sh packages/php-wasm
+
+      - name: Compress php-cgi-wasm
+        run: ./compress-package.sh packages/php-cgi-wasm
+
+      - name: Compress php-cli-wasm
+        run: ./compress-package.sh packages/php-cli-wasm
+
+      - name: Compress php-dbg-wasm
+        run: ./compress-package.sh packages/php-dbg-wasm
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-compressed-${{ matrix.libType }}
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
+
+  compress-static-packages:
+    name: Compress PHP w/${{ matrix.libType }} libs
+    runs-on: ubuntu-latest
+    needs:
+      - test-node-static
+      - test-browser-static
+    strategy:
+      matrix:
+        libType: ['static']
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-uncompressed-*-${{ matrix.libType }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-uncompressed-*-${{ matrix.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Compress php-wasm
+        run: ./compress-package.sh packages/php-wasm
+
+      - name: Compress php-cgi-wasm
+        run: ./compress-package.sh packages/php-cgi-wasm
+
+      - name: Compress php-cli-wasm
+        run: ./compress-package.sh packages/php-cli-wasm
+
+      - name: Compress php-dbg-wasm
+        run: ./compress-package.sh packages/php-dbg-wasm
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-compressed-${{ matrix.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-compressed-${{ matrix.libType }}.tar.gz' \
+              third_party \
+              packages \
+              .cache \
+              lib
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-compressed-${{ matrix.libType }}
+          path: php-compressed-${{ matrix.libType }}.tar.gz
+          compression-level: 0
+
+
+
+
+  test-node-dynamic-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-dynamic-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-        libType: ['dynamic', 'static', 'shared']
+        libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
     with:
-      artifactType: 'compressed'
+      artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       testType: ${{ matrix.testType }}
       libType: ${{ matrix.libType }}
 
-  test-browser-compressed:
+  test-node-shared-compressed:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
-    needs: [compress-packages]
+    needs: [compress-shared-packages]
     strategy:
       matrix:
         phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
-        libType: ['dynamic', 'static', 'shared']
+        libType: ['shared']
+    uses: ./.github/workflows/test-node-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      testType: ${{ matrix.testType }}
+      libType: ${{ matrix.libType }}
+
+  test-node-static-compressed:
+    name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-static-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        testType: ['node', 'deno']
+        libType: ['static']
+    uses: ./.github/workflows/test-node-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      testType: ${{ matrix.testType }}
+      libType: ${{ matrix.libType }}
+
+
+
+  test-browser-dynamic-compressed:
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-dynamic-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
-      artifactType: 'compressed'
+      artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
+
+  test-browser-shared-compressed:
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-shared-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['shared']
+    uses: ./.github/workflows/test-browser-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-browser-static-compressed:
+    name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-static-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['static']
+    uses: ./.github/workflows/test-browser-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+
+
+  index-packages:
+    name: Create HTML Indexes
+    runs-on: ubuntu-latest
+    needs:
+      - test-browser-dynamic-compressed
+      - test-node-dynamic-compressed
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-compressed-dynamic
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Index Package Directories
+        run: ./.github/bin/index-dirs.sh packages/
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-indexed-packages.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-indexed-packages.tar.gz' \
+              packages \
+              .cache
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-indexed-packages
+          path: php-indexed-packages.tar.gz
+          compression-level: 0
+
+      - name: Set up vars
+        run: |
+          echo "STAMP=$( date -u +'%Y%m%d%H%M%S' )" >> $GITHUB_ENV
+          echo "SHORT_SHA=$( git rev-parse --short $GITHUB_SHA )" >> $GITHUB_ENV
+
+      - name: Upload to Cloudflare
+        uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: packages
+          destination-dir: ${{ env.STAMP }}-${{ env.SHORT_SHA }}/
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Deploy Cloudflare Pages Function
+        run: |
+          cd .cloudflare/pages
+          wrangler pages deploy --branch=main --project-name=php-wasm-nightly
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+
+      - name: Notify Discord on success
+        if: ${{ success() }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  build-demo:
+    name: Build Web Demo
+    runs-on: ubuntu-latest
+    needs:
+      - index-packages
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-compressed-dynamic
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Download Index Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: php-indexed-packages
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-indexed-packages.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Ensure the demo uses local packages
+        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
+
+      - name: Build Web Demo
+        run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
+        env:
+          CI: ''
+
+      - name: Copy packages into web demo
+        run: cp -rfv packages demo-web/build/nightly
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload docs artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-demo-web.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-demo-web.tar.gz' \
+              docs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-demo-web
+          path: php-demo-web.tar.gz
+          compression-level: 0
+
+  deploy-docs:
+    name: Deploy Docs to GitHub Pages
+    runs-on: ubuntu-latest
+    needs:
+      - build-demo
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: true
+    steps:
+      - name: Deploy Docs
+        id: deployment
+        uses: actions/deploy-pages@v4

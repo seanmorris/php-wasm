@@ -9,13 +9,13 @@ DOCKER_RUN_IN_LIB_GL =${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} -sASYNCIFY -sUSE_SDL=2' -w /src/third_party/php${PHP_VERSION}-sdl/ emscripten-builder
 
 ifeq ($(filter ${WITH_SDL},0 1 shared static dynamic),)
-$(error WITH_SDL MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_SDL MUST BE 0, 1, static, shared, OR dynamic. WITH_SDL: '${WITH_SDL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifneq ($(filter ${WITH_SDL},1 dynamic),)
 WITH_SDL=dynamic
 EXTRA_CFLAGS+= --use-port=sdl2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
+EXTRA_MODULES+= packages/sdl/libSDL2.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 SKIP_LIBS+= -lsdl -lgl
 PHP_VARIANT:=${PHP_VARIANT}_sdl
@@ -24,6 +24,7 @@ endif
 ifeq (${WITH_SDL},static)
 CONFIGURE_FLAGS+= --with-sdl
 # EXTRA_CFLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL -lSDL2
+EXTRA_MODULES+= packages/sdl/libSDL2.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl/config.m4
 # TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 ARCHIVES+= lib/lib/libSDL2.a

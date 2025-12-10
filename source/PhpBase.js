@@ -61,6 +61,7 @@ export class PhpBase extends EventTarget
 		const {files: dynamicLibFiles, libs: dynamiclibs, urlLibs: dyamicLibUrls} = resolveDependencies(args.dynamicLibs, this);
 
 		args.locateFile = (path, directory) => {
+			args.debug && console.error('Loading %s',  path);
 			let located = userLocateFile(path, directory);
 			if(located !== undefined)
 			{

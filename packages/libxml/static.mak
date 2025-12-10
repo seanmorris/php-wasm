@@ -1,17 +1,17 @@
 #!/usr/bin/env make
 
-WITH_LIBXML?=shared
+WITH_LIBXML?=dynamic
 
 LIBXML2_TAG?=v2.9.10
 DOCKER_RUN_IN_LIBXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/libxml2/ emscripten-builder
 DOCKER_RUN_IN_EXT_LIBXML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-libxml/ emscripten-builder
 
-ifeq ($(filter ${WITH_LIBXML},0 1 static shared),)
-$(error WITH_LIBXML MUST BE 0, 1, static, OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},0 1 static shared dynamic),)
+$(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBXML: '${WITH_LIBXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBXML},1)
-WITH_LIBXML=static
+WITH_LIBXML=dynamic
 endif
 
 ifeq (${WITH_LIBXML},static)
@@ -19,6 +19,7 @@ ARCHIVES+= lib/lib/libxml2.a
 CONFIGURE_FLAGS+= --with-libxml
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
+EXTRA_MODULES+= packages/libxml/libxml2.so
 endif
 
 ifeq (${WITH_LIBXML},shared)
@@ -26,9 +27,23 @@ SHARED_LIBS+= packages/libxml/libxml2.so
 CONFIGURE_FLAGS+= --with-libxml=/src/lib/
 PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
-PHP_ASSET_LIST+= libxml2.so
 SKIP_LIBS+= -lxml2
+EXTRA_MODULES+= packages/libxml/libxml2.so
+PHP_ASSET_LIST+= libxml2.so
 endif
+
+ifeq (${WITH_LIBXML},dynamic)
+# SHARED_LIBS+= packages/libxml/libxml2.so
+CONFIGURE_FLAGS+= --with-libxml=/src/lib/
+PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
+TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
+SKIP_LIBS+= -lxml2
+EXTRA_MODULES+= packages/libxml/libxml2.so
+EXTRA_CFLAGS+= -D LIBXML_DYNAMIC_LOAD=1
+DYNAMIC_LIBS_GROUPED+= xml-libs
+endif
+
+xml-libs: packages/libxml/libxml2.so
 
 third_party/libxml2/.gitignore:
 	@ echo -e "\e[33;4mDownloading LibXML2\e[0m"

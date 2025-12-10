@@ -10,7 +10,7 @@ DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 
 ## @ TODO: Implement static & shared builds
 ifeq ($(filter ${WITH_SDL},0 1 dynamic),)
-$(error WITH_SDL MUST BE 0, 1, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_SDL MUST BE 0, 1, OR dynamic. WITH_SDL: '${WITH_SDL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_SDL},static)
@@ -19,21 +19,22 @@ PHP_CONFIGURE_DEPS+= lib/lib/libSDL2.a third_party/php${PHP_VERSION}-src/ext/sdl
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 # ARCHIVES+= lib/lib/libSDL2.a libGL.so
 # SKIP_LIBS+= -lsdl -lgl
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 endif
 
 ifeq (${WITH_SDL},shared)
 CONFIGURE_FLAGS+= --with-sdl
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 packages/sdl/libSDL2.so packages/sdl/libGL.so
 SHARED_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
-# PHP_ASSET_LIST+= libSDL2.so libGL.so
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
 
 ifeq (${WITH_SDL},dynamic)
-PHP_ASSET_LIST+= libSDL2.so libGL.so php${PHP_VERSION}-sdl.so
 DYNAMIC_LIBS+= packages/sdl/libSDL2.so packages/sdl/libGL.so
 DYNAMIC_LIBS_GROUPED+= sdl-libs
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
+EXTRA_MODULES+= packages/sdl/php${PHP_VERSION}-sdl.so packages/sdl/libGL.so packages/sdl/php${PHP_VERSION}-sdl.so
 # SKIP_LIBS+= -lsdl -lgl
 endif
 

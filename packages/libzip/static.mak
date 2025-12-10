@@ -6,11 +6,11 @@ DOCKER_RUN_IN_LIBZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -
 DOCKER_RUN_IN_EXT_ZIP =${DOCKER_ENV} -e C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" -w /src/third_party/php${PHP_VERSION}-zip/ emscripten-builder
 
 ifeq ($(filter ${WITH_LIBZIP},0 1 shared static dynamic),)
-$(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBZIP: '${WITH_LIBZIP}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBZIP},1)
-WITH_LIBZIP=static
+WITH_LIBZIP=dynamic
 endif
 
 ifeq (${WITH_LIBZIP},static)
@@ -18,6 +18,7 @@ ARCHIVES+= lib/lib/libzip.a
 CONFIGURE_FLAGS+= --with-zip
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SKIP_LIBS+= -lzip
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
 endif
 
 ifeq (${WITH_LIBZIP},shared)
@@ -25,8 +26,9 @@ CONFIGURE_FLAGS+= --with-zip
 PHP_CONFIGURE_DEPS+= packages/libzip/libzip.so
 TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SHARED_LIBS+= packages/libzip/libzip.so
-PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
 SKIP_LIBS+= -lzip
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
+PHP_ASSET_LIST+= libzip.so
 endif
 
 ifeq (${WITH_LIBZIP},dynamic)
@@ -34,7 +36,7 @@ TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 DYNAMIC_LIBS+= packages/libzip/libzip.so
 DYNAMIC_LIBS_GROUPED+= libzip-libs
 SKIP_LIBS+= -lzip
-PHP_ASSET_LIST+= libzip.so php${PHP_VERSION}-zip.so
+EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
 endif
 
 libzip-libs: packages/libzip/libzip.so

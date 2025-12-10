@@ -67,7 +67,7 @@ ifeq ($(filter ${WITH_TOKENIZER},0 1),)
 $(error WITH_TOKENIZER MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-WITH_LIBXML?=shared
+WITH_LIBXML?=dynamic
 
 ## Emscripten features...
 NODE_RAW_FS ?=0
@@ -97,6 +97,7 @@ ifeq ($(filter ${PHP_VERSION},8.4 8.3 8.2 8.1 8.0),)
 $(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
+EXTRA_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
@@ -431,7 +432,7 @@ ifneq (${PRE_JS_FILES},)
 DEPENDENCIES+= .cache/pre.js
 endif
 
-EXTRA_MODULES=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
+HELPER_MJS=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
 WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
 WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js php${PHP_SUFFIX}-web.js ${CJS_HELPERS_WEB})
@@ -442,14 +443,14 @@ WEBVIEW_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWebview.js php${PHP_SUFFI
 NODE_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpNode.mjs php${PHP_SUFFIX}-node.mjs ${MJS_HELPERS})
 NODE_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpNode.js php${PHP_SUFFIX}-node.js ${CJS_HELPERS})
 
-WEB_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
-WEB_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
-WORKER_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
-WORKER_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
-WEBVIEW_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
-WEBVIEW_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
-NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
-NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST})
+WEB_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
+WEB_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+WORKER_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
+WORKER_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+WEBVIEW_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
+WEBVIEW_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
+NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
+NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
 
 ifneq (${PRELOAD_ASSETS},)
 WEB_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
@@ -604,7 +605,6 @@ NOTPARALLEL+=\
 	node-js
 
 DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS} ${PRE_JS_FILES}
-EXTENSIONS_JS=Object.fromEntries(Object.entries({"WITH_BCMATH":"${WITH_BCMATH}","WITH_CALENDAR":"${WITH_CALENDAR}","WITH_CTYPE":"${WITH_CTYPE}","WITH_FILTER":"${WITH_FILTER}","WITH_TOKENIZER":"${WITH_TOKENIZER}","WITH_VRZNO":"${WITH_VRZNO}","WITH_EXIF":"${WITH_EXIF}","WITH_PHAR":"${WITH_PHAR}","WITH_LIBXML":"${WITH_LIBXML}","WITH_DOM":"${WITH_DOM}","WITH_XML":"${WITH_XML}","WITH_SIMPLEXML":"${WITH_SIMPLEXML}","WITH_LIBZIP":"${WITH_LIBZIP}","WITH_ICONV":"${WITH_ICONV}","WITH_SQLITE":"${WITH_SQLITE}","WITH_GD":"${WITH_GD}","WITH_ZLIB":"${WITH_ZLIB}","WITH_LIBPNG":"${WITH_LIBPNG}","WITH_FREETYPE":"${WITH_FREETYPE}","WITH_LIBJPEG":"${WITH_LIBJPEG}","WITH_YAML":"${WITH_YAML}","WITH_TIDY":"${WITH_TIDY}","WITH_MBSTRING":"${WITH_MBSTRING}","WITH_ONIGURUMA":"${WITH_ONIGURUMA}","WITH_OPENSSL":"${WITH_OPENSSL}","WITH_INTL":"${WITH_INTL}"}).filter(([k,v]) => v !== "0"))
 
 ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
 	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
@@ -799,16 +799,16 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
 
 packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
+	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
+	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
+	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
+	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 ########### Clerical stuff. ###########
 
@@ -864,6 +864,7 @@ patch/php8.0.patch:
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.0-src/|g' ./patch/php8.0.patch
 
 php-clean:
+	${DOCKER_RUN_IN_PHP} rm -f .cache/config-cache
 	${DOCKER_RUN_IN_PHP} rm -f configured
 	${DOCKER_RUN_IN_PHP} bash -c 'rm -f \
 		sapi/cli/php-*.js \
@@ -884,6 +885,11 @@ php-clean:
 		packages/php-cgi-wasm/php-*.wasm \
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
+	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
+		cd "third_party/$${DIR}"; \
+		make clean; \
+		cd ../..; \
+	}; done;'
 	- ${DOCKER_RUN_IN_PHP} make clean distclean
 
 clean:
@@ -966,6 +972,8 @@ ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
 	${MAKE} test-deno
 endif
 
+NODE_TEST_FLAGS=
+
 test-node: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
@@ -988,7 +996,7 @@ test-node: node-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node --test ${TEST_LIST} `ls test/*.mjs`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `ls test/*.mjs`
 
 test-deno: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1015,7 +1023,10 @@ test-deno: node-mjs
 	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
+
+update-snapshots:
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash

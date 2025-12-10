@@ -15,11 +15,11 @@ DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} \
 	emscripten-builder
 
 ifeq ($(filter ${WITH_OPENSSL},0 1 shared dynamic),)
-$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). WITH_OPENSSL: '${WITH_OPENSSL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_OPENSSL},1)
-WITH_OPENSSL=shared
+WITH_OPENSSL=dynamic
 endif
 
 ifneq ($(filter ${WITH_OPENSSL},shared dynamic),)
@@ -31,22 +31,24 @@ ifeq (${WITH_OPENSSL},static)
 CONFIGURE_FLAGS+= --with-openssl
 ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
 STATIC_LIB_CONFIG+="openssl",
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
 endif
 
 ifeq (${WITH_OPENSSL},shared)
 CONFIGURE_FLAGS+= --with-openssl=/src/lib
 PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 SKIP_LIBS+= -lssl -lcrypto
 SHARED_LIB_CONFIG+="openssl",
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
+PHP_ASSET_LIST+= libssl.so libcrypto.so
 endif
 
 ifeq (${WITH_OPENSSL},dynamic)
-PHP_ASSET_LIST+= libssl.so libcrypto.so php${PHP_VERSION}-openssl.so
 DYNAMIC_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 DYNAMIC_LIBS_GROUPED+= openssl-libs
 SKIP_LIBS+= -lssl -lcrypto
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
 endif
 
 openssl-libs: packages/openssl/libssl.so packages/openssl/libcrypto.so

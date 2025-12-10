@@ -10,32 +10,34 @@ DOCKER_RUN_IN_EXT_MBSTRING=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPT
 WITH_MBSTRING?=1
 
 ifeq ($(filter ${WITH_MBSTRING},0 1 static dynamic),)
-$(error WITH_MBSTRING MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_MBSTRING MUST BE 0, 1, static, or dynamic. WITH_MBSTRING: '${WITH_MBSTRING}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_MBSTRING},1)
-WITH_MBSTRING=static
+WITH_MBSTRING=dynamic
+EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},static)
 CONFIGURE_FLAGS+= --with-mbstring
+EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)
-PHP_ASSET_LIST+= php${PHP_VERSION}-mbstring.so
+EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq ($(filter ${WITH_ONIGURUMA},0 1 shared static dynamic),)
-$(error WITH_ONIGURUMA MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_ONIGURUMA MUST BE 0, 1, static, shared, OR dynamic. WITH_ONIGURUMA: '${WITH_ONIGURUMA}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_ONIGURUMA},1)
-WITH_ONIGURUMA=static
+WITH_ONIGURUMA=dynamic
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)
 ifeq ($(filter ${WITH_MBSTRING},shared dynamic),)
-$(error WITH_ONIGURUMA MUST BE 0 OR shared IF WITH_MBSTRING IS shared OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_ONIGURUMA MUST BE 0 OR shared IF WITH_MBSTRING IS shared OR dynamic. WITH_MBSTRING: '${WITH_MBSTRING}' WITH_ONIGURUMA: '${WITH_ONIGURUMA}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 endif
 
@@ -43,21 +45,23 @@ ifeq (${WITH_ONIGURUMA},static)
 ARCHIVES+= lib/lib/libonig.a
 CONFIGURE_FLAGS+= --with-onig
 SKIP_LIBS+= -lonig
+EXTRA_MODULES+= packages/mbstring/libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},shared)
 CONFIGURE_FLAGS+= --with-onig
 PHP_CONFIGURE_DEPS+= packages/mbstring/libonig.so
 SHARED_LIBS+= packages/mbstring/libonig.so
-PHP_ASSET_LIST+= libonig.so
 SKIP_LIBS+= -lonig
+EXTRA_MODULES+= packages/mbstring/libonig.so
+PHP_ASSET_LIST+= libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},dynamic)
 DYNAMIC_LIBS+= packages/mbstring/libonig.so
 DYNAMIC_LIBS_GROUPED+= mbstring-libs
 SKIP_LIBS+= -lonig
-PHP_ASSET_LIST+= libonig.so
+EXTRA_MODULES+= packages/mbstring/libonig.so
 endif
 
 mbstring-libs: packages/mbstring/libonig.so

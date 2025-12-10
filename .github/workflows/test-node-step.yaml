@@ -12,7 +12,7 @@ on:
       testType:
         required: true
         type: string
-      artifactType:
+      artifactPattern:
         required: true
         type: string
 
@@ -23,19 +23,14 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: |
+
+      - name: Import `.env` file
+        run: |
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
-      - name: Install deps
-        run: sudo apt update && sudo apt install coreutils docker-compose -y
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-${{ inputs.artifactType }}-${{ inputs.phpVersion }}-node-${{ inputs.libType }}
-          merge-multiple: true
-          path: ./
+      - name: Flatten mtimes
+        run: find . -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
 
       - name: Cache Docker image
         id: cache-docker-image
@@ -46,27 +41,58 @@ jobs:
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
-        run: docker load -i /tmp/builder-image.tar
+        run: docker load -i /tmp/builder-image.tar && rm -rf /tmp/builder-image.tar
 
       - name: Create builder image (if not cached)
         if: steps.cache-docker-image.outputs.cache-hit != 'true'
         run: |
-          time make image
+          time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
+      - name: Install deps
+        run: sudo apt update && sudo apt install coreutils docker-compose -y
 
       - name: npm install
         run: |
           npm ci
           npm install -g deno
 
-      - name: Apply mtime cache
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifactPattern }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
         run: |
-          while read -r PATH MTIME; do
-            [[ -f "${PATH}" ]] && /usr/bin/touch -d "@${MTIME}" "${PATH}"
-          done < ./.cache/.mtimes
+          for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Spin up docker-network
+        run: docker network create phpwasm_default
+
+      - name: Apply executable cache
+        run: |
+          ls ./.cache/executables-* | while read -r CACHE; do
+            cat ${CACHE} | xargs -I{} chmod +x {}
+          done
 
       - name: Run tests
-        run: make test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+        run: make --debug=basic test-${{ inputs.testType }} PHP_VERSION=${{ inputs.phpVersion }}
+
+      - name: Take Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
+
+      - name: Upload Failure Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: failure-snapshot-${{ inputs.testType }}-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
+          path: snapshot.tar.gz
+          compression-level: 0
