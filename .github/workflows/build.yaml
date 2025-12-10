@@ -2,6 +2,11 @@ name: Build Artifacts
 
 on: [push]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -671,6 +676,14 @@ jobs:
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/nightly
 
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload docs artifact for Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
       - name: Take Snapshot
         run: |
           sudo chown -R ${USER}:${USER} .
@@ -690,3 +703,23 @@ jobs:
           path: php-demo-web.tar.gz
           compression-level: 0
 
+  deploy-docs:
+    name: Deploy Docs to GitHub Pages
+    runs-on: ubuntu-latest
+    needs:
+      - build-demo
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: true
+    steps:
+      - name: Deploy Docs
+        id: deployment
+        uses: actions/deploy-pages@v4
