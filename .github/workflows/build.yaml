@@ -708,7 +708,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-demo
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       pages: write
