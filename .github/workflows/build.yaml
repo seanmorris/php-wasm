@@ -676,14 +676,6 @@ jobs:
       - name: Copy packages into web demo
         run: cp -rfv packages demo-web/build/nightly
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload docs artifact for Pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
       - name: Take Snapshot
         run: |
           sudo chown -R ${USER}:${USER} .
