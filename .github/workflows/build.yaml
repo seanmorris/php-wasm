@@ -284,7 +284,6 @@ jobs:
             tar -xzf ${TAR}
           done;
 
-
       - name: Compress php-wasm
         run: ./compress-package.sh packages/php-wasm
 
@@ -718,6 +717,12 @@ jobs:
           pattern: php-demo-web
           merge-multiple: true
           path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-demo-web.tar.gz; do
+            tar -xzf ${TAR}
+          done;
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
