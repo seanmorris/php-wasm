@@ -39,15 +39,15 @@ cp build/index.html build/install-demo.html;
 cp build/index.html build/select-framework.html;
 cp build/index.html build/vscode.html;
 
-git add \
-	../docs/*.js \
-	../docs/*.html \
-	../docs/*.wasm \
-	../docs/*.data \
-	../docs/*.so \
-	../docs/*.dat \
-	../docs/*.json \
-	../docs/static/* \
-	../demo-web/public/*.js \
-	../demo-web/public/*.wasm \
-	../demo-web/public/*.data \
+# git add \
+# 	../docs/*.js \
+# 	../docs/*.html \
+# 	../docs/*.wasm \
+# 	../docs/*.data \
+# 	../docs/*.so \
+# 	../docs/*.dat \
+# 	../docs/*.json \
+# 	../docs/static/* \
+# 	../demo-web/public/*.js \
+# 	../demo-web/public/*.wasm \
+# 	../demo-web/public/*.data \
