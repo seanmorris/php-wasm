@@ -1,0 +1,10 @@
+*
+!.gitignore
+!/backups/
+!/backups/*
+!/php-wasm/
+!/php-wasm/*
+!/public/
+!/public/*
+!/scripts/
+!/scripts/*
