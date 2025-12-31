@@ -57,3 +57,7 @@ docs/static/media/mapped/*
 demo-web/public/static/media/mapped/*
 
 .DS_Store
+
+packages/**/index.html
+packages/*.tar.gz
+packages/dependencies.json
