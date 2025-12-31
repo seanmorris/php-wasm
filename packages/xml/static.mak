@@ -5,29 +5,28 @@ DOCKER_RUN_IN_EXT_XML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPIC -flt
 WITH_XML?=dynamic
 
 ifeq ($(filter ${WITH_XML},0 1 static dynamic),)
-$(error WITH_XML MUST BE 0, 1, static, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_XML MUST BE 0, 1, static, OR dynamic. WITH_XML: '${WITH_XML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_XML},1)
-WITH_XML=static
+WITH_XML=dynamic
 endif
 
 ifeq (${WITH_XML},static)
-ifeq ($(filter ${WITH_LIBXML},1 static),)
-$(error WITH_XML=static REQUIRES WITH_LIBXML=static. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},static),)
+$(error WITH_XML=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML}' WITH_XML: '${WITH_XML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 CONFIGURE_FLAGS+= --enable-xml
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
+EXTRA_MODULES+= packages/xml/php${PHP_VERSION}-xml.so
 endif
 
 ifeq (${WITH_XML},dynamic)
-ifeq ($(filter ${WITH_LIBXML},1 static shared),)
-$(error WITH_XML=dynamic REQUIRES WITH_LIBXML=[static|shared]. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
+$(error WITH_XML=dynamic REQUIRES WITH_LIBXML=[static|shared]. WITH_LIBXML: '${WITH_LIBXML}' WITH_XML: '${WITH_XML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
-PHP_ASSET_LIST+= php${PHP_VERSION}-xml.so
+EXTRA_MODULES+= packages/xml/php${PHP_VERSION}-xml.so
 endif
 
 third_party/php${PHP_VERSION}-xml/config.m4: third_party/php${PHP_VERSION}-src/patched

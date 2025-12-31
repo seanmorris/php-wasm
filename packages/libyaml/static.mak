@@ -7,11 +7,11 @@ DOCKER_RUN_IN_LIB_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZ
 DOCKER_RUN_IN_EXT_YAML=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}' -w /src/third_party/php${PHP_VERSION}-yaml/ emscripten-builder
 
 ifeq ($(filter ${WITH_YAML},0 1 shared static dynamic),)
-$(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. WITH_YAML: '${WITH_YAML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_YAML},1)
-WITH_YAML=static
+WITH_YAML=dynamic
 endif
 
 ifeq (${WITH_YAML},static)
@@ -20,6 +20,7 @@ PHP_CONFIGURE_DEPS+= lib/lib/libyaml.a third_party/php${PHP_VERSION}-src/ext/yam
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 ARCHIVES+= lib/lib/libyaml.a
 SKIP_LIBS+= -lyaml
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
 endif
 
 ifeq (${WITH_YAML},shared)
@@ -27,16 +28,17 @@ CONFIGURE_FLAGS+= --with-yaml=/src/lib
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/yaml/config.m4 packages/libyaml/libyaml.so
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 SHARED_LIBS+= packages/libyaml/libyaml.so
-PHP_ASSET_LIST+= libyaml.so
 SKIP_LIBS+= -lyaml
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
+PHP_ASSET_LIST+= libyaml.so
 endif
 
 ifeq (${WITH_YAML},dynamic)
-PHP_ASSET_LIST+= libyaml.so php${PHP_VERSION}-yaml.so
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 DYNAMIC_LIBS+= packages/libyaml/libyaml.so
 DYNAMIC_LIBS_GROUPED+= libyaml-libs
 SKIP_LIBS+= -lyaml
+EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
 endif
 
 libyaml-libs: packages/libyaml/libyaml.so

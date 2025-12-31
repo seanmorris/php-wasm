@@ -7,24 +7,25 @@ WITH_FREETYPE?=shared
 WITH_LIBWEBP?=shared
 
 ifeq ($(filter ${WITH_GD},0 1 static dynamic),)
-$(error WITH_GD MUST BE 0, 1, static, or dynamic. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_GD MUST BE 0, 1, static, or dynamic. WITH_GD: '${WITH_GD}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-ifeq (${WITH_GD}, 1)
-WITH_GD=static
+ifeq (${WITH_GD},1)
+WITH_GD=shared
 endif
 
 ifeq (${WITH_GD}, static)
 CONFIGURE_FLAGS+= --enable-gd ${GD_FLAGS}
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
+EXTRA_MODULES+= packages/gd/php${PHP_VERSION}-gd.so
 endif
 
 ifeq (${WITH_GD}, dynamic)
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
-PHP_ASSET_LIST+= php${PHP_VERSION}-gd.so
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
 DYNAMIC_LIBS_GROUPED+= gd-libs
+EXTRA_MODULES+= packages/gd/php${PHP_VERSION}-gd.so
 endif
 
 GD_FLAGS=
@@ -35,6 +36,7 @@ GD_FLAGS+= --with-freetype=/src/lib
 GD_LIBS+= packages/gd/libfreetype.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libfreetype.so
+PHP_ASSET_LIST+= libfreetype.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libfreetype.so
 endif
@@ -45,6 +47,7 @@ GD_FLAGS+= --with-jpeg=/src/lib
 GD_LIBS+= packages/gd/libjpeg.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libjpeg.so
+PHP_ASSET_LIST+= libjpeg.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libjpeg.so
 endif
@@ -54,6 +57,7 @@ ifeq (${WITH_LIBPNG},shared)
 GD_LIBS+= packages/gd/libpng.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libpng.so
+PHP_ASSET_LIST+= libpng.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libpng.so
 endif
@@ -64,6 +68,7 @@ GD_FLAGS+= --with-webp=/src/lib
 GD_LIBS+= packages/gd/libwebp.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libwebp.so
+PHP_ASSET_LIST+= libwebp.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libwebp.so
 endif
@@ -88,14 +93,15 @@ LIBWEBP_TAG=1.4.0
 DOCKER_RUN_IN_LIBWEBP=${DOCKER_ENV} -w /src/third_party/libwebp-${LIBWEBP_TAG}/ emscripten-builder
 
 ifeq ($(filter ${WITH_FREETYPE},0 1 shared static),)
-$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_FREETYPE MUST BE 0, 1, static OR shared. WITH_FREETYPE: '${WITH_FREETYPE}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_FREETYPE},1)
-WITH_FREETYPE=static
+WITH_FREETYPE=shared
 endif
 
 ifeq (${WITH_FREETYPE},static)
+EXTRA_MODULES+= packages/gd/libfreetype.so
 ARCHIVES+= lib/lib/libfreetype.a
 CONFIGURE_FLAGS+= --with-freetype
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
@@ -103,49 +109,51 @@ SKIP_LIBS+= -lfreetype
 endif
 
 ifeq (${WITH_FREETYPE},shared)
-PHP_ASSET_LIST+= libfreetype.so
+EXTRA_MODULES+= packages/gd/libfreetype.so
 SKIP_LIBS+= -lfreetype
 endif
 
 
 
 ifeq ($(filter ${WITH_LIBJPEG},0 1 shared static),)
-$(error WITH_LIBJPEG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBJPEG MUST BE 0, 1, static OR shared. WITH_LIBJPEG: '${WITH_LIBJPEG}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBJPEG},1)
-WITH_LIBJPEG=static
+WITH_LIBJPEG=shared
 endif
 
 ifeq (${WITH_LIBJPEG},static)
+EXTRA_MODULES+= packages/gd/libjpeg.so
 ARCHIVES+= lib/lib/libjpeg.a
 CONFIGURE_FLAGS+= --with-jpeg
 SKIP_LIBS+= -ljpeg
 endif
 
 ifeq (${WITH_LIBJPEG},shared)
-PHP_ASSET_LIST+= libjpeg.so
+EXTRA_MODULES+= packages/gd/libjpeg.so
 SKIP_LIBS+= -ljpeg
 endif
 
 
 
 ifeq ($(filter ${WITH_LIBPNG},0 1 shared static),)
-$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBPNG MUST BE 0, 1, static OR shared. WITH_LIBPNG: '${WITH_LIBPNG}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBPNG},1)
-WITH_LIBPNG=static
+WITH_LIBPNG=shared
 endif
 
 ifeq (${WITH_LIBPNG},static)
+EXTRA_MODULES+= packages/gd/libpng.so
 ARCHIVES+= lib/lib/libpng.a
 CONFIGURE_FLAGS+= --enable-png
 SKIP_LIBS+= -lpng16
 endif
 
 ifeq (${WITH_LIBPNG},shared)
-PHP_ASSET_LIST+= libpng.so
+EXTRA_MODULES+= packages/gd/libpng.so
 SKIP_LIBS+= -lpng16
 endif
 
@@ -153,21 +161,22 @@ endif
 
 
 ifeq ($(filter ${WITH_LIBWEBP},0 1 shared static),)
-$(error WITH_LIBWEBP MUST BE 0, 1, static OR shared. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+$(error WITH_LIBWEBP MUST BE 0, 1, static OR shared. WITH_LIBWEBP: '${WITH_LIBWEBP}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_LIBWEBP},1)
-WITH_LIBWEBP=static
+WITH_LIBWEBP=shared
 endif
 
 ifeq (${WITH_LIBWEBP},static)
+EXTRA_MODULES+= packages/gd/libwebp.so
 ARCHIVES+= lib/lib/libwebp.a
 CONFIGURE_FLAGS+= --with-webp
 SKIP_LIBS+= -lwebp
 endif
 
 ifeq (${WITH_LIBWEBP},shared)
-PHP_ASSET_LIST+= libwebp.so
+EXTRA_MODULES+= packages/gd/libwebp.so
 SKIP_LIBS+= -lwebp
 endif
 

@@ -11,7 +11,7 @@ $(error WITH_ZLIB MUST BE 0, 1, static, shared, OR dynamic. PLEASE CHECK YOUR SE
 endif
 
 ifeq (${WITH_ZLIB},1)
-WITH_ZLIB=static
+WITH_ZLIB=dynamic
 endif
 
 ifeq (${WITH_ZLIB},static)
@@ -19,6 +19,7 @@ CONFIGURE_FLAGS+= --with-zlib
 ARCHIVES+= lib/lib/libz.a
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
 endif
 
 ifeq (${WITH_ZLIB},shared)
@@ -26,16 +27,17 @@ CONFIGURE_FLAGS+= --with-zlib
 PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SHARED_LIBS+= packages/zlib/libz.so
-PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 SKIP_LIBS+= -lz
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
+PHP_ASSET_LIST+= libz.so
 endif
 
 ifeq (${WITH_ZLIB},dynamic)
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 DYNAMIC_LIBS+= packages/zlib/libz.so
 DYNAMIC_LIBS_GROUPED+= zlib-libs
-PHP_ASSET_LIST+= libz.so php${PHP_VERSION}-zlib.so
 SKIP_LIBS+= -lz
+EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
 endif
 
 zlib-libs: packages/zlib/libz.so
