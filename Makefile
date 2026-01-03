@@ -17,18 +17,16 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 
 ## Defaults:
 
-PREINCLUDE_PHP_VERSION=${PHP_VERSION}
-
 ENV_DIR?=.
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
 ## PHP Version
-PHP_VERSION_DEFAULT=$(or, ${PREINCLUDE_PHP_VERSION},8.4)
+PHP_VERSION_DEFAULT=8.4
 PHP_VERSION?=${PHP_VERSION_DEFAULT}
 PHP_VARIANT?=
 
--include ${ENV_FILE}.$(or ${PREINCLUDE_PHP_VERSION},${PHP_VERSION})
+-include ${ENV_FILE}.${PHP_VERSION}
 
 ## Default libraries
 WITH_BCMATH  ?=1
