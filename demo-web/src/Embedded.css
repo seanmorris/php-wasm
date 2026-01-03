@@ -23,6 +23,42 @@
 	font-family: 'fixedsys';
 }
 
+@media screen and (max-width: 1300px) {
+
+	.Embedded .row.toolbar.header .row {
+		flex-wrap: wrap;
+	}
+
+	.Embedded .row.toolbar.header hr,
+	.Embedded .row.toolbar.header .separator {
+		display: none;
+	}
+
+	.Embedded .row.toolbar.header {
+		/* font-size: 1.5em; */
+	}
+
+	.Embedded .row.toolbar input[type="radio"],
+	.Embedded .row.toolbar input[type="checkbox"] {
+		transform: scale(1.5);
+		margin: 10px;
+	}
+
+	.Embedded .row.toolbar select,
+	.Embedded .row.toolbar button {
+		padding: 0.5rem;
+		margin-top: 0.25rem;
+	}
+
+	.Embedded .row.toolbar.header {
+		align-items: flex-start;
+	}
+
+	.Embedded .row.toolbar.header .rows.spread {
+		justify-content: flex-start;
+	}
+}
+
 body {
 	font-family: 'fixedsys';
 	display: flex;
@@ -446,4 +482,31 @@ body:not(.loading) .loader {
 	padding: 0 0.5rem;
 	flex-grow: 1;
 	min-width: 100%;
+}
+
+div.toggleExtensions {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+div.toggleExtensions label, div.toggleExtensions button {
+	padding: 0.5rem;
+}
+
+div.toggleExtensions label {
+	border: 2px solid;
+	border-image: url(border-inset.png) 2 2 2 2;
+}
+
+div.toggleExtensions button {
+	width: 100%;
+}
+
+div.toggleExtensions input {
+	transform: scale(2);
+	margin: 0.25rem;
+	margin-right: 1rem;
 }
