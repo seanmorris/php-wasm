@@ -568,6 +568,9 @@ jobs:
             tar -xzf ${TAR}
           done;
 
+      - name: Install Brotli & GZip
+        run: sudo apt install brotli gzip
+
       - name: Index Package Directories
         run: ./.github/bin/index-dirs.sh packages/
 

@@ -21,6 +21,16 @@ find . -type d | while read DIR; do {
 	perl -pi -e "s#^</head>#<style> html { background-color: black; } body { filter: invert(1); } </style></head>#" index.html
 	perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 	perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
+	shopt -s nullglob
+	for BINARY in *.wasm; do
+		brotli -kfZ ${BINARY}
+		gzip -k9 ${BINARY}
+	done;
+	for BINARY in *.so; do
+		brotli -kfZ ${BINARY}
+		gzip -k9 ${BINARY}
+	done;
+	shopt -u nullglob
 	popd > /dev/null;
 }; done;
 
