@@ -1065,12 +1065,6 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	rm -f third_party/php8.4-src/configured
-	rm -f third_party/php8.3-src/configured
-	rm -f third_party/php8.2-src/configured
-	rm -f third_party/php8.1-src/configured
-	rm -f third_party/php8.0-src/configured
-
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
