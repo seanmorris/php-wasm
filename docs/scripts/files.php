@@ -1,10 +1,15 @@
-<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "html"}
+<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text"}
 
 chdir('/');
 
 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator("."));
 
+$files = [];
+
 foreach ($it as $name => $entry) {
 	if('./proc/' === substr($name, 0, 7)) continue;
-	echo $name . "<br/>";
+	$files[] = $name;
 }
+
+sort($files);
+print_r($files);

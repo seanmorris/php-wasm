@@ -17,16 +17,18 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 
 ## Defaults:
 
+PREINCLUDE_PHP_VERSION=${PHP_VERSION}
+
 ENV_DIR?=.
 ENV_FILE?=.env
 -include ${ENV_FILE}
 
 ## PHP Version
-PHP_VERSION_DEFAULT=8.4
+PHP_VERSION_DEFAULT=$(or, ${PREINCLUDE_PHP_VERSION},8.4)
 PHP_VERSION?=${PHP_VERSION_DEFAULT}
 PHP_VARIANT?=
 
--include ${ENV_FILE}.${PHP_VERSION}
+-include ${ENV_FILE}.$(or ${PREINCLUDE_PHP_VERSION},${PHP_VERSION})
 
 ## Default libraries
 WITH_BCMATH  ?=1
@@ -1065,12 +1067,6 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	rm -f third_party/php8.4-src/configured
-	rm -f third_party/php8.3-src/configured
-	rm -f third_party/php8.2-src/configured
-	rm -f third_party/php8.1-src/configured
-	rm -f third_party/php8.0-src/configured
-
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1

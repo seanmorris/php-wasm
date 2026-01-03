@@ -540,7 +540,8 @@ jobs:
 
 
   index-packages:
-    name: Create HTML Indexes
+    name: Post nightly build to Cloudflare
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
       - test-browser-dynamic-compressed
@@ -626,6 +627,7 @@ jobs:
 
   build-demo:
     name: Build Web Demo
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
       - index-packages
@@ -696,10 +698,10 @@ jobs:
 
   deploy-docs:
     name: Deploy Docs to GitHub Pages
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
       - build-demo
-    if: github.ref == 'refs/heads/master'
     permissions:
       contents: read
       pages: write
