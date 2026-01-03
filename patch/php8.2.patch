@@ -99,16 +99,21 @@ index 22eb190..6089d36 100644
  	/* reset libxml generic error handling */
  	if (_php_libxml_per_request_initialization) {
  		xmlSetGenericErrorFunc(NULL, NULL);
-@@ -888,6 +930,8 @@ static zend_result php_libxml_post_deactivate(void)
+@@ -888,6 +930,13 @@ static zend_result php_libxml_post_deactivate(void)
  
  static PHP_MINFO_FUNCTION(libxml)
  {
-+	if (xmlParserVersion == NULL) return;
++	if (xmlParserVersion == NULL) {
++		php_info_print_table_start();
++		php_info_print_table_row(2, "libXML support", "NOT ACTIVE");
++		php_info_print_table_end();
++		return;
++	}
 +
  	php_info_print_table_start();
  	php_info_print_table_row(2, "libXML support", "active");
  	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
-@@ -900,6 +944,8 @@ static PHP_MINFO_FUNCTION(libxml)
+@@ -900,6 +949,8 @@ static PHP_MINFO_FUNCTION(libxml)
  /* {{{ Set the streams context for the next libxml document load or write */
  PHP_FUNCTION(libxml_set_streams_context)
  {
@@ -117,7 +122,7 @@ index 22eb190..6089d36 100644
  	zval *arg;
  
  	ZEND_PARSE_PARAMETERS_START(1, 1)
-@@ -917,6 +963,8 @@ PHP_FUNCTION(libxml_set_streams_context)
+@@ -917,6 +968,8 @@ PHP_FUNCTION(libxml_set_streams_context)
  /* {{{ Disable libxml errors and allow user to fetch error information as needed */
  PHP_FUNCTION(libxml_use_internal_errors)
  {
@@ -126,7 +131,7 @@ index 22eb190..6089d36 100644
  	xmlStructuredErrorFunc current_handler;
  	bool use_errors, use_errors_is_null = 1, retval;
  
-@@ -957,6 +1005,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
+@@ -957,6 +1010,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
  /* {{{ Retrieve last error from libxml */
  PHP_FUNCTION(libxml_get_last_error)
  {
@@ -135,7 +140,7 @@ index 22eb190..6089d36 100644
  	xmlErrorPtr error;
  
  	ZEND_PARSE_PARAMETERS_NONE();
-@@ -988,6 +1038,7 @@ PHP_FUNCTION(libxml_get_last_error)
+@@ -988,6 +1043,7 @@ PHP_FUNCTION(libxml_get_last_error)
  /* {{{ Retrieve array of errors */
  PHP_FUNCTION(libxml_get_errors)
  {
@@ -143,7 +148,7 @@ index 22eb190..6089d36 100644
  
  	xmlErrorPtr error;
  
-@@ -1029,6 +1080,8 @@ PHP_FUNCTION(libxml_get_errors)
+@@ -1029,6 +1085,8 @@ PHP_FUNCTION(libxml_get_errors)
  /* {{{ Clear last error from libxml */
  PHP_FUNCTION(libxml_clear_errors)
  {
@@ -152,7 +157,7 @@ index 22eb190..6089d36 100644
  	ZEND_PARSE_PARAMETERS_NONE();
  
  	xmlResetLastError();
-@@ -1049,6 +1102,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
+@@ -1049,6 +1107,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
  /* {{{ Disable/Enable ability to load external entities */
  PHP_FUNCTION(libxml_disable_entity_loader)
  {
@@ -161,7 +166,7 @@ index 22eb190..6089d36 100644
  	bool disable = 1;
  
  	ZEND_PARSE_PARAMETERS_START(0, 1)
-@@ -1063,6 +1118,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
+@@ -1063,6 +1123,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
  /* {{{ Changes the default external entity loader */
  PHP_FUNCTION(libxml_set_external_entity_loader)
  {
@@ -170,7 +175,7 @@ index 22eb190..6089d36 100644
  	zval					*callback;
  	zend_fcall_info			fci;
  	zend_fcall_info_cache	fcc;
-@@ -1088,6 +1145,8 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
+@@ -1088,6 +1150,8 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
  /* {{{ Get the current external entity loader, or null if the default loader is installer. */
  PHP_FUNCTION(libxml_get_external_entity_loader)
  {
