@@ -171,11 +171,10 @@ function Embedded() {
 	}, []);
 
 	const loadExtensions = useCallback(async () => {
+		if(!canToggleExtensions) return;
 		const defaultExtensions = query.has('extensionFlags')
 			? Number(query.get('extensionFlags'))
 			: 0x1FDF;
-
-		console.log({defaultExtensions});
 
 		let i = 0;
 		const toggleableList = Object.values(toggleable);
@@ -471,6 +470,7 @@ function Embedded() {
 	};
 
 	const toggleExtension = async (event, name) => {
+		if(!canToggleExtensions) return;
 		if(!toggleable[name])
 		{
 			console.warn(`${name} is not a valid extension name`);
@@ -506,6 +506,7 @@ function Embedded() {
 	};
 
 	const closeExtensionsDialog = async () => {
+		if(!canToggleExtensions) return;
 		const extensionFlags = Object.values(toggleable)
 		.map((t, k) => !!t.active << k)
 		.reduce((x, p) => x + p, 0);
@@ -581,10 +582,10 @@ function Embedded() {
 						<span>&nbsp;</span>
 						<button data-load-demo onClick = {demoSelected}>load</button>
 					</label>
-					<label>
+					{canToggleExtensions && (<label>
 						<span>&nbsp;</span>
 						<button data-toggle-extensions onClick = {showExtensionDialog}>extensions</button>
-					</label>
+					</label>)}
 				</div>
 			</div>
 		</div>
