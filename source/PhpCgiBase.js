@@ -393,6 +393,13 @@ export class PhpCgiBase
 
 				return String(dynamicLibUrls[path]);
 			}
+
+			// Suppress attempt to load libxml when
+			// it hasn't been provided in sharedLibs
+			if(path === 'libxml2.so')
+			{
+				return 'data:,';
+			}
 		};
 
 		const phpArgs = {
