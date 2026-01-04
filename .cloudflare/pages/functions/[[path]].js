@@ -65,6 +65,7 @@ export const onRequest = async (context) => {
   };
   if (encoding) {
     headers["Content-Encoding"] = encoding;
+	headers["Cache-Control"] = "no-transform";
     headers["Vary"] = "Accept-Encoding";
   }
 
