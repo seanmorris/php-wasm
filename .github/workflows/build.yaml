@@ -3,7 +3,7 @@ name: Build Artifacts
 on:
   push:
     paths-ignore:
-      - '.cloudflare/pages/functions/[[path]].js'
+      - '.cloudflare/pages/functions/\[\[path\]\].js'
 
 permissions:
   contents: read

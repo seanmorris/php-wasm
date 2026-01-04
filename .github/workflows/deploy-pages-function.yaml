@@ -3,7 +3,7 @@ name: Deploy Cloudflare Pages Function
 on:
   push:
     paths:
-      - '.cloudflare/pages/functions/[[path]].js'
+      - '.cloudflare/pages/functions/\[\[path\]\].js'
 
 permissions:
   contents: read

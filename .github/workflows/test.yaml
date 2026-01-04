@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     paths-ignore:
-      - '.cloudflare/pages/functions/[[path]].js'
+      - '.cloudflare/pages/functions/\[\[path\]\].js'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
