@@ -57,8 +57,6 @@ export const onRequest = async (context) => {
     }
   }
 
-  // return new Response(JSON.stringify({key, exists: !isMissing(obj), obj}));
-
   const headers = {
     "Content-Type": originalContentType,
     "Access-Control-Allow-Origin": "*",
