@@ -57,6 +57,8 @@ export const onRequest = async (context) => {
     }
   }
 
+  console.log({originalContentType, encoding});
+
   const headers = {
     "Content-Type": originalContentType,
     "Access-Control-Allow-Origin": "*",
