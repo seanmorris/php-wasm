@@ -1,6 +1,9 @@
 name: Build Artifacts
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - '.cloudflare/pages/functions/[[path]].js'
 
 permissions:
   contents: read
