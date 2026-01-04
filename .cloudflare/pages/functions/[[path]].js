@@ -31,6 +31,9 @@ export const onRequest = async (context) => {
     return new Response("Not found", { status: 404 });
   }
 
+  // Preserve original content-type for use after negotiating compression
+  const originalContentType = obj.httpMetadata?.contentType || "application/octet-stream";
+
   // Negotiate pre-compressed variants: Brotli preferred, then gzip
   const acceptEncoding = context.request.headers.get("Accept-Encoding") || "";
   let encoding;
@@ -57,7 +60,7 @@ export const onRequest = async (context) => {
   // return new Response(JSON.stringify({key, exists: !isMissing(obj), obj}));
 
   const headers = {
-    "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream",
+    "Content-Type": originalContentType,
     "Access-Control-Allow-Origin": "*",
   };
   if (encoding) {
