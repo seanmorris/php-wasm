@@ -30,6 +30,10 @@ find . -type d | while read DIR; do {
 		brotli -kfZ ${BINARY}
 		gzip -k9 ${BINARY}
 	done;
+	for DAT in *.dat; do
+		brotli -kfZ ${DAT}
+		gzip -k9 ${DAT}
+	done;
 	shopt -u nullglob
 	popd > /dev/null;
 }; done;
