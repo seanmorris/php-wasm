@@ -1,0 +1,30 @@
+name: Deploy Cloudflare Pages Function
+
+on:
+  push:
+    paths:
+      - '.cloudflare/pages/functions/[[path]].js'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-pages-function:
+    name: Deploy Cloudflare Pages Function
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Install Wrangler
+        run: npm install -g wrangler
+
+      - name: Deploy Cloudflare Pages Function
+        run: |
+          cd .cloudflare/pages
+          wrangler pages deploy --branch=main --project-name=php-wasm-nightly
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
