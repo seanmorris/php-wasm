@@ -69,5 +69,5 @@ export const onRequest = async (context) => {
     headers["Vary"] = "Accept-Encoding";
   }
 
-  return new Response(obj.body, { headers });
+  return new Response(obj.body, { headers, encodeBody: "manual" });
 };
