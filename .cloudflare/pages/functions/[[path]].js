@@ -31,12 +31,39 @@ export const onRequest = async (context) => {
     return new Response("Not found", { status: 404 });
   }
 
+  // Negotiate pre-compressed variants: Brotli preferred, then gzip
+  const acceptEncoding = context.request.headers.get("Accept-Encoding") || "";
+  let encoding;
+
+  if (acceptEncoding.includes("br")) {
+    const brKey = key + ".br";
+    const brObj = await context.env.NIGHTLY_BUILDS.get(brKey);
+    if (!isMissing(brObj)) {
+      obj = brObj;
+      encoding = "br";
+    }
+  }
+
+  // Fallback to gzip if supported
+  if (!encoding && acceptEncoding.includes("gzip")) {
+    const gzKey = key + ".gz";
+    const gzObj = await context.env.NIGHTLY_BUILDS.get(gzKey);
+    if (!isMissing(gzObj)) {
+      obj = gzObj;
+      encoding = "gzip";
+    }
+  }
+
   // return new Response(JSON.stringify({key, exists: !isMissing(obj), obj}));
 
-  return new Response(obj.body, {
-    headers: {
-      "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+  const headers = {
+    "Content-Type": obj.httpMetadata?.contentType || "application/octet-stream",
+    "Access-Control-Allow-Origin": "*",
+  };
+  if (encoding) {
+    headers["Content-Encoding"] = encoding;
+    headers["Vary"] = "Accept-Encoding";
+  }
+
+  return new Response(obj.body, { headers });
 };
