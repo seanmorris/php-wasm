@@ -1025,6 +1025,9 @@ test-deno: node-mjs
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
 
+test-cgi-node:
+	PHP_VERSION=${PHP_VERSION} test/node-cgi-test.sh
+
 update-snapshots:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
 

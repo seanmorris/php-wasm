@@ -1,0 +1,72 @@
+name: Test CGI Node
+
+on:
+  workflow_call:
+    inputs:
+      phpVersion:
+        required: true
+        type: string
+      libType:
+        required: true
+        type: string
+      artifactPattern:
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: Test Cgi Node ${{ inputs.phpVersion }} w/${{ inputs.libType }} libs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Import configuration
+        run: |
+          cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
+          touch -d '1970-01-01 00:00:00 UTC' .env
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifactPattern }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Install NPM packages
+        run: npm ci
+
+      - name: Install Global NPM packages
+        run: npm install -g deno cv3-test netcat
+
+      - name: Install docker-compose
+        run: sudo apt update && sudo apt install docker-compose -y
+
+      - name: Run tests
+        run: make --debug=basic test-cgi-node
+
+      - name: Take Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
+
+      - name: Upload Failure Artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: failure-snapshot-cgi-node-test-${{ inputs.phpVersion }}-${{ inputs.libType }}
+          path: snapshot.tar.gz
+          compression-level: 0

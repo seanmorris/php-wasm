@@ -3,24 +3,25 @@ import http from 'node:http';
 import { PhpCgiNode } from 'php-cgi-wasm/PhpCgiNode.mjs';
 
 const php = new PhpCgiNode({
-	prefix: '/php-wasm/cgi-bin/'
+	version: process.env.PHP_VERSION ?? '8.3'
+	, prefix: '/php-wasm/cgi-bin/'
 	, docroot: '/persist/www'
 	, persist: [
 		{mountPath: '/persist' , localPath: './persist'}
 		, {mountPath: '/config' , localPath: './config'}
 	]
 	, sharedLibs: [
-		// await import('php-wasm-intl')
-		// , await import('php-wasm-libxml')
-		// , await import('php-wasm-phar')
-		// , await import('php-wasm-mbstring')
-		// , await import('php-wasm-openssl')
-		// , await import('php-wasm-dom')
-		// , await import('php-wasm-xml')
-		// , await import('php-wasm-simplexml')
-		// , await import('php-wasm-sqlite')
-		// , await import('php-wasm-zlib')
-		// , await import('php-wasm-gd')
+		await import('php-wasm-intl')
+		, await import('php-wasm-libxml')
+		, await import('php-wasm-phar')
+		, await import('php-wasm-mbstring')
+		, await import('php-wasm-openssl')
+		, await import('php-wasm-dom')
+		, await import('php-wasm-xml')
+		, await import('php-wasm-simplexml')
+		, await import('php-wasm-sqlite')
+		, await import('php-wasm-zlib')
+		, await import('php-wasm-gd')
 	]
 	, types: {
 		jpeg: 'image/jpeg'

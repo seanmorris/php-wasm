@@ -256,6 +256,47 @@ jobs:
 
 
 
+  test-cgi-node-dynamic:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-dynamic]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-cgi-node-shared:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-shared]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['shared']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-cgi-node-static:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-static]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['static']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-uncompressed-*-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+
+
   compress-dynamic-packages:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
@@ -542,6 +583,47 @@ jobs:
 
 
 
+  test-cgi-node-dynamic-compressed:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-dynamic-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-cgi-node-shared-compressed:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-shared-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['shared']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-cgi-node-static-compressed:
+    name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
+    needs: [compress-static-packages]
+    strategy:
+      matrix:
+        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['static']
+    uses: ./.github/workflows/test-cgi-node-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+
+
   index-packages:
     name: Post nightly build to Cloudflare
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
@@ -608,9 +690,9 @@ jobs:
           r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
           r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
           r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          r2-bucket: ${{ secrets.R2_BUCKET }}
-          source-dir: packages
           destination-dir: ${{ env.STAMP }}-${{ env.SHORT_SHA }}/
+          r2-bucket: php-wasm
+          source-dir: packages
 
       - name: Install Wrangler
         run: npm install -g wrangler
@@ -627,9 +709,9 @@ jobs:
         if: ${{ success() }}
         run: |
           curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+              -X POST \
+              -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
+              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   build-demo:
     name: Build Web Demo

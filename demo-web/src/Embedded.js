@@ -363,6 +363,7 @@ function Embedded() {
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
 
+			phpRef.current && await phpRef.current.refresh();
 			await loadExtensions();
 			refreshPhp();
 
