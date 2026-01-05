@@ -9,10 +9,10 @@ TREE_FLAGS='-FCL 1'
 cd ${PACKAGES_DIR};
 
 find . -type d | while read DIR; do {
-	[[ "${DIR}" == "pdo-cfd1" ]]   && continue;
-	[[ "${DIR}" == "pdo-pglite" ]] && continue;
-	[[ "${DIR}" == "vrzno" ]]      && continue;
-	[[ "${DIR}" == "waitline" ]]   && continue;
+	[[ "${DIR:2}" == "pdo-cfd1" ]]   && continue;
+	[[ "${DIR:2}" == "pdo-pglite" ]] && continue;
+	[[ "${DIR:2}" == "vrzno" ]]      && continue;
+	[[ "${DIR:2}" == "waitline" ]]   && continue;
 
 	test -d ${DIR} || continue;
 	pushd ${DIR} > /dev/null;

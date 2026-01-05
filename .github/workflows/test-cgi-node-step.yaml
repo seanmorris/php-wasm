@@ -54,7 +54,7 @@ jobs:
         run: sudo apt update && sudo apt install docker-compose -y
 
       - name: Run tests
-        run: make --debug=basic test-cgi-node
+        run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}
