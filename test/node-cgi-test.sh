@@ -11,10 +11,8 @@ set -e;
 HOST_DIR="${PWD}"
 MOUNTED_DIR="/app"
 
-docker run --rm --name php-cgi-wasm-test-node -p ${PORT}:3003 -v ${HOST_DIR}:${MOUNTED_DIR} -w /app node:24 npm start --prefix demo-node/ &
+docker run --rm --name php-cgi-wasm-test-node -e PHP_VERSION=${PHP_VERSION} -p ${PORT}:3003 -v ${HOST_DIR}:${MOUNTED_DIR} -w /app node:24 npm start --prefix demo-node/ &
 trap "docker kill php-cgi-wasm-test-node" 0;
-
-sleep 3;
 
 set +x;
 while ! nc -z localhost ${PORT}; do
