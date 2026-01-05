@@ -20,4 +20,6 @@ while ! nc -z localhost ${PORT}; do
 done
 set -x;
 
+sleep 5;
+
 PHP_VERSION=${PHP_VERSION} npx cvtest test/NodeCgiTest.mjs;

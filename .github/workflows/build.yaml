@@ -303,6 +303,7 @@ jobs:
     needs:
       - test-node-dynamic
       - test-browser-dynamic
+      - test-cgi-node-dynamic
     strategy:
       matrix:
         libType: ['dynamic']
@@ -368,6 +369,7 @@ jobs:
     needs:
       - test-node-shared
       - test-browser-shared
+      - test-cgi-node-shared
     strategy:
       matrix:
         libType: ['shared']
@@ -433,6 +435,7 @@ jobs:
     needs:
       - test-node-static
       - test-browser-static
+      - test-cgi-node-static
     strategy:
       matrix:
         libType: ['static']
@@ -631,6 +634,7 @@ jobs:
     needs:
       - test-browser-dynamic-compressed
       - test-node-dynamic-compressed
+      - test-cgi-node-dynamic-compressed
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
