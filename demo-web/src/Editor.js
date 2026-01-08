@@ -64,6 +64,8 @@ export default function Editor() {
 	const lastFile = useRef(null);
 	const lastLine = useRef(null);
 
+	const versionSelector = useRef(true);
+
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	const handleSave = async () => {
@@ -340,6 +342,7 @@ export default function Editor() {
 
 		openDbg.current = <Debugger
 			file = {currentPath.current}
+			version = { versionSelector.current && versionSelector.current.value || '8.3' }
 			ref = {openDbg}
 			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
 			setCurrentFile = {file => currentBreak.current.file = file}
@@ -422,12 +425,10 @@ export default function Editor() {
 					</button>
 					{!isExecuting ? (
 						<>
-							{phpdbg ? '' : <select defaultValue = '8.3'>
+							{phpdbg ? '' : <select defaultValue = '8.3' ref={versionSelector}>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
-								<option>8.1</option>
-								<option>8.0</option>
 							</select>}
 							<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
 								{phpdbg ? '⏹' : '▶'}

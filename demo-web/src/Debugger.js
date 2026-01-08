@@ -92,7 +92,7 @@ let lastCommand = null;
 export default forwardRef(function Debugger({
 	className = '', file, localEcho = true, initCommands = [], onStdIn
 	, setCurrentFile, setCurrentLine, setStatusMessage, setIsExecuting
-	, openFile
+	, openFile, version = '8.3',
 }, ref) {
 	const phpRef = useRef(null);
 	const cmdStack = useRef(['']);
@@ -182,7 +182,7 @@ export default forwardRef(function Debugger({
 	const refreshPhp = useCallback(init => {
 		setStatusMessage && setStatusMessage('loading...');
 		phpRef.current = new PhpDbgWeb({
-			version: '8.3',
+			version,
 			sharedLibs,
 			files,
 			ini,
