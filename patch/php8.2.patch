@@ -586,6 +586,19 @@ index 7e6a87f..f4e01e3 100644
  			phpdbg_consume_stdin_line(buf);
  			buffer = estrdup(buf);
  #endif
+diff --git a/third_party/php8.2-src/sapi/phpdbg/phpdbg_info.c b/third_party/php8.2-src/sapi/phpdbg/phpdbg_info.c
+index 0a1e757..a3d53cb 100644
+--- a/third_party/php8.2-src/sapi/phpdbg/phpdbg_info.c
++++ b/third_party/php8.2-src/sapi/phpdbg/phpdbg_info.c
+@@ -159,7 +159,7 @@ PHPDBG_INFO(constants) /* {{{ */
+ 	return SUCCESS;
+ } /* }}} */
+ 
+-static int phpdbg_arm_auto_global(zval *ptrzv) {
++int phpdbg_arm_auto_global(zval *ptrzv) {
+ 	zend_auto_global *auto_global = Z_PTR_P(ptrzv);
+ 
+ 	if (auto_global->armed) {
 diff --git a/third_party/php8.2-src/sapi/phpdbg/phpdbg_io.c b/third_party/php8.2-src/sapi/phpdbg/phpdbg_io.c
 index 14ae71a..8163757 100644
 --- a/third_party/php8.2-src/sapi/phpdbg/phpdbg_io.c

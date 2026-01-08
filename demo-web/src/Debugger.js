@@ -63,6 +63,10 @@ else
 		{name: 'libcrypto.so', url: (new URL('php-wasm-openssl/libcrypto.so', import.meta.url))},
 		{name: 'libssl.so',    url: (new URL('php-wasm-openssl/libssl.so',    import.meta.url))},
 	);
+
+	// files.push(
+	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) },
+	// );
 }
 
 const files = [
@@ -86,19 +90,31 @@ const escapeHtml = s => s
 let lastCommand = null;
 
 export default forwardRef(function Debugger({
-	file, setCurrentFile, setCurrentLine, setStatusMessage
-	, localEcho = true, initCommands = [], onStdIn
+	className = '', file, localEcho = true, initCommands = [], onStdIn
+	, setCurrentFile, setCurrentLine, setStatusMessage, setIsExecuting
+	, openFile
 }, ref) {
 	const phpRef = useRef(null);
 	const cmdStack = useRef(['']);
 	const cmdStackIndex = useRef(0);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
+	const init = useRef(true);
+
 	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mprompt> ')));
 	const [ready, setReady] = useState(false);
 	const [output, setOutput] = useState([]);
 	const [exitCode, setExitCode] = useState('');
-	const init = useRef(true);
+
+	const [variables, setVariables] = useState({});
+	const [globals, setGlobals] = useState({});
+	const [constants, setConstants] = useState({});
+	const [functions, setFunctions] = useState({});
+	const [userClasses, setUserClasses] = useState({});
+
+	const [includedFiles, setIncludedFiles] = useState([]);
+
+	const [currentPanel, setCurrentPanel] = useState('none');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
@@ -232,7 +248,9 @@ export default forwardRef(function Debugger({
 		{
 			event.preventDefault();
 
-			if(event.target.selectionStart > 0)
+			const end = event.target.value.length;
+
+			if(event.target.selectionStart > 0 && event.target.selectionStart !== end)
 			{
 				event.target.selectionStart = 0;
 				event.target.selectionEnd = 0;
@@ -246,11 +264,7 @@ export default forwardRef(function Debugger({
 			}
 
 			stdIn.current.value = cmdStack.current[cmdStackIndex.current];
-
-			event.target.selectionStart = 0;
-			event.target.selectionEnd = 0;
-
-			return;
+			stdIn.current.selectionStart = stdIn.current.selectionEnd = stdIn.current.value.length;
 		}
 
 		if(event.key === 'ArrowDown')
@@ -266,15 +280,14 @@ export default forwardRef(function Debugger({
 				return;
 			}
 
-			stdIn.current.value = cmdStack.current[cmdStackIndex.current];
-
 			cmdStackIndex.current++;
 			if(cmdStackIndex.current >= cmdStack.current.length)
 			{
 				cmdStackIndex.current = 0;
 			}
 
-			return;
+			stdIn.current.value = cmdStack.current[cmdStackIndex.current];
+			stdIn.current.selectionStart = stdIn.current.selectionEnd = stdIn.current.value.length;
 		}
 
 		if(event.key === 'Enter')
@@ -311,10 +324,61 @@ export default forwardRef(function Debugger({
 
 		await php.provideInput(inputValue);
 
-		lastCommand = inputValue || lastCommand;
-		setExitCode(exitCode);
+		const isRunning = await php.isExecuting();
 
-		stdIn.current && stdIn.current.focus();
+		setIsExecuting( isRunning );
+
+		if(!silent)
+		{
+			lastCommand = inputValue || lastCommand;
+
+			stdIn.current && stdIn.current.focus();
+		}
+
+		if(isRunning)
+		{
+			if(currentPanel === 'none')
+			{
+				setCurrentPanel('variables');
+				setVariables( await (await phpRef.current).dumpVars() || {} );
+			}
+
+			switch(currentPanel)
+			{
+				case 'variables':
+					setVariables( await (await phpRef.current).dumpVars() || {} );
+					break;
+
+				case 'globals':
+					setGlobals( await (await phpRef.current).dumpGlobals() || {} );
+					break;
+
+				case 'constants':
+					setConstants( await (await phpRef.current).dumpConstants() || {} );
+					break;
+
+				case 'classes':
+					setUserClasses( await (await phpRef.current).dumpClasses() || {} );
+					break;
+
+				case 'functions':
+					setFunctions( await (await phpRef.current).dumpFunctions() || {} );
+					break;
+
+				case 'files':
+					setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
+					break;
+			}
+		}
+		else
+		{
+			setVariables( {} );
+			setGlobals( {} );
+			setConstants( {} );
+			setFunctions( {} );
+			setIncludedFiles( [] );
+			setCurrentPanel('none');
+		}
 	}
 
 	const focusInput = event => {
@@ -348,16 +412,124 @@ export default forwardRef(function Debugger({
 		scrollToEnd();
 	};
 
-	return (<div className='phpdbg-console' ref = {terminal} onMouseUp={handleTerminalClicked}>
-		<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
-		<div className='console-output'>
-			<span className = "warning">⚠️ <i>This is in VERY early alpha!</i> ⚠️</span>
-			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
-			<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
-				{!ready && (<img src = {loading} />)}
-				<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
-				<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
-				<button onClick = {runCommand}>&gt;</button>
+	const zvalViews = obj => {
+
+		try
+		{
+			const entries = Object.entries(obj);
+			return <div className = "phpdbg-zval">
+				{entries.map(zvalView)}
+			</div>;
+		}
+		catch(error)
+		{
+			console.error(error);
+			console.warn(obj, 'returned duplicate keys');
+		}
+	};
+
+	const zvalView = ([name, zv]) => {
+		return <label key = {name}>
+			<div className='variable-name bevel'>{name}:&nbsp;</div>
+			<div className='variable-value'>{(zv && typeof zv === 'object') ? zvalViews(zv) : String(zv)}</div>
+		</label>;
+	};
+
+	const switchRightPanel = async panel => {
+		switch(panel)
+		{
+			case undefined:
+			case 'variables':
+				setVariables( await (await phpRef.current).dumpVars() || {} );
+				setCurrentPanel('variables');
+				break;
+
+			case 'globals':
+				setGlobals( await (await phpRef.current).dumpGlobals() || {} );
+				setCurrentPanel('globals');
+				break;
+
+			case 'constants':
+				setConstants( await (await phpRef.current).dumpConstants() || {} );
+				setCurrentPanel('constants');
+				break;
+
+			case 'classes':
+				console.log( await (await phpRef.current).dumpClasses() || {} );
+				setUserClasses( await (await phpRef.current).dumpClasses() || {} );
+				setCurrentPanel('classes');
+				break;
+
+			case 'functions':
+				setFunctions( await (await phpRef.current).dumpFunctions() || {} );
+				setCurrentPanel('functions');
+				break;
+
+			case 'files':
+				setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
+				setCurrentPanel('files');
+				break;
+		}
+	};
+
+	return (<div className={'phpdbg ' + className}>
+		<div className='phpdbg-left-panel'>
+			<div className='phpdbg-console' ref = {terminal} onMouseUp={handleTerminalClicked}>
+				<div className='console-output'>
+					<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
+					<span className = "warning">⚠️ <i>This is in VERY early alpha!</i> ⚠️</span>
+					{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
+					<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
+						{!ready && (<img src = {loading} />)}
+						<span dangerouslySetInnerHTML = {{__html:prompt}}></span>
+						<input autoFocus = {true} disabled={!ready} autoComplete="off" name = "stdin" onKeyDown={checkEnter} ref = {stdIn} />
+						<button onClick = {runCommand}>&gt;</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div className='phpdbg-right-panel' data-current-panel = {currentPanel}>
+			<div className = "row toolbar tight">
+				<button onClick = {async () => switchRightPanel('variables')}>vars</button>
+				<button onClick = {async () => switchRightPanel('globals')}>globals</button>
+				<button onClick = {async () => switchRightPanel('constants')}>constants</button>
+				<button onClick = {async () => switchRightPanel('classes')}>classes</button>
+				<button onClick = {async () => switchRightPanel('functions')}>functions</button>
+				<button onClick = {async () => switchRightPanel('files')}>files</button>
+			</div>
+			<div className='phpdbg-panel-frame inset'>
+				<div className='phpdbg-panel-frame-inner'>
+					<div className='phpdbg-panel phpdbg-variables'>
+						{zvalViews(variables)}
+					</div>
+					<div className='phpdbg-panel phpdbg-globals'>
+						{zvalViews(globals)}
+					</div>
+					<div className='phpdbg-panel phpdbg-constants'>
+						{zvalViews(constants)}
+					</div>
+					<div className='phpdbg-panel phpdbg-classes'>
+						{Object.entries(userClasses).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name,func]) => {
+							return <div key={name} title = {func.filename + ':' + func.lineNo} onClick = {() => openFile(func.filename, func.lineNo)}>
+								<span>{name} <span className='filename'>{String(func.filename).split('/').pop()}:{func.lineNo}</span></span>
+							</div>
+						})}
+					</div>
+					<div className='phpdbg-panel phpdbg-functions'>
+						{Object.entries(functions).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name,func]) => {
+							return <div key={name} title = {func.filename + ':' + func.lineNo} onClick = {() => openFile(func.filename, func.lineNo)}>
+								<span>{name} <span className='filename'>{String(func.filename).split('/').pop()}:{func.lineNo}</span></span>
+							</div>
+						})}
+					</div>
+					<div className='phpdbg-panel phpdbg-files'>
+						{includedFiles.sort((a, b) => String(a).localeCompare(b)).map(name => {
+							return <div key={name} onClick = {() => openFile(name)}>
+								<span>{name}</span>
+							</div>
+						})}
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>);

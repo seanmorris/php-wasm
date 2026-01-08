@@ -19,7 +19,6 @@ export class PhpDbgWeb extends PhpBase
 		this.bpCountPtr = null;
 
 		this.binary = this.binary.then((php) => {
-			console.log(php);
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
 			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
@@ -136,7 +135,20 @@ export class PhpDbgWeb extends PhpBase
 			, []
 			, []
 			, {}
-		);;
+		);
+	}
+
+	async isExecuting()
+	{
+		const php = await this.binary;
+
+		return php.ccall(
+			'php_wasm_is_executing'
+			, NUM
+			, []
+			, []
+			, {}
+		);
 	}
 
 	async currentFile()
@@ -158,6 +170,206 @@ export class PhpDbgWeb extends PhpBase
 		const php = await this.binary;
 
 		return php.getValue(this.bpCountPtr, 'i32');
+	}
+
+	async dumpVars()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_symbols'
+			, NUM
+			, [NUM]
+			, [false]
+			, {}
+		);
+
+		if(ptr) return this.dumpSymbols(ptr, php);
+	}
+
+	async dumpGlobals()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_symbols'
+			, NUM
+			, [NUM]
+			, [true]
+			, {}
+		);
+
+		if(ptr) return this.dumpSymbols(ptr, php);
+	}
+
+	async dumpConstants()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_constants'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		if(ptr) return this.dumpSymbols(ptr, php);
+	}
+
+	dumpSymbols(ptr, php)
+	{
+		const heap = new DataView(php.HEAP8.buffer);
+		const end = ptr + heap.getInt32(ptr, true);
+		const pointerLen = 4;
+
+		let cur = ptr + pointerLen;
+		const dec = new TextDecoder;
+		const symbols = {};
+
+		while(cur < end)
+		{
+			const zv = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const nameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const name = dec.decode(php.HEAP8.slice(cur, cur + nameLen));
+			cur += nameLen + 1;
+
+			symbols[name] = php.zvalToJS(zv);
+		}
+
+		php._free(ptr);
+
+		return symbols;
+	}
+
+	async dumpFunctions()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_functions'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const heap = new DataView(php.HEAP8.buffer);
+		const end = ptr + heap.getInt32(ptr, true);
+		const pointerLen = 4;
+
+		let cur = ptr + pointerLen;
+		const dec = new TextDecoder;
+		const functions = {};
+
+		while(cur < end)
+		{
+			const filenameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const filename = dec.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			cur += filenameLen + 1;
+
+			const lineNo = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const nameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const name = dec.decode(php.HEAP8.slice(cur, cur + nameLen));
+			cur += nameLen + 1;
+
+			functions[name] = {name, filename, lineNo};
+		}
+
+		php._free(ptr);
+
+		return functions;
+	}
+
+	async dumpClasses()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_classes'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const heap = new DataView(php.HEAP8.buffer);
+		const end = ptr + heap.getInt32(ptr, true);
+		const pointerLen = 4;
+
+		let cur = ptr + pointerLen;
+		const dec = new TextDecoder;
+		const functions = {};
+
+		while(cur < end)
+		{
+			const filenameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const filename = dec.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			cur += filenameLen + 1;
+
+			const lineNo = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const nameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const name = dec.decode(php.HEAP8.slice(cur, cur + nameLen));
+			cur += nameLen + 1;
+
+			functions[name] = {name, filename, lineNo};
+		}
+
+		php._free(ptr);
+
+		return functions;
+	}
+
+	async dumpFiles()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_files'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		const heap = new DataView(php.HEAP8.buffer);
+		const end = ptr + heap.getInt32(ptr, true);
+		const pointerLen = 4;
+
+		let cur = ptr + pointerLen;
+		const dec = new TextDecoder;
+		const files = [];
+
+		while(cur < end)
+		{
+			const filenameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const filename = dec.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			cur += filenameLen + 1;
+
+			files.push(filename);
+		}
+
+		php._free(ptr);
+
+		return files;
 	}
 
 	async refresh()
