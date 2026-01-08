@@ -454,7 +454,7 @@ index 2e2faf8..9cbb048 100644
  %.c: %.y
  %.c: %.l
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
-index a583854..49f0301 100644
+index a583854..435a42c 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
 +++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.c
 @@ -16,6 +16,8 @@
@@ -466,7 +466,7 @@ index a583854..49f0301 100644
  #include "phpdbg.h"
  #include "phpdbg_prompt.h"
  #include "phpdbg_bp.h"
-@@ -148,6 +150,24 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+@@ -148,6 +150,29 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
  #endif
  } /* }}} */
  
@@ -488,10 +488,15 @@ index a583854..49f0301 100644
 +	return &PHPDBG_G(bp_count);
 +}
 +
++bool EMSCRIPTEN_KEEPALIVE php_wasm_is_executing(void)
++{
++	return PHPDBG_G(in_execution) || (PHPDBG_G(flags) & PHPDBG_IS_STOPPING);
++}
++
  static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  {
  	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-@@ -177,6 +197,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+@@ -177,6 +202,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  
  static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
  {
@@ -501,7 +506,7 @@ index a583854..49f0301 100644
  	zend_hash_destroy(&PHPDBG_G(registered));
  	phpdbg_destroy_watchpoints();
  
-@@ -1118,7 +1141,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+@@ -1118,7 +1146,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
  	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
  } /* }}} */
  
@@ -511,7 +516,7 @@ index a583854..49f0301 100644
  	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
  	char *sapi_name;
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg.h b/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
-index 8857816..6b18f62 100644
+index 8857816..29782f7 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
 +++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg.h
 @@ -182,7 +182,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
@@ -523,13 +528,12 @@ index 8857816..6b18f62 100644
  #endif /* }}} */
  
  /* {{{ output descriptors */
-@@ -311,4 +311,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
+@@ -311,4 +311,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
  	zend_ulong lines;                                  /* max number of lines to display */
  ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
  
 +extern const char* phpdbg_wasm_current_file;
 +extern uint32_t phpdbg_wasm_current_line;
-+
 +
  #endif /* PHPDBG_H */
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_cmd.c
@@ -545,8 +549,21 @@ index 6249e79..e3e7c34 100644
  			phpdbg_consume_stdin_line(buf);
  			buffer = estrdup(buf);
  #endif
+diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_info.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_info.c
+index b6c48d5..b1dae7a 100644
+--- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_info.c
++++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_info.c
+@@ -159,7 +159,7 @@ PHPDBG_INFO(constants) /* {{{ */
+ 	return SUCCESS;
+ } /* }}} */
+ 
+-static int phpdbg_arm_auto_global(zval *ptrzv) {
++int phpdbg_arm_auto_global(zval *ptrzv) {
+ 	zend_auto_global *auto_global = Z_PTR_P(ptrzv);
+ 
+ 	if (auto_global->armed) {
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
-index 14ae71a..8163757 100644
+index 14ae71a..cd11272 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
 +++ b/third_party/php8.3-src/sapi/phpdbg/phpdbg_io.c
 @@ -14,6 +14,8 @@
@@ -637,6 +654,18 @@ index 14ae71a..8163757 100644
  }
  
  PHPDBG_API int phpdbg_mixed_read(int fd, char *ptr, int len, int tmo) {
+@@ -111,11 +101,5 @@ static int phpdbg_output_pager(int fd, const char *ptr, int len) {
+ }
+ 
+ PHPDBG_API int phpdbg_mixed_write(int fd, const char *ptr, int len) {
+-	if ((PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION)
+-	 && PHPDBG_G(io)[PHPDBG_STDOUT].fd == fd
+-	 && PHPDBG_G(lines) > 0) {
+-		return phpdbg_output_pager(fd, ptr, len);
+-	}
+-
+ 	return write(fd, ptr, len);
+ }
 diff --git a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c b/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c
 index c054326..0c81d93 100644
 --- a/third_party/php8.3-src/sapi/phpdbg/phpdbg_prompt.c

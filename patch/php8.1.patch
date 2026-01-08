@@ -85,16 +85,21 @@ index 3959b36..262d34f 100644
  	/* reset libxml generic error handling */
  	if (_php_libxml_per_request_initialization) {
  		xmlSetGenericErrorFunc(NULL, NULL);
-@@ -940,6 +981,8 @@ static zend_result php_libxml_post_deactivate(void)
+@@ -940,6 +981,13 @@ static zend_result php_libxml_post_deactivate(void)
  
  static PHP_MINFO_FUNCTION(libxml)
  {
-+	if (xmlParserVersion == NULL) return;
++	if (xmlParserVersion == NULL) {
++		php_info_print_table_start();
++		php_info_print_table_row(2, "libXML support", "NOT ACTIVE");
++		php_info_print_table_end();
++		return;
++	}
 +
  	php_info_print_table_start();
  	php_info_print_table_row(2, "libXML support", "active");
  	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
-@@ -952,6 +995,8 @@ static PHP_MINFO_FUNCTION(libxml)
+@@ -952,6 +1000,8 @@ static PHP_MINFO_FUNCTION(libxml)
  /* {{{ Set the streams context for the next libxml document load or write */
  PHP_FUNCTION(libxml_set_streams_context)
  {
@@ -103,7 +108,7 @@ index 3959b36..262d34f 100644
  	zval *arg;
  
  	ZEND_PARSE_PARAMETERS_START(1, 1)
-@@ -969,6 +1014,8 @@ PHP_FUNCTION(libxml_set_streams_context)
+@@ -969,6 +1019,8 @@ PHP_FUNCTION(libxml_set_streams_context)
  /* {{{ Disable libxml errors and allow user to fetch error information as needed */
  PHP_FUNCTION(libxml_use_internal_errors)
  {
@@ -112,7 +117,7 @@ index 3959b36..262d34f 100644
  	xmlStructuredErrorFunc current_handler;
  	bool use_errors, use_errors_is_null = 1, retval;
  
-@@ -1009,6 +1056,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
+@@ -1009,6 +1061,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
  /* {{{ Retrieve last error from libxml */
  PHP_FUNCTION(libxml_get_last_error)
  {
@@ -121,7 +126,7 @@ index 3959b36..262d34f 100644
  	xmlErrorPtr error;
  
  	ZEND_PARSE_PARAMETERS_NONE();
-@@ -1040,6 +1089,7 @@ PHP_FUNCTION(libxml_get_last_error)
+@@ -1040,6 +1094,7 @@ PHP_FUNCTION(libxml_get_last_error)
  /* {{{ Retrieve array of errors */
  PHP_FUNCTION(libxml_get_errors)
  {
@@ -129,7 +134,7 @@ index 3959b36..262d34f 100644
  
  	xmlErrorPtr error;
  
-@@ -1081,6 +1131,8 @@ PHP_FUNCTION(libxml_get_errors)
+@@ -1081,6 +1136,8 @@ PHP_FUNCTION(libxml_get_errors)
  /* {{{ Clear last error from libxml */
  PHP_FUNCTION(libxml_clear_errors)
  {
@@ -138,7 +143,7 @@ index 3959b36..262d34f 100644
  	ZEND_PARSE_PARAMETERS_NONE();
  
  	xmlResetLastError();
-@@ -1101,6 +1153,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
+@@ -1101,6 +1158,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
  /* {{{ Disable/Enable ability to load external entities */
  PHP_FUNCTION(libxml_disable_entity_loader)
  {
@@ -147,7 +152,7 @@ index 3959b36..262d34f 100644
  	bool disable = 1;
  
  	ZEND_PARSE_PARAMETERS_START(0, 1)
-@@ -1115,6 +1169,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
+@@ -1115,6 +1174,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
  /* {{{ Changes the default external entity loader */
  PHP_FUNCTION(libxml_set_external_entity_loader)
  {
@@ -364,3 +369,251 @@ index 2e2faf80..9cbb0486 100644
  
  %.c: %.y
  %.c: %.l
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg.c
+index e1824ec..96af7bc 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #include "phpdbg.h"
+ #include "phpdbg_prompt.h"
+ #include "phpdbg_bp.h"
+@@ -142,6 +144,29 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+ 	pg->last_line = 0;
+ } /* }}} */
+ 
++const char* phpdbg_wasm_current_file = NULL;
++uint32_t phpdbg_wasm_current_line = NULL;
++
++const char** EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_file(void)
++{
++	return &phpdbg_wasm_current_file;
++}
++
++uint32_t* EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_line(void)
++{
++	return &phpdbg_wasm_current_line;
++}
++
++int* EMSCRIPTEN_KEEPALIVE php_wasm_get_bpcount(void)
++{
++	return &PHPDBG_G(bp_count);
++}
++
++bool EMSCRIPTEN_KEEPALIVE php_wasm_is_executing(void)
++{
++	return PHPDBG_G(in_execution) || (PHPDBG_G(flags) & PHPDBG_IS_STOPPING);
++}
++
+ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ {
+ 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+@@ -175,6 +200,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ 
+ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
+ {
++	phpdbg_wasm_current_file = NULL;
++	phpdbg_wasm_current_line = NULL;
++
+ 	zend_hash_destroy(&PHPDBG_G(registered));
+ 	phpdbg_destroy_watchpoints();
+ 
+@@ -1113,7 +1141,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+ 	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+ } /* }}} */
+ 
+-int main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
+ {
+ 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+ 	char *sapi_name;
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg.h b/third_party/php8.1-src/sapi/phpdbg/phpdbg.h
+index 789abec..72992d7 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg.h
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg.h
+@@ -186,7 +186,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
+ #ifndef _WIN32
+ #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
+ #else
+-#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
++#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED )
+ #endif /* }}} */
+ 
+ /* {{{ output descriptors */
+@@ -310,4 +310,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
+ 	zend_ulong lines;                                  /* max number of lines to display */
+ ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+ 
++extern const char* phpdbg_wasm_current_file;
++extern uint32_t phpdbg_wasm_current_line;
++
+ #endif /* PHPDBG_H */
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg_cmd.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg_cmd.c
+index 7e6a87f..f4e01e3 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg_cmd.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg_cmd.c
+@@ -757,7 +757,7 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
+ 			buffer = estrdup(cmd);
+ 			free(cmd);
+ #else
+-			phpdbg_write("%s", phpdbg_get_prompt());
++			// phpdbg_write("%s", phpdbg_get_prompt());
+ 			phpdbg_consume_stdin_line(buf);
+ 			buffer = estrdup(buf);
+ #endif
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg_info.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg_info.c
+index e63ec89..7dbc2e3 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg_info.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg_info.c
+@@ -159,7 +159,7 @@ PHPDBG_INFO(constants) /* {{{ */
+ 	return SUCCESS;
+ } /* }}} */
+ 
+-static int phpdbg_arm_auto_global(zval *ptrzv) {
++int phpdbg_arm_auto_global(zval *ptrzv) {
+ 	zend_auto_global *auto_global = Z_PTR_P(ptrzv);
+ 
+ 	if (auto_global->armed) {
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg_io.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg_io.c
+index 14ae71a..cd11272 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg_io.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg_io.c
+@@ -14,6 +14,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #ifdef HAVE_CONFIG_H
+ #include "config.h"
+ #endif
+@@ -22,52 +24,40 @@
+ 
+ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+ 
+-/* is easy to generalize ... but not needed for now */
+-PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
+-	int bytes = PHPDBG_G(input_buflen), len = 0;
++EM_ASYNC_JS(int, phpdbg_internal_consume_stdin_line, (char *buf, int max_length), {
++
++	let input;
++
++	Module.triggerStdin();
+ 
+-	if (PHPDBG_G(input_buflen)) {
+-		memcpy(buf, PHPDBG_G(input_buffer), bytes);
++	if(Module.inputDataQueue.length)
++	{
++		input = String(Module.inputDataQueue.shift());
++	}
++	else
++	{
++		let a, r;
++		const promise = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
++		Module.awaitingInput = a;
++		input = String(await promise);
+ 	}
+ 
+-	PHPDBG_G(last_was_newline) = 1;
++	if(input.length >= max_length)
++	{
++		input = input.slice(0, max_length - 1);
++	}
+ 
+-	do {
+-		int i;
+-		if (bytes <= 0) {
+-			continue;
+-		}
++	stringToUTF8(input, buf, input.length + 1);
+ 
+-		for (i = len; i < len + bytes; i++) {
+-			if (buf[i] == '\x03') {
+-				if (i != len + bytes - 1) {
+-					memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+-				}
+-				len--;
+-				i--;
+-				continue;
+-			}
+-			if (buf[i] == '\n') {
+-				PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+-				if (PHPDBG_G(input_buflen)) {
+-					memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+-				}
+-				if (i != PHPDBG_MAX_CMD - 1) {
+-					buf[i + 1] = 0;
+-				}
+-				return i;
+-			}
+-		}
+ 
+-		len += bytes;
+-	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0);
+ 
+-	if (bytes <= 0) {
+-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+-		zend_bailout();
+-	}
++	return input.length;
++});
+ 
+-	return bytes;
++
++/* is easy to generalize ... but not needed for now */
++PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
++	return phpdbg_internal_consume_stdin_line(buf, PHPDBG_MAX_CMD);
+ }
+ 
+ PHPDBG_API int phpdbg_mixed_read(int fd, char *ptr, int len, int tmo) {
+@@ -111,11 +101,5 @@ static int phpdbg_output_pager(int fd, const char *ptr, int len) {
+ }
+ 
+ PHPDBG_API int phpdbg_mixed_write(int fd, const char *ptr, int len) {
+-	if ((PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION)
+-	 && PHPDBG_G(io)[PHPDBG_STDOUT].fd == fd
+-	 && PHPDBG_G(lines) > 0) {
+-		return phpdbg_output_pager(fd, ptr, len);
+-	}
+-
+ 	return write(fd, ptr, len);
+ }
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg_prompt.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg_prompt.c
+index 8ca6d83..d0ffc42 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg_prompt.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg_prompt.c
+@@ -1657,6 +1657,8 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
+ 	PHPDBG_G(in_execution) = 1;
+ 
+ 	while (1) {
++		phpdbg_wasm_current_file = zend_get_executed_filename();
++		phpdbg_wasm_current_line = zend_get_executed_lineno();
+ 		zend_object *exception = EG(exception);
+ 
+ 		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
+diff --git a/third_party/php8.1-src/sapi/phpdbg/phpdbg_utils.c b/third_party/php8.1-src/sapi/phpdbg/phpdbg_utils.c
+index f638d60..4c50f0f 100644
+--- a/third_party/php8.1-src/sapi/phpdbg/phpdbg_utils.c
++++ b/third_party/php8.1-src/sapi/phpdbg/phpdbg_utils.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
++
+ #include "zend.h"
+ 
+ #include "php.h"
+@@ -293,7 +295,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt) /* {{{ */
+ 	PHPDBG_G(prompt)[0] = strdup(prompt);
+ } /* }}} */
+ 
+-PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
++PHPDBG_API const char EMSCRIPTEN_KEEPALIVE *phpdbg_get_prompt(void) /* {{{ */
+ {
+ 	/* find cached prompt */
+ 	if (PHPDBG_G(prompt)[1]) {

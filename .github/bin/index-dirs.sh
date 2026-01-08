@@ -9,10 +9,10 @@ TREE_FLAGS='-FCL 1'
 cd ${PACKAGES_DIR};
 
 find . -type d | while read DIR; do {
-	[[ "${DIR::-1}" == "pdo-cfd1" ]]   && continue;
-	[[ "${DIR::-1}" == "pdo-pglite" ]] && continue;
-	[[ "${DIR::-1}" == "vrzno" ]]      && continue;
-	[[ "${DIR::-1}" == "waitline" ]]   && continue;
+	[[ "${DIR:2}" == "pdo-cfd1" ]]   && continue;
+	[[ "${DIR:2}" == "pdo-pglite" ]] && continue;
+	[[ "${DIR:2}" == "vrzno" ]]      && continue;
+	[[ "${DIR:2}" == "waitline" ]]   && continue;
 
 	test -d ${DIR} || continue;
 	pushd ${DIR} > /dev/null;
@@ -21,6 +21,20 @@ find . -type d | while read DIR; do {
 	perl -pi -e "s#^</head>#<style> html { background-color: black; } body { filter: invert(1); } </style></head>#" index.html
 	perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 	perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
+	shopt -s nullglob
+	for BINARY in *.wasm; do
+		brotli -kfZ ${BINARY}
+		gzip -k9 ${BINARY}
+	done;
+	for BINARY in *.so; do
+		brotli -kfZ ${BINARY}
+		gzip -k9 ${BINARY}
+	done;
+	for DAT in *.dat; do
+		brotli -kfZ ${DAT}
+		gzip -k9 ${DAT}
+	done;
+	shopt -u nullglob
 	popd > /dev/null;
 }; done;
 

@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "ansi-to-html": "^0.7.2",
     "@electric-sql/pglite": "0.2.17",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "ansi-to-html": "^0.7.2",
     "pdo-pglite": "../packages/pdo-pglite",
     "php-cgi-wasm": "../packages/php-cgi-wasm",
     "php-cli-wasm": "../packages/php-cli-wasm",
@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "baseline-browser-mapping": "^2.9.11",
     "webpack-cli": "^5.1.4"
   }
 }

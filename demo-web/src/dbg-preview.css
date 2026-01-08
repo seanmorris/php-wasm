@@ -42,23 +42,29 @@
 	flex: 1;
 }
 
-.phpdbg-console {
+.phpdbg {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	position: absolute;
 	width: 100%;;
 	height: 100%;
-	background-color: #000;
-	color: #FFF;
 	flex: 1;
 	box-sizing: border-box;
 }
 
+.phpdbg-console {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
 .phpdbg-console .scroll-to-bottom {
 	z-index: 100;
-	position: absolute;
-	top: 1rem;
-	right: 1.75rem;
+	position: sticky;
+	top: 0;
+	left: calc(100% - 2rem);
 	width: 2rem;
 	height: 2rem;
 	background-color: #888;
@@ -72,11 +78,16 @@
 }
 
 .phpdbg-console .console-output {
+	color: #FFF;
+	background-color: #000;
+
+	position: relative;
 	white-space: pre-wrap;
 	overflow-y: scroll;
 	overflow-x: auto;
 	padding: 1rem;
-	min-height: 100%;
+	height: 100%;
+
 	box-sizing: border-box;
 	text-align: left;
 }
@@ -150,4 +161,140 @@
 
 .phpdbg-console .console-input button:active {
 	filter: brightness(2);
+}
+
+.phpdbg .phpdbg-left-panel {
+	flex-grow: 1;
+	flex-basis: 50%;
+	position: relative;
+}
+
+.phpdbg .phpdbg-right-panel {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-basis: 30%;
+
+	background-color: #FFF;
+}
+
+.phpdbg .phpdbg-zval label {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+	border-right: 1px solid #CCC;
+
+	width: 100%;
+}
+
+.phpdbg .phpdbg-zval label > div:not(:has(*)) {
+	padding: 0.25rem;
+}
+
+.phpdbg .phpdbg-zval label .variable-name {
+	background-color: #CCC;
+}
+
+.phpdbg .phpdbg-zval label .variable-name {
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+}
+
+.phpdbg .phpdbg-zval label .variable-value {
+	background-color: #FFF;
+	flex-grow: 1;
+}
+
+.phpdbg .phpdbg-zval label {
+	border-bottom: 1px solid #0004;
+}
+
+.phpdbg .phpdbg-zval label .phpdbg-zval label:last-child {
+	border-bottom: none;
+}
+
+.editor .phpdbg .phpdbg-right-panel .toolbar {
+	margin: 0;
+	background-color: #ccc;
+	border-top: none;
+	overflow-x: auto;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.phpdbg-panel {
+	display: none;
+	width: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
+}
+
+.editor .phpdbg .phpdbg-right-panel[data-current-panel="none"] {
+	display: none;
+}
+
+[data-current-panel="variables"] .phpdbg-panel.phpdbg-variables {
+	display: initial;
+}
+
+[data-current-panel="globals"] .phpdbg-panel.phpdbg-globals {
+	display: initial;
+}
+
+[data-current-panel="constants"] .phpdbg-panel.phpdbg-constants {
+	display: initial;
+}
+
+[data-current-panel="classes"] .phpdbg-panel.phpdbg-classes {
+	display: initial;
+}
+
+[data-current-panel="functions"] .phpdbg-panel.phpdbg-functions {
+	display: initial;
+}
+
+[data-current-panel="files"] .phpdbg-panel.phpdbg-files {
+	display: initial;
+}
+
+
+.phpdbg-panel-frame {
+	position: relative;
+	width: 100%;
+	flex: 1;
+	box-sizing: border-box;
+}
+
+.phpdbg-panel-frame-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	overflow: auto;
+}
+
+.phpdbg-panel.phpdbg-files > div,
+.phpdbg-panel.phpdbg-classes > div,
+.phpdbg-panel.phpdbg-functions > div {
+	padding: 0.5rem;
+	border-bottom: 1px solid #CCC;
+	white-space: pre;
+}
+
+.phpdbg-panel.phpdbg-files > div span,
+.phpdbg-panel.phpdbg-classes > div span,
+.phpdbg-panel.phpdbg-functions > div > span {
+	cursor: pointer;
+}
+
+.phpdbg-panel.phpdbg-classes > div .filename,
+.phpdbg-panel.phpdbg-functions > div .filename {
+	color: #666;
+}
+
+.phpdbg-panel.phpdbg-files > div:active span,
+.phpdbg-panel.phpdbg-classes > div:active span,
+.phpdbg-panel.phpdbg-functions > div:active > span {
+	color: #999;
 }

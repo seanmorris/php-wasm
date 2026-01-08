@@ -22,29 +22,33 @@ const files = [
 	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' },
 ];
 
+let canToggleExtensions = false;
+const toggleable = {};
+
 if(buildType === 'dynamic')
 {
-	sharedLibs.push(...(await Promise.all([
-		import('php-wasm-libxml'),
-		import('php-wasm-dom'),
-		import('php-wasm-xml'),
-		import('php-wasm-simplexml'),
-		import('php-wasm-zlib'),
-		import('php-wasm-libzip'),
-		import('php-wasm-gd'),
-		import('php-wasm-iconv'),
-		import('php-wasm-intl'),
-		import('php-wasm-openssl'),
-		import('php-wasm-mbstring'),
-		import('php-wasm-sqlite'),
-	])).map(m => m.default));
+	canToggleExtensions = true;
+
+	toggleable['dom']       = {active: false, module: import('php-wasm-dom')};
+	toggleable['gd']        = {active: false, module: import('php-wasm-gd')};
+	toggleable['iconv']     = {active: false, module: import('php-wasm-iconv')};
+	toggleable['intl']      = {active: false, module: import('php-wasm-intl')};
+	toggleable['libxml']    = {active: false, module: import('php-wasm-libxml')};
+	toggleable['yaml']      = {active: false, module: import('php-wasm-yaml')};
+	toggleable['libzip']    = {active: false, module: import('php-wasm-libzip')};
+	toggleable['mbstring']  = {active: false, module: import('php-wasm-mbstring')};
+	toggleable['openssl']   = {active: false, module: import('php-wasm-openssl')};
+	toggleable['simplexml'] = {active: false, module: import('php-wasm-simplexml')};
+	toggleable['sqlite']    = {active: false, module: import('php-wasm-sqlite')};
+	toggleable['xml']       = {active: false, module: import('php-wasm-xml')};
+	toggleable['zlib']      = {active: false, module: import('php-wasm-zlib')};
+
+	sharedLibs.push(...(await Promise.all(
+		Object.values(toggleable).filter(t => t.active).map(t => t.module)
+	)).map(m => m.default));
 }
 else if(buildType === 'shared')
 {
-	// files.push(
-	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL('php-wasm-intl/icudt72l.dat', import.meta.url) }
-	// );
-
 	sharedLibs.push(
 		{name: 'libxml2.so',     url: new URL('php-wasm-libxml/libxml2.so',    import.meta.url)},
 		{name: 'libz.so',        url: new URL('php-wasm-zlib/libz.so',         import.meta.url)},
@@ -67,6 +71,10 @@ else if(buildType === 'shared')
 		{name: 'libtidy.so',     url: new URL('php-wasm-tidy/libtidy.so',      import.meta.url)},
 		{name: 'libyaml.so',     url: new URL('php-wasm-yaml/libyaml.so',      import.meta.url)},
 	);
+
+	// files.push(
+	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL('php-wasm-intl/icudt72l.dat', import.meta.url) }
+	// );
 }
 else
 {
@@ -114,7 +122,7 @@ function Embedded() {
 	const [stdErr, setStdErr] = useState('');
 	const [stdRet, setStdRet] = useState('');
 	const [overlay, setOverlay] = useState(null);
-	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	const [isIframe, /*setIsIframe*/] = useState(!!Number(query.get('iframed')));
 	const [showCanvas, setShowCanvas] = useState(true);
 
 	const [running, setRunning] = useState(false);
@@ -126,8 +134,11 @@ function Embedded() {
 	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 
 	const refreshPhp = useCallback(() => {
-		const version = (selectVersionBox.current ? selectVersionBox.current.value : '8.4') ?? '8.4';
-		const variant = (selectVariantBox.current ? selectVariantBox.current.value : '') ?? '';
+		const version = (selectVersionBox.current ? selectVersionBox.current.value : null)
+			?? '8.4';
+
+		const variant = (selectVariantBox.current ? selectVariantBox.current.value : null)
+			?? '';
 
 		const _sharedLibs = [...sharedLibs];
 
@@ -159,6 +170,27 @@ function Embedded() {
 		};
 	}, []);
 
+	const loadExtensions = useCallback(async () => {
+		if(!canToggleExtensions) return;
+		const defaultExtensions = query.has('extensionFlags')
+			? Number(query.get('extensionFlags'))
+			: 0x1FDF;
+
+		let i = 0;
+		const toggleableList = Object.values(toggleable);
+		while(i < toggleableList.length)
+		{
+			toggleableList[i].active = !!(defaultExtensions & 2**i);
+			i++;
+		}
+
+		sharedLibs.length = 0;
+
+		sharedLibs.push(...(await Promise.all(
+			Object.values(toggleable).filter(t => t.active).map(t => t.module)
+		)).map(m => m.default));
+	}, [query]);
+
 	useEffect(() => {
 		persist.current.checked = !!Number(query.get('persist')) ?? '';
 		single.current.checked = !!Number(query.get('single-expression')) ?? '';
@@ -167,10 +199,15 @@ function Embedded() {
 
 		if(!init.current && !query.has('demo'))
 		{
-			refreshPhp();
+			(async () => {
+				await loadExtensions();
+				refreshPhp();
+			})();
 		}
+
 		init.current = true;
-	}, [refreshPhp]);
+
+	}, [refreshPhp, query, loadExtensions]);
 
 	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
 	const canvasChanged = () => setShowCanvas(canvasCheckbox.current.checked);
@@ -179,7 +216,7 @@ function Embedded() {
 
 	const refreshMem = useCallback(async () => {
 		await phpRef.current.refresh();
-	});
+	}, []);
 
 	const runCode = useCallback(async () => {
 		setRunning(true);
@@ -205,6 +242,7 @@ function Embedded() {
 			'single-expression': single.current?.checked,
 			'render-as': htmlRadio.current?.checked ? 'html' : 'text',
 			'canvas': canvasCheckbox.current?.checked,
+			// 'extensionFlags': 0,
 			'version': version,
 			'variant': variant,
 		})}\n`);
@@ -263,9 +301,10 @@ function Embedded() {
 	}, [query]);
 
 	const loadDemo = useCallback(demoName => {
-
 		if(!demoName)
 		{
+			refreshPhp();
+			runCode();
 			return;
 		}
 
@@ -312,6 +351,11 @@ function Embedded() {
 			query.set('persist', persist.current.checked ? 1 : 0);
 			query.set('single-expression', single.current.checked ? 1 : 0);
 
+			if('extensionFlags' in settings)
+			{
+				query.set('extensionFlags', settings.extensionFlags);
+			}
+
 			if(phpCode.length < 1024)
 			{
 				query.set('code', encodeURIComponent(phpCode));
@@ -319,6 +363,8 @@ function Embedded() {
 
 			window.history.replaceState({}, document.title, "?" + query.toString());
 
+			phpRef.current && await phpRef.current.refresh();
+			await loadExtensions();
 			refreshPhp();
 
 			if(settings.autorun)
@@ -330,7 +376,7 @@ function Embedded() {
 			setShowCanvas(canvasCheckbox.current.checked);
 			setOutputMode(single.current.checked ? 'single' : 'normal');
 		});
-	}, [query, refreshPhp, runCode]);
+	}, [query, refreshPhp, runCode, loadExtensions]);
 
 	useEffect(() => {
 		if(inputBox.current)
@@ -404,25 +450,76 @@ function Embedded() {
 
 	const demoSelected = () => loadDemo(selectDemoBox.current.value);
 
-	const onKeyDown = event => {
-		if(event.key === 'Enter' && event.ctrlKey)
-		{
-			runCode();
-			return;
-		}
-	};
-
 	useEffect(() => {
-
+		const onKeyDown = event => {
+			if(event.key === 'Enter' && event.ctrlKey)
+			{
+				runCode();
+				return;
+			}
+		};
 		window.addEventListener('keydown', onKeyDown);
 		return () => {
 			window.removeEventListener('keydown', onKeyDown);
 		}
-	}, []);
+
+	}, [runCode]);
 
 	const openFile = async event => {
 		const file = event.target.files[0];
 		editor.current.editor.setValue(await file.text(), -1);;
+	};
+
+	const toggleExtension = async (event, name) => {
+		if(!canToggleExtensions) return;
+		if(!toggleable[name])
+		{
+			console.warn(`${name} is not a valid extension name`);
+			return;
+		}
+
+		toggleable[name].active = event.target.checked;
+
+		sharedLibs.length = 0;
+
+		sharedLibs.push(...(await Promise.all(
+			Object.values(toggleable).filter(t => t.active).map(t => t.module)
+		)).map(m => m.default));
+	};
+
+	const showExtensionDialog = () => {
+		if(!canToggleExtensions) return;
+		setOverlay(
+			<div className = "toggleExtensions">
+				<div className='bevel'>
+					{Object.entries(toggleable).map(([name, t]) => {
+						return <label key = {name} style = {{display: 'block'}}>
+							<input type = "checkbox" defaultChecked = {t.active} onChange={event => toggleExtension(event, name)}/>
+							{name}
+						</label>
+					})}
+					<div>
+						<button className = "margin" onClick={closeExtensionsDialog}>Done</button>
+					</div>
+				</div>
+			</div>
+		);
+	};
+
+	const closeExtensionsDialog = async () => {
+		if(!canToggleExtensions) return;
+		const extensionFlags = Object.values(toggleable)
+		.map((t, k) => !!t.active << k)
+		.reduce((x, p) => x + p, 0);
+
+		query.set('extensionFlags', extensionFlags);
+
+		setOverlay(null);
+		setStdOut('');
+		setStdErr('');
+		await loadExtensions();
+		refreshPhp();
+		runCode();
 	};
 
 	const topBar = (<div className = "row header toolbar">
@@ -439,12 +536,12 @@ function Embedded() {
 					<span>Demo:</span>
 					<select data-select-demo ref = {selectDemoBox}>
 						<option value = "">Select a Demo</option>
+						<option value = "phpinfo.php">phpinfo();</option>
 						<option value = "hello-world.php">Hello, World!</option>
 						<option value = "dynamic-extension.php">Dynamic Extension Loading</option>
 						<option value = "callbacks.php">Javascript Callbacks</option>
 						<option value = "import.php">Import Javascript Modules</option>
 						<option value = "curvature.php">Curvature</option>
-						<option value = "phpinfo.php">phpinfo();</option>
 						<option value = "fetch.php">Fetch</option>
 						<option value = "promise.php">Promise</option>
 						<option value = "persistent-memory.php">Persistent Memory</option>
@@ -462,27 +559,35 @@ function Embedded() {
 						{isIframe || <option value = "drupal.php">Drupal 7</option>}
 					</select>
 				</label>
-				<label>
-					<span>Version:</span>
-						<select data-select-demo ref = {selectVersionBox}>
-							<option value = "8.4">8.4</option>
-							<option value = "8.3">8.3</option>
-							<option value = "8.2">8.2</option>
-							<option value = "8.1">8.1</option>
-							<option value = "8.0">8.0</option>
+				<div className='row'>
+					<label>
+						<span>Version:</span>
+							<select data-select-demo ref = {selectVersionBox}>
+								<option value = "8.4">8.4</option>
+								<option value = "8.3">8.3</option>
+								<option value = "8.2">8.2</option>
+								<option value = "8.1">8.1</option>
+								<option value = "8.0">8.0</option>
+							</select>
+					</label>
+					<label>
+						<span>Variant:</span>
+							<select data-select-demo ref = {selectVariantBox}>
+							<option value = "">base</option>
+							<option value = "_sdl">sdl</option>
 						</select>
-				</label>
-				<label>
-					<span>Variant:</span>
-						<select data-select-demo ref = {selectVariantBox}>
-						<option value = "">base</option>
-						<option value = "_sdl">sdl</option>
-					</select>
-				</label>
-				<label>
-					<span>&nbsp;</span>
-					<button data-load-demo onClick = {demoSelected}>load</button>
-				</label>
+					</label>
+				</div>
+				<div className = "row">
+					<label>
+						<span>&nbsp;</span>
+						<button data-load-demo onClick = {demoSelected}>load</button>
+					</label>
+					{canToggleExtensions && (<label>
+						<span>&nbsp;</span>
+						<button data-toggle-extensions onClick = {showExtensionDialog}>extensions</button>
+					</label>)}
+				</div>
 			</div>
 		</div>
 		<div className = "separator"></div>
@@ -513,8 +618,10 @@ function Embedded() {
 					<input type = "checkbox" id = "singleExpression" ref = { canvasCheckbox } onChange = {canvasChanged} />
 				</label>
 			</div>
-			<button data-ui data-refresh onClick = { refreshMem }><span>refresh</span></button>
-			<button data-ui data-run onClick = { runCode }><span>run</span></button>
+			<div className = "row">
+				<button data-ui data-refresh onClick = { refreshMem }><span>refresh</span></button>
+				<button data-ui data-run onClick = { runCode }><span>run</span></button>
+			</div>
 		</div>
 	</div>);
 
@@ -524,8 +631,7 @@ function Embedded() {
 				{statusMessage}
 			</div>
 		</div>
-		<div>
-		</div>
+		<div></div>
 	</div>);
 
 	return (<div className="Embedded margined" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1: 0} data-iframed = {isIframe ? 1 : 0}>

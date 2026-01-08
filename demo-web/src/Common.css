@@ -148,6 +148,11 @@ button.padded {
 	line-height: 85%;
 }
 
+.row.toolbar select {
+	height: 100%;
+	padding: 0 0.25rem;
+}
+
 button.square {
 	width:2.15rem;
 	height:2.25rem;
@@ -190,5 +195,3 @@ a, button, select, input {
 [data-iframed="1"] .bevel .frameworks .row.icons {
 	flex: 1;
 }
-
-

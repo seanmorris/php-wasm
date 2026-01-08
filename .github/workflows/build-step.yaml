@@ -88,6 +88,9 @@ jobs:
       - name: Build PHP for Web & PHP-CGI for Worker
         run: time make --debug=basic web-mjs worker-cgi-mjs
 
+      - name: Build PHP CGI for Node
+        run: time make --debug=basic node-cgi-mjs
+
       - name: Build php${{ inputs.phpVersion }}-sdl.so
         run: time make --debug=basic packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
 

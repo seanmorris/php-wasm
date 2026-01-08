@@ -171,7 +171,7 @@ export default function InstallDemo() {
 			setTerminal(
 				<div style={{
 					position: 'relative',
-					minWidth: 'max(45rem, 90vh)',
+					minWidth: 'min(45rem, 90vw)',
 					minHeight: '30rem',
 					resize: 'both'
 				}}>

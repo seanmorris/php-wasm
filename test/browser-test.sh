@@ -13,9 +13,9 @@ docker kill php-wasm-test-apache;
 set -e;
 
 HOST_DIR="${PWD}/demo-web/build"
-MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm httpd:2.4"
+MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm"
 
-docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} &
+docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} httpd:2.4 &
 trap "docker kill php-wasm-test-apache" 0;
 
 set +x;
