@@ -261,6 +261,10 @@
 	display: initial;
 }
 
+.phpdbg-panel.phpdbg-trace .current-frame {
+	background-color: #008;
+	color: #FFF;
+}
 
 .phpdbg-panel-frame {
 	position: relative;
@@ -304,3 +308,4 @@
 .phpdbg-panel.phpdbg-functions > div:active > span {
 	color: #999;
 }
+

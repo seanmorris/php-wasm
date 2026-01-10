@@ -384,8 +384,6 @@ export class PhpDbgWeb extends PhpBase
 			, {}
 		);
 
-		console.log({ptr});
-
 		const heap = new DataView(php.HEAP8.buffer);
 		const end = ptr + heap.getInt32(ptr, true);
 		const pointerLen = 4;
@@ -412,11 +410,22 @@ export class PhpDbgWeb extends PhpBase
 			i++;
 		}
 
-		console.log(frames);
-
 		php._free(ptr);
 
 		return frames;
+	}
+
+	async switchFrame(frame)
+	{
+		const php = await this.binary;
+
+		return php.ccall(
+			'vrzno_dbg_switch_frame'
+			, NUM
+			, [NUM]
+			, [frame]
+			, {}
+		);
 	}
 
 	async refresh()

@@ -322,6 +322,23 @@ export default function Editor() {
 
 			editor.scrollToLine(-1 + line, true, true, () => {});
 		}
+
+		if(line !== undefined)
+		{
+			activeLines.current.forEach(m => {
+				editor.session.removeMarker(m);
+				activeLines.current.delete(m);
+			});
+
+			const marker = editor.session.addMarker(
+				new Range(-1 + line, 0, -1 + line, Infinity)
+				, 'active_breakpoint'
+				, 'fullLine'
+				, true
+			);
+
+			activeLines.current.add(marker);
+		}
 	}
 
 	const startDebugger = () => {

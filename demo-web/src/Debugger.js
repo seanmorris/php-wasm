@@ -114,6 +114,7 @@ export default forwardRef(function Debugger({
 
 	const [includedFiles, setIncludedFiles] = useState([]);
 	const [trace, setTrace] = useState([]);
+	const [currentFrame, setCurrentFrame] = useState(0);
 
 	const [currentPanel, setCurrentPanel] = useState('none');
 
@@ -371,7 +372,11 @@ export default forwardRef(function Debugger({
 					break;
 
 				case 'trace':
+					const php = (await phpRef.current);
+					const oldFrame = await php.switchFrame(0);
+					setCurrentFrame(oldFrame);
 					setTrace( await (await phpRef.current).dumpBacktrace() || [] );
+					php.switchFrame(oldFrame);
 					break;
 			}
 		}
@@ -476,8 +481,13 @@ export default forwardRef(function Debugger({
 				break;
 
 			case 'trace':
+				const php = (await phpRef.current);
+				const oldFrame = await php.switchFrame(0);
+				console.log(oldFrame);
+				setCurrentFrame(oldFrame);
 				setTrace( await (await phpRef.current).dumpBacktrace() || [] );
 				setCurrentPanel('trace');
+				php.switchFrame(oldFrame);
 				break;
 		}
 	};
@@ -542,7 +552,11 @@ export default forwardRef(function Debugger({
 					</div>
 					<div className='phpdbg-panel phpdbg-trace'>
 						{trace.map((frame) => {
-							return <div key={frame.frame} onClick = {() => openFile(frame.filename, frame.lineNo)}>
+							return <div key={frame.frame} className={currentFrame === frame.frame ? 'current-frame': ''} onClick = {async () => {
+								openFile(frame.filename, frame.lineNo);
+								(await phpRef.current).switchFrame(frame.frame);
+								setCurrentFrame(frame.frame);
+							}}>
 								<span>{frame.filename}: {frame.lineNo}</span>
 							</div>
 						})}
