@@ -65,6 +65,7 @@ export default function Editor() {
 	const lastLine = useRef(null);
 
 	const versionSelector = useRef(true);
+	const version = useRef('8.3');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -345,7 +346,7 @@ export default function Editor() {
 
 		openDbg.current = <Debugger
 			file = {currentPath.current}
-			version = { versionSelector.current && versionSelector.current.value || '8.3' }
+			version = { version.current }
 			ref = {openDbg}
 			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
 			setCurrentFile = {file => currentBreak.current.file = file}
@@ -423,7 +424,7 @@ export default function Editor() {
 					</button>
 					{!isExecuting ? (
 						<>
-							{phpdbg ? '' : <select className='bevel' defaultValue = '8.3' ref={versionSelector}>
+							{phpdbg ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
