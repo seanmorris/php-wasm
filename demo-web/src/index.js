@@ -19,13 +19,24 @@ const params = new URLSearchParams(window.location.search);
 
 if(!params.has('no-service-worker'))
 {
-	navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-	setTimeout(() => {
+	(async () => {
+		await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
+		await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/`);
+		await navigator.serviceWorker.ready;
+
+		await new Promise((resolve) => {
+			if (navigator.serviceWorker.controller) return resolve();
+			navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
+		});
+
 		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
 		{
+			console.log('No Service Worker Detected, Reloading...');
+			await new Promise(a => setTimeout(a, 500));
 			window.location.reload();
+			return;
 		}
-	}, 450);
+	})();
 
 	navigator.serviceWorker.addEventListener('message', onMessage);
 }

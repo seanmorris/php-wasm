@@ -359,11 +359,8 @@ export class PhpCgiBase
 
 	refresh()
 	{
-		// const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
 		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
 		const {files: dynamicLibFiles, libs: dynamicLibs, urlLibs: dynamicLibUrls} = resolveDependencies(this.dynamicLibs, this);
-
-		const files = [...sharedLibFiles, ...dynamicLibFiles];
 
 		const userLocateFile = this.phpArgs.locateFile || (() => undefined);
 
@@ -393,6 +390,13 @@ export class PhpCgiBase
 
 				return String(dynamicLibUrls[path]);
 			}
+
+			// Suppress attempt to load libxml when
+			// it hasn't been provided in sharedLibs
+			if(path === 'libxml2.so')
+			{
+				return 'data:,';
+			}
 		};
 
 		const phpArgs = {
@@ -406,7 +410,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		return this.binary = this.binLoader.then({default: PHP}).then(async php => {
+		return this.binary = this.binLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -420,7 +424,7 @@ export class PhpCgiBase
 				php.FS.mkdir('/preload');
 			}
 
-			const allFiles = this.files.concat(files).concat(sharedLibFiles).concat(dynamicLibFiles);
+			const allFiles = this.files.concat(sharedLibFiles).concat(dynamicLibFiles);
 
 			// Make sure folder structure exists before preloading files
 			allFiles.forEach(fileDef => {

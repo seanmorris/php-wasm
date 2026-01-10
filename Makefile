@@ -1025,6 +1025,9 @@ test-deno: node-mjs
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
 
+test-cgi-node:
+	PHP_VERSION=${PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} test/node-cgi-test.sh
+
 update-snapshots:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
@@ -1065,12 +1068,6 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	rm -f third_party/php8.4-src/configured
-	rm -f third_party/php8.3-src/configured
-	rm -f third_party/php8.2-src/configured
-	rm -f third_party/php8.1-src/configured
-	rm -f third_party/php8.0-src/configured
-
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1

@@ -321,7 +321,6 @@ class PhpCgiBase {
     return coordinator;
   }
   refresh() {
-    // const {files, libs, urlLibs} = resolveDependencies(this.sharedLibs, this);
     const {
       files: sharedLibFiles,
       libs: sharedLibs,
@@ -332,7 +331,6 @@ class PhpCgiBase {
       libs: dynamicLibs,
       urlLibs: dynamicLibUrls
     } = (0,_resolveDependencies_mjs__WEBPACK_IMPORTED_MODULE_3__.resolveDependencies)(this.dynamicLibs, this);
-    const files = [...sharedLibFiles, ...dynamicLibFiles];
     const userLocateFile = this.phpArgs.locateFile || (() => undefined);
     const locateFile = (path, directory) => {
       let located = userLocateFile(path, directory);
@@ -351,6 +349,12 @@ class PhpCgiBase {
         }
         return String(dynamicLibUrls[path]);
       }
+
+      // Suppress attempt to load libxml when
+      // it hasn't been provided in sharedLibs
+      if (path === 'libxml2.so') {
+        return 'data:,';
+      }
     };
     const phpArgs = {
       persist: [{
@@ -364,16 +368,16 @@ class PhpCgiBase {
       stderr: x => this.error.push(x),
       locateFile
     };
-    return this.binary = this.binLoader.then({
+    return this.binary = this.binLoader.then(({
       default: PHP
-    }).then(async php => {
+    }) => new PHP(phpArgs)).then(async php => {
       await php.ccall('pib_storage_init', NUM, [], [], {
         async: true
       });
       if (!php.FS.analyzePath('/preload').exists) {
         php.FS.mkdir('/preload');
       }
-      const allFiles = this.files.concat(files).concat(sharedLibFiles).concat(dynamicLibFiles);
+      const allFiles = this.files.concat(sharedLibFiles).concat(dynamicLibFiles);
 
       // Make sure folder structure exists before preloading files
       allFiles.forEach(fileDef => {

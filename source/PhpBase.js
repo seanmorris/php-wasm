@@ -75,6 +75,13 @@ export class PhpBase extends EventTarget
 			{
 				return dyamicLibUrls[path];
 			}
+
+			// Suppress attempt to load libxml when
+			// it hasn't been provided in sharedLibs
+			if(path === 'libxml2.so')
+			{
+				return 'data:,';
+			}
 		};
 
 		this.valueIndex = 0;

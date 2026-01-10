@@ -13,8 +13,8 @@ export class BrowserTest extends BotTest
 	async testHelloWorld()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=hello-world.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=hello-world.php&version=${version}&extensionFlags=0`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -22,8 +22,8 @@ export class BrowserTest extends BotTest
 	async testSqlite()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite.php&version=${version}&extensionFlags=1024`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -33,8 +33,8 @@ export class BrowserTest extends BotTest
 		if(!['8.4', '8.3', '8.2'].includes(version)) return;
 
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=postgres.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=postgres.php&version=${version}&extensionFlags=0`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -42,8 +42,8 @@ export class BrowserTest extends BotTest
 	async testSqlitePdo()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite-pdo.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=sqlite-pdo.php&version=${version}&extensionFlags=1024`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -51,8 +51,8 @@ export class BrowserTest extends BotTest
 	async testFiles()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=files.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=files.php&version=${version}&extensionFlags=8`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -60,8 +60,8 @@ export class BrowserTest extends BotTest
 	async testGoto()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=goto.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=goto.php&version=${version}&extensionFlags=0`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
@@ -69,16 +69,16 @@ export class BrowserTest extends BotTest
 	async testDynamicExtensions()
 	{
 		await new Promise(a => setTimeout(a, 1000));
-		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=dynamic-extension.php&version=${version}`);
-		await new Promise(a => setTimeout(a, 20_000));
+		await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=dynamic-extension.php&version=${version}&extensionFlags=0`);
+		await new Promise(a => setTimeout(a, 4000));
 		const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 		this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	}
 
 	// async testFetch()
 	// {
-	// 	await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=fetch.php&version=${version}`);
-	// 	await new Promise(a => setTimeout(a, 20_000));
+	// 	await this.pobot.goto(`http://localhost:9000/php-wasm/embedded-php.html?demo=fetch.php&version=${version}&extensionFlags=0`);
+	// 	await new Promise(a => setTimeout(a, 4000));
 	// 	const phpOutput = await this.pobot.inject(() => document.querySelectorAll('iframe')[1].getAttribute('srcdoc'));
 	// 	this.assert(compareSnapshot(phpOutput), 'Snapshot does not match!');
 	// }

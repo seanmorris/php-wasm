@@ -3,6 +3,8 @@ import { PhpWeb } from './PhpWeb.mjs';
 const runPhpScriptTag = async (element) => {
 
 	const scope = {
+		version: '8.4',
+		variant: '',
 		stdin: null,
 		canvas: null,
 		stdout: null,
@@ -12,6 +14,16 @@ const runPhpScriptTag = async (element) => {
 		files: [],
 		imports: {}
 	};
+
+	if(element.hasAttribute('data-version'))
+	{
+		scope.version = element.getAttribute('data-version');
+	}
+
+	if(element.hasAttribute('data-variant'))
+	{
+		scope.variant = element.getAttribute('data-variant');
+	}
 
 	if(element.hasAttribute('data-ini'))
 	{
@@ -120,10 +132,12 @@ const runPhpScriptTag = async (element) => {
 
 	const php = new PhpWeb({
 		...flatImports,
+		version:    scope.version,
+		variant:    scope.variant,
 		sharedLibs: scope.libs,
-		ini: scope.ini,
-		files: scope.files,
-		canvas: scope.canvas,
+		ini:        scope.ini,
+		files:      scope.files,
+		canvas:     scope.canvas,
 	});
 
 	php.inputString(input);

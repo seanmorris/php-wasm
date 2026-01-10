@@ -70,7 +70,13 @@ export default function InstallDemo() {
 
 	useEffect(() => void (async()=>{
 		await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-		await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
+		await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/`);
+		await navigator.serviceWorker.ready;
+
+		await new Promise((resolve) => {
+			if (navigator.serviceWorker.controller) return resolve();
+			navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
+		});
 
 		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
 		{
@@ -165,7 +171,7 @@ export default function InstallDemo() {
 			setTerminal(
 				<div style={{
 					position: 'relative',
-					minWidth: 'max(45rem, 90vh)',
+					minWidth: 'min(45rem, 90vw)',
 					minHeight: '30rem',
 					resize: 'both'
 				}}>

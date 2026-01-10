@@ -51,6 +51,7 @@ export default function Editor() {
 	const [openFiles, setOpenFiles] = useState([]);
 	const [showLeft, setShowLeft] = useState([]);
 	const [phpdbg, setPhpDbg] = useState(false);
+	const [isExecuting, setIsExecuting] = useState(false);
 
 	const activeLines = useRef(new Set);
 	const currentBreak = useRef({});
@@ -59,6 +60,12 @@ export default function Editor() {
 	const aceRef = useRef(null);
 	const tabBox = useRef(null);
 	const openDbg = useRef(null);
+
+	const lastFile = useRef(null);
+	const lastLine = useRef(null);
+
+	const versionSelector = useRef(true);
+	const version = useRef('8.3');
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -168,6 +175,14 @@ export default function Editor() {
 		if(!openDbg.current)
 		{
 			window.history.replaceState({}, null, window.location.pathname + '?' + query);
+		}
+
+		if(currentPath.current !== path)
+		{
+			activeLines.current.forEach(m => {
+				editor.session.removeMarker(m);
+				activeLines.current.delete(m);
+			});
 		}
 
 		currentPath.current = path;
@@ -296,16 +311,34 @@ export default function Editor() {
 
 	const handleOpenFile = event => openFile(event.detail);
 
+	const gotoFile = async (file, line) => {
+		const { exists } = await sendMessage('analyzePath', [file]);
+
+		const editor = aceRef.current.editor;
+
+		if(exists)
+		{
+			await openFile(file);
+
+			editor.scrollToLine(-1 + line, true, true, () => {});
+		}
+	}
+
 	const startDebugger = () => {
 
 		const editor = aceRef.current.editor;
 
 		if(openDbg.current)
 		{
-			activeLines.current.forEach(m => editor.session.removeMarker(m));
+			activeLines.current.forEach(m => {
+				editor.session.removeMarker(m);
+				activeLines.current.delete(m);
+			});
+
 			openDbg.current = null;
 			editor.setReadOnly(false);
 			setPhpDbg(openDbg.current);
+			setIsExecuting(false);
 			return;
 		}
 
@@ -313,27 +346,52 @@ export default function Editor() {
 
 		openDbg.current = <Debugger
 			file = {currentPath.current}
+			version = { version.current }
 			ref = {openDbg}
 			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
 			setCurrentFile = {file => currentBreak.current.file = file}
 			setCurrentLine = {line => currentBreak.current.line = line}
-			onStdIn = {async () => {
+			setIsExecuting = {setIsExecuting}
+			openFile = {gotoFile}
+			onStdIn = {async (...args) => {
 				const file = currentBreak.current.file;
 				const line = currentBreak.current.line;
 
-				activeLines.current.forEach(m => editor.session.removeMarker(m));
+				if(!(file && line)) return;
 
-				if(file && line)
+				if(file === lastFile.current && line === lastLine.current) return;
+
+				const { exists } = await sendMessage('analyzePath', [file]);
+
+				if(exists)
 				{
 					await openFile(file);
 
+					activeLines.current.forEach(m => {
+						editor.session.removeMarker(m);
+						activeLines.current.delete(m);
+					});
+
 					const marker = editor.session.addMarker(
-						new Range(-1 + line, 0, -1 + line, Infinity), 'active_breakpoint', 'fullLine', true
+						new Range(-1 + line, 0, -1 + line, Infinity)
+						, 'active_breakpoint'
+						, 'fullLine'
+						, true
 					);
+
+					activeLines.current.add(marker);
 
 					editor.scrollToLine(-1 + line, true, true, () => {});
 
-					activeLines.current.add(marker);
+					lastFile.current = file;
+					lastLine.current = line;
+				}
+				else
+				{
+					activeLines.current.forEach(m => {
+						editor.session.removeMarker(m);
+						activeLines.current.delete(m);
+					});
 				}
 			}}
 		/>;
@@ -364,10 +422,18 @@ export default function Editor() {
 					<button className='square' onClick = {handleOpenVsCode}>
 						<img src = {vsCodeIcon} />
 					</button>
-					{!phpdbg ? (
-						<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
-							▶
-						</button>
+					{!isExecuting ? (
+						<>
+							{phpdbg ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
+								<option>8.4</option>
+								<option>8.3</option>
+								<option>8.2</option>
+								<option>8.1</option>
+							</select>}
+							<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
+								{phpdbg ? '⏹' : '▶'}
+							</button>
+						</>
 					) : (
 						<span className='contents'>
 						<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
@@ -420,9 +486,7 @@ export default function Editor() {
 								</div>
 							</div>
 						</div>
-						{phpdbg && (
-							<div className='inset row grow'><div className='frame grow'>{phpdbg}</div></div>
-						)}
+						{phpdbg && <div className='inset row grow'><div className='frame grow'>{phpdbg}</div></div>}
 					</div>
 				</div>
 				<div className = "inset right demo-bar">
