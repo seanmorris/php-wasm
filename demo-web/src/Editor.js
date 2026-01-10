@@ -176,6 +176,14 @@ export default function Editor() {
 			window.history.replaceState({}, null, window.location.pathname + '?' + query);
 		}
 
+		if(currentPath.current !== path)
+		{
+			activeLines.current.forEach(m => {
+				editor.session.removeMarker(m);
+				activeLines.current.delete(m);
+			});
+		}
+
 		currentPath.current = path;
 
 		editor.setReadOnly(!!openDbg.current);
@@ -309,11 +317,6 @@ export default function Editor() {
 
 		if(exists)
 		{
-			activeLines.current.forEach(m => {
-				editor.session.removeMarker(m);
-				activeLines.current.delete(m);
-			});
-
 			await openFile(file);
 
 			editor.scrollToLine(-1 + line, true, true, () => {});
@@ -361,11 +364,6 @@ export default function Editor() {
 
 				if(exists)
 				{
-					activeLines.current.forEach(m => {
-						editor.session.removeMarker(m);
-						activeLines.current.delete(m);
-					});
-
 					await openFile(file);
 
 					activeLines.current.forEach(m => {
@@ -425,10 +423,11 @@ export default function Editor() {
 					</button>
 					{!isExecuting ? (
 						<>
-							{phpdbg ? '' : <select defaultValue = '8.3' ref={versionSelector}>
+							{phpdbg ? '' : <select className='bevel' defaultValue = '8.3' ref={versionSelector}>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
+								<option>8.1</option>
 							</select>}
 							<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
 								{phpdbg ? '⏹' : '▶'}

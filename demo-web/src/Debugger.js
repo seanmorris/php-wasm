@@ -113,6 +113,7 @@ export default forwardRef(function Debugger({
 	const [userClasses, setUserClasses] = useState({});
 
 	const [includedFiles, setIncludedFiles] = useState([]);
+	const [trace, setTrace] = useState([]);
 
 	const [currentPanel, setCurrentPanel] = useState('none');
 
@@ -368,6 +369,10 @@ export default forwardRef(function Debugger({
 				case 'files':
 					setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
 					break;
+
+				case 'trace':
+					setTrace( await (await phpRef.current).dumpBacktrace() || [] );
+					break;
 			}
 		}
 		else
@@ -469,6 +474,11 @@ export default forwardRef(function Debugger({
 				setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
 				setCurrentPanel('files');
 				break;
+
+			case 'trace':
+				setTrace( await (await phpRef.current).dumpBacktrace() || [] );
+				setCurrentPanel('trace');
+				break;
 		}
 	};
 
@@ -496,6 +506,7 @@ export default forwardRef(function Debugger({
 				<button onClick = {async () => switchRightPanel('classes')}>classes</button>
 				<button onClick = {async () => switchRightPanel('functions')}>functions</button>
 				<button onClick = {async () => switchRightPanel('files')}>files</button>
+				<button onClick = {async () => switchRightPanel('trace')}>trace</button>
 			</div>
 			<div className='phpdbg-panel-frame inset'>
 				<div className='phpdbg-panel-frame-inner'>
@@ -526,6 +537,13 @@ export default forwardRef(function Debugger({
 						{includedFiles.sort((a, b) => String(a).localeCompare(b)).map(name => {
 							return <div key={name} onClick = {() => openFile(name)}>
 								<span>{name}</span>
+							</div>
+						})}
+					</div>
+					<div className='phpdbg-panel phpdbg-trace'>
+						{trace.map((frame) => {
+							return <div key={frame.frame} onClick = {() => openFile(frame.filename, frame.lineNo)}>
+								<span>{frame.filename}: {frame.lineNo}</span>
 							</div>
 						})}
 					</div>

@@ -65,7 +65,7 @@ export class PhpDbgWeb extends PhpBase
 	{
 		const php = (await this.binary);
 
-	const cmd = ['phpdbg', '-c', '/php.ini', '-e'];
+		const cmd = ['phpdbg', '-c', '/php.ini', '-e'];
 
 		const ptrs = cmd.map(part => {
 			const len = php.lengthBytesUTF8(part) + 1;
@@ -370,6 +370,53 @@ export class PhpDbgWeb extends PhpBase
 		php._free(ptr);
 
 		return files;
+	}
+
+	async dumpBacktrace()
+	{
+		const php = await this.binary;
+
+		const ptr = php.ccall(
+			'vrzno_dbg_dump_backtrace'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+
+		console.log({ptr});
+
+		const heap = new DataView(php.HEAP8.buffer);
+		const end = ptr + heap.getInt32(ptr, true);
+		const pointerLen = 4;
+
+		let cur = ptr + pointerLen;
+		const dec = new TextDecoder;
+		const frames = [];
+
+		let i = 0;
+
+		while(cur < end)
+		{
+			const filenameLen = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			const filename = dec.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			cur += filenameLen + 1;
+
+			const lineNo = heap.getInt32(cur, true);
+			cur += pointerLen;
+
+			frames.push({filename, lineNo, frame: i});
+
+			i++;
+		}
+
+		console.log(frames);
+
+		php._free(ptr);
+
+		return frames;
 	}
 
 	async refresh()

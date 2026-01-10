@@ -257,6 +257,10 @@
 	display: initial;
 }
 
+[data-current-panel="trace"] .phpdbg-panel.phpdbg-trace {
+	display: initial;
+}
+
 
 .phpdbg-panel-frame {
 	position: relative;
@@ -276,6 +280,7 @@
 
 .phpdbg-panel.phpdbg-files > div,
 .phpdbg-panel.phpdbg-classes > div,
+.phpdbg-panel.phpdbg-trace > div,
 .phpdbg-panel.phpdbg-functions > div {
 	padding: 0.5rem;
 	border-bottom: 1px solid #CCC;
@@ -284,6 +289,7 @@
 
 .phpdbg-panel.phpdbg-files > div span,
 .phpdbg-panel.phpdbg-classes > div span,
+.phpdbg-panel.phpdbg-trace > div,
 .phpdbg-panel.phpdbg-functions > div > span {
 	cursor: pointer;
 }
