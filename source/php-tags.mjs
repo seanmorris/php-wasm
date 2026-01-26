@@ -126,6 +126,20 @@ const runPhpScriptTag = async (element) => {
 		canvas: scope.canvas,
 	});
 
+	// Option 1:
+
+	// Allow binding php into window via attribute data-bind-php-window='true'
+	// if(element.getAttribute('data-bind-php-window') === 'true'){
+	// 	window.php = php;
+	// }
+
+	// Option 2:
+
+	// Improved by allowing specific window binding name to avoid naming collisions
+	if(element.getAttribute('data-php-bind-window-as')){
+		window[element.getAttribute('data-php-bind-window-as')] = php;
+	}
+
 	php.inputString(input);
 
 	const outListener = event => {
