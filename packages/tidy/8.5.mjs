@@ -8,4 +8,3 @@ export const getLibs = () => [
 ];
 
 export default {getLibs};
-

@@ -7,6 +7,7 @@ import phar8_0 from './8.0.mjs';
 
 const versionTable = {
 	'8.5': phar8_5,
+	'8.4': phar8_4,
 	'8.3': phar8_3,
 	'8.2': phar8_2,
 	'8.1': phar8_1,
