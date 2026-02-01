@@ -46,6 +46,9 @@ third_party/php${PHP_VERSION}-sdl/config.m4:
 	${DOCKER_RUN} tar -C third_party -xvzf sdl-2.7.0.tgz sdl-2.7.0
 	${DOCKER_RUN} mv third_party/sdl-2.7.0 third_party/php${PHP_VERSION}-sdl
 	${DOCKER_RUN} rm sdl-2.7.0.tgz
+ifeq (${PHP_VERSION},8.5)
+	${DOCKER_RUN_IN_EXT_SDL} find . -type f -exec perl -pi -e 's/zend_exception_get_default\(\)/zend_ce_exception/g;' {} +
+endif
 
 third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSION}-sdl/config.m4 | third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mImporting ext-sdl\e[0m"
