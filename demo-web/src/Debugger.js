@@ -92,7 +92,7 @@ let lastCommand = null;
 export default forwardRef(function Debugger({
 	className = '', file, localEcho = true, initCommands = [], onStdIn
 	, setCurrentFile, setCurrentLine, setStatusMessage, setIsExecuting
-	, openFile
+	, openFile, version = '8.3',
 }, ref) {
 	const phpRef = useRef(null);
 	const cmdStack = useRef(['']);
@@ -113,6 +113,8 @@ export default forwardRef(function Debugger({
 	const [userClasses, setUserClasses] = useState({});
 
 	const [includedFiles, setIncludedFiles] = useState([]);
+	const [trace, setTrace] = useState([]);
+	const [currentFrame, setCurrentFrame] = useState(0);
 
 	const [currentPanel, setCurrentPanel] = useState('none');
 
@@ -182,7 +184,7 @@ export default forwardRef(function Debugger({
 	const refreshPhp = useCallback(init => {
 		setStatusMessage && setStatusMessage('loading...');
 		phpRef.current = new PhpDbgWeb({
-			version: '8.3',
+			version,
 			sharedLibs,
 			files,
 			ini,
@@ -368,6 +370,14 @@ export default forwardRef(function Debugger({
 				case 'files':
 					setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
 					break;
+
+				case 'trace':
+					const php = (await phpRef.current);
+					const oldFrame = await php.switchFrame(0);
+					setCurrentFrame(oldFrame);
+					setTrace( await (await phpRef.current).dumpBacktrace() || [] );
+					php.switchFrame(oldFrame);
+					break;
 			}
 		}
 		else
@@ -469,6 +479,16 @@ export default forwardRef(function Debugger({
 				setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
 				setCurrentPanel('files');
 				break;
+
+			case 'trace':
+				const php = (await phpRef.current);
+				const oldFrame = await php.switchFrame(0);
+				console.log(oldFrame);
+				setCurrentFrame(oldFrame);
+				setTrace( await (await phpRef.current).dumpBacktrace() || [] );
+				setCurrentPanel('trace');
+				php.switchFrame(oldFrame);
+				break;
 		}
 	};
 
@@ -496,6 +516,7 @@ export default forwardRef(function Debugger({
 				<button onClick = {async () => switchRightPanel('classes')}>classes</button>
 				<button onClick = {async () => switchRightPanel('functions')}>functions</button>
 				<button onClick = {async () => switchRightPanel('files')}>files</button>
+				<button onClick = {async () => switchRightPanel('trace')}>trace</button>
 			</div>
 			<div className='phpdbg-panel-frame inset'>
 				<div className='phpdbg-panel-frame-inner'>
@@ -526,6 +547,17 @@ export default forwardRef(function Debugger({
 						{includedFiles.sort((a, b) => String(a).localeCompare(b)).map(name => {
 							return <div key={name} onClick = {() => openFile(name)}>
 								<span>{name}</span>
+							</div>
+						})}
+					</div>
+					<div className='phpdbg-panel phpdbg-trace'>
+						{trace.map((frame) => {
+							return <div key={frame.frame} className={currentFrame === frame.frame ? 'current-frame': ''} onClick = {async () => {
+								openFile(frame.filename, frame.lineNo);
+								(await phpRef.current).switchFrame(frame.frame);
+								setCurrentFrame(frame.frame);
+							}}>
+								<span>{frame.filename}: {frame.lineNo}</span>
 							</div>
 						})}
 					</div>

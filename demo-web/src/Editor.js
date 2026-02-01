@@ -64,6 +64,9 @@ export default function Editor() {
 	const lastFile = useRef(null);
 	const lastLine = useRef(null);
 
+	const versionSelector = useRef(true);
+	const version = useRef('8.3');
+
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	const handleSave = async () => {
@@ -172,6 +175,14 @@ export default function Editor() {
 		if(!openDbg.current)
 		{
 			window.history.replaceState({}, null, window.location.pathname + '?' + query);
+		}
+
+		if(currentPath.current !== path)
+		{
+			activeLines.current.forEach(m => {
+				editor.session.removeMarker(m);
+				activeLines.current.delete(m);
+			});
 		}
 
 		currentPath.current = path;
@@ -307,14 +318,26 @@ export default function Editor() {
 
 		if(exists)
 		{
+			await openFile(file);
+
+			editor.scrollToLine(-1 + line, true, true, () => {});
+		}
+
+		if(line !== undefined)
+		{
 			activeLines.current.forEach(m => {
 				editor.session.removeMarker(m);
 				activeLines.current.delete(m);
 			});
 
-			await openFile(file);
+			const marker = editor.session.addMarker(
+				new Range(-1 + line, 0, -1 + line, Infinity)
+				, 'active_breakpoint'
+				, 'fullLine'
+				, true
+			);
 
-			editor.scrollToLine(-1 + line, true, true, () => {});
+			activeLines.current.add(marker);
 		}
 	}
 
@@ -340,6 +363,7 @@ export default function Editor() {
 
 		openDbg.current = <Debugger
 			file = {currentPath.current}
+			version = { version.current }
 			ref = {openDbg}
 			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
 			setCurrentFile = {file => currentBreak.current.file = file}
@@ -358,11 +382,6 @@ export default function Editor() {
 
 				if(exists)
 				{
-					activeLines.current.forEach(m => {
-						editor.session.removeMarker(m);
-						activeLines.current.delete(m);
-					});
-
 					await openFile(file);
 
 					activeLines.current.forEach(m => {
@@ -422,12 +441,11 @@ export default function Editor() {
 					</button>
 					{!isExecuting ? (
 						<>
-							{phpdbg ? '' : <select defaultValue = '8.3'>
+							{phpdbg ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
 								<option>8.1</option>
-								<option>8.0</option>
 							</select>}
 							<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
 								{phpdbg ? '⏹' : '▶'}

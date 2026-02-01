@@ -140,3 +140,7 @@
 .editor iframe {
 	flex-grow: 1;
 }
+
+select.bevel option {
+	background-color: #FFF;
+}
