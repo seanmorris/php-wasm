@@ -93,8 +93,8 @@ ifeq ($(filter ${BROTLI},0 1),)
 $(error BROTLI MUST BE 0, 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
-ifeq ($(filter ${PHP_VERSION},8.4 8.3 8.2 8.1 8.0),)
-$(error PHP_VERSION MUST BE 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2 8.1 8.0),)
+$(error PHP_VERSION MUST BE 8.5, 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION}) PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 EXTRA_MODULES=
@@ -158,6 +158,12 @@ PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
 
 TEST_LIST?=
+
+ifeq (${PHP_VERSION},8.5)
+PHP_VERSION_FULL=8.5.2
+PHP_BRANCH=php-${PHP_VERSION_FULL}
+PHP_AR=libphp
+endif
 
 ifeq (${PHP_VERSION},8.4)
 PHP_VERSION_FULL=8.4.1
@@ -336,6 +342,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 		--disable-all      \
 		--disable-fiber-asm \
 		--disable-rpath    \
+		--disable-opcache-jit \
 		--without-pear     \
 		--without-pcre-jit \
 		${CONFIGURE_FLAGS}
@@ -391,8 +398,9 @@ BUILD_FLAGS+=-f ../../php.mk \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CLI_PATH}'\
 	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
+	SAPI_PHPDBG_PATH='${SAPI_PHPDBG_PATH}'\
 	PHP_CLI_OBJS='${PHP_CLI_OBJS}' \
-	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
 	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
@@ -489,7 +497,7 @@ web-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
 endif
 	@ cat ico.ans >&2
@@ -498,7 +506,7 @@ worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
 endif
 	@ cat ico.ans >&2
@@ -513,7 +521,7 @@ webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
 endif
 	@ cat ico.ans >&2
@@ -528,7 +536,7 @@ node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
 endif
 	@ cat ico.ans >&2
@@ -843,6 +851,10 @@ third_party/php${PHP_VERSION}-src/scripts/phpize-built: ${DEPENDENCIES} | ${ORDE
 	${DOCKER_RUN_IN_PHP} chmod +x scripts/phpize
 	${DOCKER_RUN_IN_PHP} touch scripts/phpize-built
 
+patch/php8.5.patch:
+	bash -c 'cd third_party/php8.5-src/ && git diff > ../../patch/php8.5.patch'
+	perl -pi -w -e 's|([ab])/|\1/third_party/php8.5-src/|g' ./patch/php8.5.patch
+
 patch/php8.4.patch:
 	bash -c 'cd third_party/php8.4-src/ && git diff > ../../patch/php8.4.patch'
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.4-src/|g' ./patch/php8.4.patch
@@ -968,7 +980,7 @@ publish:
 
 test:
 	${MAKE} test-node
-ifneq ($(filter ${PHP_VERSION},8.4 8.3 8.2),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} test-deno
 endif
 
@@ -1035,6 +1047,7 @@ run:
 	${DOCKER_ENV} emscripten-builder bash
 
 all-versions:
+	${MAKE} PHP_VERSION=8.5
 	${MAKE} PHP_VERSION=8.4
 	${MAKE} PHP_VERSION=8.3
 	${MAKE} PHP_VERSION=8.2
@@ -1042,11 +1055,13 @@ all-versions:
 	${MAKE} PHP_VERSION=8.0
 
 all-stdlibs:
+	${MAKE} stdlib PHP_VERSION=8.5
 	${MAKE} stdlib PHP_VERSION=8.4
 	${MAKE} stdlib PHP_VERSION=8.3
 	${MAKE} stdlib PHP_VERSION=8.2
 
 test-all-versions:
+	${MAKE} test PHP_VERSION=8.5
 	${MAKE} test PHP_VERSION=8.4
 	${MAKE} test PHP_VERSION=8.3
 	${MAKE} test PHP_VERSION=8.2
@@ -1054,6 +1069,7 @@ test-all-versions:
 	${MAKE} test PHP_VERSION=8.0
 
 x-all-versions:
+	${MAKE} ${X} PHP_VERSION=8.5
 	${MAKE} ${X} PHP_VERSION=8.4
 	${MAKE} ${X} PHP_VERSION=8.3
 	${MAKE} ${X} PHP_VERSION=8.2
@@ -1061,6 +1077,7 @@ x-all-versions:
 	${MAKE} ${X} PHP_VERSION=8.0
 
 php-clean-all-versions:
+	${MAKE} php-clean PHP_VERSION=8.5
 	${MAKE} php-clean PHP_VERSION=8.4
 	${MAKE} php-clean PHP_VERSION=8.3
 	${MAKE} php-clean PHP_VERSION=8.2
@@ -1068,6 +1085,7 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
+	${MAKE} web-mjs PHP_VERSION=8.5 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
@@ -1076,6 +1094,7 @@ demo-versions:
 
 	${MAKE} worker-cgi-mjs web-cli-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
 
+	${MAKE} web-mjs PHP_VERSION=8.5 WITH_SDL=0
 	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=0
 	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=0
 	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=0

@@ -140,7 +140,7 @@ jobs:
     needs: [build-libs]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -150,7 +150,7 @@ jobs:
     needs: [build-libs]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -160,7 +160,7 @@ jobs:
     needs: []
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -173,7 +173,7 @@ jobs:
     needs: [build-php-dynamic]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
@@ -188,7 +188,7 @@ jobs:
     needs: [build-php-shared]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
@@ -203,7 +203,7 @@ jobs:
     needs: [build-php-static]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
@@ -220,7 +220,7 @@ jobs:
     needs: [build-php-dynamic]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -233,7 +233,7 @@ jobs:
     needs: [build-php-shared]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -246,7 +246,7 @@ jobs:
     needs: [build-php-static]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -261,7 +261,7 @@ jobs:
     needs: [build-php-dynamic]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -274,7 +274,7 @@ jobs:
     needs: [build-php-shared]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -287,7 +287,7 @@ jobs:
     needs: [build-php-static]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -503,7 +503,7 @@ jobs:
     needs: [compress-dynamic-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
@@ -518,7 +518,7 @@ jobs:
     needs: [compress-shared-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
@@ -533,7 +533,7 @@ jobs:
     needs: [compress-static-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
@@ -550,7 +550,7 @@ jobs:
     needs: [compress-dynamic-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -563,7 +563,7 @@ jobs:
     needs: [compress-shared-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -576,7 +576,7 @@ jobs:
     needs: [compress-static-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -591,7 +591,7 @@ jobs:
     needs: [compress-dynamic-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -604,7 +604,7 @@ jobs:
     needs: [compress-shared-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -617,7 +617,7 @@ jobs:
     needs: [compress-static-packages]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:

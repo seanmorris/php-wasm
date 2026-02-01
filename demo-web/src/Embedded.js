@@ -563,6 +563,7 @@ function Embedded() {
 					<label>
 						<span>Version:</span>
 							<select data-select-demo ref = {selectVersionBox}>
+								<option value = "8.5">8.5</option>
 								<option value = "8.4">8.4</option>
 								<option value = "8.3">8.3</option>
 								<option value = "8.2">8.2</option>

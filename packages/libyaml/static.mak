@@ -60,12 +60,14 @@ lib/lib/libyaml.a: third_party/libyaml/.gitignore
 lib/lib/libyaml.so: lib/lib/libyaml.a
 	${DOCKER_RUN_IN_LIB_YAML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
+PHP_YAML_VERSION=2.3.0
+
 third_party/php${PHP_VERSION}-yaml/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-yaml\e[0m"
-	${DOCKER_RUN} wget -q https://pecl.php.net/get/yaml-2.2.3.tgz
-	${DOCKER_RUN} tar -C third_party -xvzf yaml-2.2.3.tgz yaml-2.2.3
-	${DOCKER_RUN} mv third_party/yaml-2.2.3 third_party/php${PHP_VERSION}-yaml
-	${DOCKER_RUN} rm yaml-2.2.3.tgz
+	${DOCKER_RUN} wget -q https://pecl.php.net/get/yaml-${PHP_YAML_VERSION}.tgz
+	${DOCKER_RUN} tar -C third_party -xvzf yaml-${PHP_YAML_VERSION}.tgz yaml-${PHP_YAML_VERSION}
+	${DOCKER_RUN} mv third_party/yaml-${PHP_YAML_VERSION} third_party/php${PHP_VERSION}-yaml
+	${DOCKER_RUN} rm yaml-${PHP_YAML_VERSION}.tgz
 
 third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/php${PHP_VERSION}-yaml/config.m4 | third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mImporting ext-yaml\e[0m"

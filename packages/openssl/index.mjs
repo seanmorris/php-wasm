@@ -1,10 +1,12 @@
+import openssl8_5 from './8.5.mjs';
 import openssl8_4 from './8.4.mjs';
-import openssl8_3 from './8.3.mjs'; 
-import openssl8_2 from './8.2.mjs'; 
-import openssl8_1 from './8.1.mjs'; 
-import openssl8_0 from './8.0.mjs'; 
+import openssl8_3 from './8.3.mjs';
+import openssl8_2 from './8.2.mjs';
+import openssl8_1 from './8.1.mjs';
+import openssl8_0 from './8.0.mjs';
 
 const versionTable = {
+	'8.5': openssl8_5,
 	'8.4': openssl8_4,
 	'8.3': openssl8_3,
 	'8.2': openssl8_2,
