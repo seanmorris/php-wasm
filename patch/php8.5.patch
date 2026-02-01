@@ -1,0 +1,733 @@
+diff --git a/third_party/php8.5-src/Zend/zend_API.c b/third_party/php8.5-src/Zend/zend_API.c
+index b5c8b7a..58aae9f 100644
+--- a/third_party/php8.5-src/Zend/zend_API.c
++++ b/third_party/php8.5-src/Zend/zend_API.c
+@@ -3707,6 +3707,70 @@ ZEND_API void zend_disable_functions(const char *function_list) /* {{{ */
+ }
+ /* }}} */
+ 
++static ZEND_COLD zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
++{
++	zend_object *intern;
++
++	intern = zend_objects_new(class_type);
++
++	/* Initialize default properties */
++	if (EXPECTED(class_type->default_properties_count != 0)) {
++		zval *p = intern->properties_table;
++		zval *end = p + class_type->default_properties_count;
++		do {
++			ZVAL_UNDEF(p);
++			p++;
++		} while (p != end);
++	}
++
++	zend_error(E_WARNING, "%s() has been disabled for security reasons", ZSTR_VAL(class_type->name));
++	return intern;
++}
++
++static const zend_function_entry disabled_class_new[] = {
++	ZEND_FE_END
++};
++
++ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length) /* {{{ */
++{
++	zend_class_entry *disabled_class;
++	zend_string *key;
++	zend_function *fn;
++	zend_property_info *prop;
++
++	key = zend_string_alloc(class_name_length, 0);
++	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
++	disabled_class = zend_hash_find_ptr(CG(class_table), key);
++	zend_string_release_ex(key, 0);
++	if (!disabled_class) {
++		return FAILURE;
++	}
++
++	/* Will be reset by INIT_CLASS_ENTRY. */
++	free(disabled_class->interfaces);
++
++	INIT_CLASS_ENTRY_INIT_METHODS((*disabled_class), disabled_class_new);
++	disabled_class->create_object = display_disabled_class;
++
++	ZEND_HASH_MAP_FOREACH_PTR(&disabled_class->function_table, fn) {
++		if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
++			fn->common.scope == disabled_class) {
++			zend_free_internal_arg_info(&fn->internal_function);
++		}
++	} ZEND_HASH_FOREACH_END();
++	zend_hash_clean(&disabled_class->function_table);
++	ZEND_HASH_MAP_FOREACH_PTR(&disabled_class->properties_info, prop) {
++		if (prop->ce == disabled_class) {
++			zend_string_release(prop->name);
++			zend_type_release(prop->type, /* persistent */ 1);
++			free(prop);
++		}
++	} ZEND_HASH_FOREACH_END();
++	zend_hash_clean(&disabled_class->properties_info);
++	return SUCCESS;
++}
++/* }}} */
++
+ static zend_always_inline zend_class_entry *get_scope(zend_execute_data *frame)
+ {
+ 	return frame && frame->func ? frame->func->common.scope : NULL;
+diff --git a/third_party/php8.5-src/Zend/zend_API.h b/third_party/php8.5-src/Zend/zend_API.h
+index 8cde831..f06c07a 100644
+--- a/third_party/php8.5-src/Zend/zend_API.h
++++ b/third_party/php8.5-src/Zend/zend_API.h
+@@ -405,6 +405,7 @@ static zend_always_inline zend_result zend_register_class_alias(const char *name
+ 	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, 1)
+ 
+ ZEND_API void zend_disable_functions(const char *function_list);
++ZEND_API zend_result zend_disable_class(const char *class_name, size_t class_name_length);
+ 
+ ZEND_API ZEND_COLD void zend_wrong_param_count(void);
+ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
+diff --git a/third_party/php8.5-src/ext/libxml/libxml.c b/third_party/php8.5-src/ext/libxml/libxml.c
+index 0105106..e66ceaf 100644
+--- a/third_party/php8.5-src/ext/libxml/libxml.c
++++ b/third_party/php8.5-src/ext/libxml/libxml.c
+@@ -50,6 +50,17 @@
+ 
+ #include "libxml_arginfo.h"
+ 
++#ifdef LIBXML_DYNAMIC_LOAD
++__attribute__((weak)) const char *xmlParserVersion = {0};
++__attribute__((weak)) void (*xmlFree)(void *);
++__attribute__((weak)) void *(*xmlMalloc)(size_t);
++__attribute__((weak)) void *(*xmlMallocAtomic)(size_t);
++__attribute__((weak)) char *(*xmlMemStrdup)(const char *);
++__attribute__((weak)) void *(*xmlRealloc)(void *, size_t);
++__attribute__((weak)) void (*xmlGenericError)(void *, const char *, ...);
++__attribute__((weak)) void (*xmlStructuredError)(void *, xmlErrorPtr);
++#endif
++
+ /* a true global for initialization */
+ static bool php_libxml_initialized = false;
+ static bool php_libxml_per_request_initialization = true;
+@@ -983,6 +994,29 @@ PHP_LIBXML_API void php_libxml_switch_context(const zval *context, zval *oldcont
+ 
+ static PHP_MINIT_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) {
++		void *handle = DL_LOAD("libxml2.so");
++		const char** xmlParserVersionPtr = (const char**)dlsym(handle, "xmlParserVersion");
++		if (xmlParserVersionPtr) {
++			xmlParserVersion = *xmlParserVersionPtr;
++		}
++	}
++
++	if (xmlParserVersion == NULL) {
++		zend_disable_class("LibXMLError", sizeof("LibXMLError") - 1);
++		zend_disable_functions(
++			"libxml_set_streams_context,"
++			"libxml_use_internal_errors,"
++			"libxml_get_last_error,"
++			"libxml_get_errors,"
++			"libxml_clear_errors,"
++			"libxml_disable_entity_loader,"
++			"libxml_set_external_entity_loader,"
++			"libxml_get_external_entity_loader,"
++		);
++		return SUCCESS;
++	}
++
+ 	php_libxml_initialize();
+ 
+ 	register_libxml_symbols(module_number);
+@@ -1020,6 +1054,8 @@ static PHP_MINIT_FUNCTION(libxml)
+ 
+ static PHP_RINIT_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	if (php_libxml_per_request_initialization) {
+ 		/* report errors via handler rather than stderr */
+ 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
+@@ -1047,6 +1083,8 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
+ 
+ static PHP_MSHUTDOWN_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	if (!php_libxml_per_request_initialization) {
+ 		xmlSetGenericErrorFunc(NULL, NULL);
+ 
+@@ -1060,6 +1098,8 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
+ 
+ static zend_result php_libxml_post_deactivate(void)
+ {
++	if (xmlParserVersion == NULL) return SUCCESS;
++
+ 	/* reset libxml generic error handling */
+ 	if (php_libxml_per_request_initialization) {
+ 		xmlSetGenericErrorFunc(NULL, NULL);
+@@ -1085,6 +1125,13 @@ static zend_result php_libxml_post_deactivate(void)
+ 
+ static PHP_MINFO_FUNCTION(libxml)
+ {
++	if (xmlParserVersion == NULL) {
++		php_info_print_table_start();
++		php_info_print_table_row(2, "libXML support", "NOT ACTIVE");
++		php_info_print_table_end();
++		return;
++	}
++
+ 	php_info_print_table_start();
+ 	php_info_print_table_row(2, "libXML support", "active");
+ 	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
+@@ -1097,6 +1144,8 @@ static PHP_MINFO_FUNCTION(libxml)
+ /* {{{ Set the streams context for the next libxml document load or write */
+ PHP_FUNCTION(libxml_set_streams_context)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	zval *arg;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(1, 1)
+@@ -1120,6 +1169,8 @@ PHP_LIBXML_API bool php_libxml_uses_internal_errors(void)
+ /* {{{ Disable libxml errors and allow user to fetch error information as needed */
+ PHP_FUNCTION(libxml_use_internal_errors)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	bool use_errors, use_errors_is_null = true;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(0, 1)
+@@ -1173,6 +1224,8 @@ static void php_libxml_create_error_object(zval *return_value, const xmlError *e
+ /* {{{ Retrieve last error from libxml */
+ PHP_FUNCTION(libxml_get_last_error)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+ 	const xmlError *error;
+@@ -1194,6 +1247,8 @@ PHP_FUNCTION(libxml_get_last_error)
+ /* {{{ Retrieve array of errors */
+ PHP_FUNCTION(libxml_get_errors)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+ 	if (LIBXML(error_list)) {
+@@ -1215,6 +1270,8 @@ PHP_FUNCTION(libxml_get_errors)
+ /* {{{ Clear last error from libxml */
+ PHP_FUNCTION(libxml_clear_errors)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+ 	xmlResetLastError();
+@@ -1235,6 +1292,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
+ /* {{{ Disable/Enable ability to load external entities */
+ PHP_FUNCTION(libxml_disable_entity_loader)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	bool disable = true;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(0, 1)
+@@ -1249,6 +1308,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
+ /* {{{ Changes the default external entity loader */
+ PHP_FUNCTION(libxml_set_external_entity_loader)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	zend_fcall_info			fci;
+ 	zend_fcall_info_cache	fcc;
+ 
+@@ -1270,6 +1331,8 @@ PHP_FUNCTION(libxml_set_external_entity_loader)
+ /* {{{ Get the current external entity loader, or null if the default loader is installer. */
+ PHP_FUNCTION(libxml_get_external_entity_loader)
+ {
++	if (xmlParserVersion == NULL) return;
++
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
+ 	if (ZEND_FCC_INITIALIZED(LIBXML(entity_loader_callback))) {
+diff --git a/third_party/php8.5-src/ext/openssl/openssl.c b/third_party/php8.5-src/ext/openssl/openssl.c
+index cb134e9..b1ef0af 100644
+--- a/third_party/php8.5-src/ext/openssl/openssl.c
++++ b/third_party/php8.5-src/ext/openssl/openssl.c
+@@ -437,8 +437,8 @@ PHP_MINIT_FUNCTION(openssl)
+ 	/* override the default tcp socket provider */
+ 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
+ 
+-	php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("https", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
+ 
+ 	REGISTER_INI_ENTRIES();
+ 
+@@ -2304,7 +2304,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
+ 	array_init(return_value);
+ 	add_assoc_long(return_value, "bits", EVP_PKEY_bits(pkey));
+ 	add_assoc_stringl(return_value, "key", pbio, pbio_len);
+-	
++
+ 	zend_long ktype = php_openssl_pkey_get_details(return_value, pkey);
+ 
+ 	add_assoc_long(return_value, "type", ktype);
+diff --git a/third_party/php8.5-src/ext/pdo_sqlite/pdo_sqlite.c b/third_party/php8.5-src/ext/pdo_sqlite/pdo_sqlite.c
+index 667948f..96ee360 100644
+--- a/third_party/php8.5-src/ext/pdo_sqlite/pdo_sqlite.c
++++ b/third_party/php8.5-src/ext/pdo_sqlite/pdo_sqlite.c
+@@ -22,8 +22,8 @@
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+ #include "SAPI.h"
+-#include "ext/pdo/php_pdo.h"
+-#include "ext/pdo/php_pdo_driver.h"
++#include "../ext/pdo/php_pdo.h"
++#include "../ext/pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.5-src/ext/pdo_sqlite/sqlite_driver.c b/third_party/php8.5-src/ext/pdo_sqlite/sqlite_driver.c
+index 537aefa..a55cbd5 100644
+--- a/third_party/php8.5-src/ext/pdo_sqlite/sqlite_driver.c
++++ b/third_party/php8.5-src/ext/pdo_sqlite/sqlite_driver.c
+@@ -21,8 +21,8 @@
+ #include "php.h"
+ #include "php_ini.h"
+ #include "ext/standard/info.h"
+-#include "ext/pdo/php_pdo.h"
+-#include "ext/pdo/php_pdo_driver.h"
++#include "../ext/pdo/php_pdo.h"
++#include "../ext/pdo/php_pdo_driver.h"
+ #include "php_pdo_sqlite.h"
+ #include "php_pdo_sqlite_int.h"
+ #include "zend_exceptions.h"
+diff --git a/third_party/php8.5-src/ext/standard/basic_functions.c b/third_party/php8.5-src/ext/standard/basic_functions.c
+index 8b72fff..6f8a63c 100644
+--- a/third_party/php8.5-src/ext/standard/basic_functions.c
++++ b/third_party/php8.5-src/ext/standard/basic_functions.c
+@@ -342,8 +342,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
+ 	php_register_url_stream_wrapper("file", &php_plain_files_wrapper);
+ 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper);
+ 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper);
+-	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
+-	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
++	// php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
++	// php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
+ 
+ 	return SUCCESS;
+ }
+diff --git a/third_party/php8.5-src/ext/standard/credits.c b/third_party/php8.5-src/ext/standard/credits.c
+index 4e8722d..1343330 100644
+--- a/third_party/php8.5-src/ext/standard/credits.c
++++ b/third_party/php8.5-src/ext/standard/credits.c
+@@ -33,6 +33,11 @@ PHPAPI ZEND_COLD void php_print_credits(int flag) /* {{{ */
+ 		PUTS("PHP Credits\n");
+ 	}
+ 
++	php_info_print_table_start();
++	php_info_print_table_header(1, "php-wasm");
++	php_info_print_table_row(1, "Sean Morris & Oraoto");
++	php_info_print_table_end();
++
+ 	if (flag & PHP_CREDITS_GROUP) {
+ 		/* Group */
+ 
+diff --git a/third_party/php8.5-src/ext/standard/credits_ext.h b/third_party/php8.5-src/ext/standard/credits_ext.h
+index 509135a..981ea04 100644
+--- a/third_party/php8.5-src/ext/standard/credits_ext.h
++++ b/third_party/php8.5-src/ext/standard/credits_ext.h
+@@ -44,10 +44,12 @@ CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann, Daniel R
+ CREDIT_LINE("Opcache", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Dmitry Stogov, Xinchen Hui");
+ CREDIT_LINE("OpenSSL", "Stig Venaas, Wez Furlong, Sascha Kettler, Scott MacVicar, Eliot Lear");
+ CREDIT_LINE("pcntl", "Jason Greene, Arnaud Le Blanc");
++CREDIT_LINE("pdo-pglite", "Sean Morris");
+ CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
+ CREDIT_LINE("PHP Archive", "Gregory Beaver, Marcus Boerger");
+ CREDIT_LINE("PHP Data Objects", "Wez Furlong, Marcus Boerger, Sterling Hughes, George Schlossnagle, Ilia Alshanetsky");
+ CREDIT_LINE("PHP hash", "Sara Golemon, Rasmus Lerdorf, Stefan Esser, Michael Wallner, Scott MacVicar");
++CREDIT_LINE("pib", "Oraoto, Sean Morris");
+ CREDIT_LINE("Posix", "Kristian Koehntopp");
+ CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
+ CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
+@@ -70,6 +72,8 @@ CREDIT_LINE("System V Shared Memory", "Christian Cartus");
+ CREDIT_LINE("tidy", "John Coggeshall, Ilia Alshanetsky");
+ CREDIT_LINE("tokenizer", "Andrei Zmievski, Johannes Schlueter");
+ CREDIT_LINE("uri", "Máté Kocsis, Tim Düsterhus, Ignace Nyamagana Butera, Arnaud Le Blanc, Dennis Snell, Niels Dossche, Nicolas Grekas");
++CREDIT_LINE("Vrzno", "Sean Morris");
++CREDIT_LINE("waitline", "Sean Morris");
+ CREDIT_LINE("XML", "Stig Bakken, Thies C. Arntzen, Sterling Hughes");
+ CREDIT_LINE("XMLReader", "Rob Richards");
+ CREDIT_LINE("XMLWriter", "Rob Richards, Pierre-Alain Joye");
+diff --git a/third_party/php8.5-src/ext/tokenizer/tokenizer.c b/third_party/php8.5-src/ext/tokenizer/tokenizer.c
+index 203a9b9..0d78de1 100644
+--- a/third_party/php8.5-src/ext/tokenizer/tokenizer.c
++++ b/third_party/php8.5-src/ext/tokenizer/tokenizer.c
+@@ -318,7 +318,7 @@ static void add_token(
+ 	zend_hash_next_index_insert_new(return_value_ht, &token);
+ }
+ 
+-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
++bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+ {
+ 	zval source_zval;
+ 	zend_lex_state original_lex_state;
+diff --git a/third_party/php8.5-src/main/fastcgi.c b/third_party/php8.5-src/main/fastcgi.c
+index 448576a..7209487 100644
+--- a/third_party/php8.5-src/main/fastcgi.c
++++ b/third_party/php8.5-src/main/fastcgi.c
+@@ -551,6 +551,7 @@ void fcgi_shutdown(void)
+ {
+ 	if (is_initialized) {
+ 		zend_hash_destroy(&fcgi_mgmt_vars);
++		is_initialized = 0;
+ 	}
+ 	is_fastcgi = 0;
+ 	if (allowed_clients) {
+diff --git a/third_party/php8.5-src/sapi/cgi/Makefile.frag b/third_party/php8.5-src/sapi/cgi/Makefile.frag
+index 79e2afe..0956f43 100644
+--- a/third_party/php8.5-src/sapi/cgi/Makefile.frag
++++ b/third_party/php8.5-src/sapi/cgi/Makefile.frag
+@@ -1,7 +1,7 @@
+ cgi: $(SAPI_CGI_PATH)
+ 
+ $(SAPI_CGI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_FASTCGI_OBJS) $(PHP_CGI_OBJS)
+-	$(BUILD_CGI)
++	$(BUILD_CGI) $(WASM_SHARED_LIBS)
+ 
+ install-cgi: $(SAPI_CGI_PATH)
+ 	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.5-src/sapi/cgi/cgi_main.c b/third_party/php8.5-src/sapi/cgi/cgi_main.c
+index 6db96a4..1ff31d7 100644
+--- a/third_party/php8.5-src/sapi/cgi/cgi_main.c
++++ b/third_party/php8.5-src/sapi/cgi/cgi_main.c
+@@ -19,6 +19,7 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1870,7 +1871,8 @@ int main(int argc, char *argv[])
+ 	SG(request_info).path_translated = NULL;
+ #endif
+ 
+-	cgi_sapi_module.executable_location = argv[0];
++	// cgi_sapi_module.executable_location = argv[0];
++	cgi_sapi_module.executable_location = NULL;
+ 	if (!cgi && !fastcgi && !bindpath) {
+ 		cgi_sapi_module.additional_functions = additional_functions;
+ 	}
+@@ -1952,9 +1954,10 @@ consult the installation file that came with this distribution, or visit \n\
+ 	}
+ 
+ 	/* make php call us to get _ENV vars */
+-	php_php_import_environment_variables = php_import_environment_variables;
+-	php_import_environment_variables = cgi_php_import_environment_variables;
+-
++	if(php_import_environment_variables != cgi_php_import_environment_variables) {
++		php_php_import_environment_variables = php_import_environment_variables;
++		php_import_environment_variables = cgi_php_import_environment_variables;
++	}
+ 	if (fastcgi) {
+ 		/* How many times to run PHP scripts before dying */
+ 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
+@@ -2677,3 +2680,18 @@ consult the installation file that came with this distribution, or visit \n\
+ 	return exit_status;
+ }
+ /* }}} */
++
++void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
++{
++	putenv("USE_ZEND_ALLOC=0");
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_getenv(char *name)
++{
++	return getenv(name);
++}
++
++char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
++{
++	return _sapi_cgi_putenv(name, strlen(name), value);
++}
+diff --git a/third_party/php8.5-src/sapi/cli/Makefile.frag b/third_party/php8.5-src/sapi/cli/Makefile.frag
+index aa1d642..649533d 100644
+--- a/third_party/php8.5-src/sapi/cli/Makefile.frag
++++ b/third_party/php8.5-src/sapi/cli/Makefile.frag
+@@ -1,7 +1,7 @@
+ cli: $(SAPI_CLI_PATH)
+ 
+ $(SAPI_CLI_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_CLI_OBJS)
+-	$(BUILD_CLI)
++	$(BUILD_CLI) $(WASM_SHARED_LIBS)
+ 
+ install-cli: $(SAPI_CLI_PATH)
+ 	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.5-src/sapi/embed/php_embed.c b/third_party/php8.5-src/sapi/embed/php_embed.c
+index 06cd1fb..5fb7754 100644
+--- a/third_party/php8.5-src/sapi/embed/php_embed.c
++++ b/third_party/php8.5-src/sapi/embed/php_embed.c
+@@ -241,8 +241,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
+ 		return FAILURE;
+ 	}
+ 
+-	SG(headers_sent) = 1;
+-	SG(request_info).no_headers = 1;
++	SG(headers_sent) = 0;
++	SG(request_info).no_headers = 0;
+ 	php_register_variable("PHP_SELF", "-", NULL);
+ 
+ 	return SUCCESS;
+diff --git a/third_party/php8.5-src/sapi/phpdbg/Makefile.frag b/third_party/php8.5-src/sapi/phpdbg/Makefile.frag
+index 3b09f6a..263b3ff 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/Makefile.frag
++++ b/third_party/php8.5-src/sapi/phpdbg/Makefile.frag
+@@ -6,7 +6,7 @@ $(SAPI_PHPDBG_SHARED_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_O
+ 	$(BUILD_PHPDBG_SHARED)
+ 
+ $(SAPI_PHPDBG_PATH): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
+-	$(BUILD_PHPDBG)
++	$(BUILD_PHPDBG) $(WASM_SHARED_LIBS)
+ 
+ %.c: %.y
+ %.c: %.l
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
+index 4ef83be..5c9e90e 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #include "phpdbg.h"
+ #include "phpdbg_prompt.h"
+ #include "phpdbg_bp.h"
+@@ -144,6 +146,29 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+ #endif
+ } /* }}} */
+ 
++const char* phpdbg_wasm_current_file = NULL;
++uint32_t phpdbg_wasm_current_line = NULL;
++
++const char** EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_file(void)
++{
++	return &phpdbg_wasm_current_file;
++}
++
++uint32_t* EMSCRIPTEN_KEEPALIVE phpdbg_wasm_get_current_line(void)
++{
++	return &phpdbg_wasm_current_line;
++}
++
++int* EMSCRIPTEN_KEEPALIVE php_wasm_get_bpcount(void)
++{
++	return &PHPDBG_G(bp_count);
++}
++
++bool EMSCRIPTEN_KEEPALIVE php_wasm_is_executing(void)
++{
++	return PHPDBG_G(in_execution) || (PHPDBG_G(flags) & PHPDBG_IS_STOPPING);
++}
++
+ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ {
+ 	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
+@@ -173,6 +198,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+ 
+ static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
+ {
++	phpdbg_wasm_current_file = NULL;
++	phpdbg_wasm_current_line = NULL;
++
+ 	zend_hash_destroy(&PHPDBG_G(registered));
+ 	phpdbg_destroy_watchpoints();
+ 
+@@ -1111,7 +1139,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+ 	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+ } /* }}} */
+ 
+-int main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
+ {
+ 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+ 	char *sapi_name;
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg.h b/third_party/php8.5-src/sapi/phpdbg/phpdbg.h
+index e5f6413..487a2e6 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg.h
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg.h
+@@ -182,7 +182,7 @@ int phpdbg_do_parse(phpdbg_param_t *stack, char *input);
+ #ifndef _WIN32
+ #	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_COLOURED | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
+ #else
+-#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED | PHPDBG_HAS_PAGINATION)
++#	define PHPDBG_DEFAULT_FLAGS (PHPDBG_IS_QUIET | PHPDBG_IS_BP_ENABLED)
+ #endif /* }}} */
+ 
+ /* {{{ output descriptors */
+@@ -313,4 +313,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
+ 	zend_ulong lines;                                  /* max number of lines to display */
+ ZEND_END_MODULE_GLOBALS(phpdbg) /* }}} */
+ 
++extern const char* phpdbg_wasm_current_file;
++extern uint32_t phpdbg_wasm_current_line;
++
+ #endif /* PHPDBG_H */
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg_cmd.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg_cmd.c
+index 9877d60..d27a228 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg_cmd.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg_cmd.c
+@@ -754,7 +754,7 @@ PHPDBG_API char *phpdbg_read_input(const char *buffered) /* {{{ */
+ 			ignored if compiled without readline integration. */
+ 			if (!isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd)) {
+ 				char buf[PHPDBG_MAX_CMD];
+-				phpdbg_write("%s", phpdbg_get_prompt());
++				// phpdbg_write("%s", phpdbg_get_prompt());
+ 				phpdbg_consume_stdin_line(buf);
+ 				buffer = estrdup(buf);
+ 			} else
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg_info.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg_info.c
+index b329bda..4dde04a 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg_info.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg_info.c
+@@ -159,7 +159,7 @@ PHPDBG_INFO(constants) /* {{{ */
+ 	return SUCCESS;
+ } /* }}} */
+ 
+-static int phpdbg_arm_auto_global(zval *ptrzv) {
++int phpdbg_arm_auto_global(zval *ptrzv) {
+ 	zend_auto_global *auto_global = Z_PTR_P(ptrzv);
+ 
+ 	if (auto_global->armed) {
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg_io.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg_io.c
+index 261a67c..d614628 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg_io.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg_io.c
+@@ -14,6 +14,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include  <emscripten.h>
++
+ #ifdef HAVE_CONFIG_H
+ #include <config.h>
+ #endif
+@@ -22,52 +24,40 @@
+ 
+ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+ 
+-/* is easy to generalize ... but not needed for now */
+-PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
+-	int bytes = PHPDBG_G(input_buflen), len = 0;
++EM_ASYNC_JS(int, phpdbg_internal_consume_stdin_line, (char *buf, int max_length), {
++
++	let input;
++
++	Module.triggerStdin();
+ 
+-	if (PHPDBG_G(input_buflen)) {
+-		memcpy(buf, PHPDBG_G(input_buffer), bytes);
++	if(Module.inputDataQueue.length)
++	{
++		input = String(Module.inputDataQueue.shift());
++	}
++	else
++	{
++		let a, r;
++		const promise = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
++		Module.awaitingInput = a;
++		input = String(await promise);
+ 	}
+ 
+-	PHPDBG_G(last_was_newline) = 1;
++	if(input.length >= max_length)
++	{
++		input = input.slice(0, max_length - 1);
++	}
+ 
+-	do {
+-		int i;
+-		if (bytes <= 0) {
+-			continue;
+-		}
++	stringToUTF8(input, buf, input.length + 1);
+ 
+-		for (i = len; i < len + bytes; i++) {
+-			if (buf[i] == '\x03') {
+-				if (i != len + bytes - 1) {
+-					memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+-				}
+-				len--;
+-				i--;
+-				continue;
+-			}
+-			if (buf[i] == '\n') {
+-				PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+-				if (PHPDBG_G(input_buflen)) {
+-					memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+-				}
+-				if (i != PHPDBG_MAX_CMD - 1) {
+-					buf[i + 1] = 0;
+-				}
+-				return i;
+-			}
+-		}
+ 
+-		len += bytes;
+-	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0);
+ 
+-	if (bytes <= 0) {
+-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
+-		zend_bailout();
+-	}
++	return input.length;
++});
+ 
+-	return bytes;
++
++/* is easy to generalize ... but not needed for now */
++PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
++	return phpdbg_internal_consume_stdin_line(buf, PHPDBG_MAX_CMD);
+ }
+ 
+ PHPDBG_API int phpdbg_mixed_read(int fd, char *ptr, int len, int tmo) {
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg_prompt.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg_prompt.c
+index 7215888..a3bfbb2 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg_prompt.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg_prompt.c
+@@ -1645,6 +1645,8 @@ void phpdbg_execute_ex(zend_execute_data *execute_data) /* {{{ */
+ #endif /* ZEND_CHECK_STACK_LIMIT */
+ 
+ 	while (1) {
++		phpdbg_wasm_current_file = zend_get_executed_filename();
++		phpdbg_wasm_current_line = zend_get_executed_lineno();
+ 		zend_object *exception = EG(exception);
+ 
+ 		if ((PHPDBG_G(flags) & PHPDBG_BP_RESOLVE_MASK)) {
+diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg_utils.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg_utils.c
+index 329ee9a..2b6d83e 100644
+--- a/third_party/php8.5-src/sapi/phpdbg/phpdbg_utils.c
++++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg_utils.c
+@@ -16,6 +16,8 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
++
+ #include "zend.h"
+ 
+ #include "php.h"
+@@ -293,7 +295,7 @@ PHPDBG_API void phpdbg_set_prompt(const char *prompt) /* {{{ */
+ 	PHPDBG_G(prompt)[0] = strdup(prompt);
+ } /* }}} */
+ 
+-PHPDBG_API const char *phpdbg_get_prompt(void) /* {{{ */
++PHPDBG_API const char EMSCRIPTEN_KEEPALIVE *phpdbg_get_prompt(void) /* {{{ */
+ {
+ 	/* find cached prompt */
+ 	if (PHPDBG_G(prompt)[1]) {
