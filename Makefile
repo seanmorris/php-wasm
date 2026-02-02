@@ -487,19 +487,21 @@ ALL=${MJS} ${CJS} ${TAG_JS}
 
 tags: ${TAG_JS}
 
+# Single Builds
+
 web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
+	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+endif
 	@ cat ico.ans >&2
 
 web-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_JS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
-endif
 	@ cat ico.ans >&2
 
 worker-mjs:
@@ -547,7 +549,7 @@ node-js:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS}
 	@ cat ico.ans >&2
 
-# You must have one of the above built to use the following step.
+# You must have one of the above "Single Builds" done to use the following step.
 # Don't use it unless you're mad at your CPU cooler.
 fast-build: third_party/php${PHP_VERSION}-src/main/main.o
 	$(MAKE) -j${CPU_COUNT} -l${CPU_COUNT} \

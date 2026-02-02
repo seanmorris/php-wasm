@@ -442,6 +442,7 @@ export default function Editor() {
 					{!isExecuting ? (
 						<>
 							{phpdbg ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
+								<option>8.5</option>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
