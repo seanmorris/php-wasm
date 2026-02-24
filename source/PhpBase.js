@@ -277,13 +277,8 @@ export class PhpBase extends EventTarget
 
 			while(fragments.length || names.length)
 			{
-				if(fragments.length)
-					code += fragments.shift();
-
-				if(names.length)
-				{
-					code += `(vrzno_shared('${names.shift()}'))`;
-				}
+				if(fragments.length) code += fragments.shift();
+				if(names.length) code += `(vrzno_shared('${names.shift()}'))`;
 			}
 
 			code = `vrzno_zval( ${code} );`;

@@ -1,6 +1,6 @@
 {
   "name": "php-cli-wasm",
-  "version": "0.0.9-alpha-32",
+  "version": "0.1.0",
   "description": "php-cli for wasm.",
   "repository": {
     "type": "git",
