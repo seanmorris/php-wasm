@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import Terminal from './Terminal';
 import loader from './tail-spin.svg';
+import { basePath } from './runtimePaths';
+import { ensureServiceWorker } from './serviceWorker';
 
 // import zlib from 'php-wasm-zlib';
 // import libzip from 'php-wasm-libzip';
@@ -69,16 +71,9 @@ export default function InstallDemo() {
 	const [terminal, setTerminal] = useState('');
 
 	useEffect(() => void (async()=>{
-		await navigator.serviceWorker.register(process.env.PUBLIC_URL + `/cgi-worker.js`);
-		await navigator.serviceWorker.getRegistration(`${window.location.origin}${process.env.PUBLIC_URL}/`);
-		await navigator.serviceWorker.ready;
+		const registered = await ensureServiceWorker();
 
-		await new Promise((resolve) => {
-			if (navigator.serviceWorker.controller) return resolve();
-			navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), { once: true });
-		});
-
-		if(!(navigator.serviceWorker && navigator.serviceWorker.controller))
+		if(!registered)
 		{
 			setMessage('No Service Worker Detected, Reloading...');
 			await new Promise(a => setTimeout(a, 500));
@@ -104,7 +99,7 @@ export default function InstallDemo() {
 		const selectedFramework = packages[selectedFrameworkName];
 
 		setMessage('Downloading init script...');
-		const initPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/init.php')).text();
+		const initPhpCode = await (await fetch(basePath('scripts/init.php'))).text();
 
 		setMessage('Acquiring Lock...');
 		await navigator.locks.request('php-wasm-demo-install', async () => {
@@ -117,18 +112,18 @@ export default function InstallDemo() {
 			{
 				setMessage('Already installed...');
 				informOpener(selectedFrameworkName);
-				window.location = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+				window.location = basePath(`cgi-bin/${selectedFramework.vHost}`);
 				return;
 			}
 
 			setMessage(`Downloading ${selectedFramework.file}...`);
-			const zipContents = await (await fetch(process.env.PUBLIC_URL + selectedFramework.file)).arrayBuffer();
+			const zipContents = await (await fetch(basePath(selectedFramework.file))).arrayBuffer();
 			await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 			await sendMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
 
 			setMessage(`Setting up ${selectedFrameworkName}...`);
 			const settings = await sendMessage('getSettings');
-			const vHostPrefix = '/php-wasm/cgi-bin/' + selectedFramework.vHost;
+			const vHostPrefix = basePath(`cgi-bin/${selectedFramework.vHost}`);
 			const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
 
 			if(!existingvHost)

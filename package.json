@@ -12,7 +12,9 @@
     "build": "make",
     "build-image": "make image",
     "clean": "make clean",
-    "test": "make test"
+    "test": "make test",
+    "test:docs": "node --test test/docs.test.mjs",
+    "docs:coverage": "node ./bin/docs-snippet-report.js"
   },
   "dependencies": {
     "@babel/cli": "^7.8.4",

@@ -7,6 +7,7 @@ import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
 import { useEffect, useMemo, useState } from 'react';
 import Header from './Header';
+import { basePath } from './runtimePaths';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
 import reactIcon from './react-icon.svg';
@@ -18,7 +19,7 @@ import DoWithFile from './DoWithFile';
 import ErrorDialog from './ErrorDialog';
 import Confirm from './Confirm';
 
-// const sendMessage = sendMessageFor(`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`);
+// const sendMessage = sendMessageFor(`${window.location.origin}${basePath('cgi-worker.mjs')}`);
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller)
 
 function SelectFramework() {
@@ -119,68 +120,68 @@ function SelectFramework() {
 					<h2>Select a Framework:</h2>
 					<div className='inset row icons'>
 						<div className='column center'>
-							<a onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=cakephp-5')}>
+							<a onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5'))}>
 								<img src = {cakePhpIcon} alt = "cakephp 5" />
 							</a>
 							{cakeInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/cakephp-5')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor.html?path=/persist/cakephp-5/README.md')}>IDE</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=cakephp-5&overwrite=true')}>Reset</button>
+								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/cakephp-5/README.md'))}>IDE</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5&overwrite=true'))}>Reset</button>
 							</span>)}
 							{cakeInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=cakephp-5')}>Start</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5'))}>Start</button>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=codeigniter-4')}>
+							<a onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4'))}>
 								<img src = {codeIgniterIcon} alt = "codeigniter 4" />
 							</a>
 							{codeigniterInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/codeigniter-4')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor.html?path=/persist/codeigniter-4/README.md')}>IDE</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=codeigniter-4&overwrite=true')}>Reset</button>
+								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/codeigniter-4/README.md'))}>IDE</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4&overwrite=true'))}>Reset</button>
 							</span>)}
 							{codeigniterInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=codeigniter-4')}>Start</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4'))}>Start</button>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=drupal-7')}>
+							<a onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7'))}>
 								<img src = {drupalIcon} alt = "drupal 7" /> {drupalInstalled}
 							</a>
 							{drupalInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/drupal')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor.html?path=/persist/drupal-7.95/README.txt')}>IDE</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=drupal-7&overwrite=true')}>Reset</button>
+								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/drupal-7.95/README.txt'))}>IDE</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7&overwrite=true'))}>Reset</button>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=drupal-7')}>Start</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7'))}>Start</button>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laravel-11')}>
+							<a onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11'))}>
 								<img src = {laravelIcon} alt = "laravel 11" />
 							</a>
 							{laravelInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/laravel-11')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor.html?path=/persist/laravel-11/README.md')}>IDE</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laravel-11&overwrite=true')}>Reset</button>
+								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/laravel-11/README.md'))}>IDE</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11&overwrite=true'))}>Reset</button>
 							</span>)}
 							{laravelInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laravel-11')}>Start</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11'))}>Start</button>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laminas-3')} >
+							<a onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3'))} >
 								<img src = {laminasIcon} alt = "laminas 3" />
 							</a>
 							{laminasInstalled && (<span className = "contents">
 								<button onClick = { () => window.open('/php-wasm/cgi-bin/laminas-3')}>Open Demo</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/code-editor.html?path=/persist/laminas-3/README.md')}>IDE</button>
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laminas-3&overwrite=true')}>Reset</button>
+								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/laminas-3/README.md'))}>IDE</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3&overwrite=true'))}>Reset</button>
 							</span>)}
 							{laminasInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(process.env.PUBLIC_URL + '/install-demo.html?framework=laminas-3')}>Start</button>
+								<button onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3'))}>Start</button>
 							</span>)}
 						</div>
 					</div>
@@ -208,7 +209,7 @@ function SelectFramework() {
 						<h2 style = {{marginBottom: "0"}}><a
 							style = {{padding: "1rem"}}
 							href = "#"
-							onClick = {() => window.open(process.env.PUBLIC_URL + '/')}>
+							onClick = {() => window.open(basePath())}>
 								Open Full Demo
 						</a></h2>
 					</div>}

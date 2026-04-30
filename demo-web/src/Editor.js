@@ -6,12 +6,22 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 import EditorFolder from './EditorFolder';
 import Header from './Header';
+import { basePath } from './runtimePaths';
 
 import ace from 'ace-builds';
-import AceEditor from "react-ace-builds";
+import AceEditor from 'react-ace';
 import { Range } from "ace-builds";
-import "react-ace-builds/webpack-resolver-min";
 import { createRoot } from 'react-dom/client';
+import 'ace-builds/src-noconflict/mode-css';
+import 'ace-builds/src-noconflict/mode-html';
+import 'ace-builds/src-noconflict/mode-javascript';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-markdown';
+import 'ace-builds/src-noconflict/mode-php';
+import 'ace-builds/src-noconflict/mode-text';
+import 'ace-builds/src-noconflict/mode-xml';
+import 'ace-builds/src-noconflict/mode-yaml';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 import reactIcon from './react-icon.svg';
 import redCircle from './circle-red.svg';
@@ -21,7 +31,7 @@ import vsCodeIcon from './icons/vscode-16.png';
 
 import Debugger from './Debugger';
 
-// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const openFilesMap = new Map();
@@ -88,11 +98,11 @@ export default function Editor() {
 	const handleOpenVsCode = async () => {
 		if(currentPath.current)
 		{
-			window.location.href = process.env.PUBLIC_URL + '/vscode.html?path=' + currentPath.current;
+			window.location.href = basePath(`vscode.html?path=${currentPath.current}`);
 		}
 		else
 		{
-			window.location.href = process.env.PUBLIC_URL + '/vscode.html';
+			window.location.href = basePath('vscode.html');
 		}
 	};
 

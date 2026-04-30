@@ -1,20 +1,20 @@
 import './Embedded.css';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import AceEditor from "react-ace-builds";
-import "react-ace-builds/webpack-resolver-min";
+import AceEditor from 'react-ace';
 
 import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
+import { basePath, buildType } from './runtimePaths';
+import 'ace-builds/src-noconflict/mode-php';
+import 'ace-builds/src-noconflict/theme-monokai';
 
 // import yaml from 'php-wasm-yaml';
 import sdl from 'php-wasm-sdl';
 
 const sharedLibs = [];
-
-const buildType = process.env.REACT_APP_BUILD_TYPE ?? 'dynamic';
 
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' },
@@ -192,8 +192,8 @@ function Embedded() {
 	}, [query]);
 
 	useEffect(() => {
-		persist.current.checked = !!Number(query.get('persist')) ?? '';
-		single.current.checked = !!Number(query.get('single-expression')) ?? '';
+		persist.current.checked = !!Number(query.get('persist') ?? '');
+		single.current.checked = !!Number(query.get('single-expression') ?? '');
 		selectVersionBox.current.value = query.get('version') ?? '8.4';
 		selectVariantBox.current.value = query.get('variant') ?? '';
 
@@ -311,7 +311,7 @@ function Embedded() {
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
-				onConfirm = { () => window.location = process.env.PUBLIC_URL + '/select-framework.html' }
+				onConfirm = { () => window.location = basePath('select-framework.html') }
 				onCancel = { () => setOverlay(null) }
 				message = {(
 					<span>The Drupal demo has been moved into the <b>php-cgi-wasm</b> demo. Would you like to go there now?</span>
@@ -326,7 +326,7 @@ function Embedded() {
 		setStdErr('');
 		setStdRet('');
 
-		fetch(process.env.PUBLIC_URL + '/scripts/' + demoName)
+		fetch(basePath(`scripts/${demoName}`))
 		.then(response => response.text())
 		.then(async phpCode => {
 			editor.current.editor.setValue(phpCode, -1);
@@ -526,10 +526,10 @@ function Embedded() {
 		<div className = "cols">
 			<div className = "row start selects">
 				{isIframe || <span className = "contents">
-					<a href = { process.env.PUBLIC_URL || "/" }>
+					<a href = { basePath() }>
 						<img src = "sean-icon.png" alt = "sean" />
 					</a>
-					<h1><a href = { process.env.PUBLIC_URL || "/" }>php-wasm</a></h1>
+					<h1><a href = { basePath() }>php-wasm</a></h1>
 					<hr />
 				</span>}
 				<label>

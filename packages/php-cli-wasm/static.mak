@@ -114,13 +114,13 @@ cli-all:
 #	$(MAKE) node-cli-mjs
 #	$(MAKE) node-cli-js
 
-cli-mjs: ${CLI_MJS}
+cli-mjs:
 	$(MAKE) web-cli-mjs
 #	$(MAKE) worker-cli-mjs
 #	$(MAKE) webview-cli-mjs
 #	$(MAKE) node-cli-mjs
 
-cli-cjs: ${CLI_CJS}
+cli-cjs:
 	$(MAKE) web-cli-js
 #	$(MAKE) worker-cli-js
 #	$(MAKE) webview-cli-js

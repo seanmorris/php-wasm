@@ -21,23 +21,14 @@ rm -f public/*.map;
 rm -f public/*.js;
 rm -f public/*.so;
 rm -f public/*.dat;
+rm -rf public/worker-assets;
 
 rm -rf public/static/media/*.map public/static/media/mapped
 
-GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx webpack --config service-worker-prod.config.ts;
-GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx react-scripts build;
+NODE_OPTIONS='--max_old_space_size=8192' npm run build:worker;
+NODE_OPTIONS='--max_old_space_size=8192' npm run build:app;
 
-cat aphex.txt >> build/index.html;
-
-cp build/index.html build/404.html;
-cp build/index.html build/code-editor.html;
-cp build/index.html build/dbg-preview.html;
-cp build/index.html build/cli-preview.html;
-cp build/index.html build/embedded-php.html;
-cp build/index.html build/home.html;
-cp build/index.html build/install-demo.html;
-cp build/index.html build/select-framework.html;
-cp build/index.html build/vscode.html;
+node ./scripts/generate-html-aliases.cjs;
 
 # git add \
 # 	../docs/*.js \

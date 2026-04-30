@@ -6,13 +6,12 @@ import './dbg-preview.css';
 import loading from './loading.svg';
 
 import Convert from 'ansi-to-html';
+import { buildType } from './runtimePaths';
 
 const parser = new Convert;
 
 const sharedLibs = [
 ];
-
-const buildType = process.env.REACT_APP_BUILD_TYPE ?? 'dynamic';
 
 if(buildType === 'dynamic')
 {

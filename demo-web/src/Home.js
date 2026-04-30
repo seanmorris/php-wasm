@@ -25,6 +25,7 @@ import upIcon from './icons/up.png';
 
 import { useEffect, useMemo, useState } from 'react';
 import Header from './Header';
+import { basePath } from './runtimePaths';
 
 function Home() {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
@@ -36,7 +37,7 @@ function Home() {
 	useEffect(() => {
 		if(query.has('code') || query.has('demo'))
 		{
-			window.location = process.env.PUBLIC_URL + '/embedded-php.html' + window.location.search;
+			window.location = basePath(`embedded-php.html${window.location.search}`);
 		}
 	}, [query]);
 
@@ -70,14 +71,14 @@ function Home() {
 				<Header />
 				<h2>Select a demo:</h2>
 				<div className='row'>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/embedded-php.html?demo=sdl-sine.php'}>
+					<a className = "big-link inset" href = {basePath('embedded-php.html?demo=sdl-sine.php')}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
 						<span className = "title">PHP Embedded Demo</span>
 						<p className='padded'>View, edit & run PHP code right in the browser.</p>
 					</a>
-					<a className = "big-link inset" href = {process.env.PUBLIC_URL + '/select-framework.html'}>
+					<a className = "big-link inset" href = {basePath('select-framework.html')}>
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
 							<div className = "offset-column">
 								<img src = {cakePhpIcon} alt = "CakePHP logo" />
@@ -95,11 +96,11 @@ function Home() {
 
 				<div className = "inset button-bar">
 					<div className = "row">
-						<button onClick = {() => window.location = process.env.PUBLIC_URL + '/code-editor.html'}>
+						<button onClick = {() => window.location = basePath('code-editor.html')}>
 							<img src = {editorIcon} className = "icon" alt = "Code Editor" />
 							Lightweight Code Editor
 						</button>
-						<button onClick = {() => window.location = process.env.PUBLIC_URL + '/vscode.html'}>
+						<button onClick = {() => window.location = basePath('vscode.html')}>
 							<img src = {vscodeIcon} className = "icon" alt = "Code Editor" />
 							VSCode
 						</button>
@@ -126,12 +127,12 @@ function Home() {
 
 				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
-					<a target = "_blank" href = {process.env.PUBLIC_URL + '/cli-preview.html'} className="icon-box">
+					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box">
 						<img src = {cmdIcon} alt = "PHP-CLI Preview" />
 						<span>PHP-CLI Preview</span>
 					</a>
 
-					<a target = "_blank" href = {process.env.PUBLIC_URL + '/forecast.html'} className="icon-box">
+					<a target = "_blank" href = {basePath('forecast.html')} className="icon-box">
 						<img src = {sunburstIcon} alt = "Inline FrontEnd PHP" />
 						<span>Inline FrontEnd PHP</span>
 					</a>

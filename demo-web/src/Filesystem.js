@@ -4,6 +4,7 @@ import './InstallDemo.css';
 import loader from './tail-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
+import { basePath } from './runtimePaths';
 
 // import libxml from 'php-wasm-libxml';
 // import zlib from 'php-wasm-zlib';
@@ -12,7 +13,7 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { useEffect, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
-// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const backupSite = async () => {
@@ -30,7 +31,7 @@ const backupSite = async () => {
 	});
 
 	await php.binary;
-	const backupPhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/backup.php')).text();
+	const backupPhpCode = await (await fetch(basePath('scripts/backup.php'))).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Backing up files...'}));
 	await php.run(backupPhpCode);
 
@@ -57,7 +58,7 @@ const restoreSite = async ({fileInput}) => {
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
 	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
 	await php.binary;
-	const restorePhpCode = await (await fetch(process.env.PUBLIC_URL + '/scripts/restore.php')).text();
+	const restorePhpCode = await (await fetch(basePath('scripts/restore.php'))).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
 	await php.run(restorePhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));

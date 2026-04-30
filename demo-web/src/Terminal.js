@@ -4,6 +4,7 @@ import { PGlite } from '@electric-sql/pglite';
 import './dbg-preview.css';
 import loading from './loading.svg';
 import Convert from 'ansi-to-html';
+import { buildType } from './runtimePaths';
 
 // import libxml from 'php-wasm-libxml';
 
@@ -12,8 +13,6 @@ const parser = new Convert();
 const defaultSharedLibs = [
 	// libxml
 ];
-
-const buildType = process.env.REACT_APP_BUILD_TYPE ?? 'dynamic';
 
 if(buildType === 'dynamic')
 {

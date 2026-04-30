@@ -20,8 +20,9 @@ import deleteIcon from './icons/delete-icon-16.png';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { basePath, baseUrlFor } from './runtimePaths';
 
-// const sendMessage = sendMessageFor((`${window.location.origin}${process.env.PUBLIC_URL}/cgi-worker.mjs`));
+// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const icons = {
@@ -79,7 +80,7 @@ export default function EditorFile({path, name}) {
 		const q = new URLSearchParams({path});
 		const u = new URL(
 			'./dbg-preview.html?' + q.toString()
-			, new URL(process.env.PUBLIC_URL + '/', window.location)
+			, baseUrlFor()
 		);
 
 		window.open(u);

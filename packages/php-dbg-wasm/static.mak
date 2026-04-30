@@ -114,13 +114,13 @@ dbg-all:
 #	$(MAKE) node-dbg-mjs
 #	$(MAKE) node-dbg-js
 
-dbg-mjs: ${DBG_MJS}
+dbg-mjs:
 	$(MAKE) web-dbg-mjs
 #	$(MAKE) worker-dbg-mjs
 #	$(MAKE) webview-dbg-mjs
 #	$(MAKE) node-dbg-mjs
 
-dbg-cjs: ${DBG_CJS}
+dbg-cjs:
 	$(MAKE) web-dbg-js
 #	$(MAKE) worker-dbg-js
 #	$(MAKE) webview-dbg-js

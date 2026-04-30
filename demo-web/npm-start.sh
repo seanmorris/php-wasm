@@ -47,7 +47,8 @@ rm -f public/*.data;
 rm -f public/*.so;
 rm -f public/*.dat;
 rm -f public/*.map;
+rm -rf public/worker-assets;
 
-NODE_OPTIONS=--max_old_space_size=4096 npx webpack --config service-worker-dev.config.ts;
+NODE_OPTIONS=--max_old_space_size=4096 npm run build:worker;
 
-react-scripts start --no-cache
+npx vite --host 0.0.0.0

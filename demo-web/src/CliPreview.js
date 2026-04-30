@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import './dbg-preview.css';
 import Terminal from './Terminal';
+import { basePath } from './runtimePaths';
 
 const sharedLibs = [];
 
@@ -20,10 +21,10 @@ export default function CliPreview() {
 		<div className = "cols">
 			<div className = "row start">
 				{isIframe || <span className = "contents">
-					<a href = { process.env.PUBLIC_URL || "/" }>
+					<a href = { basePath() }>
 						<img src = "sean-icon.png" alt = "sean" />
 					</a>
-					<h1><a href = { process.env.PUBLIC_URL || "/" }>php-wasm</a></h1>
+					<h1><a href = { basePath() }>php-wasm</a></h1>
 					<hr />
 				</span>}
 			</div>

@@ -1,8 +1,7 @@
 /* eslint-disable no-restricted-globals */
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
-
-const buildType = process.env.BUILD_TYPE ?? 'dynamic';
+import { basePath, buildType } from './runtimePaths.worker.js';
 
 const sharedLibs = [];
 
@@ -109,8 +108,8 @@ const php = new PhpCgiWorker({
 	, PGlite
 	, actions
 	, staticFS: false
-	, prefix: '/php-wasm/cgi-bin/'
-	, exclude: ['/php-wasm/cgi-bin/~!@', '/php-wasm/cgi-bin/.']
+	, prefix: basePath('cgi-bin/')
+	, exclude: [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')]
 	, docroot: '/persist/www'
 	, types: {
 		jpeg: 'image/jpeg'
@@ -121,7 +120,7 @@ const php = new PhpCgiWorker({
 	},
 	vHosts: [
 		{
-			"pathPrefix": "/php-wasm/cgi-bin/test",
+			"pathPrefix": basePath('cgi-bin/test'),
 			"directory": "/preload/test_www",
 			"entrypoint": "hello-world.php"
 		},
