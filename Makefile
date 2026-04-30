@@ -989,7 +989,7 @@ endif
 
 NODE_TEST_FLAGS=
 
-test-node: node-mjs
+test-node: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \
@@ -1013,7 +1013,7 @@ test-node: node-mjs
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs-cgi.test.mjs' | sort`
 
-test-deno: node-mjs
+test-deno: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	WITH_LIBXML=${WITH_LIBXML} \

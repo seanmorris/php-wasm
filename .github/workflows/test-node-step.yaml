@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Import `.env` file
         run: |
@@ -34,7 +34,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -91,7 +91,7 @@ jobs:
           tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
       - name: Upload Failure Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: failure-snapshot-${{ inputs.testType }}-test-${{ inputs.phpVersion }}-${{ inputs.libType }}

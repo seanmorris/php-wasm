@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -64,7 +64,7 @@ jobs:
           tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
       - name: Upload Failure Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: failure-snapshot-cgi-node-test-${{ inputs.phpVersion }}-${{ inputs.libType }}

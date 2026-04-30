@@ -22,7 +22,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.libgroups }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -44,7 +44,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -69,7 +69,7 @@ jobs:
         libgroup: ${{ fromJSON(needs.generate-lib-group-matrix.outputs.matrix) }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -87,7 +87,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -127,7 +127,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-dependencies-${{ matrix.libgroup }}
           path: php-dependencies-${{ matrix.libgroup }}.tar.gz
@@ -309,7 +309,7 @@ jobs:
         libType: ['dynamic']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -357,7 +357,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -375,7 +375,7 @@ jobs:
         libType: ['shared']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -423,7 +423,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -441,7 +441,7 @@ jobs:
         libType: ['static']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -489,7 +489,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -637,7 +637,7 @@ jobs:
       - test-cgi-node-dynamic-compressed
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -677,7 +677,7 @@ jobs:
               .cache
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-indexed-packages
           path: php-indexed-packages.tar.gz
@@ -726,7 +726,7 @@ jobs:
       - test-cgi-node-dynamic-compressed
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -767,7 +767,7 @@ jobs:
               docs
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-demo-web
           path: php-demo-web.tar.gz
@@ -788,7 +788,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Artifact
         uses: actions/download-artifact@v4

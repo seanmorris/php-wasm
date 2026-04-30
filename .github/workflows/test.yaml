@@ -11,12 +11,29 @@ concurrency:
 
 jobs:
 
+  test-8-5-static:
+    name: Test 8.5 Static
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.5.ci .env
+      - run: make image
+      - run: docker network create phpwasm_default
+      - run: PHP_VERSION=8.5 make test
+
   test-8-4-static:
     name: Test 8.4 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -33,7 +50,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -50,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -67,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -84,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -96,13 +113,29 @@ jobs:
       - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.0 make test
 
+  test-8-5-dynamic:
+    name: Test 8.5 Dynamic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.5-dynamic.ci .env
+      - run: make image
+      - run: docker network create phpwasm_default
+      - run: PHP_VERSION=8.5 make test
 
   test-8-4-dynamic:
     name: Test 8.4 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -119,7 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -136,7 +169,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -153,7 +186,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -170,7 +203,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -182,13 +215,29 @@ jobs:
       - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.0 make test
 
+  test-8-5-shared:
+    name: Test 8.5 Shared
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: cp .circleci/.env_8.5-shared.ci .env
+      - run: make image
+      - run: docker network create phpwasm_default
+      - run: PHP_VERSION=8.5 make test
 
   test-8-4-shared:
     name: Test 8.4 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -205,7 +254,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -222,7 +271,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: sudo apt update && sudo apt install docker-compose -y
@@ -236,7 +285,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
@@ -253,7 +302,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
