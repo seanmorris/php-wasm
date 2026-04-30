@@ -75,7 +75,14 @@ export async function createPhpNode(options = {})
 export async function createPhpCgiNode(options = {})
 {
 	ensureNavigatorLocks();
-	const version = options.version ?? '8.4';
+	const version = options.version
+		?? process.env.PHP_VERSION;
+
+	if(!version)
+	{
+		throw new Error('No PhpCgiNode runtime version was specified. Set PHP_VERSION or pass options.version explicitly.');
+	}
+
 	const php = new PhpCgiNode({ version, ...options });
 
 	await php.binary;

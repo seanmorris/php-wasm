@@ -1011,7 +1011,7 @@ test-node: node-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `ls test/*.mjs`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs-cgi.test.mjs' | sort`
 
 test-deno: node-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1042,6 +1042,7 @@ test-browser:
 
 test-cgi-node:
 	PHP_VERSION=${PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} test/node-cgi-test.sh
+	PHP_VERSION=${PHP_VERSION} node --test test/docs-cgi.test.mjs
 
 update-snapshots:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh

@@ -650,18 +650,60 @@ const pageValidators = {
 	'getting-started/php-in-js.md': validatePhpInJs,
 	'getting-started/php-in-static-html.md': validatePhpInStaticHtml,
 	'getting-started/php.ini.md': validatePhpIni,
-	'methods/php-cgi-wasm.md': validateMethodsPhpCgi,
 	'methods/php-wasm.md': validateMethodsPhpWasm,
 };
 
-export async function buildDocsCoverageReport()
+const cgiPageValidators = {
+	'getting-started/cgi-in-nodeJs.md': validateCgiInNodeJs,
+	'methods/php-cgi-wasm.md': validateMethodsPhpCgi,
+};
+
+const browserOnlyPageValidators = {
+	'getting-started/cgi-service-worker.md': validateCgiServiceWorker,
+};
+
+const allPageValidators = {
+	...pageValidators,
+	...cgiPageValidators,
+	...browserOnlyPageValidators,
+};
+
+function shouldIncludePage(file, options)
 {
+	if(file in cgiPageValidators)
+	{
+		return options.includeCgiNode;
+	}
+
+	if(file in browserOnlyPageValidators)
+	{
+		return options.includeBrowserOnly;
+	}
+
+	return true;
+}
+
+export async function buildDocsCoverageReport(options = {})
+{
+	const normalizedOptions = {
+		includeCgiNode: false,
+		includeBrowserOnly: true,
+		...options,
+	};
+
 	const inventory = buildDocsInventory();
-	const pagesWithBlocks = inventory.pages.filter(page => page.blockCount > 0);
+	const pagesWithBlocks = inventory.pages
+		.filter(page => page.blockCount > 0)
+		.filter(page => shouldIncludePage(page.file, normalizedOptions));
 	const blocksByFile = new Map;
 
 	for(const block of inventory.blocks)
 	{
+		if(!shouldIncludePage(block.file, normalizedOptions))
+		{
+			continue;
+		}
+
 		if(!blocksByFile.has(block.file))
 		{
 			blocksByFile.set(block.file, []);
@@ -675,7 +717,7 @@ export async function buildDocsCoverageReport()
 	for(const pageInfo of pagesWithBlocks)
 	{
 		const blocks = blocksByFile.get(pageInfo.file) ?? [];
-		const validator = pageValidators[pageInfo.file];
+		const validator = allPageValidators[pageInfo.file];
 		if(process.env.DOCS_COVERAGE_DEBUG)
 		{
 			console.error(`Validating ${pageInfo.file}`);
@@ -717,10 +759,12 @@ export async function buildDocsCoverageReport()
 		generatedAt: new Date().toISOString(),
 		docsRoot: inventory.docsRoot,
 		nodeRuntimeVersion: getAvailablePhpNodeVersion(),
+		cgiNodeRuntimeVersion: normalizedOptions.includeCgiNode ? (process.env.PHP_VERSION ?? null) : null,
 		sourceDefaults: {
 			phpNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpNode.js')),
 			phpCgiNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpCgiNode.js')),
 		},
+		options: normalizedOptions,
 		files,
 		summary,
 	};
