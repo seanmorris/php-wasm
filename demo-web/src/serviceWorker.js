@@ -8,8 +8,7 @@ export const ensureServiceWorker = async () => {
 
 	await navigator.serviceWorker.register(basePath('cgi-worker.js'), {
 		type: 'module'
-		,
-		scope: basePath()
+		, scope: basePath()
 	});
 	await navigator.serviceWorker.getRegistration(baseUrlFor().toString());
 	await navigator.serviceWorker.ready;

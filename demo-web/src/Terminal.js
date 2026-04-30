@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, forwardRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb';
 import { PGlite } from '@electric-sql/pglite';
 import './dbg-preview.css';
@@ -17,20 +17,20 @@ const defaultSharedLibs = [
 if(buildType === 'dynamic')
 {
 	defaultSharedLibs.push(...(await Promise.all([
-		import('php-wasm-libxml'),
-		import('php-wasm-dom'),
-		import('php-wasm-zlib'),
-		import('php-wasm-libzip'),
-		import('php-wasm-gd'),
-		import('php-wasm-iconv'),
-		import('php-wasm-intl'),
-		import('php-wasm-openssl'),
-		import('php-wasm-mbstring'),
-		import('php-wasm-sqlite'),
-		import('php-wasm-xml'),
-		import('php-wasm-simplexml'),
-		import('php-wasm-tidy'),
-		import('php-wasm-yaml'),
+		import('php-wasm-libxml')
+		, import('php-wasm-dom')
+		, import('php-wasm-zlib')
+		, import('php-wasm-libzip')
+		, import('php-wasm-gd')
+		, import('php-wasm-iconv')
+		, import('php-wasm-intl')
+		, import('php-wasm-openssl')
+		, import('php-wasm-mbstring')
+		, import('php-wasm-sqlite')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-tidy')
+		, import('php-wasm-yaml')
 	])).map(m => m.default));
 }
 else if(buildType === 'shared')
@@ -85,27 +85,25 @@ const escapeHtml = s => s
 let lastCommand = null;
 
 const phpArgs = {
-	version: '8.3',
-	ini,
-	PGlite,
-	persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
-	// script: '/preload/hello-world.php'
-	// code: 'echo "Hello, PHP-CLI!";',
-	// interactive: false,
+	version: '8.3'
+	, ini
+	, PGlite
+	, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
+	// , script: '/preload/hello-world.php'
+	// , code: 'echo "Hello, PHP-CLI!";'
+	// , interactive: false
 };
 
 export default function Terminal({
-	setStatusMessage = () => {},
-	setExitCode = () => {},
-	localEcho = true,
-	initCommands = [],
-	onStdIn,
-	sharedLibs = [],
-	files = [],
-	interactive,
-	script,
-	code,
-	extras,
+	setStatusMessage = () => {}
+	, setExitCode = () => {}
+	, localEcho = true
+	, onStdIn
+	, sharedLibs = []
+	, interactive
+	, script
+	, code
+	, extras
 }) {
 	const phpRef = useRef(null);
 
@@ -119,7 +117,7 @@ export default function Terminal({
 	const [output, setOutput] = useState([]);
 
 	const init = useRef(true);
-	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> '))); // @TODO: get the prompt from PHP
+	const [prompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> '))); // @TODO: get the prompt from PHP
 
 	interactive = interactive && !script && !code;
 
@@ -130,8 +128,8 @@ export default function Terminal({
 		{
 			timeout.current = setTimeout(() => {
 				terminal.current.scrollTo({
-					top: terminal.current.scrollHeight,
-					behavior: 'smooth',
+					top: terminal.current.scrollHeight
+					, behavior: 'smooth'
 				});
 
 			}, 32);
@@ -147,7 +145,7 @@ export default function Terminal({
 		timeout.current = setTimeout(() => stdIn.current.scrollIntoView(), 32);
 	}, []);
 
-	const focusInput = useCallback(event => {
+	const focusInput = useCallback(() => {
 		if(!phpRef.current.interactive)
 		{
 			scrollToEnd();
@@ -159,7 +157,7 @@ export default function Terminal({
 		}
 	}, [scrollToEnd]);
 
-	const refreshPhp = useCallback(init => {
+	const refreshPhp = useCallback(() => {
 
 		setStatusMessage && setStatusMessage('loading...');
 
@@ -169,7 +167,7 @@ export default function Terminal({
 				.replace('\r', '\u240D'));
 
 			const ansi = newOutput.map(line => {
-				return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) }
+				return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) };
 			});
 
 			setOutput(output => [...output, ...ansi]);
@@ -182,7 +180,7 @@ export default function Terminal({
 				.replace('\r', '\u240D'));
 
 			const ansi = newOutput.map(line => {
-				return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) }
+				return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) };
 			});
 
 			console.log(ansi);
@@ -194,10 +192,10 @@ export default function Terminal({
 		phpRef.current = new PhpCliWeb({
 			...extras,
 			...phpArgs,
-			sharedLibs: [...sharedLibs, ...defaultSharedLibs],
-			interactive,
-			script,
-			code,
+			sharedLibs: [...sharedLibs, ...defaultSharedLibs]
+			, interactive
+			, script
+			, code
 		});
 
 		const php = phpRef.current;
@@ -212,7 +210,7 @@ export default function Terminal({
 			setReady(true);
 			await new Promise(a => setTimeout(a, 10));
 			focusInput();
-		}
+		};
 
 		const onStdInHandler = async event => onStdIn && onStdIn(event);
 
@@ -259,7 +257,7 @@ export default function Terminal({
 		console.log(init.current);
 		if(init.current)
 		{
-			refreshPhp(init.current);
+			refreshPhp();
 			init.current = false;
 		}
 	}, [refreshPhp, init]);

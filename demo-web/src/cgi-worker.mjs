@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-globals */
+
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
 import { basePath, buildType } from './runtimePaths.worker.js';
@@ -6,28 +6,28 @@ import { basePath, buildType } from './runtimePaths.worker.js';
 const sharedLibs = [];
 
 const files = [
-	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' },
-	{ parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' },
-	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' },
+	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
+	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' },
+	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
 
 if(buildType === 'dynamic')
 {
 	sharedLibs.push(...(await Promise.all([
-		import('php-wasm-libxml'),
-		import('php-wasm-dom'),
-		import('php-wasm-zlib'),
-		import('php-wasm-libzip'),
-		import('php-wasm-gd'),
-		import('php-wasm-iconv'),
-		import('php-wasm-intl'),
-		import('php-wasm-openssl'),
-		import('php-wasm-mbstring'),
-		import('php-wasm-sqlite'),
-		import('php-wasm-xml'),
-		import('php-wasm-simplexml'),
-		import('php-wasm-tidy'),
-		import('php-wasm-yaml'),
+		import('php-wasm-libxml')
+		, import('php-wasm-dom')
+		, import('php-wasm-zlib')
+		, import('php-wasm-libzip')
+		, import('php-wasm-gd')
+		, import('php-wasm-iconv')
+		, import('php-wasm-intl')
+		, import('php-wasm-openssl')
+		, import('php-wasm-mbstring')
+		, import('php-wasm-sqlite')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-tidy')
+		, import('php-wasm-yaml')
 	])).map(m => m.default));
 }
 else if(buildType === 'shared')
@@ -90,8 +90,8 @@ const actions = {
 		console.log({database});
 		const pglite = new PGlite(database);
 		return pglite.query(sql);
-	},
-	execSql: (php, database, sql) => {
+	}
+	, execSql: (php, database, sql) => {
 		console.log({database});
 		const pglite = new PGlite(database);
 		return pglite.exec(sql);
@@ -117,13 +117,13 @@ const php = new PhpCgiWorker({
 		, gif: 'image/gif'
 		, png: 'image/png'
 		, svg: 'image/svg+xml'
-	},
-	vHosts: [
+	}
+	, vHosts: [
 		{
-			"pathPrefix": basePath('cgi-bin/test'),
-			"directory": "/preload/test_www",
-			"entrypoint": "hello-world.php"
-		},
+			"pathPrefix": basePath('cgi-bin/test')
+			, "directory": "/preload/test_www"
+			, "entrypoint": "hello-world.php"
+		}
 	]
 });
 
@@ -134,5 +134,5 @@ self.addEventListener('fetch',    event => php.handleFetchEvent(event));
 self.addEventListener('message',  event => php.handleMessageEvent(event));
 
 // Extras
-self.addEventListener('install',  event => console.log('Install'));
-self.addEventListener('activate', event => console.log('Activate'));
+self.addEventListener('install',  () => console.log('Install'));
+self.addEventListener('activate', () => console.log('Activate'));

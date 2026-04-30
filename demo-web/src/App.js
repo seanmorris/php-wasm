@@ -12,7 +12,8 @@ import SelectFramework from './SelectFramework';
 import VSCodeEditor from './VSCodeEditor';
 import { basePath, routerBase } from './runtimePaths';
 
-export function AppRoutes() {
+export function AppRoutes()
+{
 	return <Routes>
 		<Route path = "/" element = { <Home /> } />
 		<Route path = "/home.html" element = { <Home /> } />
@@ -79,7 +80,8 @@ export function AppRoutes() {
 	</Routes>;
 }
 
-export default function App() {
+export default function App()
+{
 	return <BrowserRouter basename = {routerBase}>
 		<AppRoutes />
 	</BrowserRouter>;

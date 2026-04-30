@@ -20,7 +20,7 @@ import deleteIcon from './icons/delete-icon-16.png';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
-import { basePath, baseUrlFor } from './runtimePaths';
+import { baseUrlFor } from './runtimePaths';
 
 // const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
@@ -45,7 +45,8 @@ const icons = {
 
 let init = false;
 
-export default function EditorFile({path, name}) {
+export default function EditorFile({path, name})
+{
 	const [showContext, setShowContext] = useState(false);
 	const [showRename, setShowRename]   = useState(false);
 	const [deleted, setDeleted]         = useState(false);
@@ -62,9 +63,9 @@ export default function EditorFile({path, name}) {
 		{
 			setShowContext(true);
 		}
-	}
+	};
 
-	const onBlur = event => setTimeout(() => setShowContext(false), 160);
+	const onBlur = () => setTimeout(() => setShowContext(false), 160);
 
 	const openFile = () => {
 		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: _path}));

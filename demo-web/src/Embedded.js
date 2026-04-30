@@ -1,5 +1,5 @@
 import './Embedded.css';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AceEditor from 'react-ace';
 
 import { PGlite } from '@electric-sql/pglite';
@@ -17,9 +17,9 @@ import sdl from 'php-wasm-sdl';
 const sharedLibs = [];
 
 const files = [
-	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' },
-	{ parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' },
-	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' },
+	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
+	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' },
+	{ parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
 
 let canToggleExtensions = false;
@@ -98,7 +98,8 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
-function Embedded() {
+function Embedded()
+{
 	const init = useRef(false);
 	const phpRef = useRef(null);
 	const inputBox = useRef(null);
@@ -148,15 +149,15 @@ function Embedded() {
 		}
 
 		phpRef.current = new PhpWeb({
-			version,
-			variant,
-			sharedLibs: _sharedLibs,
-			dynamicLibs,
-			files,
-			ini,
-			PGlite,
-			persist: [{mountPath:'/persist'}, {mountPath:'/config'}],
-			canvas: canvas.current,
+			version
+			, variant
+			, sharedLibs: _sharedLibs
+			, dynamicLibs
+			, files
+			, ini
+			, PGlite
+			, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
+			, canvas: canvas.current
 		});
 
 		const php = phpRef.current;
@@ -237,14 +238,14 @@ function Embedded() {
 		const variant = selectVariantBox.current?.value;
 
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
-			'autorun': true,
-			'persist': persist.current?.checked,
-			'single-expression': single.current?.checked,
-			'render-as': htmlRadio.current?.checked ? 'html' : 'text',
-			'canvas': canvasCheckbox.current?.checked,
-			// 'extensionFlags': 0,
-			'version': version,
-			'variant': variant,
+			'autorun': true
+			, 'persist': persist.current?.checked
+			, 'single-expression': single.current?.checked
+			, 'render-as': htmlRadio.current?.checked ? 'html' : 'text'
+			// 'extensionFlags': 0
+			, 'canvas': canvasCheckbox.current?.checked
+			, 'version': version
+			, 'variant': variant
 		})}\n`);
 
 		query.set('code', encodeURIComponent(code));
@@ -273,7 +274,7 @@ function Embedded() {
 			}
 			finally
 			{
-				setStatusMessage('php-wasm ready!')
+				setStatusMessage('php-wasm ready!');
 				setRunning(false);
 			}
 		}
@@ -290,11 +291,11 @@ function Embedded() {
 			}
 			catch(error)
 			{
-				console.error(error)
+				console.error(error);
 			}
 			finally
 			{
-				setStatusMessage('php-wasm ready!')
+				setStatusMessage('php-wasm ready!');
 				setRunning(false);
 			}
 		}
@@ -445,7 +446,6 @@ function Embedded() {
 		{
 			setTimeout(runCode, 1);
 		}
-
 	}, [query, loadDemo, runCode]);
 
 	const demoSelected = () => loadDemo(selectDemoBox.current.value);
@@ -461,7 +461,7 @@ function Embedded() {
 		window.addEventListener('keydown', onKeyDown);
 		return () => {
 			window.removeEventListener('keydown', onKeyDown);
-		}
+		};
 
 	}, [runCode]);
 
@@ -496,7 +496,7 @@ function Embedded() {
 						return <label key = {name} style = {{display: 'block'}}>
 							<input type = "checkbox" defaultChecked = {t.active} onChange={event => toggleExtension(event, name)}/>
 							{name}
-						</label>
+						</label>;
 					})}
 					<div>
 						<button className = "margin" onClick={closeExtensionsDialog}>Done</button>
@@ -562,18 +562,18 @@ function Embedded() {
 				<div className='row'>
 					<label>
 						<span>Version:</span>
-							<select data-select-demo ref = {selectVersionBox}>
-								<option value = "8.5">8.5</option>
-								<option value = "8.4">8.4</option>
-								<option value = "8.3">8.3</option>
-								<option value = "8.2">8.2</option>
-								<option value = "8.1">8.1</option>
-								<option value = "8.0">8.0</option>
-							</select>
+						<select data-select-demo ref = {selectVersionBox}>
+							<option value = "8.5">8.5</option>
+							<option value = "8.4">8.4</option>
+							<option value = "8.3">8.3</option>
+							<option value = "8.2">8.2</option>
+							<option value = "8.1">8.1</option>
+							<option value = "8.0">8.0</option>
+						</select>
 					</label>
 					<label>
 						<span>Variant:</span>
-							<select data-select-demo ref = {selectVariantBox}>
+						<select data-select-demo ref = {selectVariantBox}>
 							<option value = "">base</option>
 							<option value = "_sdl">sdl</option>
 						</select>
@@ -696,7 +696,7 @@ function Embedded() {
 						</div>
 						<div className = "stderr output liquid">
 							<div className = "column">
-							<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
+								<iframe srcDoc = {stdErr} title = "output" sandbox = "allow-scripts allow-forms allow-popups" className = "scroller"></iframe>
 								<div className = "scroller">{stdErr}</div>
 							</div>
 						</div>

@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import './dbg-preview.css';
 import Terminal from './Terminal';
 import { basePath } from './runtimePaths';
 
 const sharedLibs = [];
 
-export default function CliPreview() {
+export default function CliPreview()
+{
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -52,13 +53,13 @@ export default function CliPreview() {
 					code = {code}
 					sharedLibs = {sharedLibs}
 					files = {[
-						{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' },
-						{ parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' },
-						{ parent: '/preload/', name: 'list-extensions.php', url: './scripts/list-extensions.php' },
+						{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' }
+						, { parent: '/preload/test_www/', name: 'phpinfo.php', url: './scripts/phpinfo.php' }
+						, { parent: '/preload/', name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 					]}
 				/>
 			</div>
 			{statusBar}
 		</div>
-	</div>)
+	</div>);
 }

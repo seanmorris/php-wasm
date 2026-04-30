@@ -62,7 +62,7 @@ const legacyHtmlAliasPlugin = () => ({
 	}
 });
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
 	plugins: [react({
 		include: /\.[jt]sx?$/
 	}), legacyHtmlAliasPlugin()]

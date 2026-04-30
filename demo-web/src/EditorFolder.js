@@ -14,7 +14,8 @@ const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const pathStates = new Map();
 
-export default function EditorFolder({path = '/', name = ''}) {
+export default function EditorFolder({path = '/', name = ''})
+{
 	const [dirs, setDirs]                   = useState([]);
 	const [showContext, setShowContext]     = useState(false);
 	const [showNewFile, setShowNewFile]     = useState(false);
@@ -39,9 +40,9 @@ export default function EditorFolder({path = '/', name = ''}) {
 		setShowNewFolder(false);
 		setShowNewFile(false);
 		setShowContext(true);
-	}
+	};
 
-	const onBlur = event => setTimeout(() => setShowContext(false), 160);
+	const onBlur = () => setTimeout(() => setShowContext(false), 160);
 
 	const openFile = path => {
 		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: path}));
@@ -114,7 +115,7 @@ export default function EditorFolder({path = '/', name = ''}) {
 			{
 			loadFiles();
 			box.current.focus();
-		}
+			}
 	}, []);
 
 	useEffect(() => {

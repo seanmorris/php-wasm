@@ -19,7 +19,6 @@ import sunburstIcon from './icons/sunburst.png';
 import netscapeIcon from './icons/netscape.png';
 import mouseIcon from './icons/mouse.png';
 import cmdIcon from './icons/cmd-icon-32.png';
-import dbIcon from './icons/database.png';
 import downIcon from './icons/down.png';
 import upIcon from './icons/up.png';
 
@@ -27,7 +26,8 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from './Header';
 import { basePath } from './runtimePaths';
 
-function Home() {
+function Home()
+{
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
 	const [scrollState, setScrollState] = useState(1);
 	const [showMore, setShowMore] = useState(false);
@@ -60,7 +60,6 @@ function Home() {
 				setScrollState(1);
 				setOffset((offset + 1) % 6);
 			}
-
 		}, speed);
 
 	}, [offset, scrollState]);
@@ -125,24 +124,24 @@ function Home() {
 					</div>
 				</div>
 
-				<h3><button onClick = { () => {setShowMore(!showMore)}} className='square'><img src = {showMore ? upIcon : downIcon} /></button><span onClick = { () => {setShowMore(!showMore)}}>More...</span></h3>
+				<h3><button onClick = { () => {setShowMore(!showMore);}} className='square'><img src = {showMore ? upIcon : downIcon} alt = "" /></button><span onClick = { () => {setShowMore(!showMore);}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
-					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box">
+					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box" rel="noreferrer">
 						<img src = {cmdIcon} alt = "PHP-CLI Preview" />
 						<span>PHP-CLI Preview</span>
 					</a>
 
-					<a target = "_blank" href = {basePath('forecast.html')} className="icon-box">
+					<a target = "_blank" href = {basePath('forecast.html')} className="icon-box" rel="noreferrer">
 						<img src = {sunburstIcon} alt = "Inline FrontEnd PHP" />
 						<span>Inline FrontEnd PHP</span>
 					</a>
 
-					<a target = "_blank" href = "https://github.com/seanmorris/php-gtk" className="icon-box">
+					<a target = "_blank" href = "https://github.com/seanmorris/php-gtk" className="icon-box" rel="noreferrer">
 						<img src = {netscapeIcon} alt = "GTK PHP+Node Browser" />
 						<span>GTK PHP+Node Browser</span>
 					</a>
 
-					<a target = "_blank" href = "https://codepen.io/SeanMorris227/pen/NWoGMYp?editors=1010" className="icon-box">
+					<a target = "_blank" href = "https://codepen.io/SeanMorris227/pen/NWoGMYp?editors=1010" className="icon-box" rel="noreferrer">
 						<img src = {mouseIcon} alt = "PHP Event Handlers" />
 						<span>PHP Event Handlers</span>
 					</a>

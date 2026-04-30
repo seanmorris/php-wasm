@@ -24,7 +24,6 @@ import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-monokai';
 
 import reactIcon from './react-icon.svg';
-import redCircle from './circle-red.svg';
 import toggleIcon from './nuvola/view_choose.png';
 import saveIcon from './nuvola/3floppy_unmount.png';
 import vsCodeIcon from './icons/vscode-16.png';
@@ -56,7 +55,8 @@ const modes = {
 
 const breakpoints = new Map;
 
-export default function Editor() {
+export default function Editor()
+{
 	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
 	const [showLeft, setShowLeft] = useState([]);
@@ -108,7 +108,7 @@ export default function Editor() {
 
 	const onKeyDown = event => {
 		if(event.key === 's' && event.ctrlKey)
-			{
+		{
 			event.preventDefault();
 			handleSave();
 			return;
@@ -143,7 +143,7 @@ export default function Editor() {
 		return () => {
 			window.removeEventListener('editor-open-file', handleOpenFile);
 			window.removeEventListener('keydown', onKeyDown);
-		}
+		};
 	}, []);
 
 	const closeFile = async path => {
@@ -349,7 +349,7 @@ export default function Editor() {
 
 			activeLines.current.add(marker);
 		}
-	}
+	};
 
 	const startDebugger = () => {
 
@@ -380,7 +380,7 @@ export default function Editor() {
 			setCurrentLine = {line => currentBreak.current.line = line}
 			setIsExecuting = {setIsExecuting}
 			openFile = {gotoFile}
-			onStdIn = {async (...args) => {
+			onStdIn = {async () => {
 				const file = currentBreak.current.file;
 				const line = currentBreak.current.line;
 
@@ -426,14 +426,13 @@ export default function Editor() {
 		setPhpDbg(openDbg.current);
 	};
 
-	const handleStartDebugger = event => startDebugger();
-	const handleRun = event => openDbg.current.run();
-	const handleStep = event => openDbg.current.step();
-	const handleContinue = event => openDbg.current.continue();
-	const handleUntil = event => openDbg.current.until();
-	const handleNext = event => openDbg.current.next();
-	const handleFinish = event => openDbg.current.finish();
-	const handleLeave = event => openDbg.current.leave();
+	const handleStartDebugger = () => startDebugger();
+	const handleStep = () => openDbg.current.step();
+	const handleContinue = () => openDbg.current.continue();
+	const handleUntil = () => openDbg.current.until();
+	const handleNext = () => openDbg.current.next();
+	const handleFinish = () => openDbg.current.finish();
+	const handleLeave = () => openDbg.current.leave();
 
 	return (
 		<div className = "editor" data-show-left = {showLeft}>
@@ -441,13 +440,13 @@ export default function Editor() {
 				<Header />
 				<div className = "row toolbar inset tight">
 					<button className='square' onClick = {toggleLeftBar}>
-						<img src = {toggleIcon} />
+						<img src = {toggleIcon} alt = "" />
 					</button>
 					<button className='square' onClick = {handleSave}>
-						<img src = {saveIcon} />
+						<img src = {saveIcon} alt = "" />
 					</button>
 					<button className='square' onClick = {handleOpenVsCode}>
-						<img src = {vsCodeIcon} />
+						<img src = {vsCodeIcon} alt = "" />
 					</button>
 					{!isExecuting ? (
 						<>
@@ -464,27 +463,27 @@ export default function Editor() {
 						</>
 					) : (
 						<span className='contents'>
-						<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
-							⏹
-						</button>
-						<button title = "Step" className='square' onClick = {handleStep}>
-							⇥
-						</button>
-						<button title = "Continue" className='square' onClick = {handleContinue}>
-							→
-						</button>
-						<button title = "Until" className='square' onClick = {handleUntil}>
-							⤻
-						</button>
-						<button title = "Next" className='square' onClick = {handleNext}>
-							↦
-						</button>
-						<button title = "Finish" className='square' onClick = {handleFinish}>
-							↑
-						</button>
-						<button title = "Leave" className='square' onClick = {handleLeave}>
-							↳
-						</button>
+							<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
+								⏹
+							</button>
+							<button title = "Step" className='square' onClick = {handleStep}>
+								⇥
+							</button>
+							<button title = "Continue" className='square' onClick = {handleContinue}>
+								→
+							</button>
+							<button title = "Until" className='square' onClick = {handleUntil}>
+								⤻
+							</button>
+							<button title = "Next" className='square' onClick = {handleNext}>
+								↦
+							</button>
+							<button title = "Finish" className='square' onClick = {handleFinish}>
+								↑
+							</button>
+							<button title = "Leave" className='square' onClick = {handleLeave}>
+								↳
+							</button>
 						</span>
 					)}
 				</div>
@@ -498,14 +497,14 @@ export default function Editor() {
 						<div className = "inset column grow">
 							<div className = "tab-area frame">
 								<div className='scroller' ref = {tabBox}>
-								{openFiles.map(file =>
-									<div className='tab' key = {file.path} data-active = {file.active}>
-										<div onClick = { () => openFile(file.path)}>
-											{file.name} {file.dirty ? '!' : ''}
+									{openFiles.map(file =>
+										<div className='tab' key = {file.path} data-active = {file.active}>
+											<div onClick = { () => openFile(file.path)}>
+												{file.name} {file.dirty ? '!' : ''}
+											</div>
+											<div onClick = { () => closeFile(file.path)}>×</div>
 										</div>
-										<div onClick = { () => closeFile(file.path)}>×</div>
-									</div>
-								)}
+									)}
 								</div>
 							</div>
 							<div className='frame grow'>
@@ -518,7 +517,7 @@ export default function Editor() {
 					</div>
 				</div>
 				<div className = "inset right demo-bar">
-					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon' alt = "React logo" />
 				</div>
 			</div>
 		</div>

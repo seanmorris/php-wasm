@@ -85,6 +85,12 @@ export default [
 	}
 	, {
 		...smRecommended
-		, files: ['eslint.config.mjs', 'vite.config.mjs', 'vite.worker.config.mjs']
+		, files: [
+			'eslint.config.mjs'
+			, 'vite.config.mjs'
+			, 'vite.worker.config.mjs'
+			, 'src/**/*.{js,mjs}'
+			, 'test/**/*.{js,mjs}'
+		]
 	}
 ];

@@ -8,52 +8,53 @@ import { useMemo } from 'react';
 
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
-export default function VSCodeEditor() {
+export default function VSCodeEditor()
+{
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const path = query.has('path') ? query.get('path') : false;
 
-	const {VSCode, executeCommand, openFile} = useVSCode({
-		url: 'https://oss-code.pages.dev',
+	const {VSCode, openFile} = useVSCode({
 		// url: 'http://localhost:8081',
-		fsHandlers: {
+		url: 'https://oss-code.pages.dev'
+		, fsHandlers: {
 			readdir(...args) {
 				return sendMessage('readdir', args);
-			},
+			}
 
-			async readFile(...args) {
+			, async readFile(...args) {
 				return Array.from(await sendMessage('readFile', args));
-			},
+			}
 
-			analyzePath(...args) {
+			, analyzePath(...args) {
 				return sendMessage('analyzePath', args);
-			},
+			}
 
-			writeFile(path, contents) {
-				return sendMessage('writeFile', [path, new Uint8Array(contents)]);
-			},
+			, writeFile(filePath, contents) {
+				return sendMessage('writeFile', [filePath, new Uint8Array(contents)]);
+			}
 
-			rename(...args) {
+			, rename(...args) {
 				return sendMessage('rename', args);
-			},
+			}
 
-			mkdir: (...args) => {
+			, mkdir: (...args) => {
 				return sendMessage('mkdir', args);
-			},
+			}
 
-			unlink: (...args) => {
+			, unlink: (...args) => {
 				return sendMessage('unlink', args);
-			},
+			}
 
-			rmdir: (...args) => {
+			, rmdir: (...args) => {
 				return sendMessage('rmdir', args);
-			},
+			}
 
-			activate: (...args) => {
+			, activate: (...args) => {
 				console.log('activate', ...args);
 				path && openFile(path);
-			},
-		},
+			}
+		}
 	});
 
 	return (<div className = "editor">

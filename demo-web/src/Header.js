@@ -1,6 +1,7 @@
 import { basePath } from './runtimePaths';
 
-export default function Header() {
+export default function Header()
+{
 	return (<div className = "row header toolbar">
 		<div className = "cols">
 			<div className = "row start">

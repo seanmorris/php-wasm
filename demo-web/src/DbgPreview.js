@@ -1,16 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import './dbg-preview.css';
 import Debugger from './Debugger';
 import { basePath } from './runtimePaths';
 
-export default function DbgPreview() {
+export default function DbgPreview()
+{
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	const [file, setCurrentFile] = useState('');
 	const [line, setCurrentLine] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
-	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	const [isIframe] = useState(!!Number(query.get('iframed')));
 
 	const startPath = query.has('path') ? query.get('path') : false;
 	const topBar = (<div className = "row header toolbar">
@@ -53,5 +54,5 @@ export default function DbgPreview() {
 			</div>
 			{statusBar}
 		</div>
-	</div>)
+	</div>);
 }

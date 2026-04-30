@@ -20,9 +20,10 @@ import ErrorDialog from './ErrorDialog';
 import Confirm from './Confirm';
 
 // const sendMessage = sendMessageFor(`${window.location.origin}${basePath('cgi-worker.mjs')}`);
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller)
+const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
-function SelectFramework() {
+function SelectFramework()
+{
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
@@ -32,7 +33,7 @@ function SelectFramework() {
 	const [laravelInstalled, setLaravelInstalled] = useState(false);
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
 	const [overlay, setOverlay] = useState(null);
-	const [isIframe, setIsIframe] = useState(!!Number(query.get('iframed')));
+	const [isIframe] = useState(!!Number(query.get('iframed')));
 
 	const refreshAll = () => {
 		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
@@ -68,16 +69,16 @@ function SelectFramework() {
 				break;
 
 			default:
-			break;
+				break;
 
 		}
-	}
+	};
 
 	useEffect(() => {
 		window.addEventListener('install-complete', onComplete);
 		return () => {
 			window.removeEventListener('install-complete', onComplete);
-		}
+		};
 	}, []);
 
 	const backupSite = () => setOverlay(<Backup
@@ -104,7 +105,7 @@ function SelectFramework() {
 			setDrupalInstalled(false);
 			setLaravelInstalled(false);
 			setLaminasInstalled(false);
-			setOverlay(null)
+			setOverlay(null);
 		} } />) }
 		onCancel = { () => setOverlay(null) }
 		message = {(
@@ -195,14 +196,14 @@ function SelectFramework() {
 							<button onClick = {restoreSite}>
 								<img alt = "Restore" src = {floppyIcon} className = "icon" />
 								Restore
-								</button>
+							</button>
 							<button onClick = {clearFilesystem}>
 								<img alt = "Clear" src = {nukeIcon} className = "icon" />
 								Clear
 							</button>
 						</div>
 						<div className = "inset right demo-bar">
-							<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon'/>
+							<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon' alt = "React logo" />
 						</div>
 					</>}
 					{isIframe && <div className = "inset center">
@@ -210,7 +211,7 @@ function SelectFramework() {
 							style = {{padding: "1rem"}}
 							href = "#"
 							onClick = {() => window.open(basePath())}>
-								Open Full Demo
+							Open Full Demo
 						</a></h2>
 					</div>}
 				</div>

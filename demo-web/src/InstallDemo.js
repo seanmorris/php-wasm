@@ -13,49 +13,45 @@ import './InstallDemo.css';
 
 const packages = {
 	'drupal-7': {
-		name:  'Drupal 7',
-		//*/
-		file:  '/backups/drupal-7.95.zip',
-		/*/
-		file:  '/backups/drupal-7.95-pgsql.zip',
-		sql:   '/backups/drupal-7.95.sql',
-		//*/
-		path:  'drupal-7.95',
-		vHost: 'drupal',
-		dir:   'drupal-7.95',
-		entry: 'index.php',
-	},
-	'cakephp-5': {
-		name:  'CakePHP 5',
-		file:  '/backups/cakephp-5.zip',
-		path:  'cakephp-5',
-		vHost: 'cakephp-5',
-		dir:   'cakephp-5/webroot',
-		entry: 'index.php',
-	},
-	'codeigniter-4': {
-		name:  'CodeIgniter 4',
-		file:  '/backups/codeigniter-4.zip',
-		path:  'codeigniter-4',
-		vHost: 'codeigniter-4',
-		dir:   'codeigniter-4/public',
-		entry: 'index.php',
-	},
-	'laminas-3': {
-		name:  'Laminas 3',
-		file:  '/backups/laminas-3.zip',
-		path:  'laminas-3',
-		vHost: 'laminas-3',
-		dir:   'laminas-3/public',
-		entry: 'index.php',
-	},
-	'laravel-11': {
-		name:  'Laravel 11',
-		file:  '/backups/laravel-11.zip',
-		path:  'laravel-11',
-		vHost: 'laravel-11',
-		dir:   'laravel-11/public',
-		entry: 'index.php',
+		// Switch these paths to the PostgreSQL backup if needed.
+		name:  'Drupal 7'
+		, file:  '/backups/drupal-7.95.zip'
+		, path:  'drupal-7.95'
+		, vHost: 'drupal'
+		, dir:   'drupal-7.95'
+		, entry: 'index.php'
+	}
+	, 'cakephp-5': {
+		name:  'CakePHP 5'
+		, file:  '/backups/cakephp-5.zip'
+		, path:  'cakephp-5'
+		, vHost: 'cakephp-5'
+		, dir:   'cakephp-5/webroot'
+		, entry: 'index.php'
+	}
+	, 'codeigniter-4': {
+		name:  'CodeIgniter 4'
+		, file:  '/backups/codeigniter-4.zip'
+		, path:  'codeigniter-4'
+		, vHost: 'codeigniter-4'
+		, dir:   'codeigniter-4/public'
+		, entry: 'index.php'
+	}
+	, 'laminas-3': {
+		name:  'Laminas 3'
+		, file:  '/backups/laminas-3.zip'
+		, path:  'laminas-3'
+		, vHost: 'laminas-3'
+		, dir:   'laminas-3/public'
+		, entry: 'index.php'
+	}
+	, 'laravel-11': {
+		name:  'Laravel 11'
+		, file:  '/backups/laravel-11.zip'
+		, path:  'laravel-11'
+		, vHost: 'laravel-11'
+		, dir:   'laravel-11/public'
+		, entry: 'index.php'
 	}
 };
 
@@ -65,7 +61,8 @@ const informOpener = (selectedFrameworkName) => {
 	);
 };
 
-export default function InstallDemo() {
+export default function InstallDemo()
+{
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const [message, setMessage] = useState('Initializing...');
 	const [terminal, setTerminal] = useState('');
@@ -129,9 +126,9 @@ export default function InstallDemo() {
 			if(!existingvHost)
 			{
 				settings.vHosts.push({
-					pathPrefix: vHostPrefix,
-					directory:  '/persist/' + selectedFramework.dir,
-					entrypoint: selectedFramework.entry
+					pathPrefix: vHostPrefix
+					, directory:  '/persist/' + selectedFramework.dir
+					, entrypoint: selectedFramework.entry
 				});
 			}
 			else
@@ -165,10 +162,10 @@ export default function InstallDemo() {
 
 			setTerminal(
 				<div style={{
-					position: 'relative',
-					minWidth: 'min(45rem, 90vw)',
-					minHeight: '30rem',
-					resize: 'both'
+					position: 'relative'
+					, minWidth: 'min(45rem, 90vw)'
+					, minHeight: '30rem'
+					, resize: 'both'
 				}}>
 					<Terminal
 						className = "inset"
