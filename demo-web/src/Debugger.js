@@ -322,7 +322,7 @@ export default forwardRef(function Debugger({
 
 		const isRunning = await php.isExecuting();
 
-		setIsExecuting( isRunning );
+		setIsExecuting && setIsExecuting(isRunning);
 
 		if(!silent)
 		{

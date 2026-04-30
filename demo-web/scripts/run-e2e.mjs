@@ -1,14 +1,19 @@
 import { spawn } from 'node:child_process';
 import http from 'node:http';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Pobot } from 'pobot/Pobot.mjs';
 
 const port = Number(process.env.DEMO_WEB_E2E_PORT ?? 9414);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const demoWebDir = path.resolve(__dirname, '..');
 const testFiles = [
-	'test/e2e/DemoWebE2ETest.mjs'
+	path.join('test', 'e2e', 'DemoWebE2ETest.mjs')
 ];
 
 const run = (command, args, options = {}) => new Promise((resolve, reject) => {
 	const child = spawn(command, args, {
-		cwd: process.cwd()
+		cwd: demoWebDir
 		, stdio: 'inherit'
 		, env: process.env
 		, ...options
@@ -61,8 +66,52 @@ const waitForServer = (url, timeout = 60000) => new Promise((resolve, reject) =>
 	probe();
 });
 
-const server = spawn(process.execPath, ['./test/e2e-server.mjs'], {
-	cwd: process.cwd()
+const preflightBrowser = async (url) => {
+	let pobot;
+
+	try
+	{
+		pobot = await Pobot.get();
+		await pobot.goto(url);
+
+		const page = await pobot.inject(() => ({
+			href: window.location.href
+			, origin: window.location.origin
+			, pathname: window.location.pathname
+			, readyState: document.readyState
+			, title: document.title
+		}));
+
+		if(page?.origin === 'null' || page?.href?.startsWith('chrome-error://'))
+		{
+			throw new Error(`Browser preflight loaded an invalid page context: ${JSON.stringify(page)}`);
+		}
+	}
+	catch(error)
+	{
+		const message = error instanceof Error ? error.message : String(error);
+		throw new Error(
+			`Browser preflight failed before cvtest started. `
+			+ `This usually means Chromium/DevTools could not start or crashed early. `
+			+ `Original error: ${message}`
+		);
+	}
+	finally
+	{
+		if(pobot)
+		{
+			try
+			{
+				await pobot.kill();
+			}
+			catch
+			{}
+		}
+	}
+};
+
+const server = spawn(process.execPath, [path.join('test', 'e2e-server.mjs')], {
+	cwd: demoWebDir
 	, stdio: 'inherit'
 	, env: {...process.env, DEMO_WEB_E2E_PORT: String(port)}
 });
@@ -88,6 +137,7 @@ try
 {
 	await run('npm', ['run', 'build']);
 	await waitForServer(`http://127.0.0.1:${port}/php-wasm/`);
+	await preflightBrowser(`http://127.0.0.1:${port}/php-wasm/home.html?no-service-worker`);
 	await run('npx', ['cvtest', ...testFiles], {
 		env: {
 			...process.env

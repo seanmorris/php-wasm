@@ -719,10 +719,11 @@ jobs:
 
   build-demo:
     name: Build Web Demo
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - index-packages
+      - test-browser-dynamic-compressed
+      - test-node-dynamic-compressed
+      - test-cgi-node-dynamic-compressed
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
@@ -745,19 +746,6 @@ jobs:
             tar -xzf ${TAR}
           done;
 
-      - name: Download Index Artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-indexed-packages
-          merge-multiple: true
-          path: ./
-
-      - name: Extract Artifact
-        run: |
-          for TAR in php-indexed-packages.tar.gz; do
-            tar -xzf ${TAR}
-          done;
-
       - name: Ensure the demo uses local packages
         run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
 
@@ -765,9 +753,6 @@ jobs:
         run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
         env:
           CI: ''
-
-      - name: Copy packages into web demo
-        run: cp -rfv packages demo-web/build/nightly
 
       - name: Take Snapshot
         run: |

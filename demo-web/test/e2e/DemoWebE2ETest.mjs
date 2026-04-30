@@ -20,15 +20,27 @@ export class DemoWebE2ETest extends BotTest
 
 	async setUp()
 	{
-		await super.setUp();
-		await this.resetBrowserState();
+		this.setUpFailure = null;
+
+		try
+		{
+			await super.setUp();
+			await this.resetBrowserState();
+		}
+		catch(error)
+		{
+			this.setUpFailure = error;
+		}
 	}
 
 	async breakDown()
 	{
 		try
 		{
-			await this.resetBrowserState();
+			if(!this.setUpFailure)
+			{
+				await this.resetBrowserState();
+			}
 		}
 		finally
 		{
@@ -36,10 +48,33 @@ export class DemoWebE2ETest extends BotTest
 		}
 	}
 
+	ensureSetUp()
+	{
+		if(this.setUpFailure)
+		{
+			throw this.setUpFailure;
+		}
+	}
+
 	async resetBrowserState()
 	{
 		await this.pobot.goto(this.base('home.html?no-service-worker&e2e-reset=1'));
-		await this.pobot.inject(async () => {
+		const reset = await this.pobot.inject(async () => {
+			const context = {
+				href: window.location.href
+				, origin: window.location.origin
+				, pathname: window.location.pathname
+			};
+
+			if(window.location.origin === 'null' || !window.location.pathname.startsWith('/php-wasm/'))
+			{
+				return {
+					ok: false
+					, reason: 'unexpected-page-context'
+					, context
+				};
+			}
+
 			const registrations = 'serviceWorker' in navigator
 				? await navigator.serviceWorker.getRegistrations()
 				: [];
@@ -54,15 +89,41 @@ export class DemoWebE2ETest extends BotTest
 
 			for(const dbName of ['/persist', '/config', 'EM_PRELOAD_CACHE'])
 			{
-				await new Promise(resolve => {
-					const request = indexedDB.deleteDatabase(dbName);
-					request.onsuccess = request.onerror = request.onblocked = () => resolve();
-				});
+				try
+				{
+					await new Promise(resolve => {
+						const request = indexedDB.deleteDatabase(dbName);
+						request.onsuccess = request.onerror = request.onblocked = () => resolve();
+					});
+				}
+				catch(error)
+				{
+					return {
+						ok: false
+						, reason: 'indexeddb-reset-failed'
+						, dbName
+						, error: String(error)
+						, context
+					};
+				}
 			}
 
 			localStorage.clear();
 			sessionStorage.clear();
+
+			return {
+				ok: true
+				, context
+			};
 		});
+
+		if(!reset?.ok)
+		{
+			throw new Error(
+				`Browser reset failed: ${reset?.reason ?? 'unknown'} `
+				+ `${JSON.stringify(reset)}`
+			);
+		}
 	}
 
 	async waitFor(description, probe, {timeout = 90000, interval = 250} = {})
@@ -87,6 +148,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testHomePageUsesProductionBasePath()
 	{
+		this.ensureSetUp();
 		await this.pobot.goto(this.base('home.html?no-service-worker'));
 
 		const details = await this.waitFor(
@@ -118,6 +180,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testHomeDemoQueryRedirectsToEmbeddedPage()
 	{
+		this.ensureSetUp();
 		await this.pobot.goto(this.base('home.html?demo=hello-world.php&version=8.4&no-service-worker'));
 
 		const redirected = await this.waitFor(
@@ -152,6 +215,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testEmbeddedPhpHelloWorldRuns()
 	{
+		this.ensureSetUp();
 		await this.pobot.goto(this.base(`embedded-php.html?demo=hello-world.php&version=${version}&extensionFlags=0&no-service-worker`));
 
 		const output = await this.waitFor(
@@ -170,6 +234,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testCliPreviewRunsPhpScript()
 	{
+		this.ensureSetUp();
 		const code = encodeURIComponent('echo "Hello, World!";');
 		await this.pobot.goto(this.base(`cli-preview.html?code=${code}&no-service-worker`));
 
@@ -190,6 +255,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testDbgPreviewBootsPhpDbg()
 	{
+		this.ensureSetUp();
 		await this.pobot.goto(this.base('dbg-preview.html?path=/preload/test_www/hello-world.php&no-service-worker'));
 
 		const dbg = await this.waitFor(
@@ -209,6 +275,7 @@ export class DemoWebE2ETest extends BotTest
 
 	async testSelectFrameworkRegistersServiceWorker()
 	{
+		this.ensureSetUp();
 		await this.pobot.goto(this.base('select-framework.html'));
 
 		const serviceWorker = await this.waitFor(
