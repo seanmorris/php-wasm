@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const docsRoot = '/projects/php-wasm-site/pages';
+import { docsRoot } from './paths.mjs';
 
 function walkMarkdownFiles(directory, results = [])
 {

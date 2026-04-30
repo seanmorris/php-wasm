@@ -6,6 +6,7 @@ import http from 'node:http';
 
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { PhpCgiNode } from '../../../packages/php-cgi-wasm/PhpCgiNode.mjs';
+import { phpWasmPackageDir } from './paths.mjs';
 
 function ensureNavigatorLocks()
 {
@@ -27,8 +28,7 @@ function ensureNavigatorLocks()
 
 export function getAvailablePhpNodeVersion()
 {
-	const packageDir = '/projects/php-wasm/packages/php-wasm';
-	const versions = fs.readdirSync(packageDir)
+	const versions = fs.readdirSync(phpWasmPackageDir)
 		.map(entry => entry.match(/^php(\d+\.\d+)-node\.mjs$/))
 		.filter(Boolean)
 		.map(match => match[1])

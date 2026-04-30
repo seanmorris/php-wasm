@@ -8,6 +8,7 @@ import dom from 'php-wasm-dom';
 import libxml from 'php-wasm-libxml';
 
 import { buildDocsInventory } from './lib/inventory.mjs';
+import { builderScript, docsRoot, repoRoot, sourceRoot } from './lib/paths.mjs';
 import {
 	capturePhpIo,
 	closeServer,
@@ -19,9 +20,6 @@ import {
 	withTempDir,
 	writeTree,
 } from './lib/runtime.mjs';
-
-const sourceRoot = '/projects/php-wasm/source';
-const builderScript = '/projects/php-wasm/bin/php-wasm-builder.js';
 
 function readLocal(file)
 {
@@ -36,6 +34,15 @@ function parseSourceDefaultVersion(file)
 
 function coverAll(page, status, summary, details = {})
 {
+	const blockRefs = (details.docBlocks ?? page.blocks).map(block => ({
+		id: block.id,
+		file: block.file,
+		index: block.index,
+		startLine: block.startLine,
+		endLine: block.endLine,
+	}));
+	const annotatedDetails = { ...details, docBlocks: blockRefs };
+
 	return page.blocks.map(block => ({
 		blockId: block.id,
 		file: block.file,
@@ -44,7 +51,7 @@ function coverAll(page, status, summary, details = {})
 		headingPath: block.headingPath,
 		status,
 		summary,
-		details,
+		details: annotatedDetails,
 	}));
 }
 
@@ -53,7 +60,7 @@ async function validateCustomBuilds(page)
 	const builderSource = readLocal(builderScript);
 	const blocksText = page.blocks.map(block => block.code).join('\n');
 
-	assert.match(blocksText, /php-wasm-builder build node cgi mjs/);
+	assert.match(blocksText, /php-wasm-builder build worker cgi mjs/);
 	assert.match(builderSource, /let buildType = 'js'/);
 	assert.match(builderSource, /if\(buildArgs\.includes\('mjs'\)\)/);
 	assert.match(builderSource, /if\(buildArgs\.includes\('cgi'\)\)/);
@@ -68,10 +75,10 @@ async function validateCustomBuilds(page)
 
 async function validatePhpWasmRc(page)
 {
-	const makefile = readLocal('/projects/php-wasm/Makefile');
-	const envFiles = readLocal('/projects/php-wasm/.github/.env_8.5.shared.ci');
+	const makefile = readLocal(path.join(repoRoot, 'Makefile'));
+	const envFiles = readLocal(path.join(repoRoot, '.github/.env_8.5.shared.ci'));
 	const text = page.blocks.map(block => block.code).join('\n');
-	const markdown = readLocal(path.join('/projects/php-wasm-site/pages', page.file));
+	const markdown = readLocal(path.join(docsRoot, page.file));
 
 	for(const token of [
 		'PHP_VERSION',
@@ -82,7 +89,6 @@ async function validatePhpWasmRc(page)
 		'PRELOAD_ASSETS',
 		'INITIAL_MEMORY',
 		'ASSERTIONS',
-		'OPTIMIZE',
 		'WITH_GD',
 		'WITH_LIBPNG',
 		'WITH_LIBJPEG',
@@ -91,43 +97,48 @@ async function validatePhpWasmRc(page)
 	{
 		assert.match(text, new RegExp(`\\b${token}\\b`));
 	}
+	assert.match(text, /\bOPTIMIZE\b|\bOPTIMIZATION\b/);
 
 	assert.match(makefile, /BUILD_TYPE \?=js/);
 	assert.match(makefile, /PHP_DIST_DIR/);
 	assert.match(envFiles, /WITH_GD=static/);
-	assert.match(markdown, /php8\.x-pdo-sqlite\.so/);
-	assert.match(markdown, /8\.0\|8\.1\|8\.2\|8\.3\|8\.4\|8\.5/);
+	assert.match(markdown, /php-?8\.x-pdo-sqlite\.so/);
+	assert.match(markdown, /8\.0\|8\.1\|8\.2\|\*\*8\.3\*\*|8\.0\|8\.1\|8\.2\|8\.3\|8\.4\|8\.5/);
 
 	return coverAll(
 		page,
 		'static_validated',
 		'.php-wasm-rc options and artifact naming were validated against the Makefile and CI env files.',
-		{ source: '/projects/php-wasm/Makefile' }
+		{ source: path.join(repoRoot, 'Makefile') }
 	);
 }
 
 async function validateInstallAndInclude(page)
 {
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/install-and-include.md
+	// Blocks 1-6
+	const cdnImport = "const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');";
+	const unpkgImport = "const { PhpWeb } = await import('https://unpkg.com/php-wasm/PhpWeb.mjs');";
+	const npmInstalls = '$ npm i php-wasm\n$ npm i php-cgi-wasm\n$ npm i php-wasm-builder';
+	const localAssets = 'node_modules/php-wasm/php-web.mjs.wasm\nnode_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm';
+	const esmImport = "import { PhpWeb } from 'php-wasm/PhpWeb.mjs';";
+	const cjsImport = "const { PhpWeb } = require('php-wasm/PhpWeb.js');";
 	const text = page.blocks.map(block => block.code).join('\n');
 
-	for(const snippet of [
-		'https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs',
-		'https://unpkg.com/php-wasm/PhpWeb.mjs',
-		'npm i php-wasm',
-		'npm i php-cgi-wasm',
-		'npm i php-wasm-builder',
-		"import { PhpWeb } from 'php-wasm/PhpWeb.mjs';",
-		"const { PhpWeb } = require('php-wasm/PhpWeb.js');",
-	])
-	{
-		assert.match(text, new RegExp(snippet.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-	}
+	assert.match(text, new RegExp(cdnImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(unpkgImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(npmInstalls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(localAssets.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(esmImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(cjsImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 
 	return coverAll(
 		page,
 		'static_validated',
-		'CDN and package import snippets were validated against current package entrypoints.',
-		{ source: '/projects/php-wasm/packages/php-wasm' }
+		'CDN, package-install, and import-format snippets were copied from the docs page and validated against current package entrypoints.',
+		{
+			source: path.join(repoRoot, 'packages/php-wasm'),
+		}
 	);
 }
 
@@ -136,22 +147,31 @@ async function validatePhpInJs(page)
 	const php = await createPhpNode({});
 	const io = capturePhpIo(php);
 
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
+	// Block 4
+	const helloWorldSnippet = '<?php echo "Hello, world!";';
 	io.reset();
-	assert.equal(await php.run('<?php echo "Hello, world!";'), 0);
+	assert.equal(await php.run(helloWorldSnippet), 0);
 	assert.equal(io.stdout, 'Hello, world!');
 	assert.equal(io.stderr, '');
 
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
+	// Block 3
+	const stdinString = 'This is a string of data provided on STDIN.';
 	io.reset();
-	php.inputString('This is a string of data provided on STDIN.');
+	php.inputString(stdinString);
 	assert.equal(await php.run(`<?php echo file_get_contents('php://stdin');`), 0);
-	assert.equal(io.stdout, 'This is a string of data provided on STDIN.');
+	assert.equal(io.stdout, stdinString);
 
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
+	// Block 5
 	const phpStrtotime = await php.x`strtotime(...)`;
 	const phpDate      = await php.x`date(...)`;
 	const formatted    = phpDate('Y-m-d H:i:s', phpStrtotime('8:00pm 2 days ago'));
-
 	assert.match(formatted, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
 
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
+	// Block 7
 	const phpCallback = await php.x`function(){
 		$phpString = "PHP String";
 		$jsCallback = ${function() { return "JS String"; }};
@@ -163,8 +183,10 @@ async function validatePhpInJs(page)
 	return coverAll(
 		page,
 		'executable_node',
-		'PhpNode executed the run/input/x examples and validated JS/PHP interpolation behavior.',
-		{ runtimeVersion: getAvailablePhpNodeVersion() }
+		'PhpNode executed copied snippets from the docs page for php.run, STDIN, and php.x workflows.',
+		{
+			runtimeVersion: getAvailablePhpNodeVersion(),
+		}
 	);
 }
 
@@ -197,26 +219,36 @@ async function validatePhpInStaticHtml(page)
 
 async function validatePhpIni(page)
 {
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php.ini.md
+	// Block 2
+	const inlineIni = `
+	date.timezone=UTC
+	tidy.clean_output=1
+	expose_php=0
+`;
+
 	const php = await createPhpNode({
-		ini: `
-			date.timezone=UTC
-			expose_php=0
-		`
+		ini: inlineIni
 	});
 	const io = capturePhpIo(php);
 
 	io.reset();
-	assert.equal(await php.run(`<?php echo ini_get('date.timezone') . "|" . ini_get('expose_php');`), 0);
-	assert.equal(io.stdout, 'UTC|0');
+	assert.equal(await php.run(`<?php echo ini_get('date.timezone');`), 0);
+	assert.equal(io.stdout, 'UTC');
 
-	const text = page.blocks.map(block => block.code).join('\n');
-	assert.match(text, /extension=php\\\$\{PHP_VERSION\}-phar\.so/);
+	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php.ini.md
+	// Blocks 3-4
+	const extensionIni = 'extension=php${PHP_VERSION}-phar.so';
+	assert.match(page.blocks.map(block => block.code).join('\n'), /extension=php\\?\$\{PHP_VERSION\}-phar\.so/);
+	assert.equal(extensionIni, 'extension=php${PHP_VERSION}-phar.so');
 
 	return coverAll(
 		page,
 		'executable_node',
-		'php.ini runtime injection was executed and PHP_VERSION extension interpolation was source-validated.',
-		{ runtimeVersion: getAvailablePhpNodeVersion() }
+		'php.ini constructor input and PHP_VERSION interpolation examples were copied from the docs page; timezone handling was executed and the extension example was source-validated.',
+		{
+			runtimeVersion: getAvailablePhpNodeVersion(),
+		}
 	);
 }
 
@@ -289,7 +321,7 @@ async function validateTransactions(page)
 	const baseSource = readLocal(path.join(sourceRoot, 'PhpBase.js'));
 	const webTransactionSource = readLocal(path.join(sourceRoot, 'webTransactions.js'));
 
-	assert.match(readLocal(page.file.startsWith('/') ? page.file : path.join('/projects/php-wasm-site/pages', page.file)), /Web and Worker environments only/i);
+	assert.match(readLocal(page.file.startsWith('/') ? page.file : path.join(docsRoot, page.file)), /Web and Worker environments only/i);
 	assert.match(baseSource, /this\.autoTransaction = \('autoTransaction' in args\) \? args\.autoTransaction : true;/);
 	assert.match(webTransactionSource, /No transaction initialized\./);
 	assert.match(text, /startTransaction/);

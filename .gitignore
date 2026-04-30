@@ -4,7 +4,7 @@
 configured
 
 .cache/
-docs/
+/docs/
 emscripten/
 node_modules/
 
