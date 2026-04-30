@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
 	assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, publicDir: false
+	, base: '/php-wasm/'
 	, build: {
 		modulePreload: false
 		, copyPublicDir: false
@@ -21,8 +22,8 @@ export default defineConfig({
 				format: 'es'
 				, entryFileNames: 'cgi-worker.js'
 				, inlineDynamicImports: true
-				, chunkFileNames: 'worker-assets/[name]-[hash].js'
-				, assetFileNames: 'worker-assets/[name]-[hash][extname]'
+				, chunkFileNames: '[name]-[hash].js'
+				, assetFileNames: '[name]-[hash][extname]'
 			}
 		}
 	}

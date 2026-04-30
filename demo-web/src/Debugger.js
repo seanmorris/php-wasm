@@ -63,9 +63,7 @@ else
 		, {name: 'libssl.so',    url: (new URL('php-wasm-openssl/libssl.so',    import.meta.url))}
 	);
 
-	// files.push(
-	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) },
-	// );
+	// files.push({ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) });
 }
 
 const files = [

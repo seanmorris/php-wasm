@@ -1,9 +1,9 @@
 import {
-	var_dump,
-	file_put_contents,
-	fopen,
-	fread,
-	feof,
+	var_dump
+	, file_put_contents
+	, fopen
+	, fread
+	, feof
 } from 'php-wasm/stdlib/8.5-web.mjs';
 
 

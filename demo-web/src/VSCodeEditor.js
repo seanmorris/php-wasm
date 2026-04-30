@@ -15,8 +15,7 @@ export default function VSCodeEditor()
 	const path = query.has('path') ? query.get('path') : false;
 
 	const {VSCode, openFile} = useVSCode({
-		// url: 'http://localhost:8081',
-		url: 'https://oss-code.pages.dev'
+		url: 'https://oss-code.pages.dev' // 'http://localhost:8081'
 		, fsHandlers: {
 			readdir(...args) {
 				return sendMessage('readdir', args);

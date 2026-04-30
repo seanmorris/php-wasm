@@ -44,9 +44,9 @@ describe('AppRoutes', () => {
 	it('renders the home page direct entry', () => {
 		render(
 			React.createElement(
-				MemoryRouter,
-				{ initialEntries: ['/home.html'] },
-				React.createElement(AppRoutes)
+				MemoryRouter
+				, { initialEntries: ['/home.html'] }
+				, React.createElement(AppRoutes)
 			)
 		);
 
@@ -56,9 +56,9 @@ describe('AppRoutes', () => {
 	it('redirects legacy CGI routes to the install flow', () => {
 		render(
 			React.createElement(
-				MemoryRouter,
-				{ initialEntries: ['/cgi-bin/drupal'] },
-				React.createElement(AppRoutes)
+				MemoryRouter
+				, { initialEntries: ['/cgi-bin/drupal'] }
+				, React.createElement(AppRoutes)
 			)
 		);
 
