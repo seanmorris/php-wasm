@@ -48,6 +48,7 @@ rm -f public/*.so;
 rm -f public/*.dat;
 rm -f public/*.map;
 rm -rf public/worker-assets;
+rm -f public/assets/php*-web.mjs public/assets/php*-web.mjs.wasm || true
 
 NODE_OPTIONS=--max_old_space_size=4096 npm run build:worker;
 

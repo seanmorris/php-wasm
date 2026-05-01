@@ -13,25 +13,56 @@ export class PhpCliWeb extends PhpBase
 {
 	/**
 	 * Creates a browser-hosted PHP CLI runtime.
-	 * @param {object} args CLI runtime configuration.
+	 * @param {PhpRuntimeArgs} args CLI runtime configuration.
 	 */
 	constructor(args = {})
 	{
-		super(import(`./php${args.version ?? defaultVersion}-cli-web.mjs`), args, 'cli');
+		const version = args.version ?? defaultVersion;
+		const constructorArgs = {version, ...args};
+
+		switch(version)
+		{
+			case '8.5':
+				super(import(`./php8.5-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-cli-web.mjs`), constructorArgs, 'cli');
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${version}`);
+		}
 
 		this.interactive = false;
 
-		if(args.interactive)
+		if(constructorArgs.interactive)
 		{
 			this.interactive = true;
 		}
-		else if(args.script)
+		else if(constructorArgs.script)
 		{
-			this.script = args.script;
+			this.script = constructorArgs.script;
 		}
-		else if(args.code)
+		else if(constructorArgs.code)
 		{
-			this.code = args.code;
+			this.code = constructorArgs.code;
 		}
 
 		this.binary = this.binary.then((php) => {

@@ -11,6 +11,10 @@ declare interface PhpModuleFactory {
 	default: new (args: object) => object;
 }
 
+declare type PhpRuntimeVersion = '8.0' | '8.1' | '8.2' | '8.3' | '8.4' | '8.5';
+declare type PhpRuntimeVariant = '' | '_sdl';
+declare type PhpRuntimeTarget = `${PhpRuntimeVersion}${PhpRuntimeVariant}`;
+
 declare type PhpQueueParam = string | number | boolean | object | undefined;
 declare type PhpMessageParam = string | number | boolean | object | null | undefined;
 declare type PhpRuntimeValue = object | string | number | boolean | Uint8Array | null | undefined | void;
@@ -71,8 +75,11 @@ declare interface PhpPreloadFile {
 
 declare interface PhpRuntimeArgs {
 	autoTransaction?: boolean;
-	version?: string;
-	variant?: string;
+	version?: PhpRuntimeVersion;
+	variant?: PhpRuntimeVariant;
+	interactive?: boolean;
+	script?: string;
+	code?: string;
 	shared?: Record<string, PhpSharedValue>;
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFileList;
@@ -86,8 +93,18 @@ declare interface PhpRuntimeArgs {
 	[key: string]: object | string | number | boolean | Function | undefined;
 }
 
+declare module './php*.mjs' {
+	const PhpBinary: new (args: object) => object;
+	export default PhpBinary;
+}
+
 declare module './php-worker' {
 	const PhpBinary: Promise<PhpModuleFactory>;
+	export default PhpBinary;
+}
+
+declare module 'php-wasm/php*.mjs' {
+	const PhpBinary: new (args: object) => object;
 	export default PhpBinary;
 }
 
@@ -96,13 +113,13 @@ declare module 'php-wasm/php-worker.mjs' {
 	export default PhpBinary;
 }
 
-declare module 'php-wasm/PhpBase.mjs' {
+declare module 'php-wasm/PhpBase' {
 	export class PhpBase extends EventTarget {
 		constructor(phpBinLoader: Promise<PhpModuleFactory>, args?: PhpRuntimeArgs, sapi?: string);
 		binary: Promise<{
 			inputDataQueue?: string[],
-			awaitingInput?: Function | null,
-			triggerStdin?: Function,
+			awaitingInput?: ((value: string | undefined) => void) | null,
+			triggerStdin?: () => void,
 			persist?: boolean,
 			ccall?: Function,
 			lengthBytesUTF8?: Function,

@@ -30,6 +30,7 @@
   ],
   "files": [
     "*.wasm",
+    "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",

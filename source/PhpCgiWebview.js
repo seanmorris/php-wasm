@@ -28,13 +28,40 @@ export class PhpCgiWebview extends PhpCgiWebBase
 	 * @param {number} [options.dynamicCacheTime] Dynamic response cache lifetime in milliseconds.
 	 * @param {PhpVhostList} [options.vHosts] Virtual host routing rules.
 	 * @param {{[key: string]: string}} [options.env] Environment variables to set inside the runtime.
-	 * @param {string} [options.version] PHP version identifier used by the loader.
+	 * @param {PhpRuntimeVersion} [options.version] PHP version identifier used by the loader.
 	 */
 	constructor({docroot, prefix, rewrite, cookies, types, onRequest, notFound, version = defaultVersion, ...args} = {})
 	{
-		super(
-			import(`./php${version ?? defaultVersion}-cgi-webview.mjs`)
-			, {docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args}
-		);
+		const constructorArgs = {version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args};
+
+		switch(version)
+		{
+			case '8.5':
+				super(import(`./php8.5-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-cgi-webview.mjs`), constructorArgs);
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${version}`);
+		}
 	}
 }

@@ -22,6 +22,7 @@ rm -f public/*.js;
 rm -f public/*.so;
 rm -f public/*.dat;
 rm -rf public/worker-assets;
+rm -f public/assets/php*-web.mjs public/assets/php*-web.mjs.wasm || true
 
 rm -rf public/static/media/*.map public/static/media/mapped
 

@@ -10,7 +10,7 @@ export class PhpCgiWorker extends PhpCgiWebBase
 	/**
 	 * Creates a worker-hosted PHP CGI runtime.
 	 * @param {object} [options] Runtime configuration.
-	 * @param {string} [options.version] PHP version identifier used by the loader.
+	 * @param {PhpRuntimeVersion} [options.version] PHP version identifier used by the loader.
 	 * @param {string} [options.docroot] Virtual document root served by the runtime.
 	 * @param {string} [options.prefix] URL path prefix routed into the PHP runtime.
 	 * @param {(path: string) => string|{scriptName: string, path: string}} [options.rewrite] URL rewrite callback.
@@ -32,9 +32,38 @@ export class PhpCgiWorker extends PhpCgiWebBase
 	 */
 	constructor({version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args} = {})
 	{
-		super(
-			import(`./php${version ?? defaultVersion}-cgi-worker.mjs`)
-			, {version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args}
-		);
+		version = version ?? defaultVersion;
+
+		const constructorArgs = {version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args};
+
+		switch(version)
+		{
+			case '8.5':
+				super(import(`./php8.5-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-cgi-worker.mjs`), constructorArgs);
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${version}`);
+		}
 	}
 }

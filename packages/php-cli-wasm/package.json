@@ -27,6 +27,8 @@
   ],
   "files": [
     "*.wasm",
+    "*.d.ts",
+    "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",

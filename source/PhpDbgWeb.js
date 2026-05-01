@@ -1,4 +1,4 @@
-import { PhpBase } from 'php-wasm/PhpBase';
+import { PhpBase } from 'php-wasm/PhpBase.mjs';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 const NUM = 'number';
@@ -13,11 +13,42 @@ export class PhpDbgWeb extends PhpBase
 {
 	/**
 	 * Creates a browser-hosted PHP debugger runtime.
-	 * @param {object} args Debug runtime configuration.
+	 * @param {PhpRuntimeArgs} args Debug runtime configuration.
 	 */
 	constructor(args = {})
 	{
-		super(import(`./php${args.version ?? defaultVersion}-dbg-web.mjs`), args, 'phpdbg');
+		const version = args.version ?? defaultVersion;
+		const constructorArgs = {version, ...args};
+
+		switch(version)
+		{
+			case '8.5':
+				super(import(`./php8.5-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-dbg-web.mjs`), constructorArgs, 'phpdbg');
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${version}`);
+		}
 
 		this.running = false;
 		this.paused = false;
@@ -76,7 +107,7 @@ export class PhpDbgWeb extends PhpBase
 
 		if(php.awaitingInput)
 		{
-			php.awaitingInput( php.inputDataQueue.shift() );
+			php.awaitingInput(php.inputDataQueue.shift());
 			php.awaitingInput = null;
 		}
 

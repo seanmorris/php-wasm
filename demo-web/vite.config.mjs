@@ -21,6 +21,31 @@ const htmlEntryPaths = [
 	, '/vscode.html'
 ];
 
+const localPhpPackages = [
+	'@electric-sql/pglite'
+	, 'pdo-pglite'
+	, 'php-cgi-wasm'
+	, 'php-cli-wasm'
+	, 'php-dbg-wasm'
+	, 'php-wasm'
+	, 'php-wasm-dom'
+	, 'php-wasm-gd'
+	, 'php-wasm-iconv'
+	, 'php-wasm-intl'
+	, 'php-wasm-libxml'
+	, 'php-wasm-libzip'
+	, 'php-wasm-mbstring'
+	, 'php-wasm-openssl'
+	, 'php-wasm-phar'
+	, 'php-wasm-sdl'
+	, 'php-wasm-simplexml'
+	, 'php-wasm-sqlite'
+	, 'php-wasm-tidy'
+	, 'php-wasm-xml'
+	, 'php-wasm-yaml'
+	, 'php-wasm-zlib'
+];
+
 const trimmedAppBase = appBase.endsWith('/')
 	? appBase.slice(0, -1)
 	: appBase;
@@ -76,6 +101,8 @@ export default defineConfig(() => ({
 		, exclude: []
 	}
 	, optimizeDeps: {
+		exclude: localPhpPackages
+		,
 		esbuildOptions: {
 			loader: {
 				'.js': 'jsx'

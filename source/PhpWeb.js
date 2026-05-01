@@ -11,7 +11,7 @@ export class PhpWeb extends PhpBase
 {
 	/**
 	 * Creates a browser-hosted PHP runtime.
-	 * @param {object} args Runtime configuration.
+	 * @param {PhpRuntimeArgs} args Runtime configuration.
 	 */
 	constructor(args = {})
 	{
@@ -19,7 +19,58 @@ export class PhpWeb extends PhpBase
 		const variant = args.variant ?? defaultVariant;
 		const vvId = version + variant;
 
-		super(import(`./php${vvId}-web.mjs`), {version, variant, ...args});
+		const constructorArgs = {version, variant, ...args};
+
+		switch(vvId)
+		{
+			case '8.5':
+				super(import(`./php8.5-web.mjs`), constructorArgs);
+				break;
+
+			case '8.5_sdl':
+				super(import(`./php8.5_sdl-web.mjs`), constructorArgs);
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-web.mjs`), constructorArgs);
+				break;
+
+			case '8.4_sdl':
+				super(import(`./php8.4_sdl-web.mjs`), constructorArgs);
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-web.mjs`), constructorArgs);
+				break;
+
+			case '8.3_sdl':
+				super(import(`./php8.3_sdl-web.mjs`), constructorArgs);
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-web.mjs`), constructorArgs);
+				break;
+			case '8.2_sdl':
+				super(import(`./php8.2_sdl-web.mjs`), constructorArgs);
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-web.mjs`), constructorArgs);
+				break;
+			case '8.1_sdl':
+				super(import(`./php8.1_sdl-web.mjs`), constructorArgs);
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-web.mjs`), constructorArgs);
+				break;
+			case '8.0_sdl':
+				super(import(`./php8.0_sdl-web.mjs`), constructorArgs);
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${vvId}`);
+		}
 	}
 
 	/**
