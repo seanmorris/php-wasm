@@ -1,4 +1,4 @@
-import { PhpBase } from 'php-wasm/PhpBase.mjs';
+import { PhpBase } from 'php-wasm/PhpBase';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 const NUM = 'number';
