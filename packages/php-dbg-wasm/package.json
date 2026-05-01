@@ -15,6 +15,9 @@
       "url": "https://seanmorr.is"
     }
   ],
+  "dependencies": {
+    "php-wasm": "^0.1.0"
+  },
   "scripts": {
     "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
   },
