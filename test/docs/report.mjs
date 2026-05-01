@@ -612,12 +612,29 @@ async function validateMethodsPhpCgi(page)
 
 async function validateMethodsPhpWasm(page)
 {
+	let runtimeVersion;
+
+	try
+	{
+		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
+	}
+	catch
+	{
+		return coverAll(
+			page,
+			'allowed_gap',
+			'php.x/php.r marshalling examples require a VRZNO-capable PhpNode runtime, but no local PHP 8.1+ node build was available.',
+			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
+		);
+	}
+
 	await withTempDir(async directory => {
 		await writeTree(directory, {
 			'hello.txt': 'Hello, World!',
 		});
 
 		const php = await createPhpNode({
+			version: runtimeVersion,
 			sharedLibs: [sqlite],
 			files: [
 				{
@@ -662,7 +679,7 @@ async function validateMethodsPhpWasm(page)
 		page,
 		'executable_node',
 		'run, exec, r, x, refresh, sharedLibs/files, and filesystem helper examples were exercised through PhpNode.',
-		{ runtimeVersion: getAvailablePhpNodeVersion() }
+		{ runtimeVersion }
 	);
 }
 
