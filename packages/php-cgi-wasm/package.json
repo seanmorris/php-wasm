@@ -2,6 +2,61 @@
   "name": "php-cgi-wasm",
   "version": "0.1.0",
   "description": "php-cgi for wasm.",
+  "main": "./PhpCgiNode.js",
+  "module": "./PhpCgiNode.mjs",
+  "types": "./public.d.ts",
+  "exports": {
+    ".": {
+      "types": "./public.d.ts",
+      "import": "./PhpCgiNode.mjs",
+      "require": "./PhpCgiNode.js",
+      "default": "./PhpCgiNode.mjs"
+    },
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./PhpCgiBase": {
+      "types": "./PhpCgiBase.d.mts",
+      "import": "./PhpCgiBase.mjs",
+      "require": "./PhpCgiBase.js",
+      "default": "./PhpCgiBase.mjs"
+    },
+    "./PhpCgiNode": {
+      "types": "./PhpCgiNode.d.mts",
+      "import": "./PhpCgiNode.mjs",
+      "require": "./PhpCgiNode.js",
+      "default": "./PhpCgiNode.mjs"
+    },
+    "./PhpCgiWeb": {
+      "types": "./PhpCgiWeb.d.mts",
+      "import": "./PhpCgiWeb.mjs",
+      "require": "./PhpCgiWeb.js",
+      "default": "./PhpCgiWeb.mjs"
+    },
+    "./PhpCgiWebBase": {
+      "types": "./PhpCgiWebBase.d.mts",
+      "import": "./PhpCgiWebBase.mjs",
+      "require": "./PhpCgiWebBase.js",
+      "default": "./PhpCgiWebBase.mjs"
+    },
+    "./PhpCgiWebview": {
+      "types": "./PhpCgiWebview.d.mts",
+      "import": "./PhpCgiWebview.mjs",
+      "require": "./PhpCgiWebview.js",
+      "default": "./PhpCgiWebview.mjs"
+    },
+    "./PhpCgiWorker": {
+      "types": "./PhpCgiWorker.d.mts",
+      "import": "./PhpCgiWorker.mjs",
+      "require": "./PhpCgiWorker.js",
+      "default": "./PhpCgiWorker.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.wasm": "./*.wasm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"

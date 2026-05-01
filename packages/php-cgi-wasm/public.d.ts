@@ -40,6 +40,7 @@ export interface PhpCgiRuntimeArgs {
 	version?: PhpRuntimeVersion;
 	docroot?: string;
 	prefix?: string;
+	exclude?: string[];
 	rewrite?: (path: string) => string | { scriptName: string; path: string };
 	entrypoint?: string;
 	cookies?: string;
@@ -56,7 +57,10 @@ export interface PhpCgiRuntimeArgs {
 	dynamicCacheTime?: number;
 	vHosts?: PhpVhost[];
 	env?: Record<string, string>;
-	[key: string]: object | string | number | boolean | undefined;
+	ini?: string;
+	staticFS?: boolean;
+	persist?: object | object[];
+	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 }
 
 export interface PhpCgiSettings {
