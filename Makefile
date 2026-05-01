@@ -988,6 +988,12 @@ ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 endif
 
 NODE_TEST_FLAGS=
+DOC_TESTS=
+
+ifeq (${BUILD_TYPE},DYNAMIC)
+DOC_TESTS+=test/docs.test.mjs
+DOC_TESTS+=test/docs-cgi.test.mjs
+endif
 
 test-node: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1011,7 +1017,7 @@ test-node: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs-cgi.test.mjs' | sort`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort`
 
 test-deno: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1035,14 +1041,16 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
 
 test-cgi-node:
 	PHP_VERSION=${PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} test/node-cgi-test.sh
+ifeq (${BUILD_TYPE},DYNAMIC)
 	PHP_VERSION=${PHP_VERSION} node --test test/docs-cgi.test.mjs
+endif
 
 update-snapshots:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
