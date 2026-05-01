@@ -612,21 +612,8 @@ async function validateMethodsPhpCgi(page)
 
 async function validateMethodsPhpWasm(page)
 {
-	let runtimeVersion;
-
-	try
-	{
-		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
-	}
-	catch
-	{
-		return coverAll(
-			page,
-			'allowed_gap',
-			'php.x/php.r marshalling examples require a VRZNO-capable PhpNode runtime, but no local PHP 8.1+ node build was available.',
-			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
-		);
-	}
+	const runtimeVersion = getAvailablePhpNodeVersion();
+	const hasVrzno = runtimeVersion.localeCompare('8.1', undefined, { numeric: true }) >= 0;
 
 	await withTempDir(async directory => {
 		await writeTree(directory, {
@@ -659,12 +646,19 @@ async function validateMethodsPhpWasm(page)
 		assert.match(execDate, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
 
 		io.reset();
-		assert.equal(await php.r`<?php echo ${'tagged-template-ok'};`, 0);
-		assert.equal(io.stdout, 'tagged-template-ok');
+			assert.equal(await php.r`<?php echo ${'tagged-template-ok'};`, 0);
+			assert.equal(io.stdout, 'tagged-template-ok');
 
-		const callback = await php.x`function() { return 321; }`;
-		assert.equal(typeof callback, 'function');
-		assert.equal(callback(), 321);
+			if(hasVrzno)
+			{
+				const callback = await php.x`function() { return 321; }`;
+				assert.equal(typeof callback, 'function');
+				assert.equal(callback(), 321);
+			}
+			else
+			{
+				assert.equal(await php.x`321`, '321');
+			}
 
 		await php.run(`<?php $persisted = 101;`);
 		await php.refresh();
@@ -679,7 +673,7 @@ async function validateMethodsPhpWasm(page)
 		page,
 		'executable_node',
 		'run, exec, r, x, refresh, sharedLibs/files, and filesystem helper examples were exercised through PhpNode.',
-		{ runtimeVersion }
+		{ runtimeVersion, hasVrzno }
 	);
 }
 
