@@ -21,6 +21,7 @@ const trimmedBase = trimBase(baseUrl);
 
 export const routerBase = trimmedBase || '/';
 export const buildType = import.meta.env.VITE_BUILD_TYPE ?? 'dynamic';
+export const defaultPhpVersion = import.meta.env.VITE_PHP_VERSION ?? '8.4';
 
 export const basePath = (path = '') => resolveBasePath(baseUrl, path);
 

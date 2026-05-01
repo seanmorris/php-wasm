@@ -7,7 +7,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
-import { basePath, buildType } from './runtimePaths';
+import { basePath, buildType, defaultPhpVersion } from './runtimePaths';
 import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
 
@@ -136,7 +136,7 @@ function Embedded()
 
 	const refreshPhp = useCallback(() => {
 		const version = (selectVersionBox.current ? selectVersionBox.current.value : null)
-			?? '8.4';
+			?? defaultPhpVersion;
 
 		const variant = (selectVariantBox.current ? selectVariantBox.current.value : null)
 			?? '';
@@ -195,7 +195,7 @@ function Embedded()
 	useEffect(() => {
 		persist.current.checked = !!Number(query.get('persist') ?? '');
 		single.current.checked = !!Number(query.get('single-expression') ?? '');
-		selectVersionBox.current.value = query.get('version') ?? '8.4';
+		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
 		selectVariantBox.current.value = query.get('variant') ?? '';
 
 		if(!init.current && !query.has('demo'))
@@ -339,7 +339,7 @@ function Embedded()
 			persist.current.checked = settings.persist ?? persist.current.checked;
 			single.current.checked = settings['single-expression'] ?? single.current.checked;
 			canvasCheckbox.current.checked = settings['canvas'] ?? false;
-			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? '8.4';
+			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
 			selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
 			if(settings['render-as'])

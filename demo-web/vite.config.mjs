@@ -63,9 +63,10 @@ const legacyHtmlAliasPlugin = () => ({
 });
 
 export default defineConfig(() => ({
-	plugins: [react({
-		include: /\.[jt]sx?$/
-	}), legacyHtmlAliasPlugin()]
+	plugins: [
+		react({include: /\.[jt]sx?$/})
+		, legacyHtmlAliasPlugin()
+	]
 	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, base: appBase
 	, oxc: false
@@ -80,6 +81,9 @@ export default defineConfig(() => ({
 				'.js': 'jsx'
 			}
 		}
+	}
+	, define: {
+		'import.meta.env.VITE_PHP_VERSION': JSON.stringify(process.env.PHP_VERSION ?? '8.4')
 	}
 	, resolve: {
 		preserveSymlinks: true
