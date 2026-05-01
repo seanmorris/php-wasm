@@ -144,7 +144,23 @@ async function validateInstallAndInclude(page)
 
 async function validatePhpInJs(page)
 {
-	const php = await createPhpNode({});
+	let runtimeVersion;
+
+	try
+	{
+		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
+	}
+	catch
+	{
+		return coverAll(
+			page,
+			'allowed_gap',
+			'php.x examples require a VRZNO-capable PhpNode runtime, but no local PHP 8.1+ node build was available.',
+			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
+		);
+	}
+
+	const php = await createPhpNode({ version: runtimeVersion });
 	const io = capturePhpIo(php);
 
 	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
@@ -185,7 +201,7 @@ async function validatePhpInJs(page)
 		'executable_node',
 		'PhpNode executed copied snippets from the docs page for php.run, STDIN, and php.x workflows.',
 		{
-			runtimeVersion: getAvailablePhpNodeVersion(),
+			runtimeVersion,
 		}
 	);
 }
@@ -373,7 +389,23 @@ async function validateUsingExtensions(page)
 
 async function validateVrzno(page)
 {
-	const php = await createPhpNode({});
+	let runtimeVersion;
+
+	try
+	{
+		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
+	}
+	catch
+	{
+		return coverAll(
+			page,
+			'allowed_gap',
+			'Vrzno examples require PHP 8.1+, but no local PhpNode runtime meeting that requirement was available.',
+			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
+		);
+	}
+
+	const php = await createPhpNode({ version: runtimeVersion });
 	const io = capturePhpIo(php);
 
 	io.reset();
@@ -411,7 +443,7 @@ async function validateVrzno(page)
 		page,
 		'executable_node',
 		'Documented Vrzno PHP snippets were executed through PhpNode, with JS-to-PHP marshalling validated through php.x.',
-		{ runtimeVersion: getAvailablePhpNodeVersion() }
+		{ runtimeVersion }
 	);
 }
 

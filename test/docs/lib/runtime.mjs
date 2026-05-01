@@ -26,17 +26,25 @@ function ensureNavigatorLocks()
 	}
 }
 
-export function getAvailablePhpNodeVersion()
+export function getAvailablePhpNodeVersion(options = {})
 {
+	const { minVersion = null } = typeof options === 'string'
+		? { minVersion: options }
+		: options;
+
 	const versions = fs.readdirSync(phpWasmPackageDir)
 		.map(entry => entry.match(/^php(\d+\.\d+)-node\.mjs$/))
 		.filter(Boolean)
 		.map(match => match[1])
+		.filter(version => !minVersion || version.localeCompare(minVersion, undefined, { numeric: true }) >= 0)
 		.sort((left, right) => right.localeCompare(left, undefined, { numeric: true }));
 
 	if(!versions.length)
 	{
-		throw new Error('No local PhpNode runtime build is available.');
+		const suffix = minVersion
+			? ` >= ${minVersion}`
+			: '';
+		throw new Error(`No local PhpNode runtime build${suffix} is available.`);
 	}
 
 	return versions[0];
