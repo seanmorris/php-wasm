@@ -81,6 +81,9 @@ export default defineConfig(() => ({
 			}
 		}
 	}
+	, resolve: {
+		preserveSymlinks: true
+	}
 	, publicDir: 'public'
 	, build: {
 		outDir: 'build'

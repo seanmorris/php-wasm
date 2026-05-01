@@ -7,6 +7,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
 	assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
+	, resolve: {
+		preserveSymlinks: true
+	}
 	, publicDir: false
 	, base: '/php-wasm/'
 	, build: {
