@@ -1,5 +1,5 @@
 export const parseResponse = response => {
-	const headers = new Headers()
+	const headers = new Headers();
 	const line = [];
 	const decoder = new TextDecoder();
 

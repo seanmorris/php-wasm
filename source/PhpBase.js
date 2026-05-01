@@ -8,8 +8,17 @@ const importMeta = import.meta;
 const STR = 'string';
 const NUM = 'number';
 
+/**
+ * Base PHP runtime wrapper shared by the environment-specific adapters.
+ */
 export class PhpBase extends EventTarget
 {
+	/**
+	 * Creates a PHP runtime wrapper for a specific module loader and SAPI.
+	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
+	 * @param {object} args Runtime configuration for the PHP instance.
+	 * @param {string} sapi SAPI identifier to initialize inside the module.
+	 */
 	constructor(phpBinLoader, args = {}, sapi = 'embed')
 	{
 		super();
@@ -22,9 +31,9 @@ export class PhpBase extends EventTarget
 
 		Object.defineProperty(this, 'encoder', {value: new TextEncoder()});
 		Object.defineProperty(this, 'buffers', {value: {
-			stdin: [],
-			stdout: new OutputBuffer(this, 'output', -1),
-			stderr: new OutputBuffer(this, 'error',  -1),
+			stdin: []
+			, stdout: new OutputBuffer(this, 'output', -1)
+			, stderr: new OutputBuffer(this, 'error',  -1)
 		} });
 
 		Object.freeze(this.buffers);
@@ -40,15 +49,15 @@ export class PhpBase extends EventTarget
 		this.phpArgs = args;
 
 		const defaults = {
-			stdin:  () => this.buffers.stdin.shift() ?? null,
-			stdout: byte => this.buffers.stdout.push(byte),
-			stderr: byte => this.buffers.stderr.push(byte),
+			stdin:  () => this.buffers.stdin.shift() ?? null
+			, stdout: byte => this.buffers.stdout.push(byte)
+			, stderr: byte => this.buffers.stderr.push(byte)
 
-			postRun:  () => {
+			, postRun:  () => {
 				const event = new _Event('ready');
 				this.onready(event);
 				this.dispatchEvent(event);
-			},
+			}
 		};
 
 		const fixed = { onRefresh: new Set };
@@ -108,11 +117,13 @@ export class PhpBase extends EventTarget
 			allFiles.forEach(fileDef => {
 				const segments = fileDef.parent.split('/');
 				let currentPath = '';
-				for (const segment of segments) {
-					if (!segment) continue;
+				for(const segment of segments)
+				{
+					if(!segment) continue;
 
 					currentPath += segment + '/';
-					if (!php.FS.analyzePath(currentPath).exists) {
+					if(!php.FS.analyzePath(currentPath).exists)
+					{
 						php.FS.mkdir(currentPath);
 					}
 				}
@@ -156,22 +167,38 @@ export class PhpBase extends EventTarget
 		});
 	}
 
+	/**
+	 * Encodes a text string and pushes it into STDIN.
+	 * @param {string} byteString Input text to encode and queue for STDIN.
+	 */
 	inputString(byteString)
 	{
 		this.input(this.encoder.encode(byteString));
 	}
 
+	/**
+	 * Queues raw input bytes for the PHP process.
+	 * @param {Iterable<number>} items Encoded input bytes to queue for STDIN.
+	 */
 	input(items)
 	{
 		this.buffers.stdin.push(...items);
 	}
 
+	/**
+	 * Flushes any buffered STDOUT and STDERR data.
+	 */
 	flush()
 	{
 		this.buffers.stdout.flush();
 		this.buffers.stderr.flush();
 	}
 
+	/**
+	 * Tokenizes a PHP source string in the runtime.
+	 * @param {string} phpCode PHP source to tokenize.
+	 * @returns {Promise<string>} Serialized token data from the PHP runtime.
+	 */
 	tokenize(phpCode)
 	{
 		return this.binary.then(php => php.ccall(
@@ -182,16 +209,32 @@ export class PhpBase extends EventTarget
 		));
 	}
 
+	/**
+	 * Starts a filesystem transaction when the environment supports it.
+	 * @returns {Promise<void>} Resolves when a transaction has started.
+	 */
 	startTransaction()
 	{
 		return Promise.resolve();
 	}
 
+	/**
+	 * Commits a filesystem transaction when the environment supports it.
+	 * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+	 * @returns {Promise<void>} Resolves when the transaction has been committed.
+	 */
 	commitTransaction(readOnly = false)
 	{
 		return Promise.resolve();
 	}
 
+	/**
+	 * Schedules an async operation on the runtime queue.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates the filesystem.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
@@ -221,11 +264,21 @@ export class PhpBase extends EventTarget
 		return coordinator;
 	}
 
+	/**
+	 * Queues PHP code for execution through `pib_run`.
+	 * @param {string} phpCode PHP source code to execute.
+	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 */
 	run(phpCode)
 	{
 		return this._enqueue(phpCode => this._run(phpCode), [phpCode]);
 	}
 
+	/**
+	 * Executes PHP code immediately through `pib_run`.
+	 * @param {string} phpCode PHP source code to execute immediately.
+	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 */
 	_run(phpCode)
 	{
 		return this.binary.then(php => {
@@ -236,14 +289,24 @@ export class PhpBase extends EventTarget
 				, [`?>${phpCode}`]
 			);
 		})
-		.finally(() => this.flush())
+		.finally(() => this.flush());
 	}
 
+	/**
+	 * Queues PHP code for execution through `pib_exec`.
+	 * @param {string} phpCode PHP source code to evaluate and capture output from.
+	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 */
 	exec(phpCode)
 	{
 		return this._enqueue(phpCode => this._exec(phpCode), [phpCode]);
 	}
 
+	/**
+	 * Executes PHP code immediately through `pib_exec`.
+	 * @param {string} phpCode PHP source code to evaluate immediately.
+	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 */
 	async _exec(phpCode)
 	{
 		const call = (await this.binary).ccall(
@@ -257,6 +320,12 @@ export class PhpBase extends EventTarget
 		return call.finally(() => this.flush());
 	}
 
+	/**
+	 * Evaluates an interpolated PHP expression and returns its value.
+	 * @param {TemplateStringsArray} fragments Template literal string fragments.
+	 * @param {...unknown} values Values to interpolate into the PHP expression.
+	 * @returns {Promise<unknown>} Resolves with the decoded PHP expression result.
+	 */
 	async x(fragments, ...values)
 	{
 		const names = [];
@@ -308,6 +377,12 @@ export class PhpBase extends EventTarget
 		}
 	}
 
+	/**
+	 * Executes an interpolated PHP script without decoding the result.
+	 * @param {TemplateStringsArray} fragments Template literal string fragments.
+	 * @param {...unknown} values Values to interpolate into the PHP script.
+	 * @returns {Promise<unknown>} Resolves with the script execution result.
+	 */
 	async r(fragments, ...values)
 	{
 		const names = [];
@@ -362,6 +437,10 @@ export class PhpBase extends EventTarget
 		}
 	}
 
+	/**
+	 * Recreates the underlying PHP module instance.
+	 * @returns {Promise<unknown>} Resolves when the PHP runtime has been refreshed.
+	 */
 	async refresh()
 	{
 		const php = await this.binary;
@@ -382,46 +461,95 @@ export class PhpBase extends EventTarget
 		);
 	}
 
+	/**
+	 * Inspects a path in the virtual filesystem.
+	 * @param {string} path Filesystem path to inspect.
+	 * @returns {Promise<unknown>} Filesystem analysis details for the path.
+	 */
 	analyzePath(path)
 	{
 		return this._enqueue(fsOps.analyzePath, [this.binary, path]);
 	}
 
+	/**
+	 * Lists a directory in the virtual filesystem.
+	 * @param {string} path Directory path to list.
+	 * @returns {Promise<unknown>} Directory entries for the path.
+	 */
 	readdir(path)
 	{
 		return this._enqueue(fsOps.readdir, [this.binary, path]);
 	}
 
+	/**
+	 * Reads a file from the virtual filesystem.
+	 * @param {string} path File path to read.
+	 * @param {object} options Read options forwarded to Emscripten FS.
+	 * @returns {Promise<unknown>} File contents for the requested path.
+	 */
 	readFile(path, options)
 	{
 		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
 	}
 
+	/**
+	 * Returns file metadata for a virtual filesystem path.
+	 * @param {string} path Filesystem path to stat.
+	 * @returns {Promise<unknown>} File metadata for the path.
+	 */
 	stat(path)
 	{
 		return this._enqueue(fsOps.stat, [this.binary, path]);
 	}
 
+	/**
+	 * Creates a directory in the virtual filesystem.
+	 * @param {string} path Directory path to create.
+	 * @returns {Promise<unknown>} Metadata for the created directory.
+	 */
 	mkdir(path)
 	{
 		return this._enqueue(fsOps.mkdir, [this.binary, path]);
 	}
 
+	/**
+	 * Removes a directory from the virtual filesystem.
+	 * @param {string} path Directory path to remove.
+	 * @returns {Promise<unknown>} Resolves when the directory has been removed.
+	 */
 	rmdir(path)
 	{
 		return this._enqueue(fsOps.rmdir, [this.binary, path]);
 	}
 
+	/**
+	 * Renames a virtual filesystem path.
+	 * @param {string} path Existing filesystem path.
+	 * @param {string} newPath Destination filesystem path.
+	 * @returns {Promise<unknown>} Resolves when the path has been renamed.
+	 */
 	rename(path, newPath)
 	{
 		return this._enqueue(fsOps.rename, [this.binary, path, newPath]);
 	}
 
+	/**
+	 * Writes a file into the virtual filesystem.
+	 * @param {string} path File path to write.
+	 * @param {string|Uint8Array} data Data to persist.
+	 * @param {object} options Write options forwarded to Emscripten FS.
+	 * @returns {Promise<unknown>} Resolves when the file has been written.
+	 */
 	writeFile(path, data, options)
 	{
 		return this._enqueue(fsOps.writeFile, [this.binary, path, data, options]);
 	}
 
+	/**
+	 * Deletes a file from the virtual filesystem.
+	 * @param {string} path File path to remove.
+	 * @returns {Promise<unknown>} Resolves when the file has been removed.
+	 */
 	unlink(path)
 	{
 		return this._enqueue(fsOps.unlink, [this.binary, path]);

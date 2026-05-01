@@ -6,8 +6,15 @@ const STR = 'string';
 
 const defaultVersion = '8.4';
 
+/**
+ * Browser-hosted PHP debugger wrapper.
+ */
 export class PhpDbgWeb extends PhpBase
 {
+	/**
+	 * Creates a browser-hosted PHP debugger runtime.
+	 * @param {object} args Debug runtime configuration.
+	 */
 	constructor(args = {})
 	{
 		super(import(`./php${args.version ?? defaultVersion}-dbg-web.mjs`), args, 'phpdbg');
@@ -21,27 +28,45 @@ export class PhpDbgWeb extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
-			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
+			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'));
 			return php;
 		});
 	}
 
+	/**
+	 * Starts a persisted browser transaction for the debugger runtime.
+	 * @returns {Promise<void>} Resolves when the transaction lock has been acquired.
+	 */
 	startTransaction()
 	{
 		return startTransaction(this);
 	}
 
+	/**
+	 * Commits a persisted browser transaction for the debugger runtime.
+	 * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+	 * @returns {Promise<void>} Resolves when the transaction has been committed.
+	 */
 	commitTransaction(readOnly = false)
 	{
 		return commitTransaction(this, readOnly);
 	}
 
+	/**
+	 * Starts the phpdbg main loop.
+	 * @returns {Promise<unknown>} Resolves when the debugger main loop starts.
+	 */
 	run()
 	{
 		return this._main();
 		// return this._enqueue(() => this._main(), []);
 	}
 
+	/**
+	 * Queues a line of input for the debugger process.
+	 * @param {string} line Input line to send to the debugger process.
+	 * @returns {Promise<void>} Resolves after the input has been queued.
+	 */
 	async provideInput(line)
 	{
 		const php = await this.binary;
@@ -61,6 +86,10 @@ export class PhpDbgWeb extends PhpBase
 
 	}
 
+	/**
+	 * Launches the phpdbg process and captures native debugger pointers.
+	 * @returns {Promise<unknown>} Resolves with the debugger process promise.
+	 */
 	async _main()
 	{
 		const php = (await this.binary);
@@ -125,6 +154,10 @@ export class PhpDbgWeb extends PhpBase
 		}
 	}
 
+	/**
+	 * Reads the current phpdbg prompt string.
+	 * @returns {Promise<string>} The current phpdbg prompt string.
+	 */
 	async getPrompt()
 	{
 		const php = await this.binary;
@@ -138,6 +171,10 @@ export class PhpDbgWeb extends PhpBase
 		);
 	}
 
+	/**
+	 * Checks whether the debugger is currently executing code.
+	 * @returns {Promise<number>} Non-zero when PHP code is currently executing.
+	 */
 	async isExecuting()
 	{
 		const php = await this.binary;
@@ -151,6 +188,10 @@ export class PhpDbgWeb extends PhpBase
 		);
 	}
 
+	/**
+	 * Reads the current file name from the debugger state.
+	 * @returns {Promise<string>} Source file path for the current debugger frame.
+	 */
 	async currentFile()
 	{
 		const php = await this.binary;
@@ -158,6 +199,10 @@ export class PhpDbgWeb extends PhpBase
 		return php.UTF8ToString(php.getValue(this.currentFilePtr, '*'));
 	}
 
+	/**
+	 * Reads the current line number from the debugger state.
+	 * @returns {Promise<number>} Source line number for the current debugger frame.
+	 */
 	async currentLine()
 	{
 		const php = await this.binary;
@@ -165,6 +210,10 @@ export class PhpDbgWeb extends PhpBase
 		return php.getValue(this.currentLinePtr, 'i32');
 	}
 
+	/**
+	 * Reads the current breakpoint count from the debugger state.
+	 * @returns {Promise<number>} Number of registered breakpoints.
+	 */
 	async bpCount()
 	{
 		const php = await this.binary;
@@ -172,6 +221,10 @@ export class PhpDbgWeb extends PhpBase
 		return php.getValue(this.bpCountPtr, 'i32');
 	}
 
+	/**
+	 * Dumps local variables from the current debugger frame.
+	 * @returns {Promise<object|undefined>} Dumped local symbol table for the current frame.
+	 */
 	async dumpVars()
 	{
 		const php = await this.binary;
@@ -187,6 +240,10 @@ export class PhpDbgWeb extends PhpBase
 		if(ptr) return this.dumpSymbols(ptr, php);
 	}
 
+	/**
+	 * Dumps global variables from the debugger session.
+	 * @returns {Promise<object|undefined>} Dumped global symbol table.
+	 */
 	async dumpGlobals()
 	{
 		const php = await this.binary;
@@ -202,6 +259,10 @@ export class PhpDbgWeb extends PhpBase
 		if(ptr) return this.dumpSymbols(ptr, php);
 	}
 
+	/**
+	 * Dumps defined constants from the debugger session.
+	 * @returns {Promise<object|undefined>} Dumped constant table.
+	 */
 	async dumpConstants()
 	{
 		const php = await this.binary;
@@ -217,6 +278,12 @@ export class PhpDbgWeb extends PhpBase
 		if(ptr) return this.dumpSymbols(ptr, php);
 	}
 
+	/**
+	 * Decodes a native symbol dump buffer into a JavaScript object.
+	 * @param {number} ptr Pointer to the native symbol dump buffer.
+	 * @param {object} php PHP module instance used to decode the symbol buffer.
+	 * @returns {object} Decoded symbol table.
+	 */
 	dumpSymbols(ptr, php)
 	{
 		const heap = new DataView(php.HEAP8.buffer);
@@ -246,6 +313,10 @@ export class PhpDbgWeb extends PhpBase
 		return symbols;
 	}
 
+	/**
+	 * Dumps userland functions known to the debugger.
+	 * @returns {Promise<object>} Dumped function metadata indexed by name.
+	 */
 	async dumpFunctions()
 	{
 		const php = await this.binary;
@@ -291,6 +362,10 @@ export class PhpDbgWeb extends PhpBase
 		return functions;
 	}
 
+	/**
+	 * Dumps userland classes known to the debugger.
+	 * @returns {Promise<object>} Dumped class metadata indexed by name.
+	 */
 	async dumpClasses()
 	{
 		const php = await this.binary;
@@ -336,6 +411,10 @@ export class PhpDbgWeb extends PhpBase
 		return functions;
 	}
 
+	/**
+	 * Dumps the file list known to the debugger.
+	 * @returns {Promise<string[]>} Dumped list of loaded source files.
+	 */
 	async dumpFiles()
 	{
 		const php = await this.binary;
@@ -372,6 +451,10 @@ export class PhpDbgWeb extends PhpBase
 		return files;
 	}
 
+	/**
+	 * Dumps the current debugger backtrace.
+	 * @returns {Promise<Array<{filename: string, lineNo: number, frame: number}>>} Stack frames for the current backtrace.
+	 */
 	async dumpBacktrace()
 	{
 		const php = await this.binary;
@@ -415,6 +498,11 @@ export class PhpDbgWeb extends PhpBase
 		return frames;
 	}
 
+	/**
+	 * Switches the active debugger frame.
+	 * @param {number} frame Stack frame index to select.
+	 * @returns {Promise<number>} Native return code from the frame switch operation.
+	 */
 	async switchFrame(frame)
 	{
 		const php = await this.binary;
@@ -428,6 +516,10 @@ export class PhpDbgWeb extends PhpBase
 		);
 	}
 
+	/**
+	 * Refreshes the browser-hosted debugger runtime state.
+	 * @returns {Promise<void>} Resolves after the debugger runtime has been refreshed.
+	 */
 	async refresh()
 	{
 		// super.refresh();
@@ -442,6 +534,13 @@ export class PhpDbgWeb extends PhpBase
 		// });
 	}
 
+	/**
+	 * Serializes async debugger operations behind the browser FS lock.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		await this.binary;
@@ -469,7 +568,7 @@ export class PhpDbgWeb extends PhpBase
 				const run = callback(...params);
 				run.then(accept).catch(reject);
 				await run;
-			} while(this.queue.length)
+			} while(this.queue.length);
 
 			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});

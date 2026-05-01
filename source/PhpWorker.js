@@ -2,23 +2,43 @@ import { PhpBase } from './PhpBase';
 import PhpBinary from './php-worker';
 import { commitTransaction, startTransaction } from './webTransactions';
 
+/**
+ * Worker-hosted PHP wrapper.
+ */
 export class PhpWorker extends PhpBase
 {
+	/**
+	 * Creates a worker-hosted PHP runtime.
+	 * @param {object} args Runtime configuration.
+	 */
 	constructor(args = {})
 	{
 		super(PhpBinary, args);
 	}
 
+	/**
+	 * Starts a persisted browser transaction for the worker runtime.
+	 * @returns {Promise<void>} Resolves when the transaction lock has been acquired.
+	 */
 	startTransaction()
 	{
 		return startTransaction(this);
 	}
 
+	/**
+	 * Commits a persisted browser transaction for the worker runtime.
+	 * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+	 * @returns {Promise<void>} Resolves when the transaction has been committed.
+	 */
 	commitTransaction(readOnly = false)
 	{
 		return commitTransaction(this, readOnly);
 	}
 
+	/**
+	 * Refreshes the worker-hosted runtime and syncs its filesystem when needed.
+	 * @returns {Promise<void>} Resolves after the worker runtime has been refreshed.
+	 */
 	async refresh()
 	{
 		super.refresh();
@@ -39,6 +59,13 @@ export class PhpWorker extends PhpBase
 		});
 	}
 
+	/**
+	 * Serializes async worker operations behind the browser FS lock.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		await this.binary;
@@ -66,7 +93,7 @@ export class PhpWorker extends PhpBase
 				const run = callback(...params);
 				run.then(accept).catch(reject);
 				await run;
-			} while(this.queue.length)
+			} while(this.queue.length);
 
 			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});

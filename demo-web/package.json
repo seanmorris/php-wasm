@@ -73,7 +73,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.5.0",
     "jsdom": "^27.0.1",
-    "sm-no-saccade-style": "^0.1.0",
+    "sm-no-saccade-style": "^0.1.1",
     "vite": "^7.3.2",
     "vitest": "^4.1.5",
     "webpack": "5.102.1",

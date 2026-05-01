@@ -3,16 +3,16 @@ import { PhpWeb } from './PhpWeb.mjs';
 const runPhpScriptTag = async (element) => {
 
 	const scope = {
-		version: '8.4',
-		variant: '',
-		stdin: null,
-		canvas: null,
-		stdout: null,
-		stderr: null,
-		ini: '',
-		libs: [],
-		files: [],
-		imports: {}
+		version: '8.4'
+		, variant: ''
+		, stdin: null
+		, canvas: null
+		, stdout: null
+		, stderr: null
+		, ini: ''
+		, libs: []
+		, files: []
+		, imports: {}
 	};
 
 	if(element.hasAttribute('data-version'))
@@ -132,12 +132,12 @@ const runPhpScriptTag = async (element) => {
 
 	const php = new PhpWeb({
 		...flatImports,
-		version:    scope.version,
-		variant:    scope.variant,
-		sharedLibs: scope.libs,
-		ini:        scope.ini,
-		files:      scope.files,
-		canvas:     scope.canvas,
+		version:    scope.version
+		, variant:    scope.variant
+		, sharedLibs: scope.libs
+		, ini:        scope.ini
+		, files:      scope.files
+		, canvas:     scope.canvas
 	});
 
 	php.inputString(input);
@@ -175,7 +175,7 @@ const runPhpScriptTag = async (element) => {
 			scope.stderr && (scope.stderr.innerHTML = stderr);
 		});
 	});
-}
+};
 
 const phpSelector = 'script[type="text/php"]';
 
@@ -204,6 +204,6 @@ const runPhpTags = (doc) => {
 	});
 
 	observer.observe(document.body.parentElement, {childList: true, subtree: true});
-}
+};
 
 runPhpTags(document);

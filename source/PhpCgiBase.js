@@ -6,19 +6,19 @@ import { resolveDependencies } from './resolveDependencies';
 /**
  * An object representing a dynamically loaded data file.
  * @typedef {string|object} FileDef
- * @property {string} url
- * @property {string} path
- * @property {string} parent
+ * @property {string} url URL used to preload the file.
+ * @property {string} path Virtual filesystem path where the file should be mounted.
+ * @property {string} parent Parent directory for the mounted file.
  */
 
 /**
  * A string or object representing a dynamically loaded shared library.
  * @typedef {string|object} LibDef
- * @property {string} name
- * @property {string} url
- * @property {boolean} ini
- * @property {function():libDef[]} getLibs
- * @property {function():fileDef[]} getFiles
+ * @property {string} name Shared library filename.
+ * @property {string} url URL used to preload the shared library.
+ * @property {boolean} ini Indicates whether the library should be loaded via `php.ini`.
+ * @property {function(object):LibDef[]} getLibs Returns additional dependent shared libraries.
+ * @property {function(object):FileDef[]} getFiles Returns additional dependent preload files.
  */
 
 const STR = 'string';
@@ -36,13 +36,24 @@ const requestTimes = new WeakMap;
 const noTrailingSlash = s => s.slice(-1) !== '/' ? s : s.slice(0, -1);
 const noLeadingSlash = s => s.slice(0, 1) !== '/' ? s : s.slice(1);
 const joinPaths = (...args) => [
-	noTrailingSlash(args[0]), // Don't strip the leading slash on the first segment...
-	...args.slice(1).map( a => noLeadingSlash(noTrailingSlash(a)) )
+	noTrailingSlash(args[0]) // Don't strip the leading slash on the first segment...
+	, ...args.slice(1).map( a => noLeadingSlash(noTrailingSlash(a)) )
 ].join('/');
 
+/**
+ * Stores and filters cookies for CGI requests.
+ *
+ */
 class CookieJar
 {
+	/**
+	 *
+	 */
 	cookies = new Map;
+	/**
+	 * Stores a raw cookie string in the in-memory jar.
+	 * @param {string} rawCookie Raw `Set-Cookie` header value to persist.
+	 */
 	store(rawCookie)
 	{
 		let name = null;
@@ -90,6 +101,11 @@ class CookieJar
 		}
 	}
 
+	/**
+	 * Returns cookies that match a request path.
+	 * @param {?string} path Request path used to filter matching cookies.
+	 * @returns {object[]} Cookies that should be sent for the path.
+	 */
 	retrieve(path = null)
 	{
 		const cookies = [];
@@ -119,69 +135,155 @@ class CookieJar
 		return cookies;
 	}
 
+	/**
+	 * Serializes cookies for persistence.
+	 * @param {?string} path Request path used to filter matching cookies.
+	 * @returns {string} Serialized cookies for persistence.
+	 */
 	dump(path = null)
 	{
 		return this.retrieve(path).map(c => c.raw).join('\n');
 	}
 
+	/**
+	 * Hydrates the jar from serialized cookie lines.
+	 * @param {string} rawCookies Newline-delimited raw cookie strings to restore.
+	 */
 	load(rawCookies)
 	{
 		rawCookies.trim().split('\n').map(line => this.store(line));
 	}
 
+	/**
+	 * Formats cookies as a request header value.
+	 * @param {?string} path Request path used to filter matching cookies.
+	 * @returns {string} Cookie header value for the path.
+	 */
 	toEnv(path = null)
 	{
 		return this.retrieve(path).map(e => `${e.name}=${e.value}`).join(';');
 	}
 }
 
+/**
+ * Shared PHP CGI runtime wrapper used by browser, worker, and Node adapters.
+ */
 export class PhpCgiBase
 {
+	/**
+	 *
+	 */
 	docroot    = null;
+	/**
+	 *
+	 */
 	prefix     = '/php-wasm';
+	/**
+	 *
+	 */
 	exclude    = [];
+	/**
+	 * Rewrites an incoming request path before routing.
+	 * @param {string} path Request path to rewrite before PHP handles it.
+	 * @returns {string} Rewritten request path.
+	 */
 	rewrite    = path => path;
+	/**
+	 *
+	 */
 	cookies    = null;
+	/**
+	 *
+	 */
 	types      = {};
+	/**
+	 * Invokes request lifecycle hooks after a response is generated.
+	 */
 	onRequest  = () => {};
+	/**
+	 * Generates a fallback response when no PHP entrypoint matches a request.
+	 */
 	notFound   = () => {};
+	/**
+	 *
+	 */
 	sharedLibs = [];
+	/**
+	 *
+	 */
 	files      = [];
+	/**
+	 *
+	 */
 	phpArgs    = {};
 
+	/**
+	 *
+	 */
 	maxRequestAge    = 0;
+	/**
+	 *
+	 */
 	staticCacheTime  = 60_000;
+	/**
+	 *
+	 */
 	dynamicCacheTime = 0;
+	/**
+	 *
+	 */
 	vHosts = [];
 
+	/**
+	 *
+	 */
 	php        = null;
+	/**
+	 *
+	 */
 	input      = [];
+	/**
+	 *
+	 */
 	output     = [];
+	/**
+	 *
+	 */
 	error      = [];
+	/**
+	 *
+	 */
 	count      = 0;
 
+	/**
+	 *
+	 */
 	queue = [];
 
 	/**
-	 * Creates a new PHP instance (async)
-	 * @param {*} binLoader
-	 * @param {string} options.prefix The URL path prefix to look for when routing to PHP.
-	 * @param {string} options.docroot The internal directory to use as the public document root.
-	 * @param {string[]} options.exclude Array of URL prefixes to exclude from routing to PHP.
-	 * @param {Array.<{pathPrefix: string, directory: string, entrypoint: string}>} options.vHosts A list of prefixes, directories and entrypoints to serve multiple PHP applications by URL prefix.
-	 * @param {string} options.entrypoint Path to PHP file under docroot to serve as an entrypoint
-	 * @param {function(string):string} options.rewrite Function to rewrite URLs
-	 * @param {object<string, string>} options.types Mapping of file extensions to mime types to populate the `Content-type` header.
-	 * @param {function()} options.onRequest Function to be executed on each request.
-	 * @param {function(Request):Response|string} options.notFound Function to handle 404s.
-	 * @param {LibDef[]} options.sharedLibs Dynamically load shared libraries with LibDefs
-	 * @param {LibDef[]} options.dynamicLibs Similar to sharedLibs but will NEVER use the ini based loader.
-	 * @param {FileDef[]} options.files Dynamically load files with FileDefs
-	 * @param {boolean} options.autoTransaction Automatically handle FS transactions on each request
-	 * @param {number} options.maxRequestAge Oldest request to process (ms)
-	 * @param {number} options.staticCacheTime Static cache time (ms)
-	 * @param {number} options.dynamicCacheTime Dynamic cache time (ms)
-	 * @param {object<string, string}>} options.env Mapping of environment variable names to values to set inside the server.
+	 * Creates a new PHP CGI runtime wrapper.
+	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
+	 * @param {object} options Runtime configuration for the CGI wrapper.
+	 * @param {string} options.version PHP version identifier used by the loader.
+	 * @param {string} options.docroot Virtual document root served by the runtime.
+	 * @param {string} options.prefix URL path prefix routed into the PHP runtime.
+	 * @param {string[]} options.exclude URL prefixes excluded from PHP routing.
+	 * @param {(path: string) => string|{scriptName: string, path: string}} options.rewrite URL rewrite callback.
+	 * @param {string} options.entrypoint Default PHP entrypoint relative to the document root.
+	 * @param {string} options.cookies Persisted cookie data to hydrate the cookie jar with.
+	 * @param {{[key: string]: string}} options.types Mapping of file extensions to response MIME types.
+	 * @param {(request: Request, response?: Response) => unknown} options.onRequest Hook invoked for each handled request.
+	 * @param {(request: Request) => Response|string|undefined} options.notFound Custom 404 handler.
+	 * @param {LibDef[]} options.sharedLibs Shared libraries that may be loaded through `php.ini`.
+	 * @param {LibDef[]} options.dynamicLibs Shared libraries that should only be preloaded dynamically.
+	 * @param {{[key: string]: (...params: unknown[]) => unknown}} options.actions Extra message actions exposed by the wrapper.
+	 * @param {FileDef[]} options.files Additional preload files to mount into the runtime.
+	 * @param {boolean} options.autoTransaction Automatically opens and commits FS transactions around requests.
+	 * @param {number} options.maxRequestAge Maximum request age in milliseconds before timing out.
+	 * @param {number} options.staticCacheTime Static asset cache lifetime in milliseconds.
+	 * @param {number} options.dynamicCacheTime Dynamic response cache lifetime in milliseconds.
+	 * @param {Array<{pathPrefix: string, directory: string, entrypoint: string}>} options.vHosts Virtual host routing rules.
+	 * @param {{[key: string]: string}} options.env Environment variables to set inside the runtime.
 	 */
 	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, dynamicLibs, actions, files, ...args} = {})
 	{
@@ -218,38 +320,53 @@ export class PhpCgiBase
 		this.refresh();
 	}
 
+	/**
+	 * Handles the service worker install lifecycle event.
+	 * @param {Event} event Service worker install event.
+	 * @returns {void} Registers the install work with the service worker lifecycle.
+	 */
 	handleInstallEvent(event)
 	{
 		return event.waitUntil(self.skipWaiting());
 	}
 
+	/**
+	 * Handles the service worker activate lifecycle event.
+	 * @param {Event} event Service worker activate event.
+	 * @returns {void} Registers the activate work with the service worker lifecycle.
+	 */
 	handleActivateEvent(event)
 	{
 		return event.waitUntil(self.clients.claim());
 	}
 
+	/**
+	 * Handles control messages sent to the CGI runtime.
+	 * @param {MessageEvent} event Message event carrying a control action.
+	 * @returns {Promise<void>} Resolves after the action response has been posted back.
+	 */
 	async handleMessageEvent(event)
 	{
 		const { data, source } = event;
 		const { action, token, params = [] } = data;
 
 		const actions = [
-			'analyzePath',
-			'readdir',
-			'readFile',
-			'stat',
-			'mkdir',
-			'rmdir',
-			'writeFile',
-			'rename',
-			'unlink',
-			'putEnv',
-			'refresh',
-			'getSettings',
-			'setSettings',
-			'getEnvs',
-			'setEnvs',
-			'storeInit',
+			'analyzePath'
+			, 'readdir'
+			, 'readFile'
+			, 'stat'
+			, 'mkdir'
+			, 'rmdir'
+			, 'writeFile'
+			, 'rename'
+			, 'unlink'
+			, 'putEnv'
+			, 'refresh'
+			, 'getSettings'
+			, 'setSettings'
+			, 'getEnvs'
+			, 'setEnvs'
+			, 'storeInit'
 		];
 
 		await this.binary;
@@ -292,6 +409,11 @@ export class PhpCgiBase
 		}
 	}
 
+	/**
+	 * Routes eligible fetch events through the CGI runtime.
+	 * @param {Event & {request: Request, respondWith: (response: Response|Promise<Response>) => void}} event Fetch event to route through PHP when eligible.
+	 * @returns {Promise<Response>|undefined} Response promise when the request is handled by PHP.
+	 */
 	handleFetchEvent(event)
 	{
 		const url = new URL(event.request.url);
@@ -335,6 +457,13 @@ export class PhpCgiBase
 		}
 	}
 
+	/**
+	 * Schedules an async CGI operation on the runtime queue.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
@@ -357,6 +486,10 @@ export class PhpCgiBase
 		return coordinator;
 	}
 
+	/**
+	 * Recreates the underlying CGI PHP module instance.
+	 * @returns {Promise<object>} Deferred PHP module instance.
+	 */
 	refresh()
 	{
 		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
@@ -430,11 +563,13 @@ export class PhpCgiBase
 			allFiles.forEach(fileDef => {
 				const segments = fileDef.parent.split('/');
 				let currentPath = '';
-				for (const segment of segments) {
-					if (!segment) continue;
+				for(const segment of segments)
+				{
+					if(!segment) continue;
 
 					currentPath += segment + '/';
-					if (!php.FS.analyzePath(currentPath).exists) {
+					if(!php.FS.analyzePath(currentPath).exists)
+					{
 						php.FS.mkdir(currentPath);
 					}
 				}
@@ -480,12 +615,25 @@ export class PhpCgiBase
 		});
 	}
 
+	/**
+	 * Runs before each PHP request.
+	 * @returns {Promise<void>} Resolves when any request pre-work has completed.
+	 */
 	async _beforeRequest()
 	{}
 
+	/**
+	 * Runs after each successful PHP request.
+	 * @returns {Promise<void>} Resolves when any request cleanup has completed.
+	 */
 	async _afterRequest()
 	{}
 
+	/**
+	 * Serves a request through the CGI runtime.
+	 * @param {Request} request Request to serve through the CGI runtime.
+	 * @returns {Promise<Response|string|undefined>} The generated response or custom not-found result.
+	 */
 	async request(request)
 	{
 		const {
@@ -586,7 +734,7 @@ export class PhpCgiBase
 			}
 			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length ])
 			{
-				originalPath += '/'
+				originalPath += '/';
 			}
 
 			// Rewrite to entrypoint or index.php
@@ -594,7 +742,7 @@ export class PhpCgiBase
 		}
 
 		// Ensure query parameters are preserved.
-		originalPath += url.search
+		originalPath += url.search;
 
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
@@ -714,7 +862,7 @@ export class PhpCgiBase
 				return response;
 			});
 		}
-		catch (error)
+		catch(error)
 		{
 			console.error(error);
 
@@ -752,56 +900,115 @@ export class PhpCgiBase
 		}
 	}
 
+	/**
+	 * Inspects a path in the CGI virtual filesystem.
+	 * @param {string} path Filesystem path to inspect.
+	 * @returns {Promise<unknown>} Filesystem analysis details for the path.
+	 */
 	analyzePath(path)
 	{
 		return this._enqueue(fsOps.analyzePath, [this.binary, path]);
 	}
 
+	/**
+	 * Lists a directory in the CGI virtual filesystem.
+	 * @param {string} path Directory path to list.
+	 * @returns {Promise<unknown>} Directory entries for the path.
+	 */
 	readdir(path)
 	{
 		return this._enqueue(fsOps.readdir, [this.binary, path]);
 	}
 
+	/**
+	 * Reads a file from the CGI virtual filesystem.
+	 * @param {string} path File path to read.
+	 * @param {object} options Read options forwarded to Emscripten FS.
+	 * @returns {Promise<unknown>} File contents for the requested path.
+	 */
 	readFile(path, options)
 	{
 		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
 	}
 
+	/**
+	 * Returns file metadata for a CGI virtual filesystem path.
+	 * @param {string} path Filesystem path to stat.
+	 * @returns {Promise<unknown>} File metadata for the path.
+	 */
 	stat(path)
 	{
 		return this._enqueue(fsOps.stat, [this.binary, path]);
 	}
 
+	/**
+	 * Creates a directory in the CGI virtual filesystem.
+	 * @param {string} path Directory path to create.
+	 * @returns {Promise<unknown>} Metadata for the created directory.
+	 */
 	mkdir(path)
 	{
 		return this._enqueue(fsOps.mkdir, [this.binary, path]);
 	}
 
+	/**
+	 * Removes a directory from the CGI virtual filesystem.
+	 * @param {string} path Directory path to remove.
+	 * @returns {Promise<unknown>} Resolves when the directory has been removed.
+	 */
 	rmdir(path)
 	{
 		return this._enqueue(fsOps.rmdir, [this.binary, path]);
 	}
 
+	/**
+	 * Renames a path in the CGI virtual filesystem.
+	 * @param {string} path Existing filesystem path.
+	 * @param {string} newPath Destination filesystem path.
+	 * @returns {Promise<unknown>} Resolves when the path has been renamed.
+	 */
 	rename(path, newPath)
 	{
 		return this._enqueue(fsOps.rename, [this.binary, path, newPath]);
 	}
 
+	/**
+	 * Writes data to a file in the CGI virtual filesystem.
+	 * @param {string} path File path to write.
+	 * @param {string|Uint8Array} data Data to persist.
+	 * @param {object} options Write options forwarded to Emscripten FS.
+	 * @returns {Promise<unknown>} Resolves when the file has been written.
+	 */
 	writeFile(path, data, options)
 	{
 		return this._enqueue(fsOps.writeFile, [this.binary, path, data, options]);
 	}
 
+	/**
+	 * Deletes a file from the CGI virtual filesystem.
+	 * @param {string} path File path to remove.
+	 * @returns {Promise<unknown>} Resolves when the file has been removed.
+	 */
 	unlink(path)
 	{
 		return this._enqueue(fsOps.unlink, [this.binary, path]);
 	}
 
+	/**
+	 * Sets an environment variable inside the CGI runtime.
+	 * @param {string} name Environment variable name.
+	 * @param {string} value Environment variable value.
+	 * @returns {Promise<number>} Native return code from the underlying `putenv` call.
+	 */
 	async putEnv(name, value)
 	{
 		return (await this.binary).ccall('wasm_sapi_cgi_putenv', 'number', ['string', 'string'], [name, value]);
 	}
 
+	/**
+	 * Returns the current CGI runtime settings.
+	 * @returns {Promise<object>} Current runtime settings exposed over the control API.
+	 */
 	async getSettings()
 	{
 		return {
@@ -813,6 +1020,15 @@ export class PhpCgiBase
 		};
 	}
 
+	/**
+	 * Merges new settings into the CGI runtime configuration.
+	 * @param {object} options Settings to merge into the current runtime configuration.
+	 * @param {string} options.docroot Updated document root.
+	 * @param {number} options.maxRequestAge Updated request timeout threshold in milliseconds.
+	 * @param {number} options.staticCacheTime Updated static cache lifetime in milliseconds.
+	 * @param {number} options.dynamicCacheTime Updated dynamic cache lifetime in milliseconds.
+	 * @param {Array<{pathPrefix: string, directory: string, entrypoint: string}>} options.vHosts Updated virtual host definitions.
+	 */
 	setSettings({docroot, maxRequestAge, staticCacheTime, dynamicCacheTime, vHosts})
 	{
 		this.docroot = docroot ?? this.docroot;
@@ -822,11 +1038,19 @@ export class PhpCgiBase
 		this.vHosts = vHosts ?? this.vHosts;
 	}
 
+	/**
+	 * Returns a copy of the configured CGI environment variables.
+	 * @returns {Promise<object>} A shallow copy of the configured environment variables.
+	 */
 	async getEnvs()
 	{
 		return {...this.env};
 	}
 
+	/**
+	 * Replaces the CGI runtime environment variable map.
+	 * @param {{[key: string]: string}} env Environment variables to replace on the runtime.
+	 */
 	setEnvs(env)
 	{
 		for(const key of Object.keys(this.env))
@@ -837,6 +1061,10 @@ export class PhpCgiBase
 		Object.assign(this.env, env);
 	}
 
+	/**
+	 * Persists the current CGI settings and environment to disk.
+	 * @returns {Promise<void>} Resolves after the current runtime settings are persisted.
+	 */
 	async storeInit()
 	{
 		const settings = await this.getSettings();
@@ -848,6 +1076,10 @@ export class PhpCgiBase
 		);
 	}
 
+	/**
+	 * Loads persisted CGI settings and environment from disk.
+	 * @param {object} binary PHP module instance whose virtual FS may contain persisted init data.
+	 */
 	loadInit(binary)
 	{
 		const initPath = '/config/init.json';

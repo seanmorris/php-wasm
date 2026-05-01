@@ -6,8 +6,15 @@ import fs from 'node:fs';
 const defaultVersion = process.env.PHP_VERSION ?? '8.4';
 const defaultVariant = process.env.PHP_VARIANT ?? '';
 
+/**
+ * Node.js-hosted PHP wrapper.
+ */
 export class PhpNode extends PhpBase
 {
+	/**
+	 * Creates a Node.js-hosted PHP runtime.
+	 * @param {object} args Runtime configuration.
+	 */
 	constructor(args = {})
 	{
 		const locateFile = (name, dir) => {

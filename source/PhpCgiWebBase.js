@@ -5,18 +5,34 @@ import { resolveDependencies } from './resolveDependencies';
 const STR = 'string';
 const NUM = 'number';
 
+/**
+ * Browser-specific CGI wrapper with FS transaction support.
+ */
 export class PhpCgiWebBase extends PhpCgiBase
 {
+	/**
+	 * Starts a persisted browser transaction for CGI requests.
+	 * @returns {Promise<void>} Resolves when the transaction lock has been acquired.
+	 */
 	startTransaction()
 	{
 		return startTransaction(this);
 	}
 
+	/**
+	 * Commits a persisted browser transaction for CGI requests.
+	 * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+	 * @returns {Promise<void>} Resolves when the transaction has been committed.
+	 */
 	commitTransaction(readOnly = false)
 	{
 		return commitTransaction(this, readOnly);
 	}
 
+	/**
+	 * Hydrates the persisted CGI filesystem before handling a request.
+	 * @returns {Promise<void>} Resolves after the persisted filesystem has been loaded.
+	 */
 	async _beforeRequest()
 	{
 		if(!this.initialized)
@@ -34,6 +50,10 @@ export class PhpCgiWebBase extends PhpCgiBase
 		this.initialized = true;
 	}
 
+	/**
+	 * Flushes pending CGI filesystem changes after a request.
+	 * @returns {Promise<void>} Resolves after pending filesystem changes have been flushed.
+	 */
 	async _afterRequest()
 	{
 
@@ -52,6 +72,10 @@ export class PhpCgiWebBase extends PhpCgiBase
 		});
 	}
 
+	/**
+	 * Recreates the browser-side CGI runtime promise.
+	 * @returns {void} Rebuilds the browser-side PHP runtime promise.
+	 */
 	refresh()
 	{
 		const {files: sharedLibFiles, libs: sharedLibs, urlLibs: sharedLibUrls} = resolveDependencies(this.sharedLibs, this);
@@ -111,11 +135,13 @@ export class PhpCgiWebBase extends PhpCgiBase
 			allFiles.forEach(fileDef => {
 				const segments = fileDef.parent.split('/');
 				let currentPath = '';
-				for (const segment of segments) {
-					if (!segment) continue;
+				for(const segment of segments)
+				{
+					if(!segment) continue;
 
 					currentPath += segment + '/';
-					if (!php.FS.analyzePath(currentPath).exists) {
+					if(!php.FS.analyzePath(currentPath).exists)
+					{
 						php.FS.mkdir(currentPath);
 					}
 				}
@@ -169,6 +195,13 @@ export class PhpCgiWebBase extends PhpCgiBase
 		});
 	}
 
+	/**
+	 * Serializes async CGI operations behind the browser FS lock.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		let accept, reject;
@@ -195,7 +228,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 				{
 					await new Promise(a => setTimeout(a, 5));
 				}
-			} while(this.queue.length)
+			} while(this.queue.length);
 
 			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});

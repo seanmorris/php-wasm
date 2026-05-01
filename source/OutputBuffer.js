@@ -1,7 +1,16 @@
 import { _Event } from "./_Event";
 
+/**
+ * Buffers output bytes until they should be emitted as an event.
+ */
 export class OutputBuffer
 {
+	/**
+	 * Creates a new output buffer for an event target.
+	 * @param {EventTarget & {[key: string]: unknown}} target Event target that receives flushed events.
+	 * @param {string} eventType Event name to dispatch when the buffer flushes.
+	 * @param {number} maxLength Maximum buffered byte length before an automatic flush.
+	 */
 	constructor(target, eventType, maxLength)
 	{
 		Object.defineProperty(this, 'target',    {value: target});
@@ -12,6 +21,10 @@ export class OutputBuffer
 		Object.defineProperty(this, 'queue',     {value: new Set});
 	}
 
+	/**
+	 * Appends bytes to the internal output buffer.
+	 * @param {...number} items Bytes to append to the buffer.
+	 */
 	push(...items)
 	{
 		this.buffer.push(...items);
@@ -29,6 +42,9 @@ export class OutputBuffer
 		}
 	}
 
+	/**
+	 * Emits the buffered output as a single event payload.
+	 */
 	flush()
 	{
 		if(!this.buffer.length)

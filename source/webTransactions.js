@@ -1,3 +1,8 @@
+/**
+ * Starts a persisted filesystem transaction for a runtime wrapper.
+ * @param {{binary: Promise<object>, transactionStarted: boolean|Promise<void>}} wrapper Runtime wrapper coordinating FS transactions.
+ * @returns {Promise<void|boolean>} Resolves when the transaction has been started.
+ */
 export async function startTransaction(wrapper)
 {
 	const php = await wrapper.binary;
@@ -23,6 +28,12 @@ export async function startTransaction(wrapper)
 	return await wrapper.transactionStarted;
 }
 
+/**
+ * Commits a persisted filesystem transaction for a runtime wrapper.
+ * @param {{binary: Promise<object>, transactionStarted: boolean|Promise<void>}} wrapper Runtime wrapper coordinating FS transactions.
+ * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+ * @returns {Promise<void>} Resolves when the transaction has been committed.
+ */
 export async function commitTransaction(wrapper, readOnly = false)
 {
 	const php = await wrapper.binary;
@@ -54,6 +65,6 @@ export async function commitTransaction(wrapper, readOnly = false)
 				wrapper.transactionStarted = false;
 				accept();
 			}
-		}
-	)});
+		});
+	});
 }

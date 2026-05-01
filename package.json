@@ -12,6 +12,8 @@
     "build": "make",
     "build-image": "make image",
     "clean": "make clean",
+    "lint": "eslint source/ packages/",
+    "lint:fix": "eslint source/ packages/ --fix",
     "test": "make test",
     "test:docs": "node --test test/docs.test.mjs",
     "docs:coverage": "node ./bin/docs-snippet-report.js"
@@ -87,5 +89,12 @@
     "wasm",
     "php-wasm",
     "vrzno"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^10.2.1",
+    "eslint-plugin-jsdoc": "^62.9.0",
+    "globals": "^17.5.0",
+    "jsdoc": "^4.0.5",
+    "sm-no-saccade-style": "^0.1.1"
+  }
 }

@@ -6,8 +6,15 @@ const STR = 'string';
 
 const defaultVersion = '8.3';
 
+/**
+ * Browser-hosted PHP CLI wrapper.
+ */
 export class PhpCliWeb extends PhpBase
 {
+	/**
+	 * Creates a browser-hosted PHP CLI runtime.
+	 * @param {object} args CLI runtime configuration.
+	 */
 	constructor(args = {})
 	{
 		super(import(`./php${args.version ?? defaultVersion}-cli-web.mjs`), args, 'cli');
@@ -30,22 +37,36 @@ export class PhpCliWeb extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
-			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'))
+			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'));
 			this.addEventListener('stdin-request', async () => this.flush());
 			return php;
 		});
 	}
 
+	/**
+	 * Starts a persisted browser transaction for the CLI runtime.
+	 * @returns {Promise<void>} Resolves when the transaction lock has been acquired.
+	 */
 	startTransaction()
 	{
 		return startTransaction(this);
 	}
 
+	/**
+	 * Commits a persisted browser transaction for the CLI runtime.
+	 * @param {boolean} readOnly Indicates whether the transaction only performed reads.
+	 * @returns {Promise<void>} Resolves when the transaction has been committed.
+	 */
 	commitTransaction(readOnly = false)
 	{
 		return commitTransaction(this, readOnly);
 	}
 
+	/**
+	 * Queues a line of input for the interactive CLI session.
+	 * @param {string} line Input line to send to the interactive CLI process.
+	 * @returns {Promise<void>} Resolves after the input has been queued.
+	 */
 	async provideInput(line)
 	{
 		const php = await this.binary;
@@ -60,6 +81,11 @@ export class PhpCliWeb extends PhpBase
 		}
 	}
 
+	/**
+	 * Builds CLI flags and queues the main PHP CLI process.
+	 * @param {string[]} flags CLI flags to pass to the PHP process.
+	 * @returns {Promise<unknown>} Resolves with the PHP process exit status.
+	 */
 	run(flags = [])
 	{
 		if(this.interactive)
@@ -78,6 +104,11 @@ export class PhpCliWeb extends PhpBase
 		return this._enqueue(phpCode => this._run(phpCode), [flags]);
 	}
 
+	/**
+	 * Executes the PHP CLI binary with a prepared flag list.
+	 * @param {string[]} flags CLI flags to pass to the PHP process.
+	 * @returns {Promise<number>} Resolves with the PHP process exit status.
+	 */
 	async _run(flags = [])
 	{
 		const php = (await this.binary);
@@ -125,6 +156,10 @@ export class PhpCliWeb extends PhpBase
 		}
 	}
 
+	/**
+	 * Refreshes the browser-hosted CLI runtime state.
+	 * @returns {Promise<void>} Resolves after the CLI runtime has been refreshed.
+	 */
 	async refresh()
 	{
 		super.refresh();
@@ -139,6 +174,13 @@ export class PhpCliWeb extends PhpBase
 		// });
 	}
 
+	/**
+	 * Serializes async CLI operations behind the browser FS lock.
+	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
+	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
+	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
 		await this.binary;
@@ -166,7 +208,7 @@ export class PhpCliWeb extends PhpBase
 				const run = callback(...params);
 				run.then(accept).catch(reject);
 				await run;
-			} while(this.queue.length)
+			} while(this.queue.length);
 
 			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
 		});

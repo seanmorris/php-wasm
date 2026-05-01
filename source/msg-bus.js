@@ -2,8 +2,8 @@ const incomplete = new Map();
 
 /**
  * Create a sendMessage function given a service worker URL.
- * @param {*} serviceWorker The ServieWorker object or URL to the service worker.
- * @returns sendMessage function for the service workrer.
+ * @param {ServiceWorker|string} serviceWorker The service worker instance or registration URL to target.
+ * @returns {(action: string, params?: unknown[]) => Promise<unknown>} Function that sends an RPC-style message to the service worker.
  */
 export const sendMessageFor = (serviceWorker) => async (action, params = []) => {
 	const token = window.crypto.randomUUID();
@@ -48,8 +48,9 @@ export const sendMessageFor = (serviceWorker) => async (action, params = []) => 
 };
 
 /**
+ * Resolves pending service worker RPC calls when replies arrive.
  * Event handler for recieved messages.
- * @param {*} event
+ * @param {MessageEvent} event Message event carrying an RPC reply from the service worker.
  */
 export const onMessage = event => {
 	if(event.data.re && incomplete.has(event.data.re))
