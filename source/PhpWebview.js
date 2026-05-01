@@ -1,6 +1,8 @@
 import { PhpBase } from './PhpBase';
 import { commitTransaction, startTransaction } from './webTransactions';
 
+const defaultVersion = '8.4';
+
 /**
  * WebView-hosted PHP wrapper.
  */
@@ -40,7 +42,7 @@ export class PhpWebview extends PhpBase
 	 */
 	async refresh()
 	{
-		super.refresh();
+		await super.refresh();
 		const php = await this.binary;
 		await navigator.locks.request('php-wasm-fs-lock', () => {
 			new Promise((accept, reject) => {
@@ -54,10 +56,10 @@ export class PhpWebview extends PhpBase
 
 	/**
 	 * Serializes async WebView operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

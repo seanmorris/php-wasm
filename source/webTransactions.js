@@ -1,15 +1,33 @@
 /**
+ * @typedef {object} PersistentPhpRuntime
+ * @property {boolean} [persist] Indicates whether the runtime has persistent storage enabled.
+ * @property {{syncfs?: (populate: boolean, callback: (error?: Error) => void) => void}} [FS] Filesystem bridge exposed by the runtime.
+ */
+
+/**
+ * @typedef {object} TransactionalWrapper
+ * @property {Promise<PersistentPhpRuntime>} binary Deferred runtime instance used for transaction work.
+ * @property {boolean|Promise<void>} transactionStarted Tracks the currently active transaction, if any.
+ */
+
+/**
  * Starts a persisted filesystem transaction for a runtime wrapper.
- * @param {{binary: Promise<object>, transactionStarted: boolean|Promise<void>}} wrapper Runtime wrapper coordinating FS transactions.
- * @returns {Promise<void|boolean>} Resolves when the transaction has been started.
+ * @param {TransactionalWrapper} wrapper Runtime wrapper coordinating FS transactions.
+ * @returns {Promise<void>} Resolves when the transaction has been started.
  */
 export async function startTransaction(wrapper)
 {
 	const php = await wrapper.binary;
 
-	if(wrapper.transactionStarted || !php.persist)
+	if(!php.persist)
 	{
-		return wrapper.transactionStarted;
+		return;
+	}
+
+	if(wrapper.transactionStarted)
+	{
+		await wrapper.transactionStarted;
+		return;
 	}
 
 	wrapper.transactionStarted = new Promise((accept, reject) => {
@@ -30,7 +48,7 @@ export async function startTransaction(wrapper)
 
 /**
  * Commits a persisted filesystem transaction for a runtime wrapper.
- * @param {{binary: Promise<object>, transactionStarted: boolean|Promise<void>}} wrapper Runtime wrapper coordinating FS transactions.
+ * @param {TransactionalWrapper} wrapper Runtime wrapper coordinating FS transactions.
  * @param {boolean} readOnly Indicates whether the transaction only performed reads.
  * @returns {Promise<void>} Resolves when the transaction has been committed.
  */

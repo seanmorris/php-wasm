@@ -33,7 +33,7 @@ jobs:
 
       - name: Download Artifact
         if: ${{ inputs.libType != 'static' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-dependencies-*
           merge-multiple: true
@@ -61,7 +61,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}

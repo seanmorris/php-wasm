@@ -84,7 +84,7 @@ export class PhpCliWeb extends PhpBase
 	/**
 	 * Builds CLI flags and queues the main PHP CLI process.
 	 * @param {string[]} flags CLI flags to pass to the PHP process.
-	 * @returns {Promise<unknown>} Resolves with the PHP process exit status.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the PHP process exit status.
 	 */
 	run(flags = [])
 	{
@@ -101,7 +101,15 @@ export class PhpCliWeb extends PhpBase
 			flags.push('-r', this.code);
 		}
 
-		return this._enqueue(phpCode => this._run(phpCode), [flags]);
+		return this._enqueue(
+			/**
+			 * Executes queued CLI flags.
+			 * @param {string[]} phpCode CLI flags queued for execution.
+			 * @returns {Promise<PhpRuntimeValue>} Resolves with the CLI execution result.
+			 */
+			phpCode => this._run(phpCode),
+			[flags]
+		);
 	}
 
 	/**
@@ -124,9 +132,9 @@ export class PhpCliWeb extends PhpBase
 
 		const arLoc = php._malloc(4 * ptrs.length);
 
-		for(const i in ptrs)
+		for(const [i, ptr] of ptrs.entries())
 		{
-			php.setValue(arLoc + 4 * i, ptrs[i], '*');
+			php.setValue(arLoc + 4 * i, ptr, '*');
 		}
 
 		try
@@ -162,7 +170,7 @@ export class PhpCliWeb extends PhpBase
 	 */
 	async refresh()
 	{
-		super.refresh();
+		await super.refresh();
 		// const php = await this.binary;
 		// await navigator.locks.request('php-wasm-fs-lock', () => {
 		// 	return new Promise((accept, reject) => {
@@ -176,10 +184,10 @@ export class PhpCliWeb extends PhpBase
 
 	/**
 	 * Serializes async CLI operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

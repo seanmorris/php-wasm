@@ -51,7 +51,7 @@ export class fsOps
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path File path to read.
 	 * @param {object} options Read options forwarded to Emscripten FS.
-	 * @returns {Promise<unknown>} File contents for the requested path.
+	 * @returns {Promise<PhpRuntimeValue>} File contents for the requested path.
 	 */
 	static async readFile(binary, path, options)
 	{
@@ -62,7 +62,7 @@ export class fsOps
 	 * Returns file metadata for a virtual filesystem path.
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path Filesystem path to stat.
-	 * @returns {Promise<unknown>} File metadata for the path.
+	 * @returns {Promise<PhpRuntimeValue>} File metadata for the path.
 	 */
 	static async stat(binary, path)
 	{
@@ -98,7 +98,7 @@ export class fsOps
 	 * Removes a directory from the virtual filesystem.
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path Directory path to remove.
-	 * @returns {Promise<unknown>} Resolves when the directory has been removed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the directory has been removed.
 	 */
 	static async rmdir(binary, path)
 	{
@@ -110,7 +110,7 @@ export class fsOps
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path Existing filesystem path.
 	 * @param {string} newPath Destination filesystem path.
-	 * @returns {Promise<unknown>} Resolves when the path has been renamed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the path has been renamed.
 	 */
 	static async rename(binary, path, newPath)
 	{
@@ -123,7 +123,7 @@ export class fsOps
 	 * @param {string} path File path to write.
 	 * @param {string|Uint8Array} data Data to persist.
 	 * @param {object} options Write options forwarded to Emscripten FS.
-	 * @returns {Promise<unknown>} Resolves when the file has been written.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the file has been written.
 	 */
 	static async writeFile(binary, path, data, options)
 	{
@@ -155,7 +155,7 @@ export class fsOps
 	 * Deletes a file from the virtual filesystem.
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path File path to remove.
-	 * @returns {Promise<unknown>} Resolves when the file has been removed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the file has been removed.
 	 */
 	static async unlink(binary, path)
 	{
@@ -166,7 +166,7 @@ export class fsOps
 	 * Changes permissions for a virtual filesystem path.
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {number} mode POSIX permission mode to apply.
-	 * @returns {Promise<unknown>} Resolves when the mode has been applied.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the mode has been applied.
 	 */
 	static async chmod(binary, mode)
 	{

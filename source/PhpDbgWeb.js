@@ -54,7 +54,7 @@ export class PhpDbgWeb extends PhpBase
 
 	/**
 	 * Starts the phpdbg main loop.
-	 * @returns {Promise<unknown>} Resolves when the debugger main loop starts.
+	 * @returns {Promise<number>} Resolves when the debugger main loop starts.
 	 */
 	run()
 	{
@@ -88,7 +88,7 @@ export class PhpDbgWeb extends PhpBase
 
 	/**
 	 * Launches the phpdbg process and captures native debugger pointers.
-	 * @returns {Promise<unknown>} Resolves with the debugger process promise.
+	 * @returns {Promise<number>} Resolves with the debugger process promise.
 	 */
 	async _main()
 	{
@@ -105,9 +105,9 @@ export class PhpDbgWeb extends PhpBase
 
 		const arLoc = php._malloc(4 * ptrs.length);
 
-		for(const i in ptrs)
+		for(const [i, ptr] of ptrs.entries())
 		{
-			php.setValue(arLoc + 4 * i, ptrs[i], '*');
+			php.setValue(arLoc + 4 * i, ptr, '*');
 		}
 
 		try
@@ -536,10 +536,10 @@ export class PhpDbgWeb extends PhpBase
 
 	/**
 	 * Serializes async debugger operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

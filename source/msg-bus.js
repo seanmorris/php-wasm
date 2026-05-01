@@ -3,7 +3,7 @@ const incomplete = new Map();
 /**
  * Create a sendMessage function given a service worker URL.
  * @param {ServiceWorker|string} serviceWorker The service worker instance or registration URL to target.
- * @returns {(action: string, params?: unknown[]) => Promise<unknown>} Function that sends an RPC-style message to the service worker.
+ * @returns {(action: string, params?: PhpMessageParams) => Promise<PhpRuntimeValue>} Function that sends an RPC-style message to the service worker.
  */
 export const sendMessageFor = (serviceWorker) => async (action, params = []) => {
 	const token = window.crypto.randomUUID();

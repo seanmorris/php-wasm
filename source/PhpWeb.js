@@ -47,7 +47,7 @@ export class PhpWeb extends PhpBase
 	 */
 	async refresh()
 	{
-		super.refresh();
+		await super.refresh();
 		const php = await this.binary;
 		await navigator.locks.request('php-wasm-fs-lock', () => {
 			return new Promise((accept, reject) => {
@@ -61,10 +61,10 @@ export class PhpWeb extends PhpBase
 
 	/**
 	 * Serializes async runtime operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

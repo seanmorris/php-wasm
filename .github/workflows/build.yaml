@@ -44,7 +44,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -87,7 +87,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -317,7 +317,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -383,7 +383,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -449,7 +449,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -645,7 +645,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
@@ -734,7 +734,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
@@ -791,7 +791,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-demo-web
           merge-multiple: true

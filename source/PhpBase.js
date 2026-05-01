@@ -13,10 +13,39 @@ const NUM = 'number';
  */
 export class PhpBase extends EventTarget
 {
+	/** @type {Array<[PhpQueuedCallback, PhpQueueParams, PhpQueueResolve, PhpQueueReject]>} */
+	queue;
+	/** @type {(event?: Event) => void} */
+	onerror;
+	/** @type {(event?: Event) => void} */
+	onoutput;
+	/** @type {(event?: Event) => void} */
+	onready;
+	/** @type {TextEncoder} */
+	encoder;
+	/** @type {{stdin: number[], stdout: OutputBuffer, stderr: OutputBuffer}} */
+	buffers;
+	/** @type {boolean} */
+	autoTransaction;
+	/** @type {boolean|Promise<void>} */
+	transactionStarted;
+	/** @type {string|undefined} */
+	phpVersion;
+	/** @type {string|undefined} */
+	phpVariant;
+	/** @type {{[key: string]: PhpSharedValue}} */
+	shared;
+	/** @type {PhpRuntimeArgs} */
+	phpArgs;
+	/** @type {number} */
+	valueIndex;
+	/** @type {Promise<object>} */
+	binary;
+
 	/**
 	 * Creates a PHP runtime wrapper for a specific module loader and SAPI.
 	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
-	 * @param {object} args Runtime configuration for the PHP instance.
+	 * @param {PhpRuntimeArgs} args Runtime configuration for the PHP instance.
 	 * @param {string} sapi SAPI identifier to initialize inside the module.
 	 */
 	constructor(phpBinLoader, args = {}, sapi = 'embed')
@@ -186,7 +215,7 @@ export class PhpBase extends EventTarget
 	}
 
 	/**
-	 * Flushes any buffered STDOUT and STDERR data.
+	 * Flushes buffered STDOUT and STDERR data.
 	 */
 	flush()
 	{
@@ -230,10 +259,10 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Schedules an async operation on the runtime queue.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates the filesystem.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
@@ -266,18 +295,26 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Queues PHP code for execution through `pib_run`.
-	 * @param {string} phpCode PHP source code to execute.
-	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 * @param {string|string[]} phpCode PHP source code to execute.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the execution result.
 	 */
 	run(phpCode)
 	{
-		return this._enqueue(phpCode => this._run(phpCode), [phpCode]);
+		return this._enqueue(
+			/**
+			 * Executes queued PHP source.
+			 * @param {string} phpCode PHP source code queued for execution.
+			 * @returns {Promise<PhpRuntimeValue>} Resolves with the PHP execution result.
+			 */
+			phpCode => this._run(phpCode),
+			[phpCode]
+		);
 	}
 
 	/**
 	 * Executes PHP code immediately through `pib_run`.
-	 * @param {string} phpCode PHP source code to execute immediately.
-	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 * @param {string|string[]} phpCode PHP source code to execute immediately.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the execution result.
 	 */
 	_run(phpCode)
 	{
@@ -294,18 +331,26 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Queues PHP code for execution through `pib_exec`.
-	 * @param {string} phpCode PHP source code to evaluate and capture output from.
-	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 * @param {string|string[]} phpCode PHP source code to evaluate and capture output from.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the execution result.
 	 */
 	exec(phpCode)
 	{
-		return this._enqueue(phpCode => this._exec(phpCode), [phpCode]);
+		return this._enqueue(
+			/**
+			 * Executes queued PHP source and captures the result.
+			 * @param {string} phpCode PHP source code queued for evaluation.
+			 * @returns {Promise<PhpRuntimeValue>} Resolves with the PHP evaluation result.
+			 */
+			phpCode => this._exec(phpCode),
+			[phpCode]
+		);
 	}
 
 	/**
 	 * Executes PHP code immediately through `pib_exec`.
-	 * @param {string} phpCode PHP source code to evaluate immediately.
-	 * @returns {Promise<unknown>} Resolves with the execution result.
+	 * @param {string|string[]} phpCode PHP source code to evaluate immediately.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the execution result.
 	 */
 	async _exec(phpCode)
 	{
@@ -322,9 +367,9 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Evaluates an interpolated PHP expression and returns its value.
-	 * @param {TemplateStringsArray} fragments Template literal string fragments.
-	 * @param {...unknown} values Values to interpolate into the PHP expression.
-	 * @returns {Promise<unknown>} Resolves with the decoded PHP expression result.
+	 * @param {string[]} fragments Template literal string fragments.
+	 * @param {...(object|string|number|boolean|null)} values Values to interpolate into the PHP expression.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the decoded PHP expression result.
 	 */
 	async x(fragments, ...values)
 	{
@@ -379,9 +424,9 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Executes an interpolated PHP script without decoding the result.
-	 * @param {TemplateStringsArray} fragments Template literal string fragments.
-	 * @param {...unknown} values Values to interpolate into the PHP script.
-	 * @returns {Promise<unknown>} Resolves with the script execution result.
+	 * @param {string[]} fragments Template literal string fragments.
+	 * @param {...(object|string|number|boolean|null)} values Values to interpolate into the PHP script.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the script execution result.
 	 */
 	async r(fragments, ...values)
 	{
@@ -439,7 +484,7 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Recreates the underlying PHP module instance.
-	 * @returns {Promise<unknown>} Resolves when the PHP runtime has been refreshed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the PHP runtime has been refreshed.
 	 */
 	async refresh()
 	{
@@ -464,7 +509,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Inspects a path in the virtual filesystem.
 	 * @param {string} path Filesystem path to inspect.
-	 * @returns {Promise<unknown>} Filesystem analysis details for the path.
+	 * @returns {Promise<PhpRuntimeValue>} Filesystem analysis details for the path.
 	 */
 	analyzePath(path)
 	{
@@ -474,7 +519,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Lists a directory in the virtual filesystem.
 	 * @param {string} path Directory path to list.
-	 * @returns {Promise<unknown>} Directory entries for the path.
+	 * @returns {Promise<PhpRuntimeValue>} Directory entries for the path.
 	 */
 	readdir(path)
 	{
@@ -485,7 +530,7 @@ export class PhpBase extends EventTarget
 	 * Reads a file from the virtual filesystem.
 	 * @param {string} path File path to read.
 	 * @param {object} options Read options forwarded to Emscripten FS.
-	 * @returns {Promise<unknown>} File contents for the requested path.
+	 * @returns {Promise<PhpRuntimeValue>} File contents for the requested path.
 	 */
 	readFile(path, options)
 	{
@@ -495,7 +540,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Returns file metadata for a virtual filesystem path.
 	 * @param {string} path Filesystem path to stat.
-	 * @returns {Promise<unknown>} File metadata for the path.
+	 * @returns {Promise<PhpRuntimeValue>} File metadata for the path.
 	 */
 	stat(path)
 	{
@@ -505,7 +550,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Creates a directory in the virtual filesystem.
 	 * @param {string} path Directory path to create.
-	 * @returns {Promise<unknown>} Metadata for the created directory.
+	 * @returns {Promise<PhpRuntimeValue>} Metadata for the created directory.
 	 */
 	mkdir(path)
 	{
@@ -515,7 +560,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Removes a directory from the virtual filesystem.
 	 * @param {string} path Directory path to remove.
-	 * @returns {Promise<unknown>} Resolves when the directory has been removed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the directory has been removed.
 	 */
 	rmdir(path)
 	{
@@ -526,7 +571,7 @@ export class PhpBase extends EventTarget
 	 * Renames a virtual filesystem path.
 	 * @param {string} path Existing filesystem path.
 	 * @param {string} newPath Destination filesystem path.
-	 * @returns {Promise<unknown>} Resolves when the path has been renamed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the path has been renamed.
 	 */
 	rename(path, newPath)
 	{
@@ -538,7 +583,7 @@ export class PhpBase extends EventTarget
 	 * @param {string} path File path to write.
 	 * @param {string|Uint8Array} data Data to persist.
 	 * @param {object} options Write options forwarded to Emscripten FS.
-	 * @returns {Promise<unknown>} Resolves when the file has been written.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the file has been written.
 	 */
 	writeFile(path, data, options)
 	{
@@ -548,7 +593,7 @@ export class PhpBase extends EventTarget
 	/**
 	 * Deletes a file from the virtual filesystem.
 	 * @param {string} path File path to remove.
-	 * @returns {Promise<unknown>} Resolves when the file has been removed.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves when the file has been removed.
 	 */
 	unlink(path)
 	{

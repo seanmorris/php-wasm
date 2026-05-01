@@ -74,7 +74,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	/**
 	 * Recreates the browser-side CGI runtime promise.
-	 * @returns {void} Rebuilds the browser-side PHP runtime promise.
+	 * @returns {Promise<object>} Rebuilds the browser-side PHP runtime promise.
 	 */
 	refresh()
 	{
@@ -193,14 +193,16 @@ export class PhpCgiWebBase extends PhpCgiBase
 			return php;
 
 		});
+
+		return this.binary;
 	}
 
 	/**
 	 * Serializes async CGI operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

@@ -16,7 +16,7 @@ export const parseResponse = response => {
 
 				if(colon < 0)
 				{
-					headers.append(header, true);
+					headers.append(header, '');
 				}
 				else
 				{

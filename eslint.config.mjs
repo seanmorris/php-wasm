@@ -6,6 +6,31 @@ const sourceLintFiles = ['source/**/*.{js,mjs}'];
 const packageLintFiles = ['packages/**/8.*.{js,mjs}', 'packages/**/index.{js,mjs}'];
 const lintFiles = [...sourceLintFiles, ...packageLintFiles];
 const ignores = ['packages/php-wasm/stdlib/**/*'];
+const definedTypes = [
+	'EventInit',
+	'OutputTarget',
+	'PhpActionHandler',
+	'PhpEventHook',
+	'PhpLibraryList',
+	'PhpMessageParams',
+	'PhpNotFoundHook',
+	'PhpPreloadFile',
+	'PhpPreloadFileList',
+	'PhpQueueParams',
+	'PhpQueueReject',
+	'PhpQueueResolve',
+	'PhpQueuedCallback',
+	'PhpRuntimeArgs',
+	'PhpRuntimeHook',
+	'PhpRuntimeValue',
+	'PhpSharedLibrary',
+	'PhpSharedValue',
+	'PhpVhost',
+	'PhpVhostList',
+	'RuntimeFetchEvent',
+	'RuntimeLifecycleEvent',
+	'RuntimeRequest'
+];
 
 export default [
 	...smNoSaccadeStyle.configs.recommended.map(
@@ -27,8 +52,7 @@ export default [
 		}
 		, rules: {
 			'jsdoc/no-undefined-types': ['warn', {
-				definedTypes: [
-				]
+				definedTypes
 			}]
 			, 'jsdoc/require-jsdoc': ['warn', {
 				contexts: [
@@ -53,8 +77,7 @@ export default [
 		}
 		, rules: {
 			'jsdoc/no-undefined-types': ['warn', {
-				definedTypes: [
-				]
+				definedTypes
 			}]
 			, 'jsdoc/require-jsdoc': ['warn', {
 				contexts: [

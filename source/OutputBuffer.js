@@ -5,9 +5,20 @@ import { _Event } from "./_Event";
  */
 export class OutputBuffer
 {
+	/** @type {OutputTarget} */
+	target;
+	/** @type {number[]} */
+	buffer;
+	/** @type {string} */
+	eventType;
+	/** @type {number} */
+	maxLength;
+	/** @type {TextDecoder} */
+	decoder;
+
 	/**
 	 * Creates a new output buffer for an event target.
-	 * @param {EventTarget & {[key: string]: unknown}} target Event target that receives flushed events.
+	 * @param {OutputTarget} target Event target that receives flushed events.
 	 * @param {string} eventType Event name to dispatch when the buffer flushes.
 	 * @param {number} maxLength Maximum buffered byte length before an automatic flush.
 	 */
@@ -18,7 +29,6 @@ export class OutputBuffer
 		Object.defineProperty(this, 'eventType', {value: eventType});
 		Object.defineProperty(this, 'maxLength', {value: maxLength});
 		Object.defineProperty(this, 'decoder',   {value: new TextDecoder()});
-		Object.defineProperty(this, 'queue',     {value: new Set});
 	}
 
 	/**
@@ -54,16 +64,18 @@ export class OutputBuffer
 
 		const detail = [this.decoder.decode(new Uint8Array(this.buffer))];
 		const event = new _Event(this.eventType, {detail});
+		const target = /** @type {EventTarget & {[key: string]: PhpEventHook|undefined}} */ (this.target);
+		const handler = target['on' + this.eventType];
 
-		if(this.target['on' + this.eventType])
+		if(handler)
 		{
-			if(this.target['on' + this.eventType](event) === false)
+			if(handler(event) === false)
 			{
 				return;
 			}
 		}
 
-		if(!this.target.dispatchEvent(event))
+		if(!target.dispatchEvent(event))
 		{
 			return;
 		}

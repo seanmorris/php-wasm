@@ -1,5 +1,5 @@
 import { PhpBase } from './PhpBase';
-import PhpBinary from './php-worker';
+import PhpBinary from 'php-wasm/php-worker.mjs';
 import { commitTransaction, startTransaction } from './webTransactions';
 
 /**
@@ -41,7 +41,7 @@ export class PhpWorker extends PhpBase
 	 */
 	async refresh()
 	{
-		super.refresh();
+		await super.refresh();
 
 		if(!this.phpArgs.persist)
 		{
@@ -61,10 +61,10 @@ export class PhpWorker extends PhpBase
 
 	/**
 	 * Serializes async worker operations behind the browser FS lock.
-	 * @param {(...params: unknown[]) => Promise<unknown>} callback Async operation to queue.
-	 * @param {unknown[]} params Arguments passed to the queued callback.
+	 * @param {PhpQueuedCallback} callback Async operation to queue.
+	 * @param {PhpQueueParams} params Arguments passed to the queued callback.
 	 * @param {boolean} readOnly Indicates whether the queued operation mutates state.
-	 * @returns {Promise<unknown>} Resolves with the queued callback result.
+	 * @returns {Promise<PhpRuntimeValue>} Resolves with the queued callback result.
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{

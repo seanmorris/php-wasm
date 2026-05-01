@@ -1,4 +1,4 @@
-import { PhpWeb } from './PhpWeb.mjs';
+import { PhpWeb } from './PhpWeb.js';
 
 const runPhpScriptTag = async (element) => {
 
@@ -109,7 +109,7 @@ const runPhpScriptTag = async (element) => {
 		}
 	}
 
-	let getImports = Promise.resolve();
+	let getImports = Promise.resolve([]);
 
 	if(scope.imports)
 	{
@@ -128,7 +128,7 @@ const runPhpScriptTag = async (element) => {
 
 	const [code, input, imports] = await Promise.all([getCode, getInput, getImports]);
 
-	const flatImports = Object.assign({}, ...(imports.flat()));
+	const flatImports = Object.assign({}, ...imports.flat());
 
 	const php = new PhpWeb({
 		...flatImports,
@@ -193,7 +193,7 @@ const runPhpTags = (doc) => {
 		{
 			for(const addedNode of mutation.addedNodes)
 			{
-				if(!addedNode.matches || !addedNode.matches(phpSelector))
+				if(!(addedNode instanceof Element) || !addedNode.matches(phpSelector))
 				{
 					continue;
 				}

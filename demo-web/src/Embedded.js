@@ -84,9 +84,9 @@ else
 	);
 }
 
-const dynamicLibs = [
-	await import('php-wasm-yaml')
-];
+const dynamicLibs = buildType === 'dynamic'
+	? [await import('php-wasm-yaml')]
+	: [];
 
 const ini = `
 date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
