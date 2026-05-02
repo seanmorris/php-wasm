@@ -58,41 +58,36 @@
 	left: 0;
 	bottom: 0;
 	right: 0;
+
+	overflow-y: scroll;
+	overflow-x: auto;
+
+	color: #FFF;
+	background-color: #000;
 }
 
 .phpdbg-console .scroll-to-bottom {
 	z-index: 100;
-	position: absolute;
+	position: sticky;
 	top: 1rem;
-	right: 2rem;
+	left: calc(100% - 2.5rem);
 	width: 2rem;
 	height: 2rem;
-	background-color: #888;
-	color: #000;
 	text-align: center;
 	line-height: 2.125rem;
 	padding: 0;
 	user-select: none;
 	-webkit-user-select: none;
 	overflow: hidden;
+
+	background-color: #888;
+	color: #000;
 }
 
 .phpdbg-console .console-output {
-	position: absolute;
-
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-
-	color: #FFF;
-	background-color: #000;
-
 	white-space: pre-wrap;
-	overflow-y: scroll;
-	overflow-x: auto;
 	padding: 1rem;
-	height: 100%;
+	min-height: 100%;
 
 	box-sizing: border-box;
 	text-align: left;

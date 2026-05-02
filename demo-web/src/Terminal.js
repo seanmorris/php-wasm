@@ -365,9 +365,9 @@ export default function Terminal({
 		scrollToEnd();
 	};
 
-	return (<div className='phpdbg-console inset' onMouseUp={handleTerminalClicked}>
+	return (<div className='phpdbg-console inset' onMouseUp={handleTerminalClicked} ref = {terminal}>
 		<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
-		<div className='console-output' ref = {terminal}>
+		<div className='console-output'>
 			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
 			{interactive && (
 				<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
