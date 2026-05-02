@@ -132,7 +132,7 @@ body.loading button[data-ui] {
 	filter: saturate(0) brightness(1.25) contrast(0.5);
 	pointer-events: none;
 
-	background-image: url(loading.svg);
+	background-image: url(bar-spin.svg);
 	background-position: center;
 	background-repeat: no-repeat;
 }

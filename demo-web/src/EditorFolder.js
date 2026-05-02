@@ -7,7 +7,7 @@ import EditorFile from './EditorFile';
 import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
-import loader from './tail-spin.svg';
+import loader from './bar-spin.svg';
 
 // const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import Terminal from './Terminal';
-import loader from './tail-spin.svg';
+import loader from './bar-spin.svg';
 import { basePath } from './runtimePaths';
 import { ensureServiceWorker } from './serviceWorker';
 

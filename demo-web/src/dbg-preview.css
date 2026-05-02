@@ -62,9 +62,9 @@
 
 .phpdbg-console .scroll-to-bottom {
 	z-index: 100;
-	position: sticky;
-	top: 0;
-	left: calc(100% - 2rem);
+	position: absolute;
+	top: 1rem;
+	right: 2rem;
 	width: 2rem;
 	height: 2rem;
 	background-color: #888;
@@ -78,10 +78,16 @@
 }
 
 .phpdbg-console .console-output {
+	position: absolute;
+
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+
 	color: #FFF;
 	background-color: #000;
 
-	position: relative;
 	white-space: pre-wrap;
 	overflow-y: scroll;
 	overflow-x: auto;

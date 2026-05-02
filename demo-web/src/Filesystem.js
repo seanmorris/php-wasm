@@ -1,7 +1,7 @@
 import './Common.css';
 import './InstallDemo.css';
 
-import loader from './tail-spin.svg';
+import loader from './bar-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { basePath } from './runtimePaths';
