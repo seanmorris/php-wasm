@@ -13,7 +13,7 @@
     "index.mjs",
     "index.d.ts",
     "test/basic.mjs",
-    "env.js",
+    "env.mjs",
     "filter.json",
     "LICENSE",
     "NOTICE",
