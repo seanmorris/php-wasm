@@ -1,6 +1,8 @@
-import { PhpBase } from './PhpBase';
-import PhpBinary from 'php-wasm/php-worker.mjs';
-import { commitTransaction, startTransaction } from './webTransactions';
+import { PhpBase } from './PhpBase.mjs';
+import { commitTransaction, startTransaction } from './webTransactions.mjs';
+
+const defaultVersion = '8.4';
+const defaultVariant = '';
 
 /**
  * Worker-hosted PHP wrapper.
@@ -13,7 +15,61 @@ export class PhpWorker extends PhpBase
 	 */
 	constructor(args = {})
 	{
-		super(PhpBinary, args);
+		const version = args.version ?? defaultVersion;
+		const variant = args.variant ?? defaultVariant;
+		const vvId = version + variant;
+		const constructorArgs = {version, variant, ...args};
+
+		switch(vvId)
+		{
+			case '8.5':
+				super(import(`./php8.5-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.5_sdl':
+				super(import(`./php8.5_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.4':
+				super(import(`./php8.4-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.4_sdl':
+				super(import(`./php8.4_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.3':
+				super(import(`./php8.3-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.3_sdl':
+				super(import(`./php8.3_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.2':
+				super(import(`./php8.2-worker.mjs`), constructorArgs);
+				break;
+			case '8.2_sdl':
+				super(import(`./php8.2_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.1':
+				super(import(`./php8.1-worker.mjs`), constructorArgs);
+				break;
+			case '8.1_sdl':
+				super(import(`./php8.1_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			case '8.0':
+				super(import(`./php8.0-worker.mjs`), constructorArgs);
+				break;
+			case '8.0_sdl':
+				super(import(`./php8.0_sdl-worker.mjs`), constructorArgs);
+				break;
+
+			default:
+				throw new Error(`Unsupported PHP runtime: ${vvId}`);
+		}
 	}
 
 	/**

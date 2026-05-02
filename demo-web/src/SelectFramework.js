@@ -8,7 +8,7 @@ import laminasIcon from './laminas-icon.svg';
 import { useEffect, useMemo, useState } from 'react';
 import Header from './Header';
 import { basePath } from './runtimePaths';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
 import reactIcon from './react-icon.svg';
 import floppyIcon from './icons/floppy-icon-32.png';

@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 import Header from './Header';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
 import { useVSCode } from 'vscode-react';
 import { useMemo } from 'react';

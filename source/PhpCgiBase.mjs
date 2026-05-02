@@ -1,9 +1,9 @@
-import { parseResponse } from './parseResponse';
-import { breakoutRequest } from './breakoutRequest';
-import { fsOps } from './fsOps';
-import { resolveDependencies } from './resolveDependencies';
+import { parseResponse } from './parseResponse.mjs';
+import { breakoutRequest } from './breakoutRequest.mjs';
+import { fsOps } from './fsOps.mjs';
+import { resolveDependencies } from './resolveDependencies.mjs';
 
-/** @import { PhpCgiRuntimeArgs } from '../packages/php-cgi-wasm/public' */
+/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
 
 /**
  * An object representing a dynamically loaded data file.

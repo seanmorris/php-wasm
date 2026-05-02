@@ -784,14 +784,13 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 
 ########## Package files ###########
 
-${PHP_DIST_DIR}/%.js: source/%.js
+${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?)"\)|require("\1.js")|' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_DIST_DIR}/$(notdir $@)
 
-${PHP_DIST_DIR}/%.mjs: source/%.js
+${PHP_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
-	perl -pi -w -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 ${PHP_DIST_DIR}/php-tags.mjs: source/php-tags.mjs
 	cp $< $@;

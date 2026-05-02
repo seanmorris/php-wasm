@@ -1,11 +1,11 @@
-import { PhpCgiBase } from './PhpCgiBase';
+import { PhpCgiBase } from './PhpCgiBase.mjs';
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';
 
 const defaultVersion = '8.4';
 
-/** @import { PhpCgiRuntimeArgs } from '../packages/php-cgi-wasm/public' */
+/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
 
 /**
  * Node.js-hosted PHP CGI wrapper.

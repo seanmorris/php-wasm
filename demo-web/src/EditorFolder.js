@@ -1,7 +1,7 @@
 import './Common.css';
 import './EditorEntry.css';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import EditorFile from './EditorFile';
 
 import fileIcon from './nomo-dark/file.svg';

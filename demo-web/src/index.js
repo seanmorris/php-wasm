@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { onMessage } from 'php-cgi-wasm/msg-bus';
+import { onMessage } from 'php-cgi-wasm/msg-bus.mjs';
 import App from './App';
 import { ensureServiceWorker } from './serviceWorker';
 

@@ -1,5 +1,5 @@
-import { PhpBase } from 'php-wasm/PhpBase';
-import { commitTransaction, startTransaction } from './webTransactions';
+import { PhpBase } from 'php-wasm/PhpBase.mjs';
+import { commitTransaction, startTransaction } from './webTransactions.mjs';
 
 const NUM = 'number';
 const STR = 'string';

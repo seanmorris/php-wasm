@@ -1,4 +1,4 @@
-import { PhpBase } from './PhpBase';
+import { PhpBase } from './PhpBase.mjs';
 import path from 'node:path';
 import url from 'node:url';
 import fs from 'node:fs';

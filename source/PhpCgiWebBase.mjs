@@ -1,6 +1,6 @@
-import { PhpCgiBase } from './PhpCgiBase';
-import { commitTransaction, startTransaction } from './webTransactions';
-import { resolveDependencies } from './resolveDependencies';
+import { PhpCgiBase } from './PhpCgiBase.mjs';
+import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { resolveDependencies } from './resolveDependencies.mjs';
 
 const STR = 'string';
 const NUM = 'number';

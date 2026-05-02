@@ -11,7 +11,7 @@ import zlib from 'php-wasm-zlib';
 import libzip from 'php-wasm-libzip';
 
 import { useEffect, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 const sharedLibs = [libxml, zlib, libzip];

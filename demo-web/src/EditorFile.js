@@ -19,7 +19,7 @@ import renameIcon from './icons/rename-icon-16.png';
 import deleteIcon from './icons/delete-icon-16.png';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import { baseUrlFor } from './runtimePaths';
 
 // const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
