@@ -1,4 +1,4 @@
-import { _Event } from "./_Event";
+import { _Event } from './_Event.mjs';
 
 /**
  * Buffers output bytes until they should be emitted as an event.

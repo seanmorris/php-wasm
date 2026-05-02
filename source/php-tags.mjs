@@ -1,4 +1,4 @@
-import { PhpWeb } from './PhpWeb.js';
+import { PhpWeb } from './PhpWeb.mjs';
 
 const runPhpScriptTag = async (element) => {
 
