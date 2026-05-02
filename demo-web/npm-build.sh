@@ -2,6 +2,8 @@
 
 set -eux;
 
+export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}"
+
 if [ -d 'public/static/media/mapped' ]; then {
 	rm public/static/media/*.map || true
 	rm -rf public/static/media/mapped

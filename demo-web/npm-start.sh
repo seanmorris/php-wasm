@@ -2,6 +2,8 @@
 
 set -eux;
 
+export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}"
+
 mkdir -p public/static/media
 
 if [ -d 'public/static/media/mapped' ]; then {
