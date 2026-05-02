@@ -132,12 +132,12 @@ endif
 
 CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
-${PHP_CLI_DIST_DIR}/%.js: source/%.js
+${PHP_CLI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CLI_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CLI_DIST_DIR}/$(notdir $@)
 	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_CLI_DIST_DIR}/$(notdir $@)
 
-${PHP_CLI_DIST_DIR}/%.mjs: source/%.js
+${PHP_CLI_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
 
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.js: BUILD_TYPE=js
