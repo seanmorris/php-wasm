@@ -20,8 +20,13 @@ const baseUrl = import.meta.env.BASE_URL ?? new URL('./', self.location.href).pa
 const trimmedBase = trimBase(baseUrl);
 
 export const routerBase = trimmedBase || '/';
-export const buildType = import.meta.env.VITE_BUILD_TYPE ?? 'dynamic';
+export const buildType = import.meta.env.VITE_BUILD_TYPE || 'dynamic';
 
 export const basePath = (path = '') => resolveBasePath(baseUrl, path);
 
 export const baseUrlFor = (path = '') => new URL(basePath(path), self.location.origin);
+
+if(!['dynamic', 'shared', 'static'].includes(buildType))
+{
+	console.warn(`buildType invalid! VITE_BUILD_TYPE should be one of 'dynamic', 'shared', 'static', or EMPTY.`);
+}
