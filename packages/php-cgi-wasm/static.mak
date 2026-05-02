@@ -142,13 +142,13 @@ endif
 
 CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
-${PHP_CGI_DIST_DIR}/%.js: source/%.js
+${PHP_CGI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CGI_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_CGI_DIST_DIR}/$(notdir $@)
 
-${PHP_CGI_DIST_DIR}/%.mjs: source/%.js
+${PHP_CGI_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
-	perl -pi -w -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-web.js: BUILD_TYPE=js
 ${PHP_CGI_DIST_DIR}/php${PHP_SUFFIX}-cgi-web.js: ENVIRONMENT=web

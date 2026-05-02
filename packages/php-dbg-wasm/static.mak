@@ -135,10 +135,10 @@ DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 ${PHP_DBG_DIST_DIR}/%.js: source/%.js
 	npx babel $< --out-dir ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DBG_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_DBG_DIST_DIR}/$(notdir $@)
 
 ${PHP_DBG_DIST_DIR}/%.mjs: source/%.js
 	cp $< $@;
-	perl -pi -w -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ENVIRONMENT=web
