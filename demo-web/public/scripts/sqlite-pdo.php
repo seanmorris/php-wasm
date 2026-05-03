@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text"}
+<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text", "extensionFlags": 1024}
 
 $db = new PDO('sqlite:people.db');
 

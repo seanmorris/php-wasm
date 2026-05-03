@@ -102,8 +102,7 @@ export default defineConfig(() => ({
 	}
 	, optimizeDeps: {
 		exclude: localPhpPackages
-		,
-		esbuildOptions: {
+		, esbuildOptions: {
 			loader: {
 				'.js': 'jsx'
 			}

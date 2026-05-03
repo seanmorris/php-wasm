@@ -10,7 +10,7 @@ import libxml from 'php-wasm-libxml';
 import zlib from 'php-wasm-zlib';
 import libzip from 'php-wasm-libzip';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useEffectEvent, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
@@ -101,16 +101,27 @@ const clearFilesystem = () => {
 const makeComponent = (operation) => ({onComplete, onError, ...args}) => {
 	const [message, setMessage] = useState('Initializing...');
 
-	const onStatus = event => setMessage(event.detail);
+	const onStatus = useEffectEvent(event => {
+		setMessage(event.detail);
+	});
 
-	useEffect(() => {
-		window.addEventListener('install-status', onStatus);
+	const runOperation = useEffectEvent(() => {
 		window.__operation = window.__operation || operation(args)
 		.then(() => onComplete())
 		.catch(error => onError(error))
 		.finally(() => window.__operation = null);
+	});
+
+	useEffect(() => {
+		const statusListener = event => {
+			onStatus(event);
+		};
+
+		window.addEventListener('install-status', statusListener);
+		runOperation();
+
 		return () => {
-			window.removeEventListener('install-status', onStatus);
+			window.removeEventListener('install-status', statusListener);
 		};
 	}, []);
 

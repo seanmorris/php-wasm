@@ -5,10 +5,11 @@ import drupalIcon from './drupal-icon.svg';
 import codeIgniterIcon from './codeigniter-icon.svg';
 import laravelIcon from './laravel-icon.svg';
 import laminasIcon from './laminas-icon.svg';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import Header from './Header';
 import { basePath } from './runtimePaths';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
+import { popupTarget, resolvePopupHref, resolvePopupRequest } from './popupNavigation';
 
 import reactIcon from './react-icon.svg';
 import floppyIcon from './icons/floppy-icon-32.png';
@@ -21,6 +22,37 @@ import Confirm from './Confirm';
 
 // const sendMessage = sendMessageFor(`${window.location.origin}${basePath('cgi-worker.mjs')}`);
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
+
+const PopupLink = ({children, className = '', path, ...props}) => (
+	<a
+		{...props}
+		className = {['popup-link', className].filter(Boolean).join(' ')}
+		href = {resolvePopupHref(path)}
+		rel = "opener"
+		target = {popupTarget}
+	>
+		{children}
+	</a>
+);
+
+const PopupButton = ({children, path}) => (
+	<form
+		action = {resolvePopupRequest(path).action}
+		className = "popup-form"
+		method = "get"
+		target = {popupTarget}
+	>
+		{resolvePopupRequest(path).params.map(([name, value], index) => (
+			<input
+				key = {`${name}:${value}:${index}`}
+				name = {name}
+				type = "hidden"
+				value = {value}
+			/>
+		))}
+		<button type = "submit">{children}</button>
+	</form>
+);
 
 function SelectFramework()
 {
@@ -35,17 +67,19 @@ function SelectFramework()
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 
-	const refreshAll = () => {
+	const refreshAll = useCallback(() => {
 		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
 		sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
-	};
+	}, []);
 
-	useEffect(() => refreshAll(), []);
+	useEffect(() => {
+		refreshAll();
+	}, [refreshAll]);
 
-	const onComplete = event => {
+	const onComplete = useEffectEvent(event => {
 		switch(event.detail)
 		{
 			case 'cakephp-5':
@@ -72,12 +106,16 @@ function SelectFramework()
 				break;
 
 		}
-	};
+	});
 
 	useEffect(() => {
-		window.addEventListener('install-complete', onComplete);
+		const installCompleteListener = event => {
+			onComplete(event);
+		};
+
+		window.addEventListener('install-complete', installCompleteListener);
 		return () => {
-			window.removeEventListener('install-complete', onComplete);
+			window.removeEventListener('install-complete', installCompleteListener);
 		};
 	}, []);
 
@@ -121,68 +159,68 @@ function SelectFramework()
 					<h2>Select a Framework:</h2>
 					<div className='inset row icons'>
 						<div className='column center'>
-							<a onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5'))}>
+							<PopupLink path = "install-demo.html?framework=cakephp-5">
 								<img src = {cakePhpIcon} alt = "cakephp 5" />
-							</a>
+							</PopupLink>
 							{cakeInstalled && (<span className = "contents">
-								<button onClick = { () => window.open('/php-wasm/cgi-bin/cakephp-5')}>Open Demo</button>
-								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/cakephp-5/README.md'))}>IDE</button>
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5&overwrite=true'))}>Reset</button>
+								<PopupButton path = {basePath('cgi-bin/cakephp-5')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/cakephp-5/README.md">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=cakephp-5&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{cakeInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=cakephp-5'))}>Start</button>
+								<PopupButton path = "install-demo.html?framework=cakephp-5">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4'))}>
+							<PopupLink path = "install-demo.html?framework=codeigniter-4">
 								<img src = {codeIgniterIcon} alt = "codeigniter 4" />
-							</a>
+							</PopupLink>
 							{codeigniterInstalled && (<span className = "contents">
-								<button onClick = { () => window.open('/php-wasm/cgi-bin/codeigniter-4')}>Open Demo</button>
-								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/codeigniter-4/README.md'))}>IDE</button>
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4&overwrite=true'))}>Reset</button>
+								<PopupButton path = {basePath('cgi-bin/codeigniter-4')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/codeigniter-4/README.md">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=codeigniter-4&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{codeigniterInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=codeigniter-4'))}>Start</button>
+								<PopupButton path = "install-demo.html?framework=codeigniter-4">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7'))}>
+							<PopupLink path = "install-demo.html?framework=drupal-7">
 								<img src = {drupalIcon} alt = "drupal 7" /> {drupalInstalled}
-							</a>
+							</PopupLink>
 							{drupalInstalled && (<span className = "contents">
-								<button onClick = { () => window.open('/php-wasm/cgi-bin/drupal')}>Open Demo</button>
-								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/drupal-7.95/README.txt'))}>IDE</button>
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7&overwrite=true'))}>Reset</button>
+								<PopupButton path = {basePath('cgi-bin/drupal')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/drupal-7.95/README.txt">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=drupal-7&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=drupal-7'))}>Start</button>
+								<PopupButton path = "install-demo.html?framework=drupal-7">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11'))}>
+							<PopupLink path = "install-demo.html?framework=laravel-11">
 								<img src = {laravelIcon} alt = "laravel 11" />
-							</a>
+							</PopupLink>
 							{laravelInstalled && (<span className = "contents">
-								<button onClick = { () => window.open('/php-wasm/cgi-bin/laravel-11')}>Open Demo</button>
-								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/laravel-11/README.md'))}>IDE</button>
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11&overwrite=true'))}>Reset</button>
+								<PopupButton path = {basePath('cgi-bin/laravel-11')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/laravel-11/README.md">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=laravel-11&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{laravelInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=laravel-11'))}>Start</button>
+								<PopupButton path = "install-demo.html?framework=laravel-11">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>
-							<a onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3'))} >
+							<PopupLink path = "install-demo.html?framework=laminas-3">
 								<img src = {laminasIcon} alt = "laminas 3" />
-							</a>
+							</PopupLink>
 							{laminasInstalled && (<span className = "contents">
-								<button onClick = { () => window.open('/php-wasm/cgi-bin/laminas-3')}>Open Demo</button>
-								<button onClick = { () => window.open(basePath('code-editor.html?path=/persist/laminas-3/README.md'))}>IDE</button>
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3&overwrite=true'))}>Reset</button>
+								<PopupButton path = {basePath('cgi-bin/laminas-3')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/laminas-3/README.md">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=laminas-3&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{laminasInstalled || (<span className = "contents">
-								<button onClick = { () => window.open(basePath('install-demo.html?framework=laminas-3'))}>Start</button>
+								<PopupButton path = "install-demo.html?framework=laminas-3">Start</PopupButton>
 							</span>)}
 						</div>
 					</div>
@@ -207,12 +245,12 @@ function SelectFramework()
 						</div>
 					</>}
 					{isIframe && <div className = "inset center">
-						<h2 style = {{marginBottom: "0"}}><a
+						<h2 style = {{marginBottom: "0"}}><PopupLink
 							style = {{padding: "1rem"}}
-							href = "#"
-							onClick = {() => window.open(basePath())}>
+							path = ""
+						>
 							Open Full Demo
-						</a></h2>
+						</PopupLink></h2>
 					</div>}
 				</div>
 			</div>

@@ -1,11 +1,10 @@
 import './Embedded.css';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import AceEditor from 'react-ace';
 
 import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
-import { createRoot } from 'react-dom/client';
 import Confirm from './Confirm';
 import { basePath, buildType, defaultPhpVersion } from './runtimePaths';
 import 'ace-builds/src-noconflict/mode-php';
@@ -14,7 +13,9 @@ import 'ace-builds/src-noconflict/theme-monokai';
 // import yaml from 'php-wasm-yaml';
 import sdl from 'php-wasm-sdl';
 
-const sharedLibs = [];
+const baseSharedLibs = [];
+const canToggleExtensions = buildType === 'dynamic';
+const toggleableModules = {};
 
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
@@ -22,34 +23,25 @@ const files = [
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
 
-let canToggleExtensions = false;
-const toggleable = {};
-
 if(buildType === 'dynamic')
 {
-	canToggleExtensions = true;
-
-	toggleable['dom']       = {active: false, module: import('php-wasm-dom')};
-	toggleable['gd']        = {active: false, module: import('php-wasm-gd')};
-	toggleable['iconv']     = {active: false, module: import('php-wasm-iconv')};
-	toggleable['intl']      = {active: false, module: import('php-wasm-intl')};
-	toggleable['libxml']    = {active: false, module: import('php-wasm-libxml')};
-	toggleable['yaml']      = {active: false, module: import('php-wasm-yaml')};
-	toggleable['libzip']    = {active: false, module: import('php-wasm-libzip')};
-	toggleable['mbstring']  = {active: false, module: import('php-wasm-mbstring')};
-	toggleable['openssl']   = {active: false, module: import('php-wasm-openssl')};
-	toggleable['simplexml'] = {active: false, module: import('php-wasm-simplexml')};
-	toggleable['sqlite']    = {active: false, module: import('php-wasm-sqlite')};
-	toggleable['xml']       = {active: false, module: import('php-wasm-xml')};
-	toggleable['zlib']      = {active: false, module: import('php-wasm-zlib')};
-
-	sharedLibs.push(...(await Promise.all(
-		Object.values(toggleable).filter(t => t.active).map(t => t.module)
-	)).map(m => m.default));
+	toggleableModules['dom']       = import('php-wasm-dom');
+	toggleableModules['gd']        = import('php-wasm-gd');
+	toggleableModules['iconv']     = import('php-wasm-iconv');
+	toggleableModules['intl']      = import('php-wasm-intl');
+	toggleableModules['libxml']    = import('php-wasm-libxml');
+	toggleableModules['yaml']      = import('php-wasm-yaml');
+	toggleableModules['libzip']    = import('php-wasm-libzip');
+	toggleableModules['mbstring']  = import('php-wasm-mbstring');
+	toggleableModules['openssl']   = import('php-wasm-openssl');
+	toggleableModules['simplexml'] = import('php-wasm-simplexml');
+	toggleableModules['sqlite']    = import('php-wasm-sqlite');
+	toggleableModules['xml']       = import('php-wasm-xml');
+	toggleableModules['zlib']      = import('php-wasm-zlib');
 }
 else if(buildType === 'shared')
 {
-	sharedLibs.push(
+	baseSharedLibs.push(
 		{name: 'libxml2.so',     url: new URL('php-wasm-libxml/libxml2.so',    import.meta.url)}
 		, {name: 'libz.so',        url: new URL('php-wasm-zlib/libz.so',         import.meta.url)}
 		, {name: 'libzip.so',      url: new URL('php-wasm-libzip/libzip.so',     import.meta.url)}
@@ -78,9 +70,9 @@ else if(buildType === 'shared')
 }
 else
 {
-	sharedLibs.push(
-		{name: 'libcrypto.so', url: (new URL('php-wasm-openssl/libcrypto.so', import.meta.url))}
-		, {name: 'libssl.so',    url: (new URL('php-wasm-openssl/libssl.so', import.meta.url))}
+	baseSharedLibs.push(
+		{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
+		, {name: 'libssl.so',    url: new URL('php-wasm-openssl/libssl.so', import.meta.url)}
 	);
 }
 
@@ -98,32 +90,56 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
+const parseDemoSettings = phpCode => {
+	const firstLine = String(phpCode.split(/\n/).shift());
+	const settings = {};
+
+	try
+	{
+		Object.assign(settings, JSON.parse(firstLine.split('//').pop()));
+	}
+	catch
+	{}
+
+	return settings;
+};
+
 function Embedded()
 {
-	const init = useRef(false);
 	const phpRef = useRef(null);
-	const inputBox = useRef(null);
+	const runtimeCleanup = useRef(null);
 	const selectDemoBox = useRef(null);
 	const selectVersionBox = useRef(null);
 	const selectVariantBox = useRef(null);
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
-	const input = useRef('');
+	const initialQueryCode = useMemo(
+		() => decodeURIComponent((new URLSearchParams(window.location.search)).get('code') || '')
+		, []
+	);
+	const input = useRef(initialQueryCode);
 	const persist = useRef('');
-	const single  = useRef('');
+	const single = useRef('');
 	const canvasCheckbox = useRef('');
-	const canvas  = useRef(null);
-	// const stdin  = useRef('');
+	const canvas = useRef(null);
+	const sharedLibs = useRef([...baseSharedLibs]);
+	const [extensionsAvailable, setExtensionsAvailable] = useState(0);
+	const [extensionsEnabled, setExtensionsEnabled] = useState(0);
+
+	const toggleable = useRef(Object.fromEntries(
+		Object.entries(toggleableModules).map(([name, module]) => [name, {active: false, module}])
+	));
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
+	const [editorValue, setEditorValue] = useState(initialQueryCode);
 	const [exitCode, setExitCode] = useState('');
 	const [stdOut, setStdOut] = useState('');
 	const [stdErr, setStdErr] = useState('');
 	const [stdRet, setStdRet] = useState('');
 	const [overlay, setOverlay] = useState(null);
-	const [isIframe, /*setIsIframe*/] = useState(!!Number(query.get('iframed')));
+	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const [showCanvas, setShowCanvas] = useState(true);
 
 	const [running, setRunning] = useState(false);
@@ -131,27 +147,40 @@ function Embedded()
 	const [outputMode, setOutputMode] = useState('');
 	const [statusMessage, setStatusMessage] = useState('php-wasm');
 
-	const onOutput = event => setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
-	const onError  = event => setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
+	const onOutput = useCallback(event => {
+		setStdOut(stdOut => String(stdOut || '') + event.detail.join(''));
+	}, []);
+
+	const onError = useCallback(event => {
+		setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
+	}, []);
+
+	const disposePhp = useCallback(() => {
+		if(runtimeCleanup.current)
+		{
+			runtimeCleanup.current();
+			runtimeCleanup.current = null;
+		}
+
+		phpRef.current = null;
+	}, []);
 
 	const refreshPhp = useCallback(() => {
-		const version = (selectVersionBox.current ? selectVersionBox.current.value : null)
-			?? defaultPhpVersion;
+		disposePhp();
 
-		const variant = (selectVariantBox.current ? selectVariantBox.current.value : null)
-			?? '';
-
-		const _sharedLibs = [...sharedLibs];
+		const version = selectVersionBox.current?.value ?? defaultPhpVersion;
+		const variant = selectVariantBox.current?.value ?? '';
+		const runtimeSharedLibs = [...sharedLibs.current];
 
 		if(variant === '_sdl' && buildType === 'dynamic')
 		{
-			_sharedLibs.push(sdl);
+			runtimeSharedLibs.push(sdl);
 		}
 
-		phpRef.current = new PhpWeb({
+		const php = new PhpWeb({
 			version
 			, variant
-			, sharedLibs: _sharedLibs
+			, sharedLibs: runtimeSharedLibs
 			, dynamicLibs
 			, files
 			, ini
@@ -160,60 +189,70 @@ function Embedded()
 			, canvas: canvas.current
 		});
 
-		const php = phpRef.current;
-
+		phpRef.current = php;
 		php.addEventListener('output', onOutput);
 		php.addEventListener('error', onError);
 
-		return () => {
+		runtimeCleanup.current = () => {
 			php.removeEventListener('output', onOutput);
 			php.removeEventListener('error', onError);
 		};
-	}, []);
+
+		return php;
+	}, [disposePhp, onError, onOutput]);
 
 	const loadExtensions = useCallback(async () => {
-		if(!canToggleExtensions) return;
+		if(!canToggleExtensions)
+		{
+			return;
+		}
+
 		const defaultExtensions = query.has('extensionFlags')
 			? Number(query.get('extensionFlags'))
 			: 0x1FDF;
 
-		let i = 0;
-		const toggleableList = Object.values(toggleable);
-		while(i < toggleableList.length)
+		let index = 0;
+		let enabled = 0;
+		for(const toggle of Object.values(toggleable.current))
 		{
-			toggleableList[i].active = !!(defaultExtensions & 2**i);
-			i++;
+			toggle.active = !!(defaultExtensions & 2**index);
+			index++;
+
+			if(toggle.active) enabled++;
 		}
 
-		sharedLibs.length = 0;
+		setExtensionsAvailable(index);
+		setExtensionsEnabled(enabled);
 
-		sharedLibs.push(...(await Promise.all(
-			Object.values(toggleable).filter(t => t.active).map(t => t.module)
-		)).map(m => m.default));
+		sharedLibs.current = (await Promise.all(
+			Object.values(toggleable.current)
+				.filter(toggle => toggle.active)
+				.map(toggle => toggle.module)
+		)).map(module => module.default);
 	}, [query]);
 
-	useEffect(() => {
-		persist.current.checked = !!Number(query.get('persist') ?? '');
-		single.current.checked = !!Number(query.get('single-expression') ?? '');
-		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
-		selectVariantBox.current.value = query.get('variant') ?? '';
+	const applySettings = useCallback(settings => {
+		persist.current.checked = settings.persist ?? persist.current.checked;
+		single.current.checked = settings['single-expression'] ?? single.current.checked;
+		canvasCheckbox.current.checked = settings['canvas'] ?? canvasCheckbox.current.checked;
+		selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
+		selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
-		if(!init.current && !query.has('demo'))
+		setOutputMode(single.current.checked ? 'single' : 'normal');
+		setShowCanvas(canvasCheckbox.current.checked);
+
+		if(settings['render-as'])
 		{
-			(async () => {
-				await loadExtensions();
-				refreshPhp();
-			})();
+			setDisplayMode(settings['render-as']);
+			htmlRadio.current.checked = settings['render-as'] === 'html';
+			textRadio.current.checked = settings['render-as'] !== 'html';
 		}
+	}, []);
 
-		init.current = true;
-
-	}, [refreshPhp, query, loadExtensions]);
-
-	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
-	const canvasChanged = () => setShowCanvas(canvasCheckbox.current.checked);
-	const formatSelected = event => setDisplayMode(event.target.value);
-	const codeChanged = newValue => input.current = newValue;
+	const codeChanged = useCallback(newValue => {
+		input.current = newValue;
+		setEditorValue(newValue);
+	}, []);
 
 	const refreshMem = useCallback(async () => {
 		await phpRef.current.refresh();
@@ -221,7 +260,6 @@ function Embedded()
 
 	const runCode = useCallback(async () => {
 		setRunning(true);
-
 		setStatusMessage('Executing...');
 
 		if(!persist.current.checked)
@@ -232,7 +270,7 @@ function Embedded()
 
 		setStdRet('');
 
-		let code = editor.current.editor.getValue();
+		let code = editor.current?.editor?.getValue() ?? input.current ?? editorValue;
 
 		const version = selectVersionBox.current?.value;
 		const variant = selectVariantBox.current?.value;
@@ -277,43 +315,43 @@ function Embedded()
 				setStatusMessage('php-wasm ready!');
 				setRunning(false);
 			}
-		}
-		else
-		{
-			try
-			{
-				const exitCode = await phpRef.current.run(code);
-				setExitCode(exitCode);
-				if(!persist.current.checked)
-				{
-					await phpRef.current.refresh();
-				}
-			}
-			catch(error)
-			{
-				console.error(error);
-			}
-			finally
-			{
-				setStatusMessage('php-wasm ready!');
-				setRunning(false);
-			}
-		}
-	}, [query]);
 
-	const loadDemo = useCallback(demoName => {
+			return;
+		}
+
+		try
+		{
+			const nextExitCode = await phpRef.current.run(code);
+			setExitCode(nextExitCode);
+			if(!persist.current.checked)
+			{
+				await phpRef.current.refresh();
+			}
+		}
+		catch(error)
+		{
+			console.error(error);
+		}
+		finally
+		{
+			setStatusMessage('php-wasm ready!');
+			setRunning(false);
+		}
+	}, [editorValue, query]);
+
+	const loadDemo = useCallback(async demoName => {
 		if(!demoName)
 		{
 			refreshPhp();
-			runCode();
+			await runCode();
 			return;
 		}
 
 		if(demoName === 'drupal.php')
 		{
 			setOverlay(<Confirm
-				onConfirm = { () => window.location = basePath('select-framework.html') }
-				onCancel = { () => setOverlay(null) }
+				onConfirm = {() => window.location = basePath('select-framework.html')}
+				onCancel = {() => setOverlay(null)}
 				message = {(
 					<span>The Drupal demo has been moved into the <b>php-cgi-wasm</b> demo. Would you like to go there now?</span>
 				)}
@@ -322,179 +360,152 @@ function Embedded()
 		}
 
 		setRunning(true);
-
 		setStdOut('');
 		setStdErr('');
 		setStdRet('');
 
-		fetch(basePath(`scripts/${demoName}`))
-		.then(response => response.text())
-		.then(async phpCode => {
-			editor.current.editor.setValue(phpCode, -1);
+		const phpCode = await (await fetch(basePath(`scripts/${demoName}`))).text();
+		const settings = parseDemoSettings(phpCode);
 
-			document.querySelector('#example').innerHTML = '';
-			const firstLine = String(phpCode.split(/\n/).shift());
-			const settings  = JSON.parse(firstLine.split('//').pop()) || {};
+		input.current = phpCode;
+		setEditorValue(phpCode);
+		document.querySelector('#example').innerHTML = '';
 
-			persist.current.checked = settings.persist ?? persist.current.checked;
-			single.current.checked = settings['single-expression'] ?? single.current.checked;
-			canvasCheckbox.current.checked = settings['canvas'] ?? false;
-			selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
-			selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
+		applySettings(settings);
 
-			if(settings['render-as'])
-			{
-				setDisplayMode(settings['render-as']);
-				htmlRadio.current.checked = settings['render-as'] === 'html';
-				textRadio.current.checked = settings['render-as'] !== 'html';
-			}
+		query.set('persist', persist.current.checked ? 1 : 0);
+		query.set('single-expression', single.current.checked ? 1 : 0);
 
-			query.set('persist', persist.current.checked ? 1 : 0);
-			query.set('single-expression', single.current.checked ? 1 : 0);
-
-			if('extensionFlags' in settings)
-			{
-				query.set('extensionFlags', settings.extensionFlags);
-			}
-
-			if(phpCode.length < 1024)
-			{
-				query.set('code', encodeURIComponent(phpCode));
-			}
-
-			window.history.replaceState({}, document.title, "?" + query.toString());
-
-			phpRef.current && await phpRef.current.refresh();
-			await loadExtensions();
-			refreshPhp();
-
-			if(settings.autorun)
-			{
-				setStatusMessage('Executing...');
-				runCode();
-			}
-
-			setShowCanvas(canvasCheckbox.current.checked);
-			setOutputMode(single.current.checked ? 'single' : 'normal');
-		});
-	}, [query, refreshPhp, runCode, loadExtensions]);
-
-	useEffect(() => {
-		if(inputBox.current)
+		if('extensionFlags' in settings)
 		{
-			return;
+			query.set('extensionFlags', settings.extensionFlags);
 		}
 
-		inputBox.current = document.getElementById('input-box');
-
-		const inputRoot = createRoot(inputBox.current);
-		const queryCode = query.get('code') || '';
-
-		const decodedCode = decodeURIComponent(queryCode);
-
-		input.current = decodedCode;
-		inputRoot.render(
-			<AceEditor
-				mode = "php"
-				theme = "monokai"
-				onChange = {codeChanged}
-				name = "input"
-				width = "100%"
-				height = "100%"
-				ref = {editor}
-				value = {decodedCode}
-			/>
-		);
-		const firstLine = String(decodedCode.split(/\n/).shift());
-		const settings  = {};
-
-		try
+		if(phpCode.length < 1024)
 		{
-			Object.assign(settings, JSON.parse(firstLine.split('//').pop()));
-		}
-		catch
-		{}
-
-		persist.current.checked = settings.persist ?? persist.current.checked;
-		single.current.checked = settings['single-expression'] ?? single.current.checked;
-		canvasCheckbox.current.checked = settings['canvas'] ?? canvasCheckbox.current.checked;
-
-		setOutputMode(single.current.checked ? 'single' : 'normal');
-		setShowCanvas(canvasCheckbox.current.checked);
-
-		if(settings['render-as'])
-		{
-			setDisplayMode(settings['render-as']);
-
-			htmlRadio.current.checked = settings['render-as'] === 'html';
-			textRadio.current.checked = settings['render-as'] !== 'html';
+			query.set('code', encodeURIComponent(phpCode));
 		}
 
-		if(editor.current && query.has('code'))
+		window.history.replaceState({}, document.title, "?" + query.toString());
+
+		if(phpRef.current)
 		{
-			editor.current.editor.setValue(query.has('code'), -1);
+			await phpRef.current.refresh();
 		}
-		else if(query.has('demo'))
-		{
-			const demoName = query.get('demo');
-			selectDemoBox.current.value = demoName;
-			loadDemo(demoName);
-			query.delete('demo');
-		}
+
+		await loadExtensions();
+		refreshPhp();
 
 		if(settings.autorun)
 		{
-			setTimeout(runCode, 1);
+			setStatusMessage('Executing...');
+			await runCode();
 		}
-	}, [query, loadDemo, runCode]);
 
-	const demoSelected = () => loadDemo(selectDemoBox.current.value);
+		setShowCanvas(canvasCheckbox.current.checked);
+		setOutputMode(single.current.checked ? 'single' : 'normal');
+	}, [applySettings, loadExtensions, query, refreshPhp, runCode]);
+
+	const initializeEmbedded = useEffectEvent(async () => {
+		persist.current.checked = !!Number(query.get('persist') ?? '');
+		single.current.checked = !!Number(query.get('single-expression') ?? '');
+		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
+		selectVariantBox.current.value = query.get('variant') ?? '';
+
+		const settings = parseDemoSettings(initialQueryCode);
+		applySettings(settings);
+
+		if(query.has('demo'))
+		{
+			const demoName = query.get('demo');
+			selectDemoBox.current.value = demoName;
+			query.delete('demo');
+			await loadDemo(demoName);
+			return;
+		}
+
+		await loadExtensions();
+		refreshPhp();
+
+		if(settings.autorun)
+		{
+			setTimeout(() => {
+				void runCode();
+			}, 1);
+		}
+	});
+
+	useEffect(() => {
+		void initializeEmbedded();
+		return () => {
+			disposePhp();
+		};
+	}, [disposePhp]);
+
+	const demoSelected = () => {
+		void loadDemo(selectDemoBox.current.value);
+	};
 
 	useEffect(() => {
 		const onKeyDown = event => {
 			if(event.key === 'Enter' && event.ctrlKey)
 			{
-				runCode();
-				return;
+				void runCode();
 			}
 		};
+
 		window.addEventListener('keydown', onKeyDown);
 		return () => {
 			window.removeEventListener('keydown', onKeyDown);
 		};
-
 	}, [runCode]);
 
 	const openFile = async event => {
 		const file = event.target.files[0];
-		editor.current.editor.setValue(await file.text(), -1);;
+
+		if(!file)
+		{
+			return;
+		}
+
+		const contents = await file.text();
+		input.current = contents;
+		setEditorValue(contents);
 	};
 
 	const toggleExtension = async (event, name) => {
-		if(!canToggleExtensions) return;
-		if(!toggleable[name])
+		if(!canToggleExtensions)
+		{
+			return;
+		}
+
+		if(!toggleable.current[name])
 		{
 			console.warn(`${name} is not a valid extension name`);
 			return;
 		}
 
-		toggleable[name].active = event.target.checked;
+		toggleable.current[name].active = event.target.checked;
 
-		sharedLibs.length = 0;
-
-		sharedLibs.push(...(await Promise.all(
-			Object.values(toggleable).filter(t => t.active).map(t => t.module)
-		)).map(m => m.default));
+		sharedLibs.current = (await Promise.all(
+			Object.values(toggleable.current)
+				.filter(toggle => toggle.active)
+				.map(toggle => toggle.module)
+		)).map(module => module.default);
 	};
 
 	const showExtensionDialog = () => {
-		if(!canToggleExtensions) return;
+		if(!canToggleExtensions)
+		{
+			return;
+		}
+
 		setOverlay(
 			<div className = "toggleExtensions">
 				<div className='bevel'>
-					{Object.entries(toggleable).map(([name, t]) => {
+					{Object.entries(toggleable.current).map(([name, toggle]) => {
 						return <label key = {name} style = {{display: 'block'}}>
-							<input type = "checkbox" defaultChecked = {t.active} onChange={event => toggleExtension(event, name)}/>
+							<input type = "checkbox" defaultChecked = {toggle.active} onChange={event => toggleExtension(event, name)}/>
 							{name}
 						</label>;
 					})}
@@ -507,10 +518,14 @@ function Embedded()
 	};
 
 	const closeExtensionsDialog = async () => {
-		if(!canToggleExtensions) return;
-		const extensionFlags = Object.values(toggleable)
-		.map((t, k) => !!t.active << k)
-		.reduce((x, p) => x + p, 0);
+		if(!canToggleExtensions)
+		{
+			return;
+		}
+
+		const extensionFlags = Object.values(toggleable.current)
+			.map((toggle, index) => !!toggle.active << index)
+			.reduce((value, next) => value + next, 0);
 
 		query.set('extensionFlags', extensionFlags);
 
@@ -519,17 +534,21 @@ function Embedded()
 		setStdErr('');
 		await loadExtensions();
 		refreshPhp();
-		runCode();
+		await runCode();
 	};
+
+	const singleChanged = () => setOutputMode(single.current.checked ? 'single' : 'normal');
+	const canvasChanged = () => setShowCanvas(canvasCheckbox.current.checked);
+	const formatSelected = event => setDisplayMode(event.target.value);
 
 	const topBar = (<div className = "row header toolbar">
 		<div className = "cols">
 			<div className = "row start selects">
 				{isIframe || <span className = "contents">
-					<a href = { basePath() }>
+					<a href = {basePath()}>
 						<img src = "sean-icon.png" alt = "sean" />
 					</a>
-					<h1><a href = { basePath() }>php-wasm</a></h1>
+					<h1><a href = {basePath()}>php-wasm</a></h1>
 					<hr />
 				</span>}
 				<label>
@@ -586,7 +605,9 @@ function Embedded()
 					</label>
 					{canToggleExtensions && (<label>
 						<span>&nbsp;</span>
-						<button data-toggle-extensions onClick = {showExtensionDialog}>extensions</button>
+						<button data-toggle-extensions onClick = {showExtensionDialog}>
+							extensions ({extensionsEnabled}/{extensionsAvailable})
+						</button>
 					</label>)}
 				</div>
 			</div>
@@ -608,20 +629,20 @@ function Embedded()
 			<div className = "rows spread">
 				<label>
 					<span>Persist Memory</span>
-					<input type = "checkbox" id = "persist" ref = { persist } />
+					<input type = "checkbox" id = "persist" ref = {persist} />
 				</label>
 				<label>
 					<span>Single Expression</span>
-					<input type = "checkbox" id = "singleExpression" ref = { single } onChange = {singleChanged} />
+					<input type = "checkbox" id = "singleExpression" ref = {single} onChange = {singleChanged} />
 				</label>
 				<label>
 					<span>Show Canvas</span>
-					<input type = "checkbox" id = "singleExpression" ref = { canvasCheckbox } onChange = {canvasChanged} />
+					<input type = "checkbox" id = "singleExpression" ref = {canvasCheckbox} onChange = {canvasChanged} />
 				</label>
 			</div>
 			<div className = "row">
-				<button data-ui data-refresh onClick = { refreshMem }><span>refresh</span></button>
-				<button data-ui data-run onClick = { runCode }><span>run</span></button>
+				<button data-ui data-refresh onClick = {refreshMem}><span>refresh</span></button>
+				<button data-ui data-run onClick = {runCode}><span>run</span></button>
 			</div>
 		</div>
 	</div>);
@@ -635,7 +656,7 @@ function Embedded()
 		<div></div>
 	</div>);
 
-	return (<div className="Embedded margined" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1: 0} data-iframed = {isIframe ? 1 : 0}>
+	return (<div className="Embedded margined" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1 : 0} data-iframed = {isIframe ? 1 : 0}>
 		<div className='bevel column'>
 			{topBar}
 			<div className = "row body">
@@ -645,11 +666,22 @@ function Embedded()
 							<label tabIndex="-1">
 								<img src = "php.png" alt = "php" /> <span>PHP Code</span>
 							</label>
-							<label id = "openFile" className = "collapse"tabIndex="-1">
+							<label id = "openFile" className = "collapse" tabIndex="-1">
 								open file<input type = "file" accept=".php" onChange = {openFile} />
 							</label>
 						</div>
-						<div className = "liquid" id = "input-box"></div>
+						<div className = "liquid" id = "input-box">
+							<AceEditor
+								height = "100%"
+								mode = "php"
+								name = "input"
+								onChange = {codeChanged}
+								ref = {editor}
+								theme = "monokai"
+								value = {editorValue}
+								width = "100%"
+							/>
+						</div>
 					</div>
 				</div>
 

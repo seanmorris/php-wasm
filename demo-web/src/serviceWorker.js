@@ -1,28 +1,80 @@
 import { basePath, baseUrlFor } from './runtimePaths';
 
-export const ensureServiceWorker = async () => {
+export const serviceWorkerControlTimeoutMs = 1500;
+
+export const ensureServiceWorker = async ({timeoutMs = serviceWorkerControlTimeoutMs} = {}) => {
 	if(!('serviceWorker' in navigator))
 	{
-		return false;
+		return {
+			supported: false
+			, registered: false
+			, controlled: false
+			, controller: null
+			, controlSource: 'unsupported'
+			, error: null
+			, registration: null
+		};
 	}
 
-	await navigator.serviceWorker.register(basePath('cgi-worker.js'), {
-		type: 'module'
-		, scope: basePath()
-	});
-	await navigator.serviceWorker.getRegistration(baseUrlFor().toString());
-	await navigator.serviceWorker.ready;
+	try
+	{
+		const registration = await navigator.serviceWorker.register(basePath('cgi-worker.js'), {
+			type: 'module'
+			, scope: basePath()
+		});
+		await navigator.serviceWorker.getRegistration(baseUrlFor().toString());
+		await navigator.serviceWorker.ready;
 
-	await new Promise(resolve => {
 		if(navigator.serviceWorker.controller)
 		{
-			return resolve();
+			return {
+				supported: true
+				, registered: true
+				, controlled: true
+				, controller: navigator.serviceWorker.controller
+				, controlSource: 'existing'
+				, error: null
+				, registration
+			};
 		}
 
-		navigator.serviceWorker.addEventListener('controllerchange', () => resolve(), {
-			once: true
-		});
-	});
+		const controlled = await new Promise(resolve => {
+			const onControllerChange = () => {
+				clearTimeout(timeout);
+				navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+				resolve(true);
+			};
 
-	return !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+			const timeout = setTimeout(() => {
+				navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+				resolve(false);
+			}, timeoutMs);
+
+			navigator.serviceWorker.addEventListener('controllerchange', onControllerChange, {
+				once: true
+			});
+		});
+
+		return {
+			supported: true
+			, registered: true
+			, controlled
+			, controller: navigator.serviceWorker.controller ?? null
+			, controlSource: controlled ? 'controllerchange' : 'timeout'
+			, error: null
+			, registration
+		};
+	}
+	catch(error)
+	{
+		return {
+			supported: true
+			, registered: false
+			, controlled: false
+			, controller: navigator.serviceWorker?.controller ?? null
+			, controlSource: 'error'
+			, error
+			, registration: null
+		};
+	}
 };

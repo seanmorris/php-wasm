@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import { forwardRef, useCallback, useEffect, useEffectEvent, useImperativeHandle, useRef, useState } from 'react';
 import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import { PGlite } from '@electric-sql/pglite';
 
@@ -29,7 +29,7 @@ if(buildType === 'dynamic')
 		, import('php-wasm-xml')
 		, import('php-wasm-simplexml')
 		, import('php-wasm-yaml')
-	])).map(m => m.default));
+	])).map(module => module.default));
 }
 else if(buildType === 'shared')
 {
@@ -59,8 +59,8 @@ else if(buildType === 'shared')
 else
 {
 	sharedLibs.push(
-		{name: 'libcrypto.so', url: (new URL('php-wasm-openssl/libcrypto.so', import.meta.url))}
-		, {name: 'libssl.so',    url: (new URL('php-wasm-openssl/libssl.so',    import.meta.url))}
+		{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
+		, {name: 'libssl.so',    url: new URL('php-wasm-openssl/libssl.so', import.meta.url)}
 	);
 
 	// files.push({ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) });
@@ -77,26 +77,34 @@ const ini = `
 	expose_php=0
 `;
 
-const escapeHtml = s => s
+const escapeHtml = string => string
 	.replace(/&/g, "&amp;")
 	.replace(/</g, "&lt;")
 	.replace(/>/g, "&gt;")
 	.replace(/"/g, "&quot;")
 	.replace(/'/g, "&#039;");
 
-let lastCommand = null;
+const defaultInitCommands = [];
 
 export default forwardRef(function Debugger({
-	className = '', file, localEcho = true, initCommands = [], onStdIn
-	, setCurrentFile, setCurrentLine, setStatusMessage, setIsExecuting
-	, openFile, version = '8.3'
+	className = ''
+	, file
+	, initCommands = defaultInitCommands
+	, localEcho = true
+	, onStdIn
+	, setCurrentFile
+	, setCurrentLine
+	, setStatusMessage
+	, setIsExecuting
+	, openFile
+	, version = '8.3'
 }, ref) {
 	const phpRef = useRef(null);
 	const cmdStack = useRef(['']);
 	const cmdStackIndex = useRef(0);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
-	const init = useRef(true);
+	const timeout = useRef(null);
 
 	const [prompt, setPrompt] = useState(parser.toHtml(escapeHtml('\x1b[1mprompt> ')));
 	const [ready, setReady] = useState(false);
@@ -116,68 +124,213 @@ export default forwardRef(function Debugger({
 
 	const startPath = file;
 
-	useImperativeHandle(ref, () => ({
-		setBreakpoint (file, line) { runCommand(null, `b ${file}:${line}`, true); }
-		, clearBreakpoint (id) { runCommand(null, `b ~ ${id}`, true); }
-		, bpCount() { return phpRef.current.bpCount(); }
-		, run() { runCommand(null, `run`, true); }
-		, step() { runCommand(null, `step`, true); }
-		, continue() { runCommand(null, `continue`, true); }
-		, until() { runCommand(null, `until`, true); }
-		, next() { runCommand(null, `next`, true); }
-		, finish() { runCommand(null, `finish`, true); }
-		, leave() { runCommand(null, `leave`, true); }
-	}));
-
-	let timeout = null;
-
-	const scrollToEnd = () => {
-		if(!stdIn.current)
+	const scrollToEnd = useCallback(() => {
+		if(timeout.current)
 		{
-			return;
+			clearTimeout(timeout.current);
 		}
 
-		if(timeout)
-		{
-			clearTimeout(timeout);
-		}
+		timeout.current = setTimeout(() => {
+			if(stdIn.current)
+			{
+				stdIn.current.scrollIntoView({
+					behavior: 'smooth'
+				});
+				return;
+			}
 
-		timeout = setTimeout(() => stdIn.current.scrollIntoView({
-			behavior: 'smooth'
-		}), 32);
-	};
+			terminal.current?.scrollTo({
+				behavior: 'smooth'
+				, top: terminal.current.scrollHeight
+			});
+		}, 32);
+	}, []);
 
-	const onOutput = async event => {
+	const onOutput = useCallback(async event => {
 		const newOutput = event.detail.map(text => text
 			.replace('\n', '\u240A\n')
 			.replace('\r', '\u240D'));
 
 		const ansi = newOutput.map(line => {
 			return { type: 'stdout', text: parser.toHtml(escapeHtml(line)) };
-			// return { type: 'stdout', text: escapeHtml(line) }
 		});
 
 		setOutput(output => [...output, ...ansi]);
 		scrollToEnd();
-	};
+	}, [scrollToEnd]);
 
-	const onError  = async event => {
+	const onError = useCallback(async event => {
 		const newOutput = event.detail.map(text => text
 			.replace('\n', '\u240A\n')
 			.replace('\r', '\u240D'));
 
 		const ansi = newOutput.map(line => {
 			return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) };
-			// return { type: 'stderr', text: escapeHtml(line) }
 		});
 
 		setOutput(output => [...output, ...ansi]);
 		scrollToEnd();
-	};
+	}, [scrollToEnd]);
 
-	const refreshPhp = useCallback(init => {
+	const focusInput = useCallback(() => {
+		if(window.getSelection().toString() !== '')
+		{
+			return;
+		}
+
+		if(!phpRef.current?.interactive)
+		{
+			scrollToEnd();
+			return;
+		}
+
+		stdIn.current?.focus();
+	}, [scrollToEnd]);
+
+	const updateExecutionPanel = useCallback(async panel => {
+		const php = phpRef.current;
+
+		if(!php)
+		{
+			return;
+		}
+
+		switch(panel)
+		{
+			case undefined:
+			case 'variables':
+				setVariables(await php.dumpVars() || {});
+				setCurrentPanel('variables');
+				break;
+
+			case 'globals':
+				setGlobals(await php.dumpGlobals() || {});
+				setCurrentPanel('globals');
+				break;
+
+			case 'constants':
+				setConstants(await php.dumpConstants() || {});
+				setCurrentPanel('constants');
+				break;
+
+			case 'classes':
+				setUserClasses(await php.dumpClasses() || {});
+				setCurrentPanel('classes');
+				break;
+
+			case 'functions':
+				setFunctions(await php.dumpFunctions() || {});
+				setCurrentPanel('functions');
+				break;
+
+			case 'files':
+				setIncludedFiles(await php.dumpFiles() || []);
+				setCurrentPanel('files');
+				break;
+
+			case 'trace':
+			{
+				const oldFrame = await php.switchFrame(0);
+				setCurrentFrame(oldFrame);
+				setTrace(await php.dumpBacktrace() || []);
+				setCurrentPanel('trace');
+				php.switchFrame(oldFrame);
+				break;
+			}
+		}
+	}, []);
+
+	const runCommand = useCallback(async (event, command = null, silent = false) => {
+		const inputValue = command || stdIn.current?.value || '';
+		const php = phpRef.current;
+
+		if(!php)
+		{
+			return;
+		}
+
+		if(command === null && stdIn.current)
+		{
+			stdIn.current.value = '';
+		}
+
+		if(localEcho && !silent)
+		{
+			inputValue && cmdStack.current.push(inputValue);
+			setOutput(output => [...output, {
+				text: `<span>${prompt}</span><span>${inputValue}</span>`
+				, type: 'stdin'
+			}]);
+			scrollToEnd();
+		}
+
+		await php.provideInput(inputValue);
+
+		const isRunning = await php.isExecuting();
+
+		setIsExecuting && setIsExecuting(isRunning);
+
+		if(!silent)
+		{
+			stdIn.current?.focus();
+		}
+
+		if(isRunning)
+		{
+			if(currentPanel === 'none')
+			{
+				await updateExecutionPanel('variables');
+				return;
+			}
+
+			await updateExecutionPanel(currentPanel);
+			return;
+		}
+
+		setVariables({});
+		setGlobals({});
+		setConstants({});
+		setFunctions({});
+		setIncludedFiles([]);
+		setCurrentPanel('none');
+	}, [currentPanel, localEcho, prompt, scrollToEnd, setIsExecuting, updateExecutionPanel]);
+
+	useImperativeHandle(ref, () => ({
+		async setBreakpoint(file, line) {
+			await runCommand(null, `b ${file}:${line}`, true);
+			return phpRef.current?.bpCount?.() ?? 0;
+		}
+		, async clearBreakpoint(id) {
+			await runCommand(null, `b ~ ${id}`, true);
+		}
+		, bpCount() { return phpRef.current?.bpCount?.() ?? 0; }
+		, run() { void runCommand(null, `run`, true); }
+		, step() { void runCommand(null, `step`, true); }
+		, continue() { void runCommand(null, `continue`, true); }
+		, until() { void runCommand(null, `until`, true); }
+		, next() { void runCommand(null, `next`, true); }
+		, finish() { void runCommand(null, `finish`, true); }
+		, leave() { void runCommand(null, `leave`, true); }
+	}), [runCommand]);
+
+	const handleStdInRequest = useEffectEvent(async event => {
+		const php = phpRef.current;
+
+		if(!php)
+		{
+			return;
+		}
+
+		setCurrentFile && setCurrentFile(await php.currentFile());
+		setCurrentLine && setCurrentLine(await php.currentLine());
+		setPrompt(parser.toHtml(escapeHtml(await php.getPrompt())));
+		onStdIn && onStdIn(event);
+	});
+
+	useEffect(() => {
 		setStatusMessage && setStatusMessage('loading...');
-		phpRef.current = new PhpDbgWeb({
+
+		const php = new PhpDbgWeb({
 			version
 			, sharedLibs
 			, files
@@ -186,58 +339,72 @@ export default forwardRef(function Debugger({
 			, persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
 		});
 
-		const php = phpRef.current;
+		phpRef.current = php;
 
-		php.addEventListener('output', onOutput);
-		php.addEventListener('error', onError);
+		const outputListener = event => {
+			void onOutput(event);
+		};
+
+		const errorListener = event => {
+			void onError(event);
+		};
+
+		const stdinListener = event => {
+			void handleStdInRequest(event);
+		};
 
 		const firstInput = async () => {
+			const runStartupCommand = async command => {
+				await php.provideInput(command);
+				const isRunning = await php.isExecuting();
+				setIsExecuting && setIsExecuting(isRunning);
+			};
 
-			if(init && startPath)
+			if(startPath)
 			{
 				setReady(false);
-				await runCommand(null, `exec ${startPath}`);
+				await runStartupCommand(`exec ${startPath}`);
 			}
 
-			await Promise.all( initCommands.map(async cmd => runCommand(null, cmd, true)) );
+			for(const command of initCommands)
+			{
+				await runStartupCommand(command);
+			}
 
-			await runCommand(null, 'set pagination off', true);
+			await runStartupCommand('set pagination off');
 
 			setStatusMessage && setStatusMessage('php-dbg-wasm ready!');
 			setReady(true);
-			await new Promise(a => setTimeout(a, 10));
+			await new Promise(resolve => setTimeout(resolve, 10));
 			focusInput();
-		};
-
-		const onStdInHandler = async event => {
-			setCurrentFile && setCurrentFile( await php.currentFile() );
-			setCurrentLine && setCurrentLine( await php.currentLine() );
-			setPrompt( parser.toHtml(escapeHtml(await php.getPrompt())) );
-			onStdIn && onStdIn(event);
 		};
 
 		const once = {once: true};
 
-		php.addEventListener('stdin-request', onStdInHandler);
+		php.addEventListener('output', outputListener);
+		php.addEventListener('error', errorListener);
+		php.addEventListener('stdin-request', stdinListener);
 		php.addEventListener('stdin-request', firstInput, once);
-
 		php.run();
 
 		return () => {
-			php.removeEventListener('output', onOutput);
-			php.removeEventListener('error', onError);
-			php.removeEventListener('stdin-request', onStdInHandler);
-			php.removeEventListener('stdin-request', firstInput, once);
-		};
-	}, []);
+			if(timeout.current)
+			{
+				clearTimeout(timeout.current);
+				timeout.current = null;
+			}
 
-	useEffect(() => {
-		if(init.current)
-		{
-			refreshPhp(init.current);
-			init.current = false;
-		}
-	}, [refreshPhp, init]);
+			php.removeEventListener('output', outputListener);
+			php.removeEventListener('error', errorListener);
+			php.removeEventListener('stdin-request', stdinListener);
+			php.removeEventListener('stdin-request', firstInput, once);
+
+			if(phpRef.current === php)
+			{
+				phpRef.current = null;
+			}
+		};
+	}, [focusInput, initCommands, onError, onOutput, setIsExecuting, setStatusMessage, startPath, version]);
 
 	const checkEnter = async event => {
 		if(event.key === 'ArrowUp')
@@ -291,120 +458,11 @@ export default forwardRef(function Debugger({
 			cmdStackIndex.current = 0;
 			await runCommand();
 			event.preventDefault();
-			return;
-		}
-	};
-
-	const runCommand = async (event, command = null, silent = false) => {
-
-		const inputValue = command || stdIn.current.value || '';
-
-		if(!phpRef.current)
-		{
-			return;
-		}
-
-		if(command === null)
-		{
-			stdIn.current.value = '';
-		}
-
-		if(localEcho && !silent)
-		{
-			inputValue && cmdStack.current.push(inputValue);
-			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
-			scrollToEnd();
-		}
-
-		const php = phpRef.current;
-
-		await php.provideInput(inputValue);
-
-		const isRunning = await php.isExecuting();
-
-		setIsExecuting && setIsExecuting(isRunning);
-
-		if(!silent)
-		{
-			lastCommand = inputValue || lastCommand;
-
-			stdIn.current && stdIn.current.focus();
-		}
-
-		if(isRunning)
-		{
-			if(currentPanel === 'none')
-			{
-				setCurrentPanel('variables');
-				setVariables( await (await phpRef.current).dumpVars() || {} );
-			}
-
-			switch(currentPanel)
-			{
-				case 'variables':
-					setVariables( await (await phpRef.current).dumpVars() || {} );
-					break;
-
-				case 'globals':
-					setGlobals( await (await phpRef.current).dumpGlobals() || {} );
-					break;
-
-				case 'constants':
-					setConstants( await (await phpRef.current).dumpConstants() || {} );
-					break;
-
-				case 'classes':
-					setUserClasses( await (await phpRef.current).dumpClasses() || {} );
-					break;
-
-				case 'functions':
-					setFunctions( await (await phpRef.current).dumpFunctions() || {} );
-					break;
-
-				case 'files':
-					setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
-					break;
-
-				case 'trace':
-					const php = (await phpRef.current);
-					const oldFrame = await php.switchFrame(0);
-					setCurrentFrame(oldFrame);
-					setTrace( await (await phpRef.current).dumpBacktrace() || [] );
-					php.switchFrame(oldFrame);
-					break;
-			}
-		}
-		else
-		{
-			setVariables( {} );
-			setGlobals( {} );
-			setConstants( {} );
-			setFunctions( {} );
-			setIncludedFiles( [] );
-			setCurrentPanel('none');
-		}
-	};
-
-	const focusInput = () => {
-		if(window.getSelection().toString() !== '')
-		{
-			return;
-		}
-
-		if(!phpRef.current.interactive)
-		{
-			scrollToEnd();
-			return;
-		}
-		if(window.getSelection().toString() === '')
-		{
-			stdIn.current && stdIn.current.focus();
 		}
 	};
 
 	const handleTerminalClicked = () => {
-
-		if(!phpRef.current.interactive)
+		if(!phpRef.current?.interactive)
 		{
 			return;
 		}
@@ -416,11 +474,10 @@ export default forwardRef(function Debugger({
 		scrollToEnd();
 	};
 
-	const zvalViews = obj => {
-
+	const zvalViews = object => {
 		try
 		{
-			const entries = Object.entries(obj);
+			const entries = Object.entries(object);
 			return <div className = "phpdbg-zval">
 				{entries.map(zvalView)}
 			</div>;
@@ -428,62 +485,16 @@ export default forwardRef(function Debugger({
 		catch(error)
 		{
 			console.error(error);
-			console.warn(obj, 'returned duplicate keys');
+			console.warn(object, 'returned duplicate keys');
+			return null;
 		}
 	};
 
-	const zvalView = ([name, zv]) => {
+	const zvalView = ([name, zval]) => {
 		return <label key = {name}>
 			<div className='variable-name bevel'>{name}:&nbsp;</div>
-			<div className='variable-value'>{(zv && typeof zv === 'object') ? zvalViews(zv) : String(zv)}</div>
+			<div className='variable-value'>{(zval && typeof zval === 'object') ? zvalViews(zval) : String(zval)}</div>
 		</label>;
-	};
-
-	const switchRightPanel = async panel => {
-		switch(panel)
-		{
-			case undefined:
-			case 'variables':
-				setVariables( await (await phpRef.current).dumpVars() || {} );
-				setCurrentPanel('variables');
-				break;
-
-			case 'globals':
-				setGlobals( await (await phpRef.current).dumpGlobals() || {} );
-				setCurrentPanel('globals');
-				break;
-
-			case 'constants':
-				setConstants( await (await phpRef.current).dumpConstants() || {} );
-				setCurrentPanel('constants');
-				break;
-
-			case 'classes':
-				console.log( await (await phpRef.current).dumpClasses() || {} );
-				setUserClasses( await (await phpRef.current).dumpClasses() || {} );
-				setCurrentPanel('classes');
-				break;
-
-			case 'functions':
-				setFunctions( await (await phpRef.current).dumpFunctions() || {} );
-				setCurrentPanel('functions');
-				break;
-
-			case 'files':
-				setIncludedFiles( await (await phpRef.current).dumpFiles() || [] );
-				setCurrentPanel('files');
-				break;
-
-			case 'trace':
-				const php = (await phpRef.current);
-				const oldFrame = await php.switchFrame(0);
-				console.log(oldFrame);
-				setCurrentFrame(oldFrame);
-				setTrace( await (await phpRef.current).dumpBacktrace() || [] );
-				setCurrentPanel('trace');
-				php.switchFrame(oldFrame);
-				break;
-		}
 	};
 
 	return (<div className={'phpdbg ' + className}>
@@ -504,13 +515,13 @@ export default forwardRef(function Debugger({
 		</div>
 		<div className='phpdbg-right-panel' data-current-panel = {currentPanel}>
 			<div className = "row toolbar tight">
-				<button onClick = {async () => switchRightPanel('variables')}>vars</button>
-				<button onClick = {async () => switchRightPanel('globals')}>globals</button>
-				<button onClick = {async () => switchRightPanel('constants')}>constants</button>
-				<button onClick = {async () => switchRightPanel('classes')}>classes</button>
-				<button onClick = {async () => switchRightPanel('functions')}>functions</button>
-				<button onClick = {async () => switchRightPanel('files')}>files</button>
-				<button onClick = {async () => switchRightPanel('trace')}>trace</button>
+				<button onClick = {() => updateExecutionPanel('variables')}>vars</button>
+				<button onClick = {() => updateExecutionPanel('globals')}>globals</button>
+				<button onClick = {() => updateExecutionPanel('constants')}>constants</button>
+				<button onClick = {() => updateExecutionPanel('classes')}>classes</button>
+				<button onClick = {() => updateExecutionPanel('functions')}>functions</button>
+				<button onClick = {() => updateExecutionPanel('files')}>files</button>
+				<button onClick = {() => updateExecutionPanel('trace')}>trace</button>
 			</div>
 			<div className='phpdbg-panel-frame inset'>
 				<div className='phpdbg-panel-frame-inner'>
@@ -524,14 +535,14 @@ export default forwardRef(function Debugger({
 						{zvalViews(constants)}
 					</div>
 					<div className='phpdbg-panel phpdbg-classes'>
-						{Object.entries(userClasses).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name,func]) => {
+						{Object.entries(userClasses).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name, func]) => {
 							return <div key={name} title = {func.filename + ':' + func.lineNo} onClick = {() => openFile(func.filename, func.lineNo)}>
 								<span>{name} <span className='filename'>{String(func.filename).split('/').pop()}:{func.lineNo}</span></span>
 							</div>;
 						})}
 					</div>
 					<div className='phpdbg-panel phpdbg-functions'>
-						{Object.entries(functions).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name,func]) => {
+						{Object.entries(functions).sort((a, b) => String(a[0]).localeCompare(b[0])).map(([name, func]) => {
 							return <div key={name} title = {func.filename + ':' + func.lineNo} onClick = {() => openFile(func.filename, func.lineNo)}>
 								<span>{name} <span className='filename'>{String(func.filename).split('/').pop()}:{func.lineNo}</span></span>
 							</div>;

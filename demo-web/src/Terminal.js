@@ -9,10 +9,13 @@ import { buildType } from './runtimePaths';
 // import libxml from 'php-wasm-libxml';
 
 const parser = new Convert();
+const noop = () => {};
 
 const defaultSharedLibs = [
 	// libxml
 ];
+
+const emptySharedLibs = [];
 
 if(buildType === 'dynamic')
 {
@@ -31,7 +34,7 @@ if(buildType === 'dynamic')
 		, import('php-wasm-simplexml')
 		, import('php-wasm-tidy')
 		, import('php-wasm-yaml')
-	])).map(m => m.default));
+	])).map(module => module.default));
 }
 else if(buildType === 'shared')
 {
@@ -60,8 +63,8 @@ else if(buildType === 'shared')
 else
 {
 	defaultSharedLibs.push(
-		{name: 'libcrypto.so', url: (new URL('php-wasm-openssl/libcrypto.so', import.meta.url))}
-		, {name: 'libssl.so',    url: (new URL('php-wasm-openssl/libssl.so',    import.meta.url))}
+		{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
+		, {name: 'libssl.so',    url: new URL('php-wasm-openssl/libssl.so',    import.meta.url)}
 	);
 }
 
@@ -75,14 +78,12 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
-const escapeHtml = s => s
+const escapeHtml = string => string
 	.replace(/&/g, "&amp;")
 	.replace(/</g, "&lt;")
 	.replace(/>/g, "&gt;")
 	.replace(/"/g, "&quot;")
 	.replace(/'/g, "&#039;");
-
-let lastCommand = null;
 
 const phpArgs = {
 	version: '8.3'
@@ -95,73 +96,86 @@ const phpArgs = {
 };
 
 export default function Terminal({
-	setStatusMessage = () => {}
-	, setExitCode = () => {}
+	setStatusMessage = noop
+	, setExitCode = noop
 	, localEcho = true
 	, onStdIn
-	, sharedLibs = []
+	, sharedLibs = emptySharedLibs
 	, interactive
 	, script
 	, code
 	, extras
 }) {
 	const phpRef = useRef(null);
-
 	const cmdStack = useRef(['']);
 	const cmdStackIndex = useRef(0);
-
+	const onStdInRef = useRef(onStdIn);
+	const setStatusMessageRef = useRef(setStatusMessage);
+	const setExitCodeRef = useRef(setExitCode);
 	const terminal = useRef('');
 	const stdIn  = useRef('');
+	const timeout = useRef(null);
 
 	const [ready, setReady] = useState(false);
 	const [output, setOutput] = useState([]);
-
-	const init = useRef(true);
 	const [prompt] = useState(parser.toHtml(escapeHtml('\x1b[1mphp> '))); // @TODO: get the prompt from PHP
 
-	interactive = interactive && !script && !code;
-
-	let timeout = useRef();
+	const interactiveMode = interactive && !script && !code;
 
 	const scrollToEnd = useCallback(() => {
-		if(!stdIn.current)
-		{
-			timeout.current = setTimeout(() => {
-				terminal.current.scrollTo({
-					top: terminal.current.scrollHeight
-					, behavior: 'smooth'
-				});
-
-			}, 32);
-
-			return;
-		}
-
 		if(timeout.current)
 		{
 			clearTimeout(timeout.current);
+		}
+
+		if(!stdIn.current)
+		{
+			timeout.current = setTimeout(() => {
+				terminal.current?.scrollTo({
+					top: terminal.current.scrollHeight
+					, behavior: 'smooth'
+				});
+			}, 32);
+			return;
 		}
 
 		timeout.current = setTimeout(() => stdIn.current.scrollIntoView(), 32);
 	}, []);
 
 	const focusInput = useCallback(() => {
-		if(!phpRef.current.interactive)
+		if(!phpRef.current?.interactive)
 		{
 			scrollToEnd();
 			return;
 		}
+
 		if(window.getSelection().toString() === '')
 		{
-			stdIn.current && stdIn.current.focus();
+			stdIn.current?.focus();
 		}
 	}, [scrollToEnd]);
 
-	const refreshPhp = useCallback(() => {
+	useEffect(() => {
+		onStdInRef.current = onStdIn;
+	}, [onStdIn]);
 
-		setStatusMessage && setStatusMessage('loading...');
+	useEffect(() => {
+		setStatusMessageRef.current = setStatusMessage;
+		setExitCodeRef.current = setExitCode;
+	}, [setExitCode, setStatusMessage]);
+
+	const refreshPhp = useCallback(() => {
+		let active = true;
+		let launchTimeout = null;
+
+		setStatusMessageRef.current?.('loading...');
 
 		const onOutput = async event => {
+			if(!active)
+			{
+				return;
+			}
+
 			const newOutput = event.detail.map(text => text
 				.replace('\n', '\u240A\n')
 				.replace('\r', '\u240D'));
@@ -174,7 +188,12 @@ export default function Terminal({
 			scrollToEnd();
 		};
 
-		const onError  = async event => {
+		const onError = async event => {
+			if(!active)
+			{
+				return;
+			}
+
 			const newOutput = event.detail.map(text => text
 				.replace('\n', '\u240A\n')
 				.replace('\r', '\u240D'));
@@ -183,84 +202,137 @@ export default function Terminal({
 				return { type: 'stderr', text: parser.toHtml(escapeHtml(line)) };
 			});
 
-			console.log(ansi);
-
 			setOutput(output => [...output, ...ansi]);
 			scrollToEnd();
 		};
 
-		phpRef.current = new PhpCliWeb({
+		const php = new PhpCliWeb({
 			...extras
 			, ...phpArgs
 			, sharedLibs: [...sharedLibs, ...defaultSharedLibs]
-			, interactive
+			, interactive: interactiveMode
 			, script
 			, code
 		});
 
-		const php = phpRef.current;
+		phpRef.current = php;
+		setReady(interactiveMode);
+
+		const firstInput = async () => {
+			setStatusMessageRef.current?.('php-cli-wasm ready!');
+			setReady(true);
+			await new Promise(resolve => setTimeout(resolve, 10));
+			focusInput();
+		};
+
+		const onStdInHandler = event => {
+			onStdInRef.current && onStdInRef.current(event);
+		};
+
+		const once = {once: true};
 
 		php.addEventListener('output', onOutput);
 		php.addEventListener('error', onError);
 
-		setReady(true);
-
-		const firstInput = async () => {
-			setStatusMessage && setStatusMessage('php-cli-wasm ready!');
-			setReady(true);
-			await new Promise(a => setTimeout(a, 10));
-			focusInput();
-		};
-
-		const onStdInHandler = async event => onStdIn && onStdIn(event);
-
-		const once = {once: true};
-
-		if(interactive)
+		if(interactiveMode)
 		{
 			php.addEventListener('stdin-request', onStdInHandler);
 			php.addEventListener('stdin-request', firstInput, once);
 		}
 		else
 		{
-			setStatusMessage && setStatusMessage('php-cli-wasm running...');
+			setStatusMessageRef.current?.('php-cli-wasm running...');
 		}
 
-		(async () => {
+		const runPhp = async () => {
 			await php.binary;
-			php.run(['-c', '/php.ini']).then((ret) => {
-				if(interactive)
-				{
-					setStatusMessage && setStatusMessage('php-cli-wasm ready!');
-				}
-				else
-				{
-					setStatusMessage && setStatusMessage('php-cli-wasm done.');
-					setExitCode && setExitCode(ret);
-				}
-			});
-		})();
+
+			if(!active)
+			{
+				return;
+			}
+
+			const ret = await php.run(['-c', '/php.ini']);
+
+			if(!active)
+			{
+				return;
+			}
+
+			if(interactiveMode)
+			{
+				setStatusMessageRef.current?.('php-cli-wasm ready!');
+			}
+			else
+			{
+				setStatusMessageRef.current?.('php-cli-wasm done.');
+				setExitCodeRef.current?.(ret);
+			}
+		};
+
+		// Delay the CLI start so StrictMode's dev-only effect replay can cancel
+		// the first mount before a one-shot script executes twice.
+		launchTimeout = setTimeout(() => void runPhp(), 0);
 
 		return () => {
+			active = false;
+
+			if(launchTimeout)
+			{
+				clearTimeout(launchTimeout);
+				launchTimeout = null;
+			}
+
+			if(timeout.current)
+			{
+				clearTimeout(timeout.current);
+				timeout.current = null;
+			}
+
 			php.removeEventListener('output', onOutput);
 			php.removeEventListener('error', onError);
 
-			if(interactive)
+			if(interactiveMode)
 			{
 				php.removeEventListener('stdin-request', onStdInHandler);
 				php.removeEventListener('stdin-request', firstInput, once);
 			}
+
+			if(phpRef.current === php)
+			{
+				phpRef.current = null;
+			}
 		};
-	}, [code, extras, focusInput, interactive, onStdIn, script, scrollToEnd, setExitCode, setStatusMessage, sharedLibs]);
+	}, [code, extras, focusInput, interactiveMode, script, scrollToEnd, sharedLibs]);
 
 	useEffect(() => {
-		console.log(init.current);
-		if(init.current)
+		return refreshPhp();
+	}, [refreshPhp]);
+
+	const runCommand = useCallback(async (event, command = null, silent = false) => {
+		const inputValue = command || stdIn.current?.value || '';
+		const php = phpRef.current;
+
+		if(!php)
 		{
-			refreshPhp();
-			init.current = false;
+			return;
 		}
-	}, [refreshPhp, init]);
+
+		if(command === null && stdIn.current)
+		{
+			stdIn.current.value = '';
+		}
+
+		if(localEcho && !silent)
+		{
+			inputValue && cmdStack.current.push(inputValue);
+			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
+			scrollToEnd();
+		}
+
+		await php.provideInput(inputValue);
+		stdIn.current?.focus();
+	}, [localEcho, prompt, scrollToEnd]);
 
 	const checkEnter = async event => {
 		if(event.key === 'ArrowUp')
@@ -317,43 +389,11 @@ export default function Terminal({
 			cmdStackIndex.current = 0;
 			await runCommand();
 			event.preventDefault();
-			return;
 		}
-	};
-
-	const runCommand = async (event, command = null, silent = false) => {
-
-		const inputValue = command || stdIn.current.value || '';
-
-		if(!phpRef.current)
-		{
-			return;
-		}
-
-		if(command === null)
-		{
-			stdIn.current.value = '';
-		}
-
-		if(localEcho && !silent)
-		{
-			inputValue && cmdStack.current.push(inputValue);
-			setOutput(output => [...output, {text: `<span>${prompt}</span><span>${inputValue}</span>`, type: 'stdin'}]);
-			scrollToEnd();
-		}
-
-		const php = phpRef.current;
-
-		await php.provideInput(inputValue);
-
-		lastCommand = inputValue || lastCommand;
-
-		stdIn.current && stdIn.current.focus();
 	};
 
 	const handleTerminalClicked = () => {
-
-		if(!phpRef.current.interactive)
+		if(!phpRef.current?.interactive)
 		{
 			return;
 		}
@@ -369,7 +409,7 @@ export default function Terminal({
 		<div className='scroll-to-bottom' onClick={handleScrollToBottom}>&#x1F847;</div>
 		<div className='console-output'>
 			{output.map((line, index) => (<div className = 'line' data-type = {line.type} key = {index} dangerouslySetInnerHTML = {{__html: line.text}} ></div>))}
-			{interactive && (
+			{interactiveMode && (
 				<div className = 'console-input' data-ready = {ready} onClick={focusInput}>
 					{!ready && (<img src = {loading} alt = "loading" />)}
 					<span dangerouslySetInnerHTML = {{__html:prompt}}></span>

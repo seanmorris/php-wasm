@@ -1,6 +1,6 @@
 import './Common.css';
 import './EditorEntry.css';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import EditorFile from './EditorFile';
 
@@ -12,10 +12,13 @@ import loader from './bar-spin.svg';
 // const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
-const pathStates = new Map();
-
-export default function EditorFolder({path = '/', name = ''})
-{
+export default function EditorFolder({
+	path = '/'
+	, name = ''
+	, onOpenFile
+	, pathStates
+	, startPath = '/'
+}) {
 	const [dirs, setDirs]                   = useState([]);
 	const [showContext, setShowContext]     = useState(false);
 	const [showNewFile, setShowNewFile]     = useState(false);
@@ -24,12 +27,8 @@ export default function EditorFolder({path = '/', name = ''})
 	const [loading, setLoading]             = useState(false);
 	const box = useRef(null);
 
-
-	const query = useMemo(() => new URLSearchParams(window.location.search), []);
-	const startPath = query.has('path') ? query.get('path') : '/';
-
-	const startOpened = pathStates.has(path)
-		? pathStates.get(path)
+	const startOpened = pathStates.current.has(path)
+		? pathStates.current.get(path)
 		: (path === startPath.substr(0, path.length));
 
 	const [expanded, setExpanded] = useState(startOpened);
@@ -44,11 +43,30 @@ export default function EditorFolder({path = '/', name = ''})
 
 	const onBlur = () => setTimeout(() => setShowContext(false), 160);
 
-	const openFile = path => {
-		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: path}));
-		query.set('path', path);
-		window.history.replaceState({}, null, window.location.pathname + '?' + query);
-	};
+	const loadFiles = useCallback(async () => {
+		setLoading(true);
+		const entries = (await sendMessage('readdir', [path]))
+			.filter(file => file !== '.' && file !== '..');
+		const types = await Promise.all(entries.map(async file =>
+			(await sendMessage('analyzePath', [path + (path[path.length - 1] !== '/' ? '/' : '') + file]))
+			.object.isFolder
+		));
+
+		setDirs(entries.filter((_, index) => types[index]));
+		setFiles(entries.filter((_, index) => !types[index]));
+		setLoading(false);
+	}, [path]);
+
+	useEffect(() => {
+		void loadFiles();
+	}, [loadFiles]);
+
+	useEffect(() => {
+		if(startPath === path)
+		{
+			box.current?.focus();
+		}
+	}, [path, startPath]);
 
 	const newFileKeyUp = async event => {
 		if(event.key === 'Enter')
@@ -57,8 +75,8 @@ export default function EditorFolder({path = '/', name = ''})
 			{
 				const newName = path + '/' + event.target.value;
 				await sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
-				openFile(newName);
-				loadFiles();
+				await loadFiles();
+				await onOpenFile(newName);
 			}
 
 			setShowNewFile(false);
@@ -78,8 +96,8 @@ export default function EditorFolder({path = '/', name = ''})
 			if(event.target.value)
 			{
 				const newName = path + '/' + event.target.value;
-				sendMessage('mkdir', [newName]);
-				loadFiles();
+				await sendMessage('mkdir', [newName]);
+				await loadFiles();
 			}
 
 			setShowNewFolder(false);
@@ -93,47 +111,20 @@ export default function EditorFolder({path = '/', name = ''})
 		}
 	};
 
-	const loadFiles = () => {
-		setLoading(true);
-		sendMessage('readdir', [path]).then(async entries => {
-			entries = entries.filter(f => f !== '.' && f !== '..');
-			const types = await Promise.all(entries.map(async f =>
-				(await sendMessage('analyzePath', [path + (path[path.length - 1] !== '/' ? '/' : '') + f]))
-				.object.isFolder
-			));
-
-			const dirs = entries.filter((_,k) => types[k]);
-			const files = entries.filter((_,k) => !types[k]);
-			setDirs(dirs);
-			setFiles(files);
-			setLoading(false);
-		});
-	};
-
-	useEffect(() => {
-		if(startPath === path)
-			{
-			loadFiles();
-			box.current.focus();
-			}
-	}, []);
-
-	useEffect(() => {
-		loadFiles();
-	}, []);
-
 	const toggleExpanded = event => {
 		event.stopPropagation();
-		setExpanded(!expanded);
-		pathStates.set(path, !expanded);
+		setExpanded(expanded => {
+			pathStates.current.set(path, !expanded);
+			return !expanded;
+		});
 	};
 
 	return (
 		<div className = "editor-entry editor-folder">
-			<p onClick = { toggleExpanded } onContextMenu={onContext} onBlur = {onBlur} tabIndex="0" ref = {box}>
+			<p onClick = {toggleExpanded} onContextMenu={onContext} onBlur = {onBlur} tabIndex="0" ref = {box}>
 				<img className = "file icon" src = {
 					!loading
-						? (expanded  ? folderOpen : folderClose)
+						? (expanded ? folderOpen : folderClose)
 						: loader
 				} alt = "" />
 				{name}
@@ -158,12 +149,23 @@ export default function EditorFolder({path = '/', name = ''})
 			</p>}
 			{expanded && dirs.map(dir =>
 				<div key = {dir}>
-					<EditorFolder name = {dir} path = {path + (path[path.length - 1] !== '/' ? '/' : '') + dir} />
+					<EditorFolder
+						name = {dir}
+						onOpenFile = {onOpenFile}
+						path = {path + (path[path.length - 1] !== '/' ? '/' : '') + dir}
+						pathStates = {pathStates}
+						startPath = {startPath}
+					/>
 				</div>
 			)}
 			{expanded && files.map(file =>
 				<div key = {file}>
-					<EditorFile name = {file} path = {path + (path[path.length - 1] !== '/' ? '/' : '') + file} />
+					<EditorFile
+						name = {file}
+						onOpenFile = {onOpenFile}
+						path = {path + (path[path.length - 1] !== '/' ? '/' : '') + file}
+						startPath = {startPath}
+					/>
 				</div>
 			)}
 		</div>

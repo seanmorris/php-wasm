@@ -24,20 +24,24 @@
 	padding: 0.75rem 0;
 }
 
-.select-framework .frameworks a {
+.select-framework .frameworks .popup-form {
+	display: contents;
+}
+
+.select-framework .frameworks .popup-link {
 	background-color: white;
 	display: block;
 	text-align: center;
 	border-bottom: 1px solid #333;
 }
 
-.select-framework .frameworks a img {
+.select-framework .frameworks .popup-link img {
 	height: 120px;
 	width: 6rem;
 	margin:0.75rem;
 
 }
 
-.select-framework .frameworks .column:nth-child(2n) a {
+.select-framework .frameworks .column:nth-child(2n) .popup-link {
 	background-color: #EEE;
 }

@@ -10,9 +10,9 @@ const params = new URLSearchParams(window.location.search);
 if(!params.has('no-service-worker'))
 {
 	(async () => {
-		const registered = await ensureServiceWorker();
+		const serviceWorker = await ensureServiceWorker();
 
-		if(!registered)
+		if(!serviceWorker.controlled)
 		{
 			console.log('No Service Worker Detected, Reloading...');
 			await new Promise(a => setTimeout(a, 500));

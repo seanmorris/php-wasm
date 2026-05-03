@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import EditorFolder from './EditorFolder';
@@ -11,7 +11,6 @@ import { basePath } from './runtimePaths';
 import ace from 'ace-builds';
 import AceEditor from 'react-ace';
 import { Range } from "ace-builds";
-import { createRoot } from 'react-dom/client';
 import 'ace-builds/src-noconflict/mode-css';
 import 'ace-builds/src-noconflict/mode-html';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -33,9 +32,6 @@ import Debugger from './Debugger';
 // const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
-const openFilesMap = new Map();
-const sessionsMap = new WeakMap;
-
 const modes = {
 	'php': 'ace/mode/php'
 	, 'phtml': 'ace/mode/php'
@@ -53,161 +49,138 @@ const modes = {
 	, 'yaml': 'ace/mode/yaml'
 };
 
-const breakpoints = new Map;
-
 export default function Editor()
 {
-	const [contents, setContents] = useState('...');
 	const [openFiles, setOpenFiles] = useState([]);
-	const [showLeft, setShowLeft] = useState([]);
-	const [phpdbg, setPhpDbg] = useState(false);
+	const [showLeft, setShowLeft] = useState(true);
+	const [debuggerActive, setDebuggerActive] = useState(false);
+	const [debuggerStartFile, setDebuggerStartFile] = useState(null);
+	const [debuggerInitCommands, setDebuggerInitCommands] = useState([]);
 	const [isExecuting, setIsExecuting] = useState(false);
+	const [editorReady, setEditorReady] = useState(false);
 
+	const aceRef = useRef(null);
+	const editorInstance = useRef(null);
 	const activeLines = useRef(new Set);
+	const breakpoints = useRef(new Map);
 	const currentBreak = useRef({});
 	const currentPath = useRef(null);
-	const editBox = useRef(null);
-	const aceRef = useRef(null);
-	const tabBox = useRef(null);
 	const openDbg = useRef(null);
+	const openFilesMap = useRef(new Map());
+	const pathStates = useRef(new Map());
+	const pendingOpenPath = useRef(null);
+	const sessionsMap = useRef(new WeakMap);
+	const tabBox = useRef(null);
 
 	const lastFile = useRef(null);
 	const lastLine = useRef(null);
 
-	const versionSelector = useRef(true);
+	const versionSelector = useRef(null);
 	const version = useRef('8.3');
 
-	const query = useMemo(() => new URLSearchParams(window.location.search), []);
+	const query = useRef(null);
+	const startPath = useRef('/');
 
-	const handleSave = async () => {
-		if(currentPath.current)
+	if(!query.current)
+	{
+		query.current = new URLSearchParams(window.location.search);
+		startPath.current = query.current.get('path') || '/';
+	}
+
+	const updateOpenFiles = useCallback(() => {
+		setOpenFiles([...openFilesMap.current.values()]);
+	}, []);
+
+	const handleSave = useCallback(async () => {
+		if(!currentPath.current)
 		{
-			const entry = openFilesMap.get(currentPath.current);
+			return;
+		}
+
+		const entry = openFilesMap.current.get(currentPath.current);
+
+		if(!entry)
+		{
+			return;
+		}
+
 			entry.dirty = false;
 
 			sendMessage('writeFile', [
 				currentPath.current
-				, new TextEncoder().encode(aceRef.current.editor.getValue())
+				, new TextEncoder().encode(editorInstance.current.getValue())
 			]);
 
-			const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
-			setOpenFiles(openFilesList);
-		}
-	};
+		updateOpenFiles();
+	}, [updateOpenFiles]);
 
-	const handleOpenVsCode = async () => {
+	const handleOpenVsCode = useCallback(() => {
 		if(currentPath.current)
 		{
 			window.location.href = basePath(`vscode.html?path=${currentPath.current}`);
-		}
-		else
-		{
-			window.location.href = basePath('vscode.html');
-		}
-	};
-
-	const onKeyDown = event => {
-		if(event.key === 's' && event.ctrlKey)
-		{
-			event.preventDefault();
-			handleSave();
 			return;
 		}
-	};
 
-	const toggleLeftBar = () => {
-		setShowLeft(!showLeft);
-	};
-
-	useEffect(() => {
-		if(!editBox.current)
-		{
-			editBox.current = document.getElementById('edit-root');
-			const editRoot = createRoot(editBox.current);
-
-			editRoot.render(
-				<AceEditor
-					mode = "php"
-					theme = "monokai"
-					// onChange = {codeChanged}
-					name = "input"
-					width = "100%"
-					height = "100%"
-					ref = {aceRef}
-				/>
-			);
-		}
-
-		window.addEventListener('keydown', onKeyDown);
-		window.addEventListener('editor-open-file', handleOpenFile);
-		return () => {
-			window.removeEventListener('editor-open-file', handleOpenFile);
-			window.removeEventListener('keydown', onKeyDown);
-		};
+		window.location.href = basePath('vscode.html');
 	}, []);
 
-	const closeFile = async path => {
-		const entry = openFilesMap.get(path);
-
-		openFilesMap.delete(path);
-
-		if(entry.active)
+	const handleWindowKeyDown = useCallback(event => {
+		if((event.ctrlKey || event.metaKey) && event.key === 's')
 		{
-			if(openFilesMap.size)
-			{
-				const first = [...openFilesMap.entries()][0][1];
-				first.active = true;
-				currentPath.current = first.path;
-				aceRef.current.editor.setSession(first.session);
-			}
-			else
-			{
-				currentPath.current = null;
-				aceRef.current.editor.setSession(ace.createEditSession('', 'ace/mode/text'));
-				aceRef.current.editor.setReadOnly(true);
-			}
+			event.preventDefault();
+			void handleSave();
+		}
+	}, [handleSave]);
+
+	const toggleLeftBar = useCallback(() => {
+		setShowLeft(showLeft => !showLeft);
+	}, []);
+
+	const openFile = useCallback(async path => {
+		const editor = editorInstance.current;
+
+		if(!editor)
+		{
+			pendingOpenPath.current = path;
+			return;
 		}
 
-		const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
-		setOpenFiles(openFilesList);
-	};
-
-	const openFile = async path => {
-		const editor = aceRef.current.editor;
-
 		const name = path.split('/').pop();
-		const newFile = openFilesMap.has(path)
-			? openFilesMap.get(path)
+		const newFile = openFilesMap.current.has(path)
+			? openFilesMap.current.get(path)
 			: {name, path};
 
-		query.set('path', path);
+			query.current.set('path', path);
 
 		if(!openDbg.current)
 		{
-			window.history.replaceState({}, null, window.location.pathname + '?' + query);
+			window.history.replaceState({}, null, window.location.pathname + '?' + query.current);
 		}
 
 		if(currentPath.current !== path)
 		{
-			activeLines.current.forEach(m => {
-				editor.session.removeMarker(m);
-				activeLines.current.delete(m);
+			activeLines.current.forEach(marker => {
+				editor.session.removeMarker(marker);
+				activeLines.current.delete(marker);
 			});
 		}
 
 		currentPath.current = path;
 
-		editor.setReadOnly(!!openDbg.current);
+		editor.setReadOnly(debuggerActive);
 
 		if(!newFile.session)
 		{
-			openFilesMap.set(path, newFile);
+			openFilesMap.current.set(path, newFile);
 		}
 
-		const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
-		openFilesList.map(f => f.active = false);
+		for(const file of openFilesMap.current.values())
+		{
+			file.active = false;
+		}
+
 		newFile.active = true;
-		setOpenFiles(openFilesList);
+		updateOpenFiles();
 
 		if(newFile.loading)
 		{
@@ -215,8 +188,8 @@ export default function Editor()
 			return;
 		}
 
-		let _accept;
-		newFile.loading = new Promise(accept => _accept = accept);
+		let acceptLoading;
+		newFile.loading = new Promise(accept => acceptLoading = accept);
 
 		const extension = path.split('.').pop();
 		const mode = modes[extension] ?? 'ace/mode/text';
@@ -226,118 +199,110 @@ export default function Editor()
 		);
 
 		newFile.session = ace.createEditSession(code, mode);
-		sessionsMap.set(newFile.session, newFile);
+		sessionsMap.current.set(newFile.session, newFile);
 		editor.setSession(newFile.session);
-		setContents(code);
-
-		_accept(newFile.session);
+		acceptLoading(newFile.session);
 
 		newFile.dirty = false;
 
 		newFile.session.on('change', () => {
 			newFile.dirty = true;
-			const openFilesList = [...openFilesMap.entries()].map(e => e[1]);
-			setOpenFiles(openFilesList);
+			updateOpenFiles();
 		});
 
-		// editor.setOption("firstLineNumber", 0);
+		tabBox.current?.scrollTo({left: -tabBox.current.scrollWidth, behavior: 'smooth'});
+	}, [debuggerActive, updateOpenFiles]);
 
-		tabBox.current.scrollTo({left:-tabBox.current.scrollWidth, behavior: 'smooth'});
-	};
+	const closeFile = useCallback(async path => {
+		const entry = openFilesMap.current.get(path);
 
-	useEffect(() => {
-		if(aceRef.current)
+		if(!entry)
 		{
-			const onGutter = async event => {
-
-				const editor = aceRef.current.editor;
-				console.log(event);
-
-				const session = editor.getSession();
-
-				if(!sessionsMap.has(session))
-				{
-					console.trace('Unmapped session!');
-					return;
-				}
-
-				const {path} = sessionsMap.get(session);
-
-				const target = event.domEvent.target;
-
-				if(target.className.indexOf("ace_gutter-cell") == -1)
-				{
-					return;
-				}
-
-				if(event.clientX > 28 + target.getBoundingClientRect().left)
-				{
-					return;
-				}
-
-				const line = event.getDocumentPosition().row;
-				// const existing = event.editor.session.getBreakpoints(line, 0);
-
-				if(!breakpoints.has(`${path}:${1 + line}`))
-				{
-					event.editor.session.setBreakpoint(line);
-
-					let id = breakpoints.size;
-
-					if(openDbg.current)
-					{
-						openDbg.current.setBreakpoint(path, 1 + line);
-						id = await openDbg.current.bpCount();
-					}
-
-					breakpoints.set(`${path}:${1 + line}`, id);
-				}
-				else
-				{
-					const id = breakpoints.get(`${path}:${1 + line}`);
-
-					event.editor.session.clearBreakpoint(line);
-
-					if(openDbg.current)
-					{
-						openDbg.current.clearBreakpoint(id);
-					}
-
-					breakpoints.delete(`${path}:${1 + line}`);
-				}
-
-				console.log(breakpoints);
-
-				event.stop();
-			};
-
-			aceRef.current.editor.on('guttermousedown', onGutter);
-
-			return () => {
-				aceRef.current.editor.session.off('off', onGutter);
-			};
+			return;
 		}
-	}, [aceRef.current]);
 
-	const handleOpenFile = event => openFile(event.detail);
+		openFilesMap.current.delete(path);
 
-	const gotoFile = async (file, line) => {
+		if(entry.active)
+		{
+			if(openFilesMap.current.size)
+			{
+				const first = [...openFilesMap.current.values()][0];
+				first.active = true;
+				currentPath.current = first.path;
+				editorInstance.current.setSession(first.session);
+			}
+			else
+			{
+				currentPath.current = null;
+				editorInstance.current.setSession(ace.createEditSession('', 'ace/mode/text'));
+				editorInstance.current.setReadOnly(true);
+			}
+		}
+
+		updateOpenFiles();
+	}, [updateOpenFiles]);
+
+	const gotoFile = useCallback(async (file, line) => {
+		const editor = editorInstance.current;
+
+		if(!editor)
+		{
+			return;
+		}
+
 		const { exists } = await sendMessage('analyzePath', [file]);
 
-		const editor = aceRef.current.editor;
+		if(exists)
+		{
+			await openFile(file);
+			editor.scrollToLine(-1 + line, true, true, () => {});
+		}
+
+		if(line === undefined)
+		{
+			return;
+		}
+
+		activeLines.current.forEach(marker => {
+			editor.session.removeMarker(marker);
+			activeLines.current.delete(marker);
+		});
+
+		const marker = editor.session.addMarker(
+			new Range(-1 + line, 0, -1 + line, Infinity)
+			, 'active_breakpoint'
+			, 'fullLine'
+			, true
+		);
+
+		activeLines.current.add(marker);
+	}, [openFile]);
+
+	const handleDebuggerStdIn = useCallback(async () => {
+		const editor = editorInstance.current;
+		const file = currentBreak.current.file;
+		const line = currentBreak.current.line;
+
+		if(!(editor && file && line))
+		{
+			return;
+		}
+
+		if(file === lastFile.current && line === lastLine.current)
+		{
+			return;
+		}
+
+		const { exists } = await sendMessage('analyzePath', [file]);
 
 		if(exists)
 		{
 			await openFile(file);
 
-			editor.scrollToLine(-1 + line, true, true, () => {});
-		}
-
-		if(line !== undefined)
-		{
-			activeLines.current.forEach(m => {
-				editor.session.removeMarker(m);
-				activeLines.current.delete(m);
+			activeLines.current.forEach(marker => {
+				editor.session.removeMarker(marker);
+				activeLines.current.delete(marker);
 			});
 
 			const marker = editor.session.addMarker(
@@ -348,91 +313,180 @@ export default function Editor()
 			);
 
 			activeLines.current.add(marker);
+			editor.scrollToLine(-1 + line, true, true, () => {});
+
+			lastFile.current = file;
+			lastLine.current = line;
+			return;
 		}
-	};
 
-	const startDebugger = () => {
+		activeLines.current.forEach(marker => {
+			editor.session.removeMarker(marker);
+			activeLines.current.delete(marker);
+		});
+	}, [openFile]);
 
-		const editor = aceRef.current.editor;
+	const startDebugger = useCallback(() => {
+		const editor = editorInstance.current;
+
+		if(!editor)
+		{
+			return;
+		}
 
 		if(openDbg.current)
 		{
-			activeLines.current.forEach(m => {
-				editor.session.removeMarker(m);
-				activeLines.current.delete(m);
+			activeLines.current.forEach(marker => {
+				editor.session.removeMarker(marker);
+				activeLines.current.delete(marker);
 			});
 
-			openDbg.current = null;
 			editor.setReadOnly(false);
-			setPhpDbg(openDbg.current);
+			setDebuggerActive(false);
+			setDebuggerStartFile(null);
+			setDebuggerInitCommands([]);
 			setIsExecuting(false);
 			return;
 		}
 
 		editor.setReadOnly(true);
+		setDebuggerStartFile(currentPath.current);
+		setDebuggerInitCommands([
+			...[...breakpoints.current.keys()].map(bp => `b ${bp}`)
+			, 'run'
+		]);
+		setDebuggerActive(true);
+	}, []);
 
-		openDbg.current = <Debugger
-			file = {currentPath.current}
-			version = { version.current }
-			ref = {openDbg}
-			initCommands = {[...[...breakpoints.keys()].map(bp => `b ${bp}`), 'run']}
-			setCurrentFile = {file => currentBreak.current.file = file}
-			setCurrentLine = {line => currentBreak.current.line = line}
-			setIsExecuting = {setIsExecuting}
-			openFile = {gotoFile}
-			onStdIn = {async () => {
-				const file = currentBreak.current.file;
-				const line = currentBreak.current.line;
+	useEffect(() => {
+		window.addEventListener('keydown', handleWindowKeyDown);
+		return () => {
+			window.removeEventListener('keydown', handleWindowKeyDown);
+		};
+	}, [handleWindowKeyDown]);
 
-				if(!(file && line)) return;
+	useEffect(() => {
+		if(!editorReady)
+		{
+			return;
+		}
 
-				if(file === lastFile.current && line === lastLine.current) return;
+		if(startPath.current !== '/' && !pendingOpenPath.current)
+		{
+			pendingOpenPath.current = startPath.current;
+		}
 
-				const { exists } = await sendMessage('analyzePath', [file]);
+		if(!pendingOpenPath.current)
+		{
+			return;
+		}
 
-				if(exists)
+		const path = pendingOpenPath.current;
+		pendingOpenPath.current = null;
+		void openFile(path);
+	}, [editorReady, openFile]);
+
+	useEffect(() => {
+		if(!editorReady)
+		{
+			return;
+		}
+
+		const editor = editorInstance.current;
+
+		if(!editor)
+		{
+			return;
+		}
+
+		const onGutter = async event => {
+			const session = editor.getSession();
+			const target = event.domEvent.target;
+			const gutterCell = target?.closest?.('.ace_gutter-cell')
+				|| (typeof target?.className === 'string' && target.className.indexOf('ace_gutter-cell') !== -1
+					? target
+					: null
+				);
+
+			if(!gutterCell)
+			{
+				return;
+			}
+
+			if(!sessionsMap.current.has(session) && currentPath.current)
+			{
+				sessionsMap.current.set(session, {path: currentPath.current});
+			}
+
+			if(!sessionsMap.current.has(session))
+			{
+				console.trace('Unmapped session!');
+				return;
+			}
+
+			const {path} = sessionsMap.current.get(session);
+
+			if(event.clientX > 28 + gutterCell.getBoundingClientRect().left)
+			{
+				return;
+			}
+
+			const line = event.getDocumentPosition().row;
+			const breakpointKey = `${path}:${1 + line}`;
+
+				if(!breakpoints.current.has(breakpointKey))
 				{
-					await openFile(file);
+					event.editor.session.setBreakpoint(line);
 
-					activeLines.current.forEach(m => {
-						editor.session.removeMarker(m);
-						activeLines.current.delete(m);
-					});
+					let id = breakpoints.current.size;
 
-					const marker = editor.session.addMarker(
-						new Range(-1 + line, 0, -1 + line, Infinity)
-						, 'active_breakpoint'
-						, 'fullLine'
-						, true
-					);
+					if(openDbg.current)
+					{
+						id = await openDbg.current.setBreakpoint(path, 1 + line);
+					}
 
-					activeLines.current.add(marker);
-
-					editor.scrollToLine(-1 + line, true, true, () => {});
-
-					lastFile.current = file;
-					lastLine.current = line;
+					breakpoints.current.set(breakpointKey, id);
 				}
-				else
-				{
-					activeLines.current.forEach(m => {
-						editor.session.removeMarker(m);
-						activeLines.current.delete(m);
-					});
-				}
-			}}
-		/>;
+			else
+			{
+				const id = breakpoints.current.get(breakpointKey);
 
-		setPhpDbg(openDbg.current);
-	};
+					event.editor.session.clearBreakpoint(line);
 
-	const handleStartDebugger = () => startDebugger();
-	const handleStep = () => openDbg.current.step();
-	const handleContinue = () => openDbg.current.continue();
-	const handleUntil = () => openDbg.current.until();
-	const handleNext = () => openDbg.current.next();
-	const handleFinish = () => openDbg.current.finish();
-	const handleLeave = () => openDbg.current.leave();
+					if(openDbg.current)
+					{
+						await openDbg.current.clearBreakpoint(id);
+					}
+
+					breakpoints.current.delete(breakpointKey);
+			}
+
+				event.editor.renderer.updateBreakpoints();
+				event.domEvent.preventDefault();
+				event.domEvent.stopPropagation();
+				event.stop();
+		};
+
+		editor.on('guttermousedown', onGutter);
+
+		return () => {
+			editor.off('guttermousedown', onGutter);
+		};
+	}, [editorReady]);
+
+	const handleEditorLoad = useCallback(editor => {
+		editorInstance.current = editor;
+		editor.setSession(ace.createEditSession('', 'ace/mode/text'));
+		editor.setReadOnly(true);
+		setEditorReady(true);
+	}, []);
+
+	const handleStep = () => openDbg.current?.step();
+	const handleContinue = () => openDbg.current?.continue();
+	const handleUntil = () => openDbg.current?.until();
+	const handleNext = () => openDbg.current?.next();
+	const handleFinish = () => openDbg.current?.finish();
+	const handleLeave = () => openDbg.current?.leave();
 
 	return (
 		<div className = "editor" data-show-left = {showLeft}>
@@ -450,20 +504,20 @@ export default function Editor()
 					</button>
 					{!isExecuting ? (
 						<>
-							{phpdbg ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
+							{debuggerActive ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
 								<option>8.5</option>
 								<option>8.4</option>
 								<option>8.3</option>
 								<option>8.2</option>
 								<option>8.1</option>
 							</select>}
-							<button className='square' title = "Debugger" onClick = {handleStartDebugger}>
-								{phpdbg ? '⏹' : '▶'}
+							<button className='square' title = "Debugger" onClick = {startDebugger}>
+								{debuggerActive ? '⏹' : '▶'}
 							</button>
 						</>
 					) : (
 						<span className='contents'>
-							<button className='square' title = "Stop Debugger" onClick = {handleStartDebugger}>
+							<button className='square' title = "Stop Debugger" onClick = {startDebugger}>
 								⏹
 							</button>
 							<button title = "Step" className='square' onClick = {handleStep}>
@@ -490,7 +544,13 @@ export default function Editor()
 				<div className = "row">
 					<div className = "file-area frame inset">
 						<div className = "scroller">
-							<EditorFolder path = "/" name = "/" />
+							<EditorFolder
+								name = "/"
+								onOpenFile = {openFile}
+								path = "/"
+								pathStates = {pathStates}
+								startPath = {startPath.current}
+							/>
 						</div>
 					</div>
 					<div className='edit-area'>
@@ -499,21 +559,45 @@ export default function Editor()
 								<div className='scroller' ref = {tabBox}>
 									{openFiles.map(file =>
 										<div className='tab' key = {file.path} data-active = {file.active}>
-											<div onClick = { () => openFile(file.path)}>
+											<div onClick = {() => openFile(file.path)}>
 												{file.name} {file.dirty ? '!' : ''}
 											</div>
-											<div onClick = { () => closeFile(file.path)}>×</div>
+											<div onClick = {() => closeFile(file.path)}>×</div>
 										</div>
 									)}
 								</div>
 							</div>
 							<div className='frame grow'>
 								<div id = "edit-root" className = "scroller">
-									<pre>{contents}</pre>
+									<AceEditor
+										height = "100%"
+										mode = "php"
+										name = "input"
+										onLoad = {handleEditorLoad}
+										ref = {aceRef}
+										theme = "monokai"
+										width = "100%"
+									/>
 								</div>
 							</div>
 						</div>
-						{phpdbg && <div className='inset row grow'><div className='frame grow'>{phpdbg}</div></div>}
+						{debuggerActive && (
+							<div className='inset row grow'>
+								<div className='frame grow'>
+									<Debugger
+										file = {debuggerStartFile}
+										initCommands = {debuggerInitCommands}
+										onStdIn = {handleDebuggerStdIn}
+										openFile = {gotoFile}
+										ref = {openDbg}
+										setCurrentFile = {file => currentBreak.current.file = file}
+										setCurrentLine = {line => currentBreak.current.line = line}
+										setIsExecuting = {setIsExecuting}
+										version = {version.current}
+									/>
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 				<div className = "inset right demo-bar">

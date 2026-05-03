@@ -18,7 +18,7 @@ import fileZipIcon from './nomo-dark/file.zip.svg';
 import renameIcon from './icons/rename-icon-16.png';
 import deleteIcon from './icons/delete-icon-16.png';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import { baseUrlFor } from './runtimePaths';
 
@@ -43,9 +43,7 @@ const icons = {
 	, zip: fileZipIcon
 };
 
-let init = false;
-
-export default function EditorFile({path, name})
+export default function EditorFile({path, name, onOpenFile, startPath = '/'})
 {
 	const [showContext, setShowContext] = useState(false);
 	const [showRename, setShowRename]   = useState(false);
@@ -53,9 +51,7 @@ export default function EditorFile({path, name})
 	const [_name, setName] = useState(name);
 	const [_path, setPath] = useState(path);
 	const box = useRef(null);
-
-	const query = useMemo(() => new URLSearchParams(window.location.search), []);
-	const startPath = query.has('path') ? query.get('path') : '/';
+	const hasFocusedStartPath = useRef(false);
 
 	const onContext = event => {
 		event.preventDefault();
@@ -68,9 +64,7 @@ export default function EditorFile({path, name})
 	const onBlur = () => setTimeout(() => setShowContext(false), 160);
 
 	const openFile = () => {
-		window.dispatchEvent(new CustomEvent('editor-open-file', {detail: _path}));
-		query.set('path', _path);
-		window.history.replaceState({}, null, window.location.pathname + '?' + query);
+		void onOpenFile(_path);
 	};
 
 	const renameFile = () => {
@@ -105,7 +99,7 @@ export default function EditorFile({path, name})
 
 				setName(event.target.value);
 				setPath(newPath);
-				openFile();
+				void onOpenFile(newPath);
 			}
 
 			setShowRename(false);
@@ -118,19 +112,20 @@ export default function EditorFile({path, name})
 	};
 
 	useEffect(() => {
-		if(startPath === path && !init)
+		if(startPath !== path || hasFocusedStartPath.current)
 		{
-			box.current.focus();
-			openFile();
-			init = true;
+			return;
 		}
-	}, []);
+
+		hasFocusedStartPath.current = true;
+		box.current?.focus();
+	}, [path, startPath]);
 
 	const extension = _path.split('.').pop();
 
 	return !deleted && (
 		<div className = "editor-entry editor-file">
-			<p onClick = {openFile} tabIndex="0" onContextMenu={onContext}  onBlur = {onBlur} ref = {box}>
+			<p onClick = {openFile} tabIndex="0" onContextMenu={onContext} onBlur = {onBlur} ref = {box}>
 				<img className = "file icon" src = {icons[extension] ?? fileIcon} alt = "" />
 				{_name}
 			</p>
@@ -141,11 +136,11 @@ export default function EditorFile({path, name})
 						Open in PHP-DBG
 					</p>
 				)}
-				<p className = "context" onClick = {() => renameFile(true)}>
+				<p className = "context" onClick = {renameFile}>
 					<img className = "file icon" src = {renameIcon} alt = "" />
 					Rename
 				</p>
-				<p className = "context" onClick = {() => deleteFile(true)}>
+				<p className = "context" onClick = {deleteFile}>
 					<img className = "file icon" src = {deleteIcon} alt = "" />
 					Delete
 				</p>
