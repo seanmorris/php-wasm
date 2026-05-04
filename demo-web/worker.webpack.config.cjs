@@ -13,7 +13,7 @@ module.exports = (_, argv = {}) => {
 			topLevelAwait: true
 		}
 		, entry: {
-			'cgi-worker': './src/cgi-worker.mjs'
+			'cgi-worker': './src/workers/cgi-worker.mjs'
 		}
 		, output: {
 			path: path.resolve(__dirname, 'public')
@@ -48,7 +48,7 @@ module.exports = (_, argv = {}) => {
 		, plugins: [
 			new webpack.NormalModuleReplacementPlugin(
 				/\.\/runtimePaths\.js$/,
-				path.resolve(__dirname, 'src/runtimePaths.worker.js')
+				path.resolve(__dirname, 'src/lib/runtimePaths.worker.js')
 			)
 			,
 			new webpack.DefinePlugin({

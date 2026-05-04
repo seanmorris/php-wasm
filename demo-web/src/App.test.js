@@ -2,39 +2,39 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-vi.mock('./CliPreview', () => ({
+vi.mock('./pages/CliPreview', () => ({
 	default: () => React.createElement('div', null, 'CLI Preview')
 }));
 
-vi.mock('./DbgPreview', () => ({
+vi.mock('./pages/DbgPreview', () => ({
 	default: () => React.createElement('div', null, 'Debug Preview')
 }));
 
-vi.mock('./Editor', () => ({
+vi.mock('./pages/Editor', () => ({
 	default: () => React.createElement('div', null, 'Code Editor')
 }));
 
-vi.mock('./Embedded', () => ({
+vi.mock('./pages/Embedded', () => ({
 	default: () => React.createElement('div', null, 'Embedded Demo')
 }));
 
-vi.mock('./Home', () => ({
+vi.mock('./pages/Home', () => ({
 	default: () => React.createElement('div', null, 'Home Page')
 }));
 
-vi.mock('./InstallDemo', () => ({
+vi.mock('./pages/InstallDemo', () => ({
 	default: () => React.createElement('div', null, 'Install Demo')
 }));
 
-vi.mock('./MultiIframeTest', () => ({
+vi.mock('./pages/MultiIframeTest', () => ({
 	default: () => React.createElement('div', null, 'Iframe Test')
 }));
 
-vi.mock('./SelectFramework', () => ({
+vi.mock('./pages/SelectFramework', () => ({
 	default: () => React.createElement('div', null, 'Select Framework')
 }));
 
-vi.mock('./VSCodeEditor', () => ({
+vi.mock('./pages/VSCodeEditor', () => ({
 	default: () => React.createElement('div', null, 'VSCode Editor')
 }));
 

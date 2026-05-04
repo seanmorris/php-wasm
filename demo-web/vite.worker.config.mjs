@@ -20,7 +20,7 @@ export default defineConfig({
 		, target: 'esnext'
 		, sourcemap: true
 		, rollupOptions: {
-			input: path.resolve(__dirname, 'src/cgi-worker.mjs')
+			input: path.resolve(__dirname, 'src/workers/cgi-worker.mjs')
 			, output: {
 				format: 'es'
 				, entryFileNames: 'cgi-worker.js'

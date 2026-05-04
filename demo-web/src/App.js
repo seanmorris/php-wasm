@@ -1,16 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 
-import CliPreview from './CliPreview';
-import DbgPreview from './DbgPreview';
-import Editor from './Editor';
-import Embedded from './Embedded';
-import Home from './Home';
-import InstallDemo from './InstallDemo';
-import MultiIframeTest from './MultiIframeTest';
-import SelectFramework from './SelectFramework';
-import VSCodeEditor from './VSCodeEditor';
-import { basePath, routerBase } from './runtimePaths';
+import CliPreview from './pages/CliPreview';
+import DbgPreview from './pages/DbgPreview';
+import Editor from './pages/Editor';
+import Embedded from './pages/Embedded';
+import Home from './pages/Home';
+import InstallDemo from './pages/InstallDemo';
+import MultiIframeTest from './pages/MultiIframeTest';
+import SelectFramework from './pages/SelectFramework';
+import VSCodeEditor from './pages/VSCodeEditor';
+import { basePath, routerBase } from './lib/runtimePaths';
 
 export function AppRoutes()
 {
