@@ -3,9 +3,9 @@ import './Editor.css';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import EditorFolder from './EditorFolder';
 import Header from './Header';
+import { getPhpBus } from './phpBus';
 import { basePath } from './runtimePaths';
 
 import ace from 'ace-builds';
@@ -28,9 +28,6 @@ import saveIcon from './nuvola/3floppy_unmount.png';
 import vsCodeIcon from './icons/vscode-16.png';
 
 import Debugger from './Debugger';
-
-// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const modes = {
 	'php': 'ace/mode/php'
@@ -104,12 +101,13 @@ export default function Editor()
 			return;
 		}
 
-			entry.dirty = false;
+		entry.dirty = false;
+		const bus = await getPhpBus();
 
-			sendMessage('writeFile', [
-				currentPath.current
-				, new TextEncoder().encode(editorInstance.current.getValue())
-			]);
+		await bus.writeFile(
+			currentPath.current
+			, new TextEncoder().encode(editorInstance.current.getValue())
+		);
 
 		updateOpenFiles();
 	}, [updateOpenFiles]);
@@ -193,9 +191,10 @@ export default function Editor()
 
 		const extension = path.split('.').pop();
 		const mode = modes[extension] ?? 'ace/mode/text';
+		const bus = await getPhpBus();
 
 		const code = new TextDecoder().decode(
-			await sendMessage('readFile', [path])
+			await bus.readFile(path)
 		);
 
 		newFile.session = ace.createEditSession(code, mode);
@@ -251,7 +250,8 @@ export default function Editor()
 			return;
 		}
 
-		const { exists } = await sendMessage('analyzePath', [file]);
+		const bus = await getPhpBus();
+		const { exists } = await bus.analyzePath(file);
 
 		if(exists)
 		{
@@ -294,7 +294,8 @@ export default function Editor()
 			return;
 		}
 
-		const { exists } = await sendMessage('analyzePath', [file]);
+		const bus = await getPhpBus();
+		const { exists } = await bus.analyzePath(file);
 
 		if(exists)
 		{

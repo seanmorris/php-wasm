@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 
 import react from '@vitejs/plugin-react';
@@ -7,6 +8,7 @@ import { defineConfig } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appBase = '/php-wasm/';
+const localQuickbusPath = path.resolve(__dirname, '../../projects/quickbus/index.mjs');
 
 const htmlEntryPaths = [
 	'/'
@@ -44,6 +46,7 @@ const localPhpPackages = [
 	, 'php-wasm-xml'
 	, 'php-wasm-yaml'
 	, 'php-wasm-zlib'
+	, 'quickbus'
 ];
 
 const trimmedAppBase = appBase.endsWith('/')
@@ -112,7 +115,12 @@ export default defineConfig(() => ({
 		'import.meta.env.VITE_PHP_VERSION': JSON.stringify(process.env.PHP_VERSION ?? '8.4')
 	}
 	, resolve: {
-		preserveSymlinks: true
+		alias: existsSync(localQuickbusPath)
+			? {
+				quickbus: localQuickbusPath
+			}
+			: {}
+		, preserveSymlinks: true
 	}
 	, publicDir: 'public'
 	, build: {

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import Terminal from './Terminal';
 import loader from './bar-spin.svg';
+import { getPhpBus, waitForPhpBusRequest } from './phpBus';
 import { basePath } from './runtimePaths';
 import { ensureServiceWorker, serviceWorkerControlTimeoutMs } from './serviceWorker';
 
@@ -82,6 +82,32 @@ const formatInstallError = error => {
 	return `Installer failed: ${detail}`;
 };
 
+const createSerializableSettings = settings => ({
+	docroot: settings?.docroot
+	, maxRequestAge: settings?.maxRequestAge
+	, staticCacheTime: settings?.staticCacheTime
+	, dynamicCacheTime: settings?.dynamicCacheTime
+	, vHosts: Array.isArray(settings?.vHosts)
+		? settings.vHosts.map(vHost => ({
+			pathPrefix: vHost?.pathPrefix
+			, directory: vHost?.directory
+			, entrypoint: vHost?.entrypoint
+		}))
+		: []
+});
+
+const sendInstallMessage = (bus, action, params = []) => {
+	const request = bus[action](...params);
+
+	return waitForPhpBusRequest(request, {
+		action
+		, params
+		, timeoutMs: action in installerRpcTimeouts
+			? installerRpcTimeouts[action]
+			: undefined
+	});
+};
+
 export default function InstallDemo()
 {
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
@@ -149,6 +175,9 @@ export default function InstallDemo()
 					}
 
 					sessionStorage.removeItem(serviceWorkerRetryKey);
+					const bus = await getPhpBus({
+						timeoutMs: serviceWorkerControlTimeoutMs
+					});
 
 					const selectedFrameworkName = query.get('framework');
 					const overwrite = query.get('overwrite') ?? false;
@@ -173,15 +202,7 @@ export default function InstallDemo()
 						updateMessage('Acquiring Lock...');
 						await navigator.locks.request('php-wasm-demo-install', async () => {
 							updateMessage('Checking for Existing Install...');
-							const sendMessage = sendMessageFor(basePath('cgi-worker.js'));
-							const sendInstallMessage = (action, params = []) => sendMessage(
-								action
-								, params
-								, action in installerRpcTimeouts
-									? {timeoutMs: installerRpcTimeouts[action]}
-									: undefined
-							);
-							const checkPath = await sendInstallMessage('analyzePath', ['/persist/' + selectedFramework.dir]);
+							const checkPath = await sendInstallMessage(bus, 'analyzePath', ['/persist/' + selectedFramework.dir]);
 
 							if(!overwrite && checkPath.exists)
 							{
@@ -193,11 +214,13 @@ export default function InstallDemo()
 
 							updateMessage(`Downloading ${selectedFramework.file}...`);
 							const zipContents = await (await fetch(basePath(selectedFramework.file))).arrayBuffer();
-							await sendInstallMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
-							await sendInstallMessage('writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
+							await sendInstallMessage(bus, 'writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
+							await sendInstallMessage(bus, 'writeFile', ['/config/restore-path.tmp', '/persist/' + selectedFramework.path]);
 
 							updateMessage(`Setting up ${selectedFrameworkName}...`);
-							const settings = await sendInstallMessage('getSettings');
+							const settings = createSerializableSettings(
+								await sendInstallMessage(bus, 'getSettings')
+							);
 							const vHostPrefix = basePath(`cgi-bin/${selectedFramework.vHost}`);
 							const existingvHost = settings.vHosts.find(vHost => vHost.pathPrefix === vHostPrefix);
 
@@ -215,8 +238,8 @@ export default function InstallDemo()
 								existingvHost.entrypoint = selectedFramework.entry;
 							}
 
-							await sendInstallMessage('setSettings', [settings]);
-							await sendInstallMessage('storeInit');
+							await sendInstallMessage(bus, 'setSettings', [settings]);
+							await sendInstallMessage(bus, 'storeInit');
 
 							updateMessage(`Unpacking ${selectedFramework.file}...`);
 
@@ -226,12 +249,24 @@ export default function InstallDemo()
 								{
 									updateMessage('Setting up PostgreSQL...');
 									const sqlFile = await (await fetch(selectedFramework.sql)).text();
-									await sendMessage('execSql', [`idb://host= dbname=drupal port=5432`, sqlFile]);
-									await sendMessage('runSql', [`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables']);
+									await waitForPhpBusRequest(
+										bus.execSql(`idb://host= dbname=drupal port=5432`, sqlFile)
+										, {
+											action: 'execSql'
+											, params: [`idb://host= dbname=drupal port=5432`, sqlFile]
+										}
+									);
+									await waitForPhpBusRequest(
+										bus.runSql(`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables')
+										, {
+											action: 'runSql'
+											, params: [`idb://host= dbname=drupal port=5432`, 'select * from information_schema.tables']
+										}
+									);
 								}
 
 								updateMessage('Refreshing PHP-CGI...');
-								await sendInstallMessage('refresh', []);
+								await sendInstallMessage(bus, 'refresh', []);
 
 								updateMessage(`Opening ${selectedFrameworkName}...`);
 								informOpener(selectedFrameworkName);

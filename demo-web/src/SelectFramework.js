@@ -8,7 +8,7 @@ import laminasIcon from './laminas-icon.svg';
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import Header from './Header';
 import { basePath } from './runtimePaths';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
+import { getPhpBus } from './phpBus';
 import { popupTarget, resolvePopupHref, resolvePopupRequest } from './popupNavigation';
 
 import reactIcon from './react-icon.svg';
@@ -19,9 +19,6 @@ import { Backup, Clear, Restore } from './Filesystem';
 import DoWithFile from './DoWithFile';
 import ErrorDialog from './ErrorDialog';
 import Confirm from './Confirm';
-
-// const sendMessage = sendMessageFor(`${window.location.origin}${basePath('cgi-worker.mjs')}`);
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 const PopupLink = ({children, className = '', path, ...props}) => (
 	<a
@@ -68,11 +65,28 @@ function SelectFramework()
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 
 	const refreshAll = useCallback(() => {
-		sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
-		sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
-		sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
-		sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
-		sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
+		void (async() => {
+			const bus = await getPhpBus();
+			const [
+				cakePath
+				, codeigniterPath
+				, drupalPath
+				, laravelPath
+				, laminasPath
+			] = await Promise.all([
+				bus.analyzePath('/persist/cakephp-5')
+				, bus.analyzePath('/persist/codeigniter-4')
+				, bus.analyzePath('/persist/drupal-7.95')
+				, bus.analyzePath('/persist/laravel-11')
+				, bus.analyzePath('/persist/laminas-3')
+			]);
+
+			setCakeInstalled(cakePath.exists);
+			setCodeigniterInstalled(codeigniterPath.exists);
+			setDrupalInstalled(drupalPath.exists);
+			setLaravelInstalled(laravelPath.exists);
+			setLaminasInstalled(laminasPath.exists);
+		})();
 	}, []);
 
 	useEffect(() => {
@@ -83,23 +97,11 @@ function SelectFramework()
 		switch(event.detail)
 		{
 			case 'cakephp-5':
-				sendMessage('analyzePath', ['/persist/cakephp-5']).then(about => setCakeInstalled(about.exists));
-				break;
-
 			case 'codeigniter-4':
-				sendMessage('analyzePath', ['/persist/codeigniter-4']).then(about => setCodeigniterInstalled(about.exists));
-				break;
-
 			case 'drupal-7':
-				sendMessage('analyzePath', ['/persist/drupal-7.95']).then(about => setDrupalInstalled(about.exists));
-				break;
-
 			case 'laminas-3':
-				sendMessage('analyzePath', ['/persist/laminas-3']).then(about => setLaminasInstalled(about.exists));
-				break;
-
 			case 'laravel-11':
-				sendMessage('analyzePath', ['/persist/laravel-11']).then(about => setLaravelInstalled(about.exists));
+				refreshAll();
 				break;
 
 			default:

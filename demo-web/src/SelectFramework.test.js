@@ -1,30 +1,27 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
-const { sendMessage, sendMessageFor } = vi.hoisted(() => {
+const { bus, getPhpBus } = vi.hoisted(() => {
 	Object.defineProperty(globalThis.navigator, 'serviceWorker', {
 		configurable: true
 		, value: {controller: {}}
 	});
 
-	const sendMessage = vi.fn(async (action, params = []) => {
-		if(action !== 'analyzePath')
-		{
-			throw new Error(`Unexpected command: ${action}(${JSON.stringify(params)})`);
-		}
+	const bus = {
+		analyzePath: vi.fn(async path => {
+			return {
+				exists: path === '/persist/cakephp-5'
+			};
+		})
+	};
 
-		return {
-			exists: params[0] === '/persist/cakephp-5'
-		};
-	});
+	const getPhpBus = vi.fn(async () => bus);
 
-	const sendMessageFor = vi.fn(() => sendMessage);
-
-	return {sendMessage, sendMessageFor};
+	return {bus, getPhpBus};
 });
 
-vi.mock('php-cgi-wasm/msg-bus.mjs', () => ({
-	sendMessageFor
+vi.mock('./phpBus', () => ({
+	getPhpBus
 }));
 
 vi.mock('./Header', () => ({
@@ -67,8 +64,8 @@ import SelectFramework from './SelectFramework';
 
 describe('SelectFramework', () => {
 	beforeEach(() => {
-		sendMessage.mockClear();
-		sendMessageFor.mockClear();
+		bus.analyzePath.mockClear();
+		getPhpBus.mockClear();
 		window.history.pushState({}, '', '/select-framework.html');
 	});
 
@@ -78,7 +75,7 @@ describe('SelectFramework', () => {
 		const ideButton = await screen.findByRole('button', {name: 'IDE'});
 
 		await waitFor(() => {
-			expect(sendMessage).toHaveBeenCalledWith('analyzePath', ['/persist/cakephp-5']);
+			expect(bus.analyzePath).toHaveBeenCalledWith('/persist/cakephp-5');
 		});
 
 		const form = ideButton.closest('form');

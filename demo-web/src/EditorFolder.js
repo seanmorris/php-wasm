@@ -1,16 +1,13 @@
 import './Common.css';
 import './EditorEntry.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import EditorFile from './EditorFile';
+import { getPhpBus } from './phpBus';
 
 import fileIcon from './nomo-dark/file.svg';
 import folderOpen from './nomo-dark/folder.open.svg';
 import folderClose from './nomo-dark/folder.close.svg';
 import loader from './bar-spin.svg';
-
-// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 
 export default function EditorFolder({
 	path = '/'
@@ -45,10 +42,11 @@ export default function EditorFolder({
 
 	const loadFiles = useCallback(async () => {
 		setLoading(true);
-		const entries = (await sendMessage('readdir', [path]))
+		const bus = await getPhpBus();
+		const entries = (await bus.readdir(path))
 			.filter(file => file !== '.' && file !== '..');
 		const types = await Promise.all(entries.map(async file =>
-			(await sendMessage('analyzePath', [path + (path[path.length - 1] !== '/' ? '/' : '') + file]))
+			(await bus.analyzePath(path + (path[path.length - 1] !== '/' ? '/' : '') + file))
 			.object.isFolder
 		));
 
@@ -74,7 +72,8 @@ export default function EditorFolder({
 			if(event.target.value)
 			{
 				const newName = path + '/' + event.target.value;
-				await sendMessage('writeFile', [newName, new TextEncoder().encode('')]);
+				const bus = await getPhpBus();
+				await bus.writeFile(newName, new TextEncoder().encode(''));
 				await loadFiles();
 				await onOpenFile(newName);
 			}
@@ -96,7 +95,8 @@ export default function EditorFolder({
 			if(event.target.value)
 			{
 				const newName = path + '/' + event.target.value;
-				await sendMessage('mkdir', [newName]);
+				const bus = await getPhpBus();
+				await bus.mkdir(newName);
 				await loadFiles();
 			}
 

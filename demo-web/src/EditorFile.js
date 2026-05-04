@@ -19,11 +19,8 @@ import renameIcon from './icons/rename-icon-16.png';
 import deleteIcon from './icons/delete-icon-16.png';
 
 import { useEffect, useRef, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 import { baseUrlFor } from './runtimePaths';
-
-// const sendMessage = sendMessageFor((`${window.location.origin}${basePath('cgi-worker.mjs')}`));
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
+import { getPhpBus } from './phpBus';
 
 const icons = {
 	php: filePhpIcon
@@ -82,7 +79,8 @@ export default function EditorFile({path, name, onOpenFile, startPath = '/'})
 	};
 
 	const deleteFile = async () => {
-		await sendMessage('unlink', [_path]);
+		const bus = await getPhpBus();
+		await bus.unlink(_path);
 		setShowContext(false);
 		setDeleted(true);
 	};
@@ -94,8 +92,9 @@ export default function EditorFile({path, name, onOpenFile, startPath = '/'})
 			{
 				const dirPath = _path.substr(0, _path.length - _name.length);
 				const newPath = dirPath + event.target.value;
+				const bus = await getPhpBus();
 
-				await sendMessage('rename', [_path, newPath]);
+				await bus.rename(_path, newPath);
 
 				setName(event.target.value);
 				setPath(newPath);

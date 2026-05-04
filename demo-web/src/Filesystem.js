@@ -5,20 +5,19 @@ import loader from './bar-spin.svg';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { basePath } from './runtimePaths';
+import { getPhpBus } from './phpBus';
 
 import libxml from 'php-wasm-libxml';
 import zlib from 'php-wasm-zlib';
 import libzip from 'php-wasm-libzip';
 
 import { useEffect, useEffectEvent, useState } from 'react';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
-
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 const sharedLibs = [libxml, zlib, libzip];
 
 const backupSite = async () => {
-	const persistFile = await sendMessage('readdir', ['/persist']);
-	const configFiles = await sendMessage('readdir', ['/config']);
+	const bus = await getPhpBus();
+	const persistFile = await bus.readdir('/persist');
+	const configFiles = await bus.readdir('/config');
 
 	if([persistFile, configFiles].flat().length <= 4)
 	{
@@ -36,8 +35,8 @@ const backupSite = async () => {
 	await php.run(backupPhpCode);
 
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
-	await sendMessage('refresh', []);
-	const zipContents = await sendMessage('readFile', ['/persist/backup.zip']);
+	await bus.refresh();
+	const zipContents = await bus.readFile('/persist/backup.zip');
 	const blob = new Blob([zipContents], {type:'application/zip'});
 	const link = document.createElement('a');
 	link.href = URL.createObjectURL(blob);
@@ -50,24 +49,27 @@ const restoreSite = async ({fileInput}) => {
 	{
 		throw `No file provided.`;
 	}
+
+	const bus = await getPhpBus();
 	const php = new PhpWeb({
 		persist: [{mountPath:'/persist'}, {mountPath:'/config'}]
 		, sharedLibs
 	});
 	const zipContents = await fileInput.files[0].arrayBuffer();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Uploading zip...'}));
-	await sendMessage('writeFile', ['/persist/restore.zip', new Uint8Array(zipContents)]);
+	await bus.writeFile('/persist/restore.zip', new Uint8Array(zipContents));
 	await php.binary;
 	const restorePhpCode = await (await fetch(basePath('scripts/restore.php'))).text();
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Unpacking files...'}));
 	await php.run(restorePhpCode);
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Refreshing PHP...'}));
-	await sendMessage('refresh', []);
+	await bus.refresh();
 };
 
 const clearFilesystem = () => {
 	const fileDb = indexedDB.open("/persist", 21);
 	const configDb = indexedDB.open("/config", 21);
+	const busPromise = getPhpBus();
 
 	window.dispatchEvent(new CustomEvent('install-status', {detail: 'Clearing IDBFS...'}));
 
@@ -80,7 +82,8 @@ const clearFilesystem = () => {
 				const objectStore = transaction.objectStore("FILE_DATA");
 				objectStore.clear();
 
-				await sendMessage('refresh', []);
+				const bus = await busPromise;
+				await bus.refresh();
 
 				accept();
 			};

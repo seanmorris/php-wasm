@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
-const { ensureServiceWorker, sendMessageFor } = vi.hoisted(() => ({
+const { ensureServiceWorker, getPhpBus } = vi.hoisted(() => ({
 	ensureServiceWorker: vi.fn()
-	, sendMessageFor: vi.fn()
+	, getPhpBus: vi.fn()
 }));
 
 vi.mock('./serviceWorker', () => ({
@@ -11,8 +11,9 @@ vi.mock('./serviceWorker', () => ({
 	, serviceWorkerControlTimeoutMs: 1500
 }));
 
-vi.mock('php-cgi-wasm/msg-bus.mjs', () => ({
-	sendMessageFor
+vi.mock('./phpBus', async importOriginal => ({
+	...(await importOriginal())
+	, getPhpBus
 }));
 
 vi.mock('./Terminal', () => ({
@@ -25,34 +26,26 @@ import InstallDemo from './InstallDemo';
 
 describe('InstallDemo', () => {
 	let fetchMock;
-	let sendMessage;
+	let bus;
 	let originalServiceWorker;
 	let originalLocks;
 
 	beforeEach(() => {
 		ensureServiceWorker.mockReset();
-		sendMessageFor.mockReset();
+		getPhpBus.mockReset();
 
-		sendMessage = vi.fn(async (command) => {
-			switch(command)
-			{
-				case 'analyzePath':
-					return {exists: false};
+		bus = {
+			analyzePath: vi.fn(async () => ({exists: false}))
+			, getSettings: vi.fn(async () => ({vHosts: []}))
+			, writeFile: vi.fn(async () => undefined)
+			, setSettings: vi.fn(async () => undefined)
+			, storeInit: vi.fn(async () => undefined)
+			, refresh: vi.fn(async () => undefined)
+			, execSql: vi.fn(async () => undefined)
+			, runSql: vi.fn(async () => undefined)
+		};
 
-				case 'getSettings':
-					return {vHosts: []};
-
-				case 'writeFile':
-				case 'setSettings':
-				case 'storeInit':
-					return undefined;
-
-				default:
-					throw new Error(`Unexpected command: ${command}`);
-			}
-		});
-
-		sendMessageFor.mockReturnValue(sendMessage);
+		getPhpBus.mockResolvedValue(bus);
 
 		ensureServiceWorker.mockResolvedValue({
 			supported: true
@@ -141,35 +134,58 @@ describe('InstallDemo', () => {
 			)
 		);
 
-		await waitFor(() => expect(sendMessage).toHaveBeenCalledWith('storeInit', [], {timeoutMs: 10000}));
+		await waitFor(() => expect(bus.storeInit).toHaveBeenCalledTimes(1));
 
 		expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('scripts/init.php'))).toHaveLength(1);
 		expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/backups/drupal-7.95.zip'))).toHaveLength(1);
 		expect(navigator.locks.request).toHaveBeenCalledTimes(1);
 	});
 
+	it('sanitizes runtime settings before sending them back to the worker', async () => {
+		bus.getSettings.mockResolvedValue({
+			docroot: '/persist/www'
+			, maxRequestAge: 1234
+			, staticCacheTime: 10
+			, dynamicCacheTime: 20
+			, vHosts: [
+				{
+					pathPrefix: '/php-wasm/cgi-bin/test'
+					, directory: '/preload/test_www'
+					, entrypoint: 'hello-world.php'
+					, locateFile: () => '/tmp/not-cloneable'
+				}
+			]
+		});
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(bus.setSettings).toHaveBeenCalledTimes(1));
+
+		expect(bus.setSettings).toHaveBeenCalledWith({
+			docroot: '/persist/www'
+			, maxRequestAge: 1234
+			, staticCacheTime: 10
+			, dynamicCacheTime: 20
+			, vHosts: [
+				{
+					pathPrefix: '/php-wasm/cgi-bin/test'
+					, directory: '/preload/test_www'
+					, entrypoint: 'hello-world.php'
+				}
+				, {
+					pathPrefix: '/cgi-bin/drupal'
+					, directory: '/persist/drupal-7.95'
+					, entrypoint: 'index.php'
+				}
+			]
+		});
+	});
+
 	it('surfaces analyzePath failures instead of hanging on the status text', async () => {
-		sendMessage.mockImplementation(async (command) => {
-			switch(command)
-			{
-				case 'analyzePath':
-					throw {
-						error: 'Timed out waiting for a service worker reply after 5000ms.'
-						, action: 'analyzePath'
-						, params: ['/persist/drupal-7.95']
-					};
-
-				case 'getSettings':
-					return {vHosts: []};
-
-				case 'writeFile':
-				case 'setSettings':
-				case 'storeInit':
-					return undefined;
-
-				default:
-					throw new Error(`Unexpected command: ${command}`);
-			}
+		bus.analyzePath.mockRejectedValue({
+			error: 'Timed out waiting for a service worker reply after 5000ms.'
+			, action: 'analyzePath'
+			, params: ['/persist/drupal-7.95']
 		});
 
 		render(<InstallDemo />);

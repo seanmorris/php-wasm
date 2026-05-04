@@ -4,26 +4,21 @@ import { render, screen, waitFor } from '@testing-library/react';
 const {
 	createEditSession
 	, editor
-	, sendMessage
-	, sendMessageFor
+	, bus
+	, getPhpBus
 } = vi.hoisted(() => {
 	Object.defineProperty(globalThis.navigator, 'serviceWorker', {
 		configurable: true
 		, value: {controller: {}}
 	});
 
-	const sendMessage = vi.fn(async (action, params = []) => {
-		switch(action)
-		{
-			case 'readFile':
-				return new TextEncoder().encode('<?php echo 123;');
+	const bus = {
+		readFile: vi.fn(async () => new TextEncoder().encode('<?php echo 123;'))
+		, writeFile: vi.fn(async () => undefined)
+		, analyzePath: vi.fn(async () => ({exists: true}))
+	};
 
-			default:
-				throw new Error(`Unexpected command: ${action}(${JSON.stringify(params)})`);
-		}
-	});
-
-	const sendMessageFor = vi.fn(() => sendMessage);
+	const getPhpBus = vi.fn(async () => bus);
 
 	const createEditSession = vi.fn((code, mode) => ({
 		$modeId: mode
@@ -53,13 +48,13 @@ const {
 	return {
 		createEditSession
 		, editor
-		, sendMessage
-		, sendMessageFor
+		, bus
+		, getPhpBus
 	};
 });
 
-vi.mock('php-cgi-wasm/msg-bus.mjs', () => ({
-	sendMessageFor
+vi.mock('./phpBus', () => ({
+	getPhpBus
 }));
 
 vi.mock('ace-builds', () => ({
@@ -117,8 +112,10 @@ import Editor from './Editor';
 
 describe('Editor', () => {
 	beforeEach(() => {
-		sendMessage.mockClear();
-		sendMessageFor.mockClear();
+		bus.readFile.mockClear();
+		bus.writeFile.mockClear();
+		bus.analyzePath.mockClear();
+		getPhpBus.mockClear();
 		createEditSession.mockClear();
 		editor.getSession.mockClear();
 		editor.getValue.mockClear();
@@ -137,7 +134,7 @@ describe('Editor', () => {
 		render(<Editor />);
 
 		await waitFor(() => {
-			expect(sendMessage).toHaveBeenCalledWith('readFile', ['/persist/test-breakpoint.php']);
+			expect(bus.readFile).toHaveBeenCalledWith('/persist/test-breakpoint.php');
 		});
 
 		expect(screen.getByText('test-breakpoint.php')).toBeInTheDocument();

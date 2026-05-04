@@ -1,32 +1,23 @@
 import { render, waitFor } from '@testing-library/react';
 
-const { sendMessage, sendMessageFor } = vi.hoisted(() => {
+const { bus, getPhpBus } = vi.hoisted(() => {
 	Object.defineProperty(globalThis.navigator, 'serviceWorker', {
 		configurable: true
 		, value: {controller: {}}
 	});
 
-	const sendMessage = vi.fn(async action => {
-		switch(action)
-		{
-			case 'readdir':
-				return ['child.txt'];
+	const bus = {
+		readdir: vi.fn(async () => ['child.txt'])
+		, analyzePath: vi.fn(async () => ({object: {isFolder: false}}))
+	};
 
-			case 'analyzePath':
-				return {object: {isFolder: false}};
+	const getPhpBus = vi.fn(async () => bus);
 
-			default:
-				throw new Error(`Unexpected command: ${action}`);
-		}
-	});
-
-	const sendMessageFor = vi.fn(() => sendMessage);
-
-	return {sendMessage, sendMessageFor};
+	return {bus, getPhpBus};
 });
 
-vi.mock('php-cgi-wasm/msg-bus.mjs', () => ({
-	sendMessageFor
+vi.mock('./phpBus', () => ({
+	getPhpBus
 }));
 
 vi.mock('./EditorFile', () => ({
@@ -39,14 +30,15 @@ import EditorFolder from './EditorFolder';
 
 describe('EditorFolder', () => {
 	beforeEach(() => {
-		sendMessage.mockClear();
-		sendMessageFor.mockClear();
+		bus.readdir.mockClear();
+		bus.analyzePath.mockClear();
+		getPhpBus.mockClear();
 	});
 
 	it('does not reload directory contents when only startPath changes', async () => {
 		const pathStates = {current: new Map()};
 		const onOpenFile = vi.fn();
-		const readdirCalls = () => sendMessage.mock.calls.filter(([action]) => action === 'readdir').length;
+		const readdirCalls = () => bus.readdir.mock.calls.length;
 
 		const { rerender } = render(
 			<EditorFolder

@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import { onMessage } from 'php-cgi-wasm/msg-bus.mjs';
 import App from './App';
 import { ensureServiceWorker } from './serviceWorker';
 
@@ -20,8 +19,6 @@ if(!params.has('no-service-worker'))
 			return;
 		}
 	})();
-
-	navigator.serviceWorker.addEventListener('message', onMessage);
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

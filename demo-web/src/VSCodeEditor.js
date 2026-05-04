@@ -1,7 +1,7 @@
 import './Common.css';
 import './Editor.css';
 import Header from './Header';
-import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
+import { getPhpBus } from './phpBus';
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useVSCode } from 'vscode-react';
@@ -16,7 +16,6 @@ import {
 	, STARTUP_BRIDGE_RETRY_OPTIONS
 } from './vscodeBridgeStartup';
 
-const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
 const GENERATED_CONFIG_PREFIX = 'PHP DBG Wasm: Current File';
 
 const createLaunchConfig = defaultVersion => ({
@@ -24,28 +23,28 @@ const createLaunchConfig = defaultVersion => ({
 	, configurations: createGeneratedLaunchConfigurations(defaultVersion)
 });
 
-const ensureDebugFiles = async defaultVersion => {
-	const vscodeDir = await sendMessage('analyzePath', ['/.vscode']);
+const ensureDebugFiles = async (bus, defaultVersion) => {
+	const vscodeDir = await bus.analyzePath('/.vscode');
 
 	if(!vscodeDir.exists)
 	{
-		await sendMessage('mkdir', ['/.vscode']);
+		await bus.mkdir('/.vscode');
 	}
 
-	const launchJson = await sendMessage('analyzePath', ['/.vscode/launch.json']);
+	const launchJson = await bus.analyzePath('/.vscode/launch.json');
 
 	if(!launchJson.exists)
 	{
-		await sendMessage('writeFile', [
+		await bus.writeFile(
 			'/.vscode/launch.json'
 			, new TextEncoder().encode(JSON.stringify(createLaunchConfig(defaultVersion), null, 2))
-		]);
+		);
 
 		return;
 	}
 
 	const existingContent = new TextDecoder().decode(
-		await sendMessage('readFile', ['/.vscode/launch.json'])
+		await bus.readFile('/.vscode/launch.json')
 	);
 
 	let parsedLaunchConfig;
@@ -81,10 +80,10 @@ const ensureDebugFiles = async defaultVersion => {
 
 	if(nextContent !== existingContent)
 	{
-		await sendMessage('writeFile', [
+		await bus.writeFile(
 			'/.vscode/launch.json'
 			, new TextEncoder().encode(nextContent)
-		]);
+		);
 	}
 };
 
@@ -104,35 +103,36 @@ export default function VSCodeEditor()
 
 	const fsHandlers = useMemo(() => ({
 		readdir(path) {
-			return sendMessage('readdir', [path]);
+			return getPhpBus().then(bus => bus.readdir(path));
 		}
 
 		, async readFile(path) {
-			return Array.from(await sendMessage('readFile', [path]));
+			const bus = await getPhpBus();
+			return Array.from(await bus.readFile(path));
 		}
 
 		, analyzePath(path) {
-			return sendMessage('analyzePath', [path]);
+			return getPhpBus().then(bus => bus.analyzePath(path));
 		}
 
 		, writeFile(filePath, contents) {
-			return sendMessage('writeFile', [filePath, new Uint8Array(contents)]);
+			return getPhpBus().then(bus => bus.writeFile(filePath, new Uint8Array(contents)));
 		}
 
 		, rename(...args) {
-			return sendMessage('rename', args);
+			return getPhpBus().then(bus => bus.rename(...args));
 		}
 
 		, mkdir(...args) {
-			return sendMessage('mkdir', args);
+			return getPhpBus().then(bus => bus.mkdir(...args));
 		}
 
 		, unlink(...args) {
-			return sendMessage('unlink', args);
+			return getPhpBus().then(bus => bus.unlink(...args));
 		}
 
 		, rmdir(...args) {
-			return sendMessage('rmdir', args);
+			return getPhpBus().then(bus => bus.rmdir(...args));
 		}
 
 		, activate(...args) {
@@ -182,7 +182,7 @@ export default function VSCodeEditor()
 		adapterRef.current = new PhpDbgBusSession({
 			runtimeArgs: createPhpDbgRuntimeArgs(version)
 			, fs: {
-				readFile: path => sendMessage('readFile', [path])
+				readFile: path => getPhpBus().then(bus => bus.readFile(path))
 			}
 			, listOpenBreakpoints: () => {
 				return listOpenBreakpointsFor({
@@ -211,7 +211,8 @@ export default function VSCodeEditor()
 		void ready.then(async () => {
 			try
 			{
-				await ensureDebugFiles(version);
+				const bus = await getPhpBus();
+				await ensureDebugFiles(bus, version);
 				await callClientMethodWithRetry(
 					{configure}
 					, 'configure'
