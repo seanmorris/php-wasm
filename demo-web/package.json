@@ -30,7 +30,7 @@
     "php-wasm-xml": "../packages/xml",
     "php-wasm-yaml": "../packages/libyaml",
     "php-wasm-zlib": "../packages/zlib",
-    "quickbus": "^1.0.0",
+    "quickbus": "^1.0.1",
     "react": "^19.2.0",
     "react-ace": "^14.0.1",
     "react-dom": "^19.2.0",
