@@ -258,7 +258,9 @@ function Embedded()
 		await phpRef.current.refresh();
 	}, []);
 
-	const runCode = useCallback(async () => {
+	const runCode = useCallback(async (codeOverride = null) => {
+		codeOverride = typeof codeOverride === 'string' ? codeOverride : null;
+
 		setRunning(true);
 		setStatusMessage('Executing...');
 
@@ -270,7 +272,7 @@ function Embedded()
 
 		setStdRet('');
 
-		let code = editor.current?.editor?.getValue() ?? input.current ?? editorValue;
+		let code = codeOverride ?? editor.current?.editor?.getValue() ?? input.current ?? editorValue;
 
 		const version = selectVersionBox.current?.value;
 		const variant = selectVariantBox.current?.value;
@@ -399,7 +401,7 @@ function Embedded()
 		if(settings.autorun)
 		{
 			setStatusMessage('Executing...');
-			await runCode();
+			await runCode(phpCode);
 		}
 
 		setShowCanvas(canvasCheckbox.current.checked);
