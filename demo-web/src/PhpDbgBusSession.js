@@ -53,12 +53,14 @@ export class PhpDbgBusSession
 		createRuntime = args => new PhpDbgWeb(args)
 		, runtimeArgs = {}
 		, fs = {}
+		, listOpenBreakpoints = null
 		, postMessage = noop
 	} = {}) {
 		this.createRuntime = createRuntime;
 		this.defaultRuntimeArgs = runtimeArgs;
 		this.runtimeArgs = runtimeArgs;
 		this.fs = fs;
+		this.listOpenBreakpoints = listOpenBreakpoints;
 		this.postMessage = postMessage;
 
 		this.runtime = null;
@@ -80,6 +82,7 @@ export class PhpDbgBusSession
 
 		this.sessions = new Map;
 		this.activeSessionId = null;
+		this.requestedBreakpoints = new Map;
 
 		this.handleStdinRequest = this.handleStdinRequest.bind(this);
 		this.handleOutput = this.handleOutput.bind(this);
@@ -136,6 +139,7 @@ export class PhpDbgBusSession
 		this.sessions.clear();
 		this.variableReferences.clear();
 		this.activeSessionId = null;
+		this.requestedBreakpoints.clear();
 	}
 
 	configureRuntime(config = {})
@@ -154,23 +158,74 @@ export class PhpDbgBusSession
 		};
 	}
 
+	createSessionState(session, overrides = {})
+	{
+		return {
+			session
+			, frameMap: new Map
+			, breakpoints: new Map
+			, config: null
+			, lastResumeReason: 'breakpoint'
+			, running: false
+			, started: false
+			, initializing: false
+			, requestedBreakpoints: new Map(this.requestedBreakpoints)
+			, pendingInput: []
+			, waitingForInput: false
+			, ...overrides
+		};
+	}
+
+	resetSessionState(session, overrides = {})
+	{
+		const state = this.createSessionState(session, overrides);
+		this.sessions.set(session.id, state);
+		return state;
+	}
+
+	async startDebugSession(session, config = {}, overrides = {})
+	{
+		this.disposeRuntime();
+		this.clearVariableReferences();
+
+		const state = this.resetSessionState(session, {
+			config
+			, ...overrides
+		});
+
+		this.activeSessionId = session.id;
+		this.configureRuntime(config);
+		await this.getRuntime();
+
+		return state;
+	}
+
+	endDebugSession(sessionId)
+	{
+		const wasActiveSession = this.activeSessionId === sessionId;
+
+		this.sessions.delete(sessionId);
+
+		if(wasActiveSession)
+		{
+			this.activeSessionId = null;
+			this.disposeRuntime();
+			this.clearVariableReferences();
+			return;
+		}
+
+		if(!this.sessions.size)
+		{
+			this.disposeRuntime();
+			this.clearVariableReferences();
+		}
+	}
+
 	sessionState(session)
 	{
 		if(!this.sessions.has(session.id))
 		{
-			this.sessions.set(session.id, {
-				session
-				, frameMap: new Map
-				, breakpoints: new Map
-				, config: null
-				, lastResumeReason: 'breakpoint'
-				, running: false
-				, started: false
-				, initializing: false
-				, requestedBreakpoints: new Map
-				, pendingInput: []
-				, waitingForInput: false
-			});
+			this.sessions.set(session.id, this.createSessionState(session));
 		}
 
 		const state = this.sessions.get(session.id);
@@ -305,6 +360,60 @@ export class PhpDbgBusSession
 		}));
 	}
 
+	buildRequestedBreakpointMap(breakpoints = [])
+	{
+		const requestedBreakpoints = new Map;
+
+		for(const breakpoint of breakpoints)
+		{
+			if(!breakpoint?.enabled || !breakpoint.location?.uri || !breakpoint.location?.line)
+			{
+				continue;
+			}
+
+			const path = normalizePath(breakpoint.location.uri);
+
+			if(!path)
+			{
+				continue;
+			}
+
+			const nextBreakpoints = requestedBreakpoints.get(path) ?? [];
+			nextBreakpoints.push({
+				line: breakpoint.location.line
+				, column: breakpoint.location.column ?? 1
+			});
+			requestedBreakpoints.set(path, nextBreakpoints);
+		}
+
+		return requestedBreakpoints;
+	}
+
+	async syncRequestedBreakpointsFromOpenFiles(state)
+	{
+		if(!this.listOpenBreakpoints)
+		{
+			return false;
+		}
+
+		try
+		{
+			const requestedBreakpoints = this.buildRequestedBreakpointMap(
+				await this.listOpenBreakpoints()
+			);
+
+			state.requestedBreakpoints = requestedBreakpoints;
+			this.requestedBreakpoints = new Map(requestedBreakpoints);
+
+			return true;
+		}
+		catch(error)
+		{
+			console.warn('[PhpDbgBusSession] Failed to sync open breakpoints', error);
+			return false;
+		}
+	}
+
 	async applyRequestedBreakpoints(state)
 	{
 		for(const [path, breakpoints] of state.requestedBreakpoints.entries())
@@ -401,24 +510,19 @@ export class PhpDbgBusSession
 
 	async handleLaunch(session, message)
 	{
-		const state = this.sessionState(session);
-		state.config = message.arguments ?? {};
-		state.started = false;
-		state.running = false;
-		state.lastResumeReason = 'entry';
-		this.configureRuntime(state.config);
-		await this.getRuntime();
+		await this.startDebugSession(session, message.arguments ?? {}, {
+			lastResumeReason: 'entry'
+		});
 
 		return this.response(message);
 	}
 
 	async handleAttach(session, message)
 	{
-		const state = this.sessionState(session);
-		state.config = message.arguments ?? {};
-		state.running = false;
-		this.configureRuntime(state.config);
-		await this.getRuntime();
+		await this.startDebugSession(session, message.arguments ?? {}, {
+			lastResumeReason: 'breakpoint'
+		});
+
 		return this.response(message);
 	}
 
@@ -439,6 +543,7 @@ export class PhpDbgBusSession
 		// or otherwise fall back to interactive TTY-style prompt behavior.
 		await this.command('set pagination off');
 
+		await this.syncRequestedBreakpointsFromOpenFiles(state);
 		await this.applyRequestedBreakpoints(state);
 
 		for(const command of initCommands)
@@ -504,6 +609,7 @@ export class PhpDbgBusSession
 		}));
 
 		state.requestedBreakpoints.set(path, breakpoints);
+		this.requestedBreakpoints.set(path, breakpoints);
 
 		if(!path)
 		{
@@ -710,12 +816,7 @@ export class PhpDbgBusSession
 	async handleDisconnect(session, message)
 	{
 		await this.sendEvent(session.id, 'terminated', {});
-		this.sessions.delete(session.id);
-
-		if(this.activeSessionId === session.id)
-		{
-			this.activeSessionId = null;
-		}
+		this.endDebugSession(session.id);
 
 		return this.response(message);
 	}
@@ -800,12 +901,7 @@ export class PhpDbgBusSession
 
 	didTerminateDebugSession(session)
 	{
-		this.sessions.delete(session.id);
-
-		if(this.activeSessionId === session.id)
-		{
-			this.activeSessionId = null;
-		}
+		this.endDebugSession(session.id);
 
 		return true;
 	}

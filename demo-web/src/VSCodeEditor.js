@@ -3,50 +3,21 @@ import './Editor.css';
 import Header from './Header';
 import { sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
-import { Client, Server } from 'quickbus';
 import { useEffect, useMemo, useRef } from 'react';
+import { useVSCode } from 'vscode-react';
 import { PhpDbgBusSession } from './PhpDbgBusSession';
 import { createPhpDbgRuntimeArgs } from './phpDbgRuntimeArgs';
+import {
+	callClientMethodWithRetry
+	, createGeneratedLaunchConfigurations
+	, GENERATED_FILES_ASSOCIATIONS
+	, getAssociatedLanguageId
+	, listOpenBreakpointsFor
+	, STARTUP_BRIDGE_RETRY_OPTIONS
+} from './vscodeBridgeStartup';
 
 const sendMessage = sendMessageFor(navigator.serviceWorker.controller);
-const SUPPORTED_PHP_VERSIONS = ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 const GENERATED_CONFIG_PREFIX = 'PHP DBG Wasm: Current File';
-const GENERATED_FILES_ASSOCIATIONS = {
-	'*.module': 'php'
-	, '*.inc': 'php'
-};
-
-const getAssociatedLanguageId = path => {
-	if(!path)
-	{
-		return null;
-	}
-
-	return Object.entries(GENERATED_FILES_ASSOCIATIONS)
-		.find(([pattern]) => {
-			const suffix = pattern.startsWith('*.')
-				? pattern.slice(1)
-				: pattern;
-
-			return path.endsWith(suffix);
-		})
-		?.[1] ?? null;
-};
-
-const createGeneratedLaunchConfigurations = (defaultVersion = '8.3') => {
-	const orderedVersions = [
-		defaultVersion
-		, ...SUPPORTED_PHP_VERSIONS.filter(version => version !== defaultVersion)
-	];
-
-	return orderedVersions.map(version => ({
-		type: 'dbgBus'
-		, request: 'launch'
-		, name: `${GENERATED_CONFIG_PREFIX} (PHP ${version})`
-		, program: '${file}'
-		, version
-	}));
-};
 
 const createLaunchConfig = defaultVersion => ({
 	version: '0.2.0'
@@ -127,133 +98,165 @@ export default function VSCodeEditor()
 		() => new URL(query.get('vscodeUrl') || 'https://oss-code.pages.dev', outerOrigin),
 		[outerOrigin, query]
 	);
-	const innerOrigin = innerUrl.origin;
-
-	const iframeRef = useRef(null);
-	const clientRef = useRef(null);
-	const serverRef = useRef(null);
 	const adapterRef = useRef(null);
+	const listOpenBreakpointsRef = useRef(null);
+	const sendDebugAdapterMessageRef = useRef(null);
 
-	useEffect(() => {
-		if(!iframeRef.current)
-		{
-			return;
+	const fsHandlers = useMemo(() => ({
+		readdir(path) {
+			return sendMessage('readdir', [path]);
 		}
 
-		clientRef.current = new Client({
-			to: iframeRef.current.contentWindow
-			, from: window
-			, origin: innerOrigin
-		});
+		, async readFile(path) {
+			return Array.from(await sendMessage('readFile', [path]));
+		}
 
+		, analyzePath(path) {
+			return sendMessage('analyzePath', [path]);
+		}
+
+		, writeFile(filePath, contents) {
+			return sendMessage('writeFile', [filePath, new Uint8Array(contents)]);
+		}
+
+		, rename(...args) {
+			return sendMessage('rename', args);
+		}
+
+		, mkdir(...args) {
+			return sendMessage('mkdir', args);
+		}
+
+		, unlink(...args) {
+			return sendMessage('unlink', args);
+		}
+
+		, rmdir(...args) {
+			return sendMessage('rmdir', args);
+		}
+
+		, activate(...args) {
+			return args.length ? args[0] : true;
+		}
+	}), []);
+
+	const dbgHandlers = useMemo(() => ({
+		acceptVSCodeMessage(...args) {
+			return adapterRef.current.acceptVSCodeMessage(...args);
+		}
+
+		, debugSessionStarted(...args) {
+			return adapterRef.current.debugSessionStarted(...args);
+		}
+
+		, didStartDebugSession(...args) {
+			return adapterRef.current.didStartDebugSession(...args);
+		}
+
+		, didTerminateDebugSession(...args) {
+			return adapterRef.current.didTerminateDebugSession(...args);
+		}
+
+		, didChangeActiveDebugSession(...args) {
+			return adapterRef.current.didChangeActiveDebugSession(...args);
+		}
+	}), []);
+
+	const {
+		VSCode
+		, ready
+		, openFile
+		, configure
+		, listOpenBreakpoints
+		, sendDebugAdapterMessage
+	} = useVSCode({
+		url: innerUrl.href
+		, fsHandlers
+		, dbgHandlers
+	});
+
+	listOpenBreakpointsRef.current = listOpenBreakpoints;
+	sendDebugAdapterMessageRef.current = sendDebugAdapterMessage;
+
+	useEffect(() => {
 		adapterRef.current = new PhpDbgBusSession({
 			runtimeArgs: createPhpDbgRuntimeArgs(version)
 			, fs: {
 				readFile: path => sendMessage('readFile', [path])
 			}
-			, postMessage: (sessionId, message) => clientRef.current.sendDebugAdapterMessage(sessionId, message)
-		});
-
-		serverRef.current = new Server({
-			readdir(path) {
-				return sendMessage('readdir', [path]);
-			}
-
-			, async readFile(path) {
-				return Array.from(await sendMessage('readFile', [path]));
-			}
-
-			, analyzePath(path) {
-				return sendMessage('analyzePath', [path]);
-			}
-
-			, writeFile(filePath, contents) {
-				return sendMessage('writeFile', [filePath, new Uint8Array(contents)]);
-			}
-
-			, rename(...args) {
-				return sendMessage('rename', args);
-			}
-
-			, mkdir(...args) {
-				return sendMessage('mkdir', args);
-			}
-
-			, unlink(...args) {
-				return sendMessage('unlink', args);
-			}
-
-			, rmdir(...args) {
-				return sendMessage('rmdir', args);
-			}
-
-			, async activate(...args) {
-				await ensureDebugFiles(version);
-				const configurePromise = clientRef.current.configure({
-					filesAssociations: GENERATED_FILES_ASSOCIATIONS
-				}).catch(error => {
-					console.warn('Failed to configure file-bus document associations.', error);
+			, listOpenBreakpoints: () => {
+				return listOpenBreakpointsFor({
+					listOpenBreakpoints: listOpenBreakpointsRef.current
 				});
-
-				if(path)
+			}
+			, postMessage: (sessionId, message) => {
+				if(typeof sendDebugAdapterMessageRef.current !== 'function')
 				{
-					clientRef.current.openFile(path, {
-						languageId: getAssociatedLanguageId(path) || undefined
-					});
+					throw new TypeError('VS Code debug bridge is not available.');
 				}
 
-				await configurePromise;
-
-				return args.length ? args[0] : true;
+				return sendDebugAdapterMessageRef.current(sessionId, message);
 			}
-
-			, acceptVSCodeMessage(...args) {
-				return adapterRef.current.acceptVSCodeMessage(...args);
-			}
-
-			, debugSessionStarted(...args) {
-				return adapterRef.current.debugSessionStarted(...args);
-			}
-
-			, didStartDebugSession(...args) {
-				return adapterRef.current.didStartDebugSession(...args);
-			}
-
-			, didTerminateDebugSession(...args) {
-				return adapterRef.current.didTerminateDebugSession(...args);
-			}
-
-			, didChangeActiveDebugSession(...args) {
-				return adapterRef.current.didChangeActiveDebugSession(...args);
-			}
-		}, innerOrigin);
-
-		const onMessage = event => serverRef.current.handleMessageEvent(event);
-		window.addEventListener('message', onMessage);
+		});
 
 		return () => {
-			window.removeEventListener('message', onMessage);
 			adapterRef.current?.dispose();
 			adapterRef.current = null;
-			serverRef.current = null;
-			clientRef.current = null;
 		};
-	}, [innerOrigin, path, version]);
+	}, [version]);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		void ready.then(async () => {
+			try
+			{
+				await ensureDebugFiles(version);
+				await callClientMethodWithRetry(
+					{configure}
+					, 'configure'
+					, [{
+						filesAssociations: GENERATED_FILES_ASSOCIATIONS
+					}]
+					, STARTUP_BRIDGE_RETRY_OPTIONS
+				);
+			}
+			catch(error)
+			{
+				console.warn('Failed to configure file-bus document associations.', error);
+			}
+
+			if(cancelled || !path)
+			{
+				return;
+			}
+
+			try
+			{
+				await callClientMethodWithRetry(
+					{openFile}
+					, 'openFile'
+					, [path, {
+						languageId: getAssociatedLanguageId(path) || undefined
+					}]
+					, STARTUP_BRIDGE_RETRY_OPTIONS
+				);
+			}
+			catch(error)
+			{
+				console.error(`Failed to open the requested VS Code file: ${path}`, error);
+			}
+		});
+
+		return () => {
+			cancelled = true;
+		};
+	}, [configure, openFile, path, ready, version]);
 
 	return (<div className = "editor">
 		<div className='bevel'>
 			<Header />
-			<iframe
-				allow="clipboard-read; clipboard-write"
-				className='inset'
-				ref={iframeRef}
-				src={(() => {
-					const url = new URL(innerUrl.href);
-					url.searchParams.set('origin', outerOrigin);
-					return url.href;
-				})()}
-				title='VS Code Editor'
-			></iframe>
+			<VSCode className='inset' />
 		</div>
 	</div>);
 }

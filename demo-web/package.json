@@ -35,7 +35,7 @@
     "react-ace": "^14.0.1",
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.23.0",
-    "vscode-react": "^0.1.5",
+    "vscode-react": "^0.2.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

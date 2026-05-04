@@ -164,7 +164,7 @@ function SelectFramework()
 							</PopupLink>
 							{cakeInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/cakephp-5')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/cakephp-5/README.md">IDE</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/cakephp-5/webroot/index.php">IDE</PopupButton>
 								<PopupButton path = "install-demo.html?framework=cakephp-5&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{cakeInstalled || (<span className = "contents">
@@ -177,7 +177,7 @@ function SelectFramework()
 							</PopupLink>
 							{codeigniterInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/codeigniter-4')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/codeigniter-4/README.md">IDE</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/codeigniter-4/public/index.php">IDE</PopupButton>
 								<PopupButton path = "install-demo.html?framework=codeigniter-4&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{codeigniterInstalled || (<span className = "contents">
@@ -190,7 +190,7 @@ function SelectFramework()
 							</PopupLink>
 							{drupalInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/drupal')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/drupal-7.95/README.txt">IDE</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/drupal-7.95/index.php">IDE</PopupButton>
 								<PopupButton path = "install-demo.html?framework=drupal-7&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
@@ -203,7 +203,7 @@ function SelectFramework()
 							</PopupLink>
 							{laravelInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/laravel-11')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/laravel-11/README.md">IDE</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/laravel-11/public/index.php">IDE</PopupButton>
 								<PopupButton path = "install-demo.html?framework=laravel-11&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{laravelInstalled || (<span className = "contents">
@@ -216,7 +216,7 @@ function SelectFramework()
 							</PopupLink>
 							{laminasInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/laminas-3')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/laminas-3/README.md">IDE</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/laminas-3/public/index.php">IDE</PopupButton>
 								<PopupButton path = "install-demo.html?framework=laminas-3&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{laminasInstalled || (<span className = "contents">

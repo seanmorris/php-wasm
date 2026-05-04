@@ -72,7 +72,7 @@ describe('SelectFramework', () => {
 		window.history.pushState({}, '', '/select-framework.html');
 	});
 
-	it('renders IDE controls as popup forms that preserve the project path', async () => {
+	it('renders IDE controls as popup forms that target the framework entrypoint', async () => {
 		render(<SelectFramework />);
 
 		const ideButton = await screen.findByRole('button', {name: 'IDE'});
@@ -89,6 +89,6 @@ describe('SelectFramework', () => {
 		expect(form).toHaveAttribute('target', '_blank');
 		expect(form.action).toMatch(/\/code-editor\.html$/);
 		expect(pathInput).not.toBeNull();
-		expect(pathInput).toHaveValue('/persist/cakephp-5/README.md');
+		expect(pathInput).toHaveValue('/persist/cakephp-5/webroot/index.php');
 	});
 });
