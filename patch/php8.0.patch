@@ -488,10 +488,76 @@ index 30857ac..5ec5b0e 100644
  #ifdef HAVE_CONFIG_H
  #include "config.h"
  #endif
-@@ -45,6 +47,37 @@
+@@ -45,52 +47,70 @@
  
  ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
  
+-/* is easy to generalize ... but not needed for now */
+-PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
+-	int bytes = PHPDBG_G(input_buflen), len = 0;
++EM_ASYNC_JS(int, phpdbg_internal_consume_stdin_line, (char *buf, int max_length), {
++
++	let input;
++
++	Module.triggerStdin();
+ 
+-	if (PHPDBG_G(input_buflen)) {
+-		memcpy(buf, PHPDBG_G(input_buffer), bytes);
++	if(Module.inputDataQueue.length)
++	{
++		input = String(Module.inputDataQueue.shift());
++	}
++	else
++	{
++		let a, r;
++		const promise = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
++		Module.awaitingInput = a;
++		input = String(await promise);
+ 	}
+ 
+-	PHPDBG_G(last_was_newline) = 1;
++	if(input.length >= max_length)
++	{
++		input = input.slice(0, max_length - 1);
++	}
++
++	stringToUTF8(input, buf, input.length + 1);
+ 
+-	do {
+-		int i;
+-		if (bytes <= 0) {
+-			continue;
+-		}
+ 
+-		for (i = len; i < len + bytes; i++) {
+-			if (buf[i] == '\x03') {
+-				if (i != len + bytes - 1) {
+-					memmove(buf + i, buf + i + 1, len + bytes - i - 1);
+-				}
+-				len--;
+-				i--;
+-				continue;
+-			}
+-			if (buf[i] == '\n') {
+-				PHPDBG_G(input_buflen) = len + bytes - 1 - i;
+-				if (PHPDBG_G(input_buflen)) {
+-					memcpy(PHPDBG_G(input_buffer), buf + i + 1, PHPDBG_G(input_buflen));
+-				}
+-				if (i != PHPDBG_MAX_CMD - 1) {
+-					buf[i + 1] = 0;
+-				}
+-				return i;
+-			}
+-		}
+ 
+-		len += bytes;
+-	} while ((bytes = phpdbg_mixed_read(PHPDBG_G(io)[PHPDBG_STDIN].fd, buf + len, PHPDBG_MAX_CMD - len, -1)) > 0);
++	return input.length;
++});
+ 
+-	if (bytes <= 0) {
+-		PHPDBG_G(flags) |= PHPDBG_IS_QUITTING | PHPDBG_IS_DISCONNECTED;
+-		zend_bailout();
 +EM_ASYNC_JS(int, phpdbg_internal_consume_stdin_line, (char *buf, int max_length), {
 +
 +	let input;
@@ -508,8 +574,9 @@ index 30857ac..5ec5b0e 100644
 +		const promise = new Promise((accept, reject) => [a, r] = [ accept, reject ]);
 +		Module.awaitingInput = a;
 +		input = String(await promise);
-+	}
-+
+ 	}
+ 
+-	return bytes;
 +	if(input.length >= max_length)
 +	{
 +		input = input.slice(0, max_length - 1);
@@ -523,10 +590,13 @@ index 30857ac..5ec5b0e 100644
 +});
 +
 +
- /* is easy to generalize ... but not needed for now */
- PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
- 	int bytes = PHPDBG_G(input_buflen), len = 0;
-@@ -223,13 +256,6 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
++/* is easy to generalize ... but not needed for now */
++PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
++	return phpdbg_internal_consume_stdin_line(buf, PHPDBG_MAX_CMD);
+ }
+ 
+ PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo) {
+@@ -223,13 +243,6 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
  		return phpdbg_send_bytes(sock, ptr, len);
  	}
  
