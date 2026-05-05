@@ -509,7 +509,7 @@ index 3b09f6a..263b3ff 100644
  %.c: %.y
  %.c: %.l
 diff --git a/third_party/php8.5-src/sapi/phpdbg/phpdbg.c b/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
-index 4ef83be..5c9e90e 100644
+index 4ef83be..3875975 100644
 --- a/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
 +++ b/third_party/php8.5-src/sapi/phpdbg/phpdbg.c
 @@ -16,6 +16,8 @@
@@ -521,7 +521,7 @@ index 4ef83be..5c9e90e 100644
  #include "phpdbg.h"
  #include "phpdbg_prompt.h"
  #include "phpdbg_bp.h"
-@@ -144,6 +146,29 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+@@ -144,6 +146,34 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
  #endif
  } /* }}} */
  
@@ -548,10 +548,15 @@ index 4ef83be..5c9e90e 100644
 +	return PHPDBG_G(in_execution) || (PHPDBG_G(flags) & PHPDBG_IS_STOPPING);
 +}
 +
++bool EMSCRIPTEN_KEEPALIVE php_wasm_is_running(void)
++{
++	return PHPDBG_G(flags) & PHPDBG_IS_RUNNING;
++}
++
  static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  {
  	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-@@ -173,6 +198,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+@@ -173,6 +203,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  
  static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
  {
@@ -561,7 +566,7 @@ index 4ef83be..5c9e90e 100644
  	zend_hash_destroy(&PHPDBG_G(registered));
  	phpdbg_destroy_watchpoints();
  
-@@ -1111,7 +1139,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+@@ -1111,7 +1144,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
  	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
  } /* }}} */
  

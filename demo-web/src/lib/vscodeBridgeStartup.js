@@ -93,10 +93,10 @@ export const getAssociatedLanguageId = path => {
 };
 
 export const createGeneratedLaunchConfigurations = (defaultVersion = '8.3') => {
-	const orderedVersions = [
-		defaultVersion
-		, ...SUPPORTED_PHP_VERSIONS.filter(version => version !== defaultVersion)
-	];
+	void defaultVersion;
+	const orderedVersions = [...SUPPORTED_PHP_VERSIONS].sort((left, right) => {
+		return Number.parseFloat(right) - Number.parseFloat(left);
+	});
 
 	return orderedVersions.map(version => ({
 		type: 'dbgBus'

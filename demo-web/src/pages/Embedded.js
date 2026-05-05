@@ -11,7 +11,6 @@ import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
 
 // import yaml from 'php-wasm-yaml';
-import sdl from 'php-wasm-sdl';
 
 const baseSharedLibs = [];
 const canToggleExtensions = buildType === 'dynamic';
@@ -108,6 +107,8 @@ function Embedded()
 {
 	const phpRef = useRef(null);
 	const runtimeCleanup = useRef(null);
+	const bootTimeout = useRef(null);
+	const autorunTimeout = useRef(null);
 	const selectDemoBox = useRef(null);
 	const selectVersionBox = useRef(null);
 	const selectVariantBox = useRef(null);
@@ -155,7 +156,17 @@ function Embedded()
 		setStdErr(stdErr => String(stdErr || '') + event.detail.join(''));
 	}, []);
 
+	const clearPendingAutorun = useCallback(() => {
+		if(autorunTimeout.current)
+		{
+			clearTimeout(autorunTimeout.current);
+			autorunTimeout.current = null;
+		}
+	}, []);
+
 	const disposePhp = useCallback(() => {
+		clearPendingAutorun();
+
 		if(runtimeCleanup.current)
 		{
 			runtimeCleanup.current();
@@ -163,7 +174,7 @@ function Embedded()
 		}
 
 		phpRef.current = null;
-	}, []);
+	}, [clearPendingAutorun]);
 
 	const refreshPhp = useCallback(() => {
 		disposePhp();
@@ -171,11 +182,6 @@ function Embedded()
 		const version = selectVersionBox.current?.value ?? defaultPhpVersion;
 		const variant = selectVariantBox.current?.value ?? '';
 		const runtimeSharedLibs = [...sharedLibs.current];
-
-		if(variant === '_sdl' && buildType === 'dynamic')
-		{
-			runtimeSharedLibs.push(sdl);
-		}
 
 		const php = new PhpWeb({
 			version
@@ -431,15 +437,29 @@ function Embedded()
 
 		if(settings.autorun)
 		{
-			setTimeout(() => {
+			clearPendingAutorun();
+			autorunTimeout.current = setTimeout(() => {
+				autorunTimeout.current = null;
 				void runCode();
 			}, 1);
 		}
 	});
 
 	useEffect(() => {
-		void initializeEmbedded();
+		// Delay the one-shot boot so StrictMode's dev-only effect replay can
+		// cancel the first mount before a demo autoruns twice in the same runtime.
+		bootTimeout.current = setTimeout(() => {
+			bootTimeout.current = null;
+			void initializeEmbedded();
+		}, 0);
+
 		return () => {
+			if(bootTimeout.current)
+			{
+				clearTimeout(bootTimeout.current);
+				bootTimeout.current = null;
+			}
+
 			disposePhp();
 		};
 	}, [disposePhp]);

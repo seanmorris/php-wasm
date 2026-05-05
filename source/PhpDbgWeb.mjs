@@ -220,6 +220,23 @@ export class PhpDbgWeb extends PhpBase
 	}
 
 	/**
+	 * Checks whether the debugger is inside an active run loop.
+	 * @returns {Promise<number>} Non-zero while a debug run is active.
+	 */
+	async isRunning()
+	{
+		const php = await this.binary;
+
+		return php.ccall(
+			'php_wasm_is_running'
+			, NUM
+			, []
+			, []
+			, {}
+		);
+	}
+
+	/**
 	 * Reads the current file name from the debugger state.
 	 * @returns {Promise<string>} Source file path for the current debugger frame.
 	 */

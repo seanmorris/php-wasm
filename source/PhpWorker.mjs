@@ -26,45 +26,24 @@ export class PhpWorker extends PhpBase
 				super(import(`./php8.5-worker.mjs`), constructorArgs);
 				break;
 
-			case '8.5_sdl':
-				super(import(`./php8.5_sdl-worker.mjs`), constructorArgs);
-				break;
-
 			case '8.4':
 				super(import(`./php8.4-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.4_sdl':
-				super(import(`./php8.4_sdl-worker.mjs`), constructorArgs);
 				break;
 
 			case '8.3':
 				super(import(`./php8.3-worker.mjs`), constructorArgs);
 				break;
 
-			case '8.3_sdl':
-				super(import(`./php8.3_sdl-worker.mjs`), constructorArgs);
-				break;
-
 			case '8.2':
 				super(import(`./php8.2-worker.mjs`), constructorArgs);
-				break;
-			case '8.2_sdl':
-				super(import(`./php8.2_sdl-worker.mjs`), constructorArgs);
 				break;
 
 			case '8.1':
 				super(import(`./php8.1-worker.mjs`), constructorArgs);
 				break;
-			case '8.1_sdl':
-				super(import(`./php8.1_sdl-worker.mjs`), constructorArgs);
-				break;
 
 			case '8.0':
 				super(import(`./php8.0-worker.mjs`), constructorArgs);
-				break;
-			case '8.0_sdl':
-				super(import(`./php8.0_sdl-worker.mjs`), constructorArgs);
 				break;
 
 			default:

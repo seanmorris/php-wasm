@@ -14,9 +14,7 @@ const defaultVersion = (
 	? process.env.PHP_VERSION
 	: '8.4';
 
-const defaultVariant = process.env.PHP_VARIANT === '_sdl'
-	? process.env.PHP_VARIANT
-	: '';
+const defaultVariant = '';
 
 /**
  * Node.js-hosted PHP wrapper.
@@ -67,45 +65,24 @@ export class PhpNode extends PhpBase
 				super(import(`./php8.5-node.mjs`), constructorArgs);
 				break;
 
-			case '8.5_sdl':
-				super(import(`./php8.5_sdl-node.mjs`), constructorArgs);
-				break;
-
 			case '8.4':
 				super(import(`./php8.4-node.mjs`), constructorArgs);
-				break;
-
-			case '8.4_sdl':
-				super(import(`./php8.4_sdl-node.mjs`), constructorArgs);
 				break;
 
 			case '8.3':
 				super(import(`./php8.3-node.mjs`), constructorArgs);
 				break;
 
-			case '8.3_sdl':
-				super(import(`./php8.3_sdl-node.mjs`), constructorArgs);
-				break;
-
 			case '8.2':
 				super(import(`./php8.2-node.mjs`), constructorArgs);
-				break;
-			case '8.2_sdl':
-				super(import(`./php8.2_sdl-node.mjs`), constructorArgs);
 				break;
 
 			case '8.1':
 				super(import(`./php8.1-node.mjs`), constructorArgs);
 				break;
-			case '8.1_sdl':
-				super(import(`./php8.1_sdl-node.mjs`), constructorArgs);
-				break;
 
 			case '8.0':
 				super(import(`./php8.0-node.mjs`), constructorArgs);
-				break;
-			case '8.0_sdl':
-				super(import(`./php8.0_sdl-node.mjs`), constructorArgs);
 				break;
 
 			default:

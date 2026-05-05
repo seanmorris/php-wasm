@@ -6,18 +6,18 @@ import {
 } from '../lib/vscodeBridgeStartup';
 
 describe('VSCodeEditor launch config generation', () => {
-	it('keeps PHP 8.3 first by default and preserves the configured support list', () => {
+	it('keeps the configured support list and sorts generated launch configs descending', () => {
 		expect(SUPPORTED_PHP_VERSIONS).toEqual(['8.0', '8.1', '8.2', '8.3', '8.4', '8.5']);
 
 		expect(
 			createGeneratedLaunchConfigurations().map(configuration => configuration.version)
-		).toEqual(['8.3', '8.0', '8.1', '8.2', '8.4', '8.5']);
+		).toEqual(['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']);
 	});
 
-	it('reorders generated launch configs around the requested default version', () => {
+	it('keeps descending ordering even when a default version is provided', () => {
 		expect(
 			createGeneratedLaunchConfigurations('8.5').map(configuration => configuration.version)
-		).toEqual(['8.5', '8.0', '8.1', '8.2', '8.3', '8.4']);
+		).toEqual(['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']);
 	});
 
 	it('requests open breakpoints through the stable debug command bridge', async () => {

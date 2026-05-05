@@ -39,7 +39,6 @@ const localPhpPackages = [
 	, 'php-wasm-mbstring'
 	, 'php-wasm-openssl'
 	, 'php-wasm-phar'
-	, 'php-wasm-sdl'
 	, 'php-wasm-simplexml'
 	, 'php-wasm-sqlite'
 	, 'php-wasm-tidy'

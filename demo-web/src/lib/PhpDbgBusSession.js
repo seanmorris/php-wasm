@@ -927,20 +927,21 @@ export class PhpDbgBusSession
 			return;
 		}
 
-		const runtime = await this.getRuntime();
-		let isExecuting = !!(await runtime.isExecuting());
-		let file = await runtime.currentFile();
-		let line = await runtime.currentLine();
+		if(session.started && session.running)
+		{
+			const runtime = await this.getRuntime();
+			const isRunning = await runtime.isRunning();
 
-		if(!isExecuting && session.started && session.running)
-		{
-			await new Promise(resolve => setTimeout(resolve, 0));
-			isExecuting = !!(await runtime.isExecuting());
-			file = await runtime.currentFile();
-			line = await runtime.currentLine();
-		}
-		if(isExecuting)
-		{
+			if(!isRunning)
+			{
+				session.running = false;
+				session.waitingForInput = false;
+				await this.sendEvent(this.activeSessionId, 'terminated', {});
+				return;
+			}
+
+			const file = await runtime.currentFile();
+			const line = await runtime.currentLine();
 			session.running = false;
 			await this.sendEvent(this.activeSessionId, 'stopped', {
 				reason: session.lastResumeReason
@@ -948,12 +949,6 @@ export class PhpDbgBusSession
 				, allThreadsStopped: true
 				, description: file ? `${file}:${line}` : undefined
 			});
-		}
-		else if(session.started && session.running)
-		{
-			session.running = false;
-			session.waitingForInput = false;
-			await this.sendEvent(this.activeSessionId, 'terminated', {});
 		}
 	}
 

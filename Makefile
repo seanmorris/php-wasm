@@ -1119,10 +1119,10 @@ reconfigure:
 rebuild:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
+demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run build --prefix ./demo-web
 
-serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
+serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run start --prefix ./demo-web
 
 null:

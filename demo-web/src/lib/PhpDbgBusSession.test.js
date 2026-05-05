@@ -9,7 +9,10 @@ class FakeRuntime extends EventTarget
 		super();
 		this.run = vi.fn(() => Promise.resolve());
 		this.provideInput = vi.fn();
+		this.isRunning = vi.fn(() => Promise.resolve(1));
 		this.bpCount = vi.fn(() => Promise.resolve(1));
+		this.currentFile = vi.fn(() => Promise.resolve('/persist/demo.php'));
+		this.currentLine = vi.fn(() => Promise.resolve(12));
 	}
 }
 
@@ -174,5 +177,59 @@ describe('PhpDbgBusSession', () => {
 		expect(commands).toContain('exec /persist/drupal-7.95/index.php');
 		expect(commands).toContain('b /persist/drupal-7.95/index.php:17');
 		expect(commands).not.toContain('b /persist/laravel-11/public/index.php:11');
+	});
+
+	it('keeps the debug session alive when phpdbg pauses at a breakpoint prompt', async () => {
+		const runtime = new FakeRuntime;
+		const postMessage = vi.fn();
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+			, postMessage
+		});
+		const session = createSession();
+		const state = adapter.resetSessionState(session, {
+			started: true
+			, running: true
+		});
+
+		adapter.runtime = runtime;
+		adapter.activeSessionId = session.id;
+
+		await adapter.handleStdinRequest();
+
+		const events = postMessage.mock.calls
+			.map(([, message]) => message)
+			.filter(message => message.type === 'event');
+
+		expect(events.some(message => message.event === 'stopped')).toBe(true);
+		expect(events.some(message => message.event === 'terminated')).toBe(false);
+		expect(state.waitingForInput).toBe(true);
+	});
+
+	it('terminates the debug session when phpdbg reports that the script ended', async () => {
+		const runtime = new FakeRuntime;
+		runtime.isRunning.mockResolvedValue(0);
+		const postMessage = vi.fn();
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+			, postMessage
+		});
+		const session = createSession();
+		const state = adapter.resetSessionState(session, {
+			started: true
+			, running: true
+		});
+
+		adapter.runtime = runtime;
+		adapter.activeSessionId = session.id;
+
+		await adapter.handleStdinRequest();
+
+		const events = postMessage.mock.calls
+			.map(([, message]) => message)
+			.filter(message => message.type === 'event');
+
+		expect(events.some(message => message.event === 'terminated')).toBe(true);
+		expect(state.waitingForInput).toBe(false);
 	});
 });

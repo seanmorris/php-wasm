@@ -366,6 +366,48 @@ test('Can access PHP callbacks that return objects via php.x function: Two level
 	assert.equal(stdErr, '');
 });
 
+test('Preserves JS identity for recursive PHP arrays.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`(function() {
+		$array = [];
+		$array['self'] = &$array;
+		return $array;
+	})()`;
+
+	assert.equal(returnValue.self, returnValue);
+	assert.equal(returnValue.self.self, returnValue);
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
+
+test('Preserves JS identity for recursive PHP objects.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`(function() {
+		$object = (object) [];
+		$object->self = $object;
+		return $object;
+	})()`;
+
+	assert.equal(returnValue.self, returnValue);
+	assert.equal(returnValue.self.self, returnValue);
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
+
 test('Can get the date with strtotime() and format it with date().', async () => {
 	const php = new PhpNode();
 

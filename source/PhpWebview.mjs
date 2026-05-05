@@ -26,45 +26,24 @@ export class PhpWebview extends PhpBase
 				super(import(`./php8.5-webview.mjs`), constructorArgs);
 				break;
 
-			case '8.5_sdl':
-				super(import(`./php8.5_sdl-webview.mjs`), constructorArgs);
-				break;
-
 			case '8.4':
 				super(import(`./php8.4-webview.mjs`), constructorArgs);
-				break;
-
-			case '8.4_sdl':
-				super(import(`./php8.4_sdl-webview.mjs`), constructorArgs);
 				break;
 
 			case '8.3':
 				super(import(`./php8.3-webview.mjs`), constructorArgs);
 				break;
 
-			case '8.3_sdl':
-				super(import(`./php8.3_sdl-webview.mjs`), constructorArgs);
-				break;
-
 			case '8.2':
 				super(import(`./php8.2-webview.mjs`), constructorArgs);
-				break;
-			case '8.2_sdl':
-				super(import(`./php8.2_sdl-webview.mjs`), constructorArgs);
 				break;
 
 			case '8.1':
 				super(import(`./php8.1-webview.mjs`), constructorArgs);
 				break;
-			case '8.1_sdl':
-				super(import(`./php8.1_sdl-webview.mjs`), constructorArgs);
-				break;
 
 			case '8.0':
 				super(import(`./php8.0-webview.mjs`), constructorArgs);
-				break;
-			case '8.0_sdl':
-				super(import(`./php8.0_sdl-webview.mjs`), constructorArgs);
 				break;
 
 			default:

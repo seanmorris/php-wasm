@@ -1,45 +1,35 @@
 # php-wasm-phar
 
-phar extenstion for php-wasm.
+`php-wasm-phar` provides the `phar` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-phar
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-phar.so`.
 
 ## Usage
 
-`php-wasm-phar` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import phar from 'php-wasm-phar';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-phar')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [phar],
+});
+
+await php.run(`<?php var_dump(extension_loaded('phar'));`);
 ```
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+## Custom Builds
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-phar.so']});
-```
+Enable `WITH_PHAR` in `.php-wasm-rc`.
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Build Options
 
-```javascript
-const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-phar.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_PHAR
-
-### WITH_PHAR
-
-`0|static|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-phar.so`.
+- `WITH_PHAR`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.

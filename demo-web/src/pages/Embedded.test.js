@@ -43,10 +43,6 @@ vi.mock('@electric-sql/pglite', () => ({
 	PGlite: class PGliteMock {}
 }));
 
-vi.mock('php-wasm-sdl', () => ({
-	default: {}
-}));
-
 vi.mock('ace-builds/src-noconflict/mode-php', () => ({}));
 vi.mock('ace-builds/src-noconflict/theme-monokai', () => ({}));
 
@@ -85,7 +81,7 @@ echo "Hello, World!";
 		phpRefresh.mockClear();
 		phpRun.mockClear();
 
-		global.fetch = vi.fn(async () => ({
+		globalThis.fetch = vi.fn(async () => ({
 			ok: true
 			, text: async () => phpCode
 		}));
@@ -101,7 +97,7 @@ echo "Hello, World!";
 		render(<Embedded />);
 
 		await waitFor(() => {
-			expect(global.fetch).toHaveBeenCalledWith('/php-wasm/scripts/hello-world.php');
+			expect(globalThis.fetch).toHaveBeenCalledWith('/php-wasm/scripts/hello-world.php');
 		});
 
 		let executedCode;
@@ -114,6 +110,20 @@ echo "Hello, World!";
 
 		expect(executedCode).not.toBe('');
 		expect(new URLSearchParams(window.location.search).get('code')).not.toBe('');
+	});
+
+	it('boots the embedded demo only once under StrictMode', async () => {
+		render(
+			<React.StrictMode>
+				<Embedded />
+			</React.StrictMode>
+		);
+
+		await waitFor(() => {
+			expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+			expect(PhpWeb).toHaveBeenCalledTimes(1);
+			expect(phpRun).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	it('uses Ace content for a manual run after the demo loads', async () => {

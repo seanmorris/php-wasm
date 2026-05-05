@@ -474,26 +474,57 @@ export default forwardRef(function Debugger({
 		scrollToEnd();
 	};
 
-	const zvalViews = object => {
+	const getZvalIdentity = object => {
+		if(!object || typeof object !== 'object')
+		{
+			return object;
+		}
+
+		for(const symbol of Object.getOwnPropertySymbols(object))
+		{
+			if(symbol.description !== 'origZval')
+			{
+				continue;
+			}
+
+			return `zval:${String(object[symbol])}`;
+		}
+
+		return object;
+	};
+
+	const zvalViews = (object, ancestors = new Set) => {
+		const identity = getZvalIdentity(object);
+
+		if(object && ancestors.has(identity))
+		{
+			return <div className = "phpdbg-zval phpdbg-zval-circular">[Circular]</div>;
+		}
+
+		object && ancestors.add(identity);
+
 		try
 		{
 			const entries = Object.entries(object);
 			return <div className = "phpdbg-zval">
-				{entries.map(zvalView)}
+				{entries.map(entry => zvalView(entry, ancestors))}
 			</div>;
 		}
 		catch(error)
 		{
-			console.error(error);
-			console.warn(object, 'returned duplicate keys');
-			return null;
+			console.error('Failed to render debugger value', error, object);
+			return <div className = "phpdbg-zval phpdbg-zval-error">[Unrenderable]</div>;
+		}
+		finally
+		{
+			object && ancestors.delete(identity);
 		}
 	};
 
-	const zvalView = ([name, zval]) => {
+	const zvalView = ([name, zval], ancestors) => {
 		return <label key = {name}>
 			<div className='variable-name bevel'>{name}:&nbsp;</div>
-			<div className='variable-value'>{(zval && typeof zval === 'object') ? zvalViews(zval) : String(zval)}</div>
+			<div className='variable-value'>{(zval && typeof zval === 'object') ? zvalViews(zval, ancestors) : String(zval)}</div>
 		</label>;
 	};
 

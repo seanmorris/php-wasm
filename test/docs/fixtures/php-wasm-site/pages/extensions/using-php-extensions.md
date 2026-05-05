@@ -170,7 +170,7 @@ The following extensions may be loaded at runtime. This allows the shared extens
 
 ### sdl
 
-[https://www.npmjs.com/package/php-wasm-sdl](https://www.npmjs.com/package/php-wasm-sdl)
+Built into the `_sdl` runtime variant. No separate extension package is required.
 
 ### zlib
 

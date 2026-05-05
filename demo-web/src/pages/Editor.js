@@ -511,6 +511,7 @@ export default function Editor()
 								<option>8.3</option>
 								<option>8.2</option>
 								<option>8.1</option>
+								<option>8.0</option>
 							</select>}
 							<button className='square' title = "Debugger" onClick = {startDebugger}>
 								{debuggerActive ? '⏹' : '▶'}

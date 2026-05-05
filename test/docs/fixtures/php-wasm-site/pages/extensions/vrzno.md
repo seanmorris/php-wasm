@@ -10,7 +10,7 @@ Validation refs:
 -->
 # Vrzno
 
-*Vrzno requires PHP 8.1+*
+*Vrzno requires PHP 8.0+*
 
 VRZNO is the first PHP extension built for php-wasm. Once it's compiled with PHP, it can be served to any browser and executed client side. It can also run in Node.js and Cloudflare Workers.
 
