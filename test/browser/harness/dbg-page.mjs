@@ -26,26 +26,24 @@ const main = async () => {
 		, version: runtimeVersion
 	});
 
-	let bootstrapped = false;
-
 	php.addEventListener('output', event => appendStdout(event.detail));
 	php.addEventListener('error', event => appendStderr(event.detail));
-	php.addEventListener('stdin-request', async () => {
+
+	const updatePromptState = async () => {
 		setMeta('prompt', await php.getPrompt());
 		setMeta('current-file', await php.currentFile());
 		setMeta('current-line', await php.currentLine());
+	};
 
-		if(bootstrapped)
-		{
-			setStatus('ready');
-			return;
-		}
+	php.addEventListener('stdin-request', () => {
+		void updatePromptState();
+	});
 
-		bootstrapped = true;
-
+	php.addEventListener('stdin-request', async () => {
 		await php.provideInput(`exec ${startPath}`);
 		await php.provideInput('set pagination off');
-	});
+		setStatus('ready');
+	}, {once: true});
 
 	await php.run();
 };

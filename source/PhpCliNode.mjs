@@ -5,9 +5,11 @@ import url from 'node:url';
 
 const NUM = 'number';
 const SUPPORTED_VERSIONS = new Set(['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']);
-const defaultVersion = SUPPORTED_VERSIONS.has(process.env.PHP_VERSION)
-	? process.env.PHP_VERSION
-	: '8.4';
+const defaultVersion = /** @type {PhpRuntimeVersion} */ (
+	SUPPORTED_VERSIONS.has(process.env.PHP_VERSION ?? '')
+		? process.env.PHP_VERSION
+		: '8.4'
+);
 
 const createLocateFile = () => (name, dir) => {
 	if(name.startsWith('file://'))
@@ -46,7 +48,7 @@ export class PhpCliNode extends PhpBase
 	 */
 	constructor(args = {})
 	{
-		const version = args.version ?? defaultVersion;
+		const version = /** @type {PhpRuntimeVersion} */ (args.version ?? defaultVersion);
 		const constructorArgs = {locateFile: createLocateFile(), version, ...args};
 
 		switch(version)
@@ -143,7 +145,15 @@ export class PhpCliNode extends PhpBase
 			cliFlags.push('-r', this.code);
 		}
 
-		return this._enqueue(phpFlags => this._run(phpFlags), [cliFlags]);
+		return this._enqueue(
+			/**
+			 * Executes queued CLI flags.
+			 * @param {...PhpQueueParam} params Queued CLI flag payload.
+			 * @returns {Promise<number>} Resolves with the CLI execution result.
+			 */
+			(...params) => this._run(/** @type {string[]} */ (params[0] ?? [])),
+			[cliFlags]
+		);
 	}
 
 	/**

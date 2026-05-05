@@ -172,6 +172,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -187,6 +188,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -202,6 +204,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -219,6 +222,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
@@ -232,6 +236,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
@@ -245,6 +250,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
@@ -260,6 +266,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
@@ -273,6 +280,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
@@ -286,6 +294,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
@@ -502,6 +511,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -517,6 +527,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -532,6 +543,7 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
@@ -549,6 +561,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
@@ -562,6 +575,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
@@ -575,6 +589,7 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
@@ -590,6 +605,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
@@ -603,6 +619,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
@@ -616,6 +633,7 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']

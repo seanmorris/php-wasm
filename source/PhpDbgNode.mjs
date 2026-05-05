@@ -6,9 +6,11 @@ import url from 'node:url';
 const NUM = 'number';
 const STR = 'string';
 const SUPPORTED_VERSIONS = new Set(['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']);
-const defaultVersion = SUPPORTED_VERSIONS.has(process.env.PHP_VERSION)
-	? process.env.PHP_VERSION
-	: '8.4';
+const defaultVersion = /** @type {PhpRuntimeVersion} */ (
+	SUPPORTED_VERSIONS.has(process.env.PHP_VERSION ?? '')
+		? process.env.PHP_VERSION
+		: '8.4'
+);
 
 const createLocateFile = () => (name, dir) => {
 	if(name.startsWith('file://'))
@@ -47,7 +49,7 @@ export class PhpDbgNode extends PhpBase
 	 */
 	constructor(args = {})
 	{
-		const version = args.version ?? defaultVersion;
+		const version = /** @type {PhpRuntimeVersion} */ (args.version ?? defaultVersion);
 		const constructorArgs = {locateFile: createLocateFile(), version, ...args};
 
 		switch(version)

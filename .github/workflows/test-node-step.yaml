@@ -79,8 +79,9 @@ jobs:
 
       - name: Apply executable cache
         run: |
-          ls ./.cache/executables-* | while read -r CACHE; do
-            cat ${CACHE} | xargs -I{} chmod +x {}
+          shopt -s nullglob
+          for CACHE in ./.cache/executables-*; do
+            xargs -r -a "${CACHE}" chmod +x
           done
 
       - name: Run tests

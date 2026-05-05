@@ -92,6 +92,7 @@
     "vrzno"
   ],
   "devDependencies": {
+    "@types/node": "^24.8.0",
     "@playwright/test": "^1.55.0",
     "eslint": "^10.2.1",
     "eslint-plugin-jsdoc": "^62.9.0",
