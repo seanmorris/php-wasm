@@ -158,6 +158,8 @@ test('serves php through the cgi worker harness', async ({ page }) => {
 	await page.goto(`harness/cgi.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
 	await waitForHarnessStatus(page);
 	await expect(page.locator('[data-testid="controller"]')).toContainText('/php-wasm/cgi-worker.mjs');
+	await expect(page.locator('[data-testid="request-path"]')).toHaveText('/php-wasm/cgi-bin/test');
 	await expect(page.locator('[data-testid="status-code"]')).toHaveText('200');
 	await expect(page.locator('[data-testid="powered-by"]')).toContainText(`PHP/${version}`);
+	await expect(page.locator('[data-testid="stderr"]')).toHaveText('');
 });

@@ -11,6 +11,8 @@ const createNotFoundResponse = request => new Response(
 );
 
 let loader = null;
+const prefix = '/php-wasm/cgi-bin/';
+const testPath = `${prefix}test`;
 
 const init = () => {
 	if(loader)
@@ -19,7 +21,8 @@ const init = () => {
 	}
 
 	loader = Promise.resolve(new PhpCgiWorker({
-		docroot: '/preload/test_www'
+		docroot: '/persist/www'
+		, exclude: [`${prefix}~!@`, `${prefix}.`]
 		, files: [
 			{
 				parent: '/preload/test_www/'
@@ -38,57 +41,28 @@ const init = () => {
 			}
 		]
 		, notFound: createNotFoundResponse
-		, prefix: '/php-wasm/cgi-bin/'
+		, prefix
 		, sharedLibs: loadCgiSharedLibs(buildType)
-		, staticFS: true
+		, staticFS: false
 		, types: {
 			html: 'text/html'
 			, php: 'text/plain; charset=utf-8'
 			, txt: 'text/plain; charset=utf-8'
 		}
+		, vHosts: [
+			{
+				pathPrefix: testPath
+				, directory: '/preload/test_www'
+				, entrypoint: 'hello-world.php'
+			}
+		]
 		, version: runtimeVersion
 	}));
 
 	return loader;
 };
 
-self.addEventListener('install', () => {
-	self.skipWaiting();
-});
-
-self.addEventListener('activate', event => {
-	event.waitUntil(self.clients.claim());
-});
-
 self.addEventListener('install', async event => (await init()).handleInstallEvent(event));
 self.addEventListener('activate', async event => (await init()).handleActivateEvent(event));
+self.addEventListener('fetch', async event => (await init()).handleFetchEvent(event));
 self.addEventListener('message', async event => (await init()).handleMessageEvent(event));
-
-self.addEventListener('fetch', event => {
-	const url = new URL(event.request.url);
-
-	if(!url.pathname.startsWith('/php-wasm/cgi-bin/'))
-	{
-		event.respondWith(fetch(event.request));
-		return;
-	}
-
-	event.respondWith((async () => {
-		try
-		{
-			const php = await init();
-			const response = await php.request(event.request);
-
-			return response instanceof Response
-				? response
-				: new Response(String(response ?? '404 - Not Found.'), {status: 404});
-		}
-		catch(error)
-		{
-			return new Response(String(error?.stack ?? error), {
-				status: 500
-				, headers: {'Content-Type': 'text/plain; charset=utf-8'}
-			});
-		}
-	})());
-});

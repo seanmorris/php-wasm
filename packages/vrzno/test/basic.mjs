@@ -422,9 +422,9 @@ test('Can get the date with strtotime() and format it with date().', async () =>
 	const yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
 	const jsFormatted = `${yesterday.getFullYear()}-${String(1 + yesterday.getMonth()).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')} 13:00:00`;
 
-	// Extract the functions from PHP...
-	const strtotime = await php.x`strtotime(...)`;
-	const date = await php.x`date(...)`;
+	// Export wrapper callbacks that remain compatible with PHP 8.0.
+	const strtotime = await php.x`function($time) { return strtotime($time); }`;
+	const date = await php.x`function($format, $time) { return date($format, $time); }`;
 
 	// Set the timezone...
 	await php.x`date_default_timezone_set(${Intl.DateTimeFormat().resolvedOptions().timeZone})`;

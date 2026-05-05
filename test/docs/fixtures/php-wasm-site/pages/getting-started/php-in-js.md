@@ -45,8 +45,8 @@ const exitCode = await php.run('<?php echo "Hello, world!";');
 With Vrzno enabled, the `php.x՝...՝` [tagged template string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) enables you to export almost any PHP value directly to Javascript. This includes arrays, object, and even functions:
 
 ```javascript
-const phpStrtotime = await php.x`strtotime(...)`;
-const phpDate = await php.x`date(...)`;
+const phpStrtotime = await php.x`function($time) { return strtotime($time); }`;
+const phpDate = await php.x`function($format, $time) { return date($format, $time); }`;
 
 const formatTime = (format, time) => phpDate(format, phpStrtotime(time));
 ```
@@ -64,8 +64,8 @@ You can see this working live on CodePen:
   const output = document.querySelector('#date-output');
 
   // Return an actual PHP function to Javascript:
-  const phpStrtotime = await php.x`strtotime(...)`;
-  const phpDate = await php.x`date(...)`;
+  const phpStrtotime = await php.x`function($time) { return strtotime($time); }`;
+  const phpDate = await php.x`function($format, $time) { return date($format, $time); }`;
 
   const formatTime = (format, time) => phpDate(format, phpStrtotime(time));
 

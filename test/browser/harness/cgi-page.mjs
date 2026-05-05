@@ -6,6 +6,8 @@ import {
 	setStatus,
 } from './common.mjs';
 
+const testPath = '/php-wasm/cgi-bin/test';
+
 const waitForControl = async () => {
 	if(navigator.serviceWorker.controller)
 	{
@@ -58,16 +60,18 @@ const main = async () => {
 
 	setMeta('controller', controller.scriptURL);
 
-	const response = await fetch('/php-wasm/cgi-bin/hello-world.php');
+	const response = await fetch(testPath);
 	const responseText = await response.text();
 
 	setMeta('powered-by', response.headers.get('x-powered-by') ?? '');
 	setMeta('status-code', response.status);
+	setMeta('request-path', testPath);
 	document.querySelector('[data-testid="response-text"]').textContent = responseText;
 	setStatus(response.ok ? 'done' : 'failed');
 
 	if(!response.ok)
 	{
+		appendStderr([responseText, responseText.endsWith('\n') ? '' : '\n']);
 		throw new Error(`CGI response failed with status ${response.status}.`);
 	}
 };

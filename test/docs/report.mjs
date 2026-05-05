@@ -181,8 +181,8 @@ async function validatePhpInJs(page)
 
 	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
 	// Block 5
-	const phpStrtotime = await php.x`strtotime(...)`;
-	const phpDate      = await php.x`date(...)`;
+	const phpStrtotime = await php.x`function($time) { return strtotime($time); }`;
+	const phpDate      = await php.x`function($format, $time) { return date($format, $time); }`;
 	const formatted    = phpDate('Y-m-d H:i:s', phpStrtotime('8:00pm 2 days ago'));
 	assert.match(formatted, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
 

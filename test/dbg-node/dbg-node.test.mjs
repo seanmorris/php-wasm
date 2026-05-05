@@ -5,6 +5,7 @@ import { PhpDbgNode } from '../../packages/php-dbg-wasm/PhpDbgNode.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 const scriptPath = '/preload/test_www/hello-world.php';
+const legacyBootVersion = '8.1';
 
 const preloadFiles = [
 	{
@@ -27,10 +28,40 @@ const attachOutput = php => {
 	};
 };
 
-const waitForStdinRequest = (php, label) => new Promise((resolve, reject) => {
+const comparePhpVersions = (left, right) => {
+	const leftParts = left.split('.').map(Number);
+	const rightParts = right.split('.').map(Number);
+
+	for(let index = 0; index < Math.max(leftParts.length, rightParts.length); index++)
+	{
+		const leftPart = leftParts[index] ?? 0;
+		const rightPart = rightParts[index] ?? 0;
+
+		if(leftPart === rightPart)
+		{
+			continue;
+		}
+
+		return leftPart - rightPart;
+	}
+
+	return 0;
+};
+
+const timeoutForVersion = (legacyTimeoutMs, modernTimeoutMs) => {
+	return comparePhpVersions(version, legacyBootVersion) < 0
+		? legacyTimeoutMs
+		: modernTimeoutMs;
+};
+
+const formatDiagnostics = (label, stdOut, stdErr) => {
+	return `Timed out waiting for phpdbg ${label}.\nSTDOUT:\n${stdOut() || '[empty]'}\nSTDERR:\n${stdErr() || '[empty]'}`;
+};
+
+const waitForStdinRequest = (php, label, stdOut, stdErr, timeoutMs) => new Promise((resolve, reject) => {
 	const timer = setTimeout(() => {
-		reject(new Error(`Timed out waiting for phpdbg input (${label}).`));
-	}, 15000);
+		reject(new Error(formatDiagnostics(`input (${label})`, stdOut, stdErr)));
+	}, timeoutMs);
 
 	php.addEventListener('stdin-request', event => {
 		clearTimeout(timer);
@@ -38,23 +69,55 @@ const waitForStdinRequest = (php, label) => new Promise((resolve, reject) => {
 	}, {once: true});
 });
 
+const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
+	const start = Date.now();
+
+	while(Date.now() - start < timeoutMs)
+	{
+		const prompt = await php.getPrompt().catch(() => '');
+		const currentFile = await php.currentFile().catch(() => '');
+		const output = stdOut();
+
+		if(
+			currentFile === scriptPath
+			&& /\[Set execution context: \/preload\/test_www\/hello-world\.php\]/.test(output)
+			&& /\[Successful compilation of \/preload\/test_www\/hello-world\.php\]/.test(output)
+			&& /prompt>/i.test(prompt)
+		)
+		{
+			return prompt;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	throw new Error(formatDiagnostics('readiness', stdOut, stdErr));
+};
+
 test(`boots phpdbg in Node for PHP ${version}`, async () => {
 	const php = new PhpDbgNode({files: preloadFiles, version});
 	const {stdOut, stdErr} = attachOutput(php);
 
-	const bootPrompt = waitForStdinRequest(php, 'boot');
+	const bootPrompt = waitForStdinRequest(
+		php,
+		'boot',
+		stdOut,
+		stdErr,
+		timeoutForVersion(60000, 30000)
+	);
 	const process = php.run();
 
 	await bootPrompt;
 
-	const readyPrompt = waitForStdinRequest(php, 'ready');
-
 	await php.provideInput(`exec ${scriptPath}`);
 	await php.provideInput('set pagination off');
 
-	await readyPrompt;
-
-	const prompt = await php.getPrompt();
+	const prompt = await waitForReadyState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(45000, 20000)
+	);
 
 	await php.provideInput('quit');
 
