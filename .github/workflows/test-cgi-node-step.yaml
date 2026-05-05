@@ -47,12 +47,6 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install Global NPM packages
-        run: npm install -g deno cv3-test netcat
-
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
-
       - name: Run tests
         run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
 

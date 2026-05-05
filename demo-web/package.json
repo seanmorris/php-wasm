@@ -62,6 +62,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@eslint/js": "^9.39.1",
     "@vitejs/plugin-react": "^5.2.0",
     "babel-loader": "10.1.0",

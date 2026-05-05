@@ -1,3 +1,6 @@
+/**
+ * Tiny static HTTP server used by demo-web end-to-end tests.
+ */
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
@@ -25,11 +28,17 @@ const mimeTypes = {
 	, '.zip': 'application/zip'
 };
 
+/**
+ * Writes a complete HTTP response with the provided status and headers.
+ */
 const send = (res, status, body, headers = {}) => {
 	res.writeHead(status, headers);
 	res.end(body);
 };
 
+/**
+ * Resolves a request path while preventing path traversal outside the build directory.
+ */
 const safeJoin = (root, requestedPath) => {
 	const resolved = path.resolve(root, requestedPath);
 
@@ -41,6 +50,9 @@ const safeJoin = (root, requestedPath) => {
 	return resolved;
 };
 
+/**
+ * Streams a built asset using the mime type inferred from its extension.
+ */
 const serveFile = (res, file) => {
 	const extension = path.extname(file).toLowerCase();
 	const mimeType = mimeTypes[extension] ?? 'application/octet-stream';
@@ -112,6 +124,9 @@ server.listen(port, '127.0.0.1', () => {
 	process.stdout.write(`demo-web-e2e-server listening on http://127.0.0.1:${port}${basePath}/\n`);
 });
 
+/**
+ * Gracefully shuts the server down when the runner exits.
+ */
 const close = () => server.close(() => process.exit(0));
 
 process.on('SIGINT', close);

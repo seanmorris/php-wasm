@@ -1,27 +1,34 @@
 #!/usr/bin/env bash
 
-set -eux;
+set -euo pipefail
 PORT=9000
-export CI=
+export CI="${CI:-}"
 
-pushd demo-web;
-npm run build;
-popd;
+pushd demo-web >/dev/null
+npm run build
+DEMO_WEB_E2E_PORT="${PORT}" node test/e2e-server.mjs &
+SERVER_PID=$!
+popd >/dev/null
 
-set +e;
-docker kill php-wasm-test-apache;
-set -e;
+trap 'kill ${SERVER_PID}' EXIT
 
-HOST_DIR="${PWD}/demo-web/build"
-MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm"
-
-docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} httpd:2.4 &
-trap "docker kill php-wasm-test-apache" 0;
-
-set +x;
-while ! nc -z localhost ${PORT}; do
+until curl -fsS "http://127.0.0.1:${PORT}/php-wasm/" >/dev/null; do
 	sleep 0.1
 done
-set -x;
 
-PHP_VERSION=${PHP_VERSION} npx cvtest test/BrowserTest.mjs;
+PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/browser.spec.mjs)
+
+if [[ -n "${UPDATE_SNAPSHOTS:-}" || -n "${CV_UPDATE_SNAPSHOTS:-}" ]]; then
+	PLAYWRIGHT_ARGS+=(--update-snapshots)
+fi
+
+PHP_VERSION="${PHP_VERSION}" \
+PHP_VARIANT="${PHP_VARIANT:-}" \
+DEMO_WEB_E2E_PORT="${PORT}" \
+npx playwright test "${PLAYWRIGHT_ARGS[@]}"
+
+pushd demo-web >/dev/null
+PHP_VERSION="${PHP_VERSION}" \
+DEMO_WEB_E2E_PORT="${PORT}" \
+npx playwright test -c playwright.config.mjs
+popd >/dev/null

@@ -47,12 +47,6 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install Global NPM packages
-        run: npm install -g deno cv3-test netcat
-
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
-
       - name: Install Chrome's APT key
         run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 
