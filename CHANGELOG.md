@@ -2,7 +2,21 @@
 
 Changes
 
-## v0.0.9 - Aiming for the (GitHub) Stars
+## v0.1.0 - Aiming for the (GitHub) Stars (Unreleased)
+
+* Rebuilt `demo-web` around Vite, reorganized it into `pages`, `components`, `lib`, and `assets`, and added new browser/e2e harnesses plus runtime path helpers for the worker and page builds.
+* Added Quickbus-backed browser messaging, a richer `phpdbg` bus session, and a VSCode debugger bridge for the demo app.
+* Expanded runtime/build coverage across older targets, including `phpdbg`, SDL, and Vrzno support in PHP `8.0` builds. SDL now lives behind the `_sdl` runtime variant instead of a separately loaded shared library.
+* Added `version` and `variant` support to `php-tags`, making it possible to select non-default runtimes from static HTML.
+* Suppressed implicit `libxml2.so` loading when it is not provided in `sharedLibs`, which reduces startup download size for minimal runtime configurations.
+* Standardized the maintained runtime sources on `.mjs` modules and expanded type/JSDoc coverage across `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, and the extension helper packages.
+* Tightened the build/test pipeline by preserving `BUILD_TYPE` through CI, adding a dynamic fallback when it is omitted, splitting doc/CGI/VRZNO test coverage, and fixing a browser-test race condition.
+* Improved local workspace development with symlink-aware package loading and refreshed CI/build configuration for the newer runtime matrix.
+* Refreshed the root README and package docs to reflect the current runtime defaults, versioned `.wasm` assets, `php-tags` import paths, extension wiring, interactive CLI/debugger behavior via `waitline`, and Cloudflare D1 setup through `pdo_cfd1`.
+
+## v0.0.9 - Here there be dragons
+
+*Version 0.0.9 is represented by a near endless stream of letter-tagged alpha releases and will be considered officially skipped. The changes in v0.1.0 mostly landed somewhere in this range, but since the API is not stable, here there be dragons.*
 
 * Adding PHP-CGI support!
 * Runtime extension loading!

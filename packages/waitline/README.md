@@ -1,21 +1,37 @@
 # waitline
 
-`waitline` is an internal helper extension used by `php-wasm` builds that need asynchronous, line-oriented STDIN behavior.
+`waitline` is the line-reader extension used by `php-wasm` for interactive CLI and debugger input.
 
-This package does not ship a JavaScript entrypoint or a separately loadable shared-library module for end users.
-It exists so the build system can vendor the upstream `waitline` extension into custom PHP CLI and related builds.
+This package exists so the build system can vendor the upstream `waitline` extension into `php-cli-wasm` and related builds.
+It does not expose a separate JavaScript API from this folder.
 
-## When You Need It
+## What It Is For
 
-If you are consuming the published `php-wasm` runtime packages, you usually do not need to install or reference `waitline` directly.
-It matters when you are maintaining custom builds, debugging interactive input behavior, or working on the underlying runtime plumbing.
+`waitline` replaces normal blocking STDIN reads with an async, JavaScript-backed line source.
+That is what makes browser-hosted `php -a` sessions and `phpdbg` prompts workable in wasm-hosted environments.
+
+## Do You Need To Install It Directly?
+
+Usually no.
+
+If you are using the published CLI/debug runtime packages, `waitline` is expected to already be included.
+You normally only care about this package when you are maintaining custom builds, debugging interactive input behavior, or overriding the vendored source checkout.
 
 ## Custom Builds
 
-Enable `WITH_WAITLINE=1` in `.php-wasm-rc`.
+For raw custom builds, enable it in `.php-wasm-rc`:
+
+```sh
+WITH_WAITLINE=1
+```
+
+Important distinction:
+
+- published CLI/debug artifacts generally enable `waitline`
+- the custom builder default for `WITH_WAITLINE` is still `0`
 
 ## Build Options
 
-- `WITH_WAITLINE`: defaults to `0`. Set it to `1` to compile the extension into a custom build.
+- `WITH_WAITLINE`: defaults to `0` in the custom builder. Set it to `1` to compile the extension in.
 - `WAITLINE_BRANCH`: optional upstream branch override. Defaults to `master`.
 - `WAITLINE_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `waitline` repository during the build.

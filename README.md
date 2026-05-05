@@ -6,61 +6,43 @@
 
 _PHP in WebAssembly, npm not required._
 
-## [npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
-
+[npm](https://npmjs.com/package/php-wasm) | [github](https://github.com/seanmorris/php-wasm) | [unpkg](https://unpkg.com/browse/php-wasm/) | [reddit](https://www.reddit.com/r/phpwasm) | [discord](https://discord.gg/j8VZzju7gJ)
+<!--
 ### I am giving up my bed for one night.
 > My Sleep Out helps youth facing homelessness find safe shelter and loving care at Covenant House. That care includes essential services like education, job training, medical care, mental health and substance use counseling, and legal aid — everything they need to build independent, sustainable futures.
 >
 > By supporting my Sleep Out, you are supporting the dreams of young people overcoming homelessness.
-> 
+>
 > <a href = "https://www.sleepout.org/participants/62915"><img width = "50%" alt="Donate to Covenant House" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fwww.sleepout.org%2Fapi%2F1.3%2Fparticipants%2F62915%3F_%3D1760039017428&query=%24.sumDonations&prefix=%24&suffix=%20Raised&style=for-the-badge&label=Sleep%20Out%3A%20NYC&link=https%3A%2F%2Fwww.sleepout.org%2Fparticipants%2F62915"></a>
 >
 > Click here to help out: https://www.sleepout.org/participants/62915
 >
 > More info: https://www.sleepout.org/ | https://www.covenanthouse.org/ | https://www.charitynavigator.org/ein/132725416
-> 
+>
 > Together, we are working towards a future where every young person has a safe place to sleep.
 >
 > Thank you.
 >
 > and now back to your documentation...
+-->
+## 📦 Current Packages
 
-## 🌟 v0.0.9-alpha - Aiming for the (GitHub) Stars
-
-* Adding PHP-CGI & PH-DBG support!
-* Faster build time!
-* Runtime extension loading!
-* libicu, freetype, zlib, gd, libpng, libjpeg, openssl, & phar support.
-* php-wasm, php-cgi-wasm, & php-wasm-builder are now separate packages.
-* [Vrzno](https://github.com/seanmorris/vrzno) now facilitates url fopen via the fetch() api.
-* [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1) is now a separate extension from Vrzno.
-* [pdo_pglite](https://github.com/seanmorris/pdo-pglite) adds local Postgres support.
-* SQLite is now using version 3.46.
-* Demos for CodeIgniter, CakePHP, Laravel & Laminas.
-* Drupal & all other demos now use standard build + zip install.
-* Modules are now webpack-compatible out of the box.
-* Exposing FS methods w/queueing & locking to sync files between tabs & workers.
-* Fixed the bug with POST requests under Firefox.
-* Adding support for PHP 8.3.11 & 8.4.1.
-* Automatic CI testing for PHP 8.0, 8.1, 8.2, 8.3, & 8.4.
+* `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, and `php-wasm-builder` are published separately.
+* Published runtimes currently cover PHP `8.0` through `8.5`, depending on the package and entrypoint.
+* `php-wasm`, `php-cgi-wasm`, and `php-dbg-wasm` currently default to PHP `8.4`; `php-cli-wasm` currently defaults to PHP `8.3`. Pass `version` explicitly when your asset filenames need to line up.
+* Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, and `zlib`.
+* [Vrzno](https://github.com/seanmorris/vrzno), [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1), and [pdo_pglite](https://github.com/seanmorris/pdo-pglite) are maintained as separate packages.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
-Installing php-wasm:
+Install the packages you need:
 
 ```sh
-$ npm i php-wasm@alpha
-```
-
-Installing php-cgi-wasm:
-
-```sh
-$ npm i php-cgi-wasm@alpha
-```
-Installing php-wasm-builder:
-
-```sh
-$ npm i php-wasm-builder@alpha
+$ npm i php-wasm
+$ npm i php-cgi-wasm
+$ npm i php-cli-wasm
+$ npm i php-dbg-wasm
+$ npm i php-wasm-builder
 ```
 
 ## ☀️ Examples
@@ -130,7 +112,7 @@ $ npm i php-wasm-builder@alpha
 
 ## 🎩 Introducing php-cgi-wasm!
 
-Version 0.0.9 adds `php-cgi-wasm` to the mix. This allows you to run php in web-server mode, similar to how it runs under apache or nginx. Running within a Service Worker, it can intercept and respond to HTTP requests just like a normal webserver. This means the browser can simply navigate to a URL, and PHP will generate the page, and everything will work as-normal, AJAX and all. From the perspective of the webpage, its just making HTTP requests. Its not worried about whether the PHP runs on the server or in a Service Worker.
+`php-cgi-wasm` runs PHP in web-server mode, similar to Apache or nginx. Running within a Service Worker, it can intercept and respond to HTTP requests just like a normal web server. This means the browser can simply navigate to a URL and let PHP generate the page, with AJAX and other in-page requests still flowing over normal HTTP.
 
 ### Install the php-cgi-wasm package
 
@@ -163,9 +145,9 @@ self.addEventListener('fetch',    event => php.handleFetchEvent(event));
 self.addEventListener('message',  event => php.handleMessageEvent(event));
 ```
 
-You can see examples of php-cgi-wasm running in a service worker and nodejs in [`demo-web/src/cgi-worker.mjs`](demo-web/src/cgi-worker.mjs) & [`demo-node/index.mjs`](demo-node/index.mjs) respectively.
+You can see examples of `php-cgi-wasm` running in a service worker and Node.js in [`demo-web/src/cgi-worker.mjs`](demo-web/src/cgi-worker.mjs) and [`demo-node/index.mjs`](demo-node/index.mjs) respectively.
 
-***Note:*** `php-cgi-wasm` & `php-wasm` are separate packages. One "embeds" php right into your javascript, the other runs in "cgi-mode," just like php would under apache or nginx.
+***Note:*** `php-cgi-wasm` and `php-wasm` are separate packages. One embeds PHP directly into your JavaScript runtime; the other runs in CGI mode, like PHP under Apache or nginx.
 
 You can find documentation specific to php-cgi-wasm [here](packages/php-cgi-wasm).
 
@@ -179,7 +161,7 @@ $ npm install php-wasm
 
 Include the module in your preferred format:
 
-### Common JS
+### CommonJS
 
 ```javascript
 const { PhpWeb } = require('php-wasm/PhpWeb.js');
@@ -207,33 +189,36 @@ const php = new PhpWeb;
 ##### unpkg
 
 ```javascript
-const { PhpWeb } = await import('https://www.unpkg.com/php-wasm/php-wasm/PhpWeb.mjs');
+const { PhpWeb } = await import('https://unpkg.com/php-wasm/PhpWeb.mjs');
 const php = new PhpWeb;
 ```
 
 #### Pre-Packaged Static Assets:
 
-If you're using a bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
+If you're using a bundler, use the vendor's documentation to move the versioned `.wasm` file that matches the runtime, PHP version, and module format you import. For example:
 
 ```bash
-node_modules/php-wasm/php-web.mjs.wasm
-node_modules/php-wasm/php-worker.mjs.wasm # ONLY if you're running the standard build in a worker
+node_modules/php-wasm/php8.4-web.mjs.wasm
+node_modules/php-wasm/php8.4-worker.mjs.wasm # ONLY if you're running the standard build in a worker
 ```
 
-For php-cgi-wasm:
+For `php-cgi-wasm`:
+
 ```bash
-node_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm
-node_modules/php-cgi-wasm/php-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
+node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm
+node_modules/php-cgi-wasm/php8.4-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
 ```
+
+If you import a different runtime version or use the `.js` entrypoints, copy the matching `php8.x-*.mjs.wasm` or `php8.x-*.js.wasm` file instead.
 
 ## 🍎 Quickstart
 
 ### Inline PHP
 
-Include the `php-tags.js` script from a CDN:
+Include the `php-tags` module from a CDN:
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
 And run some PHP right in the page!
@@ -245,10 +230,10 @@ And run some PHP right in the page!
 <div id = "output"></div>
 ```
 
-Inline php can use standard input, output and error with `data-` attributes. Just set the value of the attribute to a selector that will match that tag.
+Inline PHP can use standard input, output, and error with `data-` attributes. Set each attribute value to a selector that matches the corresponding element.
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 
 <script id = "input" type = "text/plain">Hello, world!</script>
 
@@ -265,7 +250,7 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 ```html
 <html>
     <head>
-        <script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+        <script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
         <script id = "input" src = "/test-input.json" type = "text/json"></script>
         <script type = "text/php" src = "/test.php" data-stdin = "#input" data-stdout = "#output" data-stderr = "#error"></script>
     </head>
@@ -281,19 +266,19 @@ The `src` attribute can be used on `<script type = "text/php">` tags, as well as
 ##### JSDelivr
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
 ##### Unpkg
 
 ```html
-<script async type = "text/javascript" src = "https://www.unpkg.com/php-wasm/php-tags.unpkg.mjs"></script>
+<script async type = "module" src = "https://unpkg.com/php-wasm/php-tags.mjs"></script>
 ```
 
 <!--
 ##### esm.sh
 ```html
-<script async type = "text/javascript" src = "https://esm.sh/php-wasm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://esm.sh/php-wasm/php-tags.mjs"></script>
 ``` -->
 
 ## 🥤 Running PHP & Taking Output
@@ -336,15 +321,17 @@ const exitCode = await php.run('<?php echo "Hello, world!";');
 Dynamic extensions can be loaded in static webpages like so:
 
 ```html
-<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm@0.0.9-alpha-12/php-tags.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 
 <script type = "text/php" data-stdout = "#output" data-stderr = "#error" data-libs = '[
-  {"url": "https://unpkg.com/php-wasm-yaml/php8.3-yaml.so", "ini": true},
+  {"url": "https://unpkg.com/php-wasm-yaml/php8.4-yaml.so", "ini": true},
   {"url": "https://unpkg.com/php-wasm-yaml/libyaml.so", "ini": false}
 ]'><?php
   print yaml_emit([1,2,3,"string",["k1" => "value", "k2" => "value2", "k3" => "value3"],"now" => date("Y-m-d h:i:s")]);
 </script>
 ```
+
+The example above assumes the default `php-tags` runtime version (`8.4`). If you set `data-version` to something else, update the `php8.x-*.so` filenames to match.
 
 ## ⚙️ Configuration
 
@@ -382,7 +369,7 @@ PHP will replace strings in INI files in the form `${ENVIRONMENT_VARIABLE}` with
 extension=php${PHP_VERSION}-phar.so
 ```
 
-Remember to correctly escape the `$` if you're supplying the INI from Javascript with &#96;`backtics`&#96;:
+Remember to correctly escape the `$` if you're supplying the INI from JavaScript with backticks:
 
 ```javascript
 const php = new PhpWeb({ini: `
@@ -395,12 +382,13 @@ const php = new PhpWeb({ini: `
 
 ### Loading extensions at runtime
 
-The following extensions may be loaded at runtime. This allows the shared extension & their dependencies to be cached, re-used, and selected a-la-carte for each application.
+The following extensions may be loaded at runtime. This allows the shared extensions and their dependencies to be cached, reused, and selected a la carte for each application.
 
 * gd (https://www.npmjs.com/package/php-wasm-gd)
 * iconv  (https://www.npmjs.com/package/php-wasm-iconv)
 * intl (https://www.npmjs.com/package/php-wasm-intl)
-* xml (https://www.npmjs.com/package/php-wasm-libxml)
+* libxml (https://www.npmjs.com/package/php-wasm-libxml)
+* xml (https://www.npmjs.com/package/php-wasm-xml)
 * dom (https://www.npmjs.com/package/php-wasm-dom)
 * simplexml (https://www.npmjs.com/package/php-wasm-simplexml)
 * yaml (https://www.npmjs.com/package/php-wasm-libyaml)
@@ -416,25 +404,27 @@ There are two ways to load extensions at runtime, using the `dl()` function or `
 
 ```php
 <?php
-dl('php-8.3-xml.so');
-dl('php-8.3-dom.so');
+dl('php8.4-xml.so');
+dl('php8.4-dom.so');
 ```
 
-or, pass an array as the `extensions` argument to the constructor from Javascript to auto-generate an ini file that loads your extensions:
+Or pass a `sharedLibs` array to the constructor from JavaScript to auto-generate an INI file that loads your extensions:
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-    `php8.3-xml.so`,
-    `php8.3-dom.so`,
+    `php8.4-xml.so`,
+    `php8.4-dom.so`,
 ]});
 ```
 
-The class used to load PHP (`PhpWeb` here) also implements a phpVersion property to ensure libs can be loaded for any compatible version:
+Keep the runtime `version` and the shared-library filenames in sync when you target something other than the default build:
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [
-    `php${PhpWeb.phpVersion}-xml.so`,
-    `php${PhpWeb.phpVersion}-dom.so`,
+const version = '8.4';
+
+const php = new PhpWeb({version, sharedLibs: [
+    `php${version}-xml.so`,
+    `php${version}-dom.so`,
 ]});
 ```
 
@@ -443,7 +433,8 @@ const php = new PhpWeb({sharedLibs: [
 You can also load extensions from remote servers with URLs:
 
 ```javascript
-const php = new PhpWeb({sharedLibs: [`https://unpkg.com/php-wasm-phar/php8.3-phar.so`]});
+const version = '8.4';
+const php = new PhpWeb({version, sharedLibs: [`https://unpkg.com/php-wasm-phar/php${version}-phar.so`]});
 ```
 
 The above is actually shorthand for the following code. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.
@@ -451,8 +442,8 @@ The above is actually shorthand for the following code. Passing `ini: true` will
 ```javascript
 const php = new PhpWeb({sharedLibs: [
     {
-        name: `php8.3-phar.so`,
-        url:  `https://unpkg.com/php-wasm-phar/php8.3-phar.so`,
+        name: `php8.4-phar.so`,
+        url:  `https://unpkg.com/php-wasm-phar/php8.4-phar.so`,
         ini:  true,
     }
 ]});
@@ -462,7 +453,7 @@ Strings starting with `/`, `./`, `http://` or `https://` will be treated as URLs
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-    `./php8.3-phar.so`
+    `./php8.4-phar.so`
 ]});
 ```
 
@@ -472,14 +463,14 @@ Some extensions require supporting libraries. You can provide URLs for those as 
 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
-    { url: 'https://unpkg.com/php-wasm-sqlite/php8.3-sqlite.so', ini: true  },
-    { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
+    { url: 'https://unpkg.com/php-wasm-sqlite/php8.4-sqlite.so', ini: true  },
+    { url: 'https://unpkg.com/php-wasm-sqlite/libsqlite3.so',    ini: false },
 ]});
 ```
 
-### Loading Dynamic Extensions as JS Modules:
+### Loading Dynamic Extensions as JS Modules
 
-Dynamic extensions can be loaded as modules: So long as the main file of the module defines the `getLibs` and `getFiles` methods, extensions may be loaded like so:
+Dynamic extensions can be loaded as modules. As long as the main file of the module defines the `getLibs` and `getFiles` methods, extensions may be loaded like so:
 
 ```javascript
 new PhpNode({sharedLibs:[ await import('php-wasm-intl') ]})
@@ -488,11 +479,11 @@ new PhpNode({sharedLibs:[ await import('php-wasm-intl') ]})
 Dynamic extensions can also be loaded as modules from any static HTTP server with an ESM directory structure.
 
 ```javascript
-// This will load both sqlite.so & php8.x-sqlite.so:
+// This will load both libsqlite3.so and php8.4-sqlite.so:
 const php = new PhpWeb({sharedLibs: [ await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite') ]});
 ```
 
-Sadly, this notation is not available for Service Workers, since they do not yet support dynamic `imports()`. Hopefully this will change soon.
+This notation is not available for Service Workers, since they do not yet support dynamic `import()` in this workflow.
 
 ### Compiling extensions
 
@@ -537,7 +528,7 @@ PRELOAD_ASSETS='/path/to/file.txt /some/directory /path/to/other_file.txt /some/
 
 You can provide the `locateFile` option to php-wasm as a callback to map the names of files to URLs where they're loaded from. `undefined` can be returned as a fallback to default.
 
-You can use this if your static assets are served from a different directory than your javascript.
+You can use this if your static assets are served from a different directory than your JavaScript.
 
 This applies to `.wasm` files, shared libraries, single files and preloaded FS packages in `.data` files.
 
@@ -549,7 +540,7 @@ const php = new PhpWeb({locateFile: filename => `/my/static/path/${filename}`});
 
 ### IDBFS (Web & Worker)
 
-To use IDBFS in PhpWeb, pass a `persist` object with a `mountPath` key.
+To use IDBFS in `PhpWeb`, pass a `persist` object with a `mountPath` key.
 
 `mountPath` will be used as the path to the persistent directory within the PHP environment.
 
@@ -559,9 +550,9 @@ const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mj
 const php = new PhpWeb({persist: {mountPath: '/persist'}});
 ```
 
-### NodeFS (NodeJS Only)
+### NodeFS (Node.js Only)
 
-To use NodeFS in PhpWeb, pass a `persist` object with `mountPath` & `localPath` keys.
+To use NodeFS in `PhpNode`, pass a `persist` object with `mountPath` and `localPath` keys.
 
 `localPath` will be used as the path to the HOST directory to expose to PHP.
 `mountPath` will be used as the path to the persistent directory within the PHP environment.
@@ -595,7 +586,7 @@ await php.analyzePath(path);
 
 #### php.readdir
 
-Get a list of files and folders in or directory.
+Get a list of files and folders in a directory.
 
 ```javascript
 await php.readdir(path);
@@ -642,7 +633,7 @@ await php.rmdir(path);
 Delete a file.
 
 ```javascript
-await php.rmdir(path);
+await php.unlink(path);
 ```
 
 #### php.rename
@@ -669,11 +660,11 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 
 **Web and Worker only!**
 
-The web and worker build use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensure multiple tabs & the service worker can interact with the filesystem without overwriting eachother's work. Before any FS operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is laoded BACK into IDBFS.
+The web and worker builds use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensures multiple tabs and the service worker can interact with the filesystem without overwriting each other's work. Before any filesystem operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is loaded back into IDBFS.
 
-The operations are enqueued asyncronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
+The operations are enqueued asynchronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
 
-To suppress this behavior and take explicit control of the FS mirroring, you can pass the `{autoTransaction: false}` option to the constructor. Doing this will require you to call `php.startTransaction()` before any FS operations take place, and then`php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
+To suppress this behavior and take explicit control of FS mirroring, you can pass the `{autoTransaction: false}` option to the constructor. Doing this requires you to call `php.startTransaction()` before any FS operations take place, and then `php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
 
 #### php.startTransaction
 
@@ -689,9 +680,9 @@ await php.commitTransaction();
 
 ### msg-bus
 
-There is a `msg-bus` module supplied by `php-cgi-wasm` as a helper to communicate with php running inside a worker. The module exposes two functions: `sendMessageFor` and `onMessage`.
+There is a `msg-bus` module supplied by `php-cgi-wasm` as a helper to communicate with PHP running inside a worker. The module exposes two functions: `sendMessageFor` and `onMessage`.
 
-This allows you to simply `await` the result of calls to file system methods (see above) on the service worker:
+This lets you simply `await` the result of calls to filesystem methods (see above) on the service worker:
 
 ```javascript
 const result = await sendMessage(methodName, [param, param, param]);
@@ -703,7 +694,7 @@ const result = await sendMessage(methodName, [param, param, param]);
 * Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker.
 
 ```javascript
-import { onMessage, sendMessageFor } from `php-cgi-wasm/msg-bus`;
+import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
 const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
@@ -782,7 +773,7 @@ $ php-wasm-builder build web cgi mjs
 $ php-wasm-builder build worker cgi mjs
 ```
 
-This will build the package inside of the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
+This will build the package inside the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ### .php-wasm-rc
 
@@ -790,7 +781,7 @@ You can also create a `.php-wasm-rc` file in this directory to customize the bui
 
 ```make
 # Select a PHP version
-PHP_VERSION=8.3
+PHP_VERSION=8.4
 
 # Build the package to a directory other than the current one (RELATIVE path)
 PHP_DIST_DIR=./public
@@ -816,7 +807,7 @@ INITIAL_MEMORY=2048MB
 ASSERTIONS=0
 
 # Select the optimization level
-OPTIMIZATION=3
+OPTIMIZE=3
 
 # Build with extensions
 WITH_GD=1
@@ -833,19 +824,19 @@ The following options may appear in `.php-wasm-rc`.
 
 ##### PHP_VERSION
 
-8.0|8.1|8.2|**8.3**
+8.0|8.1|8.2|8.3|**8.4**|8.5
 
 ---
 
 ##### PHP_DIST_DIR
 
-This is the directory where javascript & wasm files will be built to, *relative to the current directory.*
+This is the directory where JavaScript and wasm files will be built, *relative to the current directory.*
 
 ---
 
 ##### PHP_ASSET_DIR
 
-This is the directory where shared libs, extension, `.data` files & other supporting files will be built to, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
+This is the directory where shared libraries, extensions, `.data` files, and other supporting files will be built, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
 
 ---
 
@@ -857,7 +848,7 @@ The optimization level to use while compiling.
 
 ---
 
-##### SUBOPTIMIZE
+##### SUB_OPTIMIZE
 
 The optimization level to use while compiling libraries. Defaults to `OPTIMIZE`.
 
@@ -887,7 +878,7 @@ As stated above, extensions may be compiled as `dynamic`, `shared`, or `static`.
 
 (defaults provided below in **bold**)
 
-The following options are availavle for building static PHP extensions:
+The following options are available for building static PHP extensions:
 
 ```
 WITH_BCMATH    # [0, 1] Enabled by default
@@ -897,9 +888,10 @@ WITH_EXIF      # [0, 1] Enabled by default
 WITH_FILTER    # [0, 1] Enabled by default
 WITH_TOKENIZER # [0, 1] Enabled by default
 WITH_VRZNO     # [0, 1] Enabled by default
+WITH_WAITLINE  # [0, 1] Disabled by default in raw custom builds
 ```
 
-The following extension may be compiled as static, shared or dynamic:
+The following extensions may be compiled as static, shared, or dynamic:
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
@@ -937,9 +929,9 @@ When compiled as a `dynamic` extension, this will produce the extension file `ph
 
 static|**shared**
 
-This actual `php-libxml` extension must be statically compiled, but `libxml` itself may be loaded as a shared library.
+The `libxml` extension itself must be statically compiled, but `libxml2` may be loaded as a shared library.
 
-When compiled as a `shared` library, it will produce the library `libxml.so`.
+When compiled as a `shared` library, it will produce the library `libxml2.so`.
 
 ---
 
@@ -947,7 +939,7 @@ When compiled as a `shared` library, it will produce the library `libxml.so`.
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zip.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-zip.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libzip.so`.
 
@@ -959,7 +951,7 @@ This extension depends on `zlib`.
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-iconv.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-iconv.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libiconv.so`.
 
@@ -969,7 +961,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extensions `php-8.x-sqlite.so`, & `php-8.x-pdo-sqlite.so`.
+When compiled as a `dynamic` extension, this will produce the extensions `php8.x-sqlite.so` and `php8.x-pdo-sqlite.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libsqlite3.so`.
 
@@ -979,9 +971,9 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 static|**dynamic**
 
-This extenstion makes use of `freetype`, `libjpeg`, `libpng`, & `zlib`.
+This extension makes use of `freetype`, `libjpeg`, `libpng`, and `zlib`.
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-gd.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-gd.so`.
 
 ###### WITH_LIBPNG
 
@@ -1013,7 +1005,7 @@ If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-zlib.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-zlib.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libz.so`.
 
@@ -1023,7 +1015,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-yaml.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-yaml.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libyaml.so`.
 
@@ -1033,7 +1025,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-tidy.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-tidy.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the library `libtidy.so`.
 
@@ -1043,7 +1035,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the library 
 
 static|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-mbstring.so`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-mbstring.so`.
 
 ---
 
@@ -1053,7 +1045,7 @@ static|shared|**dynamic**
 
 Support library for `mbstring`.
 
-When compiled as a `dynamic` or `shared ` library, this will produce the library `libonig.so`.
+When compiled as a `dynamic` or `shared` library, this will produce the library `libonig.so`.
 
 If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbstring` is loaded.
 
@@ -1063,7 +1055,7 @@ If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbst
 
 shared|**dynamic**
 
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-openssl`.
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-openssl.so`.
 
 When compiled as a `dynamic` or `shared` extension, it will produce the libraries `libssl.so` &  `libcrypto.so`.
 
@@ -1071,7 +1063,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the librarie
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.x-intl.so` & the following libraries:
+When compiled as a `dynamic` or `shared` extension, this will produce the extension `php8.x-intl.so` and the following libraries:
 
 * libicuuc.so
 * libicutu.so
@@ -1087,7 +1079,7 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 
 #### php-wasm-builder build
 
-Use this to build custom version of php-wasm. Its recommended to build this to an empty directory using a `.php-wasm-rc` file.
+Use this to build a custom version of `php-wasm`. It's recommended to build into an empty directory using a `.php-wasm-rc` file.
 
 ```bash
 npx php-wasm-builder build
@@ -1113,7 +1105,7 @@ npx php-wasm-builder copy-assets
 
 #### php-wasm-builder build-assets
 
-Similar to `copy-assets`, but will actually compile the shared libaries, then copy them to `PHP_ASSET_DIR`.
+Similar to `copy-assets`, but will actually compile the shared libraries, then copy them to `PHP_ASSET_DIR`.
 
 You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 
