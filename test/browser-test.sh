@@ -3,12 +3,8 @@
 set -euo pipefail
 PORT=9000
 export CI="${CI:-}"
-
-pushd demo-web >/dev/null
-npm run build
-DEMO_WEB_E2E_PORT="${PORT}" node test/e2e-server.mjs &
+BROWSER_TEST_PORT="${PORT}" node test/browser/server.mjs &
 SERVER_PID=$!
-popd >/dev/null
 
 trap 'kill ${SERVER_PID}' EXIT
 
@@ -24,11 +20,6 @@ fi
 
 PHP_VERSION="${PHP_VERSION}" \
 PHP_VARIANT="${PHP_VARIANT:-}" \
-DEMO_WEB_E2E_PORT="${PORT}" \
+BROWSER_TEST_PORT="${PORT}" \
+BUILD_TYPE="${BUILD_TYPE:-dynamic}" \
 npx playwright test "${PLAYWRIGHT_ARGS[@]}"
-
-pushd demo-web >/dev/null
-PHP_VERSION="${PHP_VERSION}" \
-DEMO_WEB_E2E_PORT="${PORT}" \
-npx playwright test -c playwright.config.mjs
-popd >/dev/null

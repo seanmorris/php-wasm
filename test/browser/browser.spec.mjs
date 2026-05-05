@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 const version = process.env.PHP_VERSION ?? '8.4';
-const port = Number(process.env.DEMO_WEB_E2E_PORT ?? 9000);
-const baseUrl = `http://127.0.0.1:${port}/php-wasm/`;
+const buildType = process.env.BUILD_TYPE ?? 'dynamic';
+const variant = process.env.PHP_VARIANT ?? '';
 
 const demoCases = [
 	{
@@ -22,7 +22,7 @@ const demoCases = [
 		demo: 'postgres.php',
 		extensionFlags: 0,
 		snapshot: 'BrowserTest.testPostgres_0.json',
-		versions: ['8.4', '8.3', '8.2'],
+		minVersion: '8.2',
 	},
 	{
 		name: 'renders the sqlite pdo embedded demo',
@@ -52,33 +52,112 @@ const demoCases = [
 
 test.describe.configure({ mode: 'serial' });
 
-const demoUrl = ({demo, extensionFlags}) => {
-	return `${baseUrl}embedded-php.html?demo=${demo}&version=${version}&extensionFlags=${extensionFlags}&no-service-worker`;
+const comparePhpVersions = (left, right) => {
+	const leftParts = left.split('.').map(Number);
+	const rightParts = right.split('.').map(Number);
+
+	for(let i = 0; i < Math.max(leftParts.length, rightParts.length); i++)
+	{
+		const leftPart = leftParts[i] ?? 0;
+		const rightPart = rightParts[i] ?? 0;
+
+		if(leftPart === rightPart)
+		{
+			continue;
+		}
+
+		return leftPart - rightPart;
+	}
+
+	return 0;
 };
 
-const expectEmbeddedDemoSnapshot = async (page, fixture) => {
-	await page.goto(demoUrl(fixture), {waitUntil: 'domcontentloaded'});
+const demoUrl = ({demo, extensionFlags}) => {
+	const params = new URLSearchParams({
+		buildType,
+		demo,
+		extensionFlags: String(extensionFlags),
+		version,
+	});
 
-	const phpOutput = page.locator('iframe').nth(1);
+	if(variant)
+	{
+		params.set('variant', variant);
+	}
 
+	return `harness/embedded.html?${params.toString()}`;
+};
+
+const waitForHarnessStatus = async (page, expectedStatus = 'done') => {
 	await expect(async () => {
-		const srcdoc = await phpOutput.getAttribute('srcdoc');
-		expect(srcdoc).toBeTruthy();
-		expect(JSON.stringify(srcdoc, null, 4)).toMatchSnapshot(fixture.snapshot);
+		const status = await page.locator('[data-testid="status"]').textContent();
+
+		if(status === 'failed')
+		{
+			const stderr = await page.locator('[data-testid="stderr"]').textContent();
+			throw new Error(stderr || 'Harness reported failure.');
+		}
+
+		expect(status).toBe(expectedStatus);
 	}).toPass({
 		timeout: 180000,
 		intervals: [250, 500, 1000, 2000, 4000]
 	});
 };
 
+const expectEmbeddedDemoSnapshot = async (page, fixture) => {
+	await page.goto(demoUrl(fixture), {waitUntil: 'domcontentloaded'});
+	await waitForHarnessStatus(page);
+
+	const stdout = await page.locator('[data-testid="stdout"]').textContent();
+	expect(JSON.stringify(stdout ?? '')).toMatchSnapshot(fixture.snapshot);
+};
+
 for(const fixture of demoCases)
 {
 	test(fixture.name, async ({ page }) => {
-		if(fixture.versions && !fixture.versions.includes(version))
+		if(fixture.minVersion && comparePhpVersions(version, fixture.minVersion) < 0)
 		{
-			test.skip(`${fixture.demo} only runs on PHP ${fixture.versions.join(', ')}.`);
+			test.skip(`${fixture.demo} only runs on PHP ${fixture.minVersion}+.`);
 		}
 
 		await expectEmbeddedDemoSnapshot(page, fixture);
 	});
 }
+
+test('runs a cli script in the browser harness', async ({ page }) => {
+	const params = new URLSearchParams({
+		buildType,
+		code: 'echo "Hello, World!";',
+		version,
+	});
+
+	await page.goto(`harness/cli.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
+	await waitForHarnessStatus(page);
+	await expect(page.locator('[data-testid="stdout"]')).toContainText('Hello, World!');
+});
+
+test('boots phpdbg in the browser harness', async ({ page }) => {
+	const params = new URLSearchParams({
+		buildType,
+		path: '/preload/test_www/hello-world.php',
+		version,
+	});
+
+	await page.goto(`harness/dbg.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
+	await waitForHarnessStatus(page, 'ready');
+	await expect(page.locator('[data-testid="stdout"]')).toContainText('/preload/test_www/hello-world.php');
+});
+
+test('serves php through the cgi worker harness', async ({ page }) => {
+	const params = new URLSearchParams({
+		buildType,
+		version,
+	});
+
+	await page.goto(`harness/cgi.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
+	await waitForHarnessStatus(page);
+	await expect(page.locator('[data-testid="controller"]')).toContainText('/php-wasm/cgi-worker.mjs');
+	await expect(page.locator('[data-testid="status-code"]')).toHaveText('200');
+	await expect(page.locator('[data-testid="powered-by"]')).toContainText(`PHP/${version}`);
+});

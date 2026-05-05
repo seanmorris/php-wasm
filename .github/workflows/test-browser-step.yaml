@@ -47,6 +47,9 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
+      - name: Verify browser harness assets
+        run: node test/browser/verify-browser-assets.mjs
+
       - name: Install Chrome's APT key
         run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
 
@@ -56,11 +59,8 @@ jobs:
       - name: Install Chrome
         run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
 
-      - name: Ensure the demo uses local packages
-        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
-
       - name: Run tests
-        run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-browser
+        run: PHP_VERSION=${{ inputs.phpVersion }} BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-browser
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

@@ -10,7 +10,7 @@ export default defineConfig({
 	timeout: 180000,
 	reporter: 'list',
 	use: {
-		baseURL: `http://127.0.0.1:${process.env.DEMO_WEB_E2E_PORT ?? 9000}`,
+		baseURL: `http://127.0.0.1:${process.env.BROWSER_TEST_PORT ?? 9000}/php-wasm/`,
 		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
 		video: 'off',

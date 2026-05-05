@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>php-cgi-wasm Harness</title>
+</head>
+<body data-status="booting">
+	<h1>php-cgi-wasm Harness</h1>
+	<p>Status: <span data-testid="status">booting</span></p>
+	<p hidden>Controller: <span data-testid="controller"></span></p>
+	<p hidden>Worker URL: <span data-testid="worker-url"></span></p>
+	<p hidden>HTTP status: <span data-testid="status-code"></span></p>
+	<p hidden>Powered by: <span data-testid="powered-by"></span></p>
+	<pre data-testid="response-text"></pre>
+	<pre data-testid="stderr"></pre>
+	<script type="module" src="./cgi-page.mjs"></script>
+</body>
+</html>

@@ -48,7 +48,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+        run: PHP_VERSION=${{ inputs.phpVersion }} BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}
