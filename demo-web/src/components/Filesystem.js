@@ -1,3 +1,6 @@
+/**
+ * Filesystem maintenance overlays for backing up, restoring, and clearing demo data.
+ */
 import '../styles/Common.css';
 import '../styles/InstallDemo.css';
 
@@ -14,6 +17,9 @@ import libzip from 'php-wasm-libzip';
 import { useEffect, useEffectEvent, useState } from 'react';
 const sharedLibs = [libxml, zlib, libzip];
 
+/**
+ * Creates a backup zip from the persisted demo filesystem and downloads it.
+ */
 const backupSite = async () => {
 	const bus = await getPhpBus();
 	const persistFile = await bus.readdir('/persist');
@@ -44,6 +50,9 @@ const backupSite = async () => {
 	URL.revokeObjectURL(link.href);
 };
 
+/**
+ * Uploads a backup zip and restores it into the persisted demo filesystem.
+ */
 const restoreSite = async ({fileInput}) => {
 	if(!fileInput.files.length)
 	{
@@ -66,6 +75,9 @@ const restoreSite = async ({fileInput}) => {
 	await bus.refresh();
 };
 
+/**
+ * Clears the persisted IndexedDB-backed filesystem stores used by the demo.
+ */
 const clearFilesystem = () => {
 	const fileDb = indexedDB.open("/persist", 21);
 	const configDb = indexedDB.open("/config", 21);
@@ -101,6 +113,9 @@ const clearFilesystem = () => {
 	return Promise.all([fileClear.promise, configClear.promise]);
 };
 
+/**
+ * Wraps a filesystem operation in a loading overlay component with shared status wiring.
+ */
 const makeComponent = (operation) => ({onComplete, onError, ...args}) => {
 	const [message, setMessage] = useState('Initializing...');
 

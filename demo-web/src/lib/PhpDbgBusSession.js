@@ -1,8 +1,18 @@
+/**
+ * VS Code debug adapter shim for php-dbg-wasm.
+ */
 import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
 
 const DEFAULT_THREAD_ID = 1;
 
+/**
+ * Extracts the final path segment for a runtime file.
+ */
 const basename = path => String(path ?? '').split('/').pop() || String(path ?? '');
+
+/**
+ * Converts runtime paths into the busfs scheme understood by the VS Code iframe.
+ */
 const toEditorPath = path => {
 	const normalized = normalizePath(path);
 
@@ -20,6 +30,9 @@ const toEditorPath = path => {
 	return `busfs://${runtimePath}`;
 };
 
+/**
+ * Normalizes file paths coming from URLs, runtime output, and VS Code requests.
+ */
 const normalizePath = path => {
 	if(!path)
 	{
@@ -41,6 +54,9 @@ const normalizePath = path => {
 	return stringPath;
 };
 
+/**
+ * Default no-op callback used until a debug message sink is attached.
+ */
 const noop = () => {};
 
 /**
@@ -89,11 +105,17 @@ export class PhpDbgBusSession
 		this.handleError = this.handleError.bind(this);
 	}
 
+	/**
+	 * Replaces the outbound message sink used to emit DAP responses and events.
+	 */
 	setMessageSink(postMessage = noop)
 	{
 		this.postMessage = postMessage;
 	}
 
+	/**
+	 * Lazily creates the phpdbg runtime and attaches the output listeners once.
+	 */
 	async getRuntime()
 	{
 		if(this.runtime)
@@ -119,6 +141,9 @@ export class PhpDbgBusSession
 		return this.runtime;
 	}
 
+	/**
+	 * Detaches listeners and clears the active runtime instance.
+	 */
 	disposeRuntime()
 	{
 		if(this.runtime && this.listenersAttached)
@@ -133,6 +158,9 @@ export class PhpDbgBusSession
 		this.runPromise = null;
 	}
 
+	/**
+	 * Resets the adapter state across every session and variable reference.
+	 */
 	dispose()
 	{
 		this.disposeRuntime();
@@ -142,6 +170,9 @@ export class PhpDbgBusSession
 		this.requestedBreakpoints.clear();
 	}
 
+	/**
+	 * Applies launch-time runtime settings and recreates the runtime when versions change.
+	 */
 	configureRuntime(config = {})
 	{
 		const nextVersion = config.version ?? this.defaultRuntimeArgs.version;
@@ -158,6 +189,9 @@ export class PhpDbgBusSession
 		};
 	}
 
+	/**
+	 * Creates the tracked state object for one VS Code debug session.
+	 */
 	createSessionState(session, overrides = {})
 	{
 		return {
@@ -176,6 +210,9 @@ export class PhpDbgBusSession
 		};
 	}
 
+	/**
+	 * Replaces the stored session state object and returns the new state.
+	 */
 	resetSessionState(session, overrides = {})
 	{
 		const state = this.createSessionState(session, overrides);
@@ -183,6 +220,9 @@ export class PhpDbgBusSession
 		return state;
 	}
 
+	/**
+	 * Starts a new debug session, resets runtime state, and boots phpdbg.
+	 */
 	async startDebugSession(session, config = {}, overrides = {})
 	{
 		this.disposeRuntime();
@@ -200,6 +240,9 @@ export class PhpDbgBusSession
 		return state;
 	}
 
+	/**
+	 * Ends a debug session and tears down the shared runtime when appropriate.
+	 */
 	endDebugSession(sessionId)
 	{
 		const wasActiveSession = this.activeSessionId === sessionId;
@@ -221,6 +264,9 @@ export class PhpDbgBusSession
 		}
 	}
 
+	/**
+	 * Returns the tracked state for a session, creating it on first access.
+	 */
 	sessionState(session)
 	{
 		if(!this.sessions.has(session.id))
@@ -234,6 +280,9 @@ export class PhpDbgBusSession
 		return state;
 	}
 
+	/**
+	 * Sends a raw DAP message through the configured VS Code bridge.
+	 */
 	send(sessionId, message)
 	{
 		return this.postMessage(sessionId, {
@@ -242,6 +291,9 @@ export class PhpDbgBusSession
 		});
 	}
 
+	/**
+	 * Sends a DAP event envelope to the VS Code bridge.
+	 */
 	sendEvent(sessionId, event, body = {})
 	{
 		return this.send(sessionId, {
@@ -251,6 +303,9 @@ export class PhpDbgBusSession
 		});
 	}
 
+	/**
+	 * Builds a DAP response object for the provided request.
+	 */
 	response(request, body = {}, success = true, message = undefined)
 	{
 		return {
@@ -263,12 +318,18 @@ export class PhpDbgBusSession
 		};
 	}
 
+	/**
+	 * Sends a single command line to the phpdbg runtime.
+	 */
 	async command(line)
 	{
 		const runtime = await this.getRuntime();
 		return runtime.provideInput(line);
 	}
 
+	/**
+	 * Clears tracked variable handles before a new stack inspection.
+	 */
 	clearVariableReferences()
 	{
 		this.variableReferences.clear();
@@ -322,6 +383,9 @@ export class PhpDbgBusSession
 		};
 	}
 
+	/**
+	 * Replaces the runtime breakpoints registered for a single source path.
+	 */
 	async setSourceBreakpoints(state, path, breakpoints = [])
 	{
 		const runtime = await this.getRuntime();
@@ -389,6 +453,9 @@ export class PhpDbgBusSession
 		return requestedBreakpoints;
 	}
 
+	/**
+	 * Pulls the currently open breakpoints from the VS Code bridge into session state.
+	 */
 	async syncRequestedBreakpointsFromOpenFiles(state)
 	{
 		if(!this.listOpenBreakpoints)
@@ -422,6 +489,9 @@ export class PhpDbgBusSession
 		}
 	}
 
+	/**
+	 * Builds DAP stack frames from the current phpdbg backtrace.
+	 */
 	async stackFrames(state)
 	{
 		const runtime = await this.getRuntime();
@@ -452,6 +522,9 @@ export class PhpDbgBusSession
 		});
 	}
 
+	/**
+	 * Returns the DAP scopes exposed for a frame.
+	 */
 	async scopes(state, frameId)
 	{
 		const runtime = await this.getRuntime();
@@ -486,6 +559,9 @@ export class PhpDbgBusSession
 		return activeRuntime;
 	}
 
+	/**
+	 * Handles the DAP initialize request and advertises adapter capabilities.
+	 */
 	async handleInitialize(session, message)
 	{
 		const state = this.sessionState(session);
@@ -526,6 +602,9 @@ export class PhpDbgBusSession
 		return this.response(message);
 	}
 
+	/**
+	 * Finishes session bootstrap, installs breakpoints, and optionally runs the program.
+	 */
 	async handleConfigurationDone(session, message)
 	{
 		const state = this.sessionState(session);
@@ -597,6 +676,9 @@ export class PhpDbgBusSession
 		return this.response(message);
 	}
 
+	/**
+	 * Synchronizes breakpoints for a single source file.
+	 */
 	async handleSetBreakpoints(session, message)
 	{
 		const state = this.sessionState(session);
@@ -628,6 +710,9 @@ export class PhpDbgBusSession
 		return this.response(message, {breakpoints: dapBreakpoints});
 	}
 
+	/**
+	 * Returns source text for the requested file when the backing filesystem exposes it.
+	 */
 	async handleSource(message)
 	{
 		const path = normalizePath(
@@ -683,6 +768,9 @@ export class PhpDbgBusSession
 		return this.response(message, {variables});
 	}
 
+	/**
+	 * Continues execution using the requested phpdbg resume command.
+	 */
 	async handleContinue(session, message, command, reason)
 	{
 		const state = this.sessionState(session);
@@ -714,6 +802,9 @@ export class PhpDbgBusSession
 		}
 	}
 
+	/**
+	 * Detects whether a user command resumes program execution.
+	 */
 	isResumeCommand(input)
 	{
 		const command = String(input ?? '').trim().split(/\s+/, 1)[0].toLowerCase();
@@ -732,6 +823,9 @@ export class PhpDbgBusSession
 			.filter(Boolean);
 	}
 
+	/**
+	 * Converts simple `$variable` expressions into names that match dumpVars output.
+	 */
 	normalizeLookupExpression(expression)
 	{
 		const normalized = String(expression ?? '').trim();
@@ -770,6 +864,9 @@ export class PhpDbgBusSession
 		return true;
 	}
 
+	/**
+	 * Handles REPL and watch-expression evaluation requests from VS Code.
+	 */
 	async handleEvaluate(session, message)
 	{
 		if(message.arguments?.context === 'repl')
@@ -821,6 +918,9 @@ export class PhpDbgBusSession
 		return this.response(message);
 	}
 
+	/**
+	 * Dispatches inbound VS Code adapter messages to the matching handler.
+	 */
 	async acceptVSCodeMessage(session, message)
 	{
 		switch(message.command)
@@ -906,12 +1006,18 @@ export class PhpDbgBusSession
 		return true;
 	}
 
+	/**
+	 * Updates the session id used for forwarding stdout, stderr, and stop events.
+	 */
 	didChangeActiveDebugSession(session)
 	{
 		this.activeSessionId = session?.id ?? null;
 		return true;
 	}
 
+	/**
+	 * Reacts to phpdbg stdin requests and converts them into stop or terminate events.
+	 */
 	async handleStdinRequest()
 	{
 		if(!this.activeSessionId || !this.sessions.has(this.activeSessionId))
@@ -952,6 +1058,9 @@ export class PhpDbgBusSession
 		}
 	}
 
+	/**
+	 * Forwards phpdbg stdout lines into VS Code output events.
+	 */
 	handleOutput(event)
 	{
 		if(!this.activeSessionId)
@@ -968,6 +1077,9 @@ export class PhpDbgBusSession
 		}
 	}
 
+	/**
+	 * Forwards phpdbg stderr lines into VS Code output events.
+	 */
 	handleError(event)
 	{
 		if(!this.activeSessionId)

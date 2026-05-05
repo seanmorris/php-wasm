@@ -1,5 +1,11 @@
+/**
+ * Modal confirmation prompt used by destructive or long-running demo actions.
+ */
 import '../styles/Confirm.css';
 
+/**
+ * Renders a confirm/cancel dialog with caller-provided content.
+ */
 export default function Confirm({message, onConfirm, onCancel})
 {
 	return (

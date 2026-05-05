@@ -1,3 +1,6 @@
+/**
+ * Legacy webpack build for the CGI worker kept alongside the newer Vite pipeline.
+ */
 const path = require('node:path');
 const webpack = require('webpack');
 

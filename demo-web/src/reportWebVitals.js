@@ -1,3 +1,6 @@
+/**
+ * Lazily wires the CRA-style web-vitals callback when a listener is supplied.
+ */
 const reportWebVitals = onPerfEntry => {
 	if(onPerfEntry && onPerfEntry instanceof Function)
 	{

@@ -1,3 +1,6 @@
+/**
+ * Standalone PHP CLI preview page used for scripted and interactive terminal demos.
+ */
 import { useMemo, useState } from 'react';
 import '../styles/dbg-preview.css';
 import Terminal from '../components/Terminal';
@@ -5,6 +8,9 @@ import { basePath } from '../lib/runtimePaths';
 
 const sharedLibs = [];
 
+/**
+ * Boots a terminal instance and wraps it with the CLI preview chrome.
+ */
 export default function CliPreview()
 {
 

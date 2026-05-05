@@ -1,3 +1,6 @@
+/**
+ * Primary Vite configuration for the demo-web React application.
+ */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
@@ -54,6 +57,9 @@ const trimmedAppBase = appBase.endsWith('/')
 
 const rootHtmlPath = path.resolve(__dirname, 'src/index.html');
 
+/**
+ * Serves every legacy HTML alias through the same transformed Vite entry document.
+ */
 const legacyHtmlAliasPlugin = () => ({
 	name: 'legacy-html-alias-plugin'
 	, configureServer(server) {

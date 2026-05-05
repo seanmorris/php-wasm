@@ -1,3 +1,6 @@
+/**
+ * Browser terminal component backed by php-cli-wasm.
+ */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb';
 import { PGlite } from '@electric-sql/pglite';
@@ -9,6 +12,9 @@ import { buildType } from '../lib/runtimePaths';
 // import libxml from 'php-wasm-libxml';
 
 const parser = new Convert();
+/**
+ * Default callback used for optional terminal event handlers.
+ */
 const noop = () => {};
 
 const defaultSharedLibs = [
@@ -78,6 +84,9 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
+/**
+ * Escapes terminal output before converting ANSI sequences to HTML.
+ */
 const escapeHtml = string => string
 	.replace(/&/g, "&amp;")
 	.replace(/</g, "&lt;")
@@ -85,6 +94,9 @@ const escapeHtml = string => string
 	.replace(/"/g, "&quot;")
 	.replace(/'/g, "&#039;");
 
+/**
+ * Shared php-cli runtime arguments used by every terminal instance.
+ */
 const phpArgs = {
 	version: '8.3'
 	, ini
@@ -95,6 +107,9 @@ const phpArgs = {
 	// , interactive: false
 };
 
+/**
+ * Renders an interactive or scripted PHP CLI session inside the demo shell.
+ */
 export default function Terminal({
 	setStatusMessage = noop
 	, setExitCode = noop

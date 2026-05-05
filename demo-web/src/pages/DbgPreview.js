@@ -1,8 +1,14 @@
+/**
+ * Standalone PHP debugger preview page.
+ */
 import { useMemo, useState } from 'react';
 import '../styles/dbg-preview.css';
 import Debugger from '../components/Debugger';
 import { basePath } from '../lib/runtimePaths';
 
+/**
+ * Hosts the debugger component inside the preview shell used by popup launches.
+ */
 export default function DbgPreview()
 {
 

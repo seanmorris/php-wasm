@@ -1,3 +1,6 @@
+/**
+ * Shared php-dbg runtime argument factory used by the VS Code integration.
+ */
 import { PGlite } from '@electric-sql/pglite';
 import { buildType } from './runtimePaths';
 
@@ -53,6 +56,9 @@ else
 	);
 }
 
+/**
+ * Creates the runtime configuration passed to php-dbg-wasm instances.
+ */
 export const createPhpDbgRuntimeArgs = (version = '8.3') => ({
 	version
 	, sharedLibs

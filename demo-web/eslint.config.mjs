@@ -1,3 +1,6 @@
+/**
+ * ESLint flat-config for the demo-web app, tests, and build scripts.
+ */
 import js from '@eslint/js';
 import globals from 'globals';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
@@ -7,6 +10,9 @@ import smNoSaccadeStyle from 'sm-no-saccade-style';
 
 const [smRecommended] = smNoSaccadeStyle.configs.recommended;
 
+/**
+ * Source files that should be linted with the browser-and-JSX rule set.
+ */
 const appFiles = ['src/**/*.{js,mjs}'];
 
 export default [

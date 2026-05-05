@@ -1,5 +1,11 @@
+/**
+ * Error modal used to surface recoverable UI failures to the user.
+ */
 import '../styles/Confirm.css';
 
+/**
+ * Renders a single-action error dialog with an acknowledgement button.
+ */
 export default function ErrorDialog({message, onConfirm})
 {
 	return (

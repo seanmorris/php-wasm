@@ -1,7 +1,13 @@
+/**
+ * Helpers for opening popup-backed demo flows without losing query parameters.
+ */
 import { baseUrlFor } from './runtimePaths';
 
 export const popupTarget = '_blank';
 
+/**
+ * Normalizes demo links into fully qualified popup URLs.
+ */
 export const resolvePopupHref = (pathOrUrl = '') => {
 	if(/^[a-z]+:\/\//i.test(pathOrUrl))
 	{
@@ -16,6 +22,9 @@ export const resolvePopupHref = (pathOrUrl = '') => {
 	return baseUrlFor(pathOrUrl).toString();
 };
 
+/**
+ * Converts a popup URL into a form post target plus serialized search params.
+ */
 export const resolvePopupRequest = (pathOrUrl = '') => {
 	const url = new URL(resolvePopupHref(pathOrUrl));
 

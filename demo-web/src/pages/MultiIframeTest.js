@@ -1,5 +1,11 @@
+/**
+ * Stress-test page that opens many CGI-backed iframes at once.
+ */
 const FRAME_COUNT = 120;
 
+/**
+ * Renders a large batch of demo iframes to exercise the CGI service worker.
+ */
 export default function MultiIframeTest()
 {
 	const frames = Array.from({ length: FRAME_COUNT }, (_, i) => i + 1);

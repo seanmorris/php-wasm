@@ -1,3 +1,6 @@
+/**
+ * Helpers for bootstrapping the VS Code iframe integration and debug bridge.
+ */
 export const SUPPORTED_PHP_VERSIONS = ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 const GENERATED_CONFIG_PREFIX = 'PHP DBG Wasm: Current File';
 export const GENERATED_FILES_ASSOCIATIONS = {
@@ -9,8 +12,14 @@ export const STARTUP_BRIDGE_RETRY_OPTIONS = {
 	, delayMs: 125
 };
 
+/**
+ * Waits for a short period before retrying bridge operations that often fail during startup.
+ */
 const delay = timeoutMs => new Promise(resolve => setTimeout(resolve, timeoutMs));
 
+/**
+ * Detects the bridge failures that arrive without a useful message or code.
+ */
 const isOpaqueBridgeFailure = error => {
 	if(!error)
 	{
@@ -37,6 +46,9 @@ const isOpaqueBridgeFailure = error => {
 	return !message && !code;
 };
 
+/**
+ * Calls a bridge method with bounded retries for transient startup failures.
+ */
 export const callClientMethodWithRetry = async (
 	client
 	, method
@@ -75,6 +87,9 @@ export const callClientMethodWithRetry = async (
 	throw lastError;
 };
 
+/**
+ * Maps generated file suffixes to the language modes VS Code should use.
+ */
 export const getAssociatedLanguageId = path => {
 	if(!path)
 	{
@@ -92,6 +107,9 @@ export const getAssociatedLanguageId = path => {
 		?.[1] ?? null;
 };
 
+/**
+ * Builds the synthetic launch configurations injected into launch.json.
+ */
 export const createGeneratedLaunchConfigurations = (defaultVersion = '8.3') => {
 	void defaultVersion;
 	const orderedVersions = [...SUPPORTED_PHP_VERSIONS].sort((left, right) => {
@@ -107,6 +125,9 @@ export const createGeneratedLaunchConfigurations = (defaultVersion = '8.3') => {
 	}));
 };
 
+/**
+ * Retrieves currently open breakpoints through whichever bridge API is available.
+ */
 export const listOpenBreakpointsFor = bridge => {
 	if(typeof bridge?.listOpenBreakpoints === 'function')
 	{

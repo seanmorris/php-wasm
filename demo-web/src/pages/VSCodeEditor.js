@@ -1,3 +1,6 @@
+/**
+ * VS Code iframe page wired to the demo filesystem and PHP debug adapter bridge.
+ */
 import '../styles/Common.css';
 import '../styles/Editor.css';
 import Header from '../components/Header';
@@ -18,11 +21,17 @@ import {
 
 const GENERATED_CONFIG_PREFIX = 'PHP DBG Wasm: Current File';
 
+/**
+ * Builds the generated launch.json payload for the embedded VS Code instance.
+ */
 const createLaunchConfig = defaultVersion => ({
 	version: '0.2.0'
 	, configurations: createGeneratedLaunchConfigurations(defaultVersion)
 });
 
+/**
+ * Ensures the demo filesystem contains the launch.json settings needed for debugging.
+ */
 const ensureDebugFiles = async (bus, defaultVersion) => {
 	const vscodeDir = await bus.analyzePath('/.vscode');
 
@@ -87,6 +96,9 @@ const ensureDebugFiles = async (bus, defaultVersion) => {
 	}
 };
 
+/**
+ * Mounts the VS Code iframe, filesystem handlers, and debug adapter bridge.
+ */
 export default function VSCodeEditor()
 {
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);

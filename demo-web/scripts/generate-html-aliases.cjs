@@ -1,3 +1,6 @@
+/**
+ * Post-build helper that fans the generated HTML entrypoint out to legacy aliases.
+ */
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
@@ -18,6 +21,9 @@ const aliases = [
 	, 'vscode.html'
 ];
 
+/**
+ * Copies the generated entry HTML to every legacy route expected by the demo.
+ */
 async function main() {
 	let sourceIndexHtml = indexHtml;
 

@@ -1,3 +1,6 @@
+/**
+ * Browser debugger console backed by php-dbg-wasm.
+ */
 import { forwardRef, useCallback, useEffect, useEffectEvent, useImperativeHandle, useRef, useState } from 'react';
 import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import { PGlite } from '@electric-sql/pglite';
@@ -77,6 +80,9 @@ const ini = `
 	expose_php=0
 `;
 
+/**
+ * Escapes phpdbg output before ANSI markup is converted into HTML.
+ */
 const escapeHtml = string => string
 	.replace(/&/g, "&amp;")
 	.replace(/</g, "&lt;")
@@ -86,6 +92,9 @@ const escapeHtml = string => string
 
 const defaultInitCommands = [];
 
+/**
+ * Renders the debugger UI and exposes a small imperative bridge via React refs.
+ */
 export default forwardRef(function Debugger({
 	className = ''
 	, file

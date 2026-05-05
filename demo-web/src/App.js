@@ -1,3 +1,6 @@
+/**
+ * Top-level router composition for the demo-web application.
+ */
 import { Navigate, Route, Routes } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -12,6 +15,9 @@ import SelectFramework from './pages/SelectFramework';
 import VSCodeEditor from './pages/VSCodeEditor';
 import { basePath, routerBase } from './lib/runtimePaths';
 
+/**
+ * Declares the route table used by the demo application.
+ */
 export function AppRoutes()
 {
 	return <Routes>
@@ -80,6 +86,9 @@ export function AppRoutes()
 	</Routes>;
 }
 
+/**
+ * Wraps the route table in the browser router configured for the demo base path.
+ */
 export default function App()
 {
 	return <BrowserRouter basename = {routerBase}>

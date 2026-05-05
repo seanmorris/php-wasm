@@ -1,3 +1,6 @@
+/**
+ * Folder row used by the lightweight editor's recursive filesystem tree.
+ */
 import '../styles/Common.css';
 import '../styles/EditorEntry.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -9,6 +12,9 @@ import folderOpen from '../assets/nomo-dark/folder.open.svg';
 import folderClose from '../assets/nomo-dark/folder.close.svg';
 import loader from '../assets/ui/bar-spin.svg';
 
+/**
+ * Renders a directory entry, lazily loads its contents, and supports file creation.
+ */
 export default function EditorFolder({
 	path = '/'
 	, name = ''

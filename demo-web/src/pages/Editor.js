@@ -1,3 +1,6 @@
+/**
+ * Lightweight in-browser editor backed by the CGI worker filesystem and PHP debugger.
+ */
 import '../styles/Common.css';
 import '../styles/Editor.css';
 
@@ -46,6 +49,9 @@ const modes = {
 	, 'yaml': 'ace/mode/yaml'
 };
 
+/**
+ * Renders the filesystem tree, file tabs, editor surface, and inline debugger panel.
+ */
 export default function Editor()
 {
 	const [openFiles, setOpenFiles] = useState([]);

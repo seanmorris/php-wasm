@@ -1,3 +1,6 @@
+/**
+ * Embedded PHP playground page that runs ad-hoc code in php-wasm.
+ */
 import '../styles/Embedded.css';
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import AceEditor from 'react-ace';
@@ -89,6 +92,9 @@ log_errors = On
 error_log = /dev/stderr
 `;
 
+/**
+ * Extracts optional demo settings encoded in the first line of a PHP snippet.
+ */
 const parseDemoSettings = phpCode => {
 	const firstLine = String(phpCode.split(/\n/).shift());
 	const settings = {};
@@ -103,6 +109,9 @@ const parseDemoSettings = phpCode => {
 	return settings;
 };
 
+/**
+ * Renders the embeddable PHP editor, output panes, and extension toggles.
+ */
 function Embedded()
 {
 	const phpRef = useRef(null);

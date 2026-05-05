@@ -1,3 +1,6 @@
+/**
+ * Convenience wrapper that invokes the dedicated worker Vite build config.
+ */
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 

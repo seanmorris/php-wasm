@@ -1,3 +1,6 @@
+/**
+ * Framework chooser page plus filesystem maintenance controls for the CGI demos.
+ */
 import '../styles/Common.css';
 import '../styles/SelectFramework.css';
 import cakePhpIcon from '../assets/frameworks/cakephp-icon.svg';
@@ -20,6 +23,9 @@ import DoWithFile from '../components/DoWithFile';
 import ErrorDialog from '../components/ErrorDialog';
 import Confirm from '../components/Confirm';
 
+/**
+ * Anchor wrapper that preserves popup opener semantics for demo launches.
+ */
 const PopupLink = ({children, className = '', path, ...props}) => (
 	<a
 		{...props}
@@ -32,6 +38,9 @@ const PopupLink = ({children, className = '', path, ...props}) => (
 	</a>
 );
 
+/**
+ * Form-backed popup launcher that preserves query parameters in a new window.
+ */
 const PopupButton = ({children, path}) => (
 	<form
 		action = {resolvePopupRequest(path).action}
@@ -51,6 +60,9 @@ const PopupButton = ({children, path}) => (
 	</form>
 );
 
+/**
+ * Renders the framework picker and tracks which demo installs are present.
+ */
 function SelectFramework()
 {
 

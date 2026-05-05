@@ -1,3 +1,6 @@
+/**
+ * Minimal stdlib smoke test page for the browser PHP runtime.
+ */
 import {
 	var_dump
 	, file_put_contents
@@ -7,6 +10,9 @@ import {
 } from 'php-wasm/stdlib/8.5-web.mjs';
 
 
+/**
+ * Exercises a few filesystem helpers and logs the resulting reads.
+ */
 export default function FuncTest()
 {
 	file_put_contents('/tmp/file', 'this is the content.');

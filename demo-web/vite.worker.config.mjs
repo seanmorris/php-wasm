@@ -1,3 +1,6 @@
+/**
+ * Vite configuration for bundling the CGI service worker separately from the app shell.
+ */
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 

@@ -1,3 +1,6 @@
+/**
+ * File row used by the lightweight editor's filesystem tree.
+ */
 import '../styles/Common.css';
 import '../styles/EditorEntry.css';
 
@@ -40,6 +43,9 @@ const icons = {
 	, zip: fileZipIcon
 };
 
+/**
+ * Renders a file entry with open, rename, delete, and PHP-DBG shortcuts.
+ */
 export default function EditorFile({path, name, onOpenFile, startPath = '/'})
 {
 	const [showContext, setShowContext] = useState(false);

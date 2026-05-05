@@ -1,3 +1,6 @@
+/**
+ * Popup installer flow for restoring packaged framework demos into the CGI worker.
+ */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Terminal from '../components/Terminal';
 import loader from '../assets/ui/bar-spin.svg';
@@ -55,6 +58,9 @@ const packages = {
 	}
 };
 
+/**
+ * Notifies the opener window that a framework install has completed.
+ */
 const informOpener = (selectedFrameworkName) => {
 	window.opener && window.opener.dispatchEvent(
 		new CustomEvent('install-complete', {detail: selectedFrameworkName})
@@ -71,6 +77,9 @@ const installerRpcTimeouts = {
 	, storeInit: 10000
 	, refresh: 30000
 };
+/**
+ * Converts install-time RPC failures into readable status strings.
+ */
 const formatInstallError = error => {
 	const detail = error?.error ?? error?.message ?? String(error);
 
@@ -82,6 +91,9 @@ const formatInstallError = error => {
 	return `Installer failed: ${detail}`;
 };
 
+/**
+ * Strips service-worker settings down to the serializable fields the installer mutates.
+ */
 const createSerializableSettings = settings => ({
 	docroot: settings?.docroot
 	, maxRequestAge: settings?.maxRequestAge
@@ -96,6 +108,9 @@ const createSerializableSettings = settings => ({
 		: []
 });
 
+/**
+ * Sends an installer RPC over quickbus with per-action timeout defaults.
+ */
 const sendInstallMessage = (bus, action, params = []) => {
 	const request = bus[action](...params);
 
@@ -108,6 +123,9 @@ const sendInstallMessage = (bus, action, params = []) => {
 	});
 };
 
+/**
+ * Downloads, restores, and activates a selected framework package.
+ */
 export default function InstallDemo()
 {
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);

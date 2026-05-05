@@ -1,3 +1,6 @@
+/**
+ * Browser entrypoint that ensures the CGI worker is controlling the page before rendering.
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/index.css';

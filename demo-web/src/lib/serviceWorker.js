@@ -1,7 +1,13 @@
+/**
+ * Service worker registration helpers for the CGI-backed demo runtime.
+ */
 import { basePath, baseUrlFor } from './runtimePaths';
 
 export const serviceWorkerControlTimeoutMs = 1500;
 
+/**
+ * Registers the CGI worker and waits briefly for page control when necessary.
+ */
 export const ensureServiceWorker = async ({timeoutMs = serviceWorkerControlTimeoutMs} = {}) => {
 	if(!('serviceWorker' in navigator))
 	{

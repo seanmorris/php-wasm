@@ -1,4 +1,6 @@
-
+/**
+ * Service worker entrypoint that boots php-cgi-wasm and handles demo requests.
+ */
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
 import { basePath, buildType } from '../lib/runtimePaths.worker.js';
@@ -11,7 +13,9 @@ const files = [
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
 
-// Log requests
+/**
+ * Emits an access-log style line for each handled CGI request.
+ */
 const onRequest = (request, response) => {
 	const url = new URL(request.url);
 	const logLine = `[${(new Date).toISOString()}]`
@@ -21,7 +25,9 @@ const onRequest = (request, response) => {
 	console.log(logLine);
 };
 
-// Formatted 404s
+/**
+ * Returns a simple HTML 404 response for unmatched worker routes.
+ */
 const notFound = request => {
 	return new Response(
 		`<body><h1>404</h1>${request.url} not found</body>`,
@@ -44,6 +50,9 @@ const actions = {
 
 let loader = null;
 
+/**
+ * Loads the runtime assets required for the current build type and creates the worker.
+ */
 const load = async () => {
 	if(buildType === 'dynamic')
 	{
@@ -131,6 +140,9 @@ const load = async () => {
 	});
 };
 
+/**
+ * Lazily initializes a singleton CGI runtime for install, activate, and fetch events.
+ */
 const init = () => {
 	if(loader) return loader;
 	return loader = load();

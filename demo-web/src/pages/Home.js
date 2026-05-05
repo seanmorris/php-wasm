@@ -1,3 +1,6 @@
+/**
+ * Landing page for the demo chooser and ancillary preview links.
+ */
 import '../styles/Common.css';
 import '../styles/Home.css';
 import phpPageIcon from '../assets/frameworks/deepin-php-icon.svg';
@@ -26,6 +29,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { basePath } from '../lib/runtimePaths';
 
+/**
+ * Renders the main demo launcher and cycles the framework marquee artwork.
+ */
 function Home()
 {
 	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
