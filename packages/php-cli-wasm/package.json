@@ -2,6 +2,39 @@
   "name": "php-cli-wasm",
   "version": "0.1.0",
   "description": "php-cli for wasm.",
+  "main": "./PhpCliNode.mjs",
+  "module": "./PhpCliNode.mjs",
+  "types": "./PhpCliNode.d.mts",
+  "exports": {
+    ".": {
+      "types": "./PhpCliNode.d.mts",
+      "import": "./PhpCliNode.mjs",
+      "default": "./PhpCliNode.mjs"
+    },
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./PhpBase": {
+      "types": "./PhpBase.d.mts",
+      "import": "./PhpBase.mjs",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpCliNode": {
+      "types": "./PhpCliNode.d.mts",
+      "import": "./PhpCliNode.mjs",
+      "default": "./PhpCliNode.mjs"
+    },
+    "./PhpCliWeb": {
+      "types": "./PhpCliWeb.d.mts",
+      "import": "./PhpCliWeb.mjs",
+      "default": "./PhpCliWeb.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.wasm": "./*.wasm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"
@@ -34,8 +67,11 @@
     "README.md",
     "package.json",
     "libxml2.so",
+    "PhpCliNode.d.mts",
+    "PhpCliNode.mjs",
     "PhpCliWeb.js",
     "PhpCliWeb.mjs",
+    "php*-cli-node.mjs",
     "php-cli-web.js",
     "php-cli-web.mjs",
     "config.js",

@@ -46,6 +46,10 @@ jobs:
             tar -xzf ${TAR}
           done;
 
+      - name: Re-flatten mtimes after extraction
+        if: ${{ inputs.libType != 'static' }}
+        run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Apply executable cache
         if: ${{ inputs.libType != 'static' }}
         run: |
@@ -91,14 +95,20 @@ jobs:
       - name: Build PHP CGI for Node
         run: time make --debug=basic node-cgi-mjs
 
-      - name: Build PHP (sdl variant) for Web
-        run: time make --debug=basic web-mjs WITH_SDL=1
+      - name: Build PHP CLI for Node
+        run: time make --debug=basic node-cli-mjs
 
-      - name: Build PHP CLI
+      - name: Build PHP DBG for Node
+        run: time make --debug=basic node-dbg-mjs
+
+      - name: Build PHP CLI for Web
         run: time make --debug=basic web-cli-mjs
 
-      - name: Build PHP DBG
+      - name: Build PHP DBG for Web
         run: time make --debug=basic web-dbg-mjs
+
+      - name: Build PHP (sdl variant) for Web
+        run: time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Take Snapshot
         run: |

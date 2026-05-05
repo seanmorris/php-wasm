@@ -2,6 +2,30 @@
   "name": "php-dbg-wasm",
   "version": "0.1.0",
   "description": "phpdbg for wasm.",
+  "main": "./PhpDbgNode.mjs",
+  "module": "./PhpDbgNode.mjs",
+  "types": "./PhpDbgNode.d.mts",
+  "exports": {
+    ".": {
+      "types": "./PhpDbgNode.d.mts",
+      "import": "./PhpDbgNode.mjs",
+      "default": "./PhpDbgNode.mjs"
+    },
+    "./package.json": "./package.json",
+    "./PhpDbgNode": {
+      "types": "./PhpDbgNode.d.mts",
+      "import": "./PhpDbgNode.mjs",
+      "default": "./PhpDbgNode.mjs"
+    },
+    "./PhpDbgWeb": {
+      "types": "./PhpDbgWeb.d.mts",
+      "import": "./PhpDbgWeb.mjs",
+      "default": "./PhpDbgWeb.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.wasm": "./*.wasm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"
@@ -36,8 +60,11 @@
     "README.md",
     "package.json",
     "libxml2.so",
+    "PhpDbgNode.d.mts",
+    "PhpDbgNode.mjs",
     "PhpDbgWeb.js",
     "PhpDbgWeb.mjs",
+    "php*-dbg-node.mjs",
     "php-dbg-web.js",
     "php-dbg-web.mjs",
     "config.js",

@@ -63,6 +63,9 @@
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.5.0"
+  },
   "contributors": [
     {
       "name": "Sean Morris",

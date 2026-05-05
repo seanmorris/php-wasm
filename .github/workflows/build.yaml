@@ -773,7 +773,7 @@ jobs:
           path: php-demo-web.tar.gz
           compression-level: 0
 
-  deploy-docs:
+  deploy-to-pages:
     name: Deploy Docs to GitHub Pages
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest

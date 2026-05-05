@@ -44,6 +44,9 @@ jobs:
             tar -xzf ${TAR}
           done;
 
+      - name: Flatten mtimes after extraction
+        run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Install NPM packages
         run: npm ci
 
