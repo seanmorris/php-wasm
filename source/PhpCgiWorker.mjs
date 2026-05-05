@@ -1,6 +1,21 @@
 import { PhpCgiWebBase } from './PhpCgiWebBase.mjs';
+import php8_5 from './php8.5-cgi-worker.mjs';
+import php8_4 from './php8.4-cgi-worker.mjs';
+import php8_3 from './php8.3-cgi-worker.mjs';
+import php8_2 from './php8.2-cgi-worker.mjs';
+import php8_1 from './php8.1-cgi-worker.mjs';
+import php8_0 from './php8.0-cgi-worker.mjs';
 
 const defaultVersion = '8.4';
+
+const versionTable = {
+	'8.5': php8_5
+	, '8.4': php8_4
+	, '8.3': php8_3
+	, '8.2': php8_2
+	, '8.1': php8_1
+	, '8.0': php8_0
+};
 
 /** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
 
@@ -19,34 +34,11 @@ export class PhpCgiWorker extends PhpCgiWebBase
 
 		const constructorArgs = {version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args};
 
-		switch(version)
+		if(!(version in versionTable))
 		{
-			case '8.5':
-				super(import(`./php8.5-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.4':
-				super(import(`./php8.4-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.3':
-				super(import(`./php8.3-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.2':
-				super(import(`./php8.2-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.1':
-				super(import(`./php8.1-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			case '8.0':
-				super(import(`./php8.0-cgi-worker.mjs`), constructorArgs);
-				break;
-
-			default:
-				throw new Error(`Unsupported PHP runtime: ${version}`);
+			throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
+
+		super(Promise.resolve({default: versionTable[version]}), constructorArgs);
 	}
 }

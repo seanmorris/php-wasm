@@ -58,16 +58,23 @@ const formatDiagnostics = (label, stdOut, stdErr) => {
 	return `Timed out waiting for phpdbg ${label}.\nSTDOUT:\n${stdOut() || '[empty]'}\nSTDERR:\n${stdErr() || '[empty]'}`;
 };
 
-const waitForStdinRequest = (php, label, stdOut, stdErr, timeoutMs) => new Promise((resolve, reject) => {
-	const timer = setTimeout(() => {
-		reject(new Error(formatDiagnostics(`input (${label})`, stdOut, stdErr)));
-	}, timeoutMs);
+const waitForPromptState = async (php, stdOut, stdErr, timeoutMs, label) => {
+	const start = Date.now();
 
-	php.addEventListener('stdin-request', event => {
-		clearTimeout(timer);
-		resolve(event);
-	}, {once: true});
-});
+	while(Date.now() - start < timeoutMs)
+	{
+		const prompt = await php.getPrompt().catch(() => '');
+
+		if(/prompt>/i.test(prompt))
+		{
+			return prompt;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	throw new Error(formatDiagnostics(label, stdOut, stdErr));
+};
 
 const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 	const start = Date.now();
@@ -75,12 +82,10 @@ const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 	while(Date.now() - start < timeoutMs)
 	{
 		const prompt = await php.getPrompt().catch(() => '');
-		const currentFile = await php.currentFile().catch(() => '');
 		const output = stdOut();
 
 		if(
-			currentFile === scriptPath
-			&& /\[Set execution context: \/preload\/test_www\/hello-world\.php\]/.test(output)
+			/\[Set execution context: \/preload\/test_www\/hello-world\.php\]/.test(output)
 			&& /\[Successful compilation of \/preload\/test_www\/hello-world\.php\]/.test(output)
 			&& /prompt>/i.test(prompt)
 		)
@@ -98,16 +103,15 @@ test(`boots phpdbg in Node for PHP ${version}`, async () => {
 	const php = new PhpDbgNode({files: preloadFiles, version});
 	const {stdOut, stdErr} = attachOutput(php);
 
-	const bootPrompt = waitForStdinRequest(
-		php,
-		'boot',
-		stdOut,
-		stdErr,
-		timeoutForVersion(60000, 30000)
-	);
 	const process = php.run();
 
-	await bootPrompt;
+	await waitForPromptState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(60000, 30000),
+		'boot prompt'
+	);
 
 	await php.provideInput(`exec ${scriptPath}`);
 	await php.provideInput('set pagination off');

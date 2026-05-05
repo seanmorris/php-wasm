@@ -15,6 +15,24 @@ import { loadDbgSharedLibs } from './runtime-libs.mjs';
 
 const startPath = query.get('path') ?? '/preload/test_www/hello-world.php';
 
+const waitForPrompt = async php => {
+	const start = Date.now();
+
+	while(Date.now() - start < 30000)
+	{
+		const prompt = await php.getPrompt().catch(() => '');
+
+		if(/prompt>/i.test(prompt))
+		{
+			return prompt;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	throw new Error('Timed out waiting for phpdbg prompt.');
+};
+
 const main = async () => {
 	setStatus('loading');
 
@@ -39,13 +57,14 @@ const main = async () => {
 		void updatePromptState();
 	});
 
-	php.addEventListener('stdin-request', async () => {
-		await php.provideInput(`exec ${startPath}`);
-		await php.provideInput('set pagination off');
-		setStatus('ready');
-	}, {once: true});
+	const process = php.run();
 
-	await php.run();
+	await waitForPrompt(php);
+	await php.provideInput(`exec ${startPath}`);
+	await php.provideInput('set pagination off');
+	await updatePromptState();
+	setStatus('ready');
+	await process;
 };
 
 main().catch(error => {
