@@ -247,7 +247,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs: ${DBG_DEPENDENCIES} | ${ORDER
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
+	perl -pi -w -e 's|from '\''module'\''|from '\''node:module'\''|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.mjs
