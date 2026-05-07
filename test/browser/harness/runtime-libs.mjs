@@ -107,7 +107,8 @@ const sharedEmbeddedLibs = [
 ];
 
 const sharedCliLibs = [
-	sharedLib('libz.so', 'zlib/libz.so')
+	sharedLib('libxml2.so', 'libxml/libxml2.so')
+	, sharedLib('libz.so', 'zlib/libz.so')
 	, sharedLib('libzip.so', 'libzip/libzip.so')
 	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
 	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
@@ -129,7 +130,8 @@ const sharedCliLibs = [
 ];
 
 const sharedDbgLibs = [
-	sharedLib('libz.so', 'zlib/libz.so')
+	sharedLib('libxml2.so', 'libxml/libxml2.so')
+	, sharedLib('libz.so', 'zlib/libz.so')
 	, sharedLib('libzip.so', 'libzip/libzip.so')
 	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
 	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
@@ -151,7 +153,8 @@ const sharedDbgLibs = [
 ];
 
 const sharedCgiLibs = [
-	sharedLib('libz.so', 'zlib/libz.so')
+	sharedLib('libxml2.so', 'libxml/libxml2.so')
+	, sharedLib('libz.so', 'zlib/libz.so')
 	, sharedLib('libzip.so', 'libzip/libzip.so')
 	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
 	, sharedLib('libjpeg.so', 'gd/libjpeg.so')

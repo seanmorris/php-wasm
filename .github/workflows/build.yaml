@@ -135,7 +135,6 @@ jobs:
 
 
 
-
   build-php-dynamic:
     needs: [build-libs]
     strategy:
@@ -735,68 +734,44 @@ jobs:
               -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-  build-demo:
-    name: Build Web Demo
-    runs-on: ubuntu-latest
+
+
+  build-demo-dynamic:
+    name: Build Web Demo w/${{ matrix.libType }} libs
     needs:
       - test-browser-dynamic-compressed
       - test-node-dynamic-compressed
       - test-cgi-node-dynamic-compressed
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v6
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: ${{ matrix.libType }}
 
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
+  build-demo-shared:
+    name: Build Web Demo w/${{ matrix.libType }} libs
+    needs:
+      - test-browser-shared-compressed
+      - test-node-shared-compressed
+      - test-cgi-node-shared-compressed
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: ${{ matrix.libType }}
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v8
-        with:
-          pattern: php-compressed-dynamic
-          merge-multiple: true
-          path: ./
-
-      - name: Extract Artifact
-        run: |
-          for TAR in php-compressed-*.tar.gz; do
-            tar -xzf ${TAR}
-          done;
-
-      - name: Ensure the demo uses local packages
-        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
-
-      - name: Build Web Demo
-        run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
-        env:
-          CI: ''
-
-      - name: Take Snapshot
-        run: |
-          sudo chown -R ${USER}:${USER} .
-          sudo chmod -R u+rwX,go+rX .
-          tar --exclude=.git \
-            --format=posix \
-            --exclude='php-demo-web.tar.gz' \
-            --ignore-failed-read \
-            --warning=no-file-changed \
-            -czf 'php-demo-web.tar.gz' \
-              docs
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: php-demo-web
-          path: php-demo-web.tar.gz
-          compression-level: 0
+  build-demo-static:
+    name: Build Web Demo w/${{ matrix.libType }} libs
+    needs:
+      - test-browser-static-compressed
+      - test-node-static-compressed
+      - test-cgi-node-static-compressed
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: ${{ matrix.libType }}
 
   deploy-to-pages:
     name: Deploy Docs to GitHub Pages
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - build-demo
+      - build-demo-dynamic
     permissions:
       contents: read
       pages: write
@@ -811,13 +786,13 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v8
         with:
-          pattern: php-demo-web
+          pattern: php-demo-web-dynamic
           merge-multiple: true
           path: ./
 
       - name: Extract Artifact
         run: |
-          for TAR in php-demo-web.tar.gz; do
+          for TAR in php-demo-web-dynamic.tar.gz; do
             tar -xzf ${TAR}
           done;
 

@@ -1,0 +1,61 @@
+name: Build Web Demo
+
+on:
+  workflow_call:
+    inputs:
+      libType:
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: Build Web Demo w/${{ inputs.libType }} libs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v8
+        with:
+          pattern: php-compressed-${{ inputs.libType }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-compressed-*.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Ensure the demo uses local packages
+        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
+
+      - name: Build Web Demo
+        run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
+        env:
+          CI: ''
+
+      - name: Take Snapshot
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --format=posix \
+            --exclude='php-demo-web-${{ inputs.libType }}.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf 'php-demo-web-${{ inputs.libType }}.tar.gz' \
+              docs
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: php-demo-web-${{ inputs.libType }}
+          path: php-demo-web-${{ inputs.libType }}.tar.gz
+          compression-level: 0
