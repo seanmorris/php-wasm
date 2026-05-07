@@ -33,7 +33,7 @@ const demoCases = [
 	{
 		name: 'renders the files embedded demo',
 		demo: 'files.php',
-		extensionFlags: 8,
+		extensionFlags: 0,
 		snapshot: 'BrowserTest.testFiles_0.json',
 	},
 	{
