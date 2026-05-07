@@ -1,20 +1,19 @@
 import { PhpCgiWebBase } from './PhpCgiWebBase.mjs';
-import php8_5 from './php8.5-cgi-worker.mjs';
-import php8_4 from './php8.4-cgi-worker.mjs';
-import php8_3 from './php8.3-cgi-worker.mjs';
-import php8_2 from './php8.2-cgi-worker.mjs';
-import php8_1 from './php8.1-cgi-worker.mjs';
-import php8_0 from './php8.0-cgi-worker.mjs';
+import Php80CgiWorker from './php8.0-cgi-worker.mjs';
+import Php81CgiWorker from './php8.1-cgi-worker.mjs';
+import Php82CgiWorker from './php8.2-cgi-worker.mjs';
+import Php83CgiWorker from './php8.3-cgi-worker.mjs';
+import Php84CgiWorker from './php8.4-cgi-worker.mjs';
+import Php85CgiWorker from './php8.5-cgi-worker.mjs';
 
 const defaultVersion = '8.4';
-
-const versionTable = {
-	'8.5': php8_5
-	, '8.4': php8_4
-	, '8.3': php8_3
-	, '8.2': php8_2
-	, '8.1': php8_1
-	, '8.0': php8_0
+const runtimes = {
+	'8.0': Php80CgiWorker
+	, '8.1': Php81CgiWorker
+	, '8.2': Php82CgiWorker
+	, '8.3': Php83CgiWorker
+	, '8.4': Php84CgiWorker
+	, '8.5': Php85CgiWorker
 };
 
 /** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
@@ -33,12 +32,13 @@ export class PhpCgiWorker extends PhpCgiWebBase
 		version = version ?? defaultVersion;
 
 		const constructorArgs = {version, docroot, prefix, rewrite, cookies, types, onRequest, notFound, ...args};
+		const runtime = runtimes[version];
 
-		if(!(version in versionTable))
+		if(!runtime)
 		{
 			throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
 
-		super(Promise.resolve({default: versionTable[version]}), constructorArgs);
+		super(Promise.resolve({default: runtime}), constructorArgs);
 	}
 }

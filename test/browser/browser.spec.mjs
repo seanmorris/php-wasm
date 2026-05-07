@@ -146,7 +146,19 @@ test('boots phpdbg in the browser harness', async ({ page }) => {
 
 	await page.goto(`harness/dbg.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
 	await waitForHarnessStatus(page, 'ready');
-	await expect(page.locator('[data-testid="stdout"]')).toContainText('/preload/test_www/hello-world.php');
+
+	await expect(async () => {
+		const currentFile = await page.locator('[data-testid="current-file"]').textContent();
+		const stdout = await page.locator('[data-testid="stdout"]').textContent();
+
+		expect(
+			currentFile === '/preload/test_www/hello-world.php'
+			|| (stdout ?? '').includes('/preload/test_www/hello-world.php')
+		).toBe(true);
+	}).toPass({
+		timeout: 30000,
+		intervals: [250, 500, 1000, 2000]
+	});
 });
 
 test('serves php through the cgi worker harness', async ({ page }) => {

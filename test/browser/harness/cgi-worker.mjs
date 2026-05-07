@@ -1,5 +1,5 @@
 import { PhpCgiWorker } from '/packages/php-cgi-wasm/PhpCgiWorker.mjs';
-import { loadCgiSharedLibs } from './harness/runtime-libs.mjs';
+import { loadCgiSharedLibs } from '/php-wasm/harness/runtime-libs.mjs';
 
 const query = new URL(self.location.href).searchParams;
 const runtimeVersion = query.get('version') ?? '8.4';
@@ -27,17 +27,17 @@ const init = () => {
 			{
 				parent: '/preload/test_www/'
 				, name: 'hello-world.php'
-				, url: new URL('./fixtures/scripts/hello-world.php', self.location.href)
+				, url: new URL('/php-wasm/fixtures/scripts/hello-world.php', self.location.origin)
 			}
 			, {
 				parent: '/preload/test_www/'
 				, name: 'phpinfo.php'
-				, url: new URL('./fixtures/scripts/phpinfo.php', self.location.href)
+				, url: new URL('/php-wasm/fixtures/scripts/phpinfo.php', self.location.origin)
 			}
 			, {
 				parent: '/preload/'
 				, name: 'list-extensions.php'
-				, url: new URL('./fixtures/scripts/list-extensions.php', self.location.href)
+				, url: new URL('/php-wasm/fixtures/scripts/list-extensions.php', self.location.origin)
 			}
 		]
 		, notFound: createNotFoundResponse

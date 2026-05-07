@@ -24,7 +24,7 @@ const waitForPrompt = async php => {
 
 		if(/prompt>/i.test(prompt))
 		{
-			return prompt;
+			return;
 		}
 
 		await new Promise(resolve => setTimeout(resolve, 100));
@@ -53,17 +53,55 @@ const main = async () => {
 		setMeta('current-line', await php.currentLine());
 	};
 
-	php.addEventListener('stdin-request', () => {
-		void updatePromptState();
+	const startup = new Promise((resolve, reject) => {
+		let started = false;
+
+		const runStartupCommand = async command => {
+			await php.provideInput(command);
+			await updatePromptState();
+		};
+
+		const startRuntime = async () => {
+			if(started)
+			{
+				return;
+			}
+
+			started = true;
+
+			try
+			{
+				if(startPath)
+				{
+					await runStartupCommand(`exec ${startPath}`);
+				}
+
+				await runStartupCommand('set pagination off');
+				setStatus('ready');
+				resolve();
+			}
+			catch(error)
+			{
+				reject(error);
+			}
+		};
+
+		php.addEventListener('stdin-request', () => {
+			void updatePromptState();
+		});
+
+		php.addEventListener('stdin-request', () => {
+			void startRuntime();
+		}, {once: true});
+
+		void waitForPrompt(php)
+			.then(() => startRuntime())
+			.catch(reject);
 	});
 
 	const process = php.run();
 
-	await waitForPrompt(php);
-	await php.provideInput(`exec ${startPath}`);
-	await php.provideInput('set pagination off');
-	await updatePromptState();
-	setStatus('ready');
+	await startup;
 	await process;
 };
 

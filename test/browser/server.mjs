@@ -40,6 +40,44 @@ const mounts = [
 	}
 ];
 
+const packageSpecifierAliases = new Map([
+	['php-wasm', '/packages/php-wasm']
+	, ['php-cgi-wasm', '/packages/php-cgi-wasm']
+	, ['php-cli-wasm', '/packages/php-cli-wasm']
+	, ['php-dbg-wasm', '/packages/php-dbg-wasm']
+	, ['php-wasm-dom', '/packages/dom']
+	, ['php-wasm-gd', '/packages/gd']
+	, ['php-wasm-iconv', '/packages/iconv']
+	, ['php-wasm-intl', '/packages/intl']
+	, ['php-wasm-libxml', '/packages/libxml']
+	, ['php-wasm-yaml', '/packages/libyaml']
+	, ['php-wasm-libzip', '/packages/libzip']
+	, ['php-wasm-mbstring', '/packages/mbstring']
+	, ['php-wasm-openssl', '/packages/openssl']
+	, ['php-wasm-simplexml', '/packages/simplexml']
+	, ['php-wasm-sqlite', '/packages/sqlite']
+	, ['php-wasm-tidy', '/packages/tidy']
+	, ['php-wasm-xml', '/packages/xml']
+	, ['php-wasm-zlib', '/packages/zlib']
+]);
+
+const packageIndexSpecifiers = new Set([
+	'php-wasm-dom'
+	, 'php-wasm-gd'
+	, 'php-wasm-iconv'
+	, 'php-wasm-intl'
+	, 'php-wasm-libxml'
+	, 'php-wasm-yaml'
+	, 'php-wasm-libzip'
+	, 'php-wasm-mbstring'
+	, 'php-wasm-openssl'
+	, 'php-wasm-simplexml'
+	, 'php-wasm-sqlite'
+	, 'php-wasm-tidy'
+	, 'php-wasm-xml'
+	, 'php-wasm-zlib'
+]);
+
 const send = (res, status, body, headers = {}) => {
 	res.writeHead(status, headers);
 	res.end(body);
@@ -57,6 +95,30 @@ const safeJoin = (root, requestedPath) => {
 	return resolvedPath;
 };
 
+const rewriteImportSpecifier = specifier => {
+	for(const [packageName, packagePath] of packageSpecifierAliases)
+	{
+		if(specifier === packageName)
+		{
+			return packageIndexSpecifiers.has(packageName)
+				? `${packagePath}/index.mjs`
+				: specifier;
+		}
+
+		if(specifier.startsWith(`${packageName}/`))
+		{
+			return `${packagePath}/${specifier.slice(packageName.length + 1)}`;
+		}
+	}
+
+	return specifier;
+};
+
+const rewriteJavaScriptImports = source => source.replace(
+	/((?:from\s*|import\s*\(\s*)["'])([^"']+)(["'])/g,
+	(match, prefix, specifier, suffix) => `${prefix}${rewriteImportSpecifier(specifier)}${suffix}`
+);
+
 const serveFile = (req, res, file) => {
 	const extension = path.extname(file).toLowerCase();
 	const mimeType = mimeTypes[extension] ?? 'application/octet-stream';
@@ -65,6 +127,21 @@ const serveFile = (req, res, file) => {
 	if(req.url?.startsWith(`${basePath}/cgi-worker.mjs`))
 	{
 		headers['service-worker-allowed'] = `${basePath}/`;
+	}
+
+	if(extension === '.js' || extension === '.mjs')
+	{
+		fs.readFile(file, 'utf8', (error, source) => {
+			if(error)
+			{
+				send(res, 500, String(error), {'content-type': 'text/plain; charset=utf-8'});
+				return;
+			}
+
+			send(res, 200, rewriteJavaScriptImports(source), headers);
+		});
+
+		return;
 	}
 
 	const stream = fs.createReadStream(file);
@@ -80,14 +157,14 @@ const serveFile = (req, res, file) => {
 };
 
 const resolveMountedFile = pathname => {
-	if(pathname === `${basePath}/cgi-worker.mjs`)
-	{
-		return path.resolve(repoRoot, 'test/browser/harness/cgi-worker.mjs');
-	}
-
 	if(pathname === basePath || pathname === `${basePath}/`)
 	{
 		return path.resolve(repoRoot, 'test/browser/harness/index.html');
+	}
+
+	if(pathname === `${basePath}/cgi-worker.mjs`)
+	{
+		return path.resolve(repoRoot, 'test/browser/harness/cgi-worker.mjs');
 	}
 
 	for(const mount of mounts)
