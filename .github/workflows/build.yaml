@@ -147,7 +147,7 @@ jobs:
       libType: dynamic
 
   build-php-shared:
-    needs: [build-libs, build-php-dynamic]
+    needs: [build-libs]
     strategy:
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
@@ -157,7 +157,7 @@ jobs:
       libType: shared
 
   build-php-static:
-    needs: [build-php-shared]
+    needs: []
     strategy:
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']

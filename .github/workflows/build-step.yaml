@@ -11,45 +11,9 @@ on:
         type: string
 
 jobs:
-  build-targets:
-    name: Build PHP ${{ inputs.phpVersion }} w/${{ inputs.libType }} libs (${{ matrix.target.name }})
+  build:
+    name: Build PHP ${{ inputs.phpVersion }} w/${{ inputs.libType }} libs
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - name: PHP For Node
-            slug: node-mjs
-            command: time make --debug=basic node-mjs
-            needsDemoNode: true
-          - name: PHP for Web & PHP-CGI for Worker
-            slug: web-worker-cgi-mjs
-            command: time make --debug=basic web-mjs worker-cgi-mjs
-            needsDemoNode: false
-          - name: PHP CGI for Node
-            slug: node-cgi-mjs
-            command: time make --debug=basic node-cgi-mjs
-            needsDemoNode: true
-          - name: PHP CLI for Node
-            slug: node-cli-mjs
-            command: time make --debug=basic node-cli-mjs
-            needsDemoNode: true
-          - name: PHP DBG for Node
-            slug: node-dbg-mjs
-            command: time make --debug=basic node-dbg-mjs
-            needsDemoNode: true
-          - name: PHP CLI for Web
-            slug: web-cli-mjs
-            command: time make --debug=basic web-cli-mjs
-            needsDemoNode: false
-          - name: PHP DBG for Web
-            slug: web-dbg-mjs
-            command: time make --debug=basic web-dbg-mjs
-            needsDemoNode: false
-          - name: PHP (sdl variant) for Web
-            slug: web-mjs-sdl
-            command: time make --debug=basic web-mjs WITH_SDL=1
-            needsDemoNode: false
     steps:
       - name: Check out repository code
         uses: actions/checkout@v6
@@ -121,70 +85,31 @@ jobs:
         run: docker network create phpwasm_default
 
       - name: Build demo-node
-        if: ${{ matrix.target.needsDemoNode }}
         run: npm install --prefix demo-node
 
-      - name: Build ${{ matrix.target.name }}
-        run: ${{ matrix.target.command }}
+      - name: Build PHP For Node
+        run: time make --debug=basic node-mjs
 
-      - name: Take Snapshot
-        run: |
-          sudo chown -R ${USER}:${USER} .
-          sudo chmod -R u+rwX,go+rX .
-          tar --exclude=.git \
-            --format=posix \
-            --exclude='php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-${{ matrix.target.slug }}.tar.gz' \
-            --ignore-failed-read \
-            --warning=no-file-changed \
-            -czf 'php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-${{ matrix.target.slug }}.tar.gz' \
-              third_party \
-              packages \
-              .cache \
-              lib
+      - name: Build PHP for Web & PHP-CGI for Worker
+        run: time make --debug=basic web-mjs worker-cgi-mjs
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-${{ matrix.target.slug }}
-          path: php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-${{ matrix.target.slug }}.tar.gz
-          compression-level: 0
+      - name: Build PHP CGI for Node
+        run: time make --debug=basic node-cgi-mjs
 
-      - name: Take Failure Snapshot
-        if: ${{ failure() }}
-        run: |
-          sudo chown -R ${USER}:${USER} .
-          sudo chmod -R u+rwX,go+rX .
-          tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
+      - name: Build PHP CLI for Node
+        run: time make --debug=basic node-cli-mjs
 
-      - name: Upload Failure Artifact
-        uses: actions/upload-artifact@v6
-        if: ${{ failure() }}
-        with:
-          name: failure-snapshot-${{ inputs.phpVersion }}-${{ inputs.libType }}-${{ matrix.target.slug }}
-          path: snapshot.tar.gz
-          compression-level: 0
+      - name: Build PHP DBG for Node
+        run: time make --debug=basic node-dbg-mjs
 
-  assemble:
-    name: Assemble PHP ${{ inputs.phpVersion }} w/${{ inputs.libType }} libs
-    runs-on: ubuntu-latest
-    needs: [build-targets]
-    steps:
-      - name: Download build fragments
-        uses: actions/download-artifact@v8
-        with:
-          pattern: php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-*
-          merge-multiple: true
-          path: ./
+      - name: Build PHP CLI for Web
+        run: time make --debug=basic web-cli-mjs
 
-      - name: Extract build fragments
-        run: |
-          shopt -s nullglob
-          for TAR in php-uncompressed-fragment-${{ inputs.phpVersion }}-${{ inputs.libType }}-*.tar.gz; do
-            tar -xzf "${TAR}"
-          done
+      - name: Build PHP DBG for Web
+        run: time make --debug=basic web-dbg-mjs
 
-      - name: Re-flatten mtimes after extraction
-        run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+      - name: Build PHP (sdl variant) for Web
+        run: time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Take Snapshot
         run: |
