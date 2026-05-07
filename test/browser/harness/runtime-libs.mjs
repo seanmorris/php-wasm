@@ -13,7 +13,7 @@ import xml from '/packages/xml/index.mjs';
 import yaml from '/packages/libyaml/index.mjs';
 import zlib from '/packages/zlib/index.mjs';
 
-const assetUrl = path => new URL(path, globalThis.location.origin);
+const assetUrl = path => new URL(`../../packages/${path}`, import.meta.url);
 
 const sharedLib = (name, path) => ({name, url: assetUrl(path)});
 
@@ -84,97 +84,97 @@ const dynamicCgiLibs = [
 ];
 
 const sharedEmbeddedLibs = [
-	sharedLib('libxml2.so', '/packages/libxml/libxml2.so')
-	, sharedLib('libz.so', '/packages/zlib/libz.so')
-	, sharedLib('libzip.so', '/packages/libzip/libzip.so')
-	, sharedLib('libfreetype.so', '/packages/gd/libfreetype.so')
-	, sharedLib('libjpeg.so', '/packages/gd/libjpeg.so')
-	, sharedLib('libwebp.so', '/packages/gd/libwebp.so')
-	, sharedLib('libpng.so', '/packages/gd/libpng.so')
-	, sharedLib('libiconv.so', '/packages/iconv/libiconv.so')
-	, sharedLib('libicuuc.so', '/packages/intl/libicuuc.so')
-	, sharedLib('libicutu.so', '/packages/intl/libicutu.so')
-	, sharedLib('libicutest.so', '/packages/intl/libicutest.so')
-	, sharedLib('libicuio.so', '/packages/intl/libicuio.so')
-	, sharedLib('libicui18n.so', '/packages/intl/libicui18n.so')
-	, sharedLib('libicudata.so', '/packages/intl/libicudata.so')
-	, sharedLib('libcrypto.so', '/packages/openssl/libcrypto.so')
-	, sharedLib('libssl.so', '/packages/openssl/libssl.so')
-	, sharedLib('libonig.so', '/packages/mbstring/libonig.so')
-	, sharedLib('libsqlite3.so', '/packages/sqlite/libsqlite3.so')
-	, sharedLib('libtidy.so', '/packages/tidy/libtidy.so')
-	, sharedLib('libyaml.so', '/packages/libyaml/libyaml.so')
+	sharedLib('libxml2.so', 'libxml/libxml2.so')
+	, sharedLib('libz.so', 'zlib/libz.so')
+	, sharedLib('libzip.so', 'libzip/libzip.so')
+	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
+	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
+	, sharedLib('libwebp.so', 'gd/libwebp.so')
+	, sharedLib('libpng.so', 'gd/libpng.so')
+	, sharedLib('libiconv.so', 'iconv/libiconv.so')
+	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
+	, sharedLib('libicutu.so', 'intl/libicutu.so')
+	, sharedLib('libicutest.so', 'intl/libicutest.so')
+	, sharedLib('libicuio.so', 'intl/libicuio.so')
+	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
+	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
+	, sharedLib('libssl.so', 'openssl/libssl.so')
+	, sharedLib('libonig.so', 'mbstring/libonig.so')
+	, sharedLib('libsqlite3.so', 'sqlite/libsqlite3.so')
+	, sharedLib('libtidy.so', 'tidy/libtidy.so')
+	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
 const sharedCliLibs = [
-	sharedLib('libz.so', '/packages/zlib/libz.so')
-	, sharedLib('libzip.so', '/packages/libzip/libzip.so')
-	, sharedLib('libfreetype.so', '/packages/gd/libfreetype.so')
-	, sharedLib('libjpeg.so', '/packages/gd/libjpeg.so')
-	, sharedLib('libwebp.so', '/packages/gd/libwebp.so')
-	, sharedLib('libpng.so', '/packages/gd/libpng.so')
-	, sharedLib('libiconv.so', '/packages/iconv/libiconv.so')
-	, sharedLib('libicuuc.so', '/packages/intl/libicuuc.so')
-	, sharedLib('libicutu.so', '/packages/intl/libicutu.so')
-	, sharedLib('libicutest.so', '/packages/intl/libicutest.so')
-	, sharedLib('libicuio.so', '/packages/intl/libicuio.so')
-	, sharedLib('libicui18n.so', '/packages/intl/libicui18n.so')
-	, sharedLib('libicudata.so', '/packages/intl/libicudata.so')
-	, sharedLib('libcrypto.so', '/packages/openssl/libcrypto.so')
-	, sharedLib('libssl.so', '/packages/openssl/libssl.so')
-	, sharedLib('libonig.so', '/packages/mbstring/libonig.so')
-	, sharedLib('libsqlite3.so', '/packages/sqlite/libsqlite3.so')
-	, sharedLib('libtidy.so', '/packages/tidy/libtidy.so')
-	, sharedLib('libyaml.so', '/packages/libyaml/libyaml.so')
+	sharedLib('libz.so', 'zlib/libz.so')
+	, sharedLib('libzip.so', 'libzip/libzip.so')
+	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
+	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
+	, sharedLib('libwebp.so', 'gd/libwebp.so')
+	, sharedLib('libpng.so', 'gd/libpng.so')
+	, sharedLib('libiconv.so', 'iconv/libiconv.so')
+	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
+	, sharedLib('libicutu.so', 'intl/libicutu.so')
+	, sharedLib('libicutest.so', 'intl/libicutest.so')
+	, sharedLib('libicuio.so', 'intl/libicuio.so')
+	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
+	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
+	, sharedLib('libssl.so', 'openssl/libssl.so')
+	, sharedLib('libonig.so', 'mbstring/libonig.so')
+	, sharedLib('libsqlite3.so', 'sqlite/libsqlite3.so')
+	, sharedLib('libtidy.so', 'tidy/libtidy.so')
+	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
 const sharedDbgLibs = [
-	sharedLib('libz.so', '/packages/zlib/libz.so')
-	, sharedLib('libzip.so', '/packages/libzip/libzip.so')
-	, sharedLib('libfreetype.so', '/packages/gd/libfreetype.so')
-	, sharedLib('libjpeg.so', '/packages/gd/libjpeg.so')
-	, sharedLib('libwebp.so', '/packages/gd/libwebp.so')
-	, sharedLib('libpng.so', '/packages/gd/libpng.so')
-	, sharedLib('libiconv.so', '/packages/iconv/libiconv.so')
-	, sharedLib('libicuuc.so', '/packages/intl/libicuuc.so')
-	, sharedLib('libicutu.so', '/packages/intl/libicutu.so')
-	, sharedLib('libicutest.so', '/packages/intl/libicutest.so')
-	, sharedLib('libicuio.so', '/packages/intl/libicuio.so')
-	, sharedLib('libicui18n.so', '/packages/intl/libicui18n.so')
-	, sharedLib('libicudata.so', '/packages/intl/libicudata.so')
-	, sharedLib('libcrypto.so', '/packages/openssl/libcrypto.so')
-	, sharedLib('libssl.so', '/packages/openssl/libssl.so')
-	, sharedLib('libonig.so', '/packages/mbstring/libonig.so')
-	, sharedLib('libsqlite3.so', '/packages/sqlite/libsqlite3.so')
-	, sharedLib('libtidy.so', '/packages/tidy/libtidy.so')
-	, sharedLib('libyaml.so', '/packages/libyaml/libyaml.so')
+	sharedLib('libz.so', 'zlib/libz.so')
+	, sharedLib('libzip.so', 'libzip/libzip.so')
+	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
+	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
+	, sharedLib('libwebp.so', 'gd/libwebp.so')
+	, sharedLib('libpng.so', 'gd/libpng.so')
+	, sharedLib('libiconv.so', 'iconv/libiconv.so')
+	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
+	, sharedLib('libicutu.so', 'intl/libicutu.so')
+	, sharedLib('libicutest.so', 'intl/libicutest.so')
+	, sharedLib('libicuio.so', 'intl/libicuio.so')
+	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
+	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
+	, sharedLib('libssl.so', 'openssl/libssl.so')
+	, sharedLib('libonig.so', 'mbstring/libonig.so')
+	, sharedLib('libsqlite3.so', 'sqlite/libsqlite3.so')
+	, sharedLib('libtidy.so', 'tidy/libtidy.so')
+	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
 const sharedCgiLibs = [
-	sharedLib('libz.so', '/packages/zlib/libz.so')
-	, sharedLib('libzip.so', '/packages/libzip/libzip.so')
-	, sharedLib('libfreetype.so', '/packages/gd/libfreetype.so')
-	, sharedLib('libjpeg.so', '/packages/gd/libjpeg.so')
-	, sharedLib('libwebp.so', '/packages/gd/libwebp.so')
-	, sharedLib('libpng.so', '/packages/gd/libpng.so')
-	, sharedLib('libiconv.so', '/packages/iconv/libiconv.so')
-	, sharedLib('libicuuc.so', '/packages/intl/libicuuc.so')
-	, sharedLib('libicutu.so', '/packages/intl/libicutu.so')
-	, sharedLib('libicutest.so', '/packages/intl/libicutest.so')
-	, sharedLib('libicuio.so', '/packages/intl/libicuio.so')
-	, sharedLib('libicui18n.so', '/packages/intl/libicui18n.so')
-	, sharedLib('libicudata.so', '/packages/intl/libicudata.so')
-	, sharedLib('libcrypto.so', '/packages/openssl/libcrypto.so')
-	, sharedLib('libssl.so', '/packages/openssl/libssl.so')
-	, sharedLib('libonig.so', '/packages/mbstring/libonig.so')
-	, sharedLib('libsqlite3.so', '/packages/sqlite/libsqlite3.so')
-	, sharedLib('libtidy.so', '/packages/tidy/libtidy.so')
-	, sharedLib('libyaml.so', '/packages/libyaml/libyaml.so')
+	sharedLib('libz.so', 'zlib/libz.so')
+	, sharedLib('libzip.so', 'libzip/libzip.so')
+	, sharedLib('libfreetype.so', 'gd/libfreetype.so')
+	, sharedLib('libjpeg.so', 'gd/libjpeg.so')
+	, sharedLib('libwebp.so', 'gd/libwebp.so')
+	, sharedLib('libpng.so', 'gd/libpng.so')
+	, sharedLib('libiconv.so', 'iconv/libiconv.so')
+	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
+	, sharedLib('libicutu.so', 'intl/libicutu.so')
+	, sharedLib('libicutest.so', 'intl/libicutest.so')
+	, sharedLib('libicuio.so', 'intl/libicuio.so')
+	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
+	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
+	, sharedLib('libssl.so', 'openssl/libssl.so')
+	, sharedLib('libonig.so', 'mbstring/libonig.so')
+	, sharedLib('libsqlite3.so', 'sqlite/libsqlite3.so')
+	, sharedLib('libtidy.so', 'tidy/libtidy.so')
+	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
 const staticLibs = [
-	sharedLib('libcrypto.so', '/packages/openssl/libcrypto.so')
-	, sharedLib('libssl.so', '/packages/openssl/libssl.so')
+	sharedLib('libcrypto.so', 'openssl/libcrypto.so')
+	, sharedLib('libssl.so', 'openssl/libssl.so')
 ];
 
 const pickLibsForBuildType = (buildType, dynamicLibs, sharedLibs) => {
@@ -195,6 +195,13 @@ export const loadEmbeddedSharedLibs = buildType => {
 	if(buildType === 'dynamic')
 	{
 		return [];
+	}
+
+	if(buildType === 'shared')
+	{
+		// Match demo-web so the core shared runtime resolves side modules
+		// through locateFile instead of falling back to /packages/php-wasm/*.so.
+		return sharedEmbeddedLibs;
 	}
 
 	return staticLibs;
