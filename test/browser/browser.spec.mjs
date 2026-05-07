@@ -34,7 +34,10 @@ const demoCases = [
 		name: 'renders the files embedded demo',
 		demo: 'files.php',
 		extensionFlags: 0,
-		snapshot: 'BrowserTest.testFiles_0.json',
+		snapshot: {
+			default: 'BrowserTest.testFiles_0.json',
+			shared: 'BrowserTest.testFiles_0.shared.json',
+		},
 	},
 	{
 		name: 'renders the goto embedded demo',
@@ -110,7 +113,11 @@ const expectEmbeddedDemoSnapshot = async (page, fixture) => {
 	await waitForHarnessStatus(page);
 
 	const stdout = await page.locator('[data-testid="stdout"]').textContent();
-	expect(JSON.stringify(stdout ?? '')).toMatchSnapshot(fixture.snapshot);
+	const snapshot = typeof fixture.snapshot === 'string'
+		? fixture.snapshot
+		: fixture.snapshot[buildType] ?? fixture.snapshot.default;
+
+	expect(JSON.stringify(stdout ?? '')).toMatchSnapshot(snapshot);
 };
 
 for(const fixture of demoCases)
