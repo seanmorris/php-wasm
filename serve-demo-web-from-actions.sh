@@ -3,10 +3,12 @@
 set -euo pipefail
 
 DEFAULT_ACTIONS_URL="https://github.com/seanmorris/php-wasm/actions/runs/25331839202"
-DEFAULT_ARTIFACT_NAME="php-demo-web"
+DEFAULT_LIB_TYPE="dynamic"
 DEFAULT_TMP_ROOT="/tmp"
 
-artifact_name="${ARTIFACT_NAME:-$DEFAULT_ARTIFACT_NAME}"
+artifact_name="${ARTIFACT_NAME:-}"
+artifact_name_explicit=0
+lib_type="${LIB_TYPE:-$DEFAULT_LIB_TYPE}"
 port="${PORT:-}"
 tmp_root="${TMP_ROOT:-$DEFAULT_TMP_ROOT}"
 actions_url=""
@@ -24,8 +26,10 @@ Options:
   -u, --url URL              GitHub Actions run URL.
   -r, --run-id ID            GitHub Actions run id.
   -R, --repo OWNER/REPO      Repository for --run-id mode.
+  -l, --lib-type TYPE        Artifact lib type: dynamic, shared, or static.
+                             Default: ${DEFAULT_LIB_TYPE}
   -a, --artifact-name NAME   Artifact name to download.
-                             Default: ${DEFAULT_ARTIFACT_NAME}
+                             Default: php-demo-web-<lib-type>
   -p, --port PORT            Port for http-server.
                              Default: let http-server decide
   -d, --tmp-root DIR         Parent directory for downloaded files.
@@ -41,7 +45,8 @@ Examples:
   $(basename "$0") https://github.com/seanmorris/php-wasm/actions/runs/25331839202
   $(basename "$0") --url ${DEFAULT_ACTIONS_URL}
   $(basename "$0") --run-id 25331839202 --repo seanmorris/php-wasm
-  $(basename "$0") --port 8091 --artifact-name php-demo-web
+  $(basename "$0") --lib-type shared --port 8091
+  $(basename "$0") --artifact-name php-demo-web-dynamic
 EOF
 }
 
@@ -59,8 +64,13 @@ while [[ $# -gt 0 ]]; do
 			repo_slug="${2:-}"
 			shift 2
 			;;
+		-l|--lib-type)
+			lib_type="${2:-}"
+			shift 2
+			;;
 		-a|--artifact-name)
 			artifact_name="${2:-}"
+			artifact_name_explicit=1
 			shift 2
 			;;
 		-p|--port)
@@ -97,6 +107,20 @@ while [[ $# -gt 0 ]]; do
 			;;
 	esac
 done
+
+case "$lib_type" in
+	dynamic|shared|static)
+		;;
+	*)
+		echo "Unsupported lib type: ${lib_type}" >&2
+		echo "Expected one of: dynamic, shared, static" >&2
+		exit 1
+		;;
+esac
+
+if [[ "$artifact_name_explicit" -eq 0 && -z "$artifact_name" ]]; then
+	artifact_name="php-demo-web-${lib_type}"
+fi
 
 if [[ -n "$actions_url" && -n "$run_id" ]]; then
 	echo "Use either --url or --run-id, not both." >&2

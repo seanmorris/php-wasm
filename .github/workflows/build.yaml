@@ -737,34 +737,34 @@ jobs:
 
 
   build-demo-dynamic:
-    name: Build Web Demo w/${{ matrix.libType }} libs
+    name: Build Web Demo w/dynamic libs
     needs:
       - test-browser-dynamic-compressed
       - test-node-dynamic-compressed
       - test-cgi-node-dynamic-compressed
     uses: ./.github/workflows/build-demo-step.yaml
     with:
-      libType: ${{ matrix.libType }}
+      libType: dynamic
 
   build-demo-shared:
-    name: Build Web Demo w/${{ matrix.libType }} libs
+    name: Build Web Demo w/shared libs
     needs:
       - test-browser-shared-compressed
       - test-node-shared-compressed
       - test-cgi-node-shared-compressed
     uses: ./.github/workflows/build-demo-step.yaml
     with:
-      libType: ${{ matrix.libType }}
+      libType: shared
 
   build-demo-static:
-    name: Build Web Demo w/${{ matrix.libType }} libs
+    name: Build Web Demo w/static libs
     needs:
       - test-browser-static-compressed
       - test-node-static-compressed
       - test-cgi-node-static-compressed
     uses: ./.github/workflows/build-demo-step.yaml
     with:
-      libType: ${{ matrix.libType }}
+      libType: static
 
   deploy-to-pages:
     name: Deploy Docs to GitHub Pages

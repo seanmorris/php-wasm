@@ -64,7 +64,7 @@ PHP_YAML_VERSION=2.3.0
 
 third_party/php${PHP_VERSION}-yaml/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-yaml\e[0m"
-	${DOCKER_RUN} wget -q https://pecl.php.net/get/yaml-${PHP_YAML_VERSION}.tgz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://pecl.php.net/get/yaml-${PHP_YAML_VERSION}.tgz
 	${DOCKER_RUN} tar -C third_party -xvzf yaml-${PHP_YAML_VERSION}.tgz yaml-${PHP_YAML_VERSION}
 	${DOCKER_RUN} mv third_party/yaml-${PHP_YAML_VERSION} third_party/php${PHP_VERSION}-yaml
 	${DOCKER_RUN} rm yaml-${PHP_YAML_VERSION}.tgz
