@@ -448,18 +448,17 @@ test('Can get the date from a native object with strtotime() and format it with 
 
 	await php.binary;
 
-	// Get yesterday's date and format in JS...
-	const yesterday = new Date();
-	const jsFormatted = `${yesterday.getFullYear()}-${String(1 + yesterday.getMonth()).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
-		+ ` ${String(yesterday.getHours()).padStart(2, '0')}:${String(yesterday.getMinutes()).padStart(2, '0')}:${String(yesterday.getSeconds()).padStart(2, '0')}`;
+	// Reuse the same native Date object on both sides so this test doesn't race across a second boundary.
+	const now = new Date();
+	const jsFormatted = `${now.getFullYear()}-${String(1 + now.getMonth()).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+		+ ` ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
 	// Set the timezone...
 	await php.x`date_default_timezone_set(${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
 
 	// Create a formateDate callback in PHP...
 	const formatDate = await php.x`function() {
-		$nativeJsDateClass = ${Date};
-		$nativeJsDateObject = new $nativeJsDateClass;
+		$nativeJsDateObject = ${now};
 		$isoString = $nativeJsDateObject->toISOString();
 		$timestamp = strtotime($isoString);
 		$formatted = date('Y-m-d H:i:s', $timestamp);
