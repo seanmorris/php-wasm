@@ -5,7 +5,10 @@ import smNoSaccadeStyle from 'sm-no-saccade-style';
 const sourceLintFiles = ['source/**/*.{js,mjs}'];
 const packageLintFiles = ['packages/**/8.*.{js,mjs}', 'packages/**/index.{js,mjs}'];
 const lintFiles = [...sourceLintFiles, ...packageLintFiles];
-const ignores = ['packages/php-wasm/stdlib/**/*'];
+const ignores = [
+	'packages/php-wasm/stdlib/**/*'
+	, 'test/browser/browser.spec.mjs-snapshots/**/*'
+];
 const definedTypes = [
 	'EventInit',
 	'OutputTarget',
