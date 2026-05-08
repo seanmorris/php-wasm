@@ -35,7 +35,8 @@ const demoCases = [
 		demo: 'files.php',
 		extensionFlags: 0,
 		snapshot: {
-			default: 'BrowserTest.testFiles_0.json',
+			static: 'BrowserTest.testFiles_0.json',
+			dynamic: 'BrowserTest.testFiles_0.dynamic.json',
 			shared: 'BrowserTest.testFiles_0.shared.json',
 		},
 	},
