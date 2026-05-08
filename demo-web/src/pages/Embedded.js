@@ -57,7 +57,6 @@ else if(buildType === 'shared')
 		, {name: 'libicutest.so',  url: new URL('php-wasm-intl/libicutest.so',   import.meta.url)}
 		, {name: 'libicuio.so',    url: new URL('php-wasm-intl/libicuio.so',     import.meta.url)}
 		, {name: 'libicui18n.so',  url: new URL('php-wasm-intl/libicui18n.so',   import.meta.url)}
-		, {name: 'libicudata.so',  url: new URL('php-wasm-intl/libicudata.so',   import.meta.url)}
 		, {name: 'libcrypto.so',   url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
 		, {name: 'libssl.so',      url: new URL('php-wasm-openssl/libssl.so',    import.meta.url)}
 		, {name: 'libonig.so',     url: new URL('php-wasm-mbstring/libonig.so',  import.meta.url)}

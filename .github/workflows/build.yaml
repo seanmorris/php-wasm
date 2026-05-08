@@ -766,12 +766,39 @@ jobs:
     with:
       libType: static
 
+  test-demo-web-dynamic:
+    name: Test demo-web artifact w/dynamic libs
+    needs:
+      - build-demo-dynamic
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-dynamic
+      libType: dynamic
+
+  test-demo-web-shared:
+    name: Test demo-web artifact w/shared libs
+    needs:
+      - build-demo-shared
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-shared
+      libType: shared
+
+  test-demo-web-static:
+    name: Test demo-web artifact w/static libs
+    needs:
+      - build-demo-static
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-static
+      libType: static
+
   deploy-to-pages:
     name: Deploy Docs to GitHub Pages
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - build-demo-dynamic
+      - test-demo-web-dynamic
     permissions:
       contents: read
       pages: write

@@ -93,7 +93,6 @@ const load = async () => {
 			, { name: 'libicutest.so',  url: (await import('php-wasm-intl/libicutest.so'   )).default }
 			, { name: 'libicuio.so',    url: (await import('php-wasm-intl/libicuio.so'     )).default }
 			, { name: 'libicui18n.so',  url: (await import('php-wasm-intl/libicui18n.so'   )).default }
-			, { name: 'libicudata.so',  url: (await import('php-wasm-intl/libicudata.so'   )).default }
 			, { name: 'libcrypto.so',   url: (await import('php-wasm-openssl/libcrypto.so' )).default }
 			, { name: 'libssl.so',      url: (await import('php-wasm-openssl/libssl.so'    )).default }
 			, { name: 'libonig.so',     url: (await import('php-wasm-mbstring/libonig.so'  )).default }
