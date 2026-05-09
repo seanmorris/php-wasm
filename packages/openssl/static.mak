@@ -4,18 +4,18 @@ WITH_OPENSSL?=dynamic
 
 OPENSSL_TAG?=OpenSSL_1_1_1-stable
 DOCKER_RUN_IN_OPENSSL =${DOCKER_ENV} \
-	-eCC='emcc -fPIC -flto -O${OPTIMIZE} -sLINKABLE' \
-	-eCXX='emcc -fPIC -flto -O${OPTIMIZE} -sLINKABLE' \
+	-eCC='emcc -fPIC ${LTO_FLAG} -O${OPTIMIZE} -sLINKABLE' \
+	-eCXX='emcc -fPIC ${LTO_FLAG} -O${OPTIMIZE} -sLINKABLE' \
 	-w /src/third_party/openssl/ \
 	emscripten-builder
 DOCKER_RUN_IN_EXT_OPENSSL =${DOCKER_ENV} \
-	-eCC='emcc -fPIC -flto -O${OPTIMIZE}' \
+	-eCC='emcc -fPIC ${LTO_FLAG} -O${OPTIMIZE}' \
 	-eCXX='emcc -fPIC -O${OPTIMIZE}' \
 	-w /src/third_party/php${PHP_VERSION}-openssl/ \
 	emscripten-builder
 
-ifeq ($(filter ${WITH_OPENSSL},0 1 shared dynamic),)
-$(error WITH_OPENSSL MUST BE 0, 1, shared, or dynamic (cannot be static). WITH_OPENSSL: '${WITH_OPENSSL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
+ifeq ($(filter ${WITH_OPENSSL},0 1 static shared dynamic),)
+$(error WITH_OPENSSL MUST BE 0, 1, static, shared, or dynamic. WITH_OPENSSL: '${WITH_OPENSSL}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 
 ifeq (${WITH_OPENSSL},1)
@@ -28,10 +28,12 @@ TEST_LIST+= packages/openssl/test/basic.mjs
 endif
 
 ifeq (${WITH_OPENSSL},static)
+# Full LTO corrupts static OpenSSL builds; ThinLTO keeps startup intact.
+LTO_FLAG=-flto=thin
 CONFIGURE_FLAGS+= --with-openssl
 ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
 STATIC_LIB_CONFIG+="openssl",
-EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so
+SKIP_LIBS+= -lssl -lcrypto
 endif
 
 ifeq (${WITH_OPENSSL},shared)

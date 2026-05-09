@@ -136,6 +136,7 @@ PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 DOCKER_COMPOSE?=docker-compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
+LTO_FLAG?=-flto
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
@@ -397,11 +398,11 @@ BUILD_FLAGS+=-f ../../php.mk \
 	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
 	SAPI_PHPDBG_PATH='${SAPI_PHPDBG_PATH}'\
 	PHP_CLI_OBJS='${PHP_CLI_OBJS}' \
-	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
-	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
+	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
-		${SYMBOL_FLAGS} -flto -fPIC \
+		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \
 		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \

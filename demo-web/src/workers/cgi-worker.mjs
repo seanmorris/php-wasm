@@ -101,14 +101,6 @@ const load = async () => {
 			, { name: 'libyaml.so',     url: (await import('php-wasm-yaml/libyaml.so'      )).default }
 		);
 	}
-	else
-	{
-		sharedLibs.push(
-			{name: 'libcrypto.so',   url: (await import(('php-wasm-openssl/libcrypto.so'))).default},
-			{name: 'libssl.so',      url: (await import(('php-wasm-openssl/libssl.so'   ))).default},
-		);
-	}
-
 	// Spawn the PHP-CGI binary
 	return new PhpCgiWorker({
 		version: '8.3'

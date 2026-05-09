@@ -46,14 +46,6 @@ else if(buildType === 'shared')
 		{name: 'libyaml.so',     url: new URL('node_modules/php-wasm-yaml/libyaml.so',      import.meta.url)},
 	);
 }
-if(buildType === 'static')
-{
-	sharedLibs.push(
-		{name: 'libcrypto.so', url: (new URL('node_modules/php-wasm-openssl/libcrypto.so', import.meta.url))},
-		{name: 'libssl.so',    url: (new URL('node_modules/php-wasm-openssl/libssl.so', import.meta.url))},
-	);
-}
-
 const php = new PhpCgiNode({
 	version: process.env.PHP_VERSION ?? '8.3'
 	, sharedLibs

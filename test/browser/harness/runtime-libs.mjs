@@ -175,11 +175,6 @@ const sharedCgiLibs = [
 	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
-const staticLibs = [
-	sharedLib('libcrypto.so', 'openssl/libcrypto.so')
-	, sharedLib('libssl.so', 'openssl/libssl.so')
-];
-
 const pickLibsForBuildType = (buildType, dynamicLibs, sharedLibs) => {
 	if(buildType === 'dynamic')
 	{
@@ -191,7 +186,7 @@ const pickLibsForBuildType = (buildType, dynamicLibs, sharedLibs) => {
 		return sharedLibs;
 	}
 
-	return staticLibs;
+	return [];
 };
 
 export const loadEmbeddedSharedLibs = buildType => {
@@ -207,7 +202,7 @@ export const loadEmbeddedSharedLibs = buildType => {
 		return sharedEmbeddedLibs;
 	}
 
-	return staticLibs;
+	return [];
 };
 
 export const loadEmbeddedExtensionLibs = (buildType, flags) => {

@@ -11,7 +11,7 @@ import yaml from '../../packages/libyaml/index.mjs';
 import zlib from '../../packages/zlib/index.mjs';
 
 const envFlagIsShared = value => value === 'shared';
-const envFlagNeedsOpenSslLibs = value => ['1', 'shared', 'static'].includes(value ?? '');
+const envFlagNeedsOpenSslLibs = value => ['1', 'shared', 'dynamic'].includes(value ?? '');
 const extensionNamePattern = /^php\d+\.\d+-/;
 
 const sharedLibraryPackages = [

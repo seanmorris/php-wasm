@@ -58,15 +58,7 @@ else if(buildType === 'shared')
 		, {name: 'libyaml.so',     url: new URL('php-wasm-yaml/libyaml.so', import.meta.url)}
 	);
 }
-else
-{
-	sharedLibs.push(
-		{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
-		, {name: 'libssl.so',    url: new URL('php-wasm-openssl/libssl.so', import.meta.url)}
-	);
-
-	// files.push({ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) });
-}
+// files.push({ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) });
 
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php', url: './scripts/hello-world.php' }

@@ -69,14 +69,6 @@ else if(buildType === 'shared')
 	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL('php-wasm-intl/icudt72l.dat', import.meta.url) }
 	// );
 }
-else
-{
-	baseSharedLibs.push(
-		{name: 'libcrypto.so', url: new URL('php-wasm-openssl/libcrypto.so', import.meta.url)}
-		, {name: 'libssl.so',    url: new URL('php-wasm-openssl/libssl.so', import.meta.url)}
-	);
-}
-
 const dynamicLibs = buildType === 'dynamic'
 	? [await import('php-wasm-yaml')]
 	: [];
