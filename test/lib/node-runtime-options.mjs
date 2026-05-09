@@ -10,6 +10,7 @@ import tidy from '../../packages/tidy/index.mjs';
 import yaml from '../../packages/libyaml/index.mjs';
 import zlib from '../../packages/zlib/index.mjs';
 
+const currentEnv = () => globalThis.process?.env ?? {};
 const envFlagIsShared = value => value === 'shared';
 const envFlagNeedsOpenSslLibs = value => ['1', 'shared', 'dynamic'].includes(value ?? '');
 const extensionNamePattern = /^php\d+\.\d+-/;
@@ -34,7 +35,6 @@ const sharedLibraryPackages = [
 	, [env => envFlagIsShared(env.WITH_YAML), yaml]
 ];
 
-const currentEnv = () => globalThis.process?.env ?? {};
 const currentPhpVersion = env => env.PHP_VERSION ?? '8.4';
 
 const supportLibsFromPackage = (pkg, phpVersion) => (
