@@ -490,8 +490,8 @@ web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+ifneq (${STDLIB_WEB_TARGET},)
+	${MAKE} ${STDLIB_WEB_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -505,8 +505,8 @@ worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+ifneq (${STDLIB_WORKER_TARGET},)
+	${MAKE} ${STDLIB_WORKER_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -520,8 +520,8 @@ webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+ifneq (${STDLIB_WEBVIEW_TARGET},)
+	${MAKE} ${STDLIB_WEBVIEW_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -535,8 +535,8 @@ node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+ifneq (${STDLIB_NODE_TARGET},)
+	${MAKE} ${STDLIB_NODE_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -802,19 +802,33 @@ ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 
 ############### StdLibs ###############
 
-stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+STDLIB_NODE_TARGET=
+STDLIB_WEB_TARGET=
+STDLIB_WORKER_TARGET=
+STDLIB_WEBVIEW_TARGET=
+
+ifneq ($(filter ${WITH_LIBXML},dynamic),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
+STDLIB_NODE_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+STDLIB_WEB_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+STDLIB_WORKER_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+STDLIB_WEBVIEW_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+endif
+endif
+
+stdlib: ${STDLIB_NODE_TARGET} ${STDLIB_WEB_TARGET} ${STDLIB_WORKER_TARGET} ${STDLIB_WEBVIEW_TARGET}
 
 packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
 packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 ########### Clerical stuff. ###########
 

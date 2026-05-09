@@ -7,6 +7,7 @@ import http from 'node:http';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { PhpCgiNode } from '../../../packages/php-cgi-wasm/PhpCgiNode.mjs';
 import { phpWasmPackageDir } from './paths.mjs';
+import { nodeRuntimeOptions } from '../../lib/node-runtime-options.mjs';
 
 function ensureNavigatorLocks()
 {
@@ -73,7 +74,7 @@ export async function createPhpNode(options = {})
 {
 	ensureNavigatorLocks();
 	const version = options.version ?? getAvailablePhpNodeVersion();
-	const php = new PhpNode({ version, ...options });
+	const php = new PhpNode(nodeRuntimeOptions({ version, ...options }));
 
 	await php.binary;
 

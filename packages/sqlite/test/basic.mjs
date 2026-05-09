@@ -1,9 +1,18 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { PhpNode as BasePhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { env } from 'node:process';
+import { nodeRuntimeOptions } from '../../../test/lib/node-runtime-options.mjs';
 
 import sqlite from 'php-wasm-sqlite';
+
+class PhpNode extends BasePhpNode
+{
+	constructor(args = {})
+	{
+		super(nodeRuntimeOptions(args));
+	}
+}
 
 test('Sqlite3 Extension is enabled.', async () => {
 	const php = env.WITH_SQLITE === 'dynamic'
