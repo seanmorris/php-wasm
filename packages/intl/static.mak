@@ -106,27 +106,6 @@ packages/intl/libicudata.so: lib/lib/libicudata.so
 packages/intl/$(notdir ${LIBICU_DATFILE}): ${LIBICU_DATFILE}
 	cp -Lp $^ $@
 
-$(addsuffix /libicui18n.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicui18n.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicuio.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicuio.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicutest.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicutest.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicutu.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicutu.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicuuc.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicuuc.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicudata.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicudata.so
-	cp -Lp $^ $@
-
-$(addsuffix /$(notdir ${LIBICU_DATFILE}),$(sort ${SHARED_ASSET_PATHS})): packages/intl/$(notdir ${LIBICU_DATFILE})
-	cp -Lp $^ $@
-
 packages/intl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/intl/tests/%.phpt
 	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} --buildType static > $@
 
@@ -149,6 +128,3 @@ packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} third_party/php${PHP_VERSION}
 		/src/packages/intl/libicuio.so \
 		/src/packages/intl/libicutu.so \
 		/src/packages/intl/libicutest.so
-
-$(addsuffix /php${PHP_VERSION}-intl.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/php${PHP_VERSION}-intl.so
-	cp -Lp $^ $@

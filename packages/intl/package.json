@@ -20,16 +20,7 @@
     "README.md",
     "pre.mak",
     "static.mak",
-    "php8.3-intl.so",
-    "php8.2-intl.so",
-    "php8.1-intl.so",
-    "php8.0-intl.so",
-    "libicudata.so",
-    "libicui18n.so",
-    "libicuio.so",
-    "libicutest.so",
-    "libicutu.so",
-    "libicuuc.so",
-    "icudt72l.dat"
+    "*.so",
+    "*.dat"
   ]
 }

@@ -203,7 +203,7 @@ export const loadEmbeddedSharedLibs = buildType => {
 	if(buildType === 'shared')
 	{
 		// Match demo-web so the core shared runtime resolves side modules
-		// through locateFile instead of falling back to /packages/php-wasm/*.so.
+		// through locateFile using package-local asset URLs.
 		return sharedEmbeddedLibs;
 	}
 

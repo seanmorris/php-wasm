@@ -91,7 +91,6 @@
     "NOTICE",
     "README.md",
     "package.json",
-    "libxml2.so",
     "PhpCgiBase.js",
     "PhpCgiBase.mjs",
     "PhpCgiNode.js",

@@ -16,10 +16,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libonig.so",
-    "php8.3-mbstring.so",
-    "php8.2-mbstring.so",
-    "php8.1-mbstring.so",
-    "php8.0-mbstring.so"
+    "*.so"
   ]
 }

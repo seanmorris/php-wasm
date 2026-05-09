@@ -59,7 +59,6 @@
     "NOTICE",
     "README.md",
     "package.json",
-    "libxml2.so",
     "PhpDbgNode.d.mts",
     "PhpDbgNode.mjs",
     "PhpDbgWeb.js",

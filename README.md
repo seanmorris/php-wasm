@@ -836,7 +836,7 @@ This is the directory where JavaScript and wasm files will be built, *relative t
 
 ##### PHP_ASSET_DIR
 
-This is the directory where shared libraries, extensions, `.data` files, and other supporting files will be built, *relative to the current directory.* Defaults to `PHP_DIST_DIR`.
+This is the directory where preload `.data` / `.dat` files and other supporting assets will be built, *relative to the current directory.* Shared libraries and side modules remain in their owning packages. Defaults to `PHP_DIST_DIR`.
 
 ---
 
@@ -1095,7 +1095,7 @@ npx php-wasm-builder image
 
 #### php-wasm-builder copy-assets
 
-This will scan the current package's node_modules directory for shared libraries & supporting files, and copy them to `PHP_ASSET_DIR`.
+This will scan the current package's `node_modules` directory for supporting data files, and copy them to `PHP_ASSET_DIR`.
 
 You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 
@@ -1105,7 +1105,7 @@ npx php-wasm-builder copy-assets
 
 #### php-wasm-builder build-assets
 
-Similar to `copy-assets`, but will actually compile the shared libraries, then copy them to `PHP_ASSET_DIR`.
+Similar to `copy-assets`, but will build the supporting asset files described by `.php-wasm-rc`, then copy them to `PHP_ASSET_DIR`.
 
 You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 

@@ -17,10 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libzip.so",
-    "php8.3-zip.so",
-    "php8.2-zip.so",
-    "php8.1-zip.so",
-    "php8.0-zip.so"
+    "*.so"
   ]
 }

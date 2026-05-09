@@ -18,7 +18,6 @@ $(error WITH_XML=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML
 endif
 CONFIGURE_FLAGS+= --enable-xml
 TEST_LIST+=$(shell ls packages/xml/test/*.mjs)
-EXTRA_MODULES+= packages/xml/php${PHP_VERSION}-xml.so
 endif
 
 ifeq (${WITH_XML},dynamic)
@@ -42,6 +41,3 @@ packages/xml/php${PHP_VERSION}-xml.so: ${PHPIZE} third_party/php${PHP_VERSION}-x
 	${DOCKER_RUN_IN_EXT_XML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_XML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_XML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/xml.a /src/packages/libxml/libxml2.so
-
-$(addsuffix /php${PHP_VERSION}-xml.so,$(sort ${SHARED_ASSET_PATHS})): packages/xml/php${PHP_VERSION}-xml.so
-	cp -Lp $^ $@

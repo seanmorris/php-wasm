@@ -18,13 +18,6 @@
     "README.md",
     "static.mak",
     "webp.mak",
-    "libfreetype.so",
-    "libjpeg.so",
-    "libpng.so",
-    "libwebp.so",
-    "php8.3-gd.so",
-    "php8.2-gd.so",
-    "php8.1-gd.so",
-    "php8.0-gd.so"
+    "*.so"
   ]
 }

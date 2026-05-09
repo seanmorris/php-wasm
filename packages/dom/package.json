@@ -17,9 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "php8.3-dom.so",
-    "php8.2-dom.so",
-    "php8.1-dom.so",
-    "php8.0-dom.so"
+    "*.so"
   ]
 }

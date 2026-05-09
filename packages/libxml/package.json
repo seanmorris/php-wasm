@@ -17,6 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libxml2.so"
+    "*.so"
   ]
 }

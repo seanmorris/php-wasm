@@ -31,7 +31,7 @@ ifeq (${WITH_OPENSSL},static)
 CONFIGURE_FLAGS+= --with-openssl
 ARCHIVES+= lib/lib/libssl.a lib/lib/libcrypto.a
 STATIC_LIB_CONFIG+="openssl",
-EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 endif
 
 ifeq (${WITH_OPENSSL},shared)
@@ -40,8 +40,7 @@ PHP_CONFIGURE_DEPS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SHARED_LIBS+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 SKIP_LIBS+= -lssl -lcrypto
 SHARED_LIB_CONFIG+="openssl",
-EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so packages/openssl/php${PHP_VERSION}-openssl.so
-PHP_ASSET_LIST+= libssl.so libcrypto.so
+EXTRA_MODULES+= packages/openssl/libssl.so packages/openssl/libcrypto.so
 endif
 
 ifeq (${WITH_OPENSSL},dynamic)
@@ -79,15 +78,6 @@ packages/openssl/libssl.so: lib/lib/libssl.so
 	cp -Lp $^ $@
 
 packages/openssl/libcrypto.so: lib/lib/libcrypto.so
-	cp -Lp $^ $@
-
-$(addsuffix /libcrypto.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libcrypto.so
-	cp -Lp $^ $@
-
-$(addsuffix /libssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/libssl.so
-	cp -Lp $^ $@
-
-$(addsuffix /php${PHP_VERSION}-openssl.so,$(sort ${SHARED_ASSET_PATHS})): packages/openssl/php${PHP_VERSION}-openssl.so
 	cp -Lp $^ $@
 
 packages/openssl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/openssl/tests/%.phpt

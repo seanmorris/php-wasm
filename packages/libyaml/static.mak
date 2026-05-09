@@ -20,7 +20,7 @@ PHP_CONFIGURE_DEPS+= lib/lib/libyaml.a third_party/php${PHP_VERSION}-src/ext/yam
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 ARCHIVES+= lib/lib/libyaml.a
 SKIP_LIBS+= -lyaml
-EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
+EXTRA_MODULES+= packages/libyaml/libyaml.so
 endif
 
 ifeq (${WITH_YAML},shared)
@@ -29,8 +29,7 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/yaml/config.m4 packag
 TEST_LIST+=$(shell ls packages/libyaml/test/*.mjs)
 SHARED_LIBS+= packages/libyaml/libyaml.so
 SKIP_LIBS+= -lyaml
-EXTRA_MODULES+= packages/libyaml/libyaml.so packages/libyaml/php${PHP_VERSION}-yaml.so
-PHP_ASSET_LIST+= libyaml.so
+EXTRA_MODULES+= packages/libyaml/libyaml.so
 endif
 
 ifeq (${WITH_YAML},dynamic)
@@ -76,9 +75,6 @@ third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/php${PHP_VERSI
 packages/libyaml/libyaml.so: lib/lib/libyaml.so
 	cp $^ $@
 
-$(addsuffix /libyaml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libyaml/libyaml.so
-	cp -Lp $^ $@
-
 packages/libyaml/php${PHP_VERSION}-yaml.so: ${PHPIZE} packages/libyaml/libyaml.so third_party/php${PHP_VERSION}-yaml/config.m4
 	@ echo -e "\e[33;4mBuilding php-yaml\e[0m"
 	${DOCKER_RUN_IN_EXT_YAML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
@@ -88,6 +84,3 @@ packages/libyaml/php${PHP_VERSION}-yaml.so: ${PHPIZE} packages/libyaml/libyaml.s
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_YAML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/yaml.a /src/packages/libyaml/libyaml.so
-
-$(addsuffix /php${PHP_VERSION}-yaml.so,$(sort ${SHARED_ASSET_PATHS})): packages/libyaml/php${PHP_VERSION}-yaml.so
-	cp -Lp $^ $@

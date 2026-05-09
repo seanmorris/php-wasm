@@ -70,7 +70,6 @@
     "resolveDependencies.mjs",
     "webTransactions.js",
     "webTransactions.mjs",
-    "libxml2.so",
     "mapped/*"
   ]
 }

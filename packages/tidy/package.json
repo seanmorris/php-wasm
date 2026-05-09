@@ -17,10 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libtidy.so",
-    "php8.3-tidy.so",
-    "php8.2-tidy.so",
-    "php8.1-tidy.so",
-    "php8.0-tidy.so"
+    "*.so"
   ]
 }

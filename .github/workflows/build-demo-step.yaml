@@ -39,6 +39,7 @@ jobs:
       - name: Build Web Demo
         run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
         env:
+          BUILD_TYPE: ${{ inputs.libType }}
           CI: ''
 
       - name: Take Snapshot

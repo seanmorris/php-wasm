@@ -17,9 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "php8.3-simplexml.so",
-    "php8.2-simplexml.so",
-    "php8.1-simplexml.so",
-    "php8.0-simplexml.so"
+    "*.so"
   ]
 }

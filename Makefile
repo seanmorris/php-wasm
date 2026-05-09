@@ -210,10 +210,6 @@ PHP_ASSET_LIST=
 PHP_ASSET_DIR?=${PHP_DIST_DIR}
 SHARED_ASSET_PATHS=${PHP_ASSET_DIR}
 
-ifneq (${PHP_ASSET_DIR},${PHP_DIST_DIR})
-PHP_ASSET_LIST+=
-endif
-
 PRELOAD_NAME=php
 NOTPARALLEL=
 
@@ -832,7 +828,6 @@ shared:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS}
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
-#	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}

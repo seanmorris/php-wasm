@@ -17,10 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libiconv.so",
-    "php8.3-iconv.so",
-    "php8.2-iconv.so",
-    "php8.1-iconv.so",
-    "php8.0-iconv.so"
+    "*.so"
   ]
 }

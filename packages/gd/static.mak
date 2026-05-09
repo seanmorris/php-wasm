@@ -18,7 +18,6 @@ ifeq (${WITH_GD}, static)
 CONFIGURE_FLAGS+= --enable-gd ${GD_FLAGS}
 PHP_CONFIGURE_DEPS+= ${GD_LIBS}
 TEST_LIST+= $(shell ls packages/gd/test/*.mjs)
-EXTRA_MODULES+= packages/gd/php${PHP_VERSION}-gd.so
 endif
 
 ifeq (${WITH_GD}, dynamic)
@@ -36,7 +35,6 @@ GD_FLAGS+= --with-freetype=/src/lib
 GD_LIBS+= packages/gd/libfreetype.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libfreetype.so
-PHP_ASSET_LIST+= libfreetype.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libfreetype.so
 endif
@@ -47,7 +45,6 @@ GD_FLAGS+= --with-jpeg=/src/lib
 GD_LIBS+= packages/gd/libjpeg.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libjpeg.so
-PHP_ASSET_LIST+= libjpeg.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libjpeg.so
 endif
@@ -57,7 +54,6 @@ ifeq (${WITH_LIBPNG},shared)
 GD_LIBS+= packages/gd/libpng.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libpng.so
-PHP_ASSET_LIST+= libpng.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libpng.so
 endif
@@ -68,7 +64,6 @@ GD_FLAGS+= --with-webp=/src/lib
 GD_LIBS+= packages/gd/libwebp.so
 ifeq (${WITH_GD}, static)
 SHARED_LIBS+= packages/gd/libwebp.so
-PHP_ASSET_LIST+= libwebp.so
 else ifeq (${WITH_GD}, dynamic)
 DYNAMIC_LIBS+= packages/gd/libwebp.so
 endif
@@ -194,9 +189,6 @@ packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/
 	${DOCKER_RUN_IN_EXT_GD} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_GD} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/gd.a $(addprefix /src/,${GD_LIBS})
 
-$(addsuffix /php${PHP_VERSION}-gd.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/php${PHP_VERSION}-gd.so
-	cp -Lp $^ $@
-
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
 	${DOCKER_RUN} wget -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
@@ -221,9 +213,6 @@ lib/lib/libfreetype.so: lib/lib/libfreetype.a lib/lib/libpng.so lib/lib/libz.a
 packages/gd/libfreetype.so: lib/lib/libfreetype.so
 	cp -Lp $^ $@
 
-$(addsuffix /libfreetype.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libfreetype.so
-	cp -Lp $^ $@
-
 
 
 third_party/jpeg-9f/README:
@@ -243,9 +232,6 @@ lib/lib/libjpeg.so: lib/lib/libjpeg.a
 
 packages/gd/libjpeg.so: lib/lib/libjpeg.so
 	cp -rL $^ $@
-
-$(addsuffix /libjpeg.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libjpeg.so
-	cp -Lp $^ $@
 
 
 
@@ -284,9 +270,6 @@ lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 packages/gd/libpng.so: lib/lib/libpng.so
 	cp -rL $^ $@
 
-$(addsuffix /libpng.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libpng.so
-	cp -Lp $^ $@
-
 
 third_party/libwebp-${LIBWEBP_TAG}/README.md:
 	@ echo -e "\e[33;4mDownloading LIBWEBP\e[0m"
@@ -306,6 +289,3 @@ lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 
 packages/gd/libwebp.so: lib/lib/libwebp.so
 	cp -rL $^ $@
-
-$(addsuffix /libwebp.so,$(sort ${SHARED_ASSET_PATHS})): packages/gd/libwebp.so
-	cp -Lp $^ $@

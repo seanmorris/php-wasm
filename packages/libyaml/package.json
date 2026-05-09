@@ -15,10 +15,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libyaml.so",
-    "php8.3-yaml.so",
-    "php8.2-yaml.so",
-    "php8.1-yaml.so",
-    "php8.0-yaml.so"
+    "*.so"
   ]
 }

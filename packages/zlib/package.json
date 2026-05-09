@@ -16,10 +16,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libz.so",
-    "php8.3-zlib.so",
-    "php8.2-zlib.so",
-    "php8.1-zlib.so",
-    "php8.0-zlib.so"
+    "*.so"
   ]
 }

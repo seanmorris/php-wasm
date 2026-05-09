@@ -17,9 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "php8.3-phar.so",
-    "php8.2-phar.so",
-    "php8.1-phar.so",
-    "php8.0-phar.so"
+    "*.so"
   ]
 }

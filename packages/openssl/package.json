@@ -17,11 +17,6 @@
     "NOTICE",
     "README.md",
     "static.mak",
-    "libcrypto.so",
-    "libssl.so",
-    "php8.3-openssl.so",
-    "php8.2-openssl.so",
-    "php8.1-openssl.so",
-    "php8.0-openssl.so"
+    "*.so"
   ]
 }
