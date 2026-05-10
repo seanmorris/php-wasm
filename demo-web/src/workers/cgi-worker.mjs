@@ -49,12 +49,14 @@ const actions = {
 	}
 };
 
-let loader = null;
+let phpLoader = null;
 
 /**
  * Loads the runtime assets required for the current build type and creates the worker.
  */
-const load = async () => {
+const init = async () => {
+	if(phpLoader) return phpLoader;
+
 	if(buildType === 'dynamic')
 	{
 		sharedLibs.push(...(await Promise.all([
@@ -76,14 +78,11 @@ const load = async () => {
 	}
 	else if(buildType === 'shared')
 	{
-		// files.push(
-		// 	{ parent: '/preload/', name: 'icudt72l.dat', url: (await import('php-wasm-intl/icudt72l.dat')).default }
-		// );
-
 		sharedLibs.push(...sharedSupportLibs);
 	}
+
 	// Spawn the PHP-CGI binary
-	return new PhpCgiWorker({
+	return phpLoader = new PhpCgiWorker({
 		version: '8.3'
 		, onRequest
 		, notFound
@@ -112,17 +111,9 @@ const load = async () => {
 	});
 };
 
-/**
- * Lazily initializes a singleton CGI runtime for install, activate, and fetch events.
- */
-const init = () => {
-	if(loader) return loader;
-	return loader = load();
-};
-
 // Set up the event handlers
-self.addEventListener('install',  async event => (await init()).handleInstallEvent(event));
-self.addEventListener('activate', async event => (await init()).handleActivateEvent(event));
+self.addEventListener('install', event => event.waitUntil(globalThis.skipWaiting()));
+self.addEventListener('activate', event => event.waitUntil(globalThis.clients.claim()));
 self.addEventListener('fetch',    async event => (await init()).handleFetchEvent(event));
 self.addEventListener('message',  async event => (await init()).handleMessageEvent(event));
 
