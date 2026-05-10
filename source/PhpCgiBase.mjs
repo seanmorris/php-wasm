@@ -821,8 +821,12 @@ export class PhpCgiBase
 
 		try
 		{
+			const requestLock = globalThis.navigator?.locks?.request
+				? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
+				: callback => callback();
+
 			// We need "return await" otherwise the finally block will run before the lock releases.
-			return await navigator.locks.request('php-wasm-request-lock', async () => {
+			return await requestLock(async () => {
 				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '').split('') : [];
 				this.output = [];
 				this.error = [];

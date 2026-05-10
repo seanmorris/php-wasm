@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
 import { PhpCliNode } from '../../packages/php-cli-wasm/PhpCliNode.mjs';
+import { nodeRuntimeOptions } from '../lib/node-runtime-options.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 
@@ -19,10 +20,10 @@ const attachOutput = php => {
 };
 
 test('runs a CLI script in Node', async () => {
-	const php = new PhpCliNode({
+	const php = new PhpCliNode(nodeRuntimeOptions({
 		code: 'echo "Hello, World!";'
 		, version
-	});
+	}));
 	const {stdOut, stdErr} = attachOutput(php);
 
 	await php.binary;
@@ -35,10 +36,10 @@ test('runs a CLI script in Node', async () => {
 });
 
 test(`loads the requested CLI runtime version (${version})`, async () => {
-	const php = new PhpCliNode({
+	const php = new PhpCliNode(nodeRuntimeOptions({
 		code: 'echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;'
 		, version
-	});
+	}));
 	const {stdOut, stdErr} = attachOutput(php);
 
 	await php.binary;

@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
 
 import { PhpDbgNode } from '../../packages/php-dbg-wasm/PhpDbgNode.mjs';
+import { nodeRuntimeOptions } from '../lib/node-runtime-options.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 const scriptPath = '/preload/test_www/hello-world.php';
@@ -100,7 +101,7 @@ const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 };
 
 test(`boots phpdbg in Node for PHP ${version}`, async () => {
-	const php = new PhpDbgNode({files: preloadFiles, version});
+	const php = new PhpDbgNode(nodeRuntimeOptions({files: preloadFiles, version}));
 	const {stdOut, stdErr} = attachOutput(php);
 
 	const process = php.run();
