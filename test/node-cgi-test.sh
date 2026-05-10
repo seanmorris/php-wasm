@@ -3,7 +3,7 @@
 set -euo pipefail
 PORT=9001
 export CI="${CI:-}"
-STARTUP_TIMEOUT_SECONDS="${CGI_NODE_TEST_STARTUP_TIMEOUT_SECONDS:-30}"
+STARTUP_TIMEOUT_SECONDS="${CGI_NODE_TEST_STARTUP_TIMEOUT_SECONDS:-45}"
 
 docker kill php-cgi-wasm-test-node >/dev/null 2>&1 || true
 

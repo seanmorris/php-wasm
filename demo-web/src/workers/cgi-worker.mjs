@@ -4,6 +4,7 @@
 import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
 import { PGlite } from '@electric-sql/pglite';
 import { basePath, buildType } from '../lib/runtimePaths.worker.js';
+import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const sharedLibs = [];
 
@@ -79,27 +80,7 @@ const load = async () => {
 		// 	{ parent: '/preload/', name: 'icudt72l.dat', url: (await import('php-wasm-intl/icudt72l.dat')).default }
 		// );
 
-		sharedLibs.push(
-			{ name: 'libxml2.so',     url: (await import('php-wasm-libxml/libxml2.so'    )).default }
-			, { name: 'libz.so',        url: (await import('php-wasm-zlib/libz.so'         )).default }
-			, { name: 'libzip.so',      url: (await import('php-wasm-libzip/libzip.so'     )).default }
-			, { name: 'libfreetype.so', url: (await import('php-wasm-gd/libfreetype.so'    )).default }
-			, { name: 'libjpeg.so',     url: (await import('php-wasm-gd/libjpeg.so'        )).default }
-			, { name: 'libwebp.so',     url: (await import('php-wasm-gd/libwebp.so'        )).default }
-			, { name: 'libpng.so',      url: (await import('php-wasm-gd/libpng.so'         )).default }
-			, { name: 'libiconv.so',    url: (await import('php-wasm-iconv/libiconv.so'    )).default }
-			, { name: 'libicuuc.so',    url: (await import('php-wasm-intl/libicuuc.so'     )).default }
-			, { name: 'libicutu.so',    url: (await import('php-wasm-intl/libicutu.so'     )).default }
-			, { name: 'libicutest.so',  url: (await import('php-wasm-intl/libicutest.so'   )).default }
-			, { name: 'libicuio.so',    url: (await import('php-wasm-intl/libicuio.so'     )).default }
-			, { name: 'libicui18n.so',  url: (await import('php-wasm-intl/libicui18n.so'   )).default }
-			, { name: 'libcrypto.so',   url: (await import('php-wasm-openssl/libcrypto.so' )).default }
-			, { name: 'libssl.so',      url: (await import('php-wasm-openssl/libssl.so'    )).default }
-			, { name: 'libonig.so',     url: (await import('php-wasm-mbstring/libonig.so'  )).default }
-			, { name: 'libsqlite3.so',  url: (await import('php-wasm-sqlite/libsqlite3.so' )).default }
-			, { name: 'libtidy.so',     url: (await import('php-wasm-tidy/libtidy.so'      )).default }
-			, { name: 'libyaml.so',     url: (await import('php-wasm-yaml/libyaml.so'      )).default }
-		);
+		sharedLibs.push(...sharedSupportLibs);
 	}
 	// Spawn the PHP-CGI binary
 	return new PhpCgiWorker({

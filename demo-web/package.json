@@ -37,17 +37,17 @@
     "vscode-react": "^0.2.2",
     "web-vitals": "^2.1.4"
   },
-	"scripts": {
-		"start": "bash ./npm-start.sh",
-		"build": "bash ./npm-build.sh",
-		"build:app": "vite build",
-		"build:worker": "node ./scripts/build-worker.cjs",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"lint": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src",
-		"lint:fix": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src --fix",
-		"clean": ""
-	},
+  "scripts": {
+    "start": "bash ./npm-start.sh",
+    "build": "bash ./npm-build.sh",
+    "build:app": "vite build",
+    "build:worker": "node ./scripts/build-worker.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src",
+    "lint:fix": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src --fix",
+    "clean": ""
+  },
   "browserslist": {
     "production": [
       ">0.2%",

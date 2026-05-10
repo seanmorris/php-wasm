@@ -12,6 +12,12 @@ import { defineConfig } from 'vite';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appBase = '/php-wasm/';
 const localQuickbusPath = path.resolve(__dirname, '../../projects/quickbus/index.mjs');
+const sharedSupportLibsPath = path.resolve(
+	__dirname
+	, process.env.BUILD_TYPE === 'shared'
+		? 'src/lib/sharedSupportLibs.js'
+		: 'src/lib/sharedSupportLibs.stub.js'
+);
 
 const htmlEntryPaths = [
 	'/'
@@ -120,11 +126,12 @@ export default defineConfig(() => ({
 		'import.meta.env.VITE_PHP_VERSION': JSON.stringify(process.env.PHP_VERSION ?? '8.4')
 	}
 	, resolve: {
-		alias: existsSync(localQuickbusPath)
-			? {
-				quickbus: localQuickbusPath
-			}
-			: {}
+		alias: {
+			'demo-web-shared-support-libs': sharedSupportLibsPath
+			, ...(existsSync(localQuickbusPath)
+				? { quickbus: localQuickbusPath }
+				: {})
+		}
 		, preserveSymlinks: true
 	}
 	, publicDir: 'public'

@@ -7,10 +7,19 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const sharedSupportLibsPath = path.resolve(
+	__dirname
+	, process.env.BUILD_TYPE === 'shared'
+		? 'src/lib/sharedSupportLibs.js'
+		: 'src/lib/sharedSupportLibs.stub.js'
+);
 
 export default defineConfig({
 	assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, resolve: {
+		alias: {
+			'demo-web-shared-support-libs': sharedSupportLibsPath
+		},
 		preserveSymlinks: true
 	}
 	, publicDir: false
