@@ -766,6 +766,8 @@ jobs:
     with:
       libType: static
 
+
+
   test-demo-web-dynamic:
     name: Test demo-web artifact w/dynamic libs
     needs:
@@ -792,6 +794,8 @@ jobs:
     with:
       artifactName: php-demo-web-static
       libType: static
+
+
 
   deploy-to-pages:
     name: Deploy Docs to GitHub Pages
