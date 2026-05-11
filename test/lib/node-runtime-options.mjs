@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import gd from '../../packages/gd/index.mjs';
 import iconv from '../../packages/iconv/index.mjs';
 import intl from '../../packages/intl/index.mjs';
@@ -14,6 +17,30 @@ const currentEnv = () => globalThis.process?.env ?? {};
 const envFlagIsShared = value => value === 'shared';
 const envFlagNeedsOpenSslLibs = value => ['1', 'shared', 'dynamic'].includes(value ?? '');
 const extensionNamePattern = /^php\d+\.\d+-/;
+const sharedWrapperMarkers = ['php.data', 'getDylinkMetadata', 'LDSO'];
+const sharedBuildFlags = new Set([
+	'WITH_LIBXML'
+	, 'WITH_ZLIB'
+	, 'WITH_LIBZIP'
+	, 'WITH_GD'
+	, 'WITH_LIBPNG'
+	, 'WITH_FREETYPE'
+	, 'WITH_LIBJPEG'
+	, 'WITH_LIBWEBP'
+	, 'WITH_ICONV'
+	, 'WITH_INTL'
+	, 'WITH_MBSTRING'
+	, 'WITH_ONIGURUMA'
+	, 'WITH_OPENSSL'
+	, 'WITH_SQLITE'
+	, 'WITH_TIDY'
+	, 'WITH_YAML'
+]);
+const runtimeWrapperByKind = {
+	php: version => path.resolve(`/app/packages/php-wasm/php${version}-node.mjs`)
+	, cli: version => path.resolve(`/app/packages/php-cli-wasm/php${version}-cli-node.mjs`)
+	, dbg: version => path.resolve(`/app/packages/php-dbg-wasm/php${version}-dbg-node.mjs`)
+};
 
 const sharedLibraryPackages = [
 	[env => envFlagIsShared(env.WITH_LIBXML), libxml]
@@ -36,6 +63,64 @@ const sharedLibraryPackages = [
 ];
 
 const currentPhpVersion = env => env.PHP_VERSION ?? '8.4';
+const hasExplicitBuildFlags = env => Object.keys(env).some(key => sharedBuildFlags.has(key));
+
+const parseEnvFile = envFile => {
+	if(!fs.existsSync(envFile))
+	{
+		return {};
+	}
+
+	return fs.readFileSync(envFile, 'utf8')
+		.split(/\r?\n/)
+		.reduce((parsed, line) => {
+			const trimmed = line.trim();
+
+			if(!trimmed || trimmed.startsWith('#') || trimmed.startsWith('!') || !trimmed.includes('='))
+			{
+				return parsed;
+			}
+
+			const [key, ...rest] = trimmed.split('=');
+			parsed[key] = rest.join('=');
+			return parsed;
+		}, {});
+};
+
+const runtimeLooksShared = wrapperFile => {
+	if(!wrapperFile || !fs.existsSync(wrapperFile))
+	{
+		return false;
+	}
+
+	const wrapperSource = fs.readFileSync(wrapperFile, 'utf8');
+
+	return sharedWrapperMarkers.every(marker => wrapperSource.includes(marker));
+};
+
+export const resolveNodeTestEnv = (options = {}, env = currentEnv()) => {
+	if(hasExplicitBuildFlags(env))
+	{
+		return env;
+	}
+
+	const phpVersion = options.version ?? currentPhpVersion(env);
+	const runtimeKind = options.runtime;
+	const wrapperFile = runtimeKind && runtimeWrapperByKind[runtimeKind]?.(phpVersion);
+
+	if(!runtimeLooksShared(wrapperFile))
+	{
+		return env;
+	}
+
+	const sharedEnvFile = path.resolve(`/app/.github/.env_${phpVersion}.shared.ci`);
+
+	return {
+		...parseEnvFile(sharedEnvFile)
+		, ...env
+		, PHP_VERSION: phpVersion
+	};
+};
 
 const supportLibsFromPackage = (pkg, phpVersion) => (
 	(pkg.getLibs?.({ phpVersion }) ?? [])
@@ -65,8 +150,9 @@ export const getNodeEnvSharedLibs = (env = currentEnv()) => {
 };
 
 export const nodeRuntimeOptions = (options = {}, env = currentEnv()) => {
+	const resolvedEnv = resolveNodeTestEnv(options, env);
 	const sharedLibs = [
-		...getNodeEnvSharedLibs(env)
+		...getNodeEnvSharedLibs(resolvedEnv)
 		, ...(options.sharedLibs ?? [])
 	];
 

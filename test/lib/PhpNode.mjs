@@ -5,6 +5,6 @@ export class PhpNode extends BasePhpNode
 {
 	constructor(args = {})
 	{
-		super(nodeRuntimeOptions(args));
+		super(nodeRuntimeOptions({ runtime: 'php', ...args }));
 	}
 }

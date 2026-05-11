@@ -101,7 +101,7 @@ const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 };
 
 test(`boots phpdbg in Node for PHP ${version}`, async () => {
-	const php = new PhpDbgNode(nodeRuntimeOptions({files: preloadFiles, version}));
+	const php = new PhpDbgNode(nodeRuntimeOptions({runtime: 'dbg', files: preloadFiles, version}));
 	const {stdOut, stdErr} = attachOutput(php);
 
 	const process = php.run();
