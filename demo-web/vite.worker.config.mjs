@@ -24,22 +24,24 @@ export default defineConfig({
 	}
 	, publicDir: false
 	, base: '/php-wasm/'
-	, build: {
-		modulePreload: false
-		, copyPublicDir: false
-		, emptyOutDir: false
+		, build: {
+			modulePreload: false
+			, copyPublicDir: false
+			, emptyOutDir: false
 		, outDir: 'public'
 		, target: 'esnext'
 		, sourcemap: true
-		, rollupOptions: {
-			input: path.resolve(__dirname, 'src/workers/cgi-worker.mjs')
-			, output: {
-				format: 'es'
-				, entryFileNames: 'cgi-worker.js'
-				, inlineDynamicImports: true
-				, chunkFileNames: '[name]-[hash].js'
-				, assetFileNames: '[name]-[hash][extname]'
+			, rollupOptions: {
+				input: path.resolve(__dirname, 'src/workers/cgi-worker.mjs')
+				, preserveEntrySignatures: 'strict'
+				, output: {
+					format: 'es'
+					, entryFileNames: 'cgi-worker.js'
+					, preserveModules: true
+					, preserveModulesRoot: __dirname
+					, chunkFileNames: '[name]-[hash].js'
+					, assetFileNames: '[name]-[hash][extname]'
+				}
 			}
-		}
 	}
 });
