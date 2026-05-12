@@ -57,7 +57,7 @@ const parsePhpt = source => {
 
 	for(const line of normalize(source).split('\n'))
 	{
-		const section = line.match(/^--([A-Z_]+)--$/);
+		const section = line.match(/^--([A-Z_]+)(?:--)?$/);
 
 		if(section)
 		{
