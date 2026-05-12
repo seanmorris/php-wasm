@@ -278,6 +278,12 @@ const parseExtensions = extensionSection => [...new Set(
 		.filter(Boolean)
 )];
 
+const inferExtensionsFromSkipif = skipifSection => [...new Set(
+	[...normalize(skipifSection ?? '').matchAll(/extension_loaded\s*\(\s*["']([^"']+)["']\s*\)/g)]
+		.map(([, extensionName]) => extensionName.trim().toLowerCase())
+		.filter(Boolean)
+)];
+
 const inferExtensionSection = phptFile => {
 	const normalized = phptFile.replace(/\\/g, '/');
 	const match = normalized.match(/\/ext\/([^/]+)\/tests\//);
@@ -476,11 +482,17 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 
 	if(!sections.EXTENSIONS)
 	{
+		const inferredExtensions = new Set(inferExtensionsFromSkipif(sections.SKIPIF));
 		const inferredExtension = inferExtensionSection(phptFile);
 
 		if(inferredExtension)
 		{
-			sections.EXTENSIONS = `${inferredExtension}\n`;
+			inferredExtensions.add(inferredExtension);
+		}
+
+		if(inferredExtensions.size)
+		{
+			sections.EXTENSIONS = `${[...inferredExtensions].join('\n')}\n`;
 		}
 	}
 
