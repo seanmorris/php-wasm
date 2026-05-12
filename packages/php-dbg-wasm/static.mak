@@ -127,7 +127,7 @@ dbg-cjs:
 #	$(MAKE) node-dbg-js
 
 ifneq (${PRE_JS_FILES},)
-DBG_DEPENDENCIES+= .cache/pre.js
+DBG_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
 DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured

@@ -127,7 +127,7 @@ cli-cjs:
 #	$(MAKE) node-cli-js
 
 ifneq (${PRE_JS_FILES},)
-CLI_DEPENDENCIES+= .cache/pre.js
+CLI_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
 CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured

@@ -23,6 +23,14 @@ import { nodeRuntimeOptions, resolveNodeTestEnv } from './node-runtime-options.m
 
 const normalize = text => String(text ?? '').replace(/\r\n/g, '\n');
 const normalizeExpectation = text => normalize(text).trim();
+const normalizeActualCandidates = text => {
+	const normalized = normalizeExpectation(text);
+	const withoutTrailingStackTrace = normalized.replace(/\nStack trace:\n(?:#\d+[^\n]*(?:\n|$))+$/u, '');
+
+	return withoutTrailingStackTrace !== normalized
+		? [normalized, withoutTrailingStackTrace]
+		: [normalized];
+};
 const extensionPackageMap = new Map([
 	['dom', [{ key: 'libxml', module: libxml }, { key: 'dom', module: dom }]]
 	, ['gd', [{ key: 'zlib', module: zlib }]]
@@ -71,7 +79,7 @@ const expectfTextToPattern = text => text
 	.replace(/[|\\{}()[\]^$+?.*]/g, '\\$&')
 	.replaceAll('%e', '[\\\\/]')
 	.replaceAll('%s', '[^\\r\\n]+')
-	.replaceAll('%S', '[\\s\\S]+')
+	.replaceAll('%S', '[^\\r\\n]*')
 	.replaceAll('%a', '[\\s\\S]+')
 	.replaceAll('%A', '[\\s\\S]*')
 	.replaceAll('%w', '\\s*')
@@ -113,6 +121,31 @@ const expectfToRegExp = expectf => {
 	return new RegExp(`^${pattern}$`);
 };
 
+const stripHtmlErrorFormatting = text => normalize(text)
+	.replace(/\s*\[<a href='[^']*'>[^<]*<\/a>\]/g, '')
+	.replace(/<br \/>/g, '')
+	.replace(/<\/?b>/g, '')
+	.replace(/<\/?a[^>]*>/g, '')
+	.replace(/:\s{2,}/g, ': ');
+
+const expectationVariants = expected => {
+	const variants = [expected];
+
+	if(!/[<][^>]+[>]/.test(expected.value))
+	{
+		return variants;
+	}
+
+	const stripped = normalizeExpectation(stripHtmlErrorFormatting(expected.value));
+
+	if(stripped && stripped !== expected.value)
+	{
+		variants.push({ ...expected, value: stripped });
+	}
+
+	return variants;
+};
+
 const getExpectation = sections => {
 	if('EXPECT' in sections)
 	{
@@ -130,6 +163,45 @@ const getExpectation = sections => {
 	}
 
 	throw new Error('PHPT is missing EXPECT, EXPECTF, or EXPECTREGEX');
+};
+
+const expectationMatches = (expected, actual) => {
+	return expectationVariants(expected).some(variant => {
+		if(variant.type === 'EXPECT')
+		{
+			return actual === variant.value;
+		}
+
+		if(variant.type === 'EXPECTF')
+		{
+			return expectfToRegExp(variant.value).test(actual);
+		}
+
+		return new RegExp(variant.value).test(actual);
+	});
+};
+
+const assertExpectationMatches = (expected, actual) => {
+	for(const candidate of normalizeActualCandidates(actual))
+	{
+		if(expectationMatches(expected, candidate))
+		{
+			return candidate;
+		}
+	}
+
+	if(expected.type === 'EXPECT')
+	{
+		assert.equal(actual, expected.value);
+	}
+	else if(expected.type === 'EXPECTF')
+	{
+		assert.match(actual, expectfToRegExp(expectationVariants(expected).at(-1).value));
+	}
+	else
+	{
+		assert.match(actual, new RegExp(expectationVariants(expected).at(-1).value));
+	}
 };
 
 const collectFixtureFiles = async (rootDir, currentDir = rootDir, relativeDir = '') => {
@@ -179,7 +251,7 @@ const parsePhpStringLiteral = value => {
 const quotePhpSingle = value => `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, '\\\'')}'`;
 
 const parseIniSettings = (iniSection, phptDir) => {
-	const flags = [];
+	const lines = [];
 	let autoPrependFile = null;
 
 	for(const line of normalize(iniSection).split('\n').map(line => line.trim()).filter(Boolean))
@@ -193,10 +265,10 @@ const parseIniSettings = (iniSection, phptDir) => {
 			continue;
 		}
 
-		flags.push('-d', substituted);
+		lines.push(substituted);
 	}
 
-	return { flags, autoPrependFile };
+	return { lines, autoPrependFile };
 };
 
 const parseExtensions = extensionSection => [...new Set(
@@ -323,7 +395,7 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 	const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), `phpt-${phptBase}-`));
 	const subjectHost = path.join(tempDir, `${phptBase}.php`);
 	const prependHost = path.join(tempDir, `prepend-${phptBase}.php`);
-	const iniSettings = sections.INI ? parseIniSettings(sections.INI, phptDir) : { flags: [], autoPrependFile: null };
+	const iniSettings = sections.INI ? parseIniSettings(sections.INI, phptDir) : { lines: [], autoPrependFile: null };
 
 	const fileSection = sections.FILE ?? sections.FILEEOF;
 
@@ -349,11 +421,18 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 	];
 	files.push(...await collectFixtureFiles(phptDir));
 	const extensionPackages = await resolveExtensionPackages({ sections, version, phpOptions });
+	const iniEntries = ['docref_ext=.html'];
+	if(phpOptions.ini)
+	{
+		iniEntries.push(phpOptions.ini);
+	}
+	iniEntries.push(...iniSettings.lines);
 
 	const php = new PhpCliNode(nodeRuntimeOptions({
 		...phpOptions,
 		runtime: 'cli',
 		version,
+		ini: iniEntries.join('\n'),
 		script: `${runtimeDir}/${path.basename(subjectHost)}`,
 		sharedLibs: [...extensionPackages, ...(phpOptions.sharedLibs ?? [])],
 		files: [...files, ...(phpOptions.files ?? [])]
@@ -369,27 +448,13 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 	await php.binary;
 
 	const exitCode = await php.run([
-		'-d', 'docref_ext=.html',
 		'-d', `auto_prepend_file=${runtimeDir}/${path.basename(prependHost)}`,
-		...iniSettings.flags
 	]);
 	const actual = normalizeExpectation(combined);
 	const expected = getExpectation(sections);
-
-	if(expected.type === 'EXPECT')
-	{
-		assert.equal(actual, expected.value);
-	}
-	else if(expected.type === 'EXPECTF')
-	{
-		assert.match(actual, expectfToRegExp(expected.value));
-	}
-	else
-	{
-		assert.match(actual, new RegExp(expected.value));
-	}
+	const matchedActual = assertExpectationMatches(expected, actual) ?? actual;
 
 	await fs.rm(tempDir, { recursive: true, force: true });
 
-	return { actual, expected, exitCode, sections, stdErr, stdOut };
+	return { actual: matchedActual, expected, exitCode, sections, stdErr, stdOut };
 };

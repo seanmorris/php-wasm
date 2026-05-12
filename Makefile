@@ -155,6 +155,7 @@ ARCHIVES=
 SHARED_LIBS=
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
+PRE_JS_CACHE?=
 PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
@@ -363,12 +364,13 @@ EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
 ifneq (${PRE_JS_FILES},)
-EXTRA_FLAGS+= --pre-js /src/.cache/pre.js
+PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
+EXTRA_FLAGS+= --pre-js /src/${PRE_JS_CACHE}
 endif
 
-.cache/pre.js: ${PRE_JS_FILES}
+${PRE_JS_CACHE}: ${PRE_JS_FILES}
 ifneq (${PRE_JS_FILES},)
-	${DOCKER_RUN} cat $(addprefix /src/,${PRE_JS_FILES}) > .cache/pre.js
+	${DOCKER_RUN} cat $(addprefix /src/,${PRE_JS_FILES}) > ${PRE_JS_CACHE}
 endif
 
 WEB_FS_TYPE?=-lidbfs.js
@@ -435,7 +437,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 BUILD_TYPE ?=js
 
 ifneq (${PRE_JS_FILES},)
-DEPENDENCIES+= .cache/pre.js
+DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
 HELPER_MJS=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
@@ -909,6 +911,7 @@ php-clean:
 		packages/php-cgi-wasm/php-*.wasm \
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
+	${DOCKER_RUN} rm -rf lib/include/lexbor
 	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
 		cd "third_party/$${DIR}"; \
 		make clean; \
@@ -951,7 +954,7 @@ clean:
 		packages/php-cli-wasm/*.mjs* \
 		third_party/php${PHP_VERSION}-src/configured \
 		third_party/preload \
-		.cache/pre.js \
+		.cache/pre*.js \
 		.cache/preload-collected
 	${MAKE} php-clean
 
