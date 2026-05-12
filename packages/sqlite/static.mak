@@ -47,7 +47,7 @@ libsqlite-libs: packages/sqlite/libsqlite3.so
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
-	wget -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	wget --tries=5 --waitretry=2 --timeout=20 -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}

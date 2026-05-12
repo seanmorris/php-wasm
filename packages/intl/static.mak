@@ -2,8 +2,8 @@
 
 third_party/icu-${LIBICU_VERSION}/icu/readme.html:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
-	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
-	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
 	${DOCKER_RUN} mkdir -p third_party/icu-${LIBICU_VERSION}
 	${DOCKER_RUN} tar -xvzf icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz -C third_party/icu-${LIBICU_VERSION}/
 	${DOCKER_RUN} rm -rf /src/third_party/icu-72-1/icu/source/data/

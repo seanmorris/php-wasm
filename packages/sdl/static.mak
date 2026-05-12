@@ -4,7 +4,7 @@ DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 
 third_party/php${PHP_VERSION}-sdl/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-sdl\e[0m"
-	${DOCKER_RUN} wget -q https://pecl.php.net/get/sdl-2.7.0.tgz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://pecl.php.net/get/sdl-2.7.0.tgz
 	${DOCKER_RUN} tar -C third_party -xvzf sdl-2.7.0.tgz sdl-2.7.0
 	${DOCKER_RUN} mv third_party/sdl-2.7.0 third_party/php${PHP_VERSION}-sdl
 	${DOCKER_RUN} rm sdl-2.7.0.tgz

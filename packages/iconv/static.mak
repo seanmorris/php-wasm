@@ -49,7 +49,7 @@ ICONV_URL?=https://mirrors.ocf.berkeley.edu/gnu/libiconv/libiconv-${ICONV_VERSIO
 
 third_party/libiconv-1.17/README:
 	@ echo -e "\e[33;4mDownloading Iconv\e[0m"
-	${DOCKER_RUN} wget -q ${ICONV_URL}
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q ${ICONV_URL}
 	${DOCKER_RUN} tar -xvzf libiconv-1.17.tar.gz -C third_party
 	${DOCKER_RUN} rm libiconv-1.17.tar.gz
 

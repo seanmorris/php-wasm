@@ -191,7 +191,7 @@ packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/
 
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
-	${DOCKER_RUN} wget -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 
@@ -217,7 +217,7 @@ packages/gd/libfreetype.so: lib/lib/libfreetype.so
 
 third_party/jpeg-9f/README:
 	@ echo -e "\e[33;4mDownloading LIBJPEG\e[0m"
-	${DOCKER_RUN} wget -q https://ijg.org/files/jpegsrc.${JPEG_VERSION}.tar.gz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://ijg.org/files/jpegsrc.${JPEG_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf jpegsrc.${JPEG_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm jpegsrc.${JPEG_VERSION}.tar.gz
 
@@ -273,7 +273,7 @@ packages/gd/libpng.so: lib/lib/libpng.so
 
 third_party/libwebp-${LIBWEBP_TAG}/README.md:
 	@ echo -e "\e[33;4mDownloading LIBWEBP\e[0m"
-	${DOCKER_RUN} wget -q https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_TAG}.tar.gz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-${LIBWEBP_TAG}.tar.gz
 	${DOCKER_RUN} tar -xvzf libwebp-${LIBWEBP_TAG}.tar.gz -C third_party
 	${DOCKER_RUN} rm libwebp-${LIBWEBP_TAG}.tar.gz
 
