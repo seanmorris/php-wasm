@@ -15,20 +15,32 @@ index 0c252e5..0163b8d 100644
 +__attribute__((weak)) void *(*xmlRealloc)(void *, size_t);
 +__attribute__((weak)) void (*xmlGenericError)(void *, const char *, ...);
 +__attribute__((weak)) void (*xmlStructuredError)(void *, xmlErrorPtr);
++#define PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, symbol) do { \
++	__typeof__(symbol) *symbol##_ptr = (__typeof__(symbol) *) dlsym((handle), #symbol); \
++	if (symbol##_ptr) { \
++		symbol = *symbol##_ptr; \
++	} \
++} while (0)
 +#endif
 +
  /* a true global for initialization */
  static int _php_libxml_initialized = 0;
  static int _php_libxml_per_request_initialization = 1;
-@@ -937,6 +948,29 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
+@@ -937,6 +954,35 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
  
  static PHP_MINIT_FUNCTION(libxml)
  {
 +	if (xmlParserVersion == NULL) {
 +		void *handle = DL_LOAD("libxml2.so");
-+		const char** xmlParserVersionPtr = (const char**)dlsym(handle, "xmlParserVersion");
-+		if (xmlParserVersionPtr) {
-+			xmlParserVersion = *xmlParserVersionPtr;
++		if (handle) {
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlParserVersion);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlFree);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMalloc);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMallocAtomic);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMemStrdup);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlRealloc);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlGenericError);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlStructuredError);
 +		}
 +	}
 +

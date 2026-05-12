@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
 import { test } from 'node:test';
 import path from 'node:path';
 import url from 'node:url';
@@ -1449,9 +1450,12 @@ test(`loads the requested CLI runtime version (${version})`, async () => {
 
 for(const phptName of directCliPhpts)
 {
-	test(`runs core PHPT ${phptName} directly in CLI Node (${version})`, async () => {
+	const phptFile = phpt(phptName);
+	const runner = fs.existsSync(phptFile) ? test : test.skip;
+
+	runner(`runs core PHPT ${phptName} directly in CLI Node (${version})`, async () => {
 		await runCliPhpt({
-			phptFile: phpt(phptName),
+			phptFile,
 			version
 		});
 	});
@@ -1459,9 +1463,12 @@ for(const phptName of directCliPhpts)
 
 for(const [extensionName, phptName] of directCliExtensionPhpts)
 {
-	test(`runs ${extensionName} PHPT ${phptName} directly in CLI Node (${version})`, async () => {
+	const phptFile = extPhpt(extensionName, phptName);
+	const runner = fs.existsSync(phptFile) ? test : test.skip;
+
+	runner(`runs ${extensionName} PHPT ${phptName} directly in CLI Node (${version})`, async () => {
 		await runCliPhpt({
-			phptFile: extPhpt(extensionName, phptName),
+			phptFile,
 			version
 		});
 	});

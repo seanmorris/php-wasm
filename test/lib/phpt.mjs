@@ -278,6 +278,76 @@ const parseExtensions = extensionSection => [...new Set(
 		.filter(Boolean)
 )];
 
+const inferExtensionSection = phptFile => {
+	const normalized = phptFile.replace(/\\/g, '/');
+	const match = normalized.match(/\/ext\/([^/]+)\/tests\//);
+
+	if(!match)
+	{
+		return null;
+	}
+
+	return match[1].toLowerCase();
+};
+
+const collectReferencedRelativeFiles = async ({ fileBody, phptDir, runtimeDir }) => {
+	const files = [];
+	const seen = new Set();
+	const stringLiteralPattern = /(['"])([^'"\\]*(?:\\.[^'"\\]*)*)\1/g;
+
+	for(const match of normalize(fileBody).matchAll(stringLiteralPattern))
+	{
+		const literal = match[2];
+		const relativeLiteral = literal.startsWith('/../') || literal.startsWith('/./')
+			? `.${literal}`
+			: literal;
+
+		if(!relativeLiteral || relativeLiteral.startsWith('php://') || relativeLiteral.startsWith('http://') || relativeLiteral.startsWith('https://'))
+		{
+			continue;
+		}
+
+		if(!relativeLiteral.startsWith('./') && !relativeLiteral.startsWith('../'))
+		{
+			continue;
+		}
+
+		const hostPath = path.resolve(phptDir, relativeLiteral);
+		let stat;
+
+		try
+		{
+			stat = await fs.stat(hostPath);
+		}
+		catch
+		{
+			continue;
+		}
+
+		if(!stat.isFile())
+		{
+			continue;
+		}
+
+		const virtualPath = path.posix.normalize(path.posix.join(runtimeDir, relativeLiteral));
+
+		if(seen.has(virtualPath))
+		{
+			continue;
+		}
+
+		seen.add(virtualPath);
+
+		files.push({
+			parent: path.posix.dirname(virtualPath)
+			, name: path.posix.basename(virtualPath)
+			, url: `file://${hostPath}`
+		});
+	}
+
+	return files;
+};
+
 const attachOutput = php => {
 	let stdOut = '';
 	let stdErr = '';
@@ -404,6 +474,16 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 		throw new Error(`PHPT is missing FILE/FILEEOF section: ${phptFile}`);
 	}
 
+	if(!sections.EXTENSIONS)
+	{
+		const inferredExtension = inferExtensionSection(phptFile);
+
+		if(inferredExtension)
+		{
+			sections.EXTENSIONS = `${inferredExtension}\n`;
+		}
+	}
+
 	await fs.writeFile(subjectHost, normalize(fileSection));
 
 	let prependBody = `<?php chdir('${runtimeDir}');`;
@@ -420,6 +500,7 @@ export const runCliPhpt = async ({ phptFile, version, phpOptions = {} }) => {
 		{ parent: runtimeDir, name: path.basename(prependHost), url: `file://${prependHost}` }
 	];
 	files.push(...await collectFixtureFiles(phptDir));
+	files.push(...await collectReferencedRelativeFiles({ fileBody: fileSection, phptDir, runtimeDir }));
 	const extensionPackages = await resolveExtensionPackages({ sections, version, phpOptions });
 	const iniEntries = ['docref_ext=.html'];
 	if(phpOptions.ini)
