@@ -15,7 +15,12 @@ const sharedSupportLibsPath = path.resolve(
 );
 
 export default defineConfig({
-	assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
+	define: {
+		__DEMO_BUILD_TYPE__: JSON.stringify(
+			process.env.BUILD_TYPE ?? process.env.VITE_BUILD_TYPE ?? 'dynamic'
+		)
+	}
+	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, resolve: {
 		alias: {
 			'demo-web-shared-support-libs': sharedSupportLibsPath

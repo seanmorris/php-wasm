@@ -21,12 +21,11 @@ third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSIO
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl -maxdepth 1 -type f \( -name 'Makefile*' -o -name 'config.h' -o -name 'config.log' -o -name 'config.nice' -o -name 'config.status' -o -name 'configure' -o -name 'configure~' -o -name 'libtool' -o -name 'sdl.la' -o -name 'a.wasm' \) -delete
 	${DOCKER_RUN} cp -fv third_party/php${PHP_VERSION}-src/ext/sdl/src/php_sdl.h third_party/php${PHP_VERSION}-src/ext/sdl/php_sdl.h
 
+lib/bin/sdl2-config: lib/lib/libSDL2.a
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
 	${DOCKER_RUN} embuilder.py build sdl2
-#	${DOCKER_RUN} embuilder --pic --lto build sdl2
-#	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libSDL2.a lib/lib/libSDL2.a
 	${DOCKER_RUN_IN_LIB_SDL} ls -al
 	${DOCKER_RUN_IN_LIB_SDL} chmod +x configure
 	${DOCKER_RUN_IN_LIB_SDL} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache

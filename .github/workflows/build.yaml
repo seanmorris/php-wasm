@@ -595,6 +595,23 @@ jobs:
       phpVersion: ${{ matrix.phpVersion }}
       libType: ${{ matrix.libType }}
 
+  test-browser-sdl-compressed:
+    name: Test Browser 8.4 _sdl w/${{ matrix.libType }} libs (compressed)
+    needs:
+      - compress-dynamic-packages
+      - compress-shared-packages
+      - compress-static-packages
+    strategy:
+      fail-fast: false
+      matrix:
+        libType: ['dynamic', 'shared', 'static']
+    uses: ./.github/workflows/test-browser-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: '8.4'
+      phpVariant: '_sdl'
+      libType: ${{ matrix.libType }}
+
 
 
   test-cgi-node-dynamic-compressed:

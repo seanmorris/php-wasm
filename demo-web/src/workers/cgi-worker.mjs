@@ -1,12 +1,43 @@
 /**
  * Service worker entrypoint that boots php-cgi-wasm and handles demo requests.
  */
-import { PhpCgiWorker } from "php-cgi-wasm/PhpCgiWorker.mjs";
+import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
-import { basePath, buildType } from '../lib/runtimePaths.worker.js';
+import phpWasmDom from 'php-wasm-dom';
+import phpWasmGd from 'php-wasm-gd';
+import phpWasmIconv from 'php-wasm-iconv';
+import phpWasmIntl from 'php-wasm-intl';
+import phpWasmLibxml from 'php-wasm-libxml';
+import phpWasmLibzip from 'php-wasm-libzip';
+import phpWasmMbstring from 'php-wasm-mbstring';
+import phpWasmOpenssl from 'php-wasm-openssl';
+import phpWasmSimplexml from 'php-wasm-simplexml';
+import phpWasmSqlite from 'php-wasm-sqlite';
+import phpWasmTidy from 'php-wasm-tidy';
+import phpWasmXml from 'php-wasm-xml';
+import phpWasmYaml from 'php-wasm-yaml';
+import phpWasmZlib from 'php-wasm-zlib';
+import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const sharedLibs = [];
+const workerBuildType = __DEMO_BUILD_TYPE__;
+const dynamicSupportLibs = [
+	phpWasmLibxml
+	, phpWasmDom
+	, phpWasmZlib
+	, phpWasmLibzip
+	, phpWasmGd
+	, phpWasmIconv
+	, phpWasmIntl
+	, phpWasmOpenssl
+	, phpWasmMbstring
+	, phpWasmSqlite
+	, phpWasmXml
+	, phpWasmSimplexml
+	, phpWasmTidy
+	, phpWasmYaml
+];
 
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
@@ -57,26 +88,11 @@ let phpLoader = null;
 const init = async () => {
 	if(phpLoader) return phpLoader;
 
-	if(buildType === 'dynamic')
+	if(workerBuildType === 'dynamic')
 	{
-		sharedLibs.push(...(await Promise.all([
-			import('php-wasm-libxml')
-			, import('php-wasm-dom')
-			, import('php-wasm-zlib')
-			, import('php-wasm-libzip')
-			, import('php-wasm-gd')
-			, import('php-wasm-iconv')
-			, import('php-wasm-intl')
-			, import('php-wasm-openssl')
-			, import('php-wasm-mbstring')
-			, import('php-wasm-sqlite')
-			, import('php-wasm-xml')
-			, import('php-wasm-simplexml')
-			, import('php-wasm-tidy')
-			, import('php-wasm-yaml')
-		])).map(m => m.default));
+		sharedLibs.push(...dynamicSupportLibs);
 	}
-	else if(buildType === 'shared')
+	else if(workerBuildType === 'shared')
 	{
 		sharedLibs.push(...sharedSupportLibs);
 	}
