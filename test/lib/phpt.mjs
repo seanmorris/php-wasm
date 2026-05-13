@@ -16,6 +16,7 @@ import simplexml from '../../packages/simplexml/index.mjs';
 import sqlite from '../../packages/sqlite/index.mjs';
 import tidy from '../../packages/tidy/index.mjs';
 import xml from '../../packages/xml/index.mjs';
+import xmlreader from '../../packages/xmlreader/index.mjs';
 import xmlwriter from '../../packages/xmlwriter/index.mjs';
 import yaml from '../../packages/libyaml/index.mjs';
 import zlib from '../../packages/zlib/index.mjs';
@@ -44,6 +45,7 @@ const extensionPackageMap = new Map([
 	, ['sqlite3', [{ key: 'sqlite', module: sqlite }]]
 	, ['tidy', [{ key: 'tidy', module: tidy }]]
 	, ['xml', [{ key: 'libxml', module: libxml }, { key: 'xml', module: xml }]]
+	, ['xmlreader', [{ key: 'libxml', module: libxml }, { key: 'dom', module: dom }, { key: 'xmlreader', module: xmlreader }]]
 	, ['xmlwriter', [{ key: 'libxml', module: libxml }, { key: 'xmlwriter', module: xmlwriter }]]
 	, ['yaml', [{ key: 'yaml', module: yaml }]]
 	, ['zip', [{ key: 'zlib', module: zlib }, { key: 'libzip', module: libzip }]]
@@ -431,6 +433,7 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 			, sqlite3: 'WITH_SQLITE'
 			, tidy: 'WITH_TIDY'
 			, xml: 'WITH_XML'
+			, xmlreader: 'WITH_XMLREADER'
 			, xmlwriter: 'WITH_XMLWRITER'
 			, yaml: 'WITH_YAML'
 			, zip: 'WITH_LIBZIP'

@@ -47,6 +47,7 @@
     "php-wasm-sqlite": "./packages/sqlite",
     "php-wasm-tidy": "./packages/tidy",
     "php-wasm-xml": "./packages/xml",
+    "php-wasm-xmlreader": "./packages/xmlreader",
     "php-wasm-xmlwriter": "./packages/xmlwriter",
     "php-wasm-yaml": "./packages/libyaml",
     "php-wasm-zlib": "./packages/zlib",
@@ -72,6 +73,7 @@
     "packages/vrzno",
     "packages/waitline",
     "packages/xml",
+    "packages/xmlreader",
     "packages/xmlwriter",
     "packages/zlib",
     "packages/sdl"

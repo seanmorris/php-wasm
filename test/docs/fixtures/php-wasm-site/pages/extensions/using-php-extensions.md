@@ -3,8 +3,8 @@ title: Using PHP Extensions
 weight: -1000
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/extensions/using-php-extensions.md
+Vendored from php-wasm-site working tree based on commit 30bc147c87d58caf7c40bdaa36f1288188d56c91
+Source: https://github.com/seanmorris/php-wasm-site/blob/30bc147c87d58caf7c40bdaa36f1288188d56c91/pages/extensions/using-php-extensions.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.js
@@ -42,6 +42,12 @@ const php = new PhpWeb({dynamicLibs: [
 // Load the extension at runtime
 dl('php8.4-dom.so');
 ```
+
+Versioned extension filenames must match the active runtime version. If you switch away from the default `8.4` runtime, update `php8.4-*.so` examples accordingly.
+
+Shared builds work a little differently from dynamic ones. In `shared` builds, many common extensions are already compiled into the base runtime, so only third-party support libraries should be injected at startup. For example, `intl` in shared mode still needs the ICU `libicu*.so` files, but it should not try to load `php8.x-intl.so` a second time.
+
+The same distinction applies to SSL/TLS support. In static and shared runtime variants, OpenSSL support and its backing libraries may already be linked into the base runtime, while dynamic builds still rely on the `php-wasm-openssl` package and explicit support-library loading.
 
 ## Dynamic Imports for Extensions
 
@@ -135,6 +141,10 @@ The following extensions may be loaded at runtime. This allows the shared extens
 ### simplexml
 
 [https://www.npmjs.com/package/php-wasm-simplexml](https://www.npmjs.com/package/php-wasm-simplexml)
+
+### xmlwriter
+
+[https://www.npmjs.com/package/php-wasm-xmlwriter](https://www.npmjs.com/package/php-wasm-xmlwriter)
 
 ### yaml
 

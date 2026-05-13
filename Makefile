@@ -988,10 +988,11 @@ save-image:
 	mkdir -p ./image
 	docker image save seanmorris/php-emscripten-builder -o ./image/builder.tar
 
+NPM_PUBLISH_TAG?=latest
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
-	npm publish ${NPM_PUBLISH_DRY}
+	./publish-packages.sh ${NPM_PUBLISH_TAG} ${NPM_PUBLISH_DRY}
 
 test:
 	${MAKE} test-node
@@ -1023,6 +1024,7 @@ test-node: node-mjs node-cgi-mjs
 	WITH_DOM=${WITH_DOM} \
 	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
 	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
 	WITH_XMLWRITER=${WITH_XMLWRITER} \
 	WITH_YAML=${WITH_YAML} \
 	WITH_TIDY=${WITH_TIDY} \
@@ -1048,6 +1050,7 @@ test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	WITH_DOM=${WITH_DOM} \
 	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
 	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
 	WITH_XMLWRITER=${WITH_XMLWRITER} \
 	WITH_YAML=${WITH_YAML} \
 	WITH_TIDY=${WITH_TIDY} \
@@ -1076,6 +1079,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_DOM=${WITH_DOM} \
 	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
 	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
 	WITH_XMLWRITER=${WITH_XMLWRITER} \
 	WITH_YAML=${WITH_YAML} \
 	WITH_TIDY=${WITH_TIDY} \

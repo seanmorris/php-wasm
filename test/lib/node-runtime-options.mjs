@@ -33,6 +33,7 @@ const sharedBuildFlags = new Set([
 	, 'WITH_ONIGURUMA'
 	, 'WITH_OPENSSL'
 	, 'WITH_SQLITE'
+	, 'WITH_XMLREADER'
 	, 'WITH_TIDY'
 	, 'WITH_YAML'
 ]);
