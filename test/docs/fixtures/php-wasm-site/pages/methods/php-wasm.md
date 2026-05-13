@@ -79,6 +79,8 @@ Resolved the same way as `sharedLibs`, but never written into `php.ini`.
 
 Preloads arbitrary files into the runtime before startup.
 
+Dynamic and shared `intl` builds use this mechanism to provide `icudt72l.dat` under `/preload`. Static `intl` builds can bundle the same file into the runtime `.data` package instead.
+
 ```javascript
 const php = new PhpWeb({
   files: [

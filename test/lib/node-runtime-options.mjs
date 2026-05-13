@@ -130,9 +130,24 @@ const supportLibsFromPackage = (pkg, phpVersion) => (
 		.map(lib => ({ ...lib }))
 );
 
+const supportPackageFromPackage = (pkg, phpVersion) => {
+	const libs = supportLibsFromPackage(pkg, phpVersion);
+	const files = (pkg.getFiles?.({ phpVersion }) ?? []).map(file => ({ ...file }));
+
+	if(!libs.length && !files.length)
+	{
+		return null;
+	}
+
+	return {
+		getLibs: () => libs.map(lib => ({ ...lib }))
+		, getFiles: () => files.map(file => ({ ...file }))
+	};
+};
+
 export const getNodeEnvSharedLibs = (env = currentEnv()) => {
 	const phpVersion = currentPhpVersion(env);
-	const libsByName = new Map();
+	const supportPackages = [];
 
 	for(const [shouldInclude, pkg] of sharedLibraryPackages)
 	{
@@ -141,13 +156,15 @@ export const getNodeEnvSharedLibs = (env = currentEnv()) => {
 			continue;
 		}
 
-		for(const lib of supportLibsFromPackage(pkg, phpVersion))
+		const supportPackage = supportPackageFromPackage(pkg, phpVersion);
+
+		if(supportPackage)
 		{
-			libsByName.has(lib.name) || libsByName.set(lib.name, lib);
+			supportPackages.push(supportPackage);
 		}
 	}
 
-	return [...libsByName.values()];
+	return supportPackages;
 };
 
 export const nodeRuntimeOptions = (options = {}, env = currentEnv()) => {

@@ -45,9 +45,11 @@ dl('php8.4-dom.so');
 
 Versioned extension filenames must match the active runtime version. If you switch away from the default `8.4` runtime, update `php8.4-*.so` examples accordingly.
 
-Shared builds work a little differently from dynamic ones. In `shared` builds, many common extensions are already compiled into the base runtime, so only third-party support libraries should be injected at startup. For example, `intl` in shared mode still needs the ICU `libicu*.so` files, but it should not try to load `php8.x-intl.so` a second time.
+Shared builds work a little differently from dynamic ones. In `shared` builds, many common extensions are already compiled into the base runtime, so only third-party support libraries should be injected at startup. For example, `intl` in shared mode still needs the ICU `libicu*.so` files and `icudt72l.dat`, but it should not try to load `php8.x-intl.so` a second time. Shared `intl` should get the data file the same way dynamic builds do: preload `icudt72l.dat` into `/preload` at startup.
 
 The same distinction applies to SSL/TLS support. In static and shared runtime variants, OpenSSL support and its backing libraries may already be linked into the base runtime, while dynamic builds still rely on the `php-wasm-openssl` package and explicit support-library loading.
+
+Static builds are the exception for `intl`: they can bundle `icudt72l.dat` directly into the runtime `.data` payload instead of fetching it separately.
 
 ## Dynamic Imports for Extensions
 

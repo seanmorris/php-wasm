@@ -70,6 +70,8 @@ third_party/php${PHP_VERSION}-yaml/config.m4:
 
 third_party/php${PHP_VERSION}-src/ext/yaml/config.m4: third_party/php${PHP_VERSION}-yaml/config.m4 | third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mImporting ext-yaml\e[0m"
+	${DOCKER_RUN} bash -lc 'if [ -f third_party/php${PHP_VERSION}-yaml/Makefile ]; then make -C third_party/php${PHP_VERSION}-yaml distclean; fi'
+	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/yaml
 	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-yaml third_party/php${PHP_VERSION}-src/ext/yaml
 
 packages/libyaml/libyaml.so: lib/lib/libyaml.so

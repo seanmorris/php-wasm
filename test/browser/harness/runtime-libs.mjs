@@ -16,6 +16,23 @@ import zlib from '/packages/zlib/index.mjs';
 const assetUrl = path => new URL(`../../packages/${path}`, import.meta.url);
 
 const sharedLib = (name, path) => ({name, url: assetUrl(path)});
+const intlSharedSupport = {
+	getLibs: () => [
+		sharedLib('libicuuc.so', 'intl/libicuuc.so')
+		, sharedLib('libicutu.so', 'intl/libicutu.so')
+		, sharedLib('libicutest.so', 'intl/libicutest.so')
+		, sharedLib('libicuio.so', 'intl/libicuio.so')
+		, sharedLib('libicui18n.so', 'intl/libicui18n.so')
+		, sharedLib('libicudata.so', 'intl/libicudata.so')
+	]
+	, getFiles: () => [
+		{
+			name: 'icudt72l.dat'
+			, path: '/preload/icudt72l.dat'
+			, url: assetUrl('intl/icudt72l.dat')
+		}
+	]
+};
 
 const toggleableModules = [
 	['php-wasm-dom', 1, dom]
@@ -92,12 +109,7 @@ const sharedEmbeddedLibs = [
 	, sharedLib('libwebp.so', 'gd/libwebp.so')
 	, sharedLib('libpng.so', 'gd/libpng.so')
 	, sharedLib('libiconv.so', 'iconv/libiconv.so')
-	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
-	, sharedLib('libicutu.so', 'intl/libicutu.so')
-	, sharedLib('libicutest.so', 'intl/libicutest.so')
-	, sharedLib('libicuio.so', 'intl/libicuio.so')
-	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
-	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, intlSharedSupport
 	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
 	, sharedLib('libssl.so', 'openssl/libssl.so')
 	, sharedLib('libonig.so', 'mbstring/libonig.so')
@@ -115,12 +127,7 @@ const sharedCliLibs = [
 	, sharedLib('libwebp.so', 'gd/libwebp.so')
 	, sharedLib('libpng.so', 'gd/libpng.so')
 	, sharedLib('libiconv.so', 'iconv/libiconv.so')
-	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
-	, sharedLib('libicutu.so', 'intl/libicutu.so')
-	, sharedLib('libicutest.so', 'intl/libicutest.so')
-	, sharedLib('libicuio.so', 'intl/libicuio.so')
-	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
-	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, intlSharedSupport
 	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
 	, sharedLib('libssl.so', 'openssl/libssl.so')
 	, sharedLib('libonig.so', 'mbstring/libonig.so')
@@ -138,12 +145,7 @@ const sharedDbgLibs = [
 	, sharedLib('libwebp.so', 'gd/libwebp.so')
 	, sharedLib('libpng.so', 'gd/libpng.so')
 	, sharedLib('libiconv.so', 'iconv/libiconv.so')
-	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
-	, sharedLib('libicutu.so', 'intl/libicutu.so')
-	, sharedLib('libicutest.so', 'intl/libicutest.so')
-	, sharedLib('libicuio.so', 'intl/libicuio.so')
-	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
-	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, intlSharedSupport
 	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
 	, sharedLib('libssl.so', 'openssl/libssl.so')
 	, sharedLib('libonig.so', 'mbstring/libonig.so')
@@ -161,12 +163,7 @@ const sharedCgiLibs = [
 	, sharedLib('libwebp.so', 'gd/libwebp.so')
 	, sharedLib('libpng.so', 'gd/libpng.so')
 	, sharedLib('libiconv.so', 'iconv/libiconv.so')
-	, sharedLib('libicuuc.so', 'intl/libicuuc.so')
-	, sharedLib('libicutu.so', 'intl/libicutu.so')
-	, sharedLib('libicutest.so', 'intl/libicutest.so')
-	, sharedLib('libicuio.so', 'intl/libicuio.so')
-	, sharedLib('libicui18n.so', 'intl/libicui18n.so')
-	, sharedLib('libicudata.so', 'intl/libicudata.so')
+	, intlSharedSupport
 	, sharedLib('libcrypto.so', 'openssl/libcrypto.so')
 	, sharedLib('libssl.so', 'openssl/libssl.so')
 	, sharedLib('libonig.so', 'mbstring/libonig.so')
@@ -206,7 +203,7 @@ export const loadEmbeddedSharedLibs = buildType => {
 };
 
 export const loadEmbeddedExtensionLibs = (buildType, flags) => {
-	if(!flags)
+	if(buildType !== 'dynamic' || !flags)
 	{
 		return [];
 	}

@@ -310,7 +310,7 @@ When compiled as a `dynamic` or `shared` extension, it will produce the librarie
 
 static|shared|**dynamic**
 
-When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php8.x-intl.so` & the following libraries:
+When compiled as a `dynamic` extension, this will produce the extension `php8.x-intl.so`, the following libraries, and the preload file `icudt72l.dat`:
 
 * libicuuc.so
 * libicutu.so
@@ -319,3 +319,7 @@ When compiled as a `dynamic`, or `shared` extension, this will produce the exten
 * libicui18n.so
 * libicudata.so
 * icudt72l.dat
+
+When compiled as a `shared` extension, the `intl` extension itself is built into the base runtime. Shared builds still emit the ICU support libraries above and the preload file `icudt72l.dat`, but they should not reload `php8.x-intl.so`.
+
+When compiled as a `static` extension, `icudt72l.dat` is bundled into the runtime `.data` payload instead of being loaded separately.

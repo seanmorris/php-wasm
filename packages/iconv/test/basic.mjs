@@ -6,7 +6,7 @@ import { env } from 'node:process';
 import iconv from 'php-wasm-iconv';
 
 test('Iconv Extension is enabled. (loaded via strings)', async () => {
-	const php = env.WITH_INTL === 'dynamic'
+	const php = env.WITH_ICONV === 'dynamic'
 		? new PhpNode({sharedLibs:[
 			{ url: `./packages/iconv/libiconv.so` },
 			`./packages/iconv/php${process.env.PHP_VERSION ?? '8.4'}-iconv.so`,
@@ -28,7 +28,7 @@ test('Iconv Extension is enabled. (loaded via strings)', async () => {
 });
 
 test('Iconv Extension is enabled. (loaded via URL objects)', async () => {
-	const php = env.WITH_INTL === 'dynamic'
+	const php = env.WITH_ICONV === 'dynamic'
 		? new PhpNode({sharedLibs:[
 			{ url: new URL(`../../iconv/libiconv.so`, import.meta.url) },
 			new URL(`../../iconv/php${process.env.PHP_VERSION ?? '8.4'}-iconv.so`, import.meta.url),
@@ -50,7 +50,7 @@ test('Iconv Extension is enabled. (loaded via URL objects)', async () => {
 });
 
 test('Iconv Extension is enabled (loaded via module).', async () => {
-	const php = env.WITH_INTL === 'dynamic'
+	const php = env.WITH_ICONV === 'dynamic'
 		? new PhpNode({sharedLibs:[iconv]})
 		: new PhpNode;
 
@@ -69,7 +69,7 @@ test('Iconv Extension is enabled (loaded via module).', async () => {
 });
 
 test('Iconv Extension is enabled (loaded via async module).', async () => {
-	const php = env.WITH_INTL === 'dynamic'
+	const php = env.WITH_ICONV === 'dynamic'
 		? new PhpNode({sharedLibs:[await import('php-wasm-iconv')]})
 		: new PhpNode;
 

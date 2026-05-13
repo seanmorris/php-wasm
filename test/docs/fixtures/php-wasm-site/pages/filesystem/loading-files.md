@@ -13,10 +13,17 @@ Validation refs:
 
 ### Loading Single Files
 
-The constructor method of the php-wasm objects accepts a `files` parameter to load files into the filesystem by URL. For example, the `php-intl` extension requires us to load `icudt72l.dat` into the  `/preload` directory.
+The constructor method of the php-wasm objects accepts a `files` parameter to load files into the filesystem by URL. For example, dynamic and shared `php-intl` builds require `icudt72l.dat` to be loaded into the `/preload` directory. Static `intl` builds can bundle that file into the runtime `.data` payload instead.
 
 ```javascript
-const sharedLibs = [`https://unpkg.com/php-wasm-intl/php\${PHP_VERSION}-intl.so`];
+const sharedLibs = [
+  { name: 'libicuuc.so',   url: 'https://unpkg.com/php-wasm-intl/libicuuc.so' },
+  { name: 'libicutu.so',   url: 'https://unpkg.com/php-wasm-intl/libicutu.so' },
+  { name: 'libicutest.so', url: 'https://unpkg.com/php-wasm-intl/libicutest.so' },
+  { name: 'libicuio.so',   url: 'https://unpkg.com/php-wasm-intl/libicuio.so' },
+  { name: 'libicui18n.so', url: 'https://unpkg.com/php-wasm-intl/libicui18n.so' },
+  { name: 'libicudata.so', url: 'https://unpkg.com/php-wasm-intl/libicudata.so' },
+];
 
 const files = [
 	{
@@ -28,6 +35,8 @@ const files = [
 
 const php = new PhpWeb({sharedLibs, files});
 ```
+
+If you use the `php-wasm-intl` module directly, it will provide both the ICU support libraries and the `icudt72l.dat` preload file for dynamic builds. Shared runtimes should use the same preload file, but only inject the `libicu*.so` support libraries, not `php8.x-intl.so`.
 
 ### Preloaded FS
 

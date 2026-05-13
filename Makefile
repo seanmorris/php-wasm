@@ -912,6 +912,7 @@ php-clean:
 		packages/php-wasm/Php*.mjs \
 		packages/php-cgi-wasm/Php*.mjs'
 	${DOCKER_RUN} rm -rf lib/include/lexbor
+	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/yaml
 	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
 		cd "third_party/$${DIR}"; \
 		make clean; \

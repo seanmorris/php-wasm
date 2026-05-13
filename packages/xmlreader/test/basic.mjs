@@ -7,14 +7,25 @@ import libxml from 'php-wasm-libxml';
 import dom from 'php-wasm-dom';
 import xmlreader from 'php-wasm-xmlreader';
 
+const phpVersion = process.env.PHP_VERSION ?? '8.4';
+const isDynamic = flag => env[flag] === 'dynamic';
+
+const stringSharedLibs = [
+	isDynamic('WITH_LIBXML') && { url: './packages/libxml/libxml2.so', ini: false },
+	isDynamic('WITH_DOM') && `./packages/dom/php${phpVersion}-dom.so`,
+	isDynamic('WITH_XMLREADER') && `./packages/xmlreader/php${phpVersion}-xmlreader.so`
+].filter(Boolean);
+
+const moduleSharedLibs = [
+	isDynamic('WITH_LIBXML') && libxml,
+	isDynamic('WITH_DOM') && dom,
+	isDynamic('WITH_XMLREADER') && xmlreader
+].filter(Boolean);
+
 test('XMLReader Extension is enabled. (loaded via strings)', async () => {
-	const php = env.WITH_XMLREADER === 'dynamic'
-		? new PhpNode({sharedLibs:[
-			{ url: './packages/libxml/libxml2.so', ini: false },
-			`./packages/dom/php${process.env.PHP_VERSION ?? '8.4'}-dom.so`,
-			`./packages/xmlreader/php${process.env.PHP_VERSION ?? '8.4'}-xmlreader.so`
-		]})
-		: new PhpNode;
+	const php = stringSharedLibs.length
+		? new PhpNode({ sharedLibs: stringSharedLibs })
+		: new PhpNode();
 
 	let stdOut = '', stdErr = '';
 
@@ -31,9 +42,9 @@ test('XMLReader Extension is enabled. (loaded via strings)', async () => {
 });
 
 test('XMLReader Extension is enabled. (loaded via module)', async () => {
-	const php = env.WITH_XMLREADER === 'dynamic'
-		? new PhpNode({sharedLibs:[libxml, dom, xmlreader]})
-		: new PhpNode;
+	const php = moduleSharedLibs.length
+		? new PhpNode({ sharedLibs: moduleSharedLibs })
+		: new PhpNode();
 
 	let stdOut = '', stdErr = '';
 

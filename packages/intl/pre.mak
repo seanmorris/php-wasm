@@ -46,7 +46,6 @@ EXTRA_MODULES+= packages/intl/libicudata.so \
 endif
 
 ifeq (${WITH_INTL},shared)
-PRELOAD_ASSETS+=${LIBICU_DATFILE}
 CONFIGURE_FLAGS+=--enable-intl
 PHP_CONFIGURE_DEPS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so
 SHARED_LIBS+= packages/intl/libicudata.so packages/intl/libicui18n.so packages/intl/libicuio.so packages/intl/libicutest.so packages/intl/libicutu.so packages/intl/libicuuc.so

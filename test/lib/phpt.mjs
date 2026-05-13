@@ -51,6 +51,25 @@ const extensionPackageMap = new Map([
 	, ['zip', [{ key: 'zlib', module: zlib }, { key: 'libzip', module: libzip }]]
 	, ['zlib', [{ key: 'zlib', module: zlib }]]
 ]);
+const packageBuildFlagMap = {
+	dom: 'WITH_DOM'
+	, gd: 'WITH_GD'
+	, iconv: 'WITH_ICONV'
+	, intl: 'WITH_INTL'
+	, libxml: 'WITH_LIBXML'
+	, libzip: 'WITH_LIBZIP'
+	, mbstring: 'WITH_MBSTRING'
+	, openssl: 'WITH_OPENSSL'
+	, phar: 'WITH_PHAR'
+	, simplexml: 'WITH_SIMPLEXML'
+	, sqlite: 'WITH_SQLITE'
+	, tidy: 'WITH_TIDY'
+	, xml: 'WITH_XML'
+	, xmlreader: 'WITH_XMLREADER'
+	, xmlwriter: 'WITH_XMLWRITER'
+	, yaml: 'WITH_YAML'
+	, zlib: 'WITH_ZLIB'
+};
 const intlLibsOnly = { getLibs: intl.getLibs, getFiles: () => [] };
 
 const parsePhpt = source => {
@@ -452,6 +471,14 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 
 		for(const pkg of packages)
 		{
+			const packageBuildFlag = packageBuildFlagMap[pkg.key];
+			const packageBuildMode = packageBuildFlag ? resolvedEnv[packageBuildFlag] : undefined;
+
+			if(packageBuildMode === 'shared' || packageBuildMode === 'static')
+			{
+				continue;
+			}
+
 			if(seenPackages.has(pkg.key))
 			{
 				continue;

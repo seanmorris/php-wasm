@@ -66,6 +66,8 @@ Resolved like `sharedLibs`, but never written into `php.ini`.
 
 *array of objects*
 
+Dynamic and shared `intl` builds use this mechanism to provide `icudt72l.dat` under `/preload`. Static `intl` builds can bundle the same file into the runtime `.data` package instead.
+
 ```javascript
 const php = new PhpCgiWorker({
     files: [
