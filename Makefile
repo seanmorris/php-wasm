@@ -133,7 +133,7 @@ SHELL=bash -euo pipefail
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
-DOCKER_COMPOSE?=docker-compose
+DOCKER_COMPOSE?=docker compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto

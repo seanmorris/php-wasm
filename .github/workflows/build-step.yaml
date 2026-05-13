@@ -61,8 +61,8 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install deps
-        run: sudo apt update && sudo apt install coreutils docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Cache Docker image
         id: cache-docker-image

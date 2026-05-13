@@ -29,8 +29,8 @@ jobs:
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Install NPM packages
         run: npm ci
@@ -79,8 +79,8 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Import configuration
         run: cp -p .github/.env_8.4.dynamic.ci .env
