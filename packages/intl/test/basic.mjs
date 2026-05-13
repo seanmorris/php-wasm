@@ -5,6 +5,12 @@ import { env } from 'node:process';
 
 import intl from 'php-wasm-intl';
 
+const getIntlExtensionOnly = () => (
+	intl
+		.getLibs({ phpVersion: process.env.PHP_VERSION })
+		.filter(lib => /^php\d+\.\d+-intl\.so$/.test(lib.name ?? ''))
+);
+
 const createIntlPhp = (useUrlObjects = false) => {
 	if(env.WITH_INTL === 'dynamic')
 	{
@@ -24,7 +30,7 @@ const createIntlPhp = (useUrlObjects = false) => {
 
 	if(env.WITH_INTL === 'shared')
 	{
-		return new PhpNode({ sharedLibs: [intl] });
+		return new PhpNode({ sharedLibs: getIntlExtensionOnly() });
 	}
 
 	return new PhpNode;
@@ -84,7 +90,7 @@ test('Intl can format numbers. (loaded via URL objects)', async () => {
 
 test('Intl Extension is enabled. (loaded via module)', async () => {
 	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: [intl]})
+		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [intl]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -102,7 +108,7 @@ test('Intl Extension is enabled. (loaded via module)', async () => {
 
 test('Intl can format numbers. (loaded via module)', async () => {
 	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: [intl]})
+		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [intl]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -123,7 +129,7 @@ test('Intl can format numbers. (loaded via module)', async () => {
 
 test('Intl Extension is enabled. (dynamic module loader)', async () => {
 	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
+		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [ await import('php-wasm-intl') ]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';
@@ -141,7 +147,7 @@ test('Intl Extension is enabled. (dynamic module loader)', async () => {
 
 test('Intl can format numbers. (dynamic module loader)', async () => {
 	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: [ await import('php-wasm-intl') ]})
+		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [ await import('php-wasm-intl') ]})
 		: new PhpNode;
 
 	let stdOut = '', stdErr = '';

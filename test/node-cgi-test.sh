@@ -4,13 +4,16 @@ set -euo pipefail
 PORT=9001
 export CI="${CI:-}"
 STARTUP_TIMEOUT_SECONDS="${CGI_NODE_TEST_STARTUP_TIMEOUT_SECONDS:-45}"
+NODE_IMAGE="${CGI_NODE_TEST_IMAGE:-node:24}"
 
 docker kill php-cgi-wasm-test-node >/dev/null 2>&1 || true
 
 HOST_DIR="${PWD}"
 MOUNTED_DIR="/app"
 
-docker run --rm --name php-cgi-wasm-test-node -e PHP_VERSION=${PHP_VERSION} -e BUILD_TYPE=${BUILD_TYPE} -p ${PORT}:3003 -v ${HOST_DIR}:${MOUNTED_DIR} -w /app node:24 npm start --prefix demo-node/ &
+docker pull "${NODE_IMAGE}" >/dev/null
+
+docker run --rm --name php-cgi-wasm-test-node -e PHP_VERSION=${PHP_VERSION} -e BUILD_TYPE=${BUILD_TYPE} -p ${PORT}:3003 -v ${HOST_DIR}:${MOUNTED_DIR} -w /app "${NODE_IMAGE}" npm start --prefix demo-node/ &
 docker_run_pid=$!
 trap "docker kill php-cgi-wasm-test-node" 0;
 
