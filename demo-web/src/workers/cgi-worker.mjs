@@ -3,40 +3,44 @@
  */
 import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
-import phpWasmDom from 'php-wasm-dom';
-import phpWasmGd from 'php-wasm-gd';
-import phpWasmIconv from 'php-wasm-iconv';
-import phpWasmIntl from 'php-wasm-intl';
-import phpWasmLibxml from 'php-wasm-libxml';
-import phpWasmLibzip from 'php-wasm-libzip';
-import phpWasmMbstring from 'php-wasm-mbstring';
-import phpWasmOpenssl from 'php-wasm-openssl';
-import phpWasmSimplexml from 'php-wasm-simplexml';
-import phpWasmSqlite from 'php-wasm-sqlite';
-import phpWasmTidy from 'php-wasm-tidy';
-import phpWasmXml from 'php-wasm-xml';
-import phpWasmYaml from 'php-wasm-yaml';
-import phpWasmZlib from 'php-wasm-zlib';
+import Dom from 'php-wasm-dom';
+import Gd from 'php-wasm-gd';
+import Iconv from 'php-wasm-iconv';
+import Intl from 'php-wasm-intl';
+import Libxml from 'php-wasm-libxml';
+import Libzip from 'php-wasm-libzip';
+import Mbstring from 'php-wasm-mbstring';
+import Openssl from 'php-wasm-openssl';
+import Simplexml from 'php-wasm-simplexml';
+import Sqlite from 'php-wasm-sqlite';
+import Tidy from 'php-wasm-tidy';
+import Xml from 'php-wasm-xml';
+import XmlReader from 'php-wasm-xmlreader';
+import XmlWriter from 'php-wasm-xmlwriter';
+import Yaml from 'php-wasm-yaml';
+import Zlib from 'php-wasm-zlib';
 import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const sharedLibs = [];
 const workerBuildType = __DEMO_BUILD_TYPE__;
 const dynamicSupportLibs = [
-	phpWasmLibxml
-	, phpWasmDom
-	, phpWasmZlib
-	, phpWasmLibzip
-	, phpWasmGd
-	, phpWasmIconv
-	, phpWasmIntl
-	, phpWasmOpenssl
-	, phpWasmMbstring
-	, phpWasmSqlite
-	, phpWasmXml
-	, phpWasmSimplexml
-	, phpWasmTidy
-	, phpWasmYaml
+	Libxml
+	, Dom
+	, Zlib
+	, Libzip
+	, Gd
+	, Iconv
+	, Intl
+	, Openssl
+	, Mbstring
+	, Sqlite
+	, Xml
+	, Simplexml
+	, XmlReader
+	, XmlWriter
+	, Tidy
+	, Yaml
 ];
 
 const files = [
@@ -135,4 +139,4 @@ self.addEventListener('message',  async event => (await init()).handleMessageEve
 
 // Extras
 self.addEventListener('install',  () => console.log('Install'));
-self.addEventListener('activate', () => console.log('Activate'));
+self.addEventListener('activate', async() => { await init(); console.log('Activate') });

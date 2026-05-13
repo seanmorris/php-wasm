@@ -6,7 +6,7 @@ const webpack = require('webpack');
 
 module.exports = (_, argv = {}) => {
 	const mode = argv.mode || process.env.NODE_ENV || 'development';
-	const buildType = process.env.BUILD_TYPE ?? process.env.VITE_BUILD_TYPE ?? 'dynamic';
+	const buildType = process.env.BUILD_TYPE || process.env.VITE_BUILD_TYPE || 'dynamic';
 
 	return {
 		mode

@@ -17,7 +17,7 @@ const sharedSupportLibsPath = path.resolve(
 export default defineConfig({
 	define: {
 		__DEMO_BUILD_TYPE__: JSON.stringify(
-			process.env.BUILD_TYPE ?? process.env.VITE_BUILD_TYPE ?? 'dynamic'
+			process.env.BUILD_TYPE || process.env.VITE_BUILD_TYPE || 'dynamic'
 		)
 	}
 	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']

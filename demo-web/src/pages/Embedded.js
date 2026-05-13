@@ -19,6 +19,14 @@ import 'ace-builds/src-noconflict/theme-monokai';
 const baseSharedLibs = [];
 const canToggleExtensions = buildType === 'dynamic';
 const toggleableModules = {};
+const dynamicExtensionDependencies = {
+	dom: ['libxml']
+	, simplexml: ['libxml']
+	, xml: ['libxml']
+	, xmlwriter: ['libxml']
+	, xmlreader: ['dom', 'libxml']
+	, zip: ['zlib']
+};
 
 const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
@@ -38,6 +46,8 @@ if(buildType === 'dynamic')
 	toggleableModules['mbstring']  = import('php-wasm-mbstring');
 	toggleableModules['openssl']   = import('php-wasm-openssl');
 	toggleableModules['simplexml'] = import('php-wasm-simplexml');
+	toggleableModules['xmlreader'] = import('php-wasm-xmlreader');
+	toggleableModules['xmlwriter'] = import('php-wasm-xmlwriter');
 	toggleableModules['sqlite']    = import('php-wasm-sqlite');
 	toggleableModules['xml']       = import('php-wasm-xml');
 	toggleableModules['zlib']      = import('php-wasm-zlib');
@@ -53,6 +63,39 @@ else if(buildType === 'shared')
 const dynamicLibs = buildType === 'dynamic'
 	? [await import('php-wasm-yaml')]
 	: [];
+
+const resolveDynamicExtensionModules = async toggleState => {
+	const activeNames = new Set();
+	const queue = Object.entries(toggleState)
+		.filter(([, toggle]) => toggle.active)
+		.map(([name]) => name);
+
+	while(queue.length)
+	{
+		const name = queue.shift();
+
+		if(activeNames.has(name))
+		{
+			continue;
+		}
+
+		activeNames.add(name);
+
+		for(const dependency of dynamicExtensionDependencies[name] ?? [])
+		{
+			if(!activeNames.has(dependency))
+			{
+				queue.push(dependency);
+			}
+		}
+	}
+
+	return (await Promise.all(
+		[...activeNames]
+			.map(name => toggleState[name]?.module)
+			.filter(Boolean)
+	)).map(module => module.default);
+};
 
 const ini = `
 date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
@@ -211,11 +254,7 @@ function Embedded()
 		setExtensionsAvailable(index);
 		setExtensionsEnabled(enabled);
 
-		sharedLibs.current = (await Promise.all(
-			Object.values(toggleable.current)
-				.filter(toggle => toggle.active)
-				.map(toggle => toggle.module)
-		)).map(module => module.default);
+		sharedLibs.current = await resolveDynamicExtensionModules(toggleable.current);
 	}, [query]);
 
 	const applySettings = useCallback(settings => {
@@ -490,11 +529,7 @@ function Embedded()
 
 		toggleable.current[name].active = event.target.checked;
 
-		sharedLibs.current = (await Promise.all(
-			Object.values(toggleable.current)
-				.filter(toggle => toggle.active)
-				.map(toggle => toggle.module)
-		)).map(module => module.default);
+		sharedLibs.current = await resolveDynamicExtensionModules(toggleable.current);
 	};
 
 	const showExtensionDialog = () => {

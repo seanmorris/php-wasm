@@ -52,6 +52,8 @@ const localPhpPackages = [
 	, 'php-wasm-sqlite'
 	, 'php-wasm-tidy'
 	, 'php-wasm-xml'
+	, 'php-wasm-xmlreader'
+	, 'php-wasm-xmlwriter'
 	, 'php-wasm-yaml'
 	, 'php-wasm-zlib'
 	, 'quickbus'
