@@ -74,9 +74,6 @@ jobs:
       - name: Re-flatten mtimes after extraction
         run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
 
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
-
       - name: Apply executable cache
         run: |
           shopt -s nullglob

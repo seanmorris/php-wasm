@@ -81,9 +81,6 @@ jobs:
           time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
-
       - name: Build demo-node
         run: npm install --prefix demo-node
 
