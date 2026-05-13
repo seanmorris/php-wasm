@@ -5,14 +5,10 @@ import { env } from 'node:process';
 
 import intl from 'php-wasm-intl';
 
-const getIntlExtensionOnly = () => (
-	intl
-		.getLibs({ phpVersion: process.env.PHP_VERSION })
-		.filter(lib => /^php\d+\.\d+-intl\.so$/.test(lib.name ?? ''))
-);
+const isDynamicIntl = env.WITH_INTL === 'dynamic';
 
 const createIntlPhp = (useUrlObjects = false) => {
-	if(env.WITH_INTL === 'dynamic')
+	if(isDynamicIntl)
 	{
 		return new PhpNode({
 			sharedLibs: [
@@ -28,12 +24,18 @@ const createIntlPhp = (useUrlObjects = false) => {
 		});
 	}
 
-	if(env.WITH_INTL === 'shared')
+	return new PhpNode;
+};
+
+const createModuleIntlPhp = async (useDynamicImport = false) => {
+	if(!isDynamicIntl)
 	{
-		return new PhpNode({ sharedLibs: getIntlExtensionOnly() });
+		return new PhpNode;
 	}
 
-	return new PhpNode;
+	return new PhpNode({
+		sharedLibs: [useDynamicImport ? await import('php-wasm-intl') : intl]
+	});
 };
 
 test('Intl Extension is enabled. (loaded via strings)', async () => {
@@ -89,9 +91,7 @@ test('Intl can format numbers. (loaded via URL objects)', async () => {
 });
 
 test('Intl Extension is enabled. (loaded via module)', async () => {
-	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [intl]})
-		: new PhpNode;
+	const php = await createModuleIntlPhp();
 
 	let stdOut = '', stdErr = '';
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
@@ -107,9 +107,7 @@ test('Intl Extension is enabled. (loaded via module)', async () => {
 });
 
 test('Intl can format numbers. (loaded via module)', async () => {
-	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [intl]})
-		: new PhpNode;
+	const php = await createModuleIntlPhp();
 
 	let stdOut = '', stdErr = '';
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
@@ -128,9 +126,7 @@ test('Intl can format numbers. (loaded via module)', async () => {
 });
 
 test('Intl Extension is enabled. (dynamic module loader)', async () => {
-	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [ await import('php-wasm-intl') ]})
-		: new PhpNode;
+	const php = await createModuleIntlPhp(true);
 
 	let stdOut = '', stdErr = '';
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
@@ -146,9 +142,7 @@ test('Intl Extension is enabled. (dynamic module loader)', async () => {
 });
 
 test('Intl can format numbers. (dynamic module loader)', async () => {
-	const php = env.WITH_INTL === 'dynamic' || env.WITH_INTL === 'shared'
-		? new PhpNode({sharedLibs: env.WITH_INTL === 'shared' ? getIntlExtensionOnly() : [ await import('php-wasm-intl') ]})
-		: new PhpNode;
+	const php = await createModuleIntlPhp(true);
 
 	let stdOut = '', stdErr = '';
 	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
