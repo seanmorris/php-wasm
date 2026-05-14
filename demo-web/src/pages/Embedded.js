@@ -189,6 +189,8 @@ function Embedded()
 	}, []);
 
 	const disposePhp = useCallback(() => {
+		phpRef.current && phpRef.current.refresh();
+
 		clearPendingAutorun();
 
 		if(runtimeCleanup.current)
@@ -260,7 +262,7 @@ function Embedded()
 	const applySettings = useCallback(settings => {
 		persist.current.checked = settings.persist ?? persist.current.checked;
 		single.current.checked = settings['single-expression'] ?? single.current.checked;
-		canvasCheckbox.current.checked = settings['canvas'] ?? canvasCheckbox.current.checked;
+		canvasCheckbox.current.checked = settings['canvas'] ?? false;
 		selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
 		selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
