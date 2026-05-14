@@ -21,7 +21,12 @@ third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSIO
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl -maxdepth 1 -type f \( -name 'Makefile*' -o -name 'config.h' -o -name 'config.log' -o -name 'config.nice' -o -name 'config.status' -o -name 'configure' -o -name 'configure~' -o -name 'libtool' -o -name 'sdl.la' -o -name 'a.wasm' \) -delete
 	${DOCKER_RUN} cp -fv third_party/php${PHP_VERSION}-src/ext/sdl/src/php_sdl.h third_party/php${PHP_VERSION}-src/ext/sdl/php_sdl.h
 
-lib/bin/sdl2-config: lib/lib/libSDL2.a
+lib/bin/sdl2-config: lib/lib/libSDL2.a lib/lib/libGL.a
+
+lib/lib/libGL.a:
+	@ echo -e "\e[33;4mBuilding LIBGL\e[0m"
+	${DOCKER_RUN} embuilder build libGL-mt-webgl2-ofb-full_es3-getprocaddr --lto --pic --verbose
+	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libGL-mt-webgl2-ofb-full_es3-getprocaddr.a /src/$@
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"

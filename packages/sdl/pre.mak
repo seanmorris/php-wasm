@@ -13,8 +13,8 @@ endif
 ifneq ($(filter ${WITH_SDL},1 dynamic),)
 WITH_SDL=1
 CONFIGURE_FLAGS+= --with-sdl=/src/lib/bin/sdl2-config
+EXTRA_FLAGS+= -sUSE_SDL=2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 lib/bin/sdl2-config
-EXTRA_FLAGS+= --use-port=sdl2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
 ZEND_EXTRA_LIBS+= -lhtml5
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
 PHP_VARIANT:=${PHP_VARIANT}_sdl
