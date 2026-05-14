@@ -21,6 +21,11 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v6
 
+      - name: Install wabt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wabt
+
       - name: Download Artifact
         uses: actions/download-artifact@v8
         with:
@@ -33,9 +38,6 @@ jobs:
           for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
             tar -xzf ${TAR}
           done
-
-      - name: Verify wasm-objdump
-        run: command -v wasm-objdump
 
       - name: Verify PHP (sdl variant) for Web
         run: ./.github/bin/verify-sdl-main-module.sh ${{ inputs.phpVersion }}
