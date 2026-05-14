@@ -17,6 +17,5 @@ PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 lib/bin
 EXTRA_FLAGS+= --use-port=sdl2 -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
 ZEND_EXTRA_LIBS+= -lhtml5
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
-SKIP_LIBS+= /src/lib/lib/libSDL2.a -lSDL2 -lGL -lsdl -lgl
 PHP_VARIANT:=${PHP_VARIANT}_sdl
 endif
