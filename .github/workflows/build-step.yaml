@@ -106,7 +106,9 @@ jobs:
         run: time make --debug=basic web-dbg-mjs
 
       - name: Build PHP (sdl variant) for Web
-        run: sudo rm third_party/php${{ inputs.phpVersion }}-src/configured && time make --debug=basic web-mjs WITH_SDL=1
+        run: |
+          sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
+          time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Take Snapshot
         run: |
