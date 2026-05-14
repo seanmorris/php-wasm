@@ -40,12 +40,16 @@ if ! command -v wasm-objdump >/dev/null 2>&1; then
 	exit 1
 fi
 
-if wasm-objdump -x "${WASM}" | grep -E -q 'GOT\.mem\.SDL_(HIDAPI|VIRTUAL|DUMMY)_JoystickDriver'; then
+OBJDUMP_LOG="$(mktemp)"
+trap 'rm -f "${OBJDUMP_LOG}"' EXIT
+wasm-objdump -x "${WASM}" > "${OBJDUMP_LOG}"
+
+if grep -E -q 'GOT\.mem\.SDL_(HIDAPI|VIRTUAL|DUMMY)_JoystickDriver' "${OBJDUMP_LOG}"; then
 	echo "SDL main module still imports joystick driver globals: ${WASM}" >&2
 	exit 1
 fi
 
-if wasm-objdump -x "${WASM}" | grep -E -q '<env\.emscripten_compute_dom_pk_code> <- env\.emscripten_compute_dom_pk_code'; then
+if grep -E -q '<env\.emscripten_compute_dom_pk_code> <- env\.emscripten_compute_dom_pk_code' "${OBJDUMP_LOG}"; then
 	echo "SDL main module still imports emscripten_compute_dom_pk_code: ${WASM}" >&2
 	exit 1
 fi
