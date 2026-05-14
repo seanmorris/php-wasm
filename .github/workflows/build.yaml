@@ -162,6 +162,48 @@ jobs:
       phpVersion: ${{ matrix.phpVersion }}
       libType: static
 
+  verify-sdl-dynamic:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-dynamic]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  verify-sdl-shared:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-shared]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['shared']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  verify-sdl-static:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-static]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['static']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
 
 
   test-node-dynamic:
@@ -306,6 +348,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-dynamic
       - test-node-dynamic
       - test-browser-dynamic
       - test-cgi-node-dynamic
@@ -372,6 +415,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-shared
       - test-node-shared
       - test-browser-shared
       - test-cgi-node-shared
@@ -438,6 +482,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-static
       - test-node-static
       - test-browser-static
       - test-cgi-node-static

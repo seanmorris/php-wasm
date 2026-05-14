@@ -108,9 +108,6 @@ jobs:
       - name: Build PHP (sdl variant) for Web
         run: time make --debug=basic web-mjs WITH_SDL=1
 
-      - name: Verify PHP (sdl variant) for Web
-        run: ./.github/bin/verify-sdl-main-module.sh ${{ inputs.phpVersion }}
-
       - name: Take Snapshot
         run: |
           sudo chown -R ${USER}:${USER} .
