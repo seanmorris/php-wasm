@@ -11,8 +11,12 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import Confirm from '../components/Confirm';
 import { basePath, buildType, defaultPhpVersion } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+
 import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
+
+import phpWorkerUrl from "ace-builds/src-noconflict/worker-php?url";
+ace.config.setModuleUrl("ace/mode/php_worker", phpWorkerUrl);
 
 // import yaml from 'php-wasm-yaml';
 
@@ -189,9 +193,12 @@ function Embedded()
 	}, []);
 
 	const disposePhp = useCallback(() => {
+		canvasCheckbox.current && (canvasCheckbox.current.checked = false);
 		phpRef.current && phpRef.current.refresh();
-
 		clearPendingAutorun();
+		setStdOut('');
+		setStdErr('');
+
 
 		if(runtimeCleanup.current)
 		{

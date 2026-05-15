@@ -192,7 +192,7 @@ export default function VSCodeEditor()
 
 	useEffect(() => {
 		adapterRef.current = new PhpDbgBusSession({
-			runtimeArgs: createPhpDbgRuntimeArgs(version)
+			runtimeArgs: createPhpDbgRuntimeArgs(version, path || null)
 			, fs: {
 				readFile: path => getPhpBus().then(bus => bus.readFile(path))
 			}
@@ -215,7 +215,7 @@ export default function VSCodeEditor()
 			adapterRef.current?.dispose();
 			adapterRef.current = null;
 		};
-	}, [version]);
+	}, [path, version]);
 
 	useEffect(() => {
 		let cancelled = false;

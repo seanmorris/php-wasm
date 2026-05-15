@@ -11,6 +11,7 @@ class FakeRuntime extends EventTarget
 		this.provideInput = vi.fn();
 		this.isRunning = vi.fn(() => Promise.resolve(1));
 		this.bpCount = vi.fn(() => Promise.resolve(1));
+		this.dumpBacktrace = vi.fn(() => Promise.resolve([]));
 		this.currentFile = vi.fn(() => Promise.resolve('/persist/demo.php'));
 		this.currentLine = vi.fn(() => Promise.resolve(12));
 	}
@@ -38,6 +39,11 @@ const createSetBreakpointsMessage = (seq = 1, lines = [12]) => ({
 const createConfigurationDoneMessage = (seq = 1) => ({
 	seq
 	, command: 'configurationDone'
+	, arguments: {}
+});
+const createStackTraceMessage = (seq = 1) => ({
+	seq
+	, command: 'stackTrace'
 	, arguments: {}
 });
 
@@ -179,6 +185,122 @@ describe('PhpDbgBusSession', () => {
 		expect(commands).not.toContain('b /persist/laravel-11/public/index.php:11');
 	});
 
+	it('returns busfs workspace paths for stack frames', async () => {
+		const runtime = new FakeRuntime;
+		runtime.dumpBacktrace.mockResolvedValue([{
+			filename: 'busfs:/persist/drupal-7.95/index.php'
+			, lineNo: 17
+			, frame: 0
+		}]);
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+		});
+		const session = createSession();
+
+		await adapter.acceptVSCodeMessage(session, createLaunchMessage(1));
+
+		const response = await adapter.acceptVSCodeMessage(session, createStackTraceMessage(2));
+
+		expect(response.body.stackFrames).toEqual([{
+			id: 1
+			, name: 'index.php'
+			, line: 17
+			, column: 1
+			, source: {
+				name: 'index.php'
+				, path: 'busfs:/persist/drupal-7.95/index.php'
+			}
+		}]);
+	});
+
+	it('falls back to the current debugger location when the top backtrace frame is blank', async () => {
+		const runtime = new FakeRuntime;
+		runtime.dumpBacktrace.mockResolvedValue([{
+			filename: ''
+			, lineNo: 0
+			, frame: 0
+		}]);
+		runtime.currentFile.mockResolvedValue('/persist/drupal-7.95/index.php');
+		runtime.currentLine.mockResolvedValue(17);
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+		});
+		const session = createSession();
+
+		await adapter.acceptVSCodeMessage(session, createLaunchMessage(1));
+
+		const response = await adapter.acceptVSCodeMessage(session, createStackTraceMessage(2));
+
+		expect(response.body.stackFrames[0]).toEqual({
+			id: 1
+			, name: 'index.php'
+			, line: 17
+			, column: 1
+			, source: {
+				name: 'index.php'
+				, path: 'busfs:/persist/drupal-7.95/index.php'
+			}
+		});
+	});
+
+	it('falls back to the current debugger location when the top backtrace frame uses the no-active-file placeholder', async () => {
+		const runtime = new FakeRuntime;
+		runtime.dumpBacktrace.mockResolvedValue([{
+			filename: '[no active file]'
+			, lineNo: 1
+			, frame: 0
+		}]);
+		runtime.currentFile.mockResolvedValue('/persist/drupal-7.95/index.php');
+		runtime.currentLine.mockResolvedValue(17);
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+		});
+		const session = createSession();
+
+		await adapter.acceptVSCodeMessage(session, createLaunchMessage(1));
+
+		const response = await adapter.acceptVSCodeMessage(session, createStackTraceMessage(2));
+
+		expect(response.body.stackFrames[0]).toEqual({
+			id: 1
+			, name: 'index.php'
+			, line: 17
+			, column: 1
+			, source: {
+				name: 'index.php'
+				, path: 'busfs:/persist/drupal-7.95/index.php'
+			}
+		});
+	});
+
+	it('falls back to the runtime program when the launch config program is not a runtime path', async () => {
+		const runtime = new FakeRuntime;
+		const adapter = new PhpDbgBusSession({
+			createRuntime: vi.fn(async () => runtime)
+			, runtimeArgs: {
+				version: '8.3'
+				, program: '/persist/drupal-7.95/index.php'
+			}
+		});
+		const session = createSession();
+
+		await adapter.acceptVSCodeMessage(session, {
+			seq: 1
+			, command: 'launch'
+			, arguments: {
+				program: '[no active file]'
+				, version: '8.3'
+				, stopOnEntry: true
+			}
+		});
+		await adapter.acceptVSCodeMessage(session, createConfigurationDoneMessage(2));
+
+		const commands = runtime.provideInput.mock.calls.map(([command]) => command);
+
+		expect(commands).toContain('exec /persist/drupal-7.95/index.php');
+		expect(commands).not.toContain('exec [no active file]');
+	});
+
 	it('keeps the debug session alive when phpdbg pauses at a breakpoint prompt', async () => {
 		const runtime = new FakeRuntime;
 		const postMessage = vi.fn();
@@ -209,6 +331,7 @@ describe('PhpDbgBusSession', () => {
 	it('terminates the debug session when phpdbg reports that the script ended', async () => {
 		const runtime = new FakeRuntime;
 		runtime.isRunning.mockResolvedValue(0);
+		runtime.currentFile.mockResolvedValue('');
 		const postMessage = vi.fn();
 		const adapter = new PhpDbgBusSession({
 			createRuntime: vi.fn(async () => runtime)

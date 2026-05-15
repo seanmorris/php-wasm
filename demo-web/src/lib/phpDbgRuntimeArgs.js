@@ -32,8 +32,9 @@ else if(buildType === 'shared')
 /**
  * Creates the runtime configuration passed to php-dbg-wasm instances.
  */
-export const createPhpDbgRuntimeArgs = (version = '8.3') => ({
+export const createPhpDbgRuntimeArgs = (version = '8.3', program = null) => ({
 	version
+	, ...(program ? {program} : {})
 	, sharedLibs
 	, ini: `
 		date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}

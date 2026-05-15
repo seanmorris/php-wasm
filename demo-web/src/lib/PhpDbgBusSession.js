@@ -11,26 +11,6 @@ const DEFAULT_THREAD_ID = 1;
 const basename = path => String(path ?? '').split('/').pop() || String(path ?? '');
 
 /**
- * Converts runtime paths into the busfs scheme understood by the VS Code iframe.
- */
-const toEditorPath = path => {
-	const normalized = normalizePath(path);
-
-	if(!normalized)
-	{
-		return normalized;
-	}
-
-	if(normalized.startsWith('busfs:'))
-	{
-		return normalized;
-	}
-
-	const runtimePath = normalized.startsWith('/') ? normalized : `/${normalized}`;
-	return `busfs://${runtimePath}`;
-};
-
-/**
  * Normalizes file paths coming from URLs, runtime output, and VS Code requests.
  */
 const normalizePath = path => {
@@ -52,6 +32,31 @@ const normalizePath = path => {
 	}
 
 	return stringPath;
+};
+
+/**
+ * Runtime scripts are mounted as absolute paths; placeholder launch values are not.
+ */
+const isExecutableRuntimePath = path => typeof path === 'string' && path.startsWith('/');
+
+/**
+ * Converts runtime paths into the busfs scheme exposed to the embedded workbench.
+ */
+const toEditorPath = path => {
+	const normalized = normalizePath(path);
+
+	if(!normalized)
+	{
+		return normalized;
+	}
+
+	if(normalized.startsWith('busfs:'))
+	{
+		return normalized;
+	}
+
+	const runtimePath = normalized.startsWith('/') ? normalized : `/${normalized}`;
+	return `busfs:${runtimePath}`;
 };
 
 /**
@@ -506,17 +511,27 @@ export class PhpDbgBusSession
 		state.frameMap.clear();
 
 		return frames.map((frame, index) => {
+			const frameFilename = normalizePath(frame.filename);
+			const useCurrentLocation = index === 0 && !isExecutableRuntimePath(frameFilename);
+			const filename = normalizePath(
+				useCurrentLocation
+					? currentFile
+					: frameFilename
+			);
+			const line = useCurrentLocation
+				? (currentLine || 1)
+				: (frame.lineNo || 1);
 			const id = index + 1;
 			state.frameMap.set(id, frame.frame ?? index);
 
 			return {
 				id
-				, name: basename(frame.filename) || `frame ${index}`
-				, line: frame.lineNo || 1
+				, name: basename(filename) || `frame ${index}`
+				, line
 				, column: 1
 				, source: {
-					name: basename(frame.filename)
-					, path: toEditorPath(frame.filename)
+					name: basename(filename)
+					, path: toEditorPath(filename)
 				}
 			};
 		});
@@ -609,7 +624,11 @@ export class PhpDbgBusSession
 	{
 		const state = this.sessionState(session);
 		const config = state.config ?? {};
-		const program = normalizePath(config.program ?? this.runtimeArgs.program);
+		const configuredProgram = normalizePath(config.program);
+		const fallbackProgram = normalizePath(this.runtimeArgs.program);
+		const program = isExecutableRuntimePath(configuredProgram)
+			? configuredProgram
+			: fallbackProgram;
 		const initCommands = this.normalizeInitCommands(config.initCommands);
 		let resumedDuringInit = false;
 
@@ -1037,8 +1056,10 @@ export class PhpDbgBusSession
 		{
 			const runtime = await this.getRuntime();
 			const isRunning = await runtime.isRunning();
+			const file = await runtime.currentFile();
+			const line = await runtime.currentLine();
 
-			if(!isRunning)
+			if(!isRunning && !file)
 			{
 				session.running = false;
 				session.waitingForInput = false;
@@ -1046,8 +1067,6 @@ export class PhpDbgBusSession
 				return;
 			}
 
-			const file = await runtime.currentFile();
-			const line = await runtime.currentLine();
 			session.running = false;
 			await this.sendEvent(this.activeSessionId, 'stopped', {
 				reason: session.lastResumeReason
