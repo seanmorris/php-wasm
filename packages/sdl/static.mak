@@ -21,7 +21,10 @@ third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSIO
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl -maxdepth 1 -type f \( -name 'Makefile*' -o -name 'config.h' -o -name 'config.log' -o -name 'config.nice' -o -name 'config.status' -o -name 'configure' -o -name 'configure~' -o -name 'libtool' -o -name 'sdl.la' -o -name 'a.wasm' \) -delete
 	${DOCKER_RUN} cp -fv third_party/php${PHP_VERSION}-src/ext/sdl/src/php_sdl.h third_party/php${PHP_VERSION}-src/ext/sdl/php_sdl.h
 
-lib/bin/sdl2-config: lib/lib/libSDL2.a lib/lib/libGL.a
+lib/bin/sdl2-config: packages/sdl/sdl2-config.in lib/lib/libSDL2.a lib/lib/libGL.a
+	${DOCKER_RUN} mkdir -p /src/lib/bin
+	${DOCKER_RUN} bash -lc "sed 's/@SDL_VERSION@/$(patsubst release-%,%,$(LIBSDL_TAG))/g' /src/packages/sdl/sdl2-config.in > /src/$@"
+	${DOCKER_RUN} chmod +x /src/$@
 
 lib/lib/libGL.a:
 	@ echo -e "\e[33;4mBuilding LIBGL\e[0m"
@@ -30,9 +33,8 @@ lib/lib/libGL.a:
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
-	${DOCKER_RUN} embuilder.py build sdl2
-	${DOCKER_RUN_IN_LIB_SDL} ls -al
-	${DOCKER_RUN_IN_LIB_SDL} chmod +x configure
-	${DOCKER_RUN_IN_LIB_SDL} emconfigure ./configure --prefix=/src/lib/ --enable-shared=no --enable-static=yes --cache-file=/tmp/config-cache
-	${DOCKER_RUN_IN_LIB_SDL} emmake make -j${CPU_COUNT}
-	${DOCKER_RUN_IN_LIB_SDL} emmake make install
+	${DOCKER_RUN} embuilder build sdl2 --lto --pic --verbose
+	${DOCKER_RUN} mkdir -p /src/lib/include /src/lib/lib
+	${DOCKER_RUN} rm -rf /src/lib/include/SDL2
+	${DOCKER_RUN} cp -r /emsdk/upstream/emscripten/cache/sysroot/include/SDL2 /src/lib/include/SDL2
+	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libSDL2.a /src/$@

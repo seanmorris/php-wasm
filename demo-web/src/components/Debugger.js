@@ -31,7 +31,10 @@ if(buildType === 'dynamic')
 		, import('php-wasm-mbstring')
 		, import('php-wasm-sqlite')
 		, import('php-wasm-xml')
+		, import('php-wasm-xmlreader')
+		, import('php-wasm-xmlwriter')
 		, import('php-wasm-simplexml')
+		, import('php-wasm-tidy')
 		, import('php-wasm-yaml')
 	])).map(module => module.default));
 }

@@ -905,12 +905,18 @@ php-clean:
 		sapi/cli/php \
 		sapi/cgi/php-cgi'
 	${DOCKER_RUN} bash -c 'rm -f \
-		packages/php-wasm/php-*.mjs \
-		packages/php-cgi-wasm/php-*.mjs \
-		packages/php-wasm/php-*.wasm \
-		packages/php-cgi-wasm/php-*.wasm \
+		packages/php-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-cgi-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-cli-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-dbg-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-cgi-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-cli-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-dbg-wasm/php${PHP_VERSION}-*.wasm \
 		packages/php-wasm/Php*.mjs \
-		packages/php-cgi-wasm/Php*.mjs'
+		packages/php-cgi-wasm/Php*.mjs' \
+		packages/php-cli-wasm/Php*.mjs' \
+		packages/php-dbg-wasm/Php*.mjs'
 	${DOCKER_RUN} rm -rf lib/include/lexbor
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/yaml
 	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
