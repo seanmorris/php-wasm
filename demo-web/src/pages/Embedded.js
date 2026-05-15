@@ -411,16 +411,15 @@ function Embedded()
 		setStdRet('');
 
 		const phpCode = await (await fetch(basePath(`scripts/${demoName}`))).text();
-		const settings = parseDemoSettings(phpCode);
 
 		input.current = phpCode;
 		setEditorValue(phpCode);
 		document.querySelector('#example').innerHTML = '';
 
-		applySettings(settings);
-
 		query.set('persist', persist.current.checked ? 1 : 0);
 		query.set('single-expression', single.current.checked ? 1 : 0);
+
+		const settings = parseDemoSettings(phpCode);
 
 		if('extensionFlags' in settings)
 		{
@@ -441,6 +440,7 @@ function Embedded()
 
 		await loadExtensions();
 		refreshPhp();
+		applySettings(settings);
 
 		if(settings.autorun)
 		{
