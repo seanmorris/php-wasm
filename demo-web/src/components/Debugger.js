@@ -41,6 +41,13 @@ if(buildType === 'dynamic')
 else if(buildType === 'shared')
 {
 	sharedLibs.push(...sharedSupportLibs);
+	sharedLibs.push(...(await Promise.all([
+		import('php-wasm-dom')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-xmlreader')
+		, import('php-wasm-xmlwriter')
+	])).map(module => module.default));
 }
 
 // files.push({ parent: '/preload/', name: 'icudt72l.dat', url: new URL(`php-wasm-intl/icudt72l.dat`, import.meta.url) });

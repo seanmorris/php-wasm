@@ -28,6 +28,13 @@ if(buildType === 'dynamic')
 else if(buildType === 'shared')
 {
 	sharedLibs.push(...sharedSupportLibs);
+	sharedLibs.push(...(await Promise.all([
+		import('php-wasm-dom')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-xmlreader')
+		, import('php-wasm-xmlwriter')
+	])).map(module => module.default));
 }
 /**
  * Creates the runtime configuration passed to php-dbg-wasm instances.

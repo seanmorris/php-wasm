@@ -48,6 +48,13 @@ if(buildType === 'dynamic')
 else if(buildType === 'shared')
 {
 	defaultSharedLibs.push(...sharedSupportLibs);
+	defaultSharedLibs.push(...(await Promise.all([
+		import('php-wasm-dom')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-xmlreader')
+		, import('php-wasm-xmlwriter')
+	])).map(module => module.default));
 }
 const ini = `
 date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}

@@ -1,6 +1,7 @@
 /**
  * Service worker entrypoint that boots php-cgi-wasm and handles demo requests.
  */
+/* global __DEMO_BUILD_TYPE__ */
 import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
 import Dom from 'php-wasm-dom';
@@ -41,6 +42,13 @@ const dynamicSupportLibs = [
 	, XmlWriter
 	, Tidy
 	, Yaml
+];
+const sharedBuildDynamicSupportLibs = [
+	Dom
+	, Xml
+	, Simplexml
+	, XmlReader
+	, XmlWriter
 ];
 
 const files = [
@@ -99,6 +107,7 @@ const init = async () => {
 	else if(workerBuildType === 'shared')
 	{
 		sharedLibs.push(...sharedSupportLibs);
+		sharedLibs.push(...sharedBuildDynamicSupportLibs);
 	}
 
 	// Spawn the PHP-CGI binary
@@ -139,4 +148,4 @@ self.addEventListener('message',  async event => (await init()).handleMessageEve
 
 // Extras
 self.addEventListener('install',  () => console.log('Install'));
-self.addEventListener('activate', async() => { await init(); console.log('Activate') });
+self.addEventListener('activate', async() => { await init(); console.log('Activate'); });

@@ -3,6 +3,7 @@
  */
 import '../styles/Embedded.css';
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import ace from 'ace-builds';
 import AceEditor from 'react-ace';
 
 import { PGlite } from '@electric-sql/pglite';
@@ -59,10 +60,13 @@ if(buildType === 'dynamic')
 else if(buildType === 'shared')
 {
 	baseSharedLibs.push(...sharedSupportLibs);
-
-	// files.push(
-	// 	{ parent: '/preload/', name: 'icudt72l.dat', url: new URL('php-wasm-intl/icudt72l.dat', import.meta.url) }
-	// );
+	baseSharedLibs.push(...(await Promise.all([
+		import('php-wasm-dom')
+		, import('php-wasm-xml')
+		, import('php-wasm-simplexml')
+		, import('php-wasm-xmlreader')
+		, import('php-wasm-xmlwriter')
+	])).map(module => module.default));
 }
 const dynamicLibs = buildType === 'dynamic'
 	? [await import('php-wasm-yaml')]
@@ -243,6 +247,11 @@ function Embedded()
 	const loadExtensions = useCallback(async () => {
 		if(!canToggleExtensions)
 		{
+			if(buildType === 'shared')
+			{
+				sharedLibs.current = [...baseSharedLibs];
+			}
+
 			return;
 		}
 
