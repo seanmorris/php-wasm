@@ -15,9 +15,7 @@ import {
 	withTempDir,
 	writeTree,
 } from './lib/runtime.mjs';
-import extensionAssets from '../lib/extension-assets.js';
-
-const { getPackage } = extensionAssets;
+import { getPackage } from '../lib/extension-assets.mjs';
 
 function readLocal(file)
 {

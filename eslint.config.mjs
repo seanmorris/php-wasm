@@ -4,7 +4,11 @@ import smNoSaccadeStyle from 'sm-no-saccade-style';
 
 const sourceLintFiles = ['source/**/*.{js,mjs}'];
 const packageLintFiles = ['packages/**/8.*.{js,mjs}', 'packages/**/index.{js,mjs}'];
-const lintFiles = [...sourceLintFiles, ...packageLintFiles];
+const testModuleLintFiles = ['test/**/*.mjs'];
+const testCommonJsLintFiles = ['test/**/*.{js,cjs}'];
+const testBrowserHarnessLintFiles = ['test/browser/harness/**/*.mjs'];
+const testLintFiles = [...testModuleLintFiles, ...testCommonJsLintFiles];
+const lintFiles = [...sourceLintFiles, ...packageLintFiles, ...testLintFiles];
 const ignores = [
 	'packages/php-wasm/stdlib/**/*'
 	, 'test/browser/browser.spec.mjs-snapshots/**/*'
@@ -92,6 +96,40 @@ export default [
 					, 'ArrowFunctionExpression'
 				]
 			}]
+		}
+	}
+	, {
+		files: testModuleLintFiles
+		, ignores
+		, languageOptions: {
+			sourceType: 'module'
+			, ecmaVersion: 'latest'
+			, globals: {
+				...globals.node
+			}
+		}
+	}
+	, {
+		files: testCommonJsLintFiles
+		, ignores
+		, languageOptions: {
+			sourceType: 'commonjs'
+			, ecmaVersion: 'latest'
+			, globals: {
+				...globals.node
+			}
+		}
+	}
+	, {
+		files: testBrowserHarnessLintFiles
+		, ignores
+		, languageOptions: {
+			sourceType: 'module'
+			, ecmaVersion: 'latest'
+			, globals: {
+				...globals.browser
+				, ...globals.serviceworker
+			}
 		}
 	}
 	, {

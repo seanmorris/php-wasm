@@ -1,9 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import extensionAssets from './extension-assets.js';
-
-const { getPackage, getSupportPackage } = extensionAssets;
+import { getPackage, getSupportPackage } from './extension-assets.mjs';
 
 const currentEnv = () => globalThis.process?.env ?? {};
 const envFlagIsShared = value => value === 'shared';

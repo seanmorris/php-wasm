@@ -85,37 +85,28 @@ jobs:
         run: npm install --prefix demo-node
 
       - name: Build PHP For Node
-        run: time make --debug=basic node-mjs
+        run: time make --debug=basic node-mjs node-js
 
-      - name: Build PHP For Node (CJS)
-        run: time make --debug=basic node-js
+      - name: Build PHP for Web
+        run: time make --debug=basic web-mjs web-js
 
-      - name: Build PHP for Web & PHP-CGI for Worker
-        run: time make --debug=basic web-mjs worker-cgi-mjs
+      - name: Build PHP-CGI for Worker
+        run: time make --debug=basic worker-cgi-mjs worker-cgi-js
 
       - name: Build PHP CGI for Node
-        run: time make --debug=basic node-cgi-mjs
-
-      - name: Build PHP CGI for Node (CJS)
-        run: time make --debug=basic node-cgi-js
+        run: time make --debug=basic node-cgi-mjs node-cgi-js
 
       - name: Build PHP CLI for Node
-        run: time make --debug=basic node-cli-mjs
-
-      - name: Build PHP CLI for Node (CJS)
-        run: time make --debug=basic node-cli-js
+        run: time make --debug=basic node-cli-mjs node-cli-js
 
       - name: Build PHP DBG for Node
-        run: time make --debug=basic node-dbg-mjs
-
-      - name: Build PHP DBG for Node (CJS)
-        run: time make --debug=basic node-dbg-js
+        run: time make --debug=basic node-dbg-mjs node-dbg-js
 
       - name: Build PHP CLI for Web
-        run: time make --debug=basic web-cli-mjs
+        run: time make --debug=basic web-cli-mjs web-cli-js
 
       - name: Build PHP DBG for Web
-        run: time make --debug=basic web-dbg-mjs
+        run: time make --debug=basic web-dbg-mjs web-dbg-js
 
       - name: Build PHP (sdl variant) for Web
         run: |

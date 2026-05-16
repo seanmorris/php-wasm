@@ -1157,7 +1157,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm
 
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh

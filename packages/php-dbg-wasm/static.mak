@@ -14,13 +14,13 @@ NOTPARALLEL+=\
 	webview-dbg-js \
 	node-dbg-js
 
-WEB_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWeb.mjs php${PHP_SUFFIX}-dbg-web.mjs ${MJS_HELPERS_WEB})
+WEB_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgWeb.mjs php${PHP_SUFFIX}-dbg-web.mjs ${MJS_HELPERS_WEB})
 WEB_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWeb.js php${PHP_SUFFIX}-dbg-web.js ${CJS_HELPERS_WEB})
 WORKER_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWorker.mjs php${PHP_SUFFIX}-dbg-worker.mjs ${MJS_HELPERS_WEB})
 WORKER_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWorker.js php${PHP_SUFFIX}-dbg-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWebview.mjs php${PHP_SUFFIX}-dbg-webview.mjs ${MJS_HELPERS_WEB})
 WEBVIEW_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWebview.js php${PHP_SUFFIX}-dbg-webview.js ${CJS_HELPERS_WEB})
-NODE_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgNode.mjs php${PHP_SUFFIX}-dbg-node.mjs ${MJS_HELPERS_WEB})
+NODE_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgNode.mjs php${PHP_SUFFIX}-dbg-node.mjs ${MJS_HELPERS_WEB})
 NODE_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgNode.js php${PHP_SUFFIX}-dbg-node.js ${CJS_HELPERS})
 
 WEB_DBG_MJS_ASSETS= $(addprefix ${PHP_DBG_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}

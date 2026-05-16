@@ -4,10 +4,8 @@ import path from 'node:path';
 import { strict as assert } from 'node:assert';
 
 import { PhpCliNode } from '../../packages/php-cli-wasm/PhpCliNode.mjs';
-import extensionAssets from './extension-assets.js';
+import { getPackage, getSupportPackage } from './extension-assets.mjs';
 import { nodeRuntimeOptions, resolveNodeTestEnv } from './node-runtime-options.mjs';
-
-const { getPackage, getSupportPackage } = extensionAssets;
 const normalize = text => String(text ?? '').replace(/\r\n/g, '\n');
 const normalizeExpectation = text => normalize(text).trim();
 const normalizeActualCandidates = text => {

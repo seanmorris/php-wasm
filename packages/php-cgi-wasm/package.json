@@ -41,12 +41,6 @@
       "require": "./PhpCgiWebBase.js",
       "default": "./PhpCgiWebBase.mjs"
     },
-    "./PhpCgiWebview": {
-      "types": "./PhpCgiWebview.d.mts",
-      "import": "./PhpCgiWebview.mjs",
-      "require": "./PhpCgiWebview.js",
-      "default": "./PhpCgiWebview.mjs"
-    },
     "./PhpCgiWorker": {
       "types": "./PhpCgiWorker.d.mts",
       "import": "./PhpCgiWorker.mjs",
