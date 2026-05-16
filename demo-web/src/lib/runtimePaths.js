@@ -29,7 +29,8 @@ const baseUrl = import.meta.env.BASE_URL ?? '/';
 const trimmedBase = trimBase(baseUrl);
 
 export const routerBase = trimmedBase || '/';
-export const buildType = import.meta.env.VITE_BUILD_TYPE || 'dynamic';
+export const libType = import.meta.env.VITE_LIB_TYPE || import.meta.env.VITE_BUILD_TYPE || 'dynamic';
+export const buildType = libType;
 export const defaultPhpVersion = import.meta.env.VITE_PHP_VERSION || '8.4';
 
 /**
@@ -42,7 +43,7 @@ export const basePath = (path = '') => resolveBasePath(baseUrl, path);
  */
 export const baseUrlFor = (path = '') => new URL(basePath(path), window.location.origin);
 
-if(!['dynamic', 'shared', 'static'].includes(buildType))
+if(!['dynamic', 'shared', 'static'].includes(libType))
 {
-	console.warn(`buildType invalid! VITE_BUILD_TYPE should be one of 'dynamic', 'shared', 'static', or EMPTY.`);
+	console.warn(`libType invalid! VITE_LIB_TYPE should be one of 'dynamic', 'shared', 'static', or EMPTY.`);
 }

@@ -87,17 +87,29 @@ jobs:
       - name: Build PHP For Node
         run: time make --debug=basic node-mjs
 
+      - name: Build PHP For Node (CJS)
+        run: time make --debug=basic node-js
+
       - name: Build PHP for Web & PHP-CGI for Worker
         run: time make --debug=basic web-mjs worker-cgi-mjs
 
       - name: Build PHP CGI for Node
         run: time make --debug=basic node-cgi-mjs
 
+      - name: Build PHP CGI for Node (CJS)
+        run: time make --debug=basic node-cgi-js
+
       - name: Build PHP CLI for Node
         run: time make --debug=basic node-cli-mjs
 
+      - name: Build PHP CLI for Node (CJS)
+        run: time make --debug=basic node-cli-js
+
       - name: Build PHP DBG for Node
         run: time make --debug=basic node-dbg-mjs
+
+      - name: Build PHP DBG for Node (CJS)
+        run: time make --debug=basic node-dbg-js
 
       - name: Build PHP CLI for Web
         run: time make --debug=basic web-cli-mjs

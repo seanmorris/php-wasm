@@ -2,7 +2,8 @@
 
 set -eux;
 
-export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}"
+export VITE_LIB_TYPE="${VITE_LIB_TYPE:-${LIB_TYPE:-${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}}}"
+export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${VITE_LIB_TYPE}}"
 
 mkdir -p public/static/media
 

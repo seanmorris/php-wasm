@@ -1,6 +1,7 @@
 export const query = new URLSearchParams(window.location.search);
 export const runtimeVersion = query.get('version') ?? '8.4';
-export const buildType = query.get('buildType') ?? 'dynamic';
+export const libType = query.get('libType') ?? query.get('buildType') ?? 'dynamic';
+export const buildType = libType;
 export const demo = query.get('demo') ?? 'hello-world.php';
 export const extensionFlags = Number(query.get('extensionFlags') ?? '0');
 export const variant = query.get('variant') ?? '';

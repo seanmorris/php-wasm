@@ -7,18 +7,22 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const libType = process.env.LIB_TYPE
+	|| process.env.VITE_LIB_TYPE
+	|| process.env.BUILD_TYPE
+	|| process.env.VITE_BUILD_TYPE
+	|| 'dynamic';
 const sharedSupportLibsPath = path.resolve(
 	__dirname
-	, process.env.BUILD_TYPE === 'shared'
+	, libType === 'shared'
 		? 'src/lib/sharedSupportLibs.js'
 		: 'src/lib/sharedSupportLibs.stub.js'
 );
 
 export default defineConfig({
 	define: {
-		__DEMO_BUILD_TYPE__: JSON.stringify(
-			process.env.BUILD_TYPE || process.env.VITE_BUILD_TYPE || 'dynamic'
-		)
+		__DEMO_LIB_TYPE__: JSON.stringify(libType),
+		__DEMO_BUILD_TYPE__: JSON.stringify(libType)
 	}
 	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, resolve: {

@@ -50,10 +50,11 @@ jobs:
       - name: Install NPM packages
         run: |
           npm ci
-          npm ci --prefix demo-node
 
       - name: Run tests
-        run: PHP_VERSION=${{ inputs.phpVersion }} BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+        run: |
+          PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+          PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node-cjs
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

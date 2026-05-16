@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const version = process.env.PHP_VERSION ?? '8.4';
-const buildType = process.env.BUILD_TYPE ?? 'dynamic';
+const libType = process.env.LIB_TYPE ?? process.env.BUILD_TYPE ?? 'dynamic';
 const variant = process.env.PHP_VARIANT ?? '';
 
 const demoCases = [
@@ -78,7 +78,7 @@ const comparePhpVersions = (left, right) => {
 
 const demoUrl = ({demo, extensionFlags}) => {
 	const params = new URLSearchParams({
-		buildType,
+		libType,
 		demo,
 		extensionFlags: String(extensionFlags),
 		version,
@@ -116,7 +116,7 @@ const expectEmbeddedDemoSnapshot = async (page, fixture) => {
 	const stdout = await page.locator('[data-testid="stdout"]').textContent();
 	const snapshot = typeof fixture.snapshot === 'string'
 		? fixture.snapshot
-		: fixture.snapshot[buildType] ?? fixture.snapshot.default;
+		: fixture.snapshot[libType] ?? fixture.snapshot.default;
 
 	expect(JSON.stringify(stdout ?? '')).toMatchSnapshot(snapshot);
 };
@@ -135,7 +135,7 @@ for(const fixture of demoCases)
 
 test('runs a cli script in the browser harness', async ({ page }) => {
 	const params = new URLSearchParams({
-		buildType,
+		libType,
 		code: 'echo "Hello, World!";',
 		version,
 	});
@@ -147,7 +147,7 @@ test('runs a cli script in the browser harness', async ({ page }) => {
 
 test('boots phpdbg in the browser harness', async ({ page }) => {
 	const params = new URLSearchParams({
-		buildType,
+		libType,
 		path: '/preload/test_www/hello-world.php',
 		version,
 	});
@@ -171,7 +171,7 @@ test('boots phpdbg in the browser harness', async ({ page }) => {
 
 test('serves php through the cgi worker harness', async ({ page }) => {
 	const params = new URLSearchParams({
-		buildType,
+		libType,
 		version,
 	});
 

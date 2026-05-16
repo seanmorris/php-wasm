@@ -15,13 +15,13 @@ NOTPARALLEL+=\
 	node-cli-js
 
 WEB_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWeb.mjs PhpBase.mjs php${PHP_SUFFIX}-cli-web.mjs ${MJS_HELPERS_WEB})
-WEB_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWeb.js php${PHP_SUFFIX}-cli-web.js ${CJS_HELPERS_WEB})
+WEB_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliWeb.js php${PHP_SUFFIX}-cli-web.js ${CJS_HELPERS_WEB})
 WORKER_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWorker.mjs php${PHP_SUFFIX}-cli-worker.mjs ${MJS_HELPERS_WEB})
-WORKER_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWorker.js php${PHP_SUFFIX}-cli-worker.js ${CJS_HELPERS_WEB})
+WORKER_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliWorker.js php${PHP_SUFFIX}-cli-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWebview.mjs php${PHP_SUFFIX}-cli-webview.mjs ${MJS_HELPERS_WEB})
-WEBVIEW_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWebview.js php${PHP_SUFFIX}-cli-webview.js ${CJS_HELPERS_WEB})
+WEBVIEW_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliWebview.js php${PHP_SUFFIX}-cli-webview.js ${CJS_HELPERS_WEB})
 NODE_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliNode.mjs php${PHP_SUFFIX}-cli-node.mjs ${MJS_HELPERS_WEB})
-NODE_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliNode.js php${PHP_SUFFIX}-cli-node.js ${CJS_HELPERS})
+NODE_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliNode.js php${PHP_SUFFIX}-cli-node.js ${CJS_HELPERS})
 
 WEB_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
 WEB_CLI_JS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
@@ -134,8 +134,8 @@ CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
 
 ${PHP_CLI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CLI_DIST_DIR}/
-	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_CLI_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_CLI_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ${PHP_CLI_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ${PHP_CLI_DIST_DIR}/$(notdir $@)
 
 ${PHP_CLI_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
@@ -147,7 +147,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.js: SAPI_CLI_PATH=sapi/cli/php${PHP
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.js: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.js: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -168,7 +168,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs: SAPI_CLI_PATH=sapi/cli/php${PH
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-web.mjs: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -189,7 +189,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.js: SAPI_CLI_PATH=sapi/cli/php${
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.js: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.js: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -210,7 +210,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs: SAPI_CLI_PATH=sapi/cli/php$
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-worker.mjs: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -231,7 +231,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.js: SAPI_CLI_PATH=sapi/cli/php${PH
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.js: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.js: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -252,7 +252,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs: SAPI_CLI_PATH=sapi/cli/php${P
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.mjs: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -272,7 +272,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.js: SAPI_CLI_PATH=sapi/cli/php$
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.js: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.js: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}
@@ -293,7 +293,7 @@ ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs: SAPI_CLI_PATH=sapi/cli/php
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs: PHP_CLI_OBJS=sapi/cli/php_cli.lo sapi/cli/php_http_parser.lo sapi/cli/php_cli_server.lo sapi/cli/ps_title.lo sapi/cli/php_cli_process_title.lo
 ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-webview.mjs: ${CLI_DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php-cli for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers -e ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-cli-${ENVIRONMENT}${RELEASE_SUFFIX}.${BUILD_TYPE}

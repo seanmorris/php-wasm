@@ -10,7 +10,7 @@ import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import Confirm from '../components/Confirm';
-import { basePath, buildType, defaultPhpVersion } from '../lib/runtimePaths';
+import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 import 'ace-builds/src-noconflict/mode-php';
@@ -22,7 +22,7 @@ ace.config.setModuleUrl("ace/mode/php_worker", phpWorkerUrl);
 // import yaml from 'php-wasm-yaml';
 
 const baseSharedLibs = [];
-const canToggleExtensions = buildType === 'dynamic';
+const canToggleExtensions = libType === 'dynamic';
 const toggleableModules = {};
 const dynamicExtensionDependencies = {
 	dom: ['libxml']
@@ -39,7 +39,7 @@ const files = [
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
 
-if(buildType === 'dynamic')
+if(libType === 'dynamic')
 {
 	toggleableModules['dom']       = import('php-wasm-dom');
 	toggleableModules['gd']        = import('php-wasm-gd');
@@ -57,7 +57,7 @@ if(buildType === 'dynamic')
 	toggleableModules['xml']       = import('php-wasm-xml');
 	toggleableModules['zlib']      = import('php-wasm-zlib');
 }
-else if(buildType === 'shared')
+else if(libType === 'shared')
 {
 	baseSharedLibs.push(...sharedSupportLibs);
 	baseSharedLibs.push(...(await Promise.all([
@@ -68,7 +68,7 @@ else if(buildType === 'shared')
 		, import('php-wasm-xmlwriter')
 	])).map(module => module.default));
 }
-const dynamicLibs = buildType === 'dynamic'
+const dynamicLibs = libType === 'dynamic'
 	? [await import('php-wasm-yaml')]
 	: [];
 
@@ -247,7 +247,7 @@ function Embedded()
 	const loadExtensions = useCallback(async () => {
 		if(!canToggleExtensions)
 		{
-			if(buildType === 'shared')
+			if(libType === 'shared')
 			{
 				sharedLibs.current = [...baseSharedLibs];
 			}

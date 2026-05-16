@@ -5,6 +5,7 @@ const { parseArgs } = require('node:util');
 const parsedArgs = parseArgs({allowPositionals:true, options: {
 	file: { type: 'string' }
 	, phpVersion: { type: 'string' }
+	, libType: { type: 'string', default: 'shared' }
 	, buildType: { type: 'string', default: 'shared' }
 }}).values;
 

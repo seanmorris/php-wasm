@@ -34,6 +34,7 @@ const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb }
 });
 
 vi.mock('../lib/runtimePaths', () => ({
+	libType: 'static',
 	buildType: 'static'
 }));
 

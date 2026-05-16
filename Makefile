@@ -20,6 +20,7 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 ENV_DIR?=.
 ENV_FILE?=.env
 -include ${ENV_FILE}
+LIB_TYPE ?=$(shell basename '${ENV_FILE}' | sed -n 's/^\.env_[0-9][0-9.]*\.\([^.]*\)\.ci$$/\1/p')
 
 ## PHP Version
 PHP_VERSION_DEFAULT=8.4
@@ -815,8 +816,8 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 
 ${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
-	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ${PHP_DIST_DIR}/$(notdir $@)
 
 ${PHP_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
@@ -1009,15 +1010,18 @@ endif
 
 NODE_TEST_FLAGS=
 DOC_TESTS=
+DOC_TESTS_CJS=
 
-ifeq (${BUILD_TYPE},DYNAMIC)
+ifeq (${LIB_TYPE},dynamic)
 DOC_TESTS+=test/docs.test.mjs
 DOC_TESTS+=test/docs-cgi.test.mjs
+DOC_TESTS_CJS+=test/docs.test.cjs
 endif
 
 test-node: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -1044,6 +1048,7 @@ test-node: node-mjs node-cgi-mjs
 test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -1070,9 +1075,67 @@ test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 		test/cli-node/cli-node.test.mjs \
 		test/dbg-node/dbg-node.test.mjs
 
+test-node-cjs: node-js
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} `find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort`
+
+test-node-cjs-standard: node-js node-cli-js node-dbg-js
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} \
+		`find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort` \
+		test/cli-node/cli-node.test.cjs \
+		test/dbg-node/dbg-node.test.cjs
+
 test-deno: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
@@ -1097,21 +1160,120 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys
 
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
 
 DEMO_WEB_PHP_VERSION ?= 8.4
 
 test-demo-web:
-	PHP_VERSION=${DEMO_WEB_PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} DEMO_WEB_ARTIFACT_ROOT=${DEMO_WEB_ARTIFACT_ROOT} test/demo-web-test.sh
+	PHP_VERSION=${DEMO_WEB_PHP_VERSION} LIB_TYPE=${LIB_TYPE} DEMO_WEB_ARTIFACT_ROOT=${DEMO_WEB_ARTIFACT_ROOT} test/demo-web-test.sh
 
-test-cgi-node:
-	PHP_VERSION=${PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} test/node-cgi-test.sh
-ifeq (${BUILD_TYPE},DYNAMIC)
-	PHP_VERSION=${PHP_VERSION} node --test test/docs-cgi.test.mjs
+test-cgi-node: node-mjs node-cgi-mjs
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} test/node-cgi-test.sh
+ifeq (${LIB_TYPE},dynamic)
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.mjs
+endif
+
+test-cgi-node-cjs: node-js node-cgi-js
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} \
+	TEST_FORMAT=cjs test/node-cgi-test.sh
+ifeq (${LIB_TYPE},dynamic)
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.cjs
 endif
 
 update-snapshots:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} UPDATE_SNAPSHOTS=1 test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash

@@ -55,7 +55,6 @@ jobs:
       - name: npm install
         run: |
           npm ci
-          npm ci --prefix demo-node
           npm install -g deno@2.5.6
 
       - name: Download Artifact
@@ -86,10 +85,12 @@ jobs:
           TARGET=test-${{ inputs.testType }}
 
           if [ "${{ inputs.testType }}" = "node" ]; then
-            TARGET=test-node-standard
+            make --debug=basic test-node-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+            make --debug=basic test-node-cjs-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+            exit 0
           fi
 
-          make --debug=basic ${TARGET} PHP_VERSION=${{ inputs.phpVersion }}
+          make --debug=basic ${TARGET} PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

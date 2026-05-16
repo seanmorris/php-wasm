@@ -3,7 +3,7 @@ import { PhpDbgWeb } from '/packages/php-dbg-wasm/PhpDbgWeb.mjs';
 import {
 	appendStderr,
 	appendStdout,
-	buildType,
+	libType,
 	createIni,
 	preloadFiles,
 	query,
@@ -40,7 +40,7 @@ const main = async () => {
 		files: preloadFiles
 		, ini: createIni()
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
-		, sharedLibs: loadDbgSharedLibs(buildType)
+		, sharedLibs: loadDbgSharedLibs(libType)
 		, version: runtimeVersion
 	});
 

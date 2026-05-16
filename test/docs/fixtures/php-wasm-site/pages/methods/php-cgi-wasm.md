@@ -3,18 +3,16 @@ pagetitle: Php-Cgi-Wasm Methods
 itemtype: schema.org/Class
 microdata:
     name: PhpCgiWasm
-    alternateName: PhpCgiWeb
-    alternateName: PhpCgiWebview
     alternateName: PhpCgiNode
     alternateName: PhpCgiWorker
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/methods/php-cgi-wasm.md
+Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
+Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/methods/php-cgi-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiBase.js
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiNode.js
+- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiBase.mjs
+- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiNode.mjs
 -->
 # Php-Cgi-Wasm Methods
 
@@ -28,8 +26,6 @@ const php = new PhpCgiWorker();
 
 The concrete classes are:
 
-- `PhpCgiWeb`
-- `PhpCgiWebview`
 - `PhpCgiNode`
 - `PhpCgiWorker`
 
@@ -56,11 +52,15 @@ const php = new PhpCgiWorker({
 });
 ```
 
+ESM helper packages can be passed directly here. CommonJS callers should pass strings, `URL`s, or `{name, url, ini}` records manually instead.
+
 ### dynamicLibs
 
 *array of strings or objects*
 
 Resolved like `sharedLibs`, but never written into `php.ini`.
+
+The same CommonJS rule applies here: pass manual strings, `URL`s, or objects rather than the ESM helper packages.
 
 ### files
 
@@ -98,7 +98,7 @@ const php = new PhpCgiWorker({
 
 ### locateFile
 
-*function*
+*function(path, directory): string | URL | undefined*
 
 ```javascript
 const php = new PhpCgiWorker({

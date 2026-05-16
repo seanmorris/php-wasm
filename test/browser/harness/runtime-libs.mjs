@@ -172,13 +172,13 @@ const sharedCgiLibs = [
 	, sharedLib('libyaml.so', 'libyaml/libyaml.so')
 ];
 
-const pickLibsForBuildType = (buildType, dynamicLibs, sharedLibs) => {
-	if(buildType === 'dynamic')
+const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
+	if(libType === 'dynamic')
 	{
 		return dynamicLibs;
 	}
 
-	if(buildType === 'shared')
+	if(libType === 'shared')
 	{
 		return sharedLibs;
 	}
@@ -186,13 +186,13 @@ const pickLibsForBuildType = (buildType, dynamicLibs, sharedLibs) => {
 	return [];
 };
 
-export const loadEmbeddedSharedLibs = buildType => {
-	if(buildType === 'dynamic')
+export const loadEmbeddedSharedLibs = libType => {
+	if(libType === 'dynamic')
 	{
 		return [];
 	}
 
-	if(buildType === 'shared')
+	if(libType === 'shared')
 	{
 		// Match demo-web so the core shared runtime resolves side modules
 		// through locateFile using package-local asset URLs.
@@ -202,8 +202,8 @@ export const loadEmbeddedSharedLibs = buildType => {
 	return [];
 };
 
-export const loadEmbeddedExtensionLibs = (buildType, flags) => {
-	if(buildType !== 'dynamic' || !flags)
+export const loadEmbeddedExtensionLibs = (libType, flags) => {
+	if(libType !== 'dynamic' || !flags)
 	{
 		return [];
 	}
@@ -230,20 +230,20 @@ export const loadEmbeddedDynamicLibs = demoName => {
 	return [yaml];
 };
 
-export const loadCliSharedLibs = buildType => pickLibsForBuildType(
-	buildType,
+export const loadCliSharedLibs = libType => pickLibsForLibType(
+	libType,
 	dynamicCliLibs,
 	sharedCliLibs
 );
 
-export const loadDbgSharedLibs = buildType => pickLibsForBuildType(
-	buildType,
+export const loadDbgSharedLibs = libType => pickLibsForLibType(
+	libType,
 	dynamicDbgLibs,
 	sharedDbgLibs
 );
 
-export const loadCgiSharedLibs = buildType => pickLibsForBuildType(
-	buildType,
+export const loadCgiSharedLibs = libType => pickLibsForLibType(
+	libType,
 	dynamicCgiLibs,
 	sharedCgiLibs
 );

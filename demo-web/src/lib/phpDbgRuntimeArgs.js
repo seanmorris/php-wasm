@@ -2,12 +2,12 @@
  * Shared php-dbg runtime argument factory used by the VS Code integration.
  */
 import { PGlite } from '@electric-sql/pglite';
-import { buildType } from './runtimePaths';
+import { libType } from './runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const sharedLibs = [];
 
-if(buildType === 'dynamic')
+if(libType === 'dynamic')
 {
 	sharedLibs.push(...(await Promise.all([
 		import('php-wasm-libxml')
@@ -25,7 +25,7 @@ if(buildType === 'dynamic')
 		, import('php-wasm-yaml')
 	])).map(module => module.default));
 }
-else if(buildType === 'shared')
+else if(libType === 'shared')
 {
 	sharedLibs.push(...sharedSupportLibs);
 	sharedLibs.push(...(await Promise.all([

@@ -22,6 +22,6 @@ PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/demo-web-artifact.spec.mj
 
 PHP_VERSION="${PHP_VERSION:-8.4}" \
 BROWSER_TEST_PORT="${PORT}" \
-BUILD_TYPE="${BUILD_TYPE:-dynamic}" \
+LIB_TYPE="${LIB_TYPE:-${BUILD_TYPE:-dynamic}}" \
 DEMO_WEB_ARTIFACT_ROOT="${ARTIFACT_ROOT}" \
 npx playwright test "${PLAYWRIGHT_ARGS[@]}"

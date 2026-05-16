@@ -1,7 +1,7 @@
 /**
  * Service worker entrypoint that boots php-cgi-wasm and handles demo requests.
  */
-/* global __DEMO_BUILD_TYPE__ */
+/* global __DEMO_BUILD_TYPE__, __DEMO_LIB_TYPE__ */
 import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
 import Dom from 'php-wasm-dom';
@@ -24,7 +24,9 @@ import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const sharedLibs = [];
-const workerBuildType = __DEMO_BUILD_TYPE__;
+const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
+	? __DEMO_LIB_TYPE__
+	: __DEMO_BUILD_TYPE__;
 const dynamicSupportLibs = [
 	Libxml
 	, Dom
@@ -100,11 +102,11 @@ let phpLoader = null;
 const init = async () => {
 	if(phpLoader) return phpLoader;
 
-	if(workerBuildType === 'dynamic')
+	if(workerLibType === 'dynamic')
 	{
 		sharedLibs.push(...dynamicSupportLibs);
 	}
-	else if(workerBuildType === 'shared')
+	else if(workerLibType === 'shared')
 	{
 		sharedLibs.push(...sharedSupportLibs);
 		sharedLibs.push(...sharedBuildDynamicSupportLibs);

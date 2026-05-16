@@ -3,7 +3,7 @@ import { loadCgiSharedLibs } from '/php-wasm/harness/runtime-libs.mjs';
 
 const query = new URL(self.location.href).searchParams;
 const runtimeVersion = query.get('version') ?? '8.4';
-const buildType = query.get('buildType') ?? 'dynamic';
+const libType = query.get('libType') ?? query.get('buildType') ?? 'dynamic';
 
 const createNotFoundResponse = request => new Response(
 	`<body><h1>404</h1>${request.url} not found</body>`,
@@ -42,7 +42,7 @@ const init = () => {
 		]
 		, notFound: createNotFoundResponse
 		, prefix
-		, sharedLibs: loadCgiSharedLibs(buildType)
+		, sharedLibs: loadCgiSharedLibs(libType)
 		, staticFS: false
 		, types: {
 			html: 'text/html'

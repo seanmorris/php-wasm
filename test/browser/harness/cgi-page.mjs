@@ -1,6 +1,6 @@
 import {
 	appendStderr,
-	buildType,
+	libType,
 	runtimeVersion,
 	setMeta,
 	setStatus,
@@ -34,7 +34,7 @@ const main = async () => {
 
 	setStatus('registering');
 
-	const workerUrl = new URL(`../cgi-worker.mjs?version=${encodeURIComponent(runtimeVersion)}&buildType=${encodeURIComponent(buildType)}&cacheBust=${Date.now()}`, import.meta.url);
+	const workerUrl = new URL(`../cgi-worker.mjs?version=${encodeURIComponent(runtimeVersion)}&libType=${encodeURIComponent(libType)}&cacheBust=${Date.now()}`, import.meta.url);
 	const registration = await navigator.serviceWorker.register(workerUrl, {
 		scope: '/php-wasm/'
 		, type: 'module'

@@ -29,7 +29,8 @@ const baseUrl = import.meta.env.BASE_URL ?? new URL('./', self.location.href).pa
 const trimmedBase = trimBase(baseUrl);
 
 export const routerBase = trimmedBase || '/';
-export const buildType = import.meta.env.VITE_BUILD_TYPE || 'dynamic';
+export const libType = import.meta.env.VITE_LIB_TYPE || import.meta.env.VITE_BUILD_TYPE || 'dynamic';
+export const buildType = libType;
 
 /**
  * Builds a worker-relative pathname for CGI routes and assets.
@@ -41,7 +42,7 @@ export const basePath = (path = '') => resolveBasePath(baseUrl, path);
  */
 export const baseUrlFor = (path = '') => new URL(basePath(path), self.location.origin);
 
-if(!['dynamic', 'shared', 'static'].includes(buildType))
+if(!['dynamic', 'shared', 'static'].includes(libType))
 {
-	console.warn(`buildType invalid! VITE_BUILD_TYPE should be one of 'dynamic', 'shared', 'static', or EMPTY.`);
+	console.warn(`libType invalid! VITE_LIB_TYPE should be one of 'dynamic', 'shared', 'static', or EMPTY.`);
 }

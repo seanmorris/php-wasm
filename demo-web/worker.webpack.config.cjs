@@ -6,7 +6,11 @@ const webpack = require('webpack');
 
 module.exports = (_, argv = {}) => {
 	const mode = argv.mode || process.env.NODE_ENV || 'development';
-	const buildType = process.env.BUILD_TYPE || process.env.VITE_BUILD_TYPE || 'dynamic';
+	const libType = process.env.LIB_TYPE
+		|| process.env.VITE_LIB_TYPE
+		|| process.env.BUILD_TYPE
+		|| process.env.VITE_BUILD_TYPE
+		|| 'dynamic';
 
 	return {
 		mode
@@ -55,7 +59,8 @@ module.exports = (_, argv = {}) => {
 			)
 			,
 			new webpack.DefinePlugin({
-				__DEMO_BUILD_TYPE__: JSON.stringify(buildType)
+				__DEMO_LIB_TYPE__: JSON.stringify(libType),
+				__DEMO_BUILD_TYPE__: JSON.stringify(libType)
 			})
 		]
 	};

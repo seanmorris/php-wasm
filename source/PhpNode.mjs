@@ -15,6 +15,20 @@ const defaultVersion = (
 	: '8.4';
 
 const defaultVariant = '';
+const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
+	? runtime
+	: {default: runtime};
+
+const loadRuntime = specifier => {
+	if(typeof require === 'function')
+	{
+		return Promise.resolve(
+			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
+		);
+	}
+
+	return import(specifier).then(normalizeRuntimeModule);
+};
 
 /**
  * Node.js-hosted PHP wrapper.
@@ -62,27 +76,27 @@ export class PhpNode extends PhpBase
 		switch(vvId)
 		{
 			case '8.5':
-				super(import(`./php8.5-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.5-node.mjs'), constructorArgs);
 				break;
 
 			case '8.4':
-				super(import(`./php8.4-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.4-node.mjs'), constructorArgs);
 				break;
 
 			case '8.3':
-				super(import(`./php8.3-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.3-node.mjs'), constructorArgs);
 				break;
 
 			case '8.2':
-				super(import(`./php8.2-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.2-node.mjs'), constructorArgs);
 				break;
 
 			case '8.1':
-				super(import(`./php8.1-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.1-node.mjs'), constructorArgs);
 				break;
 
 			case '8.0':
-				super(import(`./php8.0-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.0-node.mjs'), constructorArgs);
 				break;
 
 			default:

@@ -3,7 +3,7 @@ import { PhpCliWeb } from '/packages/php-cli-wasm/PhpCliWeb.mjs';
 import {
 	appendStderr,
 	appendStdout,
-	buildType,
+	libType,
 	createIni,
 	query,
 	runtimeVersion,
@@ -19,7 +19,7 @@ const main = async () => {
 		code: query.get('code') ?? 'echo "Hello, World!";'
 		, ini: createIni()
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
-		, sharedLibs: loadCliSharedLibs(buildType)
+		, sharedLibs: loadCliSharedLibs(libType)
 		, version: runtimeVersion
 	});
 

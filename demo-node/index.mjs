@@ -2,10 +2,10 @@
 import http from 'node:http';
 import { PhpCgiNode } from 'php-cgi-wasm/PhpCgiNode.mjs';
 
-const buildType = process.env.BUILD_TYPE ?? 'dynamic';
+const libType = process.env.LIB_TYPE ?? process.env.BUILD_TYPE ?? 'dynamic';
 const sharedLibs = [];
 
-if(buildType === 'dynamic')
+if(libType === 'dynamic')
 {
 	sharedLibs.push(
 		await import('php-wasm-intl')
@@ -21,7 +21,7 @@ if(buildType === 'dynamic')
 		, await import('php-wasm-gd')
 	);
 }
-else if(buildType === 'shared')
+else if(libType === 'shared')
 {
 	sharedLibs.push(
 		{name: 'libxml2.so',     url: new URL('node_modules/php-wasm-libxml/libxml2.so',    import.meta.url)},

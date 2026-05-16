@@ -12,9 +12,14 @@ import { defineConfig } from 'vite';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appBase = '/php-wasm/';
 const localQuickbusPath = path.resolve(__dirname, '../../projects/quickbus/index.mjs');
+const libType = process.env.LIB_TYPE
+	|| process.env.VITE_LIB_TYPE
+	|| process.env.BUILD_TYPE
+	|| process.env.VITE_BUILD_TYPE
+	|| 'dynamic';
 const sharedSupportLibsPath = path.resolve(
 	__dirname
-	, process.env.BUILD_TYPE === 'shared'
+	, libType === 'shared'
 		? 'src/lib/sharedSupportLibs.js'
 		: 'src/lib/sharedSupportLibs.stub.js'
 );

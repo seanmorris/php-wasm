@@ -1,6 +1,6 @@
 <!--
-Vendored from php-wasm-site working tree based on commit 30bc147c87d58caf7c40bdaa36f1288188d56c91
-Source: https://github.com/seanmorris/php-wasm-site/blob/30bc147c87d58caf7c40bdaa36f1288188d56c91/pages/CHANGELOG.md
+Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
+Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/CHANGELOG.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -8,44 +8,22 @@ Validation refs:
 
 Changes
 
-> Latest nightly artifact build: `Build Artifacts` run `#92` on `develop`, published on February 24, 2026. GitHub Actions run: <https://github.com/seanmorris/php-wasm/actions/runs/22360005357>. Nightly builds are announced in `#nightly-builds` on the `php-wasm` Discord server.
+## v0.1.0 - Aiming for the (GitHub) Stars
 
-## Nightly changes - May 8-13, 2026
+* Rebuilt `demo-web` around Vite, reorganized it into `pages`, `components`, `lib`, and `assets`, and added the newer browser/e2e harnesses plus runtime path helpers for the worker and page builds.
+* Added Quickbus-backed browser messaging, a richer `phpdbg` bus session, and a VSCode debugger bridge for the demo app and debugger workflow.
+* Expanded runtime/build coverage across older targets, including `phpdbg`, SDL, and Vrzno support in PHP `8.0` builds. SDL now ships as the `_sdl` runtime variant instead of a separately loaded shared library.
+* Added `version` and `variant` support to `php-tags`, making it possible to select non-default runtimes from static HTML.
+* Standardized the maintained runtime sources on `.mjs` modules and expanded type/JSDoc coverage across `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, and the extension helper packages.
+* Reworked shared and dynamic extension loading so built-in support libraries, ICU payloads, OpenSSL, libxml/XML, DOM, SimpleXML, XMLReader, and XMLWriter behave consistently across Node, browser, demo, and docs/test harnesses.
+* Suppressed implicit `libxml2.so` loading when it is not provided in `sharedLibs`, which reduces startup download size for minimal runtime configurations.
+* Broadened verification with vendored `php-wasm-site` docs fixtures, split docs/CGI coverage suites, deeper CLI-node PHPT coverage, richer XML/intl/tidy/iconv/sqlite smoke tests, and browser-test race-condition fixes.
+* Added `require()` support and CJS harness coverage for the core Node runtimes, documented manual extension asset wiring for CommonJS consumers, standardized `LIB_TYPE` as the static/shared/dynamic selector, and left `BUILD_TYPE` as the JS/MJS wrapper-format selector.
+* Improved local workspace and release plumbing with symlink-aware package loading, action-artifact overlay support, and refreshed README/package docs around runtime defaults, versioned `.wasm` assets, extension wiring, interactive CLI/debugger behavior via `waitline`, and Cloudflare D1 setup through `pdo_cfd1`.
 
-### Runtime & packaging
+## v0.0.9 - Here there be dragons
 
-* Shared-object packaging was cleaned up across the extension packages so runtime-loadable modules expose a more consistent JS package surface and test/build plumbing no longer carries duplicate per-package loader rules.
-* Static and shared test paths stopped carrying their own separate stdlib/runtime assumptions. Shared-lib resolution is now centralized in the Node test wrappers so package smoke tests, docs fixtures, demos, and CLI-node PHPT runs follow the same loader rules.
-* Static and shared builds now treat OpenSSL support more like a built-in runtime feature: `libssl` and related support no longer have to be re-injected in the same places as dynamic extension packages, and the CI matrix was updated to match the new static SSL layout.
-* Shared runtime loading now distinguishes built-in extensions from third-party support libraries. That fixes cases like `intl`, where shared builds should load ICU support libraries without trying to reload `php8.x-intl.so`.
-* The ICU data filter was refreshed to trim collation payload size without regressing the currently tested `intl` surface.
-
-### Demo & worker loading
-
-* Shared `demo-web` CGI workers now keep a split ESM module graph instead of collapsing every shared runtime into one oversized service-worker bundle.
-* `demo-web` was updated to lazy-load CGI worker instances and to supply shared support libraries more accurately, including the missing ICU/shared-lib path that was breaking shared worker runs.
-* Browser and Node demo/test harnesses were updated to follow the same shared-lib resolution rules as the package runtimes.
-
-### XML, libxml & extension fixes
-
-* Fixed XML-family shared and dynamic regressions across supported PHP versions, including `xml_parser_create()` and file-backed `SimpleXML` and `DOMDocument` paths.
-* The libxml/XML patch set for PHP `8.0` through `8.5` was corrected and realigned so rebuilt runtimes behave consistently across versions.
-* Added the `php-wasm-xmlwriter` package and wired it into the extension packaging, smoke tests, and runtime loader coverage.
-
-### PHPT & test coverage
-
-* Expanded direct `php-cli-node` PHPT coverage across `tests/lang`, `dom`, `simplexml`, `xmlwriter`, `zlib`, `sqlite3`, `tidy`, `iconv`, and `intl`.
-* The PHPT runner now handles malformed section headers, version-specific renamed tests, `%r` patterns in `EXPECTF`, `{PWD}` ini expansion, and modern fatal-error output with stack traces.
-* XMLWriter was added to the CI env matrix, and the CLI-node PHPT inventory was pushed much deeper across all supported PHP versions.
-
-### CI & harness stability
-
-* `demo-web` artifact smoke testing was added to CI so built web artifacts are exercised after packaging, not just built.
-* Shared-build smoke tests for Node and Deno were corrected so built-in extensions are not redundantly loaded as if they were dynamic modules.
-* The Node CGI harness picked up startup and dependency fixes, including better startup timing behavior and workflow fixes around missing install/setup steps.
-* Build jobs that depend on upstream downloads now use more resilient retry behavior, and cross-version rebuild cleanup was tightened so stale generated headers and wrappers do not poison later builds.
-
-## v0.0.9 - Aiming for the (GitHub) Stars
+*Version 0.0.9 is represented by a near endless stream of letter-tagged alpha releases and will be considered officially skipped. The changes in v0.1.0 mostly landed somewhere in this range, but since the API is not stable, here there be dragons.*
 
 * Adding PHP-CGI support!
 * Runtime extension loading!
@@ -60,8 +38,8 @@ Changes
 * Modules are now webpack-compatible out of the box.
 * Exposing FS methods w/queueing & locking to sync files between tabs & workers.
 * Fixed the bug with POST requests under Firefox.
-* Adding support for PHP 8.3.7
-* Automatic CI testing for PHP 8.0, 8.1, 8.2 & 8.3.
+* Adding support for PHP 8.3.7 & 8.4.1.
+* Automatic CI testing for PHP 8.0, 8.1, 8.2, 8.3, & 8.4.
 
 ## v0.0.8 - Preparing for Lift-off
 

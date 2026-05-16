@@ -9,7 +9,7 @@ import '../styles/dbg-preview.css';
 import loading from '../assets/ui/loading.svg';
 
 import Convert from 'ansi-to-html';
-import { buildType } from '../lib/runtimePaths';
+import { libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 const parser = new Convert;
@@ -17,7 +17,7 @@ const parser = new Convert;
 const sharedLibs = [
 ];
 
-if(buildType === 'dynamic')
+if(libType === 'dynamic')
 {
 	sharedLibs.push(...(await Promise.all([
 		import('php-wasm-libxml')
@@ -38,7 +38,7 @@ if(buildType === 'dynamic')
 		, import('php-wasm-yaml')
 	])).map(module => module.default));
 }
-else if(buildType === 'shared')
+else if(libType === 'shared')
 {
 	sharedLibs.push(...sharedSupportLibs);
 	sharedLibs.push(...(await Promise.all([

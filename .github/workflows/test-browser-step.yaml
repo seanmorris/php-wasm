@@ -67,7 +67,7 @@ jobs:
         run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
 
       - name: Run tests
-        run: PHP_VERSION=${{ inputs.phpVersion }} PHP_VARIANT=${{ inputs.phpVariant }} BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-browser
+        run: PHP_VERSION=${{ inputs.phpVersion }} PHP_VARIANT=${{ inputs.phpVariant }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-browser
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

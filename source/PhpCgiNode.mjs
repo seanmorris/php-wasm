@@ -4,6 +4,20 @@ import url from 'node:url';
 import fs from 'node:fs';
 
 const defaultVersion = '8.4';
+const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
+	? runtime
+	: {default: runtime};
+
+const loadRuntime = specifier => {
+	if(typeof require === 'function')
+	{
+		return Promise.resolve(
+			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
+		);
+	}
+
+	return import(specifier).then(normalizeRuntimeModule);
+};
 
 /** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
 
@@ -51,27 +65,27 @@ export class PhpCgiNode extends PhpCgiBase
 		switch(version)
 		{
 			case '8.5':
-				super(import(`./php8.5-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.5-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.4':
-				super(import(`./php8.4-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.4-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.3':
-				super(import(`./php8.3-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.3-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.2':
-				super(import(`./php8.2-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.2-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.1':
-				super(import(`./php8.1-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.1-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.0':
-				super(import(`./php8.0-cgi-node.mjs`), constructorArgs);
+				super(loadRuntime('./php8.0-cgi-node.mjs'), constructorArgs);
 				break;
 
 			default:

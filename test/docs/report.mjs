@@ -2,11 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { strict as assert } from 'node:assert';
 
-import sqlite from 'php-wasm-sqlite';
-import yaml from 'php-wasm-yaml';
-import dom from 'php-wasm-dom';
-import libxml from 'php-wasm-libxml';
-
 import { buildDocsInventory } from './lib/inventory.mjs';
 import { builderScript, docsRoot, repoRoot, sourceRoot } from './lib/paths.mjs';
 import {
@@ -20,6 +15,9 @@ import {
 	withTempDir,
 	writeTree,
 } from './lib/runtime.mjs';
+import extensionAssets from '../lib/extension-assets.js';
+
+const { getPackage } = extensionAssets;
 
 function readLocal(file)
 {
@@ -119,23 +117,26 @@ async function validateInstallAndInclude(page)
 	// Blocks 1-6
 	const cdnImport = "const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');";
 	const unpkgImport = "const { PhpWeb } = await import('https://unpkg.com/php-wasm/PhpWeb.mjs');";
-	const npmInstalls = '$ npm i php-wasm\n$ npm i php-cgi-wasm\n$ npm i php-wasm-builder';
-	const localAssets = 'node_modules/php-wasm/php-web.mjs.wasm\nnode_modules/php-cgi-wasm/php-cgi-worker.mjs.wasm';
+	const npmInstalls = '$ npm i php-wasm\n$ npm i php-cgi-wasm\n$ npm i php-cli-wasm\n$ npm i php-dbg-wasm\n$ npm i php-wasm-builder';
+	const localAssets = 'node_modules/php-wasm/php8.4-web.mjs.wasm\nnode_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm';
 	const esmImport = "import { PhpWeb } from 'php-wasm/PhpWeb.mjs';";
-	const cjsImport = "const { PhpWeb } = require('php-wasm/PhpWeb.js');";
+	const cjsRequire = "const { PhpNode } = require('php-wasm/PhpNode');";
 	const text = page.blocks.map(block => block.code).join('\n');
+	const markdown = readLocal(path.join(docsRoot, page.file));
 
 	assert.match(text, new RegExp(cdnImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(unpkgImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(npmInstalls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(localAssets.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(esmImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-	assert.match(text, new RegExp(cjsImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(text, new RegExp(cjsRequire.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.match(markdown, /Core Node runtimes support both ESM and CommonJS\./);
+	assert.match(markdown, /Extension helper JS packages (?:also )?remain ESM-only\./);
 
 	return coverAll(
 		page,
 		'static_validated',
-		'CDN, package-install, and import-format snippets were copied from the docs page and validated against current package entrypoints.',
+		'CDN, package-install, and ESM/CommonJS import snippets were copied from the docs page and validated against current package entrypoints.',
 		{
 			source: path.join(repoRoot, 'packages/php-wasm'),
 		}
@@ -334,8 +335,8 @@ async function validateLoadingFiles(page)
 async function validateTransactions(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
-	const baseSource = readLocal(path.join(sourceRoot, 'PhpBase.js'));
-	const webTransactionSource = readLocal(path.join(sourceRoot, 'webTransactions.js'));
+	const baseSource = readLocal(path.join(sourceRoot, 'PhpBase.mjs'));
+	const webTransactionSource = readLocal(path.join(sourceRoot, 'webTransactions.mjs'));
 
 	assert.match(readLocal(page.file.startsWith('/') ? page.file : path.join(docsRoot, page.file)), /Web and Worker environments only/i);
 	assert.match(baseSource, /this\.autoTransaction = \('autoTransaction' in args\) \? args\.autoTransaction : true;/);
@@ -355,8 +356,15 @@ async function validateUsingExtensions(page)
 {
 	const runtimeVersion = getAvailablePhpNodeVersion();
 	const php = await createPhpNode({
-		sharedLibs: [sqlite, yaml],
-		dynamicLibs: [libxml, dom],
+		version: runtimeVersion,
+		sharedLibs: [
+			getPackage('sqlite', runtimeVersion),
+			getPackage('yaml', runtimeVersion),
+		],
+		dynamicLibs: [
+			getPackage('libxml', runtimeVersion),
+			getPackage('dom', runtimeVersion),
+		],
 	});
 	const io = capturePhpIo(php);
 
@@ -622,7 +630,7 @@ async function validateMethodsPhpWasm(page)
 
 		const php = await createPhpNode({
 			version: runtimeVersion,
-			sharedLibs: [sqlite],
+			sharedLibs: [getPackage('sqlite', runtimeVersion)],
 			files: [
 				{
 					name: 'hello.txt',
@@ -804,8 +812,8 @@ export async function buildDocsCoverageReport(options = {})
 		nodeRuntimeVersion: getAvailablePhpNodeVersion(),
 		cgiNodeRuntimeVersion: normalizedOptions.includeCgiNode ? (process.env.PHP_VERSION ?? null) : null,
 		sourceDefaults: {
-			phpNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpNode.js')),
-			phpCgiNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpCgiNode.js')),
+			phpNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpNode.mjs')),
+			phpCgiNode: parseSourceDefaultVersion(path.join(sourceRoot, 'PhpCgiNode.mjs')),
 		},
 		options: normalizedOptions,
 		files,

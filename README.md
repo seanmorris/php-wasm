@@ -159,14 +159,7 @@ Install php-wasm with npm:
 $ npm install php-wasm
 ```
 
-Include the module in your preferred format:
-
-### CommonJS
-
-```javascript
-const { PhpWeb } = require('php-wasm/PhpWeb.js');
-const php = new PhpWeb;
-```
+Include the module:
 
 ### ESM
 
@@ -205,11 +198,22 @@ node_modules/php-wasm/php8.4-worker.mjs.wasm # ONLY if you're running the standa
 For `php-cgi-wasm`:
 
 ```bash
-node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm
-node_modules/php-cgi-wasm/php8.4-cgi-web.mjs.wasm # ONLY if you're running the cgi build in a page
+node_modules/php-cgi-wasm/php8.4-cgi-node.mjs.wasm # ONLY if you're running the CGI build in Node.js
+node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm # ONLY if you're running the CGI build in a worker
 ```
 
-If you import a different runtime version or use the `.js` entrypoints, copy the matching `php8.x-*.mjs.wasm` or `php8.x-*.js.wasm` file instead.
+If you import a different runtime version, copy the matching `php8.x-*.mjs.wasm` file as well.
+
+Core Node runtimes support both ESM and CommonJS.
+
+For `0.1.0`, use the published entrypoints across the runtime packages:
+
+- `php-wasm/PhpNode`
+- `php-cgi-wasm/PhpCgiNode`
+- `php-cli-wasm/PhpCliNode`
+- `php-dbg-wasm/PhpDbgNode`
+
+Browser/runtime helper entrypoints such as `PhpWeb` and `php-tags` remain ESM-first.
 
 ## 🍎 Quickstart
 
@@ -485,6 +489,41 @@ const php = new PhpWeb({sharedLibs: [ await import('https://cdn.jsdelivr.net/npm
 
 This notation is not available for Service Workers, since they do not yet support dynamic `import()` in this workflow.
 
+The extension helper JS packages shown above are ESM-only. If you need to bypass those helper packages, pass the extension assets manually instead of importing the helper package:
+
+```javascript
+import { PhpNode } from 'php-wasm/PhpNode';
+
+const php = new PhpNode({
+    sharedLibs: [
+        {
+            name: 'php8.4-intl.so',
+            url: new URL('./vendor/php8.4-intl.so', import.meta.url).href,
+            ini: true,
+        },
+        { name: 'libicuuc.so',   url: new URL('./vendor/libicuuc.so', import.meta.url).href },
+        { name: 'libicutu.so',   url: new URL('./vendor/libicutu.so', import.meta.url).href },
+        { name: 'libicutest.so', url: new URL('./vendor/libicutest.so', import.meta.url).href },
+        { name: 'libicuio.so',   url: new URL('./vendor/libicuio.so', import.meta.url).href },
+        { name: 'libicui18n.so', url: new URL('./vendor/libicui18n.so', import.meta.url).href },
+        { name: 'libicudata.so', url: new URL('./vendor/libicudata.so', import.meta.url).href },
+    ],
+    files: [
+        {
+            name: 'icudt72l.dat',
+            parent: '/preload/',
+            url: new URL('./vendor/icudt72l.dat', import.meta.url).href,
+        },
+    ],
+});
+```
+
+When you manage extension assets this way, build mode matters:
+
+- `dynamic`: provide the extension `.so` plus any support libraries and preload files it needs
+- `shared`: provide only the extra support libraries and preload files the runtime still needs
+- `static`: do not inject the extension assets again
+
 ### Compiling extensions
 
 Extensions may be compiled as `dynamic`, `shared`, or `static`. See `Custom Builds` for more information on compiling php-wasm.
@@ -558,9 +597,15 @@ To use NodeFS in `PhpNode`, pass a `persist` object with `mountPath` and `localP
 `mountPath` will be used as the path to the persistent directory within the PHP environment.
 
 ```javascript
-const { PhpNode } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpNode.mjs');
+import path from 'node:path';
+import { PhpNode } from 'php-wasm/PhpNode';
 
-const php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
+const php = new PhpNode({
+    persist: {
+        mountPath: '/persist',
+        localPath: path.join(process.cwd(), 'persist'),
+    }
+});
 ```
 
 ## 📁 Filesystem Operations

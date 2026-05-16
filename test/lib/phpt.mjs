@@ -3,25 +3,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { strict as assert } from 'node:assert';
 
-import dom from '../../packages/dom/index.mjs';
-import iconv from '../../packages/iconv/index.mjs';
-import intl from '../../packages/intl/index.mjs';
-import libxml from '../../packages/libxml/index.mjs';
-import libzip from '../../packages/libzip/index.mjs';
-import mbstring from '../../packages/mbstring/index.mjs';
-import openssl from '../../packages/openssl/index.mjs';
-import phar from '../../packages/phar/index.mjs';
 import { PhpCliNode } from '../../packages/php-cli-wasm/PhpCliNode.mjs';
-import simplexml from '../../packages/simplexml/index.mjs';
-import sqlite from '../../packages/sqlite/index.mjs';
-import tidy from '../../packages/tidy/index.mjs';
-import xml from '../../packages/xml/index.mjs';
-import xmlreader from '../../packages/xmlreader/index.mjs';
-import xmlwriter from '../../packages/xmlwriter/index.mjs';
-import yaml from '../../packages/libyaml/index.mjs';
-import zlib from '../../packages/zlib/index.mjs';
+import extensionAssets from './extension-assets.js';
 import { nodeRuntimeOptions, resolveNodeTestEnv } from './node-runtime-options.mjs';
 
+const { getPackage, getSupportPackage } = extensionAssets;
 const normalize = text => String(text ?? '').replace(/\r\n/g, '\n');
 const normalizeExpectation = text => normalize(text).trim();
 const normalizeActualCandidates = text => {
@@ -33,23 +19,23 @@ const normalizeActualCandidates = text => {
 		: [normalized];
 };
 const extensionPackageMap = new Map([
-	['dom', [{ key: 'libxml', module: libxml }, { key: 'dom', module: dom }]]
-	, ['gd', [{ key: 'zlib', module: zlib }]]
-	, ['iconv', [{ key: 'iconv', module: iconv }]]
-	, ['intl', [{ key: 'intl', module: intl }]]
-	, ['mbstring', [{ key: 'mbstring', module: mbstring }]]
-	, ['openssl', [{ key: 'openssl', module: openssl }]]
-	, ['pdo_sqlite', [{ key: 'sqlite', module: sqlite }]]
-	, ['phar', [{ key: 'phar', module: phar }]]
-	, ['simplexml', [{ key: 'libxml', module: libxml }, { key: 'simplexml', module: simplexml }]]
-	, ['sqlite3', [{ key: 'sqlite', module: sqlite }]]
-	, ['tidy', [{ key: 'tidy', module: tidy }]]
-	, ['xml', [{ key: 'libxml', module: libxml }, { key: 'xml', module: xml }]]
-	, ['xmlreader', [{ key: 'libxml', module: libxml }, { key: 'dom', module: dom }, { key: 'xmlreader', module: xmlreader }]]
-	, ['xmlwriter', [{ key: 'libxml', module: libxml }, { key: 'xmlwriter', module: xmlwriter }]]
-	, ['yaml', [{ key: 'yaml', module: yaml }]]
-	, ['zip', [{ key: 'zlib', module: zlib }, { key: 'libzip', module: libzip }]]
-	, ['zlib', [{ key: 'zlib', module: zlib }]]
+	['dom', ['libxml', 'dom']]
+	, ['gd', ['zlib']]
+	, ['iconv', ['iconv']]
+	, ['intl', ['intl']]
+	, ['mbstring', ['mbstring']]
+	, ['openssl', ['openssl']]
+	, ['pdo_sqlite', ['sqlite']]
+	, ['phar', ['phar']]
+	, ['simplexml', ['libxml', 'simplexml']]
+	, ['sqlite3', ['sqlite']]
+	, ['tidy', ['tidy']]
+	, ['xml', ['libxml', 'xml']]
+	, ['xmlreader', ['libxml', 'dom', 'xmlreader']]
+	, ['xmlwriter', ['libxml', 'xmlwriter']]
+	, ['yaml', ['yaml']]
+	, ['zip', ['zlib', 'libzip']]
+	, ['zlib', ['zlib']]
 ]);
 const packageBuildFlagMap = {
 	dom: 'WITH_DOM'
@@ -70,8 +56,6 @@ const packageBuildFlagMap = {
 	, yaml: 'WITH_YAML'
 	, zlib: 'WITH_ZLIB'
 };
-const intlLibsOnly = { getLibs: intl.getLibs, getFiles: () => [] };
-
 const parsePhpt = source => {
 	const sections = {};
 	let currentSection = null;
@@ -466,12 +450,18 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 
 		if(extensionName === 'intl' && resolvedEnv.WITH_INTL === 'shared')
 		{
-			packages = [{ key: 'intl', module: intlLibsOnly }];
+			if(!seenPackages.has('intl-support'))
+			{
+				seenPackages.add('intl-support');
+				extraPackages.push(getSupportPackage('intl', version));
+			}
+
+			continue;
 		}
 
-		for(const pkg of packages)
+		for(const packageKey of packages)
 		{
-			const packageBuildFlag = packageBuildFlagMap[pkg.key];
+			const packageBuildFlag = packageBuildFlagMap[packageKey];
 			const packageBuildMode = packageBuildFlag ? resolvedEnv[packageBuildFlag] : undefined;
 
 			if(packageBuildMode === 'shared' || packageBuildMode === 'static')
@@ -479,13 +469,13 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 				continue;
 			}
 
-			if(seenPackages.has(pkg.key))
+			if(seenPackages.has(packageKey))
 			{
 				continue;
 			}
 
-			seenPackages.add(pkg.key);
-			extraPackages.push(pkg.module);
+			seenPackages.add(packageKey);
+			extraPackages.push(getPackage(packageKey, version));
 		}
 	}
 

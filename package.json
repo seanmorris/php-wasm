@@ -17,6 +17,7 @@
     "test:browser": "playwright test -c playwright.config.mjs",
     "tsc": "tsc -p jsconfig.json --noEmit",
     "test": "make test",
+    "test:packaging": "node --test test/packaging.test.mjs",
     "test:docs": "node --test test/docs.test.mjs",
     "test:docs-cgi": "node --test test/docs-cgi.test.mjs",
     "docs:coverage": "node ./bin/docs-snippet-report.js"

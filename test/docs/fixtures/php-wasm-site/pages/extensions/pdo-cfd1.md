@@ -17,19 +17,16 @@ pdo_cfd1 requires PHP 8.1+.
 
 ## Connect & Configure
 
-Pass the D1 object into the php-wasm constructor as a key to the `cfd1` object to enable pdo_cfd1 support.
+Pass the D1 object into the runtime constructor as a key to the `cfd1` object to enable pdo_cfd1 support.
 
 `cfd1:` will become available as a PDO driver:
 
 ```javascript
-export async function onRequest(event)
-{
-    const php = new PhpWorker({
-        cfd1: { mainDb: event.env.mainDb }
-    });
+const phpOptions = {
+    cfd1: { mainDb: event.env.mainDb }
+};
 
-    php.run(`<?php $pdo = new PDO('cfd1:mainDb');`);
-}
+await php.run(`<?php $pdo = new PDO('cfd1:mainDb');`);
 ```
 
 You can check `phpinfo()` to make sure that the D1 object is detected. `Cloudflare D1 SQL module detected` will display "yes" when the object has been passed in correctly:
@@ -39,21 +36,18 @@ You can check `phpinfo()` to make sure that the D1 object is detected. `Cloudfla
 PDO can be used with D1 just like any other SQL server:
 
 ```javascript
-export async function onRequest(event)
-{
-    const php = new PhpWorker({
-        cfd1: { mainDb: event.env.mainDb }
-    });
+const phpOptions = {
+    cfd1: { mainDb: event.env.mainDb }
+};
 
-    php.run(`<?php
-        $pdo = new PDO('cfd1:mainDb');
-        $select = $pdo->prepare(
-            'SELECT PageTitle, PageContent FROM WikiPages WHERE PageTitle = ?'
-        );
-        $select->execute([$pageTitle]);
-        $page = $select->fetchObject();`
+await php.run(`<?php
+    $pdo = new PDO('cfd1:mainDb');
+    $select = $pdo->prepare(
+        'SELECT PageTitle, PageContent FROM WikiPages WHERE PageTitle = ?'
     );
-}
+    $select->execute([$pageTitle]);
+    $page = $select->fetchObject();`
+);
 ```
 
 ## Todo

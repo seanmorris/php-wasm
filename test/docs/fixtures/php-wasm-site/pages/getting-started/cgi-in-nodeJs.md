@@ -3,11 +3,11 @@ title: PHP-CGI for Node.js
 weight: -500
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/getting-started/cgi-in-nodeJs.md
+Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
+Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/getting-started/cgi-in-nodeJs.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiNode.js
+- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiNode.mjs
 -->
 # Php-Cgi-Wasm for Node.js
 
@@ -39,7 +39,7 @@ This is the basic pattern:
 ```javascript
 #!/usr/bin/env node
 import http from 'node:http';
-import { PhpCgiNode } from 'php-cgi-wasm/PhpCgiNode.mjs';
+import { PhpCgiNode } from 'php-cgi-wasm/PhpCgiNode';
 
 const php = new PhpCgiNode({
   prefix: '/php-wasm/cgi-bin/',
@@ -77,9 +77,11 @@ server.listen(3003);
 
 Open `http://localhost:3003/php-wasm/cgi-bin/` after creating a PHP app under `./persist/www`.
 
+If you're running CommonJS instead of ESM, use `const { PhpCgiNode } = require('php-cgi-wasm/PhpCgiNode');` and keep the rest of the constructor options the same.
+
 ## Loading extensions
 
-For the dynamic build, pass extension packages as `sharedLibs`:
+When your active library mode is `dynamic`, pass extension packages as `sharedLibs`:
 
 ```javascript
 const php = new PhpCgiNode({
@@ -106,6 +108,8 @@ const php = new PhpCgiNode({
 ```
 
 `sharedLibs` works the same way here as it does in the other runtimes: extension packages resolve their `.so` files and supporting libraries automatically.
+
+The extension helper JS packages remain ESM-only. In CommonJS, do not `require()` those helper packages. Manage extension `.so`, `.data`, `.wasm`, and support-library assets manually through `sharedLibs`, `dynamicLibs`, `files`, and `locateFile`, as described in the extensions guide.
 
 ## Important options
 
@@ -211,4 +215,4 @@ The current Node demo in the upstream repo lives at:
 
 The `PhpCgiNode` class itself is implemented at:
 
-- [`source/PhpCgiNode.js`](https://github.com/seanmorris/php-wasm/blob/develop/source/PhpCgiNode.js)
+- [`source/PhpCgiNode.mjs`](https://github.com/seanmorris/php-wasm/blob/develop/source/PhpCgiNode.mjs)

@@ -21,5 +21,5 @@ fi
 PHP_VERSION="${PHP_VERSION}" \
 PHP_VARIANT="${PHP_VARIANT:-}" \
 BROWSER_TEST_PORT="${PORT}" \
-BUILD_TYPE="${BUILD_TYPE:-dynamic}" \
+LIB_TYPE="${LIB_TYPE:-${BUILD_TYPE:-dynamic}}" \
 npx playwright test "${PLAYWRIGHT_ARGS[@]}"

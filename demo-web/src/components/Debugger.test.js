@@ -51,6 +51,7 @@ const { dumpGlobals, PhpDbgWeb } = vi.hoisted(() => {
 });
 
 vi.mock('../lib/runtimePaths', () => ({
+	libType: 'static',
 	buildType: 'static'
 }));
 

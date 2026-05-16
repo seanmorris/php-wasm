@@ -10,6 +10,20 @@ const defaultVersion = /** @type {PhpRuntimeVersion} */ (
 		? process.env.PHP_VERSION
 		: '8.4'
 );
+const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
+	? runtime
+	: {default: runtime};
+
+const loadRuntime = specifier => {
+	if(typeof require === 'function')
+	{
+		return Promise.resolve(
+			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
+		);
+	}
+
+	return import(specifier).then(normalizeRuntimeModule);
+};
 
 const createLocateFile = () => (name, dir) => {
 	if(name.startsWith('file://'))
@@ -54,27 +68,27 @@ export class PhpCliNode extends PhpBase
 		switch(version)
 		{
 			case '8.5':
-				super(import(`./php8.5-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.5-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			case '8.4':
-				super(import(`./php8.4-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.4-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			case '8.3':
-				super(import(`./php8.3-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.3-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			case '8.2':
-				super(import(`./php8.2-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.2-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			case '8.1':
-				super(import(`./php8.1-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.1-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			case '8.0':
-				super(import(`./php8.0-cli-node.mjs`), constructorArgs, 'cli');
+				super(loadRuntime('./php8.0-cli-node.mjs'), constructorArgs, 'cli');
 				break;
 
 			default:

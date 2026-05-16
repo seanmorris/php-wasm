@@ -7,6 +7,9 @@ const importMeta = import.meta;
 
 const STR = 'string';
 const NUM = 'number';
+const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
+	? runtime
+	: {default: runtime};
 
 /**
  * Base PHP runtime wrapper shared by the environment-specific adapters.
@@ -44,7 +47,7 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Creates a PHP runtime wrapper for a specific module loader and SAPI.
-	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
+	 * @param {Promise<{default: new (args: object) => object}|(new (args: object) => object)>} phpBinLoader Deferred PHP module loader.
 	 * @param {PhpRuntimeArgs} args Runtime configuration for the PHP instance.
 	 * @param {string} sapi SAPI identifier to initialize inside the module.
 	 */
@@ -126,7 +129,7 @@ export class PhpBase extends EventTarget
 
 		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
 
-		this.binary = phpBinLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
+		this.binary = phpBinLoader.then(normalizeRuntimeModule).then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM

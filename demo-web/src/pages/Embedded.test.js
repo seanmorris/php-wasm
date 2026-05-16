@@ -62,6 +62,7 @@ vi.mock('../components/Confirm', () => ({
 
 vi.mock('../lib/runtimePaths', () => ({
 	basePath: (path = '') => `/php-wasm/${path}`
+	, libType: 'static'
 	, buildType: 'static'
 	, defaultPhpVersion: '8.4'
 }));

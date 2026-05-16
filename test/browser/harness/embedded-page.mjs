@@ -4,7 +4,7 @@ import { PhpWeb } from '/packages/php-wasm/PhpWeb.mjs';
 import {
 	appendStderr,
 	appendStdout,
-	buildType,
+	libType,
 	createIni,
 	demo,
 	extensionFlags,
@@ -33,8 +33,8 @@ const main = async () => {
 		, PGlite
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
 		, sharedLibs: [
-			...loadEmbeddedSharedLibs(buildType)
-			, ...loadEmbeddedExtensionLibs(buildType, extensionFlags)
+			...loadEmbeddedSharedLibs(libType)
+			, ...loadEmbeddedExtensionLibs(libType, extensionFlags)
 		]
 	});
 

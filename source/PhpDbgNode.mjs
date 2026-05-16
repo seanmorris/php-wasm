@@ -1,4 +1,4 @@
-import { PhpBase } from 'php-wasm/PhpBase.mjs';
+import { PhpBase } from './PhpBase.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
@@ -11,6 +11,20 @@ const defaultVersion = /** @type {PhpRuntimeVersion} */ (
 		? process.env.PHP_VERSION
 		: '8.4'
 );
+const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
+	? runtime
+	: {default: runtime};
+
+const loadRuntime = specifier => {
+	if(typeof require === 'function')
+	{
+		return Promise.resolve(
+			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
+		);
+	}
+
+	return import(specifier).then(normalizeRuntimeModule);
+};
 
 const createLocateFile = () => (name, dir) => {
 	if(name.startsWith('file://'))
@@ -55,27 +69,27 @@ export class PhpDbgNode extends PhpBase
 		switch(version)
 		{
 			case '8.5':
-				super(import(`./php8.5-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.5-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			case '8.4':
-				super(import(`./php8.4-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.4-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			case '8.3':
-				super(import(`./php8.3-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.3-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			case '8.2':
-				super(import(`./php8.2-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.2-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			case '8.1':
-				super(import(`./php8.1-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.1-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			case '8.0':
-				super(import(`./php8.0-dbg-node.mjs`), constructorArgs, 'phpdbg');
+				super(loadRuntime('./php8.0-dbg-node.mjs'), constructorArgs, 'phpdbg');
 				break;
 
 			default:

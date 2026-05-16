@@ -2,13 +2,14 @@
   "name": "php-cli-wasm",
   "version": "0.1.0",
   "description": "php-cli for wasm.",
-  "main": "./PhpCliNode.mjs",
+  "main": "./PhpCliNode.js",
   "module": "./PhpCliNode.mjs",
   "types": "./PhpCliNode.d.mts",
   "exports": {
     ".": {
       "types": "./PhpCliNode.d.mts",
       "import": "./PhpCliNode.mjs",
+      "require": "./PhpCliNode.js",
       "default": "./PhpCliNode.mjs"
     },
     "./package.json": "./package.json",
@@ -19,20 +20,24 @@
     "./PhpBase": {
       "types": "./PhpBase.d.mts",
       "import": "./PhpBase.mjs",
+      "require": "./PhpBase.js",
       "default": "./PhpBase.mjs"
     },
     "./PhpCliNode": {
       "types": "./PhpCliNode.d.mts",
       "import": "./PhpCliNode.mjs",
+      "require": "./PhpCliNode.js",
       "default": "./PhpCliNode.mjs"
     },
     "./PhpCliWeb": {
       "types": "./PhpCliWeb.d.mts",
       "import": "./PhpCliWeb.mjs",
+      "require": "./PhpCliWeb.js",
       "default": "./PhpCliWeb.mjs"
     },
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
+    "./*.data": "./*.data",
     "./*.wasm": "./*.wasm"
   },
   "repository": {
@@ -59,27 +64,16 @@
     "vrzno"
   ],
   "files": [
+    "*.js",
+    "*.mjs",
     "*.wasm",
+    "*.data",
     "*.d.ts",
     "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",
     "package.json",
-    "PhpCliNode.d.mts",
-    "PhpCliNode.mjs",
-    "PhpCliWeb.js",
-    "PhpCliWeb.mjs",
-    "php*-cli-node.mjs",
-    "php-cli-web.js",
-    "php-cli-web.mjs",
-    "config.js",
-    "config.mjs",
-    "fsOps.js",
-    "fsOps.mjs",
-    "webTransactions.js",
-    "webTransactions.mjs",
-    "resolveDependencies.js",
-    "resolveDependencies.mjs"
+    "public.d.ts"
   ]
 }

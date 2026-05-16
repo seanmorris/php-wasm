@@ -3,15 +3,19 @@ title: Using PHP Extensions
 weight: -1000
 ---
 <!--
-Vendored from php-wasm-site working tree based on commit 30bc147c87d58caf7c40bdaa36f1288188d56c91
-Source: https://github.com/seanmorris/php-wasm-site/blob/30bc147c87d58caf7c40bdaa36f1288188d56c91/pages/extensions/using-php-extensions.md
+Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
+Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/extensions/using-php-extensions.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.js
+- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
 -->
 # Using PHP Extensions
 
-PHP extensions are provided as ESM modules.
+Extension helper JS packages are provided as ESM modules.
+
+Those helper modules rely on `import.meta.url` to resolve their static assets, so there is no universal CommonJS equivalent for them.
+
+If you need to bypass the helper packages, you can still provide the underlying `.so`, `.data`, `.wasm`, and support-library assets manually through the runtime constructors.
 
 You can pass an array as the `sharedLibs` argument to the constructor from Javascript to automatically generate an ini file that loads your extensions.
 
@@ -67,7 +71,62 @@ Unfortunately, this notation is not available for Service Workers, as they do no
 ## Loading extensions manually
 
 
-If you're in an environment where ESM is unavailable, you can provide the extensions manually.
+If you want to bypass the helper packages, you can provide the extensions manually.
+
+```javascript
+import { PhpNode } from 'php-wasm/PhpNode';
+
+const php = new PhpNode({
+  sharedLibs: [
+    {
+      name: 'php8.4-sqlite.so',
+      url: new URL('./vendor/php8.4-sqlite.so', import.meta.url).href,
+      ini: true,
+    },
+    {
+      name: 'libsqlite3.so',
+      url: new URL('./vendor/libsqlite3.so', import.meta.url).href,
+    },
+  ],
+});
+```
+
+This manual asset path is also where library mode matters most:
+
+- `dynamic`: provide the extension `.so` plus any support libraries and preload files it needs
+- `shared`: provide only the extra support libraries and preload files the runtime still needs
+- `static`: do not inject the extension assets again
+
+### CommonJS Node manual assets
+
+CommonJS consumers should treat the extension helper JS packages as ESM-only and load extension assets manually:
+
+```javascript
+const path = require('node:path');
+const { pathToFileURL } = require('node:url');
+const { PhpNode } = require('php-wasm/PhpNode');
+
+const asset = file => pathToFileURL(
+  path.resolve(__dirname, 'vendor', file)
+).href;
+
+const php = new PhpNode({
+  sharedLibs: [
+    {
+      name: 'php8.5-sqlite.so',
+      url: asset('php8.5-sqlite.so'),
+      ini: true,
+    },
+    {
+      name: 'libsqlite3.so',
+      url: asset('libsqlite3.so'),
+      ini: false,
+    },
+  ],
+});
+```
+
+If an extension also needs preload files such as `icudt72l.dat`, provide those through `files`. If you need to override where the base runtime discovers `.wasm`, `.data`, or supporting assets, use `locateFile`.
 
 
 The first codeblock is shorthand for the second. Passing `ini: true` will automatically load the extension via `/php.ini`, passing `ini: false` will wait for a call to `dl()` to do the lookup.

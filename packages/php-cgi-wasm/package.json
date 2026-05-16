@@ -55,6 +55,7 @@
     },
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
+    "./*.data": "./*.data",
     "./*.wasm": "./*.wasm"
   },
   "repository": {
@@ -74,7 +75,7 @@
     }
   ],
   "scripts": {
-    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-cgi-wasm/$FILENAME; echo; done;"
   },
   "keywords": [
     "php",
@@ -84,46 +85,15 @@
     "vrzno"
   ],
   "files": [
+    "*.js",
+    "*.mjs",
     "*.wasm",
+    "*.data",
     "*.d.ts",
     "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",
-    "package.json",
-    "PhpCgiBase.js",
-    "PhpCgiBase.mjs",
-    "PhpCgiNode.js",
-    "PhpCgiNode.mjs",
-    "PhpCgiWeb.js",
-    "PhpCgiWeb.mjs",
-    "PhpCgiWebBase.js",
-    "PhpCgiWebBase.mjs",
-    "PhpCgiWebview.js",
-    "PhpCgiWebview.mjs",
-    "PhpCgiWorker.js",
-    "PhpCgiWorker.mjs",
-    "php-cgi-web.js",
-    "php-cgi-web.mjs",
-    "php-cgi-worker.js",
-    "php-cgi-worker.mjs",
-    "php-cgi-node.js",
-    "php-cgi-node.mjs",
-    "php-cgi-webview.js",
-    "php-cgi-webview.mjs",
-    "breakoutRequest.js",
-    "breakoutRequest.mjs",
-    "config.js",
-    "config.mjs",
-    "fsOps.js",
-    "fsOps.mjs",
-    "msg-bus.js",
-    "msg-bus.mjs",
-    "parseResponse.mjs",
-    "parseResponse.js",
-    "resolveDependencies.js",
-    "resolveDependencies.mjs",
-    "webTransactions.js",
-    "webTransactions.mjs"
+    "package.json"
   ]
 }

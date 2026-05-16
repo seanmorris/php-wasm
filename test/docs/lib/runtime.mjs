@@ -34,9 +34,10 @@ export function getAvailablePhpNodeVersion(options = {})
 		: options;
 
 	const versions = fs.readdirSync(phpWasmPackageDir)
-		.map(entry => entry.match(/^php(\d+\.\d+)-node\.mjs$/))
+		.map(entry => entry.match(/^php(\d+\.\d+)-node\.(?:mjs|js)$/))
 		.filter(Boolean)
 		.map(match => match[1])
+		.filter((version, index, versions) => versions.indexOf(version) === index)
 		.filter(version => !minVersion || version.localeCompare(minVersion, undefined, { numeric: true }) >= 0)
 		.sort((left, right) => right.localeCompare(left, undefined, { numeric: true }));
 
@@ -74,7 +75,7 @@ export async function createPhpNode(options = {})
 {
 	ensureNavigatorLocks();
 	const version = options.version ?? getAvailablePhpNodeVersion();
-	const php = new PhpNode(nodeRuntimeOptions({ version, ...options }));
+	const php = new PhpNode(nodeRuntimeOptions({ version, runtime: 'php', ...options }));
 
 	await php.binary;
 
@@ -92,7 +93,7 @@ export async function createPhpCgiNode(options = {})
 		throw new Error('No PhpCgiNode runtime version was specified. Set PHP_VERSION or pass options.version explicitly.');
 	}
 
-	const php = new PhpCgiNode({ version, ...options });
+	const php = new PhpCgiNode(nodeRuntimeOptions({ version, runtime: 'cgi', ...options }));
 
 	await php.binary;
 

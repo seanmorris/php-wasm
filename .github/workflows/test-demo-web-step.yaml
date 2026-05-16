@@ -48,7 +48,7 @@ jobs:
         run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
 
       - name: Run tests
-        run: BUILD_TYPE=${{ inputs.libType }} DEMO_WEB_ARTIFACT_ROOT=docs make --debug=basic test-demo-web
+        run: LIB_TYPE=${{ inputs.libType }} DEMO_WEB_ARTIFACT_ROOT=docs make --debug=basic test-demo-web
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

@@ -7,7 +7,7 @@ import { PGlite } from '@electric-sql/pglite';
 import '../styles/dbg-preview.css';
 import loading from '../assets/ui/loading.svg';
 import Convert from 'ansi-to-html';
-import { buildType } from '../lib/runtimePaths';
+import { libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 // import libxml from 'php-wasm-libxml';
@@ -24,7 +24,7 @@ const defaultSharedLibs = [
 
 const emptySharedLibs = [];
 
-if(buildType === 'dynamic')
+if(libType === 'dynamic')
 {
 	defaultSharedLibs.push(...(await Promise.all([
 		import('php-wasm-libxml')
@@ -45,7 +45,7 @@ if(buildType === 'dynamic')
 		, import('php-wasm-yaml')
 	])).map(module => module.default));
 }
-else if(buildType === 'shared')
+else if(libType === 'shared')
 {
 	defaultSharedLibs.push(...sharedSupportLibs);
 	defaultSharedLibs.push(...(await Promise.all([
