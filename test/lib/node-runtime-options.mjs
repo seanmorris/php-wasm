@@ -56,6 +56,28 @@ const runtimeLibraryPackages = {
 	cgi: ['libxml', 'dom', 'zlib', 'libzip', 'gd', 'iconv', 'intl', 'openssl', 'mbstring', 'phar', 'sqlite', 'xml', 'simplexml', 'tidy', 'yaml']
 };
 
+const tagPackage = (packageKey, pkg) => ({ __packageKey: packageKey, ...pkg });
+
+const dedupeSharedLibEntries = sharedLibs => {
+	const deduped = [];
+	const seenPackages = new Set;
+
+	for(const entry of sharedLibs)
+	{
+		const packageKey = entry?.__packageKey;
+
+		if(packageKey && seenPackages.has(packageKey))
+		{
+			continue;
+		}
+
+		packageKey && seenPackages.add(packageKey);
+		deduped.push(entry);
+	}
+
+	return deduped;
+};
+
 const sharedLibraryPackages = [
 	[env => envFlagIsShared(env.WITH_LIBXML), 'libxml']
 	, [env => envFlagIsShared(env.WITH_ZLIB), 'zlib']
@@ -165,7 +187,7 @@ export const getNodeEnvSharedLibs = (env = currentEnv()) => {
 
 		if(supportPackage.getLibs().length || supportPackage.getFiles().length)
 		{
-			supportPackages.push(supportPackage);
+			supportPackages.push(tagPackage(packageKey, supportPackage));
 		}
 	}
 
@@ -200,11 +222,11 @@ const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
 		switch(effectivePackageBuildMode(packageKey, env))
 		{
 			case 'dynamic':
-				resolvedPackages.push(getPackage(packageKey, phpVersion));
+				resolvedPackages.push(tagPackage(packageKey, getPackage(packageKey, phpVersion)));
 				break;
 
 			case 'shared':
-				resolvedPackages.push(getSupportPackage(packageKey, phpVersion));
+				resolvedPackages.push(tagPackage(packageKey, getSupportPackage(packageKey, phpVersion)));
 				break;
 		}
 	}
@@ -214,10 +236,11 @@ const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
 
 export const nodeRuntimeOptions = (options = {}, env = currentEnv()) => {
 	const resolvedEnv = resolveNodeTestEnv(options, env);
-	const sharedLibs = [
-		...getNodeEnvRuntimeLibs(options, resolvedEnv)
-		, ...(options.sharedLibs ?? [])
-	];
+	const sharedLibs = dedupeSharedLibEntries([
+		...getNodeEnvSharedLibs(resolvedEnv),
+		...getNodeEnvRuntimeLibs(options, resolvedEnv),
+		...(options.sharedLibs ?? [])
+	]);
 
 	if(!sharedLibs.length)
 	{

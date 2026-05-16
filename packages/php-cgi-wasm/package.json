@@ -29,12 +29,6 @@
       "require": "./PhpCgiNode.js",
       "default": "./PhpCgiNode.mjs"
     },
-    "./PhpCgiWeb": {
-      "types": "./PhpCgiWeb.d.mts",
-      "import": "./PhpCgiWeb.mjs",
-      "require": "./PhpCgiWeb.js",
-      "default": "./PhpCgiWeb.mjs"
-    },
     "./PhpCgiWebBase": {
       "types": "./PhpCgiWebBase.d.mts",
       "import": "./PhpCgiWebBase.mjs",
