@@ -53,6 +53,30 @@ function coverAll(page, status, summary, details = {})
 	}));
 }
 
+async function detectVrznoRuntime(php)
+{
+	let marshalledValue;
+	let marshalError = null;
+
+	try
+	{
+		marshalledValue = await php.x`321`;
+	}
+	catch(error)
+	{
+		marshalError = error;
+	}
+
+	const hasVrznoClass = await php.exec(`class_exists('Vrzno') ? '1' : '0'`) === '1';
+
+	return {
+		hasVrznoClass,
+		hasTaggedMarshalling: marshalledValue === 321,
+		marshalledValue,
+		marshalError,
+	};
+}
+
 async function validateCustomBuilds(page)
 {
 	const builderSource = readLocal(builderScript);
@@ -145,24 +169,27 @@ async function validateInstallAndInclude(page)
 
 async function validatePhpInJs(page)
 {
-	let runtimeVersion;
+	const runtimeVersion = getAvailablePhpNodeVersion();
+	const php = await createPhpNode({ version: runtimeVersion });
+	const io = capturePhpIo(php);
+	const vrznoRuntime = await detectVrznoRuntime(php);
 
-	try
-	{
-		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
-	}
-	catch
+	if(!vrznoRuntime.hasVrznoClass || !vrznoRuntime.hasTaggedMarshalling)
 	{
 		return coverAll(
 			page,
 			'allowed_gap',
-			'php.x examples require a VRZNO-capable PhpNode runtime, but no local PHP 8.1+ node build was available.',
-			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
+			'php.x examples require a VRZNO-capable PhpNode runtime, but the local runtime did not expose tagged-template marshalling.',
+			{
+				gap: 'vrzno_runtime_unavailable',
+				runtimeVersion,
+				hasVrznoClass: vrznoRuntime.hasVrznoClass,
+				hasTaggedMarshalling: vrznoRuntime.hasTaggedMarshalling,
+				marshalledValue: vrznoRuntime.marshalledValue ?? null,
+				marshalError: vrznoRuntime.marshalError?.message ?? null,
+			}
 		);
 	}
-
-	const php = await createPhpNode({ version: runtimeVersion });
-	const io = capturePhpIo(php);
 
 	// Source: test/docs/fixtures/php-wasm-site/pages/getting-started/php-in-js.md
 	// Block 4
@@ -397,24 +424,27 @@ async function validateUsingExtensions(page)
 
 async function validateVrzno(page)
 {
-	let runtimeVersion;
+	const runtimeVersion = getAvailablePhpNodeVersion();
+	const php = await createPhpNode({ version: runtimeVersion });
+	const io = capturePhpIo(php);
+	const vrznoRuntime = await detectVrznoRuntime(php);
 
-	try
-	{
-		runtimeVersion = getAvailablePhpNodeVersion({ minVersion: '8.1' });
-	}
-	catch
+	if(!vrznoRuntime.hasVrznoClass || !vrznoRuntime.hasTaggedMarshalling)
 	{
 		return coverAll(
 			page,
 			'allowed_gap',
-			'Vrzno examples require PHP 8.1+, but no local PhpNode runtime meeting that requirement was available.',
-			{ gap: 'vrzno_runtime_unavailable', requiredMinVersion: '8.1' }
+			'Vrzno examples require a VRZNO-capable PhpNode runtime, but the local runtime did not expose the extension-backed bridge.',
+			{
+				gap: 'vrzno_runtime_unavailable',
+				runtimeVersion,
+				hasVrznoClass: vrznoRuntime.hasVrznoClass,
+				hasTaggedMarshalling: vrznoRuntime.hasTaggedMarshalling,
+				marshalledValue: vrznoRuntime.marshalledValue ?? null,
+				marshalError: vrznoRuntime.marshalError?.message ?? null,
+			}
 		);
 	}
-
-	const php = await createPhpNode({ version: runtimeVersion });
-	const io = capturePhpIo(php);
 
 	io.reset();
 	assert.equal(await php.run(`<?php
@@ -621,7 +651,7 @@ async function validateMethodsPhpCgi(page)
 async function validateMethodsPhpWasm(page)
 {
 	const runtimeVersion = getAvailablePhpNodeVersion();
-	const hasVrzno = runtimeVersion.localeCompare('8.1', undefined, { numeric: true }) >= 0;
+	let hasVrzno = false;
 
 	await withTempDir(async directory => {
 		await writeTree(directory, {
@@ -641,6 +671,8 @@ async function validateMethodsPhpWasm(page)
 			ini: 'display_errors=1\nmemory_limit=256M\n',
 		});
 		const io = capturePhpIo(php);
+		const vrznoRuntime = await detectVrznoRuntime(php);
+		hasVrzno = vrznoRuntime.hasVrznoClass && vrznoRuntime.hasTaggedMarshalling;
 
 		io.reset();
 		assert.equal(await php.run(`<?php echo date('Y-m-d H:i:s', strtotime('8:00pm 2 days ago'));`), 0);
@@ -665,7 +697,7 @@ async function validateMethodsPhpWasm(page)
 			}
 			else
 			{
-				assert.equal(await php.x`321`, '321');
+				assert.equal(vrznoRuntime.marshalledValue, '321');
 			}
 
 		await php.run(`<?php $persisted = 101;`);
