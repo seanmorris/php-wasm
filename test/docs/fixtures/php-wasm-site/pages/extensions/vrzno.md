@@ -125,7 +125,8 @@ $p = new $Promise(function($accept, $reject) use ($window) {
     $window->setTimeout( fn() => $accept('Pass.'), 1000);
 });
 
-$p->then(var_dump(...))->catch(var_dump(...));
+$dump = fn($value) => var_dump($value);
+$p->then($dump)->catch($dump);
 ```
 
 ## Arrays

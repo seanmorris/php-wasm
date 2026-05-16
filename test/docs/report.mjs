@@ -468,7 +468,8 @@ async function validateVrzno(page)
 		$p = new $Promise(function($accept, $reject) {
 			$accept('Pass.');
 		});
-		$p->then(var_dump(...))->catch(var_dump(...));
+		$dump = fn($value) => var_dump($value);
+		$p->then($dump)->catch($dump);
 	`, 0);
 	assert.equal(io.stdout, "string(5) \"Pass.\"\n");
 
