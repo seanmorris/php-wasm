@@ -334,6 +334,7 @@ function Embedded()
 		})}\n`);
 
 		query.set('code', encodeURIComponent(code));
+		query.set('canvas', encodeURIComponent(showCanvas ? 1 : 0));
 		query.set('version', encodeURIComponent(version));
 		query.set('variant', encodeURIComponent(variant));
 
@@ -463,7 +464,7 @@ function Embedded()
 		single.current.checked = !!Number(query.get('single-expression') ?? '');
 		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
 		selectVariantBox.current.value = query.get('variant') ?? '';
-		canvasCheckbox.current.checked = (query.get('showCanvas') ?? 'false') === 'true';
+		canvasCheckbox.current.checked = (query.get('canvas') ?? '0') === '1';
 
 		const settings = parseDemoSettings(initialQueryCode);
 		applySettings(settings);
@@ -700,7 +701,7 @@ function Embedded()
 				</label>
 				<label>
 					<span>Show Canvas</span>
-					<input type = "checkbox" id = "singleExpression" ref = {canvasCheckbox} onChange = {canvasChanged} />
+					<input type = "checkbox" id = "showCanvas" ref = {canvasCheckbox} onChange = {canvasChanged} />
 				</label>
 			</div>
 			<div className = "row">
