@@ -197,7 +197,7 @@ function Embedded()
 	}, []);
 
 	const disposePhp = useCallback(() => {
-		canvasCheckbox.current && (canvasCheckbox.current.checked = false);
+		canvasCheckbox.current && (canvasCheckbox.current.checked = query.get('canvas'));
 		phpRef.current && phpRef.current.refresh();
 		clearPendingAutorun();
 		setStdOut('');
@@ -283,7 +283,7 @@ function Embedded()
 		selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
 
 		setOutputMode(single.current.checked ? 'single' : 'normal');
-		setShowCanvas(canvasCheckbox.current.checked);
+		setShowCanvas(settings['canvas'] ?? canvasCheckbox.current.checked);
 
 		if(settings['render-as'])
 		{
@@ -320,6 +320,7 @@ function Embedded()
 
 		const version = selectVersionBox.current?.value;
 		const variant = selectVariantBox.current?.value;
+		const showCanvas = canvasCheckbox.current?.checked;
 
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
 			'autorun': true
@@ -327,7 +328,7 @@ function Embedded()
 			, 'single-expression': single.current?.checked
 			, 'render-as': htmlRadio.current?.checked ? 'html' : 'text'
 			// 'extensionFlags': 0
-			, 'canvas': canvasCheckbox.current?.checked
+			, 'canvas': showCanvas
 			, 'version': version
 			, 'variant': variant
 		})}\n`);
@@ -405,6 +406,11 @@ function Embedded()
 			return;
 		}
 
+		if(demoName === 'sdl-sine.php')
+		{
+			selectVariantBox.current.value = '_sdl';
+		}
+
 		setRunning(true);
 		setStdOut('');
 		setStdErr('');
@@ -457,6 +463,7 @@ function Embedded()
 		single.current.checked = !!Number(query.get('single-expression') ?? '');
 		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
 		selectVariantBox.current.value = query.get('variant') ?? '';
+		canvasCheckbox.current.checked = (query.get('showCanvas') ?? 'false') === 'true';
 
 		const settings = parseDemoSettings(initialQueryCode);
 		applySettings(settings);
