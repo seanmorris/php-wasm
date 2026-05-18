@@ -8,21 +8,15 @@
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "version": "0.1.0",
   "main": "index.mjs",
+  "types": "index.d.ts",
   "files": [
     "index.mjs",
+    "index.d.ts",
     "test/basic.mjs",
     "LICENSE",
     "NOTICE",
     "README.md",
     "static.mak",
-    "libsqlite3.so",
-    "php8.3-pdo-sqlite.so",
-    "php8.3-sqlite.so",
-    "php8.2-pdo-sqlite.so",
-    "php8.2-sqlite.so",
-    "php8.1-pdo-sqlite.so",
-    "php8.1-sqlite.so",
-    "php8.0-pdo-sqlite.so",
-    "php8.0-sqlite.so"
+    "*.so"
   ]
 }

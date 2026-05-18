@@ -20,6 +20,7 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 ENV_DIR?=.
 ENV_FILE?=.env
 -include ${ENV_FILE}
+LIB_TYPE ?=$(shell basename '${ENV_FILE}' | sed -n 's/^\.env_[0-9][0-9.]*\.\([^.]*\)\.ci$$/\1/p')
 
 ## PHP Version
 PHP_VERSION_DEFAULT=8.4
@@ -38,6 +39,7 @@ WITH_SESSION ?=1
 WITH_TOKENIZER?=1
 
 SKIP_SHARED_LIBS?=0
+PRELOAD_ASSETS?=
 
 ifeq ($(filter ${WITH_BCMATH},0 1),)
 $(error WITH_BCMATH MUST BE 0 or 1. PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
@@ -132,9 +134,10 @@ SHELL=bash -euo pipefail
 
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
-DOCKER_COMPOSE?=docker-compose
+DOCKER_COMPOSE?=docker compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
+LTO_FLAG?=-flto
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
@@ -153,6 +156,7 @@ ARCHIVES=
 SHARED_LIBS=
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
+PRE_JS_CACHE?=
 PHPIZE=third_party/php${PHP_VERSION}-src/scripts/phpize
 
 PRE_JS_FILES+= ${EXTRA_PRE_JS_FILES}
@@ -208,10 +212,6 @@ SKIP_LIBS=
 PHP_ASSET_LIST=
 PHP_ASSET_DIR?=${PHP_DIST_DIR}
 SHARED_ASSET_PATHS=${PHP_ASSET_DIR}
-
-ifneq (${PHP_ASSET_DIR},${PHP_DIST_DIR})
-PHP_ASSET_LIST+=
-endif
 
 PRELOAD_NAME=php
 NOTPARALLEL=
@@ -365,12 +365,13 @@ EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
 ifneq (${PRE_JS_FILES},)
-EXTRA_FLAGS+= --pre-js /src/.cache/pre.js
+PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
+EXTRA_FLAGS+= --pre-js /src/${PRE_JS_CACHE}
 endif
 
-.cache/pre.js: ${PRE_JS_FILES}
+${PRE_JS_CACHE}: ${PRE_JS_FILES}
 ifneq (${PRE_JS_FILES},)
-	${DOCKER_RUN} cat $(addprefix /src/,${PRE_JS_FILES}) > .cache/pre.js
+	${DOCKER_RUN} cat $(addprefix /src/,${PRE_JS_FILES}) > ${PRE_JS_CACHE}
 endif
 
 WEB_FS_TYPE?=-lidbfs.js
@@ -400,11 +401,11 @@ BUILD_FLAGS+=-f ../../php.mk \
 	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
 	SAPI_PHPDBG_PATH='${SAPI_PHPDBG_PATH}'\
 	PHP_CLI_OBJS='${PHP_CLI_OBJS}' \
-	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
-	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration -flto -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
+	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
-		${SYMBOL_FLAGS} -flto -fPIC \
+		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \
 		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
@@ -437,7 +438,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 BUILD_TYPE ?=js
 
 ifneq (${PRE_JS_FILES},)
-DEPENDENCIES+= .cache/pre.js
+DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
 HELPER_MJS=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
@@ -487,14 +488,44 @@ ALL=${MJS} ${CJS} ${TAG_JS}
 
 tags: ${TAG_JS}
 
+############### StdLibs ###############
+
+STDLIB_NODE_TARGET=
+STDLIB_WEB_TARGET=
+STDLIB_WORKER_TARGET=
+STDLIB_WEBVIEW_TARGET=
+
+ifneq ($(filter ${WITH_LIBXML},dynamic),)
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
+STDLIB_NODE_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+STDLIB_WEB_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+STDLIB_WORKER_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+STDLIB_WEBVIEW_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+endif
+endif
+
+stdlib: ${STDLIB_NODE_TARGET} ${STDLIB_WEB_TARGET} ${STDLIB_WORKER_TARGET} ${STDLIB_WEBVIEW_TARGET}
+
+packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
+
+packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
+
 # Single Builds
 
 web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEB_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
+ifneq (${STDLIB_WEB_TARGET},)
+	${MAKE} ${STDLIB_WEB_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -508,8 +539,8 @@ worker-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WORKER_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
+ifneq (${STDLIB_WORKER_TARGET},)
+	${MAKE} ${STDLIB_WORKER_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -523,8 +554,8 @@ webview-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${WEBVIEW_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+ifneq (${STDLIB_WEBVIEW_TARGET},)
+	${MAKE} ${STDLIB_WEBVIEW_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -538,8 +569,8 @@ node-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
 	$(MAKE) ${NODE_MJS}
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
-ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-	${MAKE} packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
+ifneq (${STDLIB_NODE_TARGET},)
+	${MAKE} ${STDLIB_NODE_TARGET}
 endif
 	@ cat ico.ans >&2
 
@@ -783,14 +814,13 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 
 ########## Package files ###########
 
-${PHP_DIST_DIR}/%.js: source/%.js
+${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
-	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|' ${PHP_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?)"\)|require("\1.js")|' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ${PHP_DIST_DIR}/$(notdir $@)
 
-${PHP_DIST_DIR}/%.mjs: source/%.js
+${PHP_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
-	perl -pi -w -e "s~\b(import.+ from )(['\"])(?!node\:)([^'\"]+)\2~\1\2\3.mjs\2~g" $@;
 
 ${PHP_DIST_DIR}/php-tags.mjs: source/php-tags.mjs
 	cp $< $@;
@@ -804,22 +834,6 @@ ${PHP_DIST_DIR}/php-tags.unpkg.mjs: source/php-tags.unpkg.mjs
 ${PHP_DIST_DIR}/php-tags.local.mjs: source/php-tags.local.mjs
 	cp $< $@;
 
-############### StdLibs ###############
-
-stdlib: packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
-
-packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
-
-packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
-
-packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
-
-packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
-	BUILD_TYPE=${WITH_LIBXML} node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
-
 ########### Clerical stuff. ###########
 
 ${ENV_FILE}:
@@ -832,7 +846,6 @@ shared:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS}
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
-#	 @ echo $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
 	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
@@ -893,12 +906,20 @@ php-clean:
 		sapi/cli/php \
 		sapi/cgi/php-cgi'
 	${DOCKER_RUN} bash -c 'rm -f \
-		packages/php-wasm/php-*.mjs \
-		packages/php-cgi-wasm/php-*.mjs \
-		packages/php-wasm/php-*.wasm \
-		packages/php-cgi-wasm/php-*.wasm \
+		packages/php-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-cgi-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-cli-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-dbg-wasm/php${PHP_VERSION}-*.mjs \
+		packages/php-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-cgi-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-cli-wasm/php${PHP_VERSION}-*.wasm \
+		packages/php-dbg-wasm/php${PHP_VERSION}-*.wasm \
 		packages/php-wasm/Php*.mjs \
-		packages/php-cgi-wasm/Php*.mjs'
+		packages/php-cgi-wasm/Php*.mjs' \
+		packages/php-cli-wasm/Php*.mjs' \
+		packages/php-dbg-wasm/Php*.mjs'
+	${DOCKER_RUN} rm -rf lib/include/lexbor
+	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/yaml
 	${DOCKER_RUN} bash -c 'ls third_party/ | grep "php${PHP_VERSION}-.*" | while read DIR; do { \
 		cd "third_party/$${DIR}"; \
 		make clean; \
@@ -941,7 +962,7 @@ clean:
 		packages/php-cli-wasm/*.mjs* \
 		third_party/php${PHP_VERSION}-src/configured \
 		third_party/preload \
-		.cache/pre.js \
+		.cache/pre*.js \
 		.cache/preload-collected
 	${MAKE} php-clean
 
@@ -975,10 +996,11 @@ save-image:
 	mkdir -p ./image
 	docker image save seanmorris/php-emscripten-builder -o ./image/builder.tar
 
+NPM_PUBLISH_TAG?=latest
 NPM_PUBLISH_DRY?=--dry-run
 
 publish:
-	npm publish ${NPM_PUBLISH_DRY}
+	./publish-packages.sh ${NPM_PUBLISH_TAG} ${NPM_PUBLISH_DRY}
 
 test:
 	${MAKE} test-node
@@ -987,14 +1009,23 @@ ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 endif
 
 NODE_TEST_FLAGS=
+DOC_TESTS=
+DOC_TESTS_CJS=
 
-test-node: node-mjs
+ifeq (${LIB_TYPE},dynamic)
+DOC_TESTS+=test/docs.test.mjs
+DOC_TESTS+=test/docs-cgi.test.mjs
+DOC_TESTS_CJS+=test/docs.test.cjs
+endif
+
+test-node: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_ZLIB=${WITH_ZLIB} \
@@ -1004,21 +1035,24 @@ test-node: node-mjs
 	WITH_DOM=${WITH_DOM} \
 	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
 	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
 	WITH_YAML=${WITH_YAML} \
 	WITH_TIDY=${WITH_TIDY} \
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} `ls test/*.mjs`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort`
 
-test-deno: node-mjs
+test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
 	WITH_LIBZIP=${WITH_LIBZIP} \
 	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_ZLIB=${WITH_ZLIB} \
@@ -1028,22 +1062,218 @@ test-deno: node-mjs
 	WITH_DOM=${WITH_DOM} \
 	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
 	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
 	WITH_YAML=${WITH_YAML} \
 	WITH_TIDY=${WITH_TIDY} \
 	WITH_MBSTRING=${WITH_MBSTRING} \
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} `ls test/*.mjs` --allow-read --allow-write --allow-env --allow-net --allow-sys
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} \
+		`find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` \
+		test/cli-node/cli-node.test.mjs \
+		test/dbg-node/dbg-node.test.mjs
+
+test-node-cjs: node-js
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} `find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort`
+
+test-node-cjs-standard: node-js node-cli-js node-dbg-js
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} \
+		`find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort` \
+		test/cli-node/cli-node.test.cjs \
+		test/dbg-node/dbg-node.test.cjs
+
+test-deno: node-mjs node-cgi-mjs
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm
 
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
 
-test-cgi-node:
-	PHP_VERSION=${PHP_VERSION} BUILD_TYPE=${BUILD_TYPE} test/node-cgi-test.sh
+DEMO_WEB_PHP_VERSION ?= 8.4
+
+test-demo-web:
+	PHP_VERSION=${DEMO_WEB_PHP_VERSION} LIB_TYPE=${LIB_TYPE} DEMO_WEB_ARTIFACT_ROOT=${DEMO_WEB_ARTIFACT_ROOT} test/demo-web-test.sh
+
+test-cgi-node: node-mjs node-cgi-mjs
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} test/node-cgi-test.sh
+ifeq (${LIB_TYPE},dynamic)
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.mjs
+endif
+
+test-cgi-node-cjs: node-js node-cgi-js
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} \
+	TEST_FORMAT=cjs test/node-cgi-test.sh
+ifeq (${LIB_TYPE},dynamic)
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.cjs
+endif
 
 update-snapshots:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} BUILD_TYPE=${BUILD_TYPE} REACT_APP_BUILD_TYPE=${BUILD_TYPE} CV_UPDATE_SNAPSHOTS=1 test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash
@@ -1110,10 +1340,10 @@ reconfigure:
 rebuild:
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/configured
 
-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
+demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run build --prefix ./demo-web
 
-serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs packages/sdl/libSDL2.so
+serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run start --prefix ./demo-web
 
 null:

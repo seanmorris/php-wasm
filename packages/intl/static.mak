@@ -2,8 +2,8 @@
 
 third_party/icu-${LIBICU_VERSION}/icu/readme.html:
 	@ echo -e "\e[33;4mDownloading LIBICU\e[0m"
-	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
-	${DOCKER_RUN} wget -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://github.com/unicode-org/icu/releases/download/release-${LIBICU_VERSION}/icu4c-${LIBICU_VERSION_UNDERSCORE}-data.zip
 	${DOCKER_RUN} mkdir -p third_party/icu-${LIBICU_VERSION}
 	${DOCKER_RUN} tar -xvzf icu4c-${LIBICU_VERSION_UNDERSCORE}-src.tgz -C third_party/icu-${LIBICU_VERSION}/
 	${DOCKER_RUN} rm -rf /src/third_party/icu-72-1/icu/source/data/
@@ -106,27 +106,6 @@ packages/intl/libicudata.so: lib/lib/libicudata.so
 packages/intl/$(notdir ${LIBICU_DATFILE}): ${LIBICU_DATFILE}
 	cp -Lp $^ $@
 
-$(addsuffix /libicui18n.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicui18n.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicuio.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicuio.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicutest.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicutest.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicutu.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicutu.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicuuc.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicuuc.so
-	cp -Lp $^ $@
-
-$(addsuffix /libicudata.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/libicudata.so
-	cp -Lp $^ $@
-
-$(addsuffix /$(notdir ${LIBICU_DATFILE}),$(sort ${SHARED_ASSET_PATHS})): packages/intl/$(notdir ${LIBICU_DATFILE})
-	cp -Lp $^ $@
-
 packages/intl/test/%.php${PHP_VERSION}.generated.mjs: third_party/php${PHP_VERSION}-src/ext/intl/tests/%.phpt
 	node bin/translate-test.js --file $^ --phpVersion ${PHP_VERSION} --buildType static > $@
 
@@ -149,6 +128,3 @@ packages/intl/php${PHP_VERSION}-intl.so: ${PHPIZE} third_party/php${PHP_VERSION}
 		/src/packages/intl/libicuio.so \
 		/src/packages/intl/libicutu.so \
 		/src/packages/intl/libicutest.so
-
-$(addsuffix /php${PHP_VERSION}-intl.so,$(sort ${SHARED_ASSET_PATHS})): packages/intl/php${PHP_VERSION}-intl.so
-	cp -Lp $^ $@

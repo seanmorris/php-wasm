@@ -1,43 +1,40 @@
 # php-wasm-sdl
 
-sdl extension for php-wasm
+`php-wasm-sdl` is a compatibility shim for SDL-enabled `php-wasm` runtimes.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm
+```
+
+## What It Does
+
+SDL support now lives entirely in the `_sdl` runtime variant.
+There is no separate `php8.x-sdl.so` payload to load at runtime.
+
+Existing code that imports `php-wasm-sdl` still works, but the package now resolves to an empty shared-library list.
 
 ## Usage
 
-`php-wasm-sdl` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-sdl')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  variant: '_sdl',
+});
+
+await php.run(`<?php var_dump(function_exists('SDL_Init'));`);
 ```
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-sdl.so']});
-```
+## Custom Builds
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+Enable `WITH_SDL` in `.php-wasm-rc`.
 
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
+## Build Options
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-sdl.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_SDL
-
-### WITH_SDL
-
-`0|static`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-sdl.so`.
+- `WITH_SDL`: defaults to `0`.
+- `WITH_SDL=1` enables the `_sdl` runtime variant and compiles `ext-sdl` into that runtime.
+- `WITH_SDL=dynamic` remains accepted as a legacy alias for `1`.
+- Enabling SDL appends `_sdl` to `PHP_VARIANT` in the SDL-specific build rules.

@@ -18,7 +18,6 @@ $(error WITH_DOM=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML
 endif
 CONFIGURE_FLAGS+= --enable-dom
 TEST_LIST+=$(shell ls packages/dom/test/*.mjs)
-EXTRA_MODULES+= packages/dom/php${PHP_VERSION}-dom.so
 endif
 
 ifeq (${WITH_DOM},dynamic)
@@ -45,6 +44,3 @@ else
 	${DOCKER_RUN_IN_EXT_DOM} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 endif
 	${DOCKER_RUN_IN_EXT_DOM} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/dom.a /src/packages/libxml/libxml2.so
-
-$(addsuffix /php${PHP_VERSION}-dom.so,$(sort ${SHARED_ASSET_PATHS})): packages/dom/php${PHP_VERSION}-dom.so
-	cp -Lp $^ $@

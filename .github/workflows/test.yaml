@@ -11,21 +11,36 @@ concurrency:
 
 jobs:
 
-  test-8-4-static:
-    name: Test 8.4 Static
+  test-8-5-static:
+    name: Test 8.5 Static
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
+      - run: cp .circleci/.env_8.5.ci .env
+      - run: make image
+      - run: PHP_VERSION=8.5 make test
+
+  test-8-4-static:
+    name: Test 8.4 Static
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: docker compose version
       - run: cp .circleci/.env_8.4.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-static:
@@ -33,16 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.3.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-static:
@@ -50,16 +64,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.2.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-static:
@@ -67,16 +80,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.1.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-static:
@@ -84,34 +96,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.0.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.0 make test
 
+  test-8-5-dynamic:
+    name: Test 8.5 Dynamic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: docker compose version
+      - run: cp .circleci/.env_8.5-dynamic.ci .env
+      - run: make image
+      - run: PHP_VERSION=8.5 make test
 
   test-8-4-dynamic:
     name: Test 8.4 Dynamic
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.4-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-dynamic:
@@ -119,16 +144,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.3-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-dynamic:
@@ -136,16 +160,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.2-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-dynamic:
@@ -153,16 +176,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.1-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-dynamic:
@@ -170,34 +192,47 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.0-dynamic.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.0 make test
 
+  test-8-5-shared:
+    name: Test 8.5 Shared
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - run: npm install
+      - run: npm install -g deno@2.5.6
+      - run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+      - run: docker compose version
+      - run: cp .circleci/.env_8.5-shared.ci .env
+      - run: make image
+      - run: PHP_VERSION=8.5 make test
 
   test-8-4-shared:
     name: Test 8.4 Shared
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.4-shared.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-shared:
@@ -205,16 +240,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.3-shared.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-shared:
@@ -222,13 +256,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run:  PHP_VERSION=8.2 make test
 
   test-8-1-shared:
@@ -236,16 +269,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.1-shared.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-shared:
@@ -253,14 +285,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
-      - run: sudo apt update && sudo apt install docker-compose -y
+      - run: docker compose version
       - run: cp .circleci/.env_8.0-shared.ci .env
       - run: make image
-      - run: docker network create phpwasm_default
       - run: PHP_VERSION=8.0 make test

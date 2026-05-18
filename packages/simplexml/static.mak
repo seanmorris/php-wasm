@@ -10,7 +10,6 @@ endif
 
 ifeq (${WITH_SIMPLEXML},1)
 WITH_SIMPLEXML=dynamic
-EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},static)
@@ -19,7 +18,6 @@ $(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_
 endif
 CONFIGURE_FLAGS+= --enable-simplexml
 TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
-EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
@@ -43,6 +41,3 @@ packages/simplexml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PH
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/simplexml.a /src/packages/libxml/libxml2.so
-
-$(addsuffix /php${PHP_VERSION}-simplexml.so,$(sort ${SHARED_ASSET_PATHS})): packages/simplexml/php${PHP_VERSION}-simplexml.so
-	cp -Lp $^ $@

@@ -2,6 +2,34 @@
   "name": "php-dbg-wasm",
   "version": "0.1.0",
   "description": "phpdbg for wasm.",
+  "main": "./PhpDbgNode.js",
+  "module": "./PhpDbgNode.mjs",
+  "types": "./PhpDbgNode.d.mts",
+  "exports": {
+    ".": {
+      "types": "./PhpDbgNode.d.mts",
+      "import": "./PhpDbgNode.mjs",
+      "require": "./PhpDbgNode.js",
+      "default": "./PhpDbgNode.mjs"
+    },
+    "./package.json": "./package.json",
+    "./PhpDbgNode": {
+      "types": "./PhpDbgNode.d.mts",
+      "import": "./PhpDbgNode.mjs",
+      "require": "./PhpDbgNode.js",
+      "default": "./PhpDbgNode.mjs"
+    },
+    "./PhpDbgWeb": {
+      "types": "./PhpDbgWeb.d.mts",
+      "import": "./PhpDbgWeb.mjs",
+      "require": "./PhpDbgWeb.js",
+      "default": "./PhpDbgWeb.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.data": "./*.data",
+    "./*.wasm": "./*.wasm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"
@@ -15,8 +43,11 @@
       "url": "https://seanmorr.is"
     }
   ],
+  "dependencies": {
+    "php-wasm": "^0.1.0"
+  },
   "scripts": {
-    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-dbg-wasm/$FILENAME; echo; done;"
   },
   "keywords": [
     "php",
@@ -26,23 +57,15 @@
     "vrzno"
   ],
   "files": [
+    "*.js",
+    "*.mjs",
     "*.wasm",
+    "*.data",
+    "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",
     "package.json",
-    "libxml2.so",
-    "PhpDbgWeb.js",
-    "PhpDbgWeb.mjs",
-    "php-dbg-web.js",
-    "php-dbg-web.mjs",
-    "config.js",
-    "config.mjs",
-    "fsOps.js",
-    "fsOps.mjs",
-    "webTransactions.js",
-    "webTransactions.mjs",
-    "resolveDependencies.js",
-    "resolveDependencies.mjs"
+    "*.d.ts"
   ]
 }

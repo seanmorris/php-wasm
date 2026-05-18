@@ -8,16 +8,14 @@
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "version": "0.1.0",
   "main": "index.mjs",
+  "types": "index.d.ts",
   "files": [
     "index.mjs",
+    "index.d.ts",
     "LICENSE",
     "NOTICE",
     "README.md",
     "static.mak",
-    "libz.so",
-    "php8.3-zlib.so",
-    "php8.2-zlib.so",
-    "php8.1-zlib.so",
-    "php8.0-zlib.so"
+    "*.so"
   ]
 }
