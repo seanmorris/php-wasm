@@ -3,46 +3,79 @@
 set -euo pipefail
 
 usage() {
-	echo "Usage: $0 <npm-tag> [--real] [--registry=<url>]"
+	echo "Usage: $0 <npm-tag> [--dry-run|--real] [--registry <url>|--registry=<url>]"
 	echo
 	echo "Publishes package directories under ./packages serially."
 	echo "Dry-run is the default. Use --real for an actual publish."
 	echo "Do not pass OTP on the command line; let npm prompt if needed."
 }
 
-NPM_TAG="${1:-}"
-shift || true
-
-if [[ -z "${NPM_TAG}" ]]; then
-	usage
-	exit 1
-fi
+NPM_TAG=""
 
 DRY_RUN=1
 REGISTRY="${NPM_REGISTRY:-}"
 
-for ARG in "$@"; do
-	case "${ARG}" in
+while [[ "$#" -gt 0 ]]; do
+	case "$1" in
 		--real)
 			DRY_RUN=0
 			;;
 		--dry-run)
 			DRY_RUN=1
 			;;
+		--registry)
+			shift || true
+			if [[ "$#" -eq 0 ]]; then
+				echo "Missing value for --registry" >&2
+				usage
+				exit 1
+			fi
+			REGISTRY="$1"
+			;;
 		--registry=*)
-			REGISTRY="${ARG#*=}"
+			REGISTRY="${1#*=}"
 			;;
 		-h|--help)
 			usage
 			exit 0
 			;;
-		*)
-			echo "Unknown argument: ${ARG}" >&2
+		--)
+			shift
+			while [[ "$#" -gt 0 ]]; do
+				if [[ -z "${NPM_TAG}" ]]; then
+					NPM_TAG="$1"
+				else
+					echo "Unexpected extra argument: $1" >&2
+					usage
+					exit 1
+				fi
+				shift
+			done
+			break
+			;;
+		-*)
+			echo "Unknown argument: $1" >&2
 			usage
 			exit 1
 			;;
+		*)
+			if [[ -z "${NPM_TAG}" ]]; then
+				NPM_TAG="$1"
+			else
+				echo "Unexpected extra argument: $1" >&2
+				usage
+				exit 1
+			fi
+			;;
 	esac
+	shift
 done
+
+if [[ -z "${NPM_TAG}" ]]; then
+	echo "Missing npm tag." >&2
+	usage
+	exit 1
+fi
 
 if [[ "${DRY_RUN}" -eq 0 && -n "${CI:-}" ]]; then
 	echo "Refusing to run a real publish from CI with the local publish script." >&2
@@ -84,7 +117,7 @@ for PACKAGE in "${PACKAGES[@]}"; do
 
 	PACK_INFO="$(npm pack --dry-run --json)"
 	jq -e '(length > 0) and ((.[0].files | length) > 0)' <<< "${PACK_INFO}" >/dev/null
-	jq -r '.[0] | "  packlist: \(.files | length) files, \(.size) bytes tarball, \(.unpackedSize) bytes unpacked"' <<< "${PACK_INFO}"
+	jq -r '.[0] | "  packlist (\(.files | length) files, \(.size) bytes tarball, \(.unpackedSize) bytes unpacked):", (.files[] | "    - \(.path)")' <<< "${PACK_INFO}"
 
 	cd "../.."
 done
