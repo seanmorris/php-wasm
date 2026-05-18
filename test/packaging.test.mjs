@@ -97,8 +97,9 @@ function writeExecutable(filePath, contents)
 	fs.chmodSync(filePath, 0o755);
 }
 
-function createPublishTestWorkspace(t)
+function createPublishTestWorkspace(t, options = {})
 {
+	const { diffMode = 'changed' } = options;
 	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'publish-packages-'));
 	const binDir = path.join(workspaceDir, 'bin');
 	const logFile = path.join(workspaceDir, 'npm.log');
@@ -136,7 +137,23 @@ case "$1" in
 JSON
 		;;
 	diff)
-		printf '%s\\n' "package.json"
+		case "${diffMode}" in
+			changed)
+				printf '%s\\n' "package.json"
+				;;
+			empty)
+				:
+				;;
+			missing)
+				echo "npm error code E404" >&2
+				echo "npm error 404 '@test/alpha@latest' is not in this registry." >&2
+				exit 1
+				;;
+			*)
+				echo "unexpected diff mode: ${diffMode}" >&2
+				exit 1
+				;;
+		esac
 		;;
 	publish)
 		printf '%s\\n' "$*"
@@ -159,14 +176,15 @@ exit 0
 	};
 }
 
-function runPublishScript(t, args)
+function runPublishScript(t, args, options)
 {
-	const { binDir, logFile, workspaceDir } = createPublishTestWorkspace(t);
+	const { binDir, logFile, workspaceDir } = createPublishTestWorkspace(t, options);
 	const result = spawnSync('bash', ['publish-packages.sh', ...args], {
 		cwd: workspaceDir,
 		encoding: 'utf8',
 		env: {
 			...process.env,
+			CI: '',
 			PATH: `${binDir}:${process.env.PATH ?? ''}`,
 			PUBLISH_TEST_LOG: logFile,
 		},
@@ -262,4 +280,36 @@ test('publish-packages.sh rejects extra positional arguments', t => {
 
 	assert.notEqual(result.status, 0);
 	assert.match(result.stderr, /Unexpected extra argument: latest/);
+});
+
+test('publish-packages.sh skips publishes when npm diff is empty', t => {
+	const result = runPublishScript(t, ['next'], { diffMode: 'empty' });
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, /no diff against next; skipping publish/);
+	assert.match(result.stdout, /No packages need publishing for tag next\./);
+	assert.doesNotMatch(result.log, /publish --tag next/);
+});
+
+test('publish-packages.sh still publishes first-release packages when npm diff returns 404', t => {
+	const result = runPublishScript(t, ['next'], { diffMode: 'missing' });
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, /package missing on next; treating as a publish candidate/);
+	assert.match(result.log, /publish --tag next --dry-run/);
+});
+
+test('publish-packages.sh uses a fresh otp source for real publishes', t => {
+	const result = runPublishScript(t, [
+		'--real',
+		'--otp-command',
+		'printf 654321',
+		'next',
+	]);
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(
+		result.log,
+		/publish --tag next --otp 654321/
+	);
 });
