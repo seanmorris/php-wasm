@@ -10,7 +10,7 @@
   "main": "index.mjs",
   "types": "index.d.ts",
   "files": [
-    "index.mjs",
+    "*.mjs",
     "index.d.ts",
     "NOTICE",
     "README.md",

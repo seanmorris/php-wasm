@@ -10,10 +10,10 @@
   "main": "index.mjs",
   "types": "index.d.ts",
   "files": [
-    "index.mjs",
+    "*.mjs",
     "index.d.ts",
     "test/basic.mjs",
-    "env.mjs",
+    "env.js",
     "filter.json",
     "LICENSE",
     "NOTICE",

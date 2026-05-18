@@ -59,7 +59,7 @@
   "files": [
     "*.js",
     "*.mjs",
-    "*.wasm",
+    "[0-9a-f]*.wasm",
     "*.data",
     "*.d.mts",
     "LICENSE",
