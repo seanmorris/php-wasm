@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { PhpNode } from '../../../test/lib/PhpNode.mjs';
 import { env } from 'node:process';
 
 import libxml from 'php-wasm-libxml';
@@ -87,4 +87,3 @@ test('XML Extension is enabled. (loaded via async module)', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
-

@@ -1,6 +1,6 @@
 {
   "name": "php-wasm",
-  "version": "0.0.9-alpha-33",
+  "version": "0.1.0",
   "description": "Run PHP right in the browser or anywhere else JS can run",
   "repository": {
     "type": "git",
@@ -28,47 +28,87 @@
     "php-wasm",
     "vrzno"
   ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./OutputBuffer": {
+      "import": "./OutputBuffer.mjs",
+      "default": "./OutputBuffer.mjs"
+    },
+    "./PhpBase": {
+      "types": "./PhpBase.d.mts",
+      "import": "./PhpBase.mjs",
+      "require": "./PhpBase.js",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpNode": {
+      "types": "./PhpNode.d.mts",
+      "import": "./PhpNode.mjs",
+      "require": "./PhpNode.js",
+      "default": "./PhpNode.mjs"
+    },
+    "./PhpWeb": {
+      "types": "./PhpWeb.d.mts",
+      "import": "./PhpWeb.mjs",
+      "require": "./PhpWeb.js",
+      "default": "./PhpWeb.mjs"
+    },
+    "./_Event": {
+      "import": "./_Event.mjs",
+      "default": "./_Event.mjs"
+    },
+    "./fsOps": {
+      "import": "./fsOps.mjs",
+      "default": "./fsOps.mjs"
+    },
+    "./resolveDependencies": {
+      "import": "./resolveDependencies.mjs",
+      "default": "./resolveDependencies.mjs"
+    },
+    "./webTransactions": {
+      "import": "./webTransactions.mjs",
+      "default": "./webTransactions.mjs"
+    },
+    "./php-tags": {
+      "types": "./php-tags.d.mts",
+      "import": "./php-tags.mjs",
+      "default": "./php-tags.mjs"
+    },
+    "./php-tags.jsdelivr": {
+      "types": "./php-tags.jsdelivr.d.mts",
+      "import": "./php-tags.jsdelivr.mjs",
+      "default": "./php-tags.jsdelivr.mjs"
+    },
+    "./php-tags.local": {
+      "types": "./php-tags.local.d.mts",
+      "import": "./php-tags.local.mjs",
+      "default": "./php-tags.local.mjs"
+    },
+    "./php-tags.unpkg": {
+      "types": "./php-tags.unpkg.d.mts",
+      "import": "./php-tags.unpkg.mjs",
+      "default": "./php-tags.unpkg.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.wasm": "./*.wasm",
+    "./*.data": "./*.data"
+  },
   "files": [
+    "*.js",
+    "*.mjs",
     "*.wasm",
+    "*.data",
+    "*.d.ts",
+    "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",
     "package.json",
-    "PhpBase.js",
-    "PhpBase.mjs",
-    "PhpNode.js",
-    "PhpNode.mjs",
-    "PhpWeb.js",
-    "PhpWeb.mjs",
-    "PhpWebview.js",
-    "PhpWebview.mjs",
-    "PhpWorker.js",
-    "PhpWorker.mjs",
-    "php-node.js",
-    "php-node.mjs",
-    "php-web.js",
-    "php-web.mjs",
-    "php-worker.js",
-    "php-worker.mjs",
-    "php-webview.js",
-    "php-webview.mjs",
-    "php-tags.mjs",
-    "php-tags.local.mjs",
-    "php-tags.jsdelivr.mjs",
-    "php-tags.unpkg.mjs",
-    "_Event.js",
-    "_Event.mjs",
-    "config.js",
-    "config.mjs",
-    "fsOps.js",
-    "fsOps.mjs",
-    "OutputBuffer.js",
-    "OutputBuffer.mjs",
-    "resolveDependencies.js",
-    "resolveDependencies.mjs",
-    "webTransactions.js",
-    "webTransactions.mjs",
-    "libxml2.so",
+    "stdlib/*.mjs",
     "mapped/*"
   ]
 }

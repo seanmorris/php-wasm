@@ -1,6 +1,15 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../packages/php-wasm/PhpNode.mjs';
+import { PhpNode as BasePhpNode } from '../packages/php-wasm/PhpNode.mjs';
+import { nodeRuntimeOptions } from './lib/node-runtime-options.mjs';
+
+class PhpNode extends BasePhpNode
+{
+	constructor(args = {})
+	{
+		super(nodeRuntimeOptions(args));
+	}
+}
 
 test('Can read files from JS through the FS interface', async () => {
 	const php = new PhpNode( { persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );

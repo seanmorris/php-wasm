@@ -1,7 +1,7 @@
 <?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text"}
 if(!extension_loaded('vrzno'))
 {
-    printf("The VRZNO extension is not loaded. VRZNO is required for this demo and requires PHP >=8.2.");
+    printf("The VRZNO extension is not loaded. VRZNO is required for this demo and requires PHP 8.0+.");
     exit(1);
 }
 

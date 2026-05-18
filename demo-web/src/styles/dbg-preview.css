@@ -1,0 +1,312 @@
+.dbg-preview {
+	display: flex;
+}
+
+.dbg-preview:not([data-iframed="1"]) {
+	width: calc(100% - 1rem);
+	height: calc(100dvh - 1rem);
+}
+
+.dbg-preview .warning {
+	filter: opacity(0.75) saturate(0.75);
+	color: #CCC;
+}
+
+.dbg-preview .status > div {
+	padding-left: 1rem;
+	padding-right: 1rem;
+}
+
+.dbg-preview .status > div > span.file:empty,
+.dbg-preview .status > div > span.file:empty + span.line {
+	display: none;
+}
+
+.dbg-preview .status > div > span.line:before {
+	content: ':';
+}
+
+.dbg-preview .ansi[style~="text-shadow:"] {
+	text-shadow: none !important;
+	font-weight: bold !important;
+}
+
+.phpdbg-console-input img {
+	width: 1.75rem;
+	margin-right: 0.5rem;
+}
+
+.dbg-preview .frame {
+	position: relative;
+	display: flex;
+	flex: 1;
+}
+
+.phpdbg {
+	display: flex;
+	flex-direction: row;
+	position: absolute;
+	width: 100%;;
+	height: 100%;
+	flex: 1;
+	box-sizing: border-box;
+}
+
+.phpdbg-console {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+
+	overflow-y: scroll;
+	overflow-x: auto;
+
+	color: #FFF;
+	background-color: #000;
+}
+
+.phpdbg-console .scroll-to-bottom {
+	z-index: 100;
+	position: sticky;
+	top: 1rem;
+	left: calc(100% - 2.5rem);
+	width: 2rem;
+	height: 2rem;
+	text-align: center;
+	line-height: 2.125rem;
+	padding: 0;
+	user-select: none;
+	-webkit-user-select: none;
+	overflow: hidden;
+
+	background-color: #888;
+	color: #000;
+}
+
+.phpdbg-console .console-output {
+	white-space: pre-wrap;
+	padding: 1rem;
+	min-height: 100%;
+
+	box-sizing: border-box;
+	text-align: left;
+}
+
+.phpdbg-console .console-input span {
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+.phpdbg-console .console-output .line[data-type="stderr"] {
+	color: #888;
+}
+
+.phpdbg-console .console-output .line[data-type="stdin"] {
+	color: #FF0;
+}
+
+.phpdbg-console :not(.line[data-type="stdin"])  + .line[data-type="stdin"],
+.phpdbg-console :not(.line[data-type="stdout"]) + .line[data-type="stdout"],
+.phpdbg-console :not(.line[data-type="stderr"]) + .line[data-type="stderr"] {
+	margin-top: 0.5rem;
+}
+
+.phpdbg-console .console-input {
+	display: flex;
+	align-items: center;
+	border-top: 1px solid #999;
+	margin-top: 1rem;
+	transition: filter 0.5s ease-in-out;
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) {
+	filter: saturate(0);
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) span {
+	filter: opacity(0.25);
+}
+
+.phpdbg-console .console-input:not([data-ready="true"]) span {
+	font-style: italic;
+}
+
+.phpdbg-console .console-input input {
+	flex: 1;
+	min-height: 100%;
+	box-sizing: border-box;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	padding-left: 0.25rem;
+	padding-right: 0.25rem;
+	font: inherit;
+	color: inherit;
+	background-color: inherit;
+	border: 0;
+	cursor: text;
+}
+
+.phpdbg-console .console-input span {
+	color: #FF0;
+}
+
+.phpdbg-console .console-input button {
+	border: 0;
+	margin: 0;
+	width: 2rem;
+	height: 100%;
+	font-weight: bold;
+	background-color: #888;
+}
+
+.phpdbg-console .console-input button:active {
+	filter: brightness(2);
+}
+
+.phpdbg .phpdbg-left-panel {
+	flex-grow: 1;
+	flex-basis: 50%;
+	position: relative;
+}
+
+.phpdbg .phpdbg-right-panel {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	flex-basis: 30%;
+
+	background-color: #FFF;
+}
+
+.phpdbg .phpdbg-zval label {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+	border-right: 1px solid #CCC;
+
+	width: 100%;
+}
+
+.phpdbg .phpdbg-zval label > div:not(:has(*)) {
+	padding: 0.25rem;
+}
+
+.phpdbg .phpdbg-zval label .variable-name {
+	background-color: #CCC;
+}
+
+.phpdbg .phpdbg-zval label .variable-name {
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+}
+
+.phpdbg .phpdbg-zval label .variable-value {
+	background-color: #FFF;
+	flex-grow: 1;
+}
+
+.phpdbg .phpdbg-zval label {
+	border-bottom: 1px solid #0004;
+}
+
+.phpdbg .phpdbg-zval label .phpdbg-zval label:last-child {
+	border-bottom: none;
+}
+
+.editor .phpdbg .phpdbg-right-panel .toolbar {
+	margin: 0;
+	background-color: #ccc;
+	border-top: none;
+	overflow-x: auto;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.phpdbg-panel {
+	display: none;
+	width: 100%;
+	overflow-y: auto;
+	overflow-x: auto;
+}
+
+.editor .phpdbg .phpdbg-right-panel[data-current-panel="none"] {
+	display: none;
+}
+
+[data-current-panel="variables"] .phpdbg-panel.phpdbg-variables {
+	display: initial;
+}
+
+[data-current-panel="globals"] .phpdbg-panel.phpdbg-globals {
+	display: initial;
+}
+
+[data-current-panel="constants"] .phpdbg-panel.phpdbg-constants {
+	display: initial;
+}
+
+[data-current-panel="classes"] .phpdbg-panel.phpdbg-classes {
+	display: initial;
+}
+
+[data-current-panel="functions"] .phpdbg-panel.phpdbg-functions {
+	display: initial;
+}
+
+[data-current-panel="files"] .phpdbg-panel.phpdbg-files {
+	display: initial;
+}
+
+[data-current-panel="trace"] .phpdbg-panel.phpdbg-trace {
+	display: initial;
+}
+
+.phpdbg-panel.phpdbg-trace .current-frame {
+	background-color: #008;
+	color: #FFF;
+}
+
+.phpdbg-panel-frame {
+	position: relative;
+	width: 100%;
+	flex: 1;
+	box-sizing: border-box;
+}
+
+.phpdbg-panel-frame-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	overflow: auto;
+}
+
+.phpdbg-panel.phpdbg-files > div,
+.phpdbg-panel.phpdbg-classes > div,
+.phpdbg-panel.phpdbg-trace > div,
+.phpdbg-panel.phpdbg-functions > div {
+	padding: 0.5rem;
+	border-bottom: 1px solid #CCC;
+	white-space: pre;
+}
+
+.phpdbg-panel.phpdbg-files > div span,
+.phpdbg-panel.phpdbg-classes > div span,
+.phpdbg-panel.phpdbg-trace > div,
+.phpdbg-panel.phpdbg-functions > div > span {
+	cursor: pointer;
+}
+
+.phpdbg-panel.phpdbg-classes > div .filename,
+.phpdbg-panel.phpdbg-functions > div .filename {
+	color: #666;
+}
+
+.phpdbg-panel.phpdbg-files > div:active span,
+.phpdbg-panel.phpdbg-classes > div:active span,
+.phpdbg-panel.phpdbg-functions > div:active > span {
+	color: #999;
+}
+

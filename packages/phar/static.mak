@@ -8,13 +8,11 @@ endif
 
 ifeq (${WITH_PHAR},1)
 WITH_PHAR=dynamic
-EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},static)
 CONFIGURE_FLAGS+= --enable-phar
 TEST_LIST+=packages/phar/test/basic.mjs
-EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 
 ifeq (${WITH_PHAR},dynamic)
@@ -40,6 +38,3 @@ packages/phar/php${PHP_VERSION}-phar.so: ${PHPIZE} third_party/php${PHP_VERSION}
 	${DOCKER_RUN_IN_EXT_PHAR} cp ../../packages/phar/phar.mak .
 	${DOCKER_RUN_IN_EXT_PHAR} emmake make -f phar.mak -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include/';
 	${DOCKER_RUN_IN_EXT_PHAR} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/phar.a
-
-$(addsuffix /php${PHP_VERSION}-phar.so,$(sort ${SHARED_ASSET_PATHS})): packages/phar/php${PHP_VERSION}-phar.so
-	cp -Lp $^ $@

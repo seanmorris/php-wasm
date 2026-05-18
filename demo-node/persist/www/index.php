@@ -42,6 +42,8 @@
 			<div>
 				<div>More:</div>
 				<div><a target = "_blank" href = "/php-wasm/cgi-bin/phpinfo.php">phpinfo</a></div>
+				<div><a target = "_blank" href = "/php-wasm/cgi-bin/test/version.php">version</a></div>
+				<div><a target = "_blank" href = "/php-wasm/cgi-bin/test/extensions.php">extensions</a></div>
 			</div>
 		</div>
 	</body>
