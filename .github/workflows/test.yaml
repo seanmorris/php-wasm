@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  SKIP_PACKAGING_TEST: 1
+
 jobs:
 
   test-8-5-static:

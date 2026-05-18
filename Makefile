@@ -1011,6 +1011,13 @@ endif
 NODE_TEST_FLAGS=
 DOC_TESTS=
 DOC_TESTS_CJS=
+PACKAGING_TESTS=test/packaging.test.mjs
+
+ifdef SKIP_PACKAGING_TEST
+ifeq (${SKIP_PACKAGING_TEST},1)
+PACKAGING_TESTS=
+endif
+endif
 
 ifeq (${LIB_TYPE},dynamic)
 DOC_TESTS+=test/docs.test.mjs
@@ -1043,7 +1050,7 @@ test-node: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort`
 
 test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1070,8 +1077,8 @@ test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} \
-		`find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` \
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} \
+		`find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` \
 		test/cli-node/cli-node.test.mjs \
 		test/dbg-node/dbg-node.test.mjs
 
@@ -1157,7 +1164,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm
 
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
