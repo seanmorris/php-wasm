@@ -2,6 +2,9 @@
 
 set -eux;
 
+export VITE_LIB_TYPE="${VITE_LIB_TYPE:-${LIB_TYPE:-${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}}}"
+export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${VITE_LIB_TYPE}}"
+
 if [ -d 'public/static/media/mapped' ]; then {
 	rm public/static/media/*.map || true
 	rm -rf public/static/media/mapped
@@ -21,23 +24,15 @@ rm -f public/*.map;
 rm -f public/*.js;
 rm -f public/*.so;
 rm -f public/*.dat;
+rm -rf public/worker-assets;
+rm -f public/assets/php*-web.mjs public/assets/php*-web.mjs.wasm || true
 
 rm -rf public/static/media/*.map public/static/media/mapped
 
-GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx webpack --config service-worker-prod.config.ts;
-GENERATE_SOURCEMAP=false NODE_OPTIONS='--max_old_space_size=8192' npx react-scripts build;
+NODE_OPTIONS='--max_old_space_size=8192' npm run build:worker;
+NODE_OPTIONS='--max_old_space_size=8192' npm run build:app;
 
-cat aphex.txt >> build/index.html;
-
-cp build/index.html build/404.html;
-cp build/index.html build/code-editor.html;
-cp build/index.html build/dbg-preview.html;
-cp build/index.html build/cli-preview.html;
-cp build/index.html build/embedded-php.html;
-cp build/index.html build/home.html;
-cp build/index.html build/install-demo.html;
-cp build/index.html build/select-framework.html;
-cp build/index.html build/vscode.html;
+node ./scripts/generate-html-aliases.cjs;
 
 # git add \
 # 	../docs/*.js \

@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "ansi-to-html": "^0.7.2",
     "@electric-sql/pglite": "0.2.17",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "ace-builds": "^1.43.6",
+    "ansi-to-html": "^0.7.2",
     "pdo-pglite": "../packages/pdo-pglite",
     "php-cgi-wasm": "../packages/php-cgi-wasm",
     "php-cli-wasm": "../packages/php-cli-wasm",
@@ -22,34 +23,32 @@
     "php-wasm-mbstring": "../packages/mbstring",
     "php-wasm-openssl": "../packages/openssl",
     "php-wasm-phar": "../packages/phar",
-    "php-wasm-sdl": "../packages/sdl",
     "php-wasm-simplexml": "../packages/simplexml",
     "php-wasm-sqlite": "../packages/sqlite",
     "php-wasm-tidy": "../packages/tidy",
     "php-wasm-xml": "../packages/xml",
+    "php-wasm-xmlreader": "../packages/xmlreader",
+    "php-wasm-xmlwriter": "../packages/xmlwriter",
     "php-wasm-yaml": "../packages/libyaml",
     "php-wasm-zlib": "../packages/zlib",
-    "quickbus": "^0.0.0",
-    "react": "^18.3.1",
-    "react-ace-builds": "^7.4.1",
-    "react-dom": "^18.3.1",
+    "quickbus": "^1.0.1",
+    "react": "^19.2.0",
+    "react-ace": "^14.0.1",
+    "react-dom": "^19.2.0",
     "react-router-dom": "^6.23.0",
-    "react-scripts": "5.0.1",
-    "vscode-react": "^0.1.5",
+    "vscode-react": "^0.2.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "bash ./npm-start.sh",
     "build": "bash ./npm-build.sh",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "build:app": "vite build",
+    "build:worker": "node ./scripts/build-worker.cjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src",
+    "lint:fix": "eslint eslint.config.mjs vite.config.mjs vite.worker.config.mjs src --fix",
     "clean": ""
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [
@@ -64,7 +63,20 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "webpack-cli": "^5.1.4"
+    "@eslint/js": "^9.39.1",
+    "@vitejs/plugin-react": "^5.2.0",
+    "babel-loader": "10.1.0",
+    "baseline-browser-mapping": "^2.9.11",
+    "eslint": "^9.39.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.5.0",
+    "jsdom": "^27.0.1",
+    "sm-no-saccade-style": "^0.1.1",
+    "vite": "^7.3.2",
+    "vitest": "^4.1.5",
+    "webpack": "5.102.1",
+    "webpack-cli": "5.1.4"
   }
 }

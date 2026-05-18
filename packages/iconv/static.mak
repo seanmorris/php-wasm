@@ -21,7 +21,7 @@ CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
 SKIP_LIBS+= -liconv
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
-EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
+EXTRA_MODULES+= packages/iconv/libiconv.so
 endif
 
 ifeq (${WITH_ICONV},shared)
@@ -30,8 +30,7 @@ PHP_CONFIGURE_DEPS+= packages/iconv/libiconv.so
 TEST_LIST+=$(shell ls packages/iconv/test/*.mjs)
 SHARED_LIBS+= packages/iconv/libiconv.so
 SKIP_LIBS+= -liconv
-EXTRA_MODULES+= packages/iconv/libiconv.so packages/iconv/php${PHP_VERSION}-iconv.so
-PHP_ASSET_LIST+= libiconv.so
+EXTRA_MODULES+= packages/iconv/libiconv.so
 endif
 
 ifeq (${WITH_ICONV},dynamic)
@@ -50,7 +49,7 @@ ICONV_URL?=https://mirrors.ocf.berkeley.edu/gnu/libiconv/libiconv-${ICONV_VERSIO
 
 third_party/libiconv-1.17/README:
 	@ echo -e "\e[33;4mDownloading Iconv\e[0m"
-	${DOCKER_RUN} wget -q ${ICONV_URL}
+	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q ${ICONV_URL}
 	${DOCKER_RUN} tar -xvzf libiconv-1.17.tar.gz -C third_party
 	${DOCKER_RUN} rm libiconv-1.17.tar.gz
 
@@ -67,9 +66,6 @@ lib/lib/libiconv.so: lib/lib/libiconv.a
 packages/iconv/libiconv.so: lib/lib/libiconv.so
 	cp -Lp $^ $@
 
-$(addsuffix /libiconv.so,$(sort ${SHARED_ASSET_PATHS})): packages/iconv/libiconv.so
-	cp -Lp $^ $@
-
 third_party/php${PHP_VERSION}-iconv/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/iconv /src/third_party/php${PHP_VERSION}-iconv
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-iconv/config.m4
@@ -83,6 +79,3 @@ packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so 
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic#-all-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_ICONV} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/iconv.a /src/packages/iconv/libiconv.so
-
-$(addsuffix /php${PHP_VERSION}-iconv.so,$(sort ${SHARED_ASSET_PATHS})): packages/iconv/php${PHP_VERSION}-iconv.so
-	cp -Lp $^ $@

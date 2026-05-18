@@ -12,7 +12,7 @@ services:
       EMCC_CORES: 8
       ENVIRONMENT: ${ENVIRONMENT:-web}
     volumes:
-      - ./:/src
+      - ${HOST_PROJECT_ROOT:-.}:/src
       - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
-      - ./.cache:/emsdk_portable/.data/cache/asmjs/
+      - ${HOST_PROJECT_ROOT:-.}/.cache:/emsdk_portable/.data/cache/asmjs/
     command: [bash]

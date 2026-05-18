@@ -1,16 +1,10 @@
-<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"html","canvas":true,"variant":"_sdl"}
+<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"html","canvas":true,"variant":"_sdl", "extensionFlags": 0}
 
 error_reporting(E_ALL);
 
 if(!extension_loaded('sdl'))
 {
     printf("The SDL extension is not loaded. Make sure it is in the system and there is a line for it on the php.ini file (eg \"extension=sdl.so\")");
-    exit(1);
-}
-
-if(!extension_loaded('vrzno'))
-{
-    printf("The VRZNO extension is not loaded. VRZNO is required for this demo and requires PHP >=8.2.");
     exit(1);
 }
 
@@ -36,13 +30,14 @@ $renderer = SDL_CreateRenderer($canvas, 0, SDL_RENDERER_ACCELERATED);
 
 $j = 0;
 $render = function() use(&$render, $renderer, &$j, $window) {
-    SDL_SetRenderDrawColor($renderer, 100, 0, 0, 0);
+    SDL_SetRenderDrawColor($renderer, 255, 255, 255, 0);
     SDL_RenderClear($renderer);
 
     SDL_SetRenderDrawColor($renderer, 0, 0, 0, 255);
 
     for ($i = 0; $i < WINDOW_WIDTH; ++$i) {
-        SDL_RenderDrawPoint($renderer, $i, 75 + (int)( sin($j+$i/100) * 15 ));
+        $pos = 75 + (int)( sin($j+$i/100) * 15 );
+        SDL_RenderDrawPoint($renderer, $i, $pos);
         $j += 0.00025;
     }
 
@@ -52,5 +47,3 @@ $render = function() use(&$render, $renderer, &$j, $window) {
 phpinfo();
 
 $render();
-
-

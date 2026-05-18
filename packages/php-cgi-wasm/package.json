@@ -1,13 +1,60 @@
 {
   "name": "php-cgi-wasm",
-  "version": "0.0.9-alpha-33",
+  "version": "0.1.0",
   "description": "php-cgi for wasm.",
+  "main": "./PhpCgiNode.js",
+  "module": "./PhpCgiNode.mjs",
+  "types": "./public.d.ts",
+  "exports": {
+    ".": {
+      "types": "./public.d.ts",
+      "import": "./PhpCgiNode.mjs",
+      "require": "./PhpCgiNode.js",
+      "default": "./PhpCgiNode.mjs"
+    },
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./PhpCgiBase": {
+      "types": "./PhpCgiBase.d.mts",
+      "import": "./PhpCgiBase.mjs",
+      "require": "./PhpCgiBase.js",
+      "default": "./PhpCgiBase.mjs"
+    },
+    "./PhpCgiNode": {
+      "types": "./PhpCgiNode.d.mts",
+      "import": "./PhpCgiNode.mjs",
+      "require": "./PhpCgiNode.js",
+      "default": "./PhpCgiNode.mjs"
+    },
+    "./PhpCgiWebBase": {
+      "types": "./PhpCgiWebBase.d.mts",
+      "import": "./PhpCgiWebBase.mjs",
+      "require": "./PhpCgiWebBase.js",
+      "default": "./PhpCgiWebBase.mjs"
+    },
+    "./PhpCgiWorker": {
+      "types": "./PhpCgiWorker.d.mts",
+      "import": "./PhpCgiWorker.mjs",
+      "require": "./PhpCgiWorker.js",
+      "default": "./PhpCgiWorker.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.js": "./*.js",
+    "./*.data": "./*.data",
+    "./*.wasm": "./*.wasm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=24.5.0"
+  },
   "contributors": [
     {
       "name": "Sean Morris",
@@ -16,7 +63,7 @@
     }
   ],
   "scripts": {
-    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-wasm/$FILENAME; echo; done;"
+    "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-cgi-wasm/$FILENAME; echo; done;"
   },
   "keywords": [
     "php",
@@ -26,45 +73,15 @@
     "vrzno"
   ],
   "files": [
+    "*.js",
+    "*.mjs",
     "*.wasm",
+    "*.data",
+    "*.d.ts",
+    "*.d.mts",
     "LICENSE",
     "NOTICE",
     "README.md",
-    "package.json",
-    "libxml2.so",
-    "PhpCgiBase.js",
-    "PhpCgiBase.mjs",
-    "PhpCgiNode.js",
-    "PhpCgiNode.mjs",
-    "PhpCgiWeb.js",
-    "PhpCgiWeb.mjs",
-    "PhpCgiWebBase.js",
-    "PhpCgiWebBase.mjs",
-    "PhpCgiWebview.js",
-    "PhpCgiWebview.mjs",
-    "PhpCgiWorker.js",
-    "PhpCgiWorker.mjs",
-    "php-cgi-web.js",
-    "php-cgi-web.mjs",
-    "php-cgi-worker.js",
-    "php-cgi-worker.mjs",
-    "php-cgi-node.js",
-    "php-cgi-node.mjs",
-    "php-cgi-webview.js",
-    "php-cgi-webview.mjs",
-    "breakoutRequest.js",
-    "breakoutRequest.mjs",
-    "config.js",
-    "config.mjs",
-    "fsOps.js",
-    "fsOps.mjs",
-    "msg-bus.js",
-    "msg-bus.mjs",
-    "parseResponse.mjs",
-    "parseResponse.js",
-    "resolveDependencies.js",
-    "resolveDependencies.mjs",
-    "webTransactions.js",
-    "webTransactions.mjs"
+    "package.json"
   ]
 }

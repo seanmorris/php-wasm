@@ -3,15 +3,27 @@ import { PhpWeb } from './PhpWeb.mjs';
 const runPhpScriptTag = async (element) => {
 
 	const scope = {
-		stdin: null,
-		canvas: null,
-		stdout: null,
-		stderr: null,
-		ini: '',
-		libs: [],
-		files: [],
-		imports: {}
+		version: '8.4'
+		, variant: ''
+		, stdin: null
+		, canvas: null
+		, stdout: null
+		, stderr: null
+		, ini: ''
+		, libs: []
+		, files: []
+		, imports: {}
 	};
+
+	if(element.hasAttribute('data-version'))
+	{
+		scope.version = element.getAttribute('data-version');
+	}
+
+	if(element.hasAttribute('data-variant'))
+	{
+		scope.variant = element.getAttribute('data-variant');
+	}
 
 	if(element.hasAttribute('data-ini'))
 	{
@@ -97,7 +109,7 @@ const runPhpScriptTag = async (element) => {
 		}
 	}
 
-	let getImports = Promise.resolve();
+	let getImports = Promise.resolve([]);
 
 	if(scope.imports)
 	{
@@ -116,14 +128,16 @@ const runPhpScriptTag = async (element) => {
 
 	const [code, input, imports] = await Promise.all([getCode, getInput, getImports]);
 
-	const flatImports = Object.assign({}, ...(imports.flat()));
+	const flatImports = Object.assign({}, ...imports.flat());
 
 	const php = new PhpWeb({
 		...flatImports,
-		sharedLibs: scope.libs,
-		ini: scope.ini,
-		files: scope.files,
-		canvas: scope.canvas,
+		version:    scope.version
+		, variant:    scope.variant
+		, sharedLibs: scope.libs
+		, ini:        scope.ini
+		, files:      scope.files
+		, canvas:     scope.canvas
 	});
 
 	php.inputString(input);
@@ -161,7 +175,7 @@ const runPhpScriptTag = async (element) => {
 			scope.stderr && (scope.stderr.innerHTML = stderr);
 		});
 	});
-}
+};
 
 const phpSelector = 'script[type="text/php"]';
 
@@ -179,7 +193,7 @@ const runPhpTags = (doc) => {
 		{
 			for(const addedNode of mutation.addedNodes)
 			{
-				if(!addedNode.matches || !addedNode.matches(phpSelector))
+				if(!(addedNode instanceof Element) || !addedNode.matches(phpSelector))
 				{
 					continue;
 				}
@@ -190,6 +204,6 @@ const runPhpTags = (doc) => {
 	});
 
 	observer.observe(document.body.parentElement, {childList: true, subtree: true});
-}
+};
 
 runPhpTags(document);

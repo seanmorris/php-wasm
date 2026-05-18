@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
 
-set -eux;
+set -euo pipefail
 PORT=9000
-export CI=
+export CI="${CI:-}"
+BROWSER_TEST_PORT="${PORT}" node test/browser/server.mjs &
+SERVER_PID=$!
 
-pushd demo-web;
-npm run build;
-popd;
+trap 'kill ${SERVER_PID}' EXIT
 
-set +e;
-docker kill php-wasm-test-apache;
-set -e;
-
-HOST_DIR="${PWD}/demo-web/build"
-MOUNTED_DIR="/usr/local/apache2/htdocs/php-wasm httpd:2.4"
-
-docker run -d --rm --name php-wasm-test-apache -p ${PORT}:80 -v ${HOST_DIR}:${MOUNTED_DIR} &
-trap "docker kill php-wasm-test-apache" 0;
-
-set +x;
-while ! nc -z localhost ${PORT}; do
+until curl -fsS "http://127.0.0.1:${PORT}/php-wasm/" >/dev/null; do
 	sleep 0.1
 done
-set -x;
 
-PHP_VERSION=${PHP_VERSION} npx cvtest test/BrowserTest.mjs;
+PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/browser.spec.mjs)
+
+if [[ -n "${UPDATE_SNAPSHOTS:-}" || -n "${CV_UPDATE_SNAPSHOTS:-}" ]]; then
+	PLAYWRIGHT_ARGS+=(--update-snapshots)
+fi
+
+PHP_VERSION="${PHP_VERSION}" \
+PHP_VARIANT="${PHP_VARIANT:-}" \
+BROWSER_TEST_PORT="${PORT}" \
+LIB_TYPE="${LIB_TYPE:-${BUILD_TYPE:-dynamic}}" \
+npx playwright test "${PLAYWRIGHT_ARGS[@]}"

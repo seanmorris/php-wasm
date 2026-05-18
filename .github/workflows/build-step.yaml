@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Import `.env` file
         run: |
@@ -33,7 +33,7 @@ jobs:
 
       - name: Download Artifact
         if: ${{ inputs.libType != 'static' }}
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-dependencies-*
           merge-multiple: true
@@ -46,22 +46,27 @@ jobs:
             tar -xzf ${TAR}
           done;
 
+      - name: Re-flatten mtimes after extraction
+        if: ${{ inputs.libType != 'static' }}
+        run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Apply executable cache
         if: ${{ inputs.libType != 'static' }}
         run: |
-          ls ./.cache/executables-* | while read -r CACHE; do
-            cat ${CACHE} | xargs -I{} chmod +x {}
+          shopt -s nullglob
+          for CACHE in ./.cache/executables-*; do
+            xargs -r -a "${CACHE}" chmod +x
           done
 
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install deps
-        run: sudo apt update && sudo apt install coreutils docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -76,26 +81,37 @@ jobs:
           time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
 
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
-
       - name: Build demo-node
         run: npm install --prefix demo-node
 
       - name: Build PHP For Node
-        run: time make --debug=basic node-mjs
+        run: time make --debug=basic node-mjs node-js
 
-      - name: Build PHP for Web & PHP-CGI for Worker
-        run: time make --debug=basic web-mjs worker-cgi-mjs
+      - name: Build PHP for Web
+        run: time make --debug=basic web-mjs web-js
 
-      - name: Build php${{ inputs.phpVersion }}-sdl.so
-        run: time make --debug=basic packages/sdl/php${{ inputs.phpVersion }}-sdl.so packages/sdl/libGL.so PHP_VERSION=${{ inputs.phpVersion }}
+      - name: Build PHP-CGI for Worker
+        run: time make --debug=basic worker-cgi-mjs worker-cgi-js
 
-      - name: Build PHP (sdl) for Web
-        run: time make --debug=basic web-mjs WITH_SDL=1
+      - name: Build PHP CGI for Node
+        run: time make --debug=basic node-cgi-mjs node-cgi-js
 
-      - name: Build PHP DBG & CLI Previews
-        run: time make --debug=basic web-dbg-mjs web-cli-mjs
+      - name: Build PHP CLI for Node
+        run: time make --debug=basic node-cli-mjs node-cli-js
+
+      - name: Build PHP DBG for Node
+        run: time make --debug=basic node-dbg-mjs node-dbg-js
+
+      - name: Build PHP CLI for Web
+        run: time make --debug=basic web-cli-mjs web-cli-js
+
+      - name: Build PHP DBG for Web
+        run: time make --debug=basic web-dbg-mjs web-dbg-js
+
+      - name: Build PHP (sdl variant) for Web
+        run: |
+          sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
+          time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Take Snapshot
         run: |
@@ -113,7 +129,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}
           path: php-uncompressed-${{ inputs.phpVersion }}-${{ inputs.libType }}.tar.gz
@@ -127,7 +143,7 @@ jobs:
           tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
       - name: Upload Failure Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: failure-snapshot-${{ inputs.phpVersion }}-${{ inputs.libType }}

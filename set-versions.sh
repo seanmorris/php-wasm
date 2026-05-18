@@ -15,6 +15,7 @@ function updateFile
 updateFile "package.json" ${NEW_VERSION};
 
 ls packages | while read PACKAGE; do {
+	test -d packages/${PACKAGE} || continue;
 	updateFile "packages/${PACKAGE}/package.json" ${NEW_VERSION};
 	cd "packages/${PACKAGE}";
 	npm pkg fix;

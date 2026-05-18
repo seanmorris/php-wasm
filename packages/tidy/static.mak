@@ -37,7 +37,7 @@ CONFIGURE_FLAGS+= --with-tidy=/src/lib
 ARCHIVES+= lib/lib/libtidy.a
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SKIP_LIBS+= -ltidy
-EXTRA_MODULES+= packages/tidy/libtidy.so packages/tidy/php${PHP_VERSION}-tidy.so
+EXTRA_MODULES+= packages/tidy/libtidy.so
 endif
 
 ifeq (${WITH_TIDY},shared)
@@ -46,8 +46,7 @@ PHP_CONFIGURE_DEPS+= packages/tidy/libtidy.so
 TEST_LIST+=$(shell ls packages/tidy/test/*.mjs)
 SHARED_LIBS+= packages/tidy/libtidy.so
 SKIP_LIBS+= -ltidy
-EXTRA_MODULES+= packages/tidy/libtidy.so packages/tidy/php${PHP_VERSION}-tidy.so
-PHP_ASSET_LIST+= libtidy.so
+EXTRA_MODULES+= packages/tidy/libtidy.so
 endif
 
 ifeq (${WITH_TIDY},dynamic)
@@ -83,9 +82,6 @@ lib/lib/libtidy.so: lib/lib/libtidy.a
 packages/tidy/libtidy.so: lib/lib/libtidy.so
 	cp -rL $^ $@
 
-$(addsuffix /libtidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/libtidy.so
-	cp -Lp $^ $@
-
 third_party/php${PHP_VERSION}-tidy/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/tidy /src/third_party/php${PHP_VERSION}-tidy
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-tidy/config.m4
@@ -99,6 +95,3 @@ packages/tidy/php${PHP_VERSION}-tidy.so: ${PHPIZE} packages/tidy/libtidy.so thir
 	${DOCKER_RUN_IN_EXT_TIDY} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_TIDY} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_TIDY} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/tidy.a /src/packages/tidy/libtidy.so
-
-$(addsuffix /php${PHP_VERSION}-tidy.so,$(sort ${SHARED_ASSET_PATHS})): packages/tidy/php${PHP_VERSION}-tidy.so
-	cp -Lp $^ $@

@@ -1,47 +1,36 @@
 # php-wasm-openssl
 
-openssl extenstion for php-wasm.
+`php-wasm-openssl` provides the `openssl` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-openssl
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-openssl.so` and bundles `libssl.so` plus `libcrypto.so`.
 
 ## Usage
 
-`php-wasm-openssl` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import openssl from 'php-wasm-openssl';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-openssl')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [openssl],
+});
+
+await php.run(`<?php var_dump(extension_loaded('openssl'));`);
 ```
 
-The supporting libraries `libssl.so` and `libcrypto.so` will automatically be pulled from the package.
+## Custom Builds
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+Enable `WITH_OPENSSL` in `.php-wasm-rc`.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-openssl.so']});
-```
+## Build Options
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-openssl.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_OPENSSL
-
-### WITH_OPENSSL
-
-`0|shared|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-openssl` as well as the libraries `libssl.so` & `libcrypto.so`.
+- `WITH_OPENSSL`: defaults to `dynamic`. Allowed values: `0`, `1`, `shared`, `dynamic`.
+- OpenSSL does not use a `static` mode in this package makefile. Shared and dynamic builds emit `libssl.so` and `libcrypto.so`.
