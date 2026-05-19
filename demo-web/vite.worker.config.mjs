@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const workerEntry = path.resolve(__dirname, 'src/workers/cgi-worker.mjs');
 const libType = process.env.LIB_TYPE
 	|| process.env.VITE_LIB_TYPE
 	|| process.env.BUILD_TYPE
@@ -41,13 +42,18 @@ export default defineConfig({
 		, target: 'esnext'
 		, sourcemap: true
 		, rollupOptions: {
-			input: path.resolve(__dirname, 'src/workers/cgi-worker.mjs')
+			input: workerEntry
 			, preserveEntrySignatures: 'strict'
 			, output: {
 				format: 'es'
-				, entryFileNames: 'cgi-worker.js'
 				, preserveModules: true
 				, preserveModulesRoot: __dirname
+				// Keep the service worker registration URL stable, but hash every
+				// other preserved module so browsers cannot stitch together a stale
+				// worker graph across deploys.
+				, entryFileNames: chunk => chunk.facadeModuleId === workerEntry
+					? 'cgi-worker.js'
+					: '[name]-[hash].js'
 				, chunkFileNames: '[name]-[hash].js'
 				, assetFileNames: '[name]-[hash][extname]'
 			}
