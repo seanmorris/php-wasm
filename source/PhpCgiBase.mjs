@@ -634,7 +634,7 @@ export class PhpCgiBase
 				}
 				else if(typeof lib === 'object' && lib.ini)
 				{
-					return `extension=${String(lib.url).split('/').pop()}`;
+					return `extension=${lib.name ?? String(lib.url).split('/').pop()}`;
 				}
 			});
 
