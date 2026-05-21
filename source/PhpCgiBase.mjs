@@ -70,34 +70,75 @@ class CookieJar
 	 */
 	store(rawCookie)
 	{
-		let name = null;
+		if(!rawCookie || !rawCookie.trim())
+		{
+			return;
+		}
 
 		const cookie = {created: Date.now(), raw: rawCookie};
 
-		const parts = rawCookie.split(';').map(p => p.trim() );
+		const parts = rawCookie.split(';').map(p => p.trim()).filter(Boolean);
 
-		for(const part of parts)
+		if(!parts.length)
+		{
+			return;
+		}
+
+		const [nameValue, ...attributes] = parts;
+		const firstEqual = nameValue.indexOf('=');
+
+		if(firstEqual === -1)
+		{
+			return;
+		}
+
+		cookie.name = nameValue.slice(0, firstEqual);
+		cookie.value = nameValue.slice(firstEqual + 1);
+
+		let expiresAt = null;
+		let hasMaxAge = false;
+
+		for(const part of attributes)
 		{
 			const equal = part.indexOf('=');
 
-			const key   = part.substr(0, equal);
-			const value = part.substr(1 + equal);
+			if(equal === -1)
+			{
+				cookie[part.toLowerCase()] = true;
+				continue;
+			}
+
+			const key   = part.slice(0, equal);
+			const value = part.slice(equal + 1);
 
 			const lowerKey = key.toLowerCase();
 
-			if(!name)
+			if(lowerKey === 'expires')
 			{
-				name = key;
-				cookie.name = key;
-				cookie.value = value;
-			}
-			else if(lowerKey === 'expires')
-			{
-				cookie[lowerKey] = new Date(value).getTime();
+				const parsedExpires = new Date(value).getTime();
+
+				if(Number.isFinite(parsedExpires))
+				{
+					cookie[lowerKey] = parsedExpires;
+
+					if(!hasMaxAge)
+					{
+						expiresAt = parsedExpires;
+					}
+				}
 			}
 			else if(lowerKey === 'max-age')
 			{
-				cookie[lowerKey] = 1000 * Number(value);
+				const parsedMaxAge = Number(value);
+
+				if(Number.isFinite(parsedMaxAge))
+				{
+					hasMaxAge = true;
+					cookie[lowerKey] = 1000 * parsedMaxAge;
+					expiresAt = parsedMaxAge <= 0
+						? cookie.created
+						: cookie.created + cookie[lowerKey];
+				}
 			}
 			else
 			{
@@ -105,14 +146,18 @@ class CookieJar
 			}
 		}
 
-		if(cookie.expires && cookie.created >= cookie.expires)
+		if(expiresAt !== null)
+		{
+			cookie.expiresAt = expiresAt;
+		}
+
+		if(cookie.expiresAt !== undefined && cookie.expiresAt <= cookie.created)
 		{
 			this.cookies.delete(cookie.name);
+			return;
 		}
-		else
-		{
-			this.cookies.set(cookie.name, cookie);
-		}
+
+		this.cookies.set(cookie.name, cookie);
 	}
 
 	/**
@@ -128,13 +173,7 @@ class CookieJar
 
 		for(const cookie of this.cookies.values())
 		{
-			if(cookie.expires && cookie.expires <= now)
-			{
-				this.cookies.delete(cookie.name);
-				continue;
-			}
-
-			if(cookie['max-age'] && cookie['max-age'] >= now - cookie.created)
+			if(cookie.expiresAt !== undefined && cookie.expiresAt <= now)
 			{
 				this.cookies.delete(cookie.name);
 				continue;
@@ -165,7 +204,10 @@ class CookieJar
 	 */
 	load(rawCookies)
 	{
-		rawCookies.trim().split('\n').map(line => this.store(line));
+		for(const line of rawCookies.trim().split('\n').map(line => line.trim()).filter(Boolean))
+		{
+			this.store(line);
+		}
 	}
 
 	/**

@@ -18,6 +18,37 @@ const { nodeRuntimeOptions } = require('../lib/node-runtime-options.cjs');
 	await mkdir(configRoot, { recursive: true });
 	await writeFile(path.join(wwwRoot, 'hello-world.php'), '<?php echo "Hello, world!\\n";');
 	await writeFile(path.join(wwwRoot, 'version.php'), '<?php echo PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;');
+	await writeFile(path.join(wwwRoot, 'issue53-set-cookie.php'), `<?php
+header('Set-Cookie: issue53_session=test-session; path=/; HttpOnly');
+echo "session-set";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-set-max-age-cookie.php'), `<?php
+header('Set-Cookie: issue53_ttl=keep-me; Max-Age=60; path=/; HttpOnly');
+echo "ttl-set";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-set-replace-cookie.php'), `<?php
+header('Set-Cookie: issue53_replace=first-value; path=/; HttpOnly');
+echo "replace-first";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-overwrite-replace-cookie.php'), `<?php
+header('Set-Cookie: issue53_replace=second-value; path=/; HttpOnly');
+echo "replace-second";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-delete-cookie.php'), `<?php
+header('Set-Cookie: issue53_session=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/; HttpOnly');
+echo "session-deleted";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-delete-replace-cookie.php'), `<?php
+header('Set-Cookie: issue53_replace=deleted; expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; path=/; HttpOnly');
+echo "replace-deleted";
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-cookies.php'), `<?php
+header('Content-Type: application/json');
+echo json_encode($_COOKIE);
+`);
+	await writeFile(path.join(wwwRoot, 'issue53-cookie-jar.php'), `<?php
+echo file_exists('/config/.cookies') ? file_get_contents('/config/.cookies') : '';
+`);
 
 	const php = new PhpCgiNode(nodeRuntimeOptions({
 		version,
