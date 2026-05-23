@@ -1,0 +1,25 @@
+{
+  "name": "php-wasm-fileinfo",
+  "description": "fileinfo extension for php-wasm.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "version": "0.0.9-alpha-33",
+  "main": "index.mjs",
+  "files": [
+    "index.mjs",
+    "test/basic.mjs",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "static.mak",
+    "php8.5-fileinfo.so",
+    "php8.4-fileinfo.so",
+    "php8.3-fileinfo.so",
+    "php8.2-fileinfo.so",
+    "php8.1-fileinfo.so",
+    "php8.0-fileinfo.so"
+  ]
+}
