@@ -18,7 +18,6 @@ import reactIcon from '../assets/frameworks/react-icon.svg';
 import floppyIcon from '../assets/icons/floppy-icon-32.png';
 import nukeIcon from '../assets/icons/nuke-icon-32.png';
 import cabinetIcon from '../assets/icons/file-cabinet-icon-32.png';
-import { Backup, Clear, Restore } from '../components/Filesystem';
 import DoWithFile from '../components/DoWithFile';
 import ErrorDialog from '../components/ErrorDialog';
 import Confirm from '../components/Confirm';
@@ -75,8 +74,14 @@ function SelectFramework()
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
+	const serviceWorkerDisabled = query.has('no-service-worker');
 
 	const refreshAll = useCallback(() => {
+		if(serviceWorkerDisabled)
+		{
+			return;
+		}
+
 		void (async() => {
 			const bus = await getPhpBus();
 			const [
@@ -99,7 +104,7 @@ function SelectFramework()
 			setLaravelInstalled(laravelPath.exists);
 			setLaminasInstalled(laminasPath.exists);
 		})();
-	}, []);
+	}, [serviceWorkerDisabled]);
 
 	useEffect(() => {
 		refreshAll();
@@ -133,17 +138,25 @@ function SelectFramework()
 		};
 	}, []);
 
-	const backupSite = () => setOverlay(<Backup
-		onComplete = { () => setOverlay(null) }
-		onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
-	/>);
+	const backupSite = async () => {
+		const { Backup } = await import('../components/Filesystem');
+
+		setOverlay(<Backup
+			onComplete = { () => setOverlay(null) }
+			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+		/>);
+	};
 
 	const restoreSite = () => setOverlay(<DoWithFile
-		onConfirm = { fileInput => setOverlay(<Restore
-			fileInput = {fileInput}
-			onComplete = { () => { setOverlay(null); refreshAll(); } }
-			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
-		/>) }
+		onConfirm = { async fileInput => {
+			const { Restore } = await import('../components/Filesystem');
+
+			setOverlay(<Restore
+				fileInput = {fileInput}
+				onComplete = { () => { setOverlay(null); refreshAll(); } }
+				onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+			/>);
+		} }
 		onCancel = { () => setOverlay(null) }
 		message = {(
 			<span>Select a zip file to restore from.</span>
@@ -151,14 +164,18 @@ function SelectFramework()
 	/>);
 
 	const clearFilesystem = () => setOverlay(<Confirm
-		onConfirm = { () => setOverlay(<Clear onComplete = { () => {
-			setCakeInstalled(false);
-			setCodeigniterInstalled(false);
-			setDrupalInstalled(false);
-			setLaravelInstalled(false);
-			setLaminasInstalled(false);
-			setOverlay(null);
-		} } />) }
+		onConfirm = { async () => {
+			const { Clear } = await import('../components/Filesystem');
+
+			setOverlay(<Clear onComplete = { () => {
+				setCakeInstalled(false);
+				setCodeigniterInstalled(false);
+				setDrupalInstalled(false);
+				setLaravelInstalled(false);
+				setLaminasInstalled(false);
+				setOverlay(null);
+			} } />);
+		} }
 		onCancel = { () => setOverlay(null) }
 		message = {(
 			<span>Are you sure you want to clear the filesystem? <b>Reminder:</b> This cannot be undone, you should take a backup first.</span>
@@ -238,7 +255,7 @@ function SelectFramework()
 							</span>)}
 						</div>
 					</div>
-					{isIframe || <>
+					{(!isIframe && !serviceWorkerDisabled) && <>
 						<h2>Filesystem Operations:</h2>
 						<div className = "inset button-bar row">
 							<button onClick = {backupSite}>

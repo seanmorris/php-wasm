@@ -58,6 +58,20 @@ const files = [
 	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' }
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
+const cgiPrefix = new URL(basePath('cgi-bin/'), self.location.origin).pathname;
+const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')]
+	.map(path => new URL(path, self.location.origin).pathname);
+
+/**
+ * Returns true only for requests that should wake the PHP-CGI runtime.
+ */
+const shouldHandleFetch = request => {
+	const url = new URL(request.url);
+
+	return url.origin === self.location.origin
+		&& url.pathname.startsWith(cgiPrefix)
+		&& !excludedFetchPrefixes.some(prefix => url.pathname.startsWith(prefix));
+};
 
 /**
  * Emits an access-log style line for each handled CGI request.
@@ -145,9 +159,16 @@ const init = async () => {
 // Set up the event handlers
 self.addEventListener('install', event => event.waitUntil(globalThis.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(globalThis.clients.claim()));
-self.addEventListener('fetch',    async event => (await init()).handleFetchEvent(event));
+self.addEventListener('fetch',    async event => {
+	if(!shouldHandleFetch(event.request))
+	{
+		return;
+	}
+
+	return (await init()).handleFetchEvent(event);
+});
 self.addEventListener('message',  async event => (await init()).handleMessageEvent(event));
 
 // Extras
 self.addEventListener('install',  () => console.log('Install'));
-self.addEventListener('activate', async() => { await init(); console.log('Activate'); });
+self.addEventListener('activate', () => console.log('Activate'));

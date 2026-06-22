@@ -88,4 +88,18 @@ describe('SelectFramework', () => {
 		expect(pathInput).not.toBeNull();
 		expect(pathInput).toHaveValue('/persist/cakephp-5/webroot/index.php');
 	});
+
+	it('does not start the CGI bus when service workers are disabled', async () => {
+		window.history.pushState({}, '', '/select-framework.html?iframed=1&no-service-worker=1');
+
+		render(<SelectFramework />);
+
+		expect(screen.getByRole('link', {name: 'Open Full Demo'})).toBeInTheDocument();
+
+		await waitFor(() => {
+			expect(getPhpBus).not.toHaveBeenCalled();
+		});
+
+		expect(bus.analyzePath).not.toHaveBeenCalled();
+	});
 });
