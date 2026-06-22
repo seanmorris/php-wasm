@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text"}
+<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text", "extensionFlags": 4096}
 
 $db = new SQLite3('people.db');
 $db->query('CREATE TABLE IF NOT EXISTS people (

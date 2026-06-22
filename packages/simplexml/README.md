@@ -1,45 +1,39 @@
 # php-wasm-simplexml
 
-simplexml extension for php-wasm
+`php-wasm-simplexml` provides the `SimpleXML` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-libxml php-wasm-simplexml
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-simplexml.so`.
+Load `php-wasm-libxml` alongside it when you are using SimpleXML as a shared or dynamic extension.
 
 ## Usage
 
-`php-wasm-simplexml` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import libxml from 'php-wasm-libxml';
+import simplexml from 'php-wasm-simplexml';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-simplexml')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [libxml, simplexml],
+});
+
+await php.run(`<?php var_dump(extension_loaded('SimpleXML'));`);
 ```
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+## Custom Builds
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-simplexml.so']});
-```
+Enable `WITH_SIMPLEXML` in `.php-wasm-rc`.
+Shared and dynamic SimpleXML builds also need `WITH_LIBXML` enabled.
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Build Options
 
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-simplexml.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_SIMPLEXML
-
-### WITH_SIMPLEXML
-
-`0|static|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-simplexml.so`.
+- `WITH_SIMPLEXML`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.
+- `WITH_LIBXML`: `WITH_SIMPLEXML=static` requires `WITH_LIBXML=static`. `WITH_SIMPLEXML=dynamic` requires libxml to be enabled in the build.

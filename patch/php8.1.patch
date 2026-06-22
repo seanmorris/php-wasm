@@ -1,8 +1,8 @@
 diff --git a/third_party/php8.1-src/ext/libxml/libxml.c b/third_party/php8.1-src/ext/libxml/libxml.c
-index 3959b36..262d34f 100644
+index 3959b36..80ac927 100644
 --- a/third_party/php8.1-src/ext/libxml/libxml.c
 +++ b/third_party/php8.1-src/ext/libxml/libxml.c
-@@ -43,6 +43,17 @@
+@@ -43,6 +43,23 @@
  #include "php_libxml.h"
  #include "libxml_arginfo.h"
  
@@ -15,22 +15,36 @@ index 3959b36..262d34f 100644
 +__attribute__((weak)) void *(*xmlRealloc)(void *, size_t);
 +__attribute__((weak)) void (*xmlGenericError)(void *, const char *, ...);
 +__attribute__((weak)) void (*xmlStructuredError)(void *, xmlErrorPtr);
++#define PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, symbol) do { \
++	__typeof__(symbol) *symbol##_ptr = (__typeof__(symbol) *) dlsym((handle), #symbol); \
++	if (symbol##_ptr) { \
++		symbol = *symbol##_ptr; \
++	} \
++} while (0)
 +#endif
 +
  #define PHP_LIBXML_ERROR 0
  #define PHP_LIBXML_CTX_ERROR 1
  #define PHP_LIBXML_CTX_WARNING 2
-@@ -799,6 +810,28 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
+@@ -799,6 +816,36 @@ PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext)
  
  static PHP_MINIT_FUNCTION(libxml)
  {
++#ifdef LIBXML_DYNAMIC_LOAD
 +	if (xmlParserVersion == NULL) {
 +		void *handle = DL_LOAD("libxml2.so");
-+		const char** xmlParserVersionPtr = (const char**)dlsym(handle, "xmlParserVersion");
-+		if (xmlParserVersionPtr) {
-+			xmlParserVersion = *xmlParserVersionPtr;
++		if (handle) {
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlParserVersion);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlFree);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMalloc);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMallocAtomic);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlMemStrdup);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlRealloc);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlGenericError);
++			PHP_LIBXML_RESOLVE_WEAK_SYMBOL(handle, xmlStructuredError);
 +		}
 +	}
++#endif
 +
 +	if (xmlParserVersion == NULL) {
 +		zend_disable_class("LibXMLError", sizeof("LibXMLError") - 1);
@@ -49,7 +63,7 @@ index 3959b36..262d34f 100644
  	php_libxml_initialize();
  
  	REGISTER_LONG_CONSTANT("LIBXML_VERSION",			LIBXML_VERSION,			CONST_CS | CONST_PERSISTENT);
-@@ -877,6 +910,8 @@ static PHP_MINIT_FUNCTION(libxml)
+@@ -877,6 +924,8 @@ static PHP_MINIT_FUNCTION(libxml)
  
  static PHP_RINIT_FUNCTION(libxml)
  {
@@ -58,7 +72,7 @@ index 3959b36..262d34f 100644
  	if (_php_libxml_per_request_initialization) {
  		/* report errors via handler rather than stderr */
  		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
-@@ -895,6 +930,8 @@ static PHP_RINIT_FUNCTION(libxml)
+@@ -895,6 +944,8 @@ static PHP_RINIT_FUNCTION(libxml)
  
  static PHP_RSHUTDOWN_FUNCTION(libxml)
  {
@@ -67,7 +81,7 @@ index 3959b36..262d34f 100644
  	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci, &LIBXML(entity_loader).object);
  
  	return SUCCESS;
-@@ -902,6 +939,8 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
+@@ -902,6 +953,8 @@ static PHP_RSHUTDOWN_FUNCTION(libxml)
  
  static PHP_MSHUTDOWN_FUNCTION(libxml)
  {
@@ -76,7 +90,7 @@ index 3959b36..262d34f 100644
  	if (!_php_libxml_per_request_initialization) {
  		xmlSetGenericErrorFunc(NULL, NULL);
  
-@@ -915,6 +954,8 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
+@@ -915,6 +968,8 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
  
  static zend_result php_libxml_post_deactivate(void)
  {
@@ -85,7 +99,7 @@ index 3959b36..262d34f 100644
  	/* reset libxml generic error handling */
  	if (_php_libxml_per_request_initialization) {
  		xmlSetGenericErrorFunc(NULL, NULL);
-@@ -940,6 +981,13 @@ static zend_result php_libxml_post_deactivate(void)
+@@ -940,6 +995,13 @@ static zend_result php_libxml_post_deactivate(void)
  
  static PHP_MINFO_FUNCTION(libxml)
  {
@@ -99,7 +113,7 @@ index 3959b36..262d34f 100644
  	php_info_print_table_start();
  	php_info_print_table_row(2, "libXML support", "active");
  	php_info_print_table_row(2, "libXML Compiled Version", LIBXML_DOTTED_VERSION);
-@@ -952,6 +1000,8 @@ static PHP_MINFO_FUNCTION(libxml)
+@@ -952,6 +1014,8 @@ static PHP_MINFO_FUNCTION(libxml)
  /* {{{ Set the streams context for the next libxml document load or write */
  PHP_FUNCTION(libxml_set_streams_context)
  {
@@ -108,7 +122,7 @@ index 3959b36..262d34f 100644
  	zval *arg;
  
  	ZEND_PARSE_PARAMETERS_START(1, 1)
-@@ -969,6 +1019,8 @@ PHP_FUNCTION(libxml_set_streams_context)
+@@ -969,6 +1033,8 @@ PHP_FUNCTION(libxml_set_streams_context)
  /* {{{ Disable libxml errors and allow user to fetch error information as needed */
  PHP_FUNCTION(libxml_use_internal_errors)
  {
@@ -117,7 +131,7 @@ index 3959b36..262d34f 100644
  	xmlStructuredErrorFunc current_handler;
  	bool use_errors, use_errors_is_null = 1, retval;
  
-@@ -1009,6 +1061,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
+@@ -1009,6 +1075,8 @@ PHP_FUNCTION(libxml_use_internal_errors)
  /* {{{ Retrieve last error from libxml */
  PHP_FUNCTION(libxml_get_last_error)
  {
@@ -126,7 +140,7 @@ index 3959b36..262d34f 100644
  	xmlErrorPtr error;
  
  	ZEND_PARSE_PARAMETERS_NONE();
-@@ -1040,6 +1094,7 @@ PHP_FUNCTION(libxml_get_last_error)
+@@ -1040,6 +1108,7 @@ PHP_FUNCTION(libxml_get_last_error)
  /* {{{ Retrieve array of errors */
  PHP_FUNCTION(libxml_get_errors)
  {
@@ -134,7 +148,7 @@ index 3959b36..262d34f 100644
  
  	xmlErrorPtr error;
  
-@@ -1081,6 +1136,8 @@ PHP_FUNCTION(libxml_get_errors)
+@@ -1081,6 +1150,8 @@ PHP_FUNCTION(libxml_get_errors)
  /* {{{ Clear last error from libxml */
  PHP_FUNCTION(libxml_clear_errors)
  {
@@ -143,7 +157,7 @@ index 3959b36..262d34f 100644
  	ZEND_PARSE_PARAMETERS_NONE();
  
  	xmlResetLastError();
-@@ -1101,6 +1158,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
+@@ -1101,6 +1172,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable) /* {{{ */
  /* {{{ Disable/Enable ability to load external entities */
  PHP_FUNCTION(libxml_disable_entity_loader)
  {
@@ -152,7 +166,7 @@ index 3959b36..262d34f 100644
  	bool disable = 1;
  
  	ZEND_PARSE_PARAMETERS_START(0, 1)
-@@ -1115,6 +1174,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
+@@ -1115,6 +1188,8 @@ PHP_FUNCTION(libxml_disable_entity_loader)
  /* {{{ Changes the default external entity loader */
  PHP_FUNCTION(libxml_set_external_entity_loader)
  {
@@ -357,7 +371,7 @@ index 1679246..2802cfc 100644
  
  	return SUCCESS;
 diff --git a/third_party/php8.1-src/sapi/phpdbg/Makefile.frag b/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
-index 2e2faf80..9cbb0486 100644
+index 2e2faf8..9cbb048 100644
 --- a/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
 +++ b/third_party/php8.1-src/sapi/phpdbg/Makefile.frag
 @@ -6,7 +6,7 @@ $(BUILD_SHARED): $(PHP_GLOBAL_OBJS) $(PHP_BINARY_OBJS) $(PHP_PHPDBG_OBJS)
@@ -382,7 +396,7 @@ index e1824ec..96af7bc 100644
  #include "phpdbg.h"
  #include "phpdbg_prompt.h"
  #include "phpdbg_bp.h"
-@@ -142,6 +144,29 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+@@ -142,6 +144,34 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
  	pg->last_line = 0;
  } /* }}} */
  
@@ -409,10 +423,15 @@ index e1824ec..96af7bc 100644
 +	return PHPDBG_G(in_execution) || (PHPDBG_G(flags) & PHPDBG_IS_STOPPING);
 +}
 +
++bool EMSCRIPTEN_KEEPALIVE php_wasm_is_running(void)
++{
++	return PHPDBG_G(flags) & PHPDBG_IS_RUNNING;
++}
++
  static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  {
  	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], 8, NULL, php_phpdbg_destroy_bp_file, 0);
-@@ -175,6 +200,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+@@ -175,6 +205,9 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
  
  static PHP_MSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
  {
@@ -422,7 +441,7 @@ index e1824ec..96af7bc 100644
  	zend_hash_destroy(&PHPDBG_G(registered));
  	phpdbg_destroy_watchpoints();
  
-@@ -1113,7 +1141,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
+@@ -1113,7 +1146,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
  	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
  } /* }}} */
  

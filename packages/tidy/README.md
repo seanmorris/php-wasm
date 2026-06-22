@@ -1,47 +1,37 @@
 # php-wasm-tidy
 
-tidy extenstion for php-wasm.
+`php-wasm-tidy` provides the `tidy` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-tidy
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-tidy.so` and bundles `libtidy.so`.
 
 ## Usage
 
-`php-wasm-tidy` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import tidy from 'php-wasm-tidy';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-tidy')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [tidy],
+});
+
+await php.run(`<?php var_dump(extension_loaded('tidy'));`);
 ```
 
-The supporting library `libtidy.so` will automatically be pulled from the package.
+## Custom Builds
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+Enable `WITH_TIDY` in `.php-wasm-rc`.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-tidy.so']});
-```
+## Build Options
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-tidy.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_TIDY
-
-### WITH_TIDY
-
-`0|static|shared|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-tidy.so`.
+- `WITH_TIDY`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
+- `WITH_TIDY=static` requires `WITH_LIBXML=static`.
+- `WITH_TIDY=shared` expects `WITH_LIBXML` to be `shared` or `static`. `WITH_TIDY=dynamic` expects a dynamic libxml setup.

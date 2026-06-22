@@ -1,6 +1,15 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { PhpNode as BasePhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { nodeRuntimeOptions } from '../../../test/lib/node-runtime-options.mjs';
+
+class PhpNode extends BasePhpNode
+{
+	constructor(args = {})
+	{
+		super(nodeRuntimeOptions(args));
+	}
+}
 
 test('Can access JS integers via php.r function.', async () => {
 
@@ -366,6 +375,48 @@ test('Can access PHP callbacks that return objects via php.x function: Two level
 	assert.equal(stdErr, '');
 });
 
+test('Preserves JS identity for recursive PHP arrays.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`(function() {
+		$array = [];
+		$array['self'] = &$array;
+		return $array;
+	})()`;
+
+	assert.equal(returnValue.self, returnValue);
+	assert.equal(returnValue.self.self, returnValue);
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
+
+test('Preserves JS identity for recursive PHP objects.', async () => {
+	const php = new PhpNode();
+
+	let stdOut = '', stdErr = '';
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const returnValue = await php.x`(function() {
+		$object = (object) [];
+		$object->self = $object;
+		return $object;
+	})()`;
+
+	assert.equal(returnValue.self, returnValue);
+	assert.equal(returnValue.self.self, returnValue);
+	assert.equal(stdOut, '');
+	assert.equal(stdErr, '');
+});
+
 test('Can get the date with strtotime() and format it with date().', async () => {
 	const php = new PhpNode();
 
@@ -380,9 +431,9 @@ test('Can get the date with strtotime() and format it with date().', async () =>
 	const yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
 	const jsFormatted = `${yesterday.getFullYear()}-${String(1 + yesterday.getMonth()).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')} 13:00:00`;
 
-	// Extract the functions from PHP...
-	const strtotime = await php.x`strtotime(...)`;
-	const date = await php.x`date(...)`;
+	// Export wrapper callbacks that remain compatible with PHP 8.0.
+	const strtotime = await php.x`function($time) { return strtotime($time); }`;
+	const date = await php.x`function($format, $time) { return date($format, $time); }`;
 
 	// Set the timezone...
 	await php.x`date_default_timezone_set(${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
@@ -406,18 +457,17 @@ test('Can get the date from a native object with strtotime() and format it with 
 
 	await php.binary;
 
-	// Get yesterday's date and format in JS...
-	const yesterday = new Date();
-	const jsFormatted = `${yesterday.getFullYear()}-${String(1 + yesterday.getMonth()).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
-		+ ` ${String(yesterday.getHours()).padStart(2, '0')}:${String(yesterday.getMinutes()).padStart(2, '0')}:${String(yesterday.getSeconds()).padStart(2, '0')}`;
+	// Reuse the same native Date object on both sides so this test doesn't race across a second boundary.
+	const now = new Date();
+	const jsFormatted = `${now.getFullYear()}-${String(1 + now.getMonth()).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+		+ ` ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
 	// Set the timezone...
 	await php.x`date_default_timezone_set(${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
 
 	// Create a formateDate callback in PHP...
 	const formatDate = await php.x`function() {
-		$nativeJsDateClass = ${Date};
-		$nativeJsDateObject = new $nativeJsDateClass;
+		$nativeJsDateObject = ${now};
 		$isoString = $nativeJsDateObject->toISOString();
 		$timestamp = strtotime($isoString);
 		$formatted = date('Y-m-d H:i:s', $timestamp);

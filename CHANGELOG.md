@@ -2,7 +2,22 @@
 
 Changes
 
-## v0.0.9 - Aiming for the (GitHub) Stars
+## v0.1.0 - Aiming for the (GitHub) Stars
+
+* Rebuilt `demo-web` around Vite, reorganized it into `pages`, `components`, `lib`, and `assets`, and added the newer browser/e2e harnesses plus runtime path helpers for the worker and page builds.
+* Added Quickbus-backed browser messaging, a richer `phpdbg` bus session, and a VSCode debugger bridge for the demo app and debugger workflow.
+* Expanded runtime/build coverage across older targets, including `phpdbg`, SDL, and Vrzno support in PHP `8.0` builds. SDL now ships as the `_sdl` runtime variant instead of a separately loaded shared library.
+* Added `version` and `variant` support to `php-tags`, making it possible to select non-default runtimes from static HTML.
+* Standardized the maintained runtime sources on `.mjs` modules and expanded type/JSDoc coverage across `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, and the extension helper packages.
+* Reworked shared and dynamic extension loading so built-in support libraries, ICU payloads, OpenSSL, libxml/XML, DOM, SimpleXML, XMLReader, and XMLWriter behave consistently across Node, browser, demo, and docs/test harnesses.
+* Suppressed implicit `libxml2.so` loading when it is not provided in `sharedLibs`, which reduces startup download size for minimal runtime configurations.
+* Broadened verification with vendored `php-wasm-site` docs fixtures, split docs/CGI coverage suites, deeper CLI-node PHPT coverage, richer XML/intl/tidy/iconv/sqlite smoke tests, and browser-test race-condition fixes.
+* Tightened the build/test pipeline by preserving `BUILD_TYPE` through CI, adding a dynamic fallback when it is omitted, smoke-testing packaged demo artifacts, centralizing shared-lib resolution, and refreshing the workflow matrix for the newer runtime surface.
+* Improved local workspace and release plumbing with symlink-aware package loading, action-artifact overlay support, and refreshed README/package docs around runtime defaults, versioned `.wasm` assets, extension wiring, interactive CLI/debugger behavior via `waitline`, and Cloudflare D1 setup through `pdo_cfd1`.
+
+## v0.0.9 - Here there be dragons
+
+*Version 0.0.9 is represented by a near endless stream of letter-tagged alpha releases and will be considered officially skipped. The changes in v0.1.0 mostly landed somewhere in this range, but since the API is not stable, here there be dragons.*
 
 * Adding PHP-CGI support!
 * Runtime extension loading!

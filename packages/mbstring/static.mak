@@ -15,12 +15,10 @@ endif
 
 ifeq (${WITH_MBSTRING},1)
 WITH_MBSTRING=dynamic
-EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},static)
 CONFIGURE_FLAGS+= --with-mbstring
-EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)
@@ -54,7 +52,6 @@ PHP_CONFIGURE_DEPS+= packages/mbstring/libonig.so
 SHARED_LIBS+= packages/mbstring/libonig.so
 SKIP_LIBS+= -lonig
 EXTRA_MODULES+= packages/mbstring/libonig.so
-PHP_ASSET_LIST+= libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},dynamic)
@@ -86,9 +83,6 @@ lib/lib/libonig.so: lib/lib/libonig.a
 packages/mbstring/libonig.so: lib/lib/libonig.so
 	cp -Lp $^ $@
 
-$(addsuffix /libonig.so,$(sort ${SHARED_ASSET_PATHS})): packages/mbstring/libonig.so
-	cp -Lp $^ $@
-
 third_party/php${PHP_VERSION}-mbstring/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/mbstring /src/third_party/php${PHP_VERSION}-mbstring
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-mbstring/config.m4
@@ -102,6 +96,3 @@ packages/mbstring/php${PHP_VERSION}-mbstring.so: ${PHPIZE} third_party/php${PHP_
 	${DOCKER_RUN_IN_EXT_MBSTRING} sed -i 's#include "libmbfl/config.h"#include "config.h#g' Makefile;
 	${DOCKER_RUN_IN_EXT_MBSTRING} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_MBSTRING} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O1 -Wl,--whole-archive .libs/mbstring.a /src/packages/mbstring/libonig.so
-
-$(addsuffix /php${PHP_VERSION}-mbstring.so,$(sort ${SHARED_ASSET_PATHS})): packages/mbstring/php${PHP_VERSION}-mbstring.so
-	cp -Lp $^ $@

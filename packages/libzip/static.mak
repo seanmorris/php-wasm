@@ -28,7 +28,6 @@ TEST_LIST+=$(shell ls packages/libzip/test/*.mjs)
 SHARED_LIBS+= packages/libzip/libzip.so
 SKIP_LIBS+= -lzip
 EXTRA_MODULES+= packages/libzip/libzip.so packages/libzip/php${PHP_VERSION}-zip.so
-PHP_ASSET_LIST+= libzip.so
 endif
 
 ifeq (${WITH_LIBZIP},dynamic)
@@ -65,9 +64,6 @@ lib/lib/libzip.so: lib/lib/libzip.a
 packages/libzip/libzip.so: lib/lib/libzip.so
 	cp -Lp $^ $@
 
-$(addsuffix /libzip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/libzip.so
-	cp -Lp $^ $@
-
 third_party/php${PHP_VERSION}-zip/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zip /src/third_party/php${PHP_VERSION}-zip
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-zip/config.m4
@@ -81,6 +77,3 @@ packages/libzip/php${PHP_VERSION}-zip.so: ${PHPIZE} packages/libzip/libzip.so th
 	${DOCKER_RUN_IN_EXT_ZIP} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZIP} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_ZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/zip.a /src/packages/libzip/libzip.so
-
-$(addsuffix /php${PHP_VERSION}-zip.so,$(sort ${SHARED_ASSET_PATHS})): packages/libzip/php${PHP_VERSION}-zip.so
-	cp -Lp $^ $@

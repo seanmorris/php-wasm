@@ -42,6 +42,7 @@ int main(void) { return 0; }
 
 bool started = false;
 char *_sapi_name = NULL;
+static const char pib_embed_sapi_name[] = "embed";
 
 /**
  * Initialize Embdedded PHP
@@ -59,7 +60,7 @@ int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 
 	putenv("USE_ZEND_ALLOC=0");
 
-	if(0 == strcmp(_sapi_name, "embed"))
+	if(0 == strcmp(_sapi_name, pib_embed_sapi_name))
 	{
 		return php_embed_init(0, NULL);
 	}
@@ -124,7 +125,7 @@ void *EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_storage_init(void)
  */
 void pib_destroy(void)
 {
-	if(0 == strcmp(_sapi_name, "embed"))
+	if(0 == strcmp(_sapi_name, pib_embed_sapi_name))
 	{
 		php_embed_shutdown();
 	}

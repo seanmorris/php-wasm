@@ -1,74 +1,40 @@
 # php-wasm-gd
 
-gd for php-wasm
+`php-wasm-gd` provides the `gd` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-zlib php-wasm-gd
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-gd.so` and bundles `libfreetype.so`, `libjpeg.so`, `libpng.so`, and `libwebp.so`.
+Load `php-wasm-zlib` alongside it because GD depends on `libz.so`.
 
 ## Usage
 
-`php-wasm-gd` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import zlib from 'php-wasm-zlib';
+import gd from 'php-wasm-gd';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-gd')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [zlib, gd],
+});
+
+await php.run(`<?php var_dump(extension_loaded('gd'));`);
 ```
 
-The supporting libraries `libfreetype.so`, `libjpeg.so`, and `libpng.so` will automatically be pulled from the package.
+## Custom Builds
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+Enable `WITH_GD` in `.php-wasm-rc`.
+Feature-complete GD builds usually also enable the matching image and font dependencies such as zlib, PNG, JPEG, WebP, and FreeType.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-gd.so']});
-```
+## Build Options
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-gd.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_GD
-* WITH_FREETYPE
-* WITH_LIBJPEG
-* WITH_LIBPNG (requires WITH_ZLIB)
-
-### WITH_GD
-
-`0|static|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-gd.so`.
-
-### WITH_LIBPNG
-
-`0|static|shared`
-
-When compiled as a `shared` library, this will produce the library `libpng.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
-
-### WITH_FREETYPE
-
-`0|static|shared`
-
-When compiled as a `shared` library, this will produce the library `libfreetype.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
-
-### WITH_LIBJPEG
-
-`0|static|shared`
-
-When compiled as a `shared` library, this will produce the library `libjpeg.so`.
-
-If WITH_GD is dynamic, then loading will be deferred until after gd is loaded.
+- `WITH_GD`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.
+- `WITH_FREETYPE`, `WITH_LIBJPEG`, `WITH_LIBPNG`, `WITH_LIBWEBP`: each defaults to `shared`. Allowed values: `0`, `1`, `static`, `shared`.
+- Those companion library flags control whether the GD side libraries are built and emitted alongside `php8.x-gd.so`.

@@ -1,0 +1,73 @@
+name: Test Demo Web Artifact
+
+on:
+  workflow_call:
+    inputs:
+      artifactName:
+        required: true
+        type: string
+      libType:
+        required: true
+        type: string
+
+jobs:
+  test:
+    name: Test demo-web artifact w/${{ inputs.libType }} libs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+
+      - name: Disable man-db auto-update
+        run: |
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifactName }}
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in php-demo-web-${{ inputs.libType }}.tar.gz; do
+            tar -xzf ${TAR}
+          done;
+
+      - name: Install NPM packages
+        run: npm ci
+
+      - name: Install Chrome's APT key
+        run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+
+      - name: Install Chrome's APT source
+        run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+
+      - name: Install Chrome
+        run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
+
+      - name: Run tests
+        run: LIB_TYPE=${{ inputs.libType }} DEMO_WEB_ARTIFACT_ROOT=docs make --debug=basic test-demo-web
+
+      - name: Take Failure Snapshot
+        if: ${{ failure() }}
+        run: |
+          sudo chown -R ${USER}:${USER} .
+          sudo chmod -R u+rwX,go+rX .
+          tar --exclude=.git \
+            --exclude='demo-web-artifact-failure.tar.gz' \
+            --ignore-failed-read \
+            --warning=no-file-changed \
+            -czf demo-web-artifact-failure.tar.gz \
+              php-demo-web-${{ inputs.libType }}.tar.gz \
+              docs \
+              test-results
+
+      - name: Upload Failure Artifact
+        uses: actions/upload-artifact@v6
+        if: ${{ failure() }}
+        with:
+          name: failure-snapshot-demo-web-test-${{ inputs.libType }}
+          path: demo-web-artifact-failure.tar.gz
+          compression-level: 0

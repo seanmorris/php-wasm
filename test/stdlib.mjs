@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 
 const phpVersion = process.env.PHP_VERSION ?? '8.4';
+const stdlibEnabled = process.env.WITH_LIBXML === 'dynamic';
 
-if(['8.4', '8.3', '8.2',].includes(phpVersion)) {
+if(stdlibEnabled && ['8.4', '8.3', '8.2',].includes(phpVersion)) {
 	const { microtime, date, sprintf, json_decode } = await import(`../packages/php-wasm/stdlib/${phpVersion}-node.mjs`);
 
 	test('Can use PHP functions that return NUMBERS in JS', () => {
@@ -33,4 +34,8 @@ if(['8.4', '8.3', '8.2',].includes(phpVersion)) {
 
 		assert.equal( x["a"], 1 );
 	});
+}
+else
+{
+	test('stdlib is only generated for dynamic 8.2-8.4 builds', { skip: true }, () => {});
 }

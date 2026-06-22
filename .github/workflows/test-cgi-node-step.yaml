@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -32,7 +32,7 @@ jobs:
           touch -d '1970-01-01 00:00:00 UTC' .env
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: ${{ inputs.artifactPattern }}
           merge-multiple: true
@@ -44,17 +44,17 @@ jobs:
             tar -xzf ${TAR}
           done;
 
+      - name: Flatten mtimes after extraction
+        run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
       - name: Install NPM packages
-        run: npm ci
-
-      - name: Install Global NPM packages
-        run: npm install -g deno cv3-test netcat
-
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
+        run: |
+          npm ci
 
       - name: Run tests
-        run: BUILD_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+        run: |
+          PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+          PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node-cjs
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}
@@ -64,7 +64,7 @@ jobs:
           tar --exclude=.git --exclude='snapshot.tar.gz' --ignore-failed-read --warning=no-file-changed -czf snapshot.tar.gz .
 
       - name: Upload Failure Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: ${{ failure() }}
         with:
           name: failure-snapshot-cgi-node-test-${{ inputs.phpVersion }}-${{ inputs.libType }}

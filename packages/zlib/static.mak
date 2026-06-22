@@ -19,7 +19,7 @@ CONFIGURE_FLAGS+= --with-zlib
 ARCHIVES+= lib/lib/libz.a
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SKIP_LIBS+= -lz
-EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
+EXTRA_MODULES+= packages/zlib/libz.so
 endif
 
 ifeq (${WITH_ZLIB},shared)
@@ -28,8 +28,7 @@ PHP_CONFIGURE_DEPS+= packages/zlib/libz.so
 TEST_LIST+=$(shell ls packages/zlib/test/*.mjs)
 SHARED_LIBS+= packages/zlib/libz.so
 SKIP_LIBS+= -lz
-EXTRA_MODULES+= packages/zlib/libz.so packages/zlib/php${PHP_VERSION}-zlib.so
-PHP_ASSET_LIST+= libz.so
+EXTRA_MODULES+= packages/zlib/libz.so
 endif
 
 ifeq (${WITH_ZLIB},dynamic)
@@ -62,9 +61,6 @@ lib/lib/libz.so: lib/lib/libz.a
 packages/zlib/libz.so: lib/lib/libz.so
 	cp -Lp $^ $@
 
-$(addsuffix /libz.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/libz.so
-	cp -Lp $^ $@
-
 third_party/php${PHP_VERSION}-zlib/config.m4: third_party/php${PHP_VERSION}-src/patched
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/zlib /src/third_party/php${PHP_VERSION}-zlib
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-zlib/config.m4
@@ -79,6 +75,3 @@ packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_p
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -s EXPORT_ALL=1 -O0 -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so
-
-$(addsuffix /php${PHP_VERSION}-zlib.so,$(sort ${SHARED_ASSET_PATHS})): packages/zlib/php${PHP_VERSION}-zlib.so
-	cp -Lp $^ $@

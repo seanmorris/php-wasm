@@ -1,45 +1,41 @@
 # php-wasm-sqlite
 
-sqlite extenstion for php-wasm.
+`php-wasm-sqlite` provides the `sqlite3` and `pdo_sqlite` extensions for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-sqlite
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-sqlite.so` and `php8.x-pdo-sqlite.so`, and bundles `libsqlite3.so`.
 
 ## Usage
 
-`php-wasm-sqlite` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import sqlite from 'php-wasm-sqlite';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-sqlite')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [sqlite],
+});
+
+await php.run(`<?php
+  var_dump(
+    extension_loaded('sqlite3'),
+    extension_loaded('pdo_sqlite')
+  );
+`);
 ```
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+## Custom Builds
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-sqlite.so']});
-```
+Enable `WITH_SQLITE` in `.php-wasm-rc`.
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Build Options
 
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-sqlite.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_SQLITE
-
-### WITH_SQLITE
-
-`0|static|shared|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-sqlite.so`.
+- `WITH_SQLITE`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
+- This flag controls the `sqlite3` extension, `pdo_sqlite`, and the companion `libsqlite3.so` side library.

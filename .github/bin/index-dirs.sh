@@ -22,18 +22,18 @@ find . -type d | while read DIR; do {
 	perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 	perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
 	shopt -s nullglob
-	for BINARY in *.wasm; do
-		brotli -kfZ ${BINARY}
-		gzip -k9 ${BINARY}
-	done;
-	for BINARY in *.so; do
-		brotli -kfZ ${BINARY}
-		gzip -k9 ${BINARY}
-	done;
-	for DAT in *.dat; do
-		brotli -kfZ ${DAT}
-		gzip -k9 ${DAT}
-	done;
+		for BINARY in *.wasm; do
+			brotli -kfZ "${BINARY}"
+			gzip -n -k9 "${BINARY}"
+		done;
+		for BINARY in *.so; do
+			brotli -kfZ "${BINARY}"
+			gzip -n -k9 "${BINARY}"
+		done;
+		for DAT in *.dat; do
+			brotli -kfZ "${DAT}"
+			gzip -n -k9 "${DAT}"
+		done;
 	shopt -u nullglob
 	popd > /dev/null;
 }; done;
@@ -57,4 +57,3 @@ tree ${TREE_FLAGS} -H "./" -T 'php-wasm/' -I "index.html" > index.html;
 perl -pi -e "s#^</head>#<style> html { background-color: black; } body { filter: invert(1); } </style></head>#" index.html
 perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
-

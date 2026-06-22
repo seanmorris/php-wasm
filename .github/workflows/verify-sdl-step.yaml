@@ -1,0 +1,43 @@
+name: Verify SDL Step
+
+on:
+  workflow_call:
+    inputs:
+      phpVersion:
+        required: true
+        type: string
+      libType:
+        required: true
+        type: string
+      artifactPattern:
+        required: true
+        type: string
+
+jobs:
+  verify:
+    name: Verify SDL ${{ inputs.phpVersion }} ${{ inputs.libType }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+
+      - name: Install wabt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wabt
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v8
+        with:
+          pattern: ${{ inputs.artifactPattern }}
+          merge-multiple: true
+          path: ./
+
+      - name: Extract Artifact
+        run: |
+          for TAR in ${{ inputs.artifactPattern }}.tar.gz; do
+            tar -xzf ${TAR}
+          done
+
+      - name: Verify PHP (sdl variant) for Web
+        run: ./.github/bin/verify-sdl-main-module.sh ${{ inputs.phpVersion }}

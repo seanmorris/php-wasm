@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>php-dbg-wasm Harness</title>
+	<script type="importmap">
+	{
+		"imports": {
+			"php-wasm/": "/packages/php-wasm/"
+		}
+	}
+	</script>
+</head>
+<body data-status="booting">
+	<h1>php-dbg-wasm Harness</h1>
+	<p>Status: <span data-testid="status">booting</span></p>
+	<p hidden>Current file: <span data-testid="current-file"></span></p>
+	<p hidden>Current line: <span data-testid="current-line"></span></p>
+	<p hidden>Prompt: <span data-testid="prompt"></span></p>
+	<pre data-testid="stdout"></pre>
+	<pre data-testid="stderr"></pre>
+	<script type="module" src="./dbg-page.mjs"></script>
+</body>
+</html>

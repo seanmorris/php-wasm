@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>php-wasm Embedded Harness</title>
+</head>
+<body data-status="booting">
+	<h1>php-wasm Embedded Harness</h1>
+	<p>Status: <span data-testid="status">booting</span></p>
+	<p hidden>Exit: <span data-testid="exit-code"></span></p>
+	<pre data-testid="stdout"></pre>
+	<pre data-testid="stderr"></pre>
+	<script type="module" src="./embedded-page.mjs"></script>
+</body>
+</html>

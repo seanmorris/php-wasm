@@ -1,83 +1,71 @@
 # php-wasm-intl
 
-intl extenstion for php-wasm, includes libicu.
+`php-wasm-intl` provides the `intl` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-intl
+```
+
+## What It Loads
+
+In dynamic builds, the package resolves the active runtime version to `php8.x-intl.so`, loads the ICU shared libraries, and preloads `icudt72l.dat` into `/preload`.
+
+In shared builds, the `intl` extension is already built into the base runtime, so only the ICU `libicu*.so` support libraries and `icudt72l.dat` should be loaded at startup.
+
+In static builds, `icudt72l.dat` is bundled into the runtime `.data` payload.
+
+Using the module form is the simplest way to get the right combination for dynamic builds.
+Shared runtimes should load only the ICU support libraries and `icudt72l.dat`, not `php8.x-intl.so`.
 
 ## Usage
 
-`php-wasm-intl` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import intl from 'php-wasm-intl';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-intl')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [intl],
+});
+
+await php.run(`<?php
+  $formatter = new NumberFormatter('en-US', NumberFormatter::CURRENCY);
+  var_dump($formatter->format(100.00));
+`);
 ```
 
-The following supporting libraries will automatically be pulled from the package:
+The example above is a dynamic-build example.
 
-* libicuuc.so
-* libicutu.so
-* libicutest.so
-* libicuio.so
-* libicui18n.so
-* libicudata.so
+For shared builds, keep the built-in `intl` extension and inject only the ICU support files:
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
-
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-intl.so']});
-```
-
-## Data files
-
-If you're loading the library manually, you'll need to load `icudt72l.dat` into the  `/preload` directory:
-
-```javascript
-const sharedLibs = [`https://unpkg.com/php-wasm-intl/php\${PHP_VERSION}-intl.so`];
-
-const files = [
-    {
-        name: 'icudt72l.dat',
-        parent: '/preload/',
-        url: 'https://unpkg.com/php-wasm-intl/icudt72l.dat'
-    }
+```js
+const sharedLibs = [
+  { name: 'libicuuc.so',   url: 'https://unpkg.com/php-wasm-intl/libicuuc.so' },
+  { name: 'libicutu.so',   url: 'https://unpkg.com/php-wasm-intl/libicutu.so' },
+  { name: 'libicutest.so', url: 'https://unpkg.com/php-wasm-intl/libicutest.so' },
+  { name: 'libicuio.so',   url: 'https://unpkg.com/php-wasm-intl/libicuio.so' },
+  { name: 'libicui18n.so', url: 'https://unpkg.com/php-wasm-intl/libicui18n.so' },
+  { name: 'libicudata.so', url: 'https://unpkg.com/php-wasm-intl/libicudata.so' },
 ];
 
-const php = new PhpWeb({sharedLibs, files});
+const files = [
+  {
+    name: 'icudt72l.dat',
+    path: '/preload/icudt72l.dat',
+    url: 'https://unpkg.com/php-wasm-intl/icudt72l.dat'
+  }
+];
 ```
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Custom Builds
 
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
+Enable `WITH_INTL` in `.php-wasm-rc`.
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-intl.so']});
-```
+## Build Options
 
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_INTL
-
-### WITH_INTL
-
-`0|static|shared|dynamic`
-
-When compiled as a `dynamic`, or `shared` extension, this will produce the extension `php-8.𝑥-intl.so` & the following libraries:
-
-* libicuuc.so
-* libicutu.so
-* libicutest.so
-* libicuio.so
-* libicui18n.so
-* libicudata.so
-
-The following data file will also be produced, and should be loaded to the `/preload` directory:
-
-* icudt72l.dat
+- `WITH_INTL`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
+- Dynamic builds emit the extension side-module, ICU side libraries, and the `icudt72l.dat` preload asset.
+- Shared builds emit the ICU side libraries and the `icudt72l.dat` preload asset.
+- Static builds bundle `icudt72l.dat` into the runtime preload archive.

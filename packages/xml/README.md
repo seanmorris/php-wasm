@@ -1,45 +1,39 @@
 # php-wasm-xml
 
-xml extenstion for php-wasm.
+`php-wasm-xml` provides the `xml` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-libxml php-wasm-xml
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-xml.so`.
+Load `php-wasm-libxml` alongside it when you are using XML as a shared or dynamic extension.
 
 ## Usage
 
-`php-wasm-xml` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import libxml from 'php-wasm-libxml';
+import xml from 'php-wasm-xml';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-xml')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [libxml, xml],
+});
+
+await php.run(`<?php var_dump(extension_loaded('xml'));`);
 ```
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+## Custom Builds
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-xml.so']});
-```
+Enable `WITH_XML` in `.php-wasm-rc`.
+Shared and dynamic XML builds also need `WITH_LIBXML` enabled.
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Build Options
 
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-xml.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_XML
-
-### WITH_XML
-
-`0|static|shared`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-xml.so`.
+- `WITH_XML`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.
+- `WITH_LIBXML`: `WITH_XML=static` requires `WITH_LIBXML=static`. `WITH_XML=dynamic` requires libxml to be enabled in the build.

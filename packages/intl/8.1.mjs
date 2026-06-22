@@ -2,22 +2,30 @@ const importMeta = import.meta;
 const url = new URL(importMeta.url ?? 'http://example.com#this-is-an-error-supression-hack');
 const ini = !!(Number( url.searchParams.get('ini') ?? true ));
 
+/**
+ * Returns the shared library definitions for this package build.
+ * @returns {Array<object>} Shared library definitions for the current package version.
+ */
 export const getLibs = () => [
-	{name: 'php8.1-intl.so', url: new URL('./php8.1-intl.so', import.meta.url), ini},
-	{name: 'libicuuc.so',   url: new URL('./libicuuc.so',   import.meta.url)},
-	{name: 'libicutu.so',   url: new URL('./libicutu.so',   import.meta.url)},
-	{name: 'libicutest.so', url: new URL('./libicutest.so', import.meta.url)},
-	{name: 'libicuio.so',   url: new URL('./libicuio.so',   import.meta.url)},
-	{name: 'libicui18n.so', url: new URL('./libicui18n.so', import.meta.url)},
-	{name: 'libicudata.so', url: new URL('./libicudata.so', import.meta.url)},
+	{name: 'php8.1-intl.so', url: new URL('./php8.1-intl.so', import.meta.url), ini}
+	, {name: 'libicuuc.so',   url: new URL('./libicuuc.so',   import.meta.url)}
+	, {name: 'libicutu.so',   url: new URL('./libicutu.so',   import.meta.url)}
+	, {name: 'libicutest.so', url: new URL('./libicutest.so', import.meta.url)}
+	, {name: 'libicuio.so',   url: new URL('./libicuio.so',   import.meta.url)}
+	, {name: 'libicui18n.so', url: new URL('./libicui18n.so', import.meta.url)}
+	, {name: 'libicudata.so', url: new URL('./libicudata.so', import.meta.url)}
 ];
 
+/**
+ * Returns preload file definitions for this package build.
+ * @returns {Array<object>} Preload file definitions for the current package version.
+ */
 export const getFiles = () => [
 	{
-		name: 'icudt72l.dat',
-		path: '/preload/icudt72l.dat',
-		url: new URL('./icudt72l.dat', import.meta.url)
-	},
+		name: 'icudt72l.dat'
+		, path: '/preload/icudt72l.dat'
+		, url: new URL('./icudt72l.dat', import.meta.url)
+	}
 ];
 
 export default {getLibs, getFiles};

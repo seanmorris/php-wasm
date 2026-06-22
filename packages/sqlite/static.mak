@@ -22,7 +22,7 @@ CONFIGURE_FLAGS+=  --enable-pdo --with-sqlite3 --with-pdo-sqlite
 ARCHIVES+= lib/lib/libsqlite3.a
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SKIP_LIBS+= -lsqlite3
-EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
+EXTRA_MODULES+= packages/sqlite/libsqlite3.so
 endif
 
 ifeq (${WITH_SQLITE},shared)
@@ -31,8 +31,7 @@ PHP_CONFIGURE_DEPS+= packages/sqlite/libsqlite3.so
 TEST_LIST+=$(shell ls packages/sqlite/test/*.mjs)
 SHARED_LIBS+= packages/sqlite/libsqlite3.so
 SKIP_LIBS+= -lsqlite3
-EXTRA_MODULES+= packages/sqlite/libsqlite3.so packages/sqlite/php${PHP_VERSION}-sqlite.so packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
-PHP_ASSET_LIST+= libsqlite3.so
+EXTRA_MODULES+= packages/sqlite/libsqlite3.so
 endif
 
 ifeq (${WITH_SQLITE},dynamic)
@@ -48,7 +47,7 @@ libsqlite-libs: packages/sqlite/libsqlite3.so
 
 third_party/${SQLITE_DIR}/sqlite3.c:
 	@ echo -e "\e[33;4mDownloading SQLite\e[0m"
-	wget -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
+	wget --tries=5 --waitretry=2 --timeout=20 -q https://sqlite.org/2024/sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xzf sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -r sqlite-autoconf-${SQLITE_VERSION}.tar.gz
 	${DOCKER_RUN} rm -rf third_party/${SQLITE_DIR}
@@ -64,9 +63,6 @@ lib/lib/libsqlite3.so: lib/lib/libsqlite3.a
 	${DOCKER_RUN_IN_SQLITE} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/sqlite/libsqlite3.so: lib/lib/libsqlite3.so
-	cp -Lp $^ $@
-
-$(addsuffix /libsqlite3.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/libsqlite3.so
 	cp -Lp $^ $@
 
 third_party/php${PHP_VERSION}-sqlite/config.m4: third_party/php${PHP_VERSION}-src/patched
@@ -85,9 +81,6 @@ packages/sqlite/php${PHP_VERSION}-sqlite.so: ${PHPIZE} third_party/php${PHP_VERS
 	${DOCKER_RUN_IN_EXT_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include';
 	${DOCKER_RUN_IN_EXT_SQLITE} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -DHAVE_CONFIG_H -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/sqlite3.a /src/packages/sqlite/libsqlite3.so
 
-$(addsuffix /php${PHP_VERSION}-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/php${PHP_VERSION}-sqlite.so
-	cp -Lp $^ $@
-
 # third_party/php${PHP_VERSION}-pdo/config.m4: third_party/php${PHP_VERSION}-src/patched
 # 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/pdo /src/third_party/php${PHP_VERSION}-pdo
 
@@ -103,7 +96,7 @@ $(addsuffix /php${PHP_VERSION}-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): package
 # 	${DOCKER_RUN_IN_EXT_PDO} emmake make install
 # 	${DOCKER_RUN_IN_EXT_PDO} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -DHAVE_CONFIG_H -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/pdo.a
 
-# $(addsuffix /php${PHP_VERSION}-pdo.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/php${PHP_VERSION}-pdo.so
+# ${PHP_ASSET_DIR}/php${PHP_VERSION}-pdo.so: packages/sqlite/php${PHP_VERSION}-pdo.so
 # 	cp -Lp $^ $@
 
 third_party/php${PHP_VERSION}-pdo-sqlite/config.m4: third_party/php${PHP_VERSION}-src/patched
@@ -126,6 +119,3 @@ packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include' RE2C=re2c;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -DHAVE_CONFIG_H -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/pdo_sqlite.a /src/packages/sqlite/libsqlite3.so
-
-$(addsuffix /php${PHP_VERSION}-pdo-sqlite.so,$(sort ${SHARED_ASSET_PATHS})): packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so
-	cp -Lp $^ $@

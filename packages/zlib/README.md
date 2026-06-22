@@ -1,47 +1,35 @@
 # php-wasm-zlib
 
-zlib extenstion for php-wasm.
+`php-wasm-zlib` provides the `zlib` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-zlib
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-zlib.so` and bundles `libz.so`.
 
 ## Usage
 
-`php-wasm-zlib` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import zlib from 'php-wasm-zlib';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-zlib')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [zlib],
+});
+
+await php.run(`<?php var_dump(extension_loaded('zlib'));`);
 ```
 
-The supporting library `libz.so` will automatically be pulled from the package.
+## Custom Builds
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+Enable `WITH_ZLIB` in `.php-wasm-rc`.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-zlib.so']});
-```
+## Build Options
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-zlib.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_ZLIB
-
-### WITH_ZLIB
-
-`0|static|shared`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-zlib.so`.
+- `WITH_ZLIB`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.

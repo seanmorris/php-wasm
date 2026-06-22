@@ -29,7 +29,6 @@ PHP_CONFIGURE_DEPS+= packages/libxml/libxml2.so
 TEST_LIST+=$(shell ls packages/libxml/test/*.mjs)
 SKIP_LIBS+= -lxml2
 EXTRA_MODULES+= packages/libxml/libxml2.so
-PHP_ASSET_LIST+= libxml2.so
 endif
 
 ifeq (${WITH_LIBXML},dynamic)
@@ -64,9 +63,6 @@ lib/lib/libxml2.so: lib/lib/libxml2.a
 
 packages/libxml/libxml2.so: lib/lib/libxml2.so
 	cp -L $^ $@
-
-$(addsuffix /libxml2.so,$(sort ${SHARED_ASSET_PATHS})): packages/libxml/libxml2.so
-	cp -Lp $^ $@
 
 ## EXPERIMENTAL!!
 third_party/php${PHP_VERSION}-libxml/config0.m4: third_party/php${PHP_VERSION}-src/patched

@@ -1,6 +1,15 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { PhpNode } from '../packages/php-wasm/PhpNode.mjs';
+import { PhpNode as BasePhpNode } from '../packages/php-wasm/PhpNode.mjs';
+import { nodeRuntimeOptions } from './lib/node-runtime-options.mjs';
+
+class PhpNode extends BasePhpNode
+{
+	constructor(args = {})
+	{
+		super(nodeRuntimeOptions(args));
+	}
+}
 
 test('Can run PHP', async () => {
 	const php = new PhpNode({});

@@ -1,53 +1,37 @@
 # php-wasm-mbstring
 
-mbstring extension for php-wasm
+`php-wasm-mbstring` provides the `mbstring` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-mbstring
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-mbstring.so` and bundles `libonig.so`.
 
 ## Usage
 
-`php-wasm-mbstring` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import mbstring from 'php-wasm-mbstring';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-mbstring')
-]});
-```
-The supporting library `libonig.so` will automatically be pulled from the package.
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [mbstring],
+});
 
-You can rely on the default loading behavior if `.so` files are served from the same directory as your `.wasm` files.
-
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-mbstring.so']});
+await php.run(`<?php var_dump(extension_loaded('mbstring'));`);
 ```
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+## Custom Builds
 
-```javascript
-const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
-};
+Enable `WITH_MBSTRING` in `.php-wasm-rc`.
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-mbstring.so']});
-```
+## Build Options
 
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_MBSTRING
-* WITH_ONIGURUMA
-
-### WITH_MBSTRING
-
-`0|static|shared|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-mbstring.so`.
-
-### WITH_ONIGURUMA
-
-`0|static|shared`
-
-When compiled as a `shared` library, this will produce the library `libonig.so`.
+- `WITH_MBSTRING`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.
+- `WITH_ONIGURUMA`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
+- `WITH_ONIGURUMA` controls whether `libonig.so` is built and emitted alongside the extension.

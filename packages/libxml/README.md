@@ -1,35 +1,38 @@
 # php-wasm-libxml
 
-libxml extension for php-wasm
+`php-wasm-libxml` provides the `libxml2.so` support library used by the XML-family extensions in `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-libxml
+```
+
+## What It Loads
+
+This package does not register a separate PHP extension module.
+It only supplies `libxml2.so` so packages like `php-wasm-dom`, `php-wasm-xml`, and `php-wasm-simplexml` can be loaded as shared or dynamic extensions.
+
+The stock `php-wasm` runtime already includes the core `libxml` extension, so most consumers only need this package when they are composing XML-related shared libraries explicitly.
 
 ## Usage
 
-The library `libxml.so` is included by default with `php-wasm`, and will be loaded automatically.
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import libxml from 'php-wasm-libxml';
+import dom from 'php-wasm-dom';
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
-
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [libxml, dom],
+});
 ```
 
-## Build options:
+## Custom Builds
 
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
+Enable `WITH_LIBXML` in `.php-wasm-rc` when you want libxml built outside the base runtime.
 
-* WITH_LIBXML
+## Build Options
 
-### WITH_LIBXML
-
-`0|static|shared`
-
-When compiled as a `shared` libary, this will produce the libary file `libxml.so`.
+- `WITH_LIBXML`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
+- The `dynamic` mode is what the XML-family side-module packages rely on when they need `libxml2.so` at runtime.

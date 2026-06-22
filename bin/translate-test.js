@@ -5,6 +5,7 @@ const { parseArgs } = require('node:util');
 const parsedArgs = parseArgs({allowPositionals:true, options: {
 	file: { type: 'string' }
 	, phpVersion: { type: 'string' }
+	, libType: { type: 'string', default: 'shared' }
 	, buildType: { type: 'string', default: 'shared' }
 }}).values;
 
@@ -36,6 +37,7 @@ async function translate()
 	console.log(`import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
+import { nodeRuntimeOptions } from '../../../test/lib/node-runtime-options.mjs';
 
 test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
 	const sharedLibs = [];
@@ -50,7 +52,7 @@ test(${JSON.stringify(String(sections.TEST).trim())}, async () => {
 	const files = [];
 	process.env.WITH_INTL === 'dynamic' && files.push({parent: '/preload/', name: 'icudt72l.dat', url: './node_modules/php-wasm-intl/icudt72l.dat'});
 
-	const php = new PhpNode( { sharedLibs, files, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } } );
+	const php = new PhpNode(nodeRuntimeOptions({ sharedLibs, files, persist: { mountPath: '/persist', localPath: process.cwd() + '/test/' } }));
 
 	let stdOut = '', stdErr = '';
 

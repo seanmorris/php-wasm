@@ -22,15 +22,15 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.libgroups }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
 
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Install NPM packages
         run: npm ci
@@ -44,7 +44,7 @@ jobs:
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -69,7 +69,7 @@ jobs:
         libgroup: ${{ fromJSON(needs.generate-lib-group-matrix.outputs.matrix) }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -79,15 +79,15 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install docker-compose
-        run: sudo apt update && sudo apt install docker-compose -y
+      - name: Verify Docker Compose
+        run: docker compose version
 
       - name: Import configuration
         run: cp -p .github/.env_8.4.dynamic.ci .env
 
       - name: Cache Docker image
         id: cache-docker-image
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
           key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile') }}
@@ -101,9 +101,6 @@ jobs:
         run: |
           time make --debug=basic image
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-
-      - name: Spin up docker-network
-        run: docker network create phpwasm_default
 
       - name: Build shared libraries
         run: time make --debug=basic ${{ matrix.libgroup }} WITH_SDL=dynamic
@@ -127,7 +124,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-dependencies-${{ matrix.libgroup }}
           path: php-dependencies-${{ matrix.libgroup }}.tar.gz
@@ -135,12 +132,11 @@ jobs:
 
 
 
-
   build-php-dynamic:
     needs: [build-libs]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -150,7 +146,7 @@ jobs:
     needs: [build-libs]
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
@@ -160,11 +156,53 @@ jobs:
     needs: []
     strategy:
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
     uses: ./.github/workflows/build-step.yaml
     with:
       phpVersion: ${{ matrix.phpVersion }}
       libType: static
+
+  verify-sdl-dynamic:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-dynamic]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['dynamic']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  verify-sdl-shared:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-shared]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['shared']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  verify-sdl-static:
+    name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
+    needs: [build-php-static]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+        libType: ['static']
+    uses: ./.github/workflows/verify-sdl-step.yaml
+    with:
+      artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}
+      phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
 
 
 
@@ -172,8 +210,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/dynamic libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
@@ -187,8 +226,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/shared libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
@@ -202,8 +242,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/static libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
@@ -219,8 +260,9 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -232,8 +274,9 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -245,8 +288,9 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -260,8 +304,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-dynamic]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -273,8 +318,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-shared]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -286,8 +332,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
     needs: [build-php-static]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -301,6 +348,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-dynamic
       - test-node-dynamic
       - test-browser-dynamic
       - test-cgi-node-dynamic
@@ -309,7 +357,7 @@ jobs:
         libType: ['dynamic']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -317,7 +365,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -357,7 +405,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -367,6 +415,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-shared
       - test-node-shared
       - test-browser-shared
       - test-cgi-node-shared
@@ -375,7 +424,7 @@ jobs:
         libType: ['shared']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -383,7 +432,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -423,7 +472,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -433,6 +482,7 @@ jobs:
     name: Compress PHP w/${{ matrix.libType }} libs
     runs-on: ubuntu-latest
     needs:
+      - verify-sdl-static
       - test-node-static
       - test-browser-static
       - test-cgi-node-static
@@ -441,7 +491,7 @@ jobs:
         libType: ['static']
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -449,7 +499,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-uncompressed-*-${{ matrix.libType }}
           merge-multiple: true
@@ -489,7 +539,7 @@ jobs:
               lib
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-compressed-${{ matrix.libType }}
           path: php-compressed-${{ matrix.libType }}.tar.gz
@@ -502,8 +552,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['dynamic']
     uses: ./.github/workflows/test-node-step.yaml
@@ -517,8 +568,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['shared']
     uses: ./.github/workflows/test-node-step.yaml
@@ -532,8 +584,9 @@ jobs:
     name: Test ${{ matrix.testType }} ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['static']
     uses: ./.github/workflows/test-node-step.yaml
@@ -549,8 +602,9 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -562,8 +616,9 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
@@ -575,13 +630,31 @@ jobs:
     name: Test Browser ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
       phpVersion: ${{ matrix.phpVersion }}
+      libType: ${{ matrix.libType }}
+
+  test-browser-sdl-compressed:
+    name: Test Browser 8.4 _sdl w/${{ matrix.libType }} libs (compressed)
+    needs:
+      - compress-dynamic-packages
+      - compress-shared-packages
+      - compress-static-packages
+    strategy:
+      fail-fast: false
+      matrix:
+        libType: ['dynamic', 'shared', 'static']
+    uses: ./.github/workflows/test-browser-step.yaml
+    with:
+      artifactPattern: php-compressed-${{ matrix.libType }}
+      phpVersion: '8.4'
+      phpVariant: '_sdl'
       libType: ${{ matrix.libType }}
 
 
@@ -590,8 +663,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-dynamic-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['dynamic']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -603,8 +677,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-shared-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['shared']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -616,8 +691,9 @@ jobs:
     name: Test CGI Node ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs (compressed)
     needs: [compress-static-packages]
     strategy:
+      fail-fast: false
       matrix:
-        phpVersion: ['8.4', '8.3', '8.2', '8.1', '8.0']
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         libType: ['static']
     uses: ./.github/workflows/test-cgi-node-step.yaml
     with:
@@ -637,7 +713,7 @@ jobs:
       - test-cgi-node-dynamic-compressed
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Disable man-db auto-update
         run: |
@@ -645,7 +721,7 @@ jobs:
           sudo dpkg-reconfigure man-db
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: php-compressed-dynamic
           merge-multiple: true
@@ -677,7 +753,7 @@ jobs:
               .cache
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: php-indexed-packages
           path: php-indexed-packages.tar.gz
@@ -717,83 +793,75 @@ jobs:
               -d "{\"content\": \"New nightly build available: https://nightly.php-wasm.seanmorr.is/${{ env.STAMP }}-${{ env.SHORT_SHA }}/\"}" \
               ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-  build-demo:
-    name: Build Web Demo
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
+
+
+  build-demo-dynamic:
+    name: Build Web Demo w/dynamic libs
     needs:
-      - index-packages
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v4
+      - test-browser-dynamic-compressed
+      - test-node-dynamic-compressed
+      - test-cgi-node-dynamic-compressed
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: dynamic
 
-      - name: Disable man-db auto-update
-        run: |
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
+  build-demo-shared:
+    name: Build Web Demo w/shared libs
+    needs:
+      - test-browser-shared-compressed
+      - test-node-shared-compressed
+      - test-cgi-node-shared-compressed
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: shared
 
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-compressed-dynamic
-          merge-multiple: true
-          path: ./
+  build-demo-static:
+    name: Build Web Demo w/static libs
+    needs:
+      - test-browser-static-compressed
+      - test-node-static-compressed
+      - test-cgi-node-static-compressed
+    uses: ./.github/workflows/build-demo-step.yaml
+    with:
+      libType: static
 
-      - name: Extract Artifact
-        run: |
-          for TAR in php-compressed-*.tar.gz; do
-            tar -xzf ${TAR}
-          done;
 
-      - name: Download Index Artifact
-        uses: actions/download-artifact@v4
-        with:
-          pattern: php-indexed-packages
-          merge-multiple: true
-          path: ./
 
-      - name: Extract Artifact
-        run: |
-          for TAR in php-indexed-packages.tar.gz; do
-            tar -xzf ${TAR}
-          done;
+  test-demo-web-dynamic:
+    name: Test demo-web artifact w/dynamic libs
+    needs:
+      - build-demo-dynamic
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-dynamic
+      libType: dynamic
 
-      - name: Ensure the demo uses local packages
-        run: cd demo-web; ./switch-packages.sh local; npm ci; cd ..;
+  test-demo-web-shared:
+    name: Test demo-web artifact w/shared libs
+    needs:
+      - build-demo-shared
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-shared
+      libType: shared
 
-      - name: Build Web Demo
-        run: cd demo-web; ./switch-packages.sh local; npm run build; cd ..;
-        env:
-          CI: ''
+  test-demo-web-static:
+    name: Test demo-web artifact w/static libs
+    needs:
+      - build-demo-static
+    uses: ./.github/workflows/test-demo-web-step.yaml
+    with:
+      artifactName: php-demo-web-static
+      libType: static
 
-      - name: Copy packages into web demo
-        run: cp -rfv packages demo-web/build/nightly
 
-      - name: Take Snapshot
-        run: |
-          sudo chown -R ${USER}:${USER} .
-          sudo chmod -R u+rwX,go+rX .
-          tar --exclude=.git \
-            --format=posix \
-            --exclude='php-demo-web.tar.gz' \
-            --ignore-failed-read \
-            --warning=no-file-changed \
-            -czf 'php-demo-web.tar.gz' \
-              docs
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: php-demo-web
-          path: php-demo-web.tar.gz
-          compression-level: 0
-
-  deploy-docs:
+  deploy-to-pages:
     name: Deploy Docs to GitHub Pages
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     needs:
-      - build-demo
+      - test-demo-web-dynamic
     permissions:
       contents: read
       pages: write
@@ -803,18 +871,18 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Download Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
-          pattern: php-demo-web
+          pattern: php-demo-web-dynamic
           merge-multiple: true
           path: ./
 
       - name: Extract Artifact
         run: |
-          for TAR in php-demo-web.tar.gz; do
+          for TAR in php-demo-web-dynamic.tar.gz; do
             tar -xzf ${TAR}
           done;
 

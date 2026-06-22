@@ -1,47 +1,35 @@
-# php-wasm-libyaml
+# php-wasm-yaml
 
-libyaml extension for php-wasm
+`php-wasm-yaml` provides the `yaml` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-yaml
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-yaml.so` and bundles `libyaml.so`.
 
 ## Usage
 
-`php-wasm-libyaml` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import yaml from 'php-wasm-yaml';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-    await import('https://unpkg.com/php-wasm-libyaml')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [yaml],
+});
+
+await php.run(`<?php var_dump(extension_loaded('yaml'));`);
 ```
 
-The supporting library `libyaml.so` will automatically be pulled from the package.
+## Custom Builds
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+Enable `WITH_YAML` in `.php-wasm-rc`.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.3-yaml.so']});
-```
+## Build Options
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
-
-```javascript
-const locateFile = (libName) => {
-    return `https://my-example-server.site/path/to/libs/${libName}`;
-};
-
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.3-yaml.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_LIBYAML
-
-### WITH_LIBYAML
-
-`0|static|shared`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.𝑥-yaml.so`.
+- `WITH_YAML`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.

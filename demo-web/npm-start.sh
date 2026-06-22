@@ -2,6 +2,9 @@
 
 set -eux;
 
+export VITE_LIB_TYPE="${VITE_LIB_TYPE:-${LIB_TYPE:-${VITE_BUILD_TYPE:-${BUILD_TYPE:-}}}}"
+export VITE_BUILD_TYPE="${VITE_BUILD_TYPE:-${VITE_LIB_TYPE}}"
+
 mkdir -p public/static/media
 
 if [ -d 'public/static/media/mapped' ]; then {
@@ -47,7 +50,9 @@ rm -f public/*.data;
 rm -f public/*.so;
 rm -f public/*.dat;
 rm -f public/*.map;
+rm -rf public/worker-assets;
+rm -f public/assets/php*-web.mjs public/assets/php*-web.mjs.wasm || true
 
-NODE_OPTIONS=--max_old_space_size=4096 npx webpack --config service-worker-dev.config.ts;
+NODE_OPTIONS=--max_old_space_size=4096 npm run build:worker;
 
-react-scripts start --no-cache
+npx vite --host 0.0.0.0
