@@ -85,6 +85,7 @@ declare interface PhpRuntimeArgs {
 	script?: string;
 	code?: string;
 	shared?: Record<string, PhpSharedValue>;
+	ENV?: Record<string, string>;
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFileList;
 	sharedLibs?: PhpLibraryList;

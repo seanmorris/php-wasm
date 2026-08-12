@@ -10,7 +10,7 @@ Validation refs:
 -->
 # Custom Builds with php-wasm-builder
 
-The `php-wasm-builder` *package* is the set of source files needed to build php-wasm & php-cgi-wasm.
+The `php-wasm-builder` *package* is the set of source files needed to build php-wasm, php-cgi-wasm, php-cli-wasm, & php-dbg-wasm.
 
 The `php-wasm-builder` *command* is a wrapper script for the build process that allows the user to easily configure the underlying build process & drop the build assets wherever is necessary.
 
@@ -50,7 +50,7 @@ $ php-wasm-builder clean
 
 ### build
 
-Use this to build custom version of php-wasm. It's recommended to build this to an empty directory using a `.php-wasm-rc` file.
+Use this to build a custom version of `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, or `php-dbg-wasm`. It's recommended to build this into an empty directory using a `.php-wasm-rc` file.
 
 ```bash
 npx php-wasm-builder build
@@ -146,6 +146,22 @@ Build CGI modules with:
 $ php-wasm-builder build web cgi mjs
 $ php-wasm-builder build node cgi mjs
 $ php-wasm-builder build worker cgi mjs
+```
+
+## CLI Modules:
+
+Build `php-cli-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node cli mjs
+```
+
+## DBG Modules:
+
+Build `php-dbg-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node dbg mjs
 ```
 ## PHP_DIST_DIR
 

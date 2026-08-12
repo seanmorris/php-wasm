@@ -23,6 +23,7 @@ export interface PhpRuntimeArgs {
 	script?: string;
 	code?: string;
 	shared?: Record<string, object | string | number | boolean | undefined>;
+	ENV?: Record<string, string>;
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFile[];
 	sharedLibs?: Array<string | URL | PhpSharedLibrary>;

@@ -79,6 +79,11 @@ export class PhpBase extends EventTarget
 		this.phpVersion = args.version;
 		this.phpVariant = args.variant;
 
+		args.ENV = {
+			...(args.ENV ?? {}),
+			...(this.phpVersion ? {PHP_VERSION: this.phpVersion} : {}),
+		};
+
 		this.shared = args.shared = ('shared' in args) ? args.shared : {};
 
 		this.phpArgs = args;
