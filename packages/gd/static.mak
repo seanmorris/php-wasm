@@ -223,7 +223,7 @@ third_party/jpeg-9f/README:
 
 lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	@ echo -e "\e[33;4mBuilding LIBJPEG\e[0m"
-	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared --enable-static
 	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
