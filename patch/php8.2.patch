@@ -449,10 +449,15 @@ index b454680..e98bf3e 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2640,3 +2643,18 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -2640,3 +2643,23 @@ consult the installation file that came with this distribution, or visit \n\
  	return exit_status;
  }
  /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 +
 +void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
 +{

@@ -453,10 +453,15 @@ index 6db96a4..1ff31d7 100644
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
  		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
-@@ -2677,3 +2680,18 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -2677,3 +2680,23 @@ consult the installation file that came with this distribution, or visit \n\
  	return exit_status;
  }
  /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 +
 +void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
 +{

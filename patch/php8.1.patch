@@ -323,10 +323,15 @@ index 499a793..b048346 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2665,3 +2667,18 @@ parent_out:
+@@ -2665,3 +2667,23 @@ parent_out:
  	return exit_status;
  }
  /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 +
 +void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
 +{

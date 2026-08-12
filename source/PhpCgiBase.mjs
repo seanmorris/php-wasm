@@ -25,6 +25,9 @@ import { resolveDependencies } from './resolveDependencies.mjs';
 
 const STR = 'string';
 const NUM = 'number';
+const instantiateRuntimeModule = (Runtime, args) => /^class\s/.test(Function.prototype.toString.call(Runtime))
+	? new Runtime(args)
+	: Runtime(args);
 
 const putEnv = (php, key, value) => php.ccall(
 	'wasm_sapi_cgi_putenv'
@@ -591,7 +594,7 @@ export class PhpCgiBase
 			, locateFile
 		};
 
-		return this.binary = this.binLoader.then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
+		return this.binary = this.binLoader.then(({default: PHP}) => instantiateRuntimeModule(PHP, phpArgs)).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM
@@ -866,10 +869,10 @@ export class PhpCgiBase
 				this.output = [];
 
 				exitCode = Number(await php.ccall(
-					'main'
+					'wasm_sapi_cgi_main'
 					, 'number'
-					, ['number', 'string']
-					, []
+					, ['number', 'number']
+					, [0, 0]
 					, {async: true}
 				));
 

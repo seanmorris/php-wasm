@@ -1,0 +1,180 @@
+diff --git a/emcc.py b/emcc.py
+index aae61e4..f39c6ec 100644
+--- a/emcc.py
++++ b/emcc.py
+@@ -82,7 +82,7 @@ LINK_ONLY_FLAGS = {
+     '--emit-symbol-map', '--emrun', '--exclude-file', '--extern-post-js',
+     '--extern-pre-js', '--ignore-dynamic-linking', '--js-library',
+     '--js-transform', '--oformat', '--output_eol', '--output-eol',
+-    '--post-js', '--pre-js', '--preload-file', '--profiling-funcs',
++    '--post-js', '--pre-js', '--preload-file', '--preload-name', '--profiling-funcs',
+     '--proxy-to-worker', '--shell-file', '--source-map-base',
+     '--threadprofiler', '--use-preload-plugins',
+ }
+diff --git a/src/lib/libidbfs.js b/src/lib/libidbfs.js
+index ac51fe7..0b9c8df 100644
+--- a/src/lib/libidbfs.js
++++ b/src/lib/libidbfs.js
+@@ -265,7 +265,9 @@ addToLibrary({
+       }
+     },
+     storeLocalEntry: (path, entry, callback) => {
++      var previousIgnore = FS.ignorePermissions;
+       try {
++        FS.ignorePermissions = true;
+         if (FS.isDir(entry['mode'])) {
+           FS.mkdirTree(path, entry['mode']);
+         } else if (FS.isLink(entry['mode'])) {
+@@ -280,6 +282,8 @@ addToLibrary({
+         FS.utime(path, entry['timestamp'], entry['timestamp']);
+       } catch (e) {
+         return callback(e);
++      } finally {
++        FS.ignorePermissions = previousIgnore;
+       }
+
+       callback(null);
+diff --git a/src/lib/libdylink.js b/src/lib/libdylink.js
+--- a/src/lib/libdylink.js
++++ b/src/lib/libdylink.js
+@@ -1303,7 +1303,7 @@ addToLibrary({
+   _dlopen_js__async: 'auto',
+   _dlopen_js: (handle) =>
+ #if ASYNCIFY
+-    dlopenInternal(handle, { loadAsync: true }),
++    dlopenInternal(handle, { loadAsync: true }).catch(() => 0),
+ #else
+     dlopenInternal(handle, { loadAsync: false }),
+ #endif
+diff --git a/src/preamble.js b/src/preamble.js
+index 7585eae..32d7fd5 100644
+--- a/src/preamble.js
++++ b/src/preamble.js
+@@ -449,7 +449,10 @@ function findWasmBinary() {
+ #endif
+
+   if (Module['locateFile']) {
+-    return locateFile('{{{ WASM_BINARY_FILE }}}');
++    return locateFile(
++      '{{{ WASM_BINARY_FILE }}}',
++      new URL('{{{ WASM_BINARY_FILE }}}', import.meta.url).href,
++    );
+   }
+
+   // Use bundler-friendly `new URL(..., import.meta.url)` pattern; works in browsers too.
+diff --git a/src/shell.js b/src/shell.js
+index ad4fd53..643d203 100644
+--- a/src/shell.js
++++ b/src/shell.js
+@@ -173,16 +173,16 @@ if (ENVIRONMENT_IS_WORKER) {
+
+ // `/` should be present at the end if `scriptDirectory` is not empty
+ var scriptDirectory = '';
+-function locateFile(path) {
++function locateFile(path, defaultPath = null) {
+ #if RUNTIME_DEBUG
+   dbg('locateFile:', path, 'scriptDirectory:', scriptDirectory);
+ #endif
+ #if expectToReceiveOnModule('locateFile')
+   if (Module['locateFile']) {
+-    return Module['locateFile'](path, scriptDirectory);
++    return Module['locateFile'](path, scriptDirectory) ?? defaultPath ?? scriptDirectory + path;
+   }
+ #endif
+-  return scriptDirectory + path;
++  return defaultPath ?? scriptDirectory + path;
+ }
+
+ // Hooks that are implemented differently in different runtime environments.
+diff --git a/tools/cmdline.py b/tools/cmdline.py
+index 1b6d02b..9ddf02e 100644
+--- a/tools/cmdline.py
++++ b/tools/cmdline.py
+@@ -95,6 +95,7 @@ class EmccOptions:
+   post_link = False
+   pre_js: list[str] = [] # before all js
+   preload_files: list[str] = []
++  preload_name: str | None = None
+   relocatable = False
+   reproduce = os.getenv('EMCC_REPRODUCE')  # None by default.
+   requested_debug = None
+@@ -433,6 +434,8 @@ def parse_args(newargs):  # ruff: ignore[complex-structure, too-many-branches, t
+       options.embed_files.append(consume_arg())
+     elif check_arg('--preload-file'):
+       options.preload_files.append(consume_arg())
++    elif check_arg('--preload-name'):
++      options.preload_name = consume_arg()
+     elif check_arg('--exclude-file'):
+       options.exclude_files.append(consume_arg())
+     elif check_flag('--use-preload-cache'):
+diff --git a/tools/emscripten.py b/tools/emscripten.py
+index 38dfd6c..c90eb2e 100644
+--- a/tools/emscripten.py
++++ b/tools/emscripten.py
+@@ -1012,7 +1012,10 @@ def create_receiving(function_exports, other_exports, library_symbols, aliases):
+   for export, info in other_exports:
+     exports[export.name] = (export, info)
+
+-  mangled = [asmjs_mangle(s) for s in exports] + list(aliases.keys())
++  # Some Wasm exports alias to the same JavaScript symbol.  In particular,
++  # `main` and `__main_argc_argv` both mangle to `_main`.  Declare each JS
++  # binding only once so Closure does not reject the duplicate declaration.
++  mangled = list(dict.fromkeys([asmjs_mangle(s) for s in exports] + list(aliases.keys())))
+   if settings.ASSERTIONS:
+     # In debug builds we generate trapping functions in case
+     # folks try to call/use a reference that was taken before the
+@@ -1054,9 +1057,13 @@ def create_receiving(function_exports, other_exports, library_symbols, aliases):
+         # are created by binaryen will be missing.
+         continue
+       receiving.append(f"  assert(typeof wasmExports['{sym}'] != 'undefined', 'missing Wasm export: {sym}');")
++  seen_mangled = set()
+   for sym, info in exports.items():
+     is_function = type(info) == webassembly.FuncType
+     mangled = asmjs_mangle(sym)
++    if mangled in seen_mangled:
++      continue
++    seen_mangled.add(mangled)
+     assignment = mangled
+     if generate_dyncall_assignment and is_function and sym.startswith('dynCall_'):
+       sig_str = sym.removeprefix('dynCall_')
+diff --git a/tools/file_packager.py b/tools/file_packager.py
+index 5db149e..f03b8db 100755
+--- a/tools/file_packager.py
++++ b/tools/file_packager.py
+@@ -762,7 +762,9 @@ def generate_preload_js(data_target, data_files, metadata, js_file):
+       }
+       var PACKAGE_NAME = '%s';
+       var REMOTE_PACKAGE_BASE = '%s';
+-      var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;\n''' % (js_manipulation.escape_for_js_string(data_target), js_manipulation.escape_for_js_string(remote_package_name))
++      var REMOTE_PACKAGE_NAME = Module['locateFile']
++        ? (Module['locateFile'](REMOTE_PACKAGE_BASE, '') ?? REMOTE_PACKAGE_BASE)
++        : REMOTE_PACKAGE_BASE;\n''' % (js_manipulation.escape_for_js_string(data_target), js_manipulation.escape_for_js_string(remote_package_name))
+     metadata['remote_package_size'] = remote_package_size
+     ret += "      var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];\n"
+
+diff --git a/tools/link.py b/tools/link.py
+index 8d78776..a82bb98 100644
+--- a/tools/link.py
++++ b/tools/link.py
+@@ -3070,9 +3070,12 @@ def package_files(target):
+   rtn = []
+   logger.debug('setting up files')
+   file_args = ['--from-emcc']
++  data_target = utils.replace_suffix(target, '.data')
+   if options.preload_files:
+     file_args.append('--preload')
+     file_args += options.preload_files
++    if options.preload_name:
++      data_target = os.path.join(os.path.dirname(target), options.preload_name + '.data')
+   if options.embed_files:
+     file_args.append('--embed')
+     file_args += options.embed_files
+@@ -3095,7 +3098,7 @@ def package_files(target):
+     rtn.append(object_file)
+
+   cmd = building.get_command_with_possible_response_file(
+-    [shared.FILE_PACKAGER, utils.replace_suffix(target, '.data'), *file_args])
++    [shared.FILE_PACKAGER, data_target, *file_args])
+   if options.preload_files:
+     # Preloading files uses --pre-js code that runs before the module is loaded.
+     file_code = shared.check_call(cmd, stdout=PIPE).stdout

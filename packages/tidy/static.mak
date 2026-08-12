@@ -75,6 +75,9 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC "
 	${DOCKER_RUN_IN_TIDY} emmake make -j`nproc`;
 	${DOCKER_RUN_IN_TIDY} emmake make install;
+	# Tidy 5.6 names its static archive libtidys.a to distinguish it from
+	# the shared library. Keep the conventional name expected by PHP's -ltidy.
+	${DOCKER_RUN_IN_TIDY} cp /src/lib/lib/libtidys.a /src/lib/lib/libtidy.a
 
 lib/lib/libtidy.so: lib/lib/libtidy.a
 	${DOCKER_RUN_IN_TIDY} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^

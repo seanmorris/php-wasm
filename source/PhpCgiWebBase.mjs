@@ -4,6 +4,9 @@ import { resolveDependencies } from './resolveDependencies.mjs';
 
 const STR = 'string';
 const NUM = 'number';
+const instantiateRuntimeModule = (Runtime, args) => /^class\s/.test(Function.prototype.toString.call(Runtime))
+	? new Runtime(args)
+	: Runtime(args);
 
 /**
  * Browser-specific CGI wrapper with FS transaction support.
@@ -114,7 +117,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 			const {default: PHP} = await this.binLoader;
 
-			const php = await new PHP(phpArgs);
+			const php = await instantiateRuntimeModule(PHP, phpArgs);
 
 			await php.ccall(
 				'pib_storage_init'

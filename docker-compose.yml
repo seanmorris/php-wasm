@@ -13,6 +13,6 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-web}
     volumes:
       - ${HOST_PROJECT_ROOT:-.}:/src
-      - /tmp/emsdk-cache:/emsdk/upstream/emscripten/cache/
+      - /tmp/emsdk-cache-6.0.6:/emsdk/upstream/emscripten/cache/
       - ${HOST_PROJECT_ROOT:-.}/.cache:/emsdk_portable/.data/cache/asmjs/
     command: [bash]
