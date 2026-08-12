@@ -103,6 +103,7 @@ EXTRA_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
+PHP_CONFIGURE_VARS=
 
 ## More Options
 ifdef PHP_BUILDER_DIR
@@ -326,6 +327,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 	${DOCKER_RUN_IN_PHP} emconfigure ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
+		${PHP_CONFIGURE_VARS} \
 		EXTENSION_DIR='./'  \
 		--prefix='/src/lib/php${PHP_VERSION}' \
 		--with-config-file-path=/php.ini \
