@@ -32,9 +32,9 @@ PHP_CGI_DIST_DIR=./public
 # Build the cgi package's extensions to a directory other than the current one (RELATIVE path)
 PHP_CGI_ASSET_DIR=./public
 
-# Space separated list of files/directories (ABSOLUTE paths)
-# to be included under the /preload directory in the final build.
-PRELOAD_ASSETS=~/path/to/file/php-scripts ~/other-dir/example.php
+# Space separated list of files/directories to include under /preload.
+# Relative paths are resolved from the current project directory.
+PRELOAD_ASSETS=./php-scripts ~/other-dir/example.php
 
 # Memory to start the instance with, before growth
 INITIAL_MEMORY=2048MB
@@ -62,10 +62,12 @@ Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of fil
 
 The files and directories will be collected into a single directory. Individual files & directories will appear in the top level, while directories will maintain their internal structure.
 
+When you use `php-wasm-builder`, relative entries are resolved from the current project directory. Anchored paths such as `/path/to/file.txt` and `~/path/to/file.txt` are copied as-is.
+
 These files & directories will be available under `/preload` in the final package, packaged into the `.data` file that is built along with the `.wasm` file.
 
 ```bash
-PRELOAD_ASSETS='/path/to/file.txt /some/directory /path/to/other_file.txt /some/other/directory'
+PRELOAD_ASSETS='./php-scripts /some/directory ~/other-dir/example.php /path/to/other_file.txt'
 ```
 
 ### PHP_VERSION

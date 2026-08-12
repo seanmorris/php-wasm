@@ -83,9 +83,12 @@ async function validateCustomBuilds(page)
 	const blocksText = page.blocks.map(block => block.code).join('\n');
 
 	assert.match(blocksText, /php-wasm-builder build worker cgi mjs/);
-	assert.match(builderSource, /let buildType = 'js'/);
-	assert.match(builderSource, /if\(buildArgs\.includes\('mjs'\)\)/);
-	assert.match(builderSource, /if\(buildArgs\.includes\('cgi'\)\)/);
+	assert.match(blocksText, /php-wasm-builder build node cli mjs/);
+	assert.match(blocksText, /php-wasm-builder build node dbg mjs/);
+	assert.match(builderSource, /const buildModuleTypes = new Map/);
+	assert.match(builderSource, /const buildPackageTypes = new Map/);
+	assert.match(builderSource, /const parseBuildArgs = buildArgs =>/);
+	assert.match(builderSource, /PACKAGE_TYPE: \[base, cgi, cli, dbg\]/);
 
 	return coverAll(
 		page,
