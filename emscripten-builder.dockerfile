@@ -56,6 +56,8 @@ RUN cd /emsdk/upstream/emscripten && {\
 	rm /tmp/emscripten.patch;\
 }
 
-RUN embuilder build USER
+COPY .github/bin/retry-embuilder.sh /usr/local/bin/retry-embuilder
+
+RUN retry-embuilder build USER
 
 RUN emcc --check
