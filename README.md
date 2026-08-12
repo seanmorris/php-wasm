@@ -557,10 +557,12 @@ Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of fil
 
 The files and directories will be collected into a single directory. Individual files & directories will appear in the top level, while directories will maintain their internal structure.
 
+When you use `php-wasm-builder`, relative entries are resolved from the current project directory. Anchored paths such as `/path/to/file.txt` and `~/path/to/file.txt` are copied as-is.
+
 These files & directories will be available under `/preload` in the final package, packaged into the `.data` file that is built along with the `.wasm` file.
 
 ```bash
-PRELOAD_ASSETS='/path/to/file.txt /some/directory /path/to/other_file.txt /some/other/directory'
+PRELOAD_ASSETS='./php-scripts /some/directory ~/other-dir/example.php /path/to/other_file.txt'
 ```
 
 ### locateFile
@@ -815,7 +817,24 @@ Build CGI modules with:
 
 ```sh
 $ php-wasm-builder build web cgi mjs
+$ php-wasm-builder build node cgi mjs
 $ php-wasm-builder build worker cgi mjs
+```
+
+### CLI Modules:
+
+Build `php-cli-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node cli mjs
+```
+
+### DBG Modules:
+
+Build `php-dbg-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node dbg mjs
 ```
 
 This will build the package inside the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
@@ -841,9 +860,9 @@ PHP_CGI_DIST_DIR=./public
 # Build the cgi package's extensions to a directory other than the current one (RELATIVE path)
 PHP_CGI_ASSET_DIR=./public
 
-# Space separated list of files/directories (ABSOLUTE paths)
-# to be included under the /preload directory in the final build.
-PRELOAD_ASSETS=~/my-project/php-scripts ~/other-dir/example.php
+# Space separated list of files/directories to include under /preload.
+# Relative paths are resolved from the current project directory.
+PRELOAD_ASSETS=./php-scripts ~/other-dir/example.php
 
 # Memory to start the instance with, before growth
 INITIAL_MEMORY=2048MB
@@ -901,7 +920,7 @@ The optimization level to use while compiling libraries. Defaults to `OPTIMIZE`.
 
 ##### PRELOAD_ASSETS
 
-A list of **absolute paths** to files & directories to build to the `/preload` directory. Will produce a `.data` file.
+A list of files & directories to build to the `/preload` directory. Relative paths are resolved from the current project directory. Anchored paths such as `/path/to/file` and `~/path/to/file` are copied as-is. Will produce a `.data` file.
 
 ---
 
@@ -1124,7 +1143,7 @@ When compiled as a `dynamic` or `shared` extension, this will produce the extens
 
 #### php-wasm-builder build
 
-Use this to build a custom version of `php-wasm`. It's recommended to build into an empty directory using a `.php-wasm-rc` file.
+Use this to build a custom version of `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, or `php-dbg-wasm`. It's recommended to build into an empty directory using a `.php-wasm-rc` file.
 
 ```bash
 npx php-wasm-builder build

@@ -105,10 +105,10 @@ STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
 
 ## More Options
+builder_resolve_path = $(if $(strip $(1)),$(if $(filter /% ~%,$(1)),$(1),$(abspath ${PHP_BUILDER_DIR}/$(1))))
+
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
-PHP_DIST_DIR:=$(realpath ${ENV_DIR}/${PHP_DIST_DIR})
-PHP_ASSET_DIR:=$(realpath ${ENV_DIR}/${PHP_ASSET_DIR})
 endif
 PHP_DIST_DIR?=${ENV_DIR}/packages/php-wasm
 INITIAL_MEMORY ?=128MB
@@ -138,7 +138,7 @@ DOCKER_COMPOSE?=docker compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
-DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
+DOCKER_ENV=PHP_DIST_DIR=$(abspath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 MAKEFLAGS+= "-l${MAX_LOAD}"
@@ -211,7 +211,17 @@ ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
 PHP_ASSET_DIR?=${PHP_DIST_DIR}
+PHP_STDLIB_DIR?=${PHP_DIST_DIR}/stdlib
 SHARED_ASSET_PATHS=${PHP_ASSET_DIR}
+
+ifdef PHP_BUILDER_DIR
+PHP_DIST_DIR:=$(call builder_resolve_path,${PHP_DIST_DIR})
+PHP_ASSET_DIR:=$(call builder_resolve_path,${PHP_ASSET_DIR})
+PHP_STDLIB_DIR:=$(call builder_resolve_path,${PHP_STDLIB_DIR})
+PRELOAD_ASSET_SOURCES:=$(foreach asset,${PRELOAD_ASSETS},$(call builder_resolve_path,$(asset)))
+else
+PRELOAD_ASSET_SOURCES:=${PRELOAD_ASSETS}
+endif
 
 PRELOAD_NAME=php
 NOTPARALLEL=
@@ -253,15 +263,11 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} ${ENV_FILE}
+.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSET_SOURCES} ${ENV_FILE}
 	${DOCKER_RUN} rm -rf /src/third_party/preload
 ifneq (${PRELOAD_ASSETS},)
 	@ mkdir -p third_party/preload
-ifdef PHP_BUILDER_DIR
-	@ cp -prfL $(addprefix ${PHP_BUILDER_DIR},${PRELOAD_ASSETS}) third_party/preload/
-else
-	@ cp -prfL ${PRELOAD_ASSETS} third_party/preload/
-endif
+	@ cp -prfL ${PRELOAD_ASSET_SOURCES} third_party/preload/
 	@ ${DOCKER_RUN} touch .cache/preload-collected
 endif
 
@@ -462,14 +468,14 @@ NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULE
 NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
 
 ifneq (${PRELOAD_ASSETS},)
-WEB_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEB_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
 
 ifeq (${WITH_SOURCEMAPS},1)
@@ -497,25 +503,29 @@ STDLIB_WEBVIEW_TARGET=
 
 ifneq ($(filter ${WITH_LIBXML},dynamic),)
 ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-STDLIB_NODE_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
-STDLIB_WEB_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
-STDLIB_WORKER_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
-STDLIB_WEBVIEW_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+STDLIB_NODE_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs
+STDLIB_WEB_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs
+STDLIB_WORKER_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs
+STDLIB_WEBVIEW_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs
 endif
 endif
 
 stdlib: ${STDLIB_NODE_TARGET} ${STDLIB_WEB_TARGET} ${STDLIB_WORKER_TARGET} ${STDLIB_WEBVIEW_TARGET}
 
-packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 # Single Builds
