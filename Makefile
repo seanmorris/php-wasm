@@ -223,9 +223,9 @@ ifdef PHP_BUILDER_DIR
 PHP_DIST_DIR:=$(call builder_resolve_path,${PHP_DIST_DIR})
 PHP_ASSET_DIR:=$(call builder_resolve_path,${PHP_ASSET_DIR})
 PHP_STDLIB_DIR:=$(call builder_resolve_path,${PHP_STDLIB_DIR})
-PRELOAD_ASSET_SOURCES:=$(foreach asset,${PRELOAD_ASSETS},$(call builder_resolve_path,$(asset)))
+PRELOAD_ASSET_SOURCES=$(foreach asset,${PRELOAD_ASSETS},$(call builder_resolve_path,$(asset)))
 else
-PRELOAD_ASSET_SOURCES:=${PRELOAD_ASSETS}
+PRELOAD_ASSET_SOURCES=${PRELOAD_ASSETS}
 endif
 
 PRELOAD_NAME=php

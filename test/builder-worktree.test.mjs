@@ -323,7 +323,8 @@ test('info.mak resolves a relative PHP_ASSET_DIR from PHP_BUILDER_DIR', t => {
 	const result = spawnSync(
 		'make',
 		[
-			'-f'
+			'--no-print-directory'
+			, '-f'
 			, 'info.mak'
 			, 'get-asset-path'
 			, `ENV_FILE=${rcFile}`
@@ -348,7 +349,8 @@ test('info.mak defaults PHP_VERSION to 8.4 for copy-assets filtering', () => {
 	const result = spawnSync(
 		'make',
 		[
-			'-f'
+			'--no-print-directory'
+			, '-f'
 			, 'info.mak'
 			, 'get-php-version'
 			, `ENV_FILE=${missingEnvFile}`
