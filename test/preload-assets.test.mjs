@@ -89,3 +89,49 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 		new RegExp(escapeRegExp(`${workspaceDir}/~/home-asset.txt`))
 	);
 });
+
+test('package pre.mak additions remain available to builder preload collection', t => {
+	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-preload-package-'));
+	const binDir = path.join(workspaceDir, 'bin');
+	const npmPath = path.join(binDir, 'npm');
+	const intlPackageDir = path.join(repoRoot, 'packages/intl');
+
+	t.after(() => {
+		fs.rmSync(workspaceDir, { recursive: true, force: true });
+	});
+
+	fs.mkdirSync(binDir, { recursive: true });
+	fs.writeFileSync(
+		npmPath,
+		`#!/usr/bin/env bash\nprintf '%s\\n' '${intlPackageDir}'\n`,
+		'utf8'
+	);
+	fs.chmodSync(npmPath, 0o755);
+
+	const result = spawnSync(
+		'make',
+		[
+			'--no-print-directory'
+			, '-f'
+			, 'Makefile'
+			, 'WITH_INTL=static'
+			, `PHP_BUILDER_DIR=${workspaceDir}`
+			, '--eval=.PHONY: print-preload-assets\nprint-preload-assets:\n\t@printf "%s\\n" "$(PRELOAD_ASSET_SOURCES)"'
+			, 'print-preload-assets'
+		],
+		{
+			cwd: repoRoot
+			, encoding: 'utf8'
+			, env: {
+				...process.env,
+				PATH: `${binDir}:${process.env.PATH ?? ''}`
+			}
+		}
+	);
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.equal(
+		result.stdout.trim(),
+		path.join(workspaceDir, 'lib/share/icu/72.1/icudt72l.dat')
+	);
+});

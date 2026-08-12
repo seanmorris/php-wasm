@@ -91,7 +91,7 @@ const ensureRuntimePackageTrees = targetRoot => {
 };
 
 const runMake = options => {
-	const result = child_process.spawnSync('make', options, {
+	const result = child_process.spawnSync('make', ['--no-print-directory', ...options], {
 		stdio: [ 'inherit', 'inherit', 'inherit' ],
 		cwd: repoRoot,
 	});
@@ -285,7 +285,7 @@ Build the docker image used by php-wasm-builder.
 
 		}).flat();
 
-		const options = ['-f', 'info.mak'];
+		const options = ['--no-print-directory', '-f', 'info.mak'];
 
 		options.push(`PHP_BUILDER_DIR=${cwd}`);
 
