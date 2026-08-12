@@ -1202,7 +1202,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
 
 # Bun uses JavaScriptCore, like Safari, but the focused lane deliberately avoids
 # heavyweight application bootstraps.  Drupal remains covered by the browser

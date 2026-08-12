@@ -342,14 +342,12 @@ test('info.mak resolves a relative PHP_ASSET_DIR from PHP_BUILDER_DIR', t => {
 
 test('info.mak defaults PHP_VERSION to 8.4 for copy-assets filtering', () => {
 	const missingEnvFile = path.join(os.tmpdir(), `php-wasm-builder-missing-${process.pid}-${Date.now()}.env`);
-	const env = { ...process.env };
-
-	delete env.PHP_VERSION;
 
 	const result = spawnSync(
 		'make',
 		[
 			'--no-print-directory'
+			, '--eval=undefine PHP_VERSION'
 			, '-f'
 			, 'info.mak'
 			, 'get-php-version'
@@ -358,7 +356,6 @@ test('info.mak defaults PHP_VERSION to 8.4 for copy-assets filtering', () => {
 		{
 			cwd: repoRoot
 			, encoding: 'utf8'
-			, env
 		}
 	);
 
