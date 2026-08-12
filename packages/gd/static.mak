@@ -250,7 +250,8 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE} " \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
-		-DPNG_SHARED="ON"
+		-DPNG_SHARED="OFF" \
+		-DPNG_STATIC="ON"
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
@@ -284,10 +285,9 @@ lib/lib/libwebp.so: lib/lib/libwebp.a lib/lib/libsharpyuv.a
 
 lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"
-	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
+	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared --enable-static CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak install
-	${DOCKER_RUN} rm /src/lib/lib/libwebp.so
 
 packages/gd/libwebp.so: lib/lib/libwebp.so
 	cp -rL $^ $@

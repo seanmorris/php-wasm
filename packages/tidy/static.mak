@@ -72,6 +72,8 @@ lib/lib/libtidy.a: third_party/tidy-html5/.gitignore
 	${DOCKER_RUN_IN_TIDY} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_SHARED_LIB=OFF \
+		-DTIDY_CONSOLE_SHARED=OFF \
 		-DCMAKE_C_FLAGS="-I/emsdk/upstream/emscripten/system/lib/libc/musl/include/ -fPIC "
 	${DOCKER_RUN_IN_TIDY} emmake make -j`nproc`;
 	${DOCKER_RUN_IN_TIDY} emmake make install;

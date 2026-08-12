@@ -73,7 +73,7 @@ third_party/oniguruma/.gitignore:
 lib/lib/libonig.a: third_party/oniguruma/.gitignore
 	@ echo -e "\e[33;4mBuilding ONIGURUMA\e[0m"
 	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./autogen.sh
-	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --enable-shared=yes --enable-static=yes --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_ONIGURUMA} emconfigure ./configure --prefix=/src/lib/ --disable-shared --enable-static --cache-file=/tmp/config-cache
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make install
 
