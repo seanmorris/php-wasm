@@ -178,3 +178,93 @@ index 8d78776..a82bb98 100644
    if options.preload_files:
      # Preloading files uses --pre-js code that runs before the module is loaded.
      file_code = shared.check_call(cmd, stdout=PIPE).stdout
+diff --git a/tools/system_libs.py b/tools/system_libs.py
+index 0ae34eb..61479ab 100644
+--- a/tools/system_libs.py
++++ b/tools/system_libs.py
+@@ -964,7 +964,6 @@ class libclang_rt_builtins(MTLibrary, SjLjLibrary):
+       '-Wno-unused-but-set-variable',
+   ]
+   src_dir = 'system/lib/compiler-rt/lib/builtins'
+-  profile_src_dir = 'system/lib/compiler-rt/lib/profile'
+   includes = ['system/lib/libc', 'system/lib/compiler-rt/include']
+   excludes = {
+     # gcc_personality_v0.c depends on libunwind, which don't include by default.
+@@ -997,8 +996,6 @@ class libclang_rt_builtins(MTLibrary, SjLjLibrary):
+     'truncxfhf2.c',
+   }
+   src_files = glob_in_path(src_dir, '*.c', excludes=excludes)
+-  src_files += glob_in_path(profile_src_dir, '*.c')
+-  src_files += glob_in_path(profile_src_dir, '*.cpp')
+   src_files += files_in_path(
+       path='system/lib/compiler-rt',
+       filenames=[
+@@ -1012,6 +1009,26 @@ class libclang_rt_builtins(MTLibrary, SjLjLibrary):
+       ])
+ 
+ 
++class libclang_rt_profile(MTLibrary, SjLjLibrary):
++  name = 'libclang_rt.profile'
++  # The profile runtime must remain an optional, lazily-extracted archive.
++  # MAIN_MODULE=1 links normal system libraries with --whole-archive, which
++  # would otherwise enable profiling in every main module.
++  never_force = True
++  force_object_files = True
++
++  cflags = [
++      '-fno-builtin',
++      '-DNDEBUG',
++      '-DCOMPILER_RT_HAS_ATOMICS=1',
++      '-Wno-unused-but-set-variable',
++  ]
++  src_dir = 'system/lib/compiler-rt/lib/profile'
++  includes = ['system/lib/libc', 'system/lib/compiler-rt/include']
++  src_files = glob_in_path(src_dir, '*.c')
++  src_files += glob_in_path(src_dir, '*.cpp')
++
++
+ class libnoexit(Library):
+   name = 'libnoexit'
+   src_dir = 'system/lib/libc'
+@@ -2397,6 +2414,7 @@ def get_libs_to_link():
+     add_library('libclang_rt.builtins')
+     add_sanitizer_libs()
+     add_forced_libs()
++    add_library('libclang_rt.profile')
+     return libs_to_link
+ 
+   if settings.AUTO_NATIVE_LIBRARIES:
+@@ -2510,17 +2528,29 @@ def get_libs_to_link():
+ 
+   add_sanitizer_libs()
+   add_forced_libs()
++  # Keep the profiling runtime available for objects built with profiling
++  # instrumentation.  Normal archive extraction leaves it out otherwise.
++  add_library('libclang_rt.profile')
+   return libs_to_link
+ 
+ 
+ def calculate():
+   libs_to_link = get_libs_to_link()
+ 
+-  # When LINKABLE is set the entire link command line is wrapped in --whole-archive by
+-  # building.link_ldd.  And since --whole-archive/--no-whole-archive processing does not nest we
+-  # shouldn't add any extra `--no-whole-archive` or we will undo the intent of building.link_ldd.
++  # When LINKABLE is set the entire link command line is wrapped in
++  # --whole-archive by building.link_lld.  Keep the profiling runtime outside
++  # that span: only instrumented objects should extract members from it.
+   if settings.LINKABLE or settings.SIDE_MODULE:
+-    return [l[0] for l in libs_to_link]
++    ret = []
++    profile_lib = None
++    for name, _ in libs_to_link:
++      if name == '-lclang_rt.profile':
++        profile_lib = name
++      else:
++        ret.append(name)
++    if profile_lib:
++      ret += ['--no-whole-archive', profile_lib, '--whole-archive']
++    return ret
+ 
+   # Wrap libraries in --whole-archive, as needed.  We need to do this last
+   # since otherwise the abort sorting won't make sense.

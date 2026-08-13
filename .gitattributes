@@ -1,2 +1,3 @@
 docs/* -diff
 demo-web/public/* -diff
+patch/*.patch whitespace=-blank-at-eol

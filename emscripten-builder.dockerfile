@@ -57,7 +57,10 @@ RUN cd /emsdk/upstream/emscripten && {\
 }
 
 COPY .github/bin/retry-embuilder.sh /usr/local/bin/retry-embuilder
+COPY .github/bin/verify-emscripten-profile-runtime.sh /usr/local/bin/verify-emscripten-profile-runtime
 
 RUN retry-embuilder build USER
+
+RUN bash /usr/local/bin/verify-emscripten-profile-runtime
 
 RUN emcc --check
