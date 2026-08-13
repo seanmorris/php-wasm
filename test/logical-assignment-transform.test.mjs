@@ -1,5 +1,4 @@
 import { strict as assert } from 'node:assert';
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -7,19 +6,15 @@ import { test } from 'node:test';
 import url from 'node:url';
 import vm from 'node:vm';
 
+import { transformLogicalAssignments } from '../bin/transform-logical-assignments.mjs';
+
 const repoRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
-const transformScript = path.join(repoRoot, 'bin/transform-logical-assignments.mjs');
 const commonJsMakefiles = [
 	'Makefile'
 	, 'packages/php-cgi-wasm/static.mak'
 	, 'packages/php-cli-wasm/static.mak'
 	, 'packages/php-dbg-wasm/static.mak'
 ];
-
-const runTransform = inputFile => spawnSync(process.execPath, [transformScript, inputFile], {
-	cwd: repoRoot
-	, encoding: 'utf8'
-});
 
 test('transforms generated logical assignments without duplicating their targets', t => {
 	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-logical-assignment-'));
@@ -39,10 +34,9 @@ test('transforms generated logical assignments without duplicating their targets
 		, 'globalThis.result={targetReads,listeners,stateListeners:state.listeners,excl,load};'
 	].join('\n'), 'utf8');
 
-	const result = runTransform(inputFile);
+	transformLogicalAssignments(inputFile);
 	const output = fs.readFileSync(inputFile, 'utf8');
 
-	assert.equal(result.status, 0, result.stderr);
 	assert.doesNotMatch(output, /\?\?=|\|\|=/);
 	assert.match(output, /webpackIgnore: true/);
 	assert.doesNotMatch(output, /var listeners=var listeners=/);
@@ -64,9 +58,7 @@ test('leaves the generated runtime untouched when transformation fails', t => {
 	t.after(() => fs.rmSync(workspaceDir, { recursive: true, force: true }));
 	fs.writeFileSync(inputFile, invalidSource, 'utf8');
 
-	const result = runTransform(inputFile);
-
-	assert.notEqual(result.status, 0);
+	assert.throws(() => transformLogicalAssignments(inputFile));
 	assert.equal(fs.readFileSync(inputFile, 'utf8'), invalidSource);
 	assert.deepEqual(fs.readdirSync(workspaceDir), ['runtime.js']);
 });
