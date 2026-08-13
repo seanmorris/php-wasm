@@ -8,6 +8,7 @@ import { strict as assert } from 'node:assert';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const retryScript = path.join(repoRoot, '.github/bin/retry-embuilder.sh');
+const sdlMakefile = path.join(repoRoot, 'packages/sdl/static.mak');
 
 function writeExecutable(filePath, contents)
 {
@@ -99,4 +100,18 @@ test('retry-embuilder stops after the configured number of attempts', t => {
 	assert.equal(result.status, 17);
 	assert.equal(attempts, 3);
 	assert.match(result.stderr, /failed after 3 attempts/);
+});
+
+test('SDL port builds use the retry wrapper', () => {
+	const contents = fs.readFileSync(sdlMakefile, 'utf8');
+
+	assert.doesNotMatch(contents, /\$\{DOCKER_RUN\} embuilder build/);
+	assert.match(
+		contents,
+		/\$\{DOCKER_RUN\} retry-embuilder build sdl2 --lto --pic --verbose/
+	);
+	assert.match(
+		contents,
+		/\$\{DOCKER_RUN\} retry-embuilder build libGL-mt-webgl2-ofb-full_es3-getprocaddr --lto --pic --verbose/
+	);
 });
