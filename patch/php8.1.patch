@@ -476,7 +476,7 @@ index e1824ec..96af7bc 100644
  } /* }}} */
  
 -int main(int argc, char **argv) /* {{{ */
-+int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_phpdbg_main(int argc, char **argv) /* {{{ */
  {
  	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
  	char *sapi_name;
