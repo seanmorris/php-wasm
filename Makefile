@@ -666,8 +666,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js
@@ -707,8 +706,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js
@@ -747,8 +745,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js
@@ -787,8 +784,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js

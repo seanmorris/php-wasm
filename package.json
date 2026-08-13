@@ -97,6 +97,7 @@
     "vrzno"
   ],
   "devDependencies": {
+    "@babel/plugin-transform-logical-assignment-operators": "^7.25.8",
     "@types/node": "^24.8.0",
     "@playwright/test": "^1.55.0",
     "eslint": "^10.2.1",

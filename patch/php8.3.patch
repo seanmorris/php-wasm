@@ -431,6 +431,31 @@ index 364758c..a969bc8 100644
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
+diff --git a/third_party/php8.3-src/sapi/cli/php_cli.c b/third_party/php8.3-src/sapi/cli/php_cli.c
+--- a/third_party/php8.3-src/sapi/cli/php_cli.c
++++ b/third_party/php8.3-src/sapi/cli/php_cli.c
+@@ -18,6 +18,7 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1376,3 +1377,12 @@ int main(int argc, char *argv[])
++#ifdef __EMSCRIPTEN__
++	return exit_status;
++#else
+-	exit(exit_status);
++	exit(exit_status);
++#endif
+ }
+ /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cli_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 diff --git a/third_party/php8.3-src/sapi/cli/Makefile.frag b/third_party/php8.3-src/sapi/cli/Makefile.frag
 index aa1d642..649533d 100644
 --- a/third_party/php8.3-src/sapi/cli/Makefile.frag

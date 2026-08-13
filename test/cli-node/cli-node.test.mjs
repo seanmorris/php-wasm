@@ -1437,6 +1437,23 @@ test('runs a CLI script in Node', async () => {
 	assert.equal(stdErr(), '');
 });
 
+test('returns the PHP CLI exit status', async () => {
+	const php = new PhpCliNode(nodeRuntimeOptions({
+		runtime: 'cli',
+		code: 'exit(7);'
+		, version
+	}));
+	const {stdOut, stdErr} = attachOutput(php);
+
+	await php.binary;
+
+	const exitCode = await php.run();
+
+	assert.equal(exitCode, 7);
+	assert.equal(stdOut(), '');
+	assert.equal(stdErr(), '');
+});
+
 test(`loads the requested CLI runtime version (${version})`, async () => {
 	const php = new PhpCliNode(nodeRuntimeOptions({
 		runtime: 'cli',
