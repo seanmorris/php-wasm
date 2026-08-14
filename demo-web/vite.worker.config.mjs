@@ -8,6 +8,7 @@ import { defineConfig } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const workerEntry = path.resolve(__dirname, 'src/workers/cgi-worker.mjs');
+const workerSourceRoot = path.resolve(__dirname, 'src');
 const libType = process.env.LIB_TYPE
 	|| process.env.VITE_LIB_TYPE
 	|| process.env.BUILD_TYPE
@@ -47,7 +48,7 @@ export default defineConfig({
 			, output: {
 				format: 'es'
 				, preserveModules: true
-				, preserveModulesRoot: __dirname
+				, preserveModulesRoot: workerSourceRoot
 				// Keep the service worker registration URL stable, but hash every
 				// other preserved module so browsers cannot stitch together a stale
 				// worker graph across deploys.
