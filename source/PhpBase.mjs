@@ -10,6 +10,9 @@ const NUM = 'number';
 const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
 	? runtime
 	: {default: runtime};
+const instantiateRuntimeModule = (Runtime, args) => /^class\s/.test(Function.prototype.toString.call(Runtime))
+	? new Runtime(args)
+	: Runtime(args);
 
 /**
  * Base PHP runtime wrapper shared by the environment-specific adapters.
@@ -129,7 +132,7 @@ export class PhpBase extends EventTarget
 
 		const phpArgs = Object.assign({}, defaults, phpSettings, args, fixed);
 
-		this.binary = phpBinLoader.then(normalizeRuntimeModule).then(({default: PHP}) => new PHP(phpArgs)).then(async php => {
+		this.binary = phpBinLoader.then(normalizeRuntimeModule).then(({default: PHP}) => instantiateRuntimeModule(PHP, phpArgs)).then(async php => {
 			await php.ccall(
 				'pib_storage_init'
 				, NUM

@@ -51,6 +51,7 @@ lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding LibZip\e[0m"
 	${DOCKER_RUN_IN_LIBZIP} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
+		-DBUILD_SHARED_LIBS=OFF \
 		-DZLIB_LIBRARY=/src/lib/lib/libz.a \
 		-DZLIB_INCLUDE_DIR=/src/lib/include/ \
 		-DCMAKE_BUILD_TYPE=Release \

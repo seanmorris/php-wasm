@@ -367,10 +367,15 @@ index 0e7b300..3652b52 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2681,3 +2684,18 @@ consult the installation file that came with this distribution, or visit \n\
+@@ -2681,3 +2684,23 @@ consult the installation file that came with this distribution, or visit \n\
  	return exit_status;
  }
  /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 +
 +void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
 +{
@@ -385,6 +390,31 @@ index 0e7b300..3652b52 100644
 +char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
++}
+diff --git a/third_party/php8.4-src/sapi/cli/php_cli.c b/third_party/php8.4-src/sapi/cli/php_cli.c
+--- a/third_party/php8.4-src/sapi/cli/php_cli.c
++++ b/third_party/php8.4-src/sapi/cli/php_cli.c
+@@ -18,6 +18,7 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1346,3 +1347,12 @@ int main(int argc, char *argv[])
++#ifdef __EMSCRIPTEN__
++	return exit_status;
++#else
+-	exit(exit_status);
++	exit(exit_status);
++#endif
+ }
+ /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cli_main(int argc, char **argv)
++{
++	return main(argc, argv);
 +}
 diff --git a/third_party/php8.4-src/sapi/cli/Makefile.frag b/third_party/php8.4-src/sapi/cli/Makefile.frag
 index aa1d642..649533d 100644
@@ -490,7 +520,7 @@ index 76b3c7f..6cf12a9 100644
  } /* }}} */
  
 -int main(int argc, char **argv) /* {{{ */
-+int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_phpdbg_main(int argc, char **argv) /* {{{ */
  {
  	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
  	char *sapi_name;

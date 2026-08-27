@@ -161,17 +161,19 @@ export class PhpCliWeb extends PhpBase
 			return loc;
 		});
 
-		const arLoc = php._malloc(4 * ptrs.length);
+		const arLoc = php._malloc(4 * (ptrs.length + 1));
 
 		for(const [i, ptr] of ptrs.entries())
 		{
 			php.setValue(arLoc + 4 * i, ptr, '*');
 		}
 
+		php.setValue(arLoc + 4 * ptrs.length, 0, '*');
+
 		try
 		{
 			return await php.ccall(
-				'main'
+				'wasm_sapi_cli_main'
 				, NUM
 				, [NUM, NUM]
 				, [ptrs.length, arLoc]

@@ -72,7 +72,7 @@ test('debug preview boots php-dbg', async ({ page }) => {
 	});
 });
 
-test('select framework registers the service worker', async ({ page }) => {
+test('select framework service worker serves CGI', async ({ page }) => {
 	await page.goto('select-framework.html', {waitUntil: 'domcontentloaded'});
 
 	await expect(page.getByText('Select a Framework:')).toBeVisible({ timeout: 180000 });
@@ -100,4 +100,11 @@ test('select framework registers the service worker', async ({ page }) => {
 		}),
 		{ timeout: 180000 }
 	).toContain('/php-wasm/cgi-worker.js');
+
+	const response = await page.goto('cgi-bin/test/hello-world.php', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	expect(response?.status()).toBe(200);
+	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
 });

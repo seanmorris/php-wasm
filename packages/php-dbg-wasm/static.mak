@@ -152,8 +152,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_O
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js
@@ -190,8 +189,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDE
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js
@@ -228,8 +226,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.js: ${DBG_DEPENDENCIES} | ${ORDER_
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-node.js
@@ -265,8 +262,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.js: ${DBG_DEPENDENCIES} | ${ORD
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/phpdbg/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DBG_DIST_DIR}/
 	perl -pi -w -e 's|import(name)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-webview.js

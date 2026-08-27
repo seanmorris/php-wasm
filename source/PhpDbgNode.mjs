@@ -155,17 +155,19 @@ export class PhpDbgNode extends PhpBase
 			php.stringToUTF8(part, loc, len);
 			return loc;
 		});
-		const arLoc = php._malloc(4 * ptrs.length);
+		const arLoc = php._malloc(4 * (ptrs.length + 1));
 
 		for(const [index, ptr] of ptrs.entries())
 		{
 			php.setValue(arLoc + 4 * index, ptr, '*');
 		}
 
+		php.setValue(arLoc + 4 * ptrs.length, 0, '*');
+
 		try
 		{
 			const process = php.ccall(
-				'main'
+				'wasm_sapi_phpdbg_main'
 				, NUM
 				, [NUM, NUM]
 				, [ptrs.length, arLoc]

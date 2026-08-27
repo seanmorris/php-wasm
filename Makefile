@@ -103,6 +103,7 @@ EXTRA_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
+PHP_CONFIGURE_VARS=
 
 ## More Options
 ifdef PHP_BUILDER_DIR
@@ -140,7 +141,7 @@ MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
-DOCKER_RUN_IN_PHP=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
+DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e EMCC_FORCE_STDLIBS=libc++abi,libc++ -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 MAKEFLAGS+= "-l${MAX_LOAD}"
 
 WITH_CGI=1
@@ -326,6 +327,7 @@ third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONF
 	${DOCKER_RUN_IN_PHP} emconfigure ./buildconf --force
 	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
 		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
+		${PHP_CONFIGURE_VARS} \
 		EXTENSION_DIR='./'  \
 		--prefix='/src/lib/php${PHP_VERSION}' \
 		--with-config-file-path=/php.ini \
@@ -407,7 +409,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \
 		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
 		-s ENVIRONMENT=${ENVIRONMENT}       \
@@ -664,8 +666,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js
@@ -705,8 +706,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js
@@ -745,8 +745,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js
@@ -785,8 +784,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}* ${PHP_DIST_DIR}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\?\?=#\1=\1??#g' $@
-	perl -pi -w -e 's#([^;{}]+)\s*\|\|=#\1=\1\|\|#g' $@
+	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js.wasm.map.MAPPED: ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js

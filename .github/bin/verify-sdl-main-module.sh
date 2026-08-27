@@ -12,7 +12,7 @@ fi
 
 WASM_BASENAME="$(
 	perl -ne '
-		if (/new URL\("([^"]+\.wasm)", import\.meta\.url\)/) {
+		if (/new URL\("([^"]+\.wasm)",\s*import\.meta\.url\)/) {
 			print "$1\n";
 			exit 0;
 		}

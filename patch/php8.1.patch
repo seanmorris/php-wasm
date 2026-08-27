@@ -323,10 +323,15 @@ index 499a793..b048346 100644
  
  	if (fastcgi) {
  		/* How many times to run PHP scripts before dying */
-@@ -2665,3 +2667,18 @@ parent_out:
+@@ -2665,3 +2667,23 @@ parent_out:
  	return exit_status;
  }
  /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 +
 +void EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_init(void)
 +{
@@ -341,6 +346,31 @@ index 499a793..b048346 100644
 +char* EMSCRIPTEN_KEEPALIVE wasm_sapi_cgi_putenv(char *name, char *value)
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
++}
+diff --git a/third_party/php8.1-src/sapi/cli/php_cli.c b/third_party/php8.1-src/sapi/cli/php_cli.c
+--- a/third_party/php8.1-src/sapi/cli/php_cli.c
++++ b/third_party/php8.1-src/sapi/cli/php_cli.c
+@@ -18,6 +18,7 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1405,3 +1406,12 @@ int main(int argc, char *argv[])
++#ifdef __EMSCRIPTEN__
++	return exit_status;
++#else
+-	exit(exit_status);
++	exit(exit_status);
++#endif
+ }
+ /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cli_main(int argc, char **argv)
++{
++	return main(argc, argv);
 +}
 diff --git a/third_party/php8.1-src/sapi/cli/Makefile.frag b/third_party/php8.1-src/sapi/cli/Makefile.frag
 index aa1d642..649533d 100644
@@ -446,7 +476,7 @@ index e1824ec..96af7bc 100644
  } /* }}} */
  
 -int main(int argc, char **argv) /* {{{ */
-+int EMSCRIPTEN_KEEPALIVE main(int argc, char **argv) /* {{{ */
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_phpdbg_main(int argc, char **argv) /* {{{ */
  {
  	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
  	char *sapi_name;
@@ -636,3 +666,109 @@ index f638d60..4c50f0f 100644
  {
  	/* find cached prompt */
  	if (PHPDBG_G(prompt)[1]) {
+diff --git a/third_party/php8.1-src/ext/iconv/config.m4 b/third_party/php8.1-src/ext/iconv/config.m4
+index ac57c81..d104b2b 100644
+--- a/third_party/php8.1-src/ext/iconv/config.m4
++++ b/third_party/php8.1-src/ext/iconv/config.m4
+@@ -27,21 +27,18 @@ if test "$PHP_ICONV" != "no"; then
+     ])
+ 
+     if test -z "$iconv_impl_name"; then
+-      AC_MSG_CHECKING([if using GNU libiconv])
+-      AC_RUN_IFELSE([AC_LANG_SOURCE([[
+-#include <iconv.h>
+-int main() {
+-  printf("%d", _libiconv_version);
+-  return 0;
+-}
+-      ]])],[
+-        AC_MSG_RESULT(yes)
+-        iconv_impl_name="gnu_libiconv"
+-      ],[
+-        AC_MSG_RESULT(no)
+-      ],[
+-        AC_MSG_RESULT([no, cross-compiling])
++      AC_CACHE_CHECK([if using GNU libiconv], [php_cv_iconv_implementation], [
++        AC_LINK_IFELSE([
++          AC_LANG_PROGRAM([[#include <iconv.h>]], [[(void) _libiconv_version;]])
++        ],[
++          php_cv_iconv_implementation="gnu_libiconv"
++        ],[
++          php_cv_iconv_implementation="unknown"
++        ])
+       ])
++      if test "$php_cv_iconv_implementation" = "gnu_libiconv"; then
++        iconv_impl_name="gnu_libiconv"
++      fi
+     fi
+ 
+     if test -z "$iconv_impl_name"; then
+@@ -85,8 +82,8 @@ int main() {
+         ;;
+     esac
+ 
+-    AC_MSG_CHECKING([if iconv supports errno])
+-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
++    AC_CACHE_CHECK([if iconv supports errno], [php_cv_iconv_errno], [
++      AC_RUN_IFELSE([AC_LANG_SOURCE([[
+ #include <iconv.h>
+ #include <errno.h>
+ 
+@@ -103,17 +100,20 @@ int main() {
+   iconv_close( cd );
+   return 2;
+ }
+-    ]])],[
+-      AC_MSG_RESULT(yes)
+-    ],[
+-      AC_MSG_RESULT(no)
+-      AC_MSG_ERROR(iconv does not support errno)
+-    ],[
+-      AC_MSG_RESULT(yes, cross-compiling)
++      ]])],[
++        php_cv_iconv_errno="yes"
++      ],[
++        php_cv_iconv_errno="no"
++      ],[
++        php_cv_iconv_errno="yes"
++      ])
+     ])
++    if test "$php_cv_iconv_errno" != "yes"; then
++      AC_MSG_ERROR(iconv does not support errno)
++    fi
+ 
+-    AC_MSG_CHECKING([if iconv supports //IGNORE])
+-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
++    AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore], [
++      AC_RUN_IFELSE([AC_LANG_SOURCE([[
+ #include <iconv.h>
+ #include <stdlib.h>
+ 
+@@ -132,16 +132,19 @@ int main() {
+   }
+   return 0;
+ }
+-   ]])],[
+-      AC_MSG_RESULT(yes)
++      ]])],[
++        php_cv_iconv_ignore="yes"
++      ],[
++        php_cv_iconv_ignore="no"
++      ],[
++        php_cv_iconv_ignore="yes"
++      ])
++    ])
++    if test "$php_cv_iconv_ignore" = "yes"; then
+       AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
+-    ],[
+-      AC_MSG_RESULT(no)
++    else
+       AC_DEFINE([ICONV_BROKEN_IGNORE],1,[Whether iconv supports IGNORE])
+-    ],[
+-      AC_MSG_RESULT(no, cross-compiling)
+-      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
+-    ])
++    fi
+ 
+     LDFLAGS="$save_LDFLAGS"
+     CFLAGS="$save_CFLAGS"

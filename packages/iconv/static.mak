@@ -16,6 +16,16 @@ ifeq (${WITH_ICONV},1)
 WITH_ICONV=dynamic
 endif
 
+ifneq (${WITH_ICONV},0)
+ICONV_CONFIGURE_VARS=ac_cv_lib_iconv_libiconv=yes php_cv_iconv_errno=yes php_cv_iconv_ignore=no
+
+ifneq ($(filter ${PHP_VERSION},8.0 8.1 8.2 8.3),)
+ICONV_CONFIGURE_VARS+=php_cv_iconv_implementation=gnu_libiconv
+endif
+
+PHP_CONFIGURE_VARS+=${ICONV_CONFIGURE_VARS}
+endif
+
 ifeq (${WITH_ICONV},static)
 CONFIGURE_FLAGS+= --with-iconv=/src/lib
 ARCHIVES+= lib/lib/libiconv.a
@@ -74,7 +84,10 @@ packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so 
 	@ echo -e "\e[33;4mBuilding php-iconv\e[0m"
 	${DOCKER_RUN_IN_EXT_ICONV} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ICONV} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	# Cache the known libiconv symbol and PHP's own cross-compilation defaults.
+	# This avoids a no-prototype link probe (invalid for strict Wasm signatures)
+	# and runtime probes whose SIDE_MODULE is outside the probe's working dir.
+	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${ICONV_CONFIGURE_VARS} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic#-all-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

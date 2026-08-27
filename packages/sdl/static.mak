@@ -4,7 +4,7 @@ DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE
 
 third_party/php${PHP_VERSION}-sdl/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-sdl\e[0m"
-	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://pecl.php.net/get/sdl-2.7.0.tgz
+	${DOCKER_RUN} /src/.github/bin/retry-download.sh https://pecl.php.net/get/sdl-2.7.0.tgz sdl-2.7.0.tgz
 	${DOCKER_RUN} tar -C third_party -xvzf sdl-2.7.0.tgz sdl-2.7.0
 	${DOCKER_RUN} mv third_party/sdl-2.7.0 third_party/php${PHP_VERSION}-sdl
 	${DOCKER_RUN} rm sdl-2.7.0.tgz
@@ -28,12 +28,12 @@ lib/bin/sdl2-config: packages/sdl/sdl2-config.in lib/lib/libSDL2.a lib/lib/libGL
 
 lib/lib/libGL.a:
 	@ echo -e "\e[33;4mBuilding LIBGL\e[0m"
-	${DOCKER_RUN} embuilder build libGL-mt-webgl2-ofb-full_es3-getprocaddr --lto --pic --verbose
+	${DOCKER_RUN} retry-embuilder build libGL-mt-webgl2-ofb-full_es3-getprocaddr --lto --pic --verbose
 	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libGL-mt-webgl2-ofb-full_es3-getprocaddr.a /src/$@
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
-	${DOCKER_RUN} embuilder build sdl2 --lto --pic --verbose
+	${DOCKER_RUN} retry-embuilder build sdl2 --lto --pic --verbose
 	${DOCKER_RUN} mkdir -p /src/lib/include /src/lib/lib
 	${DOCKER_RUN} rm -rf /src/lib/include/SDL2
 	${DOCKER_RUN} cp -r /emsdk/upstream/emscripten/cache/sysroot/include/SDL2 /src/lib/include/SDL2

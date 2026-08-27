@@ -134,17 +134,19 @@ export class PhpDbgWeb extends PhpBase
 			return loc;
 		});
 
-		const arLoc = php._malloc(4 * ptrs.length);
+		const arLoc = php._malloc(4 * (ptrs.length + 1));
 
 		for(const [i, ptr] of ptrs.entries())
 		{
 			php.setValue(arLoc + 4 * i, ptr, '*');
 		}
 
+		php.setValue(arLoc + 4 * ptrs.length, 0, '*');
+
 		try
 		{
 			const process = php.ccall(
-				'main'
+				'wasm_sapi_phpdbg_main'
 				, NUM
 				, [NUM, NUM]
 				, [ptrs.length, arLoc]

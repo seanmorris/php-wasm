@@ -183,7 +183,7 @@ packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/
 	@ echo -e "\e[33;4mBuilding php-gd\e[0m"
 	${DOCKER_RUN_IN_EXT_GD} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_GD} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_GD} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config='/src/lib/php${PHP_VERSION}/bin/php-config' ${GD_FLAGS} --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_GD} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} WEBP_LIBS='-L/src/lib/lib -lwebp -lsharpyuv' --prefix='/src/lib/php${PHP_VERSION}' --with-php-config='/src/lib/php${PHP_VERSION}/bin/php-config' ${GD_FLAGS} --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_GD} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_GD} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_GD} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
@@ -223,7 +223,7 @@ third_party/jpeg-9f/README:
 
 lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	@ echo -e "\e[33;4mBuilding LIBJPEG\e[0m"
-	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_LIBJPEG} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared --enable-static
 	${DOCKER_RUN_IN_LIBJPEG} emmake make -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
@@ -250,7 +250,8 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE} " \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.a" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
-		-DPNG_SHARED="ON"
+		-DPNG_SHARED="OFF" \
+		-DPNG_STATIC="ON"
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
@@ -277,15 +278,16 @@ third_party/libwebp-${LIBWEBP_TAG}/README.md:
 	${DOCKER_RUN} tar -xvzf libwebp-${LIBWEBP_TAG}.tar.gz -C third_party
 	${DOCKER_RUN} rm libwebp-${LIBWEBP_TAG}.tar.gz
 
-lib/lib/libwebp.so: lib/lib/libwebp.a
-	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+lib/lib/libsharpyuv.a: lib/lib/libwebp.a
+
+lib/lib/libwebp.so: lib/lib/libwebp.a lib/lib/libsharpyuv.a
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive $(addprefix /src/,$^)
 
 lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"
-	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache
+	${DOCKER_RUN_IN_LIBWEBP} emconfigure ./configure --prefix=/src/lib/ --cache-file=/tmp/config-cache --disable-shared --enable-static CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE}'
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak -j${CPU_COUNT}
 	${DOCKER_RUN_IN_LIBWEBP} emmake make -f /src/packages/gd/webp.mak install
-	${DOCKER_RUN} rm /src/lib/lib/libwebp.so
 
 packages/gd/libwebp.so: lib/lib/libwebp.so
 	cp -rL $^ $@
