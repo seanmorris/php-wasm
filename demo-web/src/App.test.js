@@ -64,4 +64,19 @@ describe('AppRoutes', () => {
 
 		expect(screen.getByText('Install Demo')).toBeInTheDocument();
 	});
+
+	it.each([
+		'/cgi-bin/wordpress'
+		, '/php-wasm/cgi-bin/wordpress'
+	])('redirects the WordPress CGI alias %s to the install flow', route => {
+		render(
+			React.createElement(
+				MemoryRouter
+				, { initialEntries: [route] }
+				, React.createElement(AppRoutes)
+			)
+		);
+
+		expect(screen.getByText('Install Demo')).toBeInTheDocument();
+	});
 });

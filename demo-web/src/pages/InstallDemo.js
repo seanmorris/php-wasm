@@ -55,6 +55,14 @@ const packages = {
 		, dir:   'laravel-11/public'
 		, entry: 'index.php'
 	}
+	, 'wordpress-7.1': {
+		name:  'WordPress 7.1'
+		, file:  '/backups/wordpress-7.1.zip'
+		, path:  'wordpress-7.1'
+		, vHost: 'wordpress'
+		, dir:   'wordpress-7.1'
+		, entry: 'index.php'
+	}
 };
 
 /**

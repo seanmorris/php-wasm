@@ -63,7 +63,7 @@ describe('InstallDemo', () => {
 				};
 			}
 
-			if(String(url).includes('/backups/drupal-11.4.5.zip'))
+			if(String(url).includes('/backups/') && String(url).endsWith('.zip'))
 			{
 				return {
 					arrayBuffer: async () => new ArrayBuffer(8)
@@ -175,6 +175,28 @@ describe('InstallDemo', () => {
 				, {
 					pathPrefix: '/cgi-bin/drupal'
 					, directory: '/persist/drupal-11.4.5/web'
+					, entrypoint: 'index.php'
+				}
+			]
+		});
+	});
+
+	it('installs the WordPress package at its CGI vhost and persistent docroot', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=wordpress-7.1');
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(bus.storeInit).toHaveBeenCalledTimes(1));
+
+		expect(bus.analyzePath).toHaveBeenCalledWith('/persist/wordpress-7.1');
+		expect(fetchMock.mock.calls.some(([url]) => (
+			String(url).includes('/backups/wordpress-7.1.zip')
+		))).toBe(true);
+		expect(bus.setSettings).toHaveBeenCalledWith({
+			vHosts: [
+				{
+					pathPrefix: '/cgi-bin/wordpress'
+					, directory: '/persist/wordpress-7.1'
 					, entrypoint: 'index.php'
 				}
 			]

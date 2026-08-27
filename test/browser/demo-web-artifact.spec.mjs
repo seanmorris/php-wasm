@@ -192,3 +192,116 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 	await expect(page).not.toHaveURL(/\/user\/login(?:\?|$)/, { timeout: 180000 });
 	await expect(page.locator('body')).toContainText('admin', { timeout: 180000 });
 });
+
+test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async ({ page }) => {
+	test.setTimeout(600000);
+
+	const runtimeFailures = [];
+
+	page.on('console', message => {
+		if(
+			message.text().includes('Aborted(invalid state')
+			|| message.text().includes("WebSocket connection to 'ws://api.wordpress.org")
+		) {
+			runtimeFailures.push(message.text());
+		}
+	});
+
+	await page.goto('install-demo.html?framework=wordpress-7.1', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/\/php-wasm\/cgi-bin\/wordpress\/?$/, {
+		timeout: 540000
+	});
+	await expect(page.locator('body')).toContainText('WordPress 7.1 on PHP-WASM', {
+		timeout: 180000
+	});
+
+	const welcomeMessage = page.locator('.php-wasm-demo-login');
+
+	await expect(welcomeMessage).toContainText('WordPress 7.1 is running in the browser!');
+	await expect(welcomeMessage).toContainText('Username: admin');
+	await expect(welcomeMessage).toContainText('Password: admin');
+
+	const wordpressPrefix = '/php-wasm/cgi-bin/wordpress/';
+	const loginLink = welcomeMessage.getByRole('link', { name: 'Log in' });
+
+	expect(new URL(await loginLink.getAttribute('href'), page.url()).pathname).toBe(
+		`${wordpressPrefix}wp-login.php`
+	);
+
+	const assetUrls = {
+		stylesheet: `${wordpressPrefix}wp-includes/css/dashicons.min.css`
+		, image: `${wordpressPrefix}wp-admin/images/wordpress-logo.svg`
+		, font: `${wordpressPrefix}wp-includes/fonts/dashicons.ttf`
+	};
+
+	expect(new URL(assetUrls.stylesheet, page.url()).pathname).toMatch(
+		new RegExp(`^${wordpressPrefix}`)
+	);
+
+	const assets = await page.evaluate(async urls => {
+		const load = async url => {
+			const response = await fetch(url);
+			const body = await response.arrayBuffer();
+
+			return {
+				status: response.status
+				, contentType: response.headers.get('content-type') ?? ''
+				, size: body.byteLength
+			};
+		};
+
+		return {
+			stylesheet: await load(urls.stylesheet)
+			, image: await load(urls.image)
+			, font: await load(urls.font)
+		};
+	}, assetUrls);
+
+	expect(assets.stylesheet.status).toBe(200);
+	expect(assets.stylesheet.contentType).toMatch(/^text\/css\b/);
+	expect(assets.stylesheet.size).toBeGreaterThan(100);
+	expect(assets.image.status).toBe(200);
+	expect(assets.image.contentType).toMatch(/^image\/svg\+xml\b/);
+	expect(assets.image.size).toBeGreaterThan(100);
+	expect(assets.font.status).toBe(200);
+	expect(assets.font.contentType).toMatch(/^font\/ttf\b/);
+	expect(assets.font.size).toBeGreaterThan(100);
+
+	const invalidInternalLinks = await page.locator('a[href]').evaluateAll((links, prefix) => (
+		links.map(link => link.href).filter(href => {
+			const url = new URL(href);
+			const root = prefix.slice(0, -1);
+
+			return url.origin === window.location.origin
+				&& url.pathname !== root
+				&& !url.pathname.startsWith(prefix);
+		})
+	), wordpressPrefix);
+
+	expect(invalidInternalLinks).toEqual([]);
+	expect(await page.content()).not.toContain('127.0.0.1:38977');
+
+	await loginLink.click();
+	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-login\\.php`));
+	await page.locator('input[name="log"]').fill('admin');
+	await page.locator('input[name="pwd"]').fill('admin');
+	await page.getByRole('button', { name: 'Log In' }).click();
+	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-admin/`), {
+		timeout: 180000
+	});
+	await expect(page.locator('body')).toContainText('Dashboard', { timeout: 180000 });
+
+	await page.reload({waitUntil: 'domcontentloaded'});
+	await expect(page.locator('body')).toContainText('Dashboard', { timeout: 180000 });
+
+	const aboutResponse = await page.goto('cgi-bin/wordpress/wp-admin/about.php', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	expect(aboutResponse?.status()).toBe(200);
+	await expect(page.locator('body')).toContainText('WordPress 7.1', { timeout: 180000 });
+	expect(runtimeFailures).toEqual([]);
+});

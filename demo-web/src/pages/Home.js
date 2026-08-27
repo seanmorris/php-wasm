@@ -9,6 +9,7 @@ import drupalIcon from '../assets/frameworks/drupal-icon.svg';
 import codeIgniterIcon from '../assets/frameworks/codeigniter-icon.svg';
 import laravelIcon from '../assets/frameworks/laravel-icon.svg';
 import laminasIcon from '../assets/frameworks/laminas-icon.svg';
+import wordpressIcon from '../assets/frameworks/wordpress-icon.svg';
 import reactIcon from '../assets/frameworks/react-icon.svg';
 
 // import rolodexIcon from '../assets/icons/rolodex-icon-32.png';
@@ -29,12 +30,22 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { basePath } from '../lib/runtimePaths';
 
+const frameworkIcons = [
+	{src: cakePhpIcon, alt: 'CakePHP logo'}
+	, {src: codeIgniterIcon, alt: 'CodeIgniter logo'}
+	, {src: drupalIcon, alt: 'Drupal logo'}
+	, {src: laminasIcon, alt: 'Laminas logo'}
+	, {src: laravelIcon, alt: 'Laravel logo'}
+	, {src: wordpressIcon, alt: 'WordPress logo'}
+];
+const carouselIcons = [...frameworkIcons, frameworkIcons[0]];
+
 /**
  * Renders the main demo launcher and cycles the framework marquee artwork.
  */
 function Home()
 {
-	const [offset, setOffset] = useState(Math.trunc(Math.random() * 5));
+	const [offset, setOffset] = useState(Math.trunc(Math.random() * frameworkIcons.length));
 	const [scrollState, setScrollState] = useState(1);
 	const [showMore, setShowMore] = useState(false);
 
@@ -50,7 +61,7 @@ function Home()
 	useEffect(() => {
 		const speed = 1400;
 		setTimeout(() => {
-			if(offset >= 5)
+			if(offset >= frameworkIcons.length)
 			{
 				setTimeout(() => {
 					setScrollState(0);
@@ -64,7 +75,7 @@ function Home()
 			else
 			{
 				setScrollState(1);
-				setOffset((offset + 1) % 6);
+				setOffset((offset + 1) % carouselIcons.length);
 			}
 		}, speed);
 
@@ -86,12 +97,9 @@ function Home()
 					<a className = "big-link inset" href = {basePath('select-framework.html')}>
 						<div className = "big-icon cgi" style={{'--offset': offset}} data-scroll-state = {scrollState}>
 							<div className = "offset-column">
-								<img src = {cakePhpIcon} alt = "CakePHP logo" />
-								<img src = {codeIgniterIcon} alt = "CodeIgniter logo" />
-								<img src = {drupalIcon} alt = "Drupal logo" />
-								<img src = {laminasIcon} alt = "Laminas logo" />
-								<img src = {laravelIcon} alt = "Laravel logo" />
-								<img src = {cakePhpIcon} alt = "CakePHP logo" />
+								{carouselIcons.map(({src, alt}, index) => (
+									<img key = {`${alt}:${index}`} src = {src} alt = {alt} />
+								))}
 							</div>
 						</div>
 						<span className = "title">PHP CGI Demo</span>

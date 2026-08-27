@@ -50,6 +50,14 @@ export function AppRoutes()
 			element = { <Navigate to = {basePath('install-demo.html?framework=drupal-11')} />}
 		/>
 		<Route
+			path = "/cgi-bin/wordpress"
+			element = { <Navigate to = {basePath('install-demo.html?framework=wordpress-7.1')} />}
+		/>
+		<Route
+			path = "/php-wasm/cgi-bin/wordpress"
+			element = { <Navigate to = {basePath('install-demo.html?framework=wordpress-7.1')} />}
+		/>
+		<Route
 			path = "/cgi-bin/cakephp-5"
 			element = { <Navigate to = {basePath('install-demo.html?framework=cakephp-5')} />}
 		/>
