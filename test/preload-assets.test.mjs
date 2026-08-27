@@ -112,6 +112,7 @@ test('package pre.mak additions remain available to builder preload collection',
 		'make',
 		[
 			'--no-print-directory'
+			, '--silent'
 			, '-f'
 			, 'Makefile'
 			, 'WITH_INTL=static'
