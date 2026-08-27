@@ -78,26 +78,24 @@ test('select framework service worker serves CGI', async ({ page }) => {
 	await expect(page.getByText('Select a Framework:')).toBeVisible({ timeout: 180000 });
 
 	await expect.poll(
-		() => page.evaluate(async () => {
-			if(!navigator.serviceWorker?.controller)
+		async () => {
+			try
 			{
-				return null;
+				return await page.evaluate(
+					() => navigator.serviceWorker?.controller?.scriptURL ?? null
+				);
 			}
-
-			const registration = await navigator.serviceWorker.getRegistration('/php-wasm/');
-
-			if(!registration)
+			catch(error)
 			{
-				return null;
-			}
+				// The app reloads once when a newly installed worker takes control.
+				if(error.message.includes('Execution context was destroyed'))
+				{
+					return null;
+				}
 
-			return (
-				registration.active?.scriptURL
-				?? registration.installing?.scriptURL
-				?? registration.waiting?.scriptURL
-				?? ''
-			);
-		}),
+				throw error;
+			}
+		},
 		{ timeout: 180000 }
 	).toContain('/php-wasm/cgi-worker.js');
 
@@ -107,4 +105,79 @@ test('select framework service worker serves CGI', async ({ page }) => {
 
 	expect(response?.status()).toBe(200);
 	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
+});
+
+test('Drupal 11.4.5 installs and runs through the existing CGI service-worker route', async ({ page }) => {
+	test.setTimeout(600000);
+
+	await page.goto('install-demo.html?framework=drupal-11', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/\/php-wasm\/cgi-bin\/drupal\/?$/, {
+		timeout: 540000
+	});
+	await expect(page.locator('body')).toContainText('Drupal 11 on PHP-WASM', {
+		timeout: 180000
+	});
+	await expect(page.locator('body')).toContainText('Welcome!', {
+		timeout: 180000
+	});
+
+	const stylesheet = page.locator('link[rel="stylesheet"][href]').first();
+	const image = page.locator('img[src], link[rel~="icon"][href]').first();
+	const stylesheetHref = await stylesheet.getAttribute('href');
+	const imageSrc = await image.evaluate(element => element.getAttribute(
+		element.tagName === 'IMG' ? 'src' : 'href'
+	));
+	const drupalAssetPrefix = '/php-wasm/cgi-bin/drupal/';
+
+	expect(new URL(stylesheetHref, page.url()).pathname).toMatch(
+		new RegExp(`^${drupalAssetPrefix}`)
+	);
+	expect(new URL(imageSrc, page.url()).pathname).toMatch(
+		new RegExp(`^${drupalAssetPrefix}`)
+	);
+
+	const assets = await page.evaluate(async ({ stylesheetHref, imageSrc }) => {
+		const load = async url => {
+			const response = await fetch(url);
+			const body = await response.arrayBuffer();
+
+			return {
+				status: response.status
+				, contentType: response.headers.get('content-type') ?? ''
+				, size: body.byteLength
+			};
+		};
+
+		return {
+			stylesheet: await load(stylesheetHref)
+			, image: await load(imageSrc)
+		};
+	}, { stylesheetHref, imageSrc });
+
+	expect(assets.stylesheet.status).toBe(200);
+	expect(assets.stylesheet.contentType).toMatch(/^text\/css\b/);
+	expect(assets.stylesheet.size).toBeGreaterThan(100);
+	expect(assets.image.status).toBe(200);
+	expect(assets.image.contentType).toMatch(/^image\//);
+	expect(assets.image.size).toBeGreaterThan(100);
+
+	const rootRelativeLinks = page.locator([
+		'a[href^="/"]'
+		, ':not([href^="//"])'
+		, `:not([href^="${drupalAssetPrefix}"])`
+	].join(''));
+
+	await expect(rootRelativeLinks).toHaveCount(0);
+
+	await page.goto(`${drupalAssetPrefix}user/login`, {
+		waitUntil: 'domcontentloaded'
+	});
+	await page.locator('input[name="name"]').fill('admin');
+	await page.locator('input[name="pass"]').fill('admin');
+	await page.getByRole('button', { name: 'Log in' }).click();
+	await expect(page).not.toHaveURL(/\/user\/login(?:\?|$)/, { timeout: 180000 });
+	await expect(page.locator('body')).toContainText('admin', { timeout: 180000 });
 });

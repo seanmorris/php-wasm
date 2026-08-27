@@ -394,6 +394,15 @@ PHP_CLI_OBJS=sapi/embed/php_embed.lo
 MAIN_MODULE?=1
 ASYNCIFY?=1
 
+# Zend Fibers use Emscripten's native fiber API for PHP 8.1 and newer. The
+# implementation switches stacks through Asyncify and cannot operate in a
+# non-Asyncify main module.
+ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2 8.1),)
+ifeq (${ASYNCIFY},0)
+$(error PHP ${PHP_VERSION} Zend Fibers require ASYNCIFY=1)
+endif
+endif
+
 BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \

@@ -52,7 +52,7 @@ $ npm i php-wasm-builder
 <table>
     <tr>
         <td width = "500px">
-            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=drupal-7">Drupal Demo</a>
+            <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=drupal-11">Drupal Demo</a>
         </td>
         <td width = "500px">
             <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=cakephp-5">CakePHP Demo</a>

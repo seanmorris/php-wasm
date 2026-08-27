@@ -93,7 +93,7 @@ function SelectFramework()
 			] = await Promise.all([
 				bus.analyzePath('/persist/cakephp-5')
 				, bus.analyzePath('/persist/codeigniter-4')
-				, bus.analyzePath('/persist/drupal-7.95')
+				, bus.analyzePath('/persist/drupal-11.4.5/web')
 				, bus.analyzePath('/persist/laravel-11')
 				, bus.analyzePath('/persist/laminas-3')
 			]);
@@ -115,7 +115,7 @@ function SelectFramework()
 		{
 			case 'cakephp-5':
 			case 'codeigniter-4':
-			case 'drupal-7':
+			case 'drupal-11':
 			case 'laminas-3':
 			case 'laravel-11':
 				refreshAll();
@@ -216,16 +216,16 @@ function SelectFramework()
 							</span>)}
 						</div>
 						<div className='column center'>
-							<PopupLink path = "install-demo.html?framework=drupal-7">
-								<img src = {drupalIcon} alt = "drupal 7" /> {drupalInstalled}
+							<PopupLink path = "install-demo.html?framework=drupal-11">
+								<img src = {drupalIcon} alt = "drupal 11" /> {drupalInstalled}
 							</PopupLink>
 							{drupalInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/drupal')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/drupal-7.95/index.php">IDE</PopupButton>
-								<PopupButton path = "install-demo.html?framework=drupal-7&overwrite=true">Reset</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/drupal-11.4.5/web/index.php">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=drupal-11&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
-								<PopupButton path = "install-demo.html?framework=drupal-7">Start</PopupButton>
+								<PopupButton path = "install-demo.html?framework=drupal-11">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>

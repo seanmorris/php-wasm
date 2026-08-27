@@ -37,7 +37,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh') }}
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'

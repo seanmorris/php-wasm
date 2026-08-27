@@ -43,11 +43,11 @@ export function AppRoutes()
 		/>
 		<Route
 			path = "/cgi-bin/drupal"
-			element = { <Navigate to = {basePath('install-demo.html?framework=drupal-7')} />}
+			element = { <Navigate to = {basePath('install-demo.html?framework=drupal-11')} />}
 		/>
 		<Route
 			path = "/php-wasm/cgi-bin/drupal"
-			element = { <Navigate to = {basePath('install-demo.html?framework=drupal-7')} />}
+			element = { <Navigate to = {basePath('install-demo.html?framework=drupal-11')} />}
 		/>
 		<Route
 			path = "/cgi-bin/cakephp-5"

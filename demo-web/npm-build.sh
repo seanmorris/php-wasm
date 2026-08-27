@@ -17,6 +17,7 @@ rm -f build/*.so;
 rm -f build/*.dat;
 rm -f build/*.map;
 rm -f build/*.js;
+rm -rf build/_virtual build/lib build/node_modules build/src;
 
 rm -f public/*.wasm;
 rm -f public/*.data;
@@ -25,12 +26,15 @@ rm -f public/*.js;
 rm -f public/*.so;
 rm -f public/*.dat;
 rm -rf public/worker-assets;
+rm -rf public/_virtual public/lib public/node_modules public/src;
 rm -f public/assets/php*-web.mjs public/assets/php*-web.mjs.wasm || true
 
 rm -rf public/static/media/*.map public/static/media/mapped
 
 NODE_OPTIONS='--max_old_space_size=8192' npm run build:worker;
 NODE_OPTIONS='--max_old_space_size=8192' npm run build:app;
+
+cp -a public/. build/;
 
 node ./scripts/generate-html-aliases.cjs;
 

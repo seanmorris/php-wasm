@@ -34,6 +34,28 @@ index ac51fe7..0b9c8df 100644
        }
 
        callback(null);
+diff --git a/src/lib/libasync.js b/src/lib/libasync.js
+index 9f9a2d3..fddbef7 100644
+--- a/src/lib/libasync.js
++++ b/src/lib/libasync.js
+@@ -514,7 +514,7 @@ addToLibrary({
+     });
+   },
+ 
+-  $Fibers__deps: ['$Asyncify', 'emscripten_stack_set_limits', '$stackRestore'],
++  $Fibers__deps: ['$Asyncify', '$dynCall', 'emscripten_stack_set_limits', '$stackRestore'],
+   $Fibers: {
+     nextFiber: 0,
+     trampolineRunning: false,
+@@ -559,7 +559,7 @@ addToLibrary({
+         {{{ makeSetValue('newFiber', C_STRUCTS.emscripten_fiber_s.entry, 0, '*') }}};
+ 
+         var userData = {{{ makeGetValue('newFiber', C_STRUCTS.emscripten_fiber_s.user_data, '*') }}};
+-        {{{ makeDynCall('vp', 'entryPoint') }}}(userData);
++        dynCall('vp', entryPoint, [userData]);
+       } else {
+         var asyncifyData = newFiber + {{{ C_STRUCTS.emscripten_fiber_s.asyncify_data }}};
+         Asyncify.currData = asyncifyData;
 diff --git a/src/lib/libdylink.js b/src/lib/libdylink.js
 --- a/src/lib/libdylink.js
 +++ b/src/lib/libdylink.js
