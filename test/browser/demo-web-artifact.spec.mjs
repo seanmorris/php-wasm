@@ -124,6 +124,18 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 		timeout: 180000
 	});
 
+	const welcomeMessage = page.locator('.php-wasm-demo-login');
+
+	await expect(welcomeMessage).toContainText('Drupal 11 is running in the browser!');
+	await expect(welcomeMessage).toContainText('Username: admin');
+	await expect(welcomeMessage).toContainText('Password: admin');
+
+	const loginLink = welcomeMessage.getByRole('link', { name: 'Log in' });
+
+	expect(new URL(await loginLink.getAttribute('href'), page.url()).pathname).toBe(
+		'/php-wasm/cgi-bin/drupal/user/login'
+	);
+
 	const stylesheet = page.locator('link[rel="stylesheet"][href]').first();
 	const image = page.locator('img[src], link[rel~="icon"][href]').first();
 	const stylesheetHref = await stylesheet.getAttribute('href');
@@ -172,9 +184,8 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 
 	await expect(rootRelativeLinks).toHaveCount(0);
 
-	await page.goto(`${drupalAssetPrefix}user/login`, {
-		waitUntil: 'domcontentloaded'
-	});
+	await loginLink.click();
+	await expect(page).toHaveURL(`${drupalAssetPrefix}user/login`);
 	await page.locator('input[name="name"]').fill('admin');
 	await page.locator('input[name="pass"]').fill('admin');
 	await page.getByRole('button', { name: 'Log in' }).click();
