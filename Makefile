@@ -6,7 +6,7 @@
 	clean php-clean deep-clean show-ports show-versions show-files \
 	hooks image push-image pull-image \
 	dist demo serve-demo scripts run \
-	test test-node test-deno test-browser \
+	test test-node test-deno test-bun test-browser \
 	all-versions all-versions all-stdlibs \
 	test-all-versions x-all-versions php-clean-all-versions \
 	demo-versions null \
@@ -394,6 +394,21 @@ PHP_CLI_OBJS=sapi/embed/php_embed.lo
 MAIN_MODULE?=1
 ASYNCIFY?=1
 
+# PHP compilation cannot suspend, but Emscripten's conservative invoke_* call
+# analysis otherwise instruments recursive Zend compiler helpers.  Those
+# enlarged Wasm frames can exhaust WebKit's mixed JS/Wasm stack while loading
+# large applications such as Drupal.  Keep this make-overridable so a toolchain
+# experiment can replace or disable the list with ASYNCIFY_REMOVE= on the make
+# command line.
+ASYNCIFY_REMOVE?=zend_compile*,zend_add_literal*
+ASYNCIFY_FLAGS=
+
+ifneq (${ASYNCIFY},0)
+ifneq (${ASYNCIFY_REMOVE},)
+ASYNCIFY_FLAGS+=-s ASYNCIFY_REMOVE=${ASYNCIFY_REMOVE}
+endif
+endif
+
 # Zend Fibers use Emscripten's native fiber API for PHP 8.1 and newer. The
 # implementation switches stacks through Asyncify and cannot operate in a
 # non-Asyncify main module.
@@ -435,6 +450,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-s AUTO_NATIVE_LIBRARIES=0          \
 		-s AUTO_JS_LIBRARIES=0              \
 		-s ASYNCIFY=${ASYNCIFY}             \
+		${ASYNCIFY_FLAGS}                   \
 		-I /src/third_party/php${PHP_VERSION}-src/ \
 		-I /src/third_party/php${PHP_VERSION}-src/Zend \
 		-I /src/third_party/php${PHP_VERSION}-src/main \
@@ -1172,6 +1188,37 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash
+
+# Bun uses JavaScriptCore, like Safari, but the focused lane deliberately avoids
+# heavyweight application bootstraps.  Drupal remains covered by the browser
+# demo test; this catches runtime, CGI, compiler, and Zend Fiber regressions in
+# seconds rather than treating Bun/Linux throughput as a Safari benchmark.
+test-bun: node-mjs node-cgi-mjs
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} bun test test/bun-runtime.test.mjs
 
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
