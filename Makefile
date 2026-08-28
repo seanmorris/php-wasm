@@ -1073,7 +1073,7 @@ test-node: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort`
+	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort`
 
 test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1101,7 +1101,7 @@ test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} \
-		`find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` \
+		`find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` \
 		test/cli-node/cli-node.test.mjs \
 		test/dbg-node/dbg-node.test.mjs
 
@@ -1187,7 +1187,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash
 
 # Bun uses JavaScriptCore, like Safari, but the focused lane deliberately avoids
 # heavyweight application bootstraps.  Drupal remains covered by the browser
