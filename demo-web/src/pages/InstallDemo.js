@@ -15,13 +15,12 @@ import '../styles/Common.css';
 import '../styles/InstallDemo.css';
 
 const packages = {
-	'drupal-7': {
-		// Switch these paths to the PostgreSQL backup if needed.
-		name:  'Drupal 7'
-		, file:  '/backups/drupal-7.95.zip'
-		, path:  'drupal-7.95'
+	'drupal-11': {
+		name:  'Drupal 11.4.5'
+		, file:  '/backups/drupal-11.4.5.zip'
+		, path:  'drupal-11.4.5'
 		, vHost: 'drupal'
-		, dir:   'drupal-7.95'
+		, dir:   'drupal-11.4.5/web'
 		, entry: 'index.php'
 	}
 	, 'cakephp-5': {
@@ -54,6 +53,14 @@ const packages = {
 		, path:  'laravel-11'
 		, vHost: 'laravel-11'
 		, dir:   'laravel-11/public'
+		, entry: 'index.php'
+	}
+	, 'wordpress-7.1': {
+		name:  'WordPress 7.1'
+		, file:  '/backups/wordpress-7.1.zip'
+		, path:  'wordpress-7.1'
+		, vHost: 'wordpress'
+		, dir:   'wordpress-7.1'
 		, entry: 'index.php'
 	}
 };

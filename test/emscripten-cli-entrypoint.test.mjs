@@ -42,7 +42,7 @@ test('all supported PHP patches export explicit CLI and phpdbg entrypoints', () 
 		assert.match(contents, /\+#include <emscripten\.h>/, patchFile);
 		assert.match(
 			contents
-			, /\+#ifdef __EMSCRIPTEN__\n\+\treturn exit_status;\n\+#else\n-\texit\(exit_status\);\n\+\texit\(exit_status\);\n\+#endif/
+			, /\+#ifdef __EMSCRIPTEN__\n\+\treturn exit_status;\n\+#else\n(?: \texit\(exit_status\);|-\texit\(exit_status\);\n\+\texit\(exit_status\);)\n\+#endif/
 			, patchFile
 		);
 		assert.match(

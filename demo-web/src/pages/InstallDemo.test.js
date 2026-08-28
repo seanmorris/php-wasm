@@ -63,7 +63,7 @@ describe('InstallDemo', () => {
 				};
 			}
 
-			if(String(url).includes('/backups/drupal-7.95.zip'))
+			if(String(url).includes('/backups/') && String(url).endsWith('.zip'))
 			{
 				return {
 					arrayBuffer: async () => new ArrayBuffer(8)
@@ -93,7 +93,7 @@ describe('InstallDemo', () => {
 		});
 
 		sessionStorage.clear();
-		window.history.pushState({}, '', '/install-demo.html?framework=drupal-7');
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11');
 	});
 
 	afterEach(() => {
@@ -137,7 +137,7 @@ describe('InstallDemo', () => {
 		await waitFor(() => expect(bus.storeInit).toHaveBeenCalledTimes(1));
 
 		expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('scripts/init.php'))).toHaveLength(1);
-		expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/backups/drupal-7.95.zip'))).toHaveLength(1);
+		expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/backups/drupal-11.4.5.zip'))).toHaveLength(1);
 		expect(navigator.locks.request).toHaveBeenCalledTimes(1);
 	});
 
@@ -174,7 +174,29 @@ describe('InstallDemo', () => {
 				}
 				, {
 					pathPrefix: '/cgi-bin/drupal'
-					, directory: '/persist/drupal-7.95'
+					, directory: '/persist/drupal-11.4.5/web'
+					, entrypoint: 'index.php'
+				}
+			]
+		});
+	});
+
+	it('installs the WordPress package at its CGI vhost and persistent docroot', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=wordpress-7.1');
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(bus.storeInit).toHaveBeenCalledTimes(1));
+
+		expect(bus.analyzePath).toHaveBeenCalledWith('/persist/wordpress-7.1');
+		expect(fetchMock.mock.calls.some(([url]) => (
+			String(url).includes('/backups/wordpress-7.1.zip')
+		))).toBe(true);
+		expect(bus.setSettings).toHaveBeenCalledWith({
+			vHosts: [
+				{
+					pathPrefix: '/cgi-bin/wordpress'
+					, directory: '/persist/wordpress-7.1'
 					, entrypoint: 'index.php'
 				}
 			]
@@ -185,7 +207,7 @@ describe('InstallDemo', () => {
 		bus.analyzePath.mockRejectedValue({
 			error: 'Timed out waiting for a service worker reply after 5000ms.'
 			, action: 'analyzePath'
-			, params: ['/persist/drupal-7.95']
+			, params: ['/persist/drupal-11.4.5/web']
 		});
 
 		render(<InstallDemo />);

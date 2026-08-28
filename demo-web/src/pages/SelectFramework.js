@@ -8,6 +8,7 @@ import drupalIcon from '../assets/frameworks/drupal-icon.svg';
 import codeIgniterIcon from '../assets/frameworks/codeigniter-icon.svg';
 import laravelIcon from '../assets/frameworks/laravel-icon.svg';
 import laminasIcon from '../assets/frameworks/laminas-icon.svg';
+import wordpressIcon from '../assets/frameworks/wordpress-icon.svg';
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { basePath } from '../lib/runtimePaths';
@@ -72,6 +73,7 @@ function SelectFramework()
 	const [drupalInstalled, setDrupalInstalled] = useState(false);
 	const [laravelInstalled, setLaravelInstalled] = useState(false);
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
+	const [wordpressInstalled, setWordpressInstalled] = useState(false);
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const serviceWorkerDisabled = query.has('no-service-worker');
@@ -90,12 +92,14 @@ function SelectFramework()
 				, drupalPath
 				, laravelPath
 				, laminasPath
+				, wordpressPath
 			] = await Promise.all([
 				bus.analyzePath('/persist/cakephp-5')
 				, bus.analyzePath('/persist/codeigniter-4')
-				, bus.analyzePath('/persist/drupal-7.95')
+				, bus.analyzePath('/persist/drupal-11.4.5/web')
 				, bus.analyzePath('/persist/laravel-11')
 				, bus.analyzePath('/persist/laminas-3')
+				, bus.analyzePath('/persist/wordpress-7.1')
 			]);
 
 			setCakeInstalled(cakePath.exists);
@@ -103,6 +107,7 @@ function SelectFramework()
 			setDrupalInstalled(drupalPath.exists);
 			setLaravelInstalled(laravelPath.exists);
 			setLaminasInstalled(laminasPath.exists);
+			setWordpressInstalled(wordpressPath.exists);
 		})();
 	}, [serviceWorkerDisabled]);
 
@@ -115,9 +120,10 @@ function SelectFramework()
 		{
 			case 'cakephp-5':
 			case 'codeigniter-4':
-			case 'drupal-7':
+			case 'drupal-11':
 			case 'laminas-3':
 			case 'laravel-11':
+			case 'wordpress-7.1':
 				refreshAll();
 				break;
 
@@ -173,6 +179,7 @@ function SelectFramework()
 				setDrupalInstalled(false);
 				setLaravelInstalled(false);
 				setLaminasInstalled(false);
+				setWordpressInstalled(false);
 				setOverlay(null);
 			} } />);
 		} }
@@ -216,16 +223,16 @@ function SelectFramework()
 							</span>)}
 						</div>
 						<div className='column center'>
-							<PopupLink path = "install-demo.html?framework=drupal-7">
-								<img src = {drupalIcon} alt = "drupal 7" /> {drupalInstalled}
+							<PopupLink path = "install-demo.html?framework=drupal-11">
+								<img src = {drupalIcon} alt = "drupal 11" /> {drupalInstalled}
 							</PopupLink>
 							{drupalInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/drupal')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/drupal-7.95/index.php">IDE</PopupButton>
-								<PopupButton path = "install-demo.html?framework=drupal-7&overwrite=true">Reset</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/drupal-11.4.5/web/index.php">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=drupal-11&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{drupalInstalled || (<span className = "contents">
-								<PopupButton path = "install-demo.html?framework=drupal-7">Start</PopupButton>
+								<PopupButton path = "install-demo.html?framework=drupal-11">Start</PopupButton>
 							</span>)}
 						</div>
 						<div className='column center'>
@@ -252,6 +259,19 @@ function SelectFramework()
 							</span>)}
 							{laminasInstalled || (<span className = "contents">
 								<PopupButton path = "install-demo.html?framework=laminas-3">Start</PopupButton>
+							</span>)}
+						</div>
+						<div className='column center'>
+							<PopupLink path = "install-demo.html?framework=wordpress-7.1">
+								<img src = {wordpressIcon} alt = "wordpress 7.1" />
+							</PopupLink>
+							{wordpressInstalled && (<span className = "contents">
+								<PopupButton path = {basePath('cgi-bin/wordpress')}>Open Demo</PopupButton>
+								<PopupButton path = "code-editor.html?path=/persist/wordpress-7.1/index.php">IDE</PopupButton>
+								<PopupButton path = "install-demo.html?framework=wordpress-7.1&overwrite=true">Reset</PopupButton>
+							</span>)}
+							{wordpressInstalled || (<span className = "contents">
+								<PopupButton path = "install-demo.html?framework=wordpress-7.1">Start</PopupButton>
 							</span>)}
 						</div>
 					</div>

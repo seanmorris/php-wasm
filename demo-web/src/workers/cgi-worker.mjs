@@ -58,9 +58,8 @@ const files = [
 	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' }
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
 ];
-const cgiPrefix = new URL(basePath('cgi-bin/'), self.location.origin).pathname;
-const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')]
-	.map(path => new URL(path, self.location.origin).pathname);
+const cgiPrefix = basePath('cgi-bin/');
+const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')];
 
 /**
  * Returns true only for requests that should wake the PHP-CGI runtime.
@@ -113,7 +112,7 @@ let phpLoader = null;
 /**
  * Loads the runtime assets required for the current build type and creates the worker.
  */
-const init = async () => {
+const init = () => {
 	if(phpLoader) return phpLoader;
 
 	if(workerLibType === 'dynamic')
@@ -140,11 +139,22 @@ const init = async () => {
 		, exclude: [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')]
 		, docroot: '/persist/www'
 		, types: {
-			jpeg: 'image/jpeg'
+			avif: 'image/avif'
+			, css: 'text/css; charset=utf-8'
+			, eot: 'application/vnd.ms-fontobject'
+			, ico: 'image/x-icon'
+			, jpeg: 'image/jpeg'
 			, jpg: 'image/jpeg'
 			, gif: 'image/gif'
+			, js: 'text/javascript; charset=utf-8'
+			, json: 'application/json; charset=utf-8'
+			, mjs: 'text/javascript; charset=utf-8'
 			, png: 'image/png'
 			, svg: 'image/svg+xml'
+			, ttf: 'font/ttf'
+			, webp: 'image/webp'
+			, woff: 'font/woff'
+			, woff2: 'font/woff2'
 		}
 		, vHosts: [
 			{
@@ -159,15 +169,15 @@ const init = async () => {
 // Set up the event handlers
 self.addEventListener('install', event => event.waitUntil(globalThis.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(globalThis.clients.claim()));
-self.addEventListener('fetch',    async event => {
+self.addEventListener('fetch', event => {
 	if(!shouldHandleFetch(event.request))
 	{
 		return;
 	}
 
-	return (await init()).handleFetchEvent(event);
+	return init().handleFetchEvent(event);
 });
-self.addEventListener('message',  async event => (await init()).handleMessageEvent(event));
+self.addEventListener('message', event => init().handleMessageEvent(event));
 
 // Extras
 self.addEventListener('install',  () => console.log('Install'));

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 
 const { bus, getPhpBus } = vi.hoisted(() => {
 	Object.defineProperty(globalThis.navigator, 'serviceWorker', {
@@ -65,8 +65,36 @@ import SelectFramework from './SelectFramework';
 describe('SelectFramework', () => {
 	beforeEach(() => {
 		bus.analyzePath.mockClear();
+		bus.analyzePath.mockImplementation(async path => ({
+			exists: path === '/persist/cakephp-5'
+		}));
 		getPhpBus.mockClear();
 		window.history.pushState({}, '', '/select-framework.html');
+	});
+
+	it('detects the WordPress install and targets its vhost and entrypoint', async () => {
+		bus.analyzePath.mockImplementation(async path => ({
+			exists: path === '/persist/wordpress-7.1'
+		}));
+
+		render(<SelectFramework />);
+
+		const wordpressIcon = screen.getByRole('img', {name: 'wordpress 7.1'});
+		const wordpressCard = wordpressIcon.closest('.column');
+
+		await waitFor(() => {
+			expect(bus.analyzePath).toHaveBeenCalledWith('/persist/wordpress-7.1');
+		});
+
+		const card = within(wordpressCard);
+		const openForm = card.getByRole('button', {name: 'Open Demo'}).closest('form');
+		const ideForm = card.getByRole('button', {name: 'IDE'}).closest('form');
+
+		expect(new URL(openForm.action).pathname).toBe('/cgi-bin/wordpress');
+		expect(ideForm.querySelector('input[name="path"]')).toHaveValue(
+			'/persist/wordpress-7.1/index.php'
+		);
+		expect(card.getByRole('button', {name: 'Reset'})).toBeInTheDocument();
 	});
 
 	it('renders IDE controls as popup forms that target the framework entrypoint', async () => {

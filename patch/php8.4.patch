@@ -1,5 +1,268 @@
+diff --git a/third_party/php8.4-src/Zend/zend_fibers.c b/third_party/php8.4-src/Zend/zend_fibers.c
+index 97b7cdc..0b62143 100644
+--- a/third_party/php8.4-src/Zend/zend_fibers.c
++++ b/third_party/php8.4-src/Zend/zend_fibers.c
+@@ -34,11 +34,17 @@
+ #include "zend_fibers.h"
+ #include "zend_fibers_arginfo.h"
+ 
++#ifdef __EMSCRIPTEN__
++# include <emscripten/fiber.h>
++# define ZEND_FIBER_EMSCRIPTEN 1
++# define EMS_FIBER_ASYNCIFY_STACK_SIZE (128 * 1024)
++#endif
++
+ #ifdef HAVE_VALGRIND
+ # include <valgrind/valgrind.h>
+ #endif
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#if defined(ZEND_FIBER_UCONTEXT) && !defined(ZEND_FIBER_EMSCRIPTEN)
+ # include <ucontext.h>
+ #endif
+ 
+@@ -93,7 +99,12 @@ struct _zend_fiber_stack {
+ 	size_t asan_size;
+ #endif
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	/* Embedded Emscripten context and Zend-owned Asyncify stack. */
++	emscripten_fiber_t fiber;
++	void *pointer_asyncify;
++	size_t size_asyncify;
++#elif defined(ZEND_FIBER_UCONTEXT)
+ 	/* Embedded ucontext to avoid unnecessary memory allocations. */
+ 	ucontext_t ucontext;
+ #elif BOOST_CONTEXT_SHADOW_STACK
+@@ -154,7 +165,7 @@ static zend_always_inline void zend_fiber_restore_vm_state(zend_fiber_vm_state *
+ #endif
+ }
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#if defined(ZEND_FIBER_EMSCRIPTEN) || defined(ZEND_FIBER_UCONTEXT)
+ ZEND_TLS zend_fiber_transfer *transfer_data;
+ #else
+ /* boost_context_data is our customized definition of struct transfer_t as
+@@ -207,7 +218,11 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
+ {
+ 	void *pointer;
+ 	const size_t page_size = zend_fiber_get_page_size();
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	const size_t minimum_stack_size = page_size;
++#else
+ 	const size_t minimum_stack_size = page_size + ZEND_FIBER_GUARD_PAGES * page_size;
++#endif
+ 
+ 	if (size < minimum_stack_size) {
+ 		zend_throw_exception_ex(NULL, 0, "Fiber stack size is too small, it needs to be at least %zu bytes", minimum_stack_size);
+@@ -215,6 +230,25 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
+ 	}
+ 
+ 	const size_t stack_size = (size + page_size - 1) / page_size * page_size;
++
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	pointer = aligned_alloc(16, stack_size);
++
++	if (!pointer) {
++		zend_throw_exception_ex(NULL, 0, "Fiber stack allocate failed: aligned_alloc failed: %s (%d)", strerror(errno), errno);
++		return NULL;
++	}
++
++	ZEND_ASSERT(((uintptr_t) pointer & 0xf) == 0 && "Emscripten fiber stacks must be 16-byte aligned");
++
++	void *pointer_asyncify = malloc(EMS_FIBER_ASYNCIFY_STACK_SIZE);
++
++	if (!pointer_asyncify) {
++		zend_throw_exception_ex(NULL, 0, "Fiber Asyncify stack allocate failed: malloc failed: %s (%d)", strerror(errno), errno);
++		free(pointer);
++		return NULL;
++	}
++#else
+ 	const size_t alloc_size = stack_size + ZEND_FIBER_GUARD_PAGES * page_size;
+ 
+ #ifdef ZEND_WIN32
+@@ -264,13 +298,25 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
+ 	}
+ # endif
+ #endif
++#endif
+ 
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	zend_fiber_stack *stack = ecalloc(1, sizeof(zend_fiber_stack));
++#else
+ 	zend_fiber_stack *stack = emalloc(sizeof(zend_fiber_stack));
++#endif
+ 
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	stack->pointer = pointer;
++	stack->size = stack_size;
++	stack->pointer_asyncify = pointer_asyncify;
++	stack->size_asyncify = EMS_FIBER_ASYNCIFY_STACK_SIZE;
++#else
+ 	stack->pointer = (void *) ((uintptr_t) pointer + ZEND_FIBER_GUARD_PAGES * page_size);
+ 	stack->size = stack_size;
++#endif
+ 
+-#if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
++#if !defined(ZEND_FIBER_EMSCRIPTEN) && !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
+ 	/* shadow stack saves ret address only, need less space */
+ 	stack->ss_size= stack_size >> 5;
+ 
+@@ -306,6 +352,10 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
+ 	VALGRIND_STACK_DEREGISTER(stack->valgrind_stack_id);
+ #endif
+ 
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	free(stack->pointer_asyncify);
++	free(stack->pointer);
++#else
+ 	const size_t page_size = zend_fiber_get_page_size();
+ 
+ 	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
+@@ -321,8 +371,9 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
+ #else
+ 	munmap(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+ #endif
++#endif
+ 
+-#if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
++#if !defined(ZEND_FIBER_EMSCRIPTEN) && !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
+ 	munmap(stack->ss_base, stack->ss_size);
+ #endif
+ 
+@@ -353,14 +404,19 @@ ZEND_API void* zend_fiber_stack_base(zend_fiber_stack *stack)
+ }
+ #endif
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#ifdef ZEND_FIBER_EMSCRIPTEN
++static void zend_fiber_trampoline(void *argument)
++#elif defined(ZEND_FIBER_UCONTEXT)
+ static ZEND_NORETURN void zend_fiber_trampoline(void)
+ #else
+ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+ #endif
+ {
+ 	/* Initialize transfer struct with a copy of passed data. */
+-#ifdef ZEND_FIBER_UCONTEXT
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	(void) argument;
++	zend_fiber_transfer transfer = *transfer_data;
++#elif defined(ZEND_FIBER_UCONTEXT)
+ 	zend_fiber_transfer transfer = *transfer_data;
+ #else
+ 	zend_fiber_transfer transfer = *data.transfer;
+@@ -372,7 +428,7 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+ 	__sanitizer_finish_switch_fiber(NULL, &from->stack->asan_pointer, &from->stack->asan_size);
+ #endif
+ 
+-#ifndef ZEND_FIBER_UCONTEXT
++#if !defined(ZEND_FIBER_EMSCRIPTEN) && !defined(ZEND_FIBER_UCONTEXT)
+ 	/* Get the context that resumed us and update its handle to allow for symmetric coroutines. */
+ 	from->handle = data.handle;
+ #endif
+@@ -390,8 +446,13 @@ static ZEND_NORETURN void zend_fiber_trampoline(boost_context_data data)
+ 	/* Final context switch, the fiber must not be resumed afterwards! */
+ 	zend_fiber_switch_context(&transfer);
+ 
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	/* Allow Asyncify to finish unwinding the completed fiber's callback. */
++	return;
++#else
+ 	/* Abort here because we are in an inconsistent program state. */
+ 	abort();
++#endif
+ }
+ 
+ ZEND_API void zend_fiber_switch_block(void)
+@@ -418,7 +479,20 @@ ZEND_API zend_result zend_fiber_init_context(zend_fiber_context *context, void *
+ 		return FAILURE;
+ 	}
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	emscripten_fiber_t *handle = &context->stack->fiber;
++
++	emscripten_fiber_init(
++		handle,
++		(em_arg_callback_func) zend_fiber_trampoline,
++		NULL,
++		context->stack->pointer,
++		context->stack->size,
++		context->stack->pointer_asyncify,
++		context->stack->size_asyncify);
++
++	context->handle = handle;
++#elif defined(ZEND_FIBER_UCONTEXT)
+ 	ucontext_t *handle = &context->stack->ucontext;
+ 
+ 	getcontext(handle);
+@@ -511,7 +585,14 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
+ 		to->stack->asan_size);
+ #endif
+ 
+-#ifdef ZEND_FIBER_UCONTEXT
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	transfer_data = transfer;
++
++	emscripten_fiber_swap(from->handle, to->handle);
++
++	/* Copy transfer struct because it might live on the other fiber's stack that will eventually be destroyed. */
++	*transfer = *transfer_data;
++#elif defined(ZEND_FIBER_UCONTEXT)
+ 	transfer_data = transfer;
+ 
+ 	swapcontext(from->handle, to->handle);
+@@ -527,7 +608,7 @@ ZEND_API void zend_fiber_switch_context(zend_fiber_transfer *transfer)
+ 
+ 	to = transfer->context;
+ 
+-#ifndef ZEND_FIBER_UCONTEXT
++#if !defined(ZEND_FIBER_EMSCRIPTEN) && !defined(ZEND_FIBER_UCONTEXT)
+ 	/* Get the context that resumed us and update its handle to allow for symmetric coroutines. */
+ 	to->handle = data.handle;
+ #endif
+@@ -1122,7 +1203,24 @@ void zend_fiber_init(void)
+ {
+ 	zend_fiber_context *context = ecalloc(1, sizeof(zend_fiber_context));
+ 
+-#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	context->stack = ecalloc(1, sizeof(zend_fiber_stack));
++	context->stack->pointer_asyncify = malloc(EMS_FIBER_ASYNCIFY_STACK_SIZE);
++
++	if (!context->stack->pointer_asyncify) {
++		efree(context->stack);
++		efree(context);
++		zend_error_noreturn(E_ERROR, "Main fiber Asyncify stack allocation failed");
++	}
++
++	context->stack->size_asyncify = EMS_FIBER_ASYNCIFY_STACK_SIZE;
++	context->handle = &context->stack->fiber;
++
++	emscripten_fiber_init_from_current_context(
++		context->handle,
++		context->stack->pointer_asyncify,
++		context->stack->size_asyncify);
++#elif defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
+ 	// Main fiber stack is only needed if ASan or ucontext is enabled.
+ 	context->stack = emalloc(sizeof(zend_fiber_stack));
+ 
+@@ -1142,7 +1240,10 @@ void zend_fiber_init(void)
+ 
+ void zend_fiber_shutdown(void)
+ {
+-#if defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
++#ifdef ZEND_FIBER_EMSCRIPTEN
++	free(EG(main_fiber_context)->stack->pointer_asyncify);
++	efree(EG(main_fiber_context)->stack);
++#elif defined(__SANITIZE_ADDRESS__) || defined(ZEND_FIBER_UCONTEXT)
+ 	efree(EG(main_fiber_context)->stack);
+ #endif
+ 
 diff --git a/third_party/php8.4-src/ext/libxml/libxml.c b/third_party/php8.4-src/ext/libxml/libxml.c
-index f07b321..9218794 100644
+index f07b321..887cdf7 100644
 --- a/third_party/php8.4-src/ext/libxml/libxml.c
 +++ b/third_party/php8.4-src/ext/libxml/libxml.c
 @@ -48,6 +48,23 @@
@@ -332,7 +595,7 @@ index 79e2afe..0956f43 100644
  install-cgi: $(SAPI_CGI_PATH)
  	@echo "Installing PHP CGI binary:        $(INSTALL_ROOT)$(bindir)/"
 diff --git a/third_party/php8.4-src/sapi/cgi/cgi_main.c b/third_party/php8.4-src/sapi/cgi/cgi_main.c
-index 0e7b300..3652b52 100644
+index 0e7b300..a29b072 100644
 --- a/third_party/php8.4-src/sapi/cgi/cgi_main.c
 +++ b/third_party/php8.4-src/sapi/cgi/cgi_main.c
 @@ -18,7 +18,7 @@
@@ -391,31 +654,6 @@ index 0e7b300..3652b52 100644
 +{
 +	return _sapi_cgi_putenv(name, strlen(name), value);
 +}
-diff --git a/third_party/php8.4-src/sapi/cli/php_cli.c b/third_party/php8.4-src/sapi/cli/php_cli.c
---- a/third_party/php8.4-src/sapi/cli/php_cli.c
-+++ b/third_party/php8.4-src/sapi/cli/php_cli.c
-@@ -18,6 +18,7 @@
-    +----------------------------------------------------------------------+
- */
- 
-+#include <emscripten.h>
- #include "php.h"
- #include "php_globals.h"
- #include "php_variables.h"
-@@ -1346,3 +1347,12 @@ int main(int argc, char *argv[])
-+#ifdef __EMSCRIPTEN__
-+	return exit_status;
-+#else
--	exit(exit_status);
-+	exit(exit_status);
-+#endif
- }
- /* }}} */
-+
-+int EMSCRIPTEN_KEEPALIVE wasm_sapi_cli_main(int argc, char **argv)
-+{
-+	return main(argc, argv);
-+}
 diff --git a/third_party/php8.4-src/sapi/cli/Makefile.frag b/third_party/php8.4-src/sapi/cli/Makefile.frag
 index aa1d642..649533d 100644
 --- a/third_party/php8.4-src/sapi/cli/Makefile.frag
@@ -429,6 +667,34 @@ index aa1d642..649533d 100644
  
  install-cli: $(SAPI_CLI_PATH)
  	@echo "Installing PHP CLI binary:        $(INSTALL_ROOT)$(bindir)/"
+diff --git a/third_party/php8.4-src/sapi/cli/php_cli.c b/third_party/php8.4-src/sapi/cli/php_cli.c
+index 9444f3d..277cefb 100644
+--- a/third_party/php8.4-src/sapi/cli/php_cli.c
++++ b/third_party/php8.4-src/sapi/cli/php_cli.c
+@@ -18,6 +18,7 @@
+    +----------------------------------------------------------------------+
+ */
+ 
++#include <emscripten.h>
+ #include "php.h"
+ #include "php_globals.h"
+ #include "php_variables.h"
+@@ -1343,6 +1344,15 @@ int main(int argc, char *argv[])
+ 	 * exiting.
+ 	 */
+ 	cleanup_ps_args(argv);
++#ifdef __EMSCRIPTEN__
++	return exit_status;
++#else
+ 	exit(exit_status);
++#endif
+ }
+ /* }}} */
++
++int EMSCRIPTEN_KEEPALIVE wasm_sapi_cli_main(int argc, char **argv)
++{
++	return main(argc, argv);
++}
 diff --git a/third_party/php8.4-src/sapi/embed/php_embed.c b/third_party/php8.4-src/sapi/embed/php_embed.c
 index c18480d..787687f 100644
 --- a/third_party/php8.4-src/sapi/embed/php_embed.c
@@ -458,7 +724,7 @@ index a069a23..e37658a 100644
  %.c: %.y
  %.c: %.l
 diff --git a/third_party/php8.4-src/sapi/phpdbg/phpdbg.c b/third_party/php8.4-src/sapi/phpdbg/phpdbg.c
-index 76b3c7f..6cf12a9 100644
+index 76b3c7f..0ca544b 100644
 --- a/third_party/php8.4-src/sapi/phpdbg/phpdbg.c
 +++ b/third_party/php8.4-src/sapi/phpdbg/phpdbg.c
 @@ -16,6 +16,8 @@

@@ -773,7 +773,7 @@ export class PhpCgiBase
 		}
 
 		const rewrite = this.rewrite(url.pathname);
-		const rewritePath = typeof rewrite === 'string'
+		let rewritePath = typeof rewrite === 'string'
 			? rewrite
 			: rewrite?.path ?? url.pathname;
 
@@ -791,7 +791,29 @@ export class PhpCgiBase
 			scriptName = path;
 		}
 
-		const aboutPath = php.FS.analyzePath(path);
+		let aboutPath = php.FS.analyzePath(path);
+		let originalPath = url.pathname;
+
+		if(aboutPath.exists && aboutPath.object.isFolder)
+		{
+			if('/' !== originalPath[ -1 + originalPath.length ])
+			{
+				originalPath += '/';
+			}
+
+			const indexPath = joinPaths(path, 'index.php');
+			const aboutIndex = php.FS.analyzePath(indexPath);
+
+			if(aboutIndex.exists && php.FS.isFile(aboutIndex.object.mode))
+			{
+				path = indexPath;
+				rewritePath = joinPaths(rewritePath, 'index.php');
+				scriptName = rewrite && typeof rewrite === 'object'
+					? rewrite.scriptName
+					: path;
+				aboutPath = aboutIndex;
+			}
+		}
 
 		if(vHostEntrypoint)
 		{
@@ -804,8 +826,6 @@ export class PhpCgiBase
 				scriptName = joinPaths(vHostPrefix, rewritePath.substr(vHostPrefix.length));
 			}
 		}
-
-		let originalPath = url.pathname;
 
 		const extension = path.split('.').pop();
 
@@ -975,12 +995,16 @@ export class PhpCgiBase
 					+ `=`.repeat(80) + `\n\n`
 					+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
 					+ `=`.repeat(80) + `\n\n`
-				, { status: 500 }
+				, {
+					status: 500
+					, headers: {
+						'Cache-Control': 'no-store'
+						, 'Content-Type': 'text/plain; charset=utf-8'
+					}
+				}
 			);
 
 			this.onRequest(request, response);
-
-			this.refresh();
 
 			return response;
 		}
@@ -988,7 +1012,7 @@ export class PhpCgiBase
 		{
 			if(exitCode === 0)
 			{
-				this._afterRequest();
+				await this._afterRequest();
 			}
 			else
 			{

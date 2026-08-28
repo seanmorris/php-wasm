@@ -6,8 +6,8 @@ import { popupTarget, resolvePopupHref, resolvePopupRequest } from './popupNavig
 
 describe('popupNavigation', () => {
 	it('resolves app-relative popup paths against the hosted base path', () => {
-		expect(resolvePopupHref('install-demo.html?framework=drupal-7'))
-			.toBe('http://localhost/php-wasm/install-demo.html?framework=drupal-7');
+		expect(resolvePopupHref('install-demo.html?framework=drupal-11'))
+			.toBe('http://localhost/php-wasm/install-demo.html?framework=drupal-11');
 	});
 
 	it('preserves absolute app paths for popup targets', () => {
