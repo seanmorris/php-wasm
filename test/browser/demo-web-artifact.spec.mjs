@@ -107,6 +107,26 @@ test('select framework service worker serves CGI', async ({ page }) => {
 	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
 });
 
+test('CodeIgniter 4 installs through ZipArchive and runs through CGI', async ({ page }) => {
+	test.setTimeout(600000);
+
+	const runtimeFailures = [];
+
+	page.on('pageerror', error => runtimeFailures.push(error.message));
+
+	await page.goto('install-demo.html?framework=codeigniter-4', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/\/php-wasm\/cgi-bin\/codeigniter-4\/?$/, {
+		timeout: 540000
+	});
+	await expect(page.locator('body')).toContainText('Welcome to CodeIgniter', {
+		timeout: 180000
+	});
+	expect(runtimeFailures).toEqual([]);
+});
+
 test('Drupal 11.4.5 installs and runs through the existing CGI service-worker route', async ({ page }) => {
 	test.setTimeout(600000);
 

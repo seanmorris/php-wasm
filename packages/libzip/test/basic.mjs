@@ -86,3 +86,41 @@ test('Zip Extension is enabled. (loaded via async module)', async () => {
 	assert.equal(stdOut, `bool(true)\n`);
 	assert.equal(stdErr, '');
 });
+
+test('ZipArchive creates and extracts an archive through the dynamic libzip API', async () => {
+	const php = env.WITH_LIBZIP === 'dynamic'
+		? new PhpNode({sharedLibs:[zip]})
+		: new PhpNode;
+
+	let stdOut = '', stdErr = '';
+
+	php.addEventListener('output', (event) => event.detail.forEach(line => void (stdOut += line)));
+	php.addEventListener('error',  (event) => event.detail.forEach(line => void (stdErr += line)));
+
+	await php.binary;
+
+	const exitCode = await php.run(`<?php
+		$archive = new ZipArchive();
+		var_dump($archive->open('/tmp/archive.zip', ZipArchive::CREATE));
+		var_dump($archive->addFromString('hello.txt', 'Hello from libzip!'));
+		var_dump($archive->close());
+
+		$archive = new ZipArchive();
+		var_dump($archive->open('/tmp/archive.zip'));
+		var_dump($archive->extractTo('/tmp/unpacked'));
+		$archive->close();
+		echo file_get_contents('/tmp/unpacked/hello.txt'), "\n";
+	`);
+
+	assert.equal(exitCode, 0);
+	assert.equal(stdOut, [
+		'bool(true)'
+		, 'bool(true)'
+		, 'bool(true)'
+		, 'bool(true)'
+		, 'bool(true)'
+		, 'Hello from libzip!'
+		, ''
+	].join('\n'));
+	assert.equal(stdErr, '');
+});

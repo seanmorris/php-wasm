@@ -182,12 +182,12 @@ export class PhpCliWeb extends PhpBase
 		}
 		catch(error)
 		{
-			// if(!('status' in error ) || error.status !== 0)
-			// {
-			// 	throw error;
-			// }
+			if(typeof error?.status === 'number')
+			{
+				return error.status;
+			}
 
-			return error.status;
+			throw error;
 		}
 		finally
 		{

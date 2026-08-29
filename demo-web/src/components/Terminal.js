@@ -77,6 +77,17 @@ const escapeHtml = string => string
 	.replace(/'/g, "&#039;");
 
 /**
+ * Converts a rejected runtime operation into concise terminal output.
+ */
+const formatRuntimeError = error => {
+	const detail = error?.message ?? String(error);
+
+	return error?.name && error.name !== 'Error'
+		? `${error.name}: ${detail}`
+		: detail;
+};
+
+/**
  * Shared php-cli runtime arguments used by every terminal instance.
  */
 const phpArgs = {
@@ -242,14 +253,52 @@ export default function Terminal({
 		}
 
 		const runPhp = async () => {
-			await php.binary;
+			const reportFailure = error => {
+				if(!active)
+				{
+					return;
+				}
 
-			if(!active)
+				const text = `php-cli-wasm failed: ${formatRuntimeError(error)}`;
+
+				setOutput(output => [...output, {
+					type: 'stderr'
+					, text: parser.toHtml(escapeHtml(text))
+				}]);
+				setStatusMessageRef.current?.('php-cli-wasm failed.');
+				scrollToEnd();
+			};
+
+			const notifyExit = async exitCode => {
+				try
+				{
+					await setExitCodeRef.current?.(exitCode);
+				}
+				catch(error)
+				{
+					reportFailure(error);
+				}
+			};
+
+			let ret;
+
+			try
 			{
+				await php.binary;
+
+				if(!active)
+				{
+					return;
+				}
+
+				ret = await php.run(['-c', '/php.ini']);
+			}
+			catch(error)
+			{
+				reportFailure(error);
+				await notifyExit(typeof error?.status === 'number' ? error.status : 1);
 				return;
 			}
-
-			const ret = await php.run(['-c', '/php.ini']);
 
 			if(!active)
 			{
@@ -263,7 +312,7 @@ export default function Terminal({
 			else
 			{
 				setStatusMessageRef.current?.('php-cli-wasm done.');
-				setExitCodeRef.current?.(ret);
+				await notifyExit(ret);
 			}
 		};
 

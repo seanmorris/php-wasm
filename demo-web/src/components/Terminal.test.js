@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 
 const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb } = vi.hoisted(() => {
 	const run = vi.fn().mockResolvedValue(0);
@@ -34,8 +34,8 @@ const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb }
 });
 
 vi.mock('../lib/runtimePaths', () => ({
-	libType: 'static',
-	buildType: 'static'
+	libType: 'static'
+	, buildType: 'static'
 }));
 
 vi.mock('php-cli-wasm/PhpCliWeb', () => ({
@@ -58,10 +58,30 @@ import Terminal from './Terminal';
 
 describe('Terminal', () => {
 	beforeEach(() => {
-		run.mockClear();
+		run.mockReset().mockResolvedValue(0);
 		addEventListener.mockClear();
 		removeEventListener.mockClear();
 		PhpCliWeb.mockClear();
+		HTMLElement.prototype.scrollTo = vi.fn();
+	});
+
+	it('renders runtime rejections and reports a failing exit code', async () => {
+		const setExitCode = vi.fn();
+
+		run.mockRejectedValueOnce(new WebAssembly.RuntimeError('Aborted(invalid state: 1)'));
+
+		render(
+			<Terminal
+				interactive = {false}
+				code = {'echo "ok";'}
+				setExitCode = {setExitCode}
+			/>
+		);
+
+		await screen.findByText(
+			'php-cli-wasm failed: RuntimeError: Aborted(invalid state: 1)'
+		);
+		expect(setExitCode).toHaveBeenCalledWith(1);
 	});
 
 	it('runs non-interactive CLI code once under StrictMode', async () => {

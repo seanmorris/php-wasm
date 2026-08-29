@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 
-const { ensureServiceWorker, getPhpBus } = vi.hoisted(() => ({
+const { ensureServiceWorker, getPhpBus, terminalProps } = vi.hoisted(() => ({
 	ensureServiceWorker: vi.fn()
 	, getPhpBus: vi.fn()
+	, terminalProps: {current: null}
 }));
 
 vi.mock('../lib/serviceWorker', () => ({
@@ -17,7 +18,8 @@ vi.mock('../lib/phpBus', async importOriginal => ({
 }));
 
 vi.mock('../components/Terminal', () => ({
-	default: function TerminalMock() {
+	default: function TerminalMock(props) {
+		terminalProps.current = props;
 		return null;
 	}
 }));
@@ -33,6 +35,7 @@ describe('InstallDemo', () => {
 	beforeEach(() => {
 		ensureServiceWorker.mockReset();
 		getPhpBus.mockReset();
+		terminalProps.current = null;
 
 		bus = {
 			analyzePath: vi.fn(async () => ({exists: false}))
@@ -214,6 +217,22 @@ describe('InstallDemo', () => {
 
 		await screen.findByText(
 			'Installer request "analyzePath" failed: Timed out waiting for a service worker reply after 5000ms.'
+		);
+	});
+
+	it('surfaces a failed archive extraction instead of leaving the installer blank', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=codeigniter-4');
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+
+		await act(async () => {
+			await terminalProps.current.setExitCode(1);
+		});
+
+		await screen.findByText(
+			'Could not unpack /backups/codeigniter-4.zip (PHP CLI exited with code 1).'
 		);
 	});
 });
