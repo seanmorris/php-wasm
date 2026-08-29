@@ -129,7 +129,7 @@ declare module 'php-wasm/PhpBase' {
 			setValue?: Function,
 			UTF8ToString?: Function,
 			getValue?: Function,
-			HEAP8?: Int8Array,
+			HEAPU8?: Uint8Array,
 			hasVrzno?: boolean,
 			zvalToJS?: Function,
 			onRefresh?: Set<Function>,
