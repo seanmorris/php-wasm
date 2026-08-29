@@ -143,6 +143,7 @@ test('runs a cli script in the browser harness', async ({ page }) => {
 	await page.goto(`harness/cli.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
 	await waitForHarnessStatus(page);
 	await expect(page.locator('[data-testid="stdout"]')).toContainText('Hello, World!');
+	await expect(page.locator('[data-testid="stderr"]')).toHaveText('');
 });
 
 test('boots phpdbg in the browser harness', async ({ page }) => {
