@@ -14,9 +14,10 @@ const defaultVersion = /** @type {PhpRuntimeVersion} */ (
 const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
 	? runtime
 	: {default: runtime};
+const isBun = typeof process !== 'undefined' && Boolean(process.versions?.bun);
 
 const loadRuntime = specifier => {
-	if(typeof require === 'function')
+	if(typeof require === 'function' && !isBun)
 	{
 		return Promise.resolve(
 			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
@@ -343,8 +344,8 @@ export class PhpDbgNode extends PhpBase
 	 */
 	dumpSymbols(ptr, php)
 	{
-		const heap = new DataView(php.HEAP8.buffer);
-		const end = ptr + heap.getInt32(ptr, true);
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
 		let cur = ptr + pointerLen;
 		const decoder = new TextDecoder;
@@ -352,13 +353,13 @@ export class PhpDbgNode extends PhpBase
 
 		while(cur < end)
 		{
-			const zv = heap.getInt32(cur, true);
+			const zv = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const nameLen = heap.getInt32(cur, true);
+			const nameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const name = decoder.decode(php.HEAP8.slice(cur, cur + nameLen));
+			const name = decoder.decode(php.HEAPU8.slice(cur, cur + nameLen));
 			cur += nameLen + 1;
 
 			symbols[name] = php.zvalToJS(zv);
@@ -377,8 +378,8 @@ export class PhpDbgNode extends PhpBase
 	{
 		const php = await this.binary;
 		const ptr = php.ccall('vrzno_dbg_dump_functions', NUM, [], [], {});
-		const heap = new DataView(php.HEAP8.buffer);
-		const end = ptr + heap.getInt32(ptr, true);
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
 		let cur = ptr + pointerLen;
 		const decoder = new TextDecoder;
@@ -386,19 +387,19 @@ export class PhpDbgNode extends PhpBase
 
 		while(cur < end)
 		{
-			const filenameLen = heap.getInt32(cur, true);
+			const filenameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const filename = decoder.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			const filename = decoder.decode(php.HEAPU8.slice(cur, cur + filenameLen));
 			cur += filenameLen + 1;
 
-			const lineNo = heap.getInt32(cur, true);
+			const lineNo = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const nameLen = heap.getInt32(cur, true);
+			const nameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const name = decoder.decode(php.HEAP8.slice(cur, cur + nameLen));
+			const name = decoder.decode(php.HEAPU8.slice(cur, cur + nameLen));
 			cur += nameLen + 1;
 
 			functions[name] = {name, filename, lineNo};
@@ -417,8 +418,8 @@ export class PhpDbgNode extends PhpBase
 	{
 		const php = await this.binary;
 		const ptr = php.ccall('vrzno_dbg_dump_classes', NUM, [], [], {});
-		const heap = new DataView(php.HEAP8.buffer);
-		const end = ptr + heap.getInt32(ptr, true);
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
 		let cur = ptr + pointerLen;
 		const decoder = new TextDecoder;
@@ -426,19 +427,19 @@ export class PhpDbgNode extends PhpBase
 
 		while(cur < end)
 		{
-			const filenameLen = heap.getInt32(cur, true);
+			const filenameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const filename = decoder.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			const filename = decoder.decode(php.HEAPU8.slice(cur, cur + filenameLen));
 			cur += filenameLen + 1;
 
-			const lineNo = heap.getInt32(cur, true);
+			const lineNo = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const nameLen = heap.getInt32(cur, true);
+			const nameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const name = decoder.decode(php.HEAP8.slice(cur, cur + nameLen));
+			const name = decoder.decode(php.HEAPU8.slice(cur, cur + nameLen));
 			cur += nameLen + 1;
 
 			functions[name] = {name, filename, lineNo};
@@ -457,8 +458,8 @@ export class PhpDbgNode extends PhpBase
 	{
 		const php = await this.binary;
 		const ptr = php.ccall('vrzno_dbg_dump_files', NUM, [], [], {});
-		const heap = new DataView(php.HEAP8.buffer);
-		const end = ptr + heap.getInt32(ptr, true);
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
 		let cur = ptr + pointerLen;
 		const decoder = new TextDecoder;
@@ -466,10 +467,10 @@ export class PhpDbgNode extends PhpBase
 
 		while(cur < end)
 		{
-			const filenameLen = heap.getInt32(cur, true);
+			const filenameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const filename = decoder.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			const filename = decoder.decode(php.HEAPU8.slice(cur, cur + filenameLen));
 			cur += filenameLen + 1;
 
 			files.push(filename);
@@ -488,8 +489,8 @@ export class PhpDbgNode extends PhpBase
 	{
 		const php = await this.binary;
 		const ptr = php.ccall('vrzno_dbg_dump_backtrace', NUM, [], [], {});
-		const heap = new DataView(php.HEAP8.buffer);
-		const end = ptr + heap.getInt32(ptr, true);
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
 		let cur = ptr + pointerLen;
 		const decoder = new TextDecoder;
@@ -498,13 +499,13 @@ export class PhpDbgNode extends PhpBase
 
 		while(cur < end)
 		{
-			const filenameLen = heap.getInt32(cur, true);
+			const filenameLen = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			const filename = decoder.decode(php.HEAP8.slice(cur, cur + filenameLen));
+			const filename = decoder.decode(php.HEAPU8.slice(cur, cur + filenameLen));
 			cur += filenameLen + 1;
 
-			const lineNo = heap.getInt32(cur, true);
+			const lineNo = heap.getUint32(cur, true);
 			cur += pointerLen;
 
 			frames.push({filename, lineNo, frame: index});

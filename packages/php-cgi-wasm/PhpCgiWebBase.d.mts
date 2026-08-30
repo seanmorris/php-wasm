@@ -1,4 +1,4 @@
-import type { PhpCgiRuntimeArgs, PhpRuntimeValue } from './public';
+import type { PhpCgiRuntimeArgs, PhpRuntimeValue } from './public.d.ts';
 import { PhpCgiBase } from './PhpCgiBase.mjs';
 
 export class PhpCgiWebBase extends PhpCgiBase {

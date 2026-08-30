@@ -18,10 +18,12 @@ WITH_MBSTRING=dynamic
 endif
 
 ifeq (${WITH_MBSTRING},static)
-CONFIGURE_FLAGS+= --with-mbstring
+CONFIGURE_FLAGS+= --enable-mbstring
+TEST_LIST+=$(shell ls packages/mbstring/test/*.mjs)
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)
+TEST_LIST+=$(shell ls packages/mbstring/test/*.mjs)
 EXTRA_MODULES+= packages/mbstring/php${PHP_VERSION}-mbstring.so
 endif
 
@@ -41,13 +43,11 @@ endif
 
 ifeq (${WITH_ONIGURUMA},static)
 ARCHIVES+= lib/lib/libonig.a
-CONFIGURE_FLAGS+= --with-onig
 SKIP_LIBS+= -lonig
 EXTRA_MODULES+= packages/mbstring/libonig.so
 endif
 
 ifeq (${WITH_ONIGURUMA},shared)
-CONFIGURE_FLAGS+= --with-onig
 PHP_CONFIGURE_DEPS+= packages/mbstring/libonig.so
 SHARED_LIBS+= packages/mbstring/libonig.so
 SKIP_LIBS+= -lonig

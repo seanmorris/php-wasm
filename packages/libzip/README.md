@@ -5,22 +5,24 @@
 ## Install
 
 ```sh
-npm install php-wasm php-wasm-libzip
+npm install php-wasm php-wasm-zlib php-wasm-libzip
 ```
 
 ## What It Loads
 
 The package resolves the active runtime version to `php8.x-zip.so` and bundles `libzip.so`.
+Load `php-wasm-zlib` ahead of it because libzip uses zlib for CRC and compression.
 
 ## Usage
 
 ```js
 import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import zlib from 'php-wasm-zlib';
 import zip from 'php-wasm-libzip';
 
 const php = new PhpWeb({
   version: '8.4',
-  sharedLibs: [zip],
+  sharedLibs: [zlib, zip],
 });
 
 await php.run(`<?php var_dump(extension_loaded('zip'));`);

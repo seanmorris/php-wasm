@@ -269,7 +269,13 @@ export default function InstallDemo()
 							updateMessage(`Unpacking ${selectedFramework.file}...`);
 
 							const onComplete = async (exitCode) => {
-								if(exitCode !== 0) return;
+								if(exitCode !== 0)
+								{
+									updateMessage(
+										`Could not unpack ${selectedFramework.file} (PHP CLI exited with code ${exitCode}).`
+									);
+									return;
+								}
 								if(selectedFramework.sql)
 								{
 									updateMessage('Setting up PostgreSQL...');

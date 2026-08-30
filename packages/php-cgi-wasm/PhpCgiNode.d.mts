@@ -1,4 +1,4 @@
-import type { PhpCgiRuntimeArgs, RuntimeRequest } from './public';
+import type { PhpCgiRuntimeArgs, RuntimeRequest } from './public.d.ts';
 import { PhpCgiBase } from './PhpCgiBase.mjs';
 
 export class PhpCgiNode extends PhpCgiBase {

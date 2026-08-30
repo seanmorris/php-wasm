@@ -215,6 +215,10 @@ jobs:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
         testType: ['node', 'deno']
         libType: ['dynamic']
+        include:
+          - phpVersion: '8.3'
+            testType: bun
+            libType: dynamic
     uses: ./.github/workflows/test-node-step.yaml
     with:
       artifactPattern: php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}

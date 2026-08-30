@@ -18,9 +18,10 @@ const defaultVariant = '';
 const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
 	? runtime
 	: {default: runtime};
+const isBun = typeof process !== 'undefined' && Boolean(process.versions?.bun);
 
 const loadRuntime = specifier => {
-	if(typeof require === 'function')
+	if(typeof require === 'function' && !isBun)
 	{
 		return Promise.resolve(
 			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))

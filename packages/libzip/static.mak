@@ -49,6 +49,11 @@ third_party/libzip/.gitignore:
 
 lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding LibZip\e[0m"
+	# Emscripten 6 no longer exports hidden symbols from a SIDE_MODULE. Libzip
+	# defaults its static target to hidden visibility, so expose its API before
+	# converting the archive to libzip.so below.
+	${DOCKER_RUN_IN_LIBZIP} sed -i 's/set(CMAKE_C_VISIBILITY_PRESET hidden)/set(CMAKE_C_VISIBILITY_PRESET default)/' lib/CMakeLists.txt
+	${DOCKER_RUN_IN_LIBZIP} grep -q 'set(CMAKE_C_VISIBILITY_PRESET default)' lib/CMakeLists.txt
 	${DOCKER_RUN_IN_LIBZIP} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DBUILD_SHARED_LIBS=OFF \

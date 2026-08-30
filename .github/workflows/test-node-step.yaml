@@ -53,9 +53,17 @@ jobs:
         run: docker compose version
 
       - name: npm install
-        run: |
-          npm ci
-          npm install -g deno@2.5.6
+        run: npm ci
+
+      - name: Install Deno
+        if: ${{ inputs.testType == 'deno' }}
+        run: npm install -g deno@2.5.6
+
+      - name: Install Bun
+        if: ${{ inputs.testType == 'bun' }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
 
       - name: Download Artifact
         uses: actions/download-artifact@v8

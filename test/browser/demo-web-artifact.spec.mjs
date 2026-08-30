@@ -107,6 +107,26 @@ test('select framework service worker serves CGI', async ({ page }) => {
 	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
 });
 
+test('CodeIgniter 4 installs through ZipArchive and runs through CGI', async ({ page }) => {
+	test.setTimeout(600000);
+
+	const runtimeFailures = [];
+
+	page.on('pageerror', error => runtimeFailures.push(error.message));
+
+	await page.goto('install-demo.html?framework=codeigniter-4', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/\/php-wasm\/cgi-bin\/codeigniter-4\/?$/, {
+		timeout: 540000
+	});
+	await expect(page.locator('body')).toContainText('Welcome to CodeIgniter', {
+		timeout: 180000
+	});
+	expect(runtimeFailures).toEqual([]);
+});
+
 test('Drupal 11.4.5 installs and runs through the existing CGI service-worker route', async ({ page }) => {
 	test.setTimeout(600000);
 
@@ -131,10 +151,19 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 	await expect(welcomeMessage).toContainText('Password: admin');
 
 	const loginLink = welcomeMessage.getByRole('link', { name: 'Log in' });
+	const editLink = welcomeMessage.getByRole('link', {
+		name: 'Click here to edit this template!'
+	});
+	const editUrl = new URL(await editLink.getAttribute('href'), page.url());
 
 	expect(new URL(await loginLink.getAttribute('href'), page.url()).pathname).toBe(
 		'/php-wasm/cgi-bin/drupal/user/login'
 	);
+	expect(editUrl.pathname).toBe('/php-wasm/code-editor.html');
+	expect(editUrl.searchParams.get('path')).toBe(
+		'/persist/drupal-11.4.5/web/core/themes/olivero/templates/includes/get-started.html.twig'
+	);
+	expect(await editLink.getAttribute('target')).toBe('_blank');
 
 	const stylesheet = page.locator('link[rel="stylesheet"][href]').first();
 	const image = page.locator('img[src], link[rel~="icon"][href]').first();
@@ -180,6 +209,7 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 		'a[href^="/"]'
 		, ':not([href^="//"])'
 		, `:not([href^="${drupalAssetPrefix}"])`
+		, ':not([href^="/php-wasm/code-editor.html"])'
 	].join(''));
 
 	await expect(rootRelativeLinks).toHaveCount(0);
@@ -226,10 +256,19 @@ test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async
 
 	const wordpressPrefix = '/php-wasm/cgi-bin/wordpress/';
 	const loginLink = welcomeMessage.getByRole('link', { name: 'Log in' });
+	const editLink = welcomeMessage.getByRole('link', {
+		name: 'Click here to edit this welcome message!'
+	});
+	const editUrl = new URL(await editLink.getAttribute('href'), page.url());
 
 	expect(new URL(await loginLink.getAttribute('href'), page.url()).pathname).toBe(
 		`${wordpressPrefix}wp-login.php`
 	);
+	expect(editUrl.pathname).toBe('/php-wasm/code-editor.html');
+	expect(editUrl.searchParams.get('path')).toBe(
+		'/persist/wordpress-7.1/wp-content/mu-plugins/php-wasm-demo.php'
+	);
+	expect(await editLink.getAttribute('target')).toBe('_blank');
 
 	const assetUrls = {
 		stylesheet: `${wordpressPrefix}wp-includes/css/dashicons.min.css`
@@ -277,6 +316,7 @@ test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async
 
 			return url.origin === window.location.origin
 				&& url.pathname !== root
+				&& url.pathname !== '/php-wasm/code-editor.html'
 				&& !url.pathname.startsWith(prefix);
 		})
 	), wordpressPrefix);

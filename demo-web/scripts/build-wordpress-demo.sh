@@ -141,6 +141,7 @@ add_filter(
 			. '<p><strong>%1$s</strong></p>'
 			. '<p>%2$s</p>'
 			. '<p><strong>%3$s</strong> admin<br><strong>%4$s</strong> admin</p>'
+			. '<p><a class="php-wasm-demo-edit" target="_blank" href="/php-wasm/code-editor.html?path=%%2Fpersist%%2Fwordpress-7.1%%2Fwp-content%%2Fmu-plugins%%2Fphp-wasm-demo.php">%5$s</a></p>'
 			. '</div>',
 			esc_html__( 'WordPress 7.1 is running in the browser!', 'php-wasm-demo' ),
 			sprintf(
@@ -148,7 +149,8 @@ add_filter(
 				esc_url( wp_login_url( admin_url() ) )
 			),
 			esc_html__( 'Username:', 'php-wasm-demo' ),
-			esc_html__( 'Password:', 'php-wasm-demo' )
+			esc_html__( 'Password:', 'php-wasm-demo' ),
+			esc_html__( 'Click here to edit this welcome message!', 'php-wasm-demo' )
 		);
 
 		return $notice . $content;
