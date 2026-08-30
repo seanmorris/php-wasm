@@ -38,7 +38,8 @@ describe('InstallDemo', () => {
 		terminalProps.current = null;
 
 		bus = {
-			analyzePath: vi.fn(async () => ({exists: false}))
+			runtimeReady: vi.fn(async () => true)
+			, analyzePath: vi.fn(async () => ({exists: false}))
 			, getSettings: vi.fn(async () => ({vHosts: []}))
 			, writeFile: vi.fn(async () => undefined)
 			, setSettings: vi.fn(async () => undefined)
@@ -101,6 +102,7 @@ describe('InstallDemo', () => {
 
 	afterEach(() => {
 		vi.unstubAllGlobals();
+		vi.restoreAllMocks();
 		sessionStorage.clear();
 
 		if(originalServiceWorker === undefined)
@@ -217,6 +219,61 @@ describe('InstallDemo', () => {
 
 		await screen.findByText(
 			'Installer request "analyzePath" failed: Timed out waiting for a service worker reply after 5000ms.'
+		);
+	});
+
+	it('waits for the cold PHP runtime before using short filesystem RPC timeouts', async () => {
+		let markRuntimeReady;
+		const runtimeReady = new Promise(resolve => markRuntimeReady = resolve);
+
+		bus.runtimeReady.mockReturnValue(runtimeReady);
+
+		render(<InstallDemo />);
+
+		await screen.findByText('Starting PHP runtime...');
+		expect(bus.runtimeReady).toHaveBeenCalledTimes(1);
+		expect(bus.analyzePath).not.toHaveBeenCalled();
+
+		markRuntimeReady(true);
+
+		await waitFor(() => expect(bus.analyzePath).toHaveBeenCalledTimes(1));
+	});
+
+	it('surfaces service-worker startup state instead of waiting indefinitely', async () => {
+		const diagnostics = {
+			phase: 'ready'
+			, registration: {
+				installing: {state: 'redundant'}
+				, waiting: null
+				, active: null
+			}
+		};
+		const error = new Error(
+			'CGI service worker ready timed out after 15000ms (installing=redundant, waiting=none, active=none, controller=none).'
+		);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+		ensureServiceWorker.mockResolvedValue({
+			supported: true
+			, registered: true
+			, controlled: false
+			, controller: null
+			, controlSource: 'ready-timeout'
+			, error
+			, diagnostics
+		});
+
+		render(<InstallDemo />);
+
+		await screen.findByText(error.message);
+		expect(getPhpBus).not.toHaveBeenCalled();
+		expect(consoleError).toHaveBeenCalledWith(
+			'CGI service worker startup failed.'
+			, {
+				controlSource: 'ready-timeout'
+				, error
+				, diagnostics
+			}
 		);
 	});
 

@@ -133,3 +133,41 @@ test('CGI runtime failures return a non-cacheable 500 and refresh exactly once',
 		console.warn = originalWarn;
 	}
 });
+
+test('CGI control messages extend worker lifetime and reply with runtime initialization errors', async () => {
+	const cgi = Object.create(PhpCgiBase.prototype);
+	const messages = [];
+	const originalWarn = console.warn;
+	let lifetimeWork;
+
+	cgi.binary = Promise.reject(new Error('Wasm runtime failed to initialize'));
+	cgi.extraActions = {};
+	console.warn = () => undefined;
+
+	try
+	{
+		const work = cgi.handleMessageEvent({
+			data: {
+				action: 'analyzePath'
+				, token: 'startup-failure'
+				, params: ['/persist/site']
+			}
+			, source: {postMessage: message => messages.push(message)}
+			, waitUntil: pending => lifetimeWork = pending
+		});
+
+		assert.equal(lifetimeWork, work);
+		await work;
+	}
+	finally
+	{
+		console.warn = originalWarn;
+	}
+
+	assert.equal(messages.length, 1);
+	assert.equal(messages[0].re, 'startup-failure');
+	assert.equal(messages[0].result, undefined);
+	assert.equal(messages[0].error.name, 'Error');
+	assert.equal(messages[0].error.message, 'Wasm runtime failed to initialize');
+	assert.match(messages[0].error.stack, /Wasm runtime failed to initialize/);
+});

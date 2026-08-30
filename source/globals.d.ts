@@ -43,6 +43,10 @@ declare interface RuntimeLifecycleEvent {
 	waitUntil(promise: Promise<void>): void;
 }
 
+declare interface RuntimeMessageEvent extends MessageEvent {
+	waitUntil?(promise: Promise<void>): void;
+}
+
 declare interface RuntimeFetchEvent {
 	request: Request;
 	respondWith(response: Response | Promise<Response>): void;

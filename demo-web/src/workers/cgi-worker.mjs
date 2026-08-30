@@ -95,7 +95,8 @@ const notFound = request => {
 };
 
 const actions = {
-	runSql: (php, database, sql) => {
+	runtimeReady: () => true
+	, runSql: (php, database, sql) => {
 		console.log({database});
 		const pglite = new PGlite(database);
 		return pglite.query(sql);

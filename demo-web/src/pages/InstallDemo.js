@@ -77,7 +77,8 @@ const informOpener = (selectedFrameworkName) => {
 const serviceWorkerRetryKey = 'php-wasm-install-demo-service-worker-retry';
 const serviceWorkerReloadDelayMs = 500;
 const installerRpcTimeouts = {
-	analyzePath: 5000
+	runtimeReady: 180000
+	, analyzePath: 5000
 	, writeFile: 30000
 	, getSettings: 10000
 	, setSettings: 10000
@@ -183,15 +184,33 @@ export default function InstallDemo()
 
 					if(!serviceWorker.controlled)
 					{
+						console.error('CGI service worker startup failed.', {
+							controlSource: serviceWorker.controlSource
+							, error: serviceWorker.error
+							, diagnostics: serviceWorker.diagnostics
+						});
+
 						if(serviceWorker.controlSource === 'error')
 						{
-							updateMessage('Failed to register the CGI service worker for the installer popup.');
+							updateMessage(
+								serviceWorker.error?.message
+								?? 'Failed to register the CGI service worker for the installer popup.'
+							);
 							return;
 						}
 
 						if(serviceWorker.controlSource === 'unsupported')
 						{
 							updateMessage('This browser does not support service workers for the installer popup.');
+							return;
+						}
+
+						if(serviceWorker.controlSource.endsWith('-timeout'))
+						{
+							updateMessage(
+								serviceWorker.error?.message
+								?? 'The CGI service worker timed out during startup.'
+							);
 							return;
 						}
 
@@ -220,6 +239,9 @@ export default function InstallDemo()
 					}
 
 					const selectedFramework = packages[selectedFrameworkName];
+
+						updateMessage('Starting PHP runtime...');
+						await sendInstallMessage(bus, 'runtimeReady');
 
 						updateMessage('Downloading init script...');
 						const initPhpCode = await (await fetch(basePath('scripts/init.php'))).text();

@@ -38,6 +38,42 @@ const putEnv = (php, key, value) => php.ccall(
 
 const requestTimes = new WeakMap;
 
+/**
+ * Converts thrown runtime values into structured-clone-safe RPC errors.
+ * @param {unknown} error Value thrown while starting or handling the runtime.
+ * @returns {object} Serializable error details for the RPC response.
+ */
+const serializeMessageError = error => {
+	if(error && typeof error === 'object')
+	{
+		const serialized = {};
+
+		for(const property of ['name', 'message', 'stack', 'code'])
+		{
+			if(property in error && error[property] !== undefined)
+			{
+				serialized[property] = String(error[property]);
+			}
+		}
+
+		try
+		{
+			Object.assign(serialized, JSON.parse(JSON.stringify(error)));
+		}
+		catch
+		{
+			// Error details collected above are sufficient when custom fields are circular.
+		}
+
+		if(Object.keys(serialized).length)
+		{
+			return serialized;
+		}
+	}
+
+	return {message: String(error)};
+};
+
 const noTrailingSlash = s => s.slice(-1) !== '/' ? s : s.slice(0, -1);
 const noLeadingSlash = s => s.slice(0, 1) !== '/' ? s : s.slice(1);
 const joinPaths = (...args) => [
@@ -424,10 +460,24 @@ export class PhpCgiBase
 
 	/**
 	 * Handles control messages sent to the CGI runtime.
-	 * @param {MessageEvent} event Message event carrying a control action.
+	 * @param {RuntimeMessageEvent} event Message event carrying a control action.
 	 * @returns {Promise<void>} Resolves after the action response has been posted back.
 	 */
-	async handleMessageEvent(event)
+	handleMessageEvent(event)
+	{
+		const work = this._handleMessageEvent(event);
+
+		event.waitUntil?.(work);
+
+		return work;
+	}
+
+	/**
+	 * Runs one control action after the runtime has initialized.
+	 * @param {RuntimeMessageEvent} event Message event carrying a control action.
+	 * @returns {Promise<void>} Resolves after the action response has been posted back.
+	 */
+	async _handleMessageEvent(event)
 	{
 		const { data, source } = event;
 		const { action, token, params = [] } = data;
@@ -451,45 +501,34 @@ export class PhpCgiBase
 			, 'storeInit'
 		];
 
-		await this.binary;
+		const builtInAction = actions.includes(action);
+		const extraAction = action in this.extraActions;
 
-		if(actions.includes(action))
+		if(!builtInAction && !extraAction)
 		{
-			let result, error;
-
-			try
-			{
-				result = await this[action](...params);
-			}
-			catch(_error)
-			{
-				error = JSON.parse(JSON.stringify(_error));
-				console.warn(_error);
-			}
-			finally
-			{
-				if(action === 'refresh') result = !!result;
-
-				source.postMessage({re: token, result, error});
-			}
+			return;
 		}
-		else if(action in this.extraActions)
-		{
-			let result, error;
 
-			try
-			{
-				result = await this.extraActions[action](this, ...params);
-			}
-			catch(_error)
-			{
-				error = JSON.parse(JSON.stringify(_error));
-				console.warn(_error);
-			}
-			finally
-			{
-				source.postMessage({re: token, result, error});
-			}
+		let result, error;
+
+		try
+		{
+			await this.binary;
+
+			result = builtInAction
+				? await this[action](...params)
+				: await this.extraActions[action](this, ...params);
+		}
+		catch(_error)
+		{
+			error = serializeMessageError(_error);
+			console.warn(_error);
+		}
+		finally
+		{
+			if(action === 'refresh') result = !!result;
+
+			source.postMessage({re: token, result, error});
 		}
 	}
 

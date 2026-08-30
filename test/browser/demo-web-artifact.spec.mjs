@@ -107,6 +107,66 @@ test('select framework service worker serves CGI', async ({ page }) => {
 	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
 });
 
+test('framework chooser popup acquires service-worker control from a cross-origin iframe', async ({ page }) => {
+	const startupFailures = [];
+
+	await page.goto('home.html?no-service-worker', {waitUntil: 'domcontentloaded'});
+
+	const demoUrl = new URL(page.url());
+	const wrapperUrl = new URL(demoUrl);
+
+	wrapperUrl.hostname = 'localhost';
+	await page.goto(wrapperUrl.toString(), {waitUntil: 'domcontentloaded'});
+
+	const chooserUrl = new URL('select-framework.html?iframed=1&no-service-worker=1', demoUrl);
+
+	await page.evaluate(src => {
+		const iframe = document.createElement('iframe');
+
+		iframe.src = src;
+		iframe.title = 'Cross-origin framework chooser';
+		document.body.replaceChildren(iframe);
+	}, chooserUrl.toString());
+
+	const chooser = page.frameLocator('iframe[title="Cross-origin framework chooser"]');
+
+	await expect(chooser.getByRole('link', {name: 'Open Full Demo'})).toBeVisible();
+
+	const popupPromise = page.waitForEvent('popup');
+
+	await chooser.getByRole('link', {name: 'Open Full Demo'}).click();
+
+	const popup = await popupPromise;
+
+	popup.on('console', message => {
+		if(message.type() === 'error' && message.text().includes('service worker startup failed'))
+		{
+			startupFailures.push(message.text());
+		}
+	});
+
+	await expect.poll(
+		async () => popup.evaluate(
+			() => navigator.serviceWorker?.controller?.scriptURL ?? null
+		)
+		, {timeout: 180000}
+	).toContain('/php-wasm/cgi-worker.js');
+
+	await expect(popup).not.toHaveURL(/no-service-worker/);
+	await expect.poll(async () => popup.evaluate(() => ({
+		topLevel: window.top === window
+		, hasOpener: Boolean(window.opener)
+		, openerTopLevel: window.opener
+			? window.opener.top === window.opener
+			: null
+	}))).toEqual({
+		topLevel: true
+		, hasOpener: true
+		, openerTopLevel: false
+	});
+	expect(startupFailures).toEqual([]);
+});
+
 test('CodeIgniter 4 installs through ZipArchive and runs through CGI', async ({ page }) => {
 	test.setTimeout(600000);
 
