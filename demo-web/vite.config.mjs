@@ -156,4 +156,5 @@ export default defineConfig(() => ({
 		, globals: true
 		, setupFiles: './src/setupTests.js'
 	}
+	, server: { allowedHosts: ['php-wasm-tunnel.seanmorr.is'] }
 }));
