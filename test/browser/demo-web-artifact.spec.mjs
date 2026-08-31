@@ -67,6 +67,30 @@ test('cli preview runs a php script without Web Locks', async ({ page }) => {
 	await expect(page.getByText('Hello, World!')).toBeVisible({ timeout: 180000 });
 });
 
+test('interactive cli uses the active readline prompt', async ({ page }) => {
+	await page.goto('cli-preview.html?no-service-worker', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const input = page.locator('input[name="stdin"]');
+	const prompt = page.locator('.console-input span');
+	const stdinLines = page.locator('.console-output .line[data-type="stdin"]');
+	const output = page.locator('.console-output');
+
+	await expect(input).toBeEnabled({ timeout: 180000 });
+	await expect(prompt).toHaveText('php> ');
+	await input.fill('var_dump(readline("Enter your command: "));');
+	await input.press('Enter');
+
+	await expect(prompt).toHaveText('Enter your command: ');
+	await input.fill('asdadasd');
+	await input.press('Enter');
+
+	await expect(stdinLines.nth(1)).toHaveText('Enter your command: asdadasd');
+	await expect(output).toContainText('string(8) "asdadasd"');
+	await expect(prompt).toHaveText('php> ');
+});
+
 test('waitline demo accepts current prompts, Unicode, blank lines, and callbacks', async ({ page }) => {
 	await page.goto('waitline-preview.html?no-service-worker', {
 		waitUntil: 'domcontentloaded'
