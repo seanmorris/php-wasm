@@ -89,6 +89,9 @@ test('interactive cli uses the active readline prompt', async ({ page }) => {
 	await expect(stdinLines.nth(1)).toHaveText('Enter your command: asdadasd');
 	await expect(output).toContainText('string(8) "asdadasd"');
 	await expect(prompt).toHaveText('php> ');
+
+	const outputText = await output.textContent();
+	expect(outputText?.match(/Enter your command:/g)).toHaveLength(2);
 });
 
 test('waitline demo accepts current prompts, Unicode, blank lines, and callbacks', async ({ page }) => {

@@ -125,9 +125,9 @@ test('readline consumes php-cli-wasm line input, including Unicode and blank lin
 	assert.equal(output.stderr(), '');
 	assert.equal(
 		output.stdout()
-		, 'Prompt: string(10) "hello 🌍"\n'
-			+ 'Blank: string(0) ""\n'
-			+ 'Callback: string(13) "callback line"\n'
+		, 'string(10) "hello 🌍"\n'
+			+ 'string(0) ""\n'
+			+ 'string(13) "callback line"\n'
 	);
 	assert.deepEqual(lines, []);
 	assert.deepEqual(prompts, ['Prompt: ', 'Blank: ', 'Callback: ']);
