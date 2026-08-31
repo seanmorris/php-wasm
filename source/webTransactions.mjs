@@ -10,6 +10,43 @@
  * @property {boolean|Promise<void>} transactionStarted Tracks the currently active transaction, if any.
  */
 
+const fallbackLocks = new Map();
+
+/**
+ * Runs a callback while holding a named Web Lock when the API is available.
+ *
+ * Browsers without Web Locks use a FIFO lock scoped to the current JavaScript
+ * realm. This preserves in-page runtime serialization, but cannot coordinate
+ * filesystem access with other tabs or workers.
+ * @template T
+ * @param {string} name Lock name.
+ * @param {() => T|Promise<T>} callback Work to perform while holding the lock.
+ * @returns {Promise<T>} Resolves with the callback result after acquiring the lock.
+ */
+export function requestWebLock(name, callback)
+{
+	const lockManager = globalThis.navigator?.locks;
+
+	if(typeof lockManager?.request === 'function')
+	{
+		return lockManager.request(name, callback);
+	}
+
+	const previous = fallbackLocks.get(name) ?? Promise.resolve();
+	const operation = previous.then(callback);
+	const tail = operation.catch(() => undefined);
+
+	fallbackLocks.set(name, tail);
+	tail.then(() => {
+		if(fallbackLocks.get(name) === tail)
+		{
+			fallbackLocks.delete(name);
+		}
+	});
+
+	return operation;
+}
+
 /**
  * Starts a persisted filesystem transaction for a runtime wrapper.
  * @param {TransactionalWrapper} wrapper Runtime wrapper coordinating FS transactions.

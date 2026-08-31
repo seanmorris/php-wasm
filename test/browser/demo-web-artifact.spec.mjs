@@ -49,8 +49,15 @@ test('embedded php hello world runs', async ({ page }) => {
 	).toContain('Hello, World!');
 });
 
-test('cli preview runs a php script', async ({ page }) => {
+test('cli preview runs a php script without Web Locks', async ({ page }) => {
 	const code = encodeURIComponent('echo "Hello, World!";');
+
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, 'locks', {
+			configurable: true
+			, value: undefined
+		});
+	});
 
 	await page.goto(`cli-preview.html?code=${code}&no-service-worker`, {
 		waitUntil: 'domcontentloaded'
