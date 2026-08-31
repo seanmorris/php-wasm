@@ -9,6 +9,6 @@ CONFIGURE_FLAGS+= --enable-waitline
 DEPENDENCIES+= third_party/waitline/waitline.c
 CGI_DEPENDENCIES+= third_party/waitline/waitline.c
 # DBG_DEPENDENCIES+= third_party/waitline/waitline.c
-# TEST_LIST+=$(shell ls packages/waitline/test/*.mjs)
+TEST_LIST+=$(shell ls packages/waitline/test/*.mjs)
 endif
 
