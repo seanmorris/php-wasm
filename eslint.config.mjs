@@ -36,6 +36,7 @@ const definedTypes = [
 	'PhpVhostList',
 	'RuntimeFetchEvent',
 	'RuntimeLifecycleEvent',
+	'RuntimeMessageEvent',
 	'RuntimeRequest'
 ];
 

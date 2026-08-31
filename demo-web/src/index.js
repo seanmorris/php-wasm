@@ -16,6 +16,17 @@ if(!params.has('no-service-worker'))
 
 		if(!serviceWorker.controlled)
 		{
+			console.error('CGI service worker startup failed.', {
+				controlSource: serviceWorker.controlSource
+				, error: serviceWorker.error
+				, diagnostics: serviceWorker.diagnostics
+			});
+
+			if(serviceWorker.controlSource !== 'timeout')
+			{
+				return;
+			}
+
 			console.log('No Service Worker Detected, Reloading...');
 			await new Promise(a => setTimeout(a, 500));
 			window.location.reload();

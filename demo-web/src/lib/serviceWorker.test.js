@@ -118,4 +118,111 @@ describe('ensureServiceWorker', () => {
 			, controlSource: 'timeout'
 		});
 	});
+
+	it('times out ready with serializable worker-state diagnostics', async () => {
+		vi.useFakeTimers();
+
+		let onStateChange;
+		const installing = {
+			scriptURL: '/php-wasm/cgi-worker.js'
+			, state: 'installing'
+			, addEventListener: vi.fn((eventName, listener) => {
+				if(eventName === 'statechange')
+				{
+					onStateChange = listener;
+				}
+			})
+			, removeEventListener: vi.fn()
+		};
+		const registration = {
+			scope: '/php-wasm/'
+			, installing
+			, waiting: null
+			, active: null
+			, addEventListener: vi.fn()
+			, removeEventListener: vi.fn()
+		};
+		const serviceWorker = {
+			controller: null
+			, register: vi.fn().mockResolvedValue(registration)
+			, getRegistration: vi.fn().mockResolvedValue(registration)
+			, ready: new Promise(() => {})
+			, addEventListener: vi.fn()
+			, removeEventListener: vi.fn()
+		};
+
+		Object.defineProperty(navigator, 'serviceWorker', {
+			configurable: true
+			, value: serviceWorker
+		});
+
+		const ensurePromise = ensureServiceWorker({startupTimeoutMs: 50});
+
+		await vi.advanceTimersByTimeAsync(0);
+		expect(onStateChange).toBeTypeOf('function');
+
+		installing.state = 'redundant';
+		onStateChange();
+		await vi.advanceTimersByTimeAsync(50);
+
+		const result = await ensurePromise;
+
+		expect(result).toMatchObject({
+			supported: true
+			, registered: true
+			, controlled: false
+			, controlSource: 'ready-timeout'
+			, diagnostics: {
+				phase: 'ready'
+				, registration: {
+					installing: {
+						scriptURL: '/php-wasm/cgi-worker.js'
+						, state: 'redundant'
+					}
+					, waiting: null
+					, active: null
+				}
+				, controller: null
+			}
+		});
+		expect(result.error).toMatchObject({
+			name: 'ServiceWorkerStartupTimeoutError'
+		});
+		expect(result.error.message).toContain('installing=redundant');
+		expect(result.diagnostics.transitions).toMatchObject([
+			{slot: 'installing', state: 'installing'}
+			, {slot: 'installing', state: 'redundant'}
+		]);
+	});
+
+	it('times out a registration call that never settles', async () => {
+		vi.useFakeTimers();
+
+		const serviceWorker = {
+			controller: null
+			, register: vi.fn(() => new Promise(() => {}))
+			, getRegistration: vi.fn()
+			, ready: new Promise(() => {})
+		};
+
+		Object.defineProperty(navigator, 'serviceWorker', {
+			configurable: true
+			, value: serviceWorker
+		});
+
+		const ensurePromise = ensureServiceWorker({startupTimeoutMs: 50});
+
+		await vi.advanceTimersByTimeAsync(50);
+
+		await expect(ensurePromise).resolves.toMatchObject({
+			registered: false
+			, controlled: false
+			, controlSource: 'register-timeout'
+			, diagnostics: {
+				phase: 'register'
+				, registration: null
+			}
+		});
+		expect(serviceWorker.getRegistration).not.toHaveBeenCalled();
+	});
 });
