@@ -109,8 +109,10 @@ test('readline consumes php-cli-wasm line input, including Unicode and blank lin
 	const php = createPhp({code});
 	const output = captureOutput(php);
 	const lines = ['hello 🌍', '', 'callback line'];
+	const prompts = [];
 
-	php.addEventListener('stdin-request', () => {
+	php.addEventListener('stdin-request', event => {
+		prompts.push(event.detail.prompt);
 		const line = lines.shift();
 
 		if(line !== undefined)
@@ -128,6 +130,7 @@ test('readline consumes php-cli-wasm line input, including Unicode and blank lin
 			+ 'Callback: string(13) "callback line"\n'
 	);
 	assert.deepEqual(lines, []);
+	assert.deepEqual(prompts, ['Prompt: ', 'Blank: ', 'Callback: ']);
 });
 
 test('the interactive CLI continues after a blank line and exits cleanly', {timeout: 10_000}, async () => {
@@ -139,8 +142,10 @@ test('the interactive CLI continues after a blank line and exits cleanly', {time
 		, 'echo "second\\n";'
 		, 'exit'
 	];
+	const prompts = [];
 
-	php.addEventListener('stdin-request', () => {
+	php.addEventListener('stdin-request', event => {
+		prompts.push(event.detail.prompt);
 		const line = lines.shift();
 
 		if(line !== undefined)
@@ -154,4 +159,5 @@ test('the interactive CLI continues after a blank line and exits cleanly', {time
 	assert.match(output.stdout(), /first\n/);
 	assert.match(output.stdout(), /second\n/);
 	assert.deepEqual(lines, []);
+	assert.deepEqual(prompts, [null, null, null, null]);
 });

@@ -315,7 +315,9 @@ export default forwardRef(function Debugger({
 
 		setCurrentFile && setCurrentFile(await php.currentFile());
 		setCurrentLine && setCurrentLine(await php.currentLine());
-		setPrompt(parser.toHtml(escapeHtml(await php.getPrompt())));
+		const currentPrompt = event.detail?.prompt ?? await php.getPrompt();
+
+		setPrompt(parser.toHtml(escapeHtml(currentPrompt)));
 		onStdIn && onStdIn(event);
 	});
 

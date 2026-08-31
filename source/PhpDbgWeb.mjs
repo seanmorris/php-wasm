@@ -59,7 +59,9 @@ export class PhpDbgWeb extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
-			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'));
+			php.triggerStdin = prompt => this.dispatchEvent(new CustomEvent('stdin-request', {
+				detail: {prompt: prompt ?? null}
+			}));
 			return php;
 		});
 	}

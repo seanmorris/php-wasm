@@ -1,8 +1,9 @@
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb } = vi.hoisted(() => {
+const { run, provideInput, addEventListener, removeEventListener, getLastInstance, PhpCliWeb } = vi.hoisted(() => {
 	const run = vi.fn().mockResolvedValue(0);
+	const provideInput = vi.fn().mockResolvedValue();
 	const addEventListener = vi.fn();
 	const removeEventListener = vi.fn();
 	const instances = [];
@@ -10,6 +11,7 @@ const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb }
 		this.listeners = new Map();
 		this.binary = Promise.resolve({});
 		this.run = run;
+		this.provideInput = provideInput;
 		this.addEventListener = (type, handler) => {
 			addEventListener(type, handler);
 			const handlers = this.listeners.get(type) || [];
@@ -26,6 +28,7 @@ const { run, addEventListener, removeEventListener, getLastInstance, PhpCliWeb }
 
 	return {
 		run
+		, provideInput
 		, addEventListener
 		, removeEventListener
 		, getLastInstance: () => instances.at(-1)
@@ -59,10 +62,12 @@ import Terminal from './Terminal';
 describe('Terminal', () => {
 	beforeEach(() => {
 		run.mockReset().mockResolvedValue(0);
+		provideInput.mockReset().mockResolvedValue();
 		addEventListener.mockClear();
 		removeEventListener.mockClear();
 		PhpCliWeb.mockClear();
 		HTMLElement.prototype.scrollTo = vi.fn();
+		HTMLElement.prototype.scrollIntoView = vi.fn();
 	});
 
 	it('renders runtime rejections and reports a failing exit code', async () => {
@@ -109,5 +114,41 @@ describe('Terminal', () => {
 		});
 
 		expect(run).toHaveBeenCalledTimes(1);
+	});
+
+	it('accepts line input for a scripted readline session', async () => {
+		render(
+			<Terminal
+				interactive = {false}
+				lineInput = {true}
+				inputPrompt = ""
+				code = {'readline("Prompt: ");'}
+			/>
+		);
+
+		const input = screen.getByRole('textbox');
+		expect(input).toBeDisabled();
+
+		await waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+
+		const terminal = getLastInstance();
+		const [onStdInRequest] = terminal.listeners.get('stdin-request');
+
+		await act(async () => {
+			onStdInRequest(new CustomEvent('stdin-request', {
+				detail: {prompt: 'Prompt: '}
+			}));
+			await new Promise(resolve => setTimeout(resolve, 20));
+		});
+
+		const readyInput = screen.getByRole('textbox');
+
+		expect(readyInput).toBeEnabled();
+		expect(screen.getByText('Prompt:')).toBeInTheDocument();
+		fireEvent.change(readyInput, {target: {value: 'Grüße 🌍'}});
+		fireEvent.keyDown(readyInput, {key: 'Enter'});
+
+		await waitFor(() => expect(provideInput).toHaveBeenCalledWith('Grüße 🌍'));
+		expect(readyInput).toBeDisabled();
 	});
 });

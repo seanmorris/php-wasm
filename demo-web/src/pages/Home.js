@@ -140,6 +140,11 @@ function Home()
 
 				<h3><button onClick = { () => {setShowMore(!showMore);}} className='square'><img src = {showMore ? upIcon : downIcon} alt = "" /></button><span onClick = { () => {setShowMore(!showMore);}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
+					<a target = "_blank" href = {basePath('waitline-preview.html')} className="icon-box" rel="noreferrer">
+						<img src = {cmdIcon} alt = "waitline Readline Test" />
+						<span>waitline / Readline Test</span>
+					</a>
+
 					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box" rel="noreferrer">
 						<img src = {cmdIcon} alt = "PHP-CLI Preview" />
 						<span>PHP-CLI Preview</span>

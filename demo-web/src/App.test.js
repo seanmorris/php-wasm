@@ -38,6 +38,10 @@ vi.mock('./pages/VSCodeEditor', () => ({
 	default: () => React.createElement('div', null, 'VSCode Editor')
 }));
 
+vi.mock('./pages/WaitlinePreview', () => ({
+	default: () => React.createElement('div', null, 'Waitline Preview')
+}));
+
 import { AppRoutes } from './App';
 
 describe('AppRoutes', () => {
@@ -63,6 +67,18 @@ describe('AppRoutes', () => {
 		);
 
 		expect(screen.getByText('Install Demo')).toBeInTheDocument();
+	});
+
+	it('renders the waitline browser test entry', () => {
+		render(
+			React.createElement(
+				MemoryRouter
+				, { initialEntries: ['/waitline-preview.html'] }
+				, React.createElement(AppRoutes)
+			)
+		);
+
+		expect(screen.getByText('Waitline Preview')).toBeInTheDocument();
 	});
 
 	it.each([

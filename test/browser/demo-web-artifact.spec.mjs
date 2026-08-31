@@ -60,6 +60,35 @@ test('cli preview runs a php script', async ({ page }) => {
 	await expect(page.getByText('Hello, World!')).toBeVisible({ timeout: 180000 });
 });
 
+test('waitline demo accepts current prompts, Unicode, blank lines, and callbacks', async ({ page }) => {
+	await page.goto('waitline-preview.html?no-service-worker', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const input = page.locator('input[name="stdin"]');
+	const prompt = page.locator('.console-input span');
+	const output = page.locator('.console-output');
+
+	await expect(input).toBeEnabled({ timeout: 180000 });
+	await expect(output).toContainText('API: 13/13 functions');
+	await expect(prompt).toHaveText('1/3 Unicode input (try Grüße 🌍): ');
+	await input.fill('Grüße 🌍');
+	await input.press('Enter');
+
+	await expect(prompt).toHaveText('2/3 Blank input (press Enter): ');
+	await input.fill('');
+	await input.press('Enter');
+
+	await expect(prompt).toHaveText('3/3 Callback input: ');
+	await input.fill('callback line');
+	await input.press('Enter');
+
+	await expect(output).toContainText(
+		'PASS: waitline input and readline compatibility are working.'
+	);
+	await expect(page.locator('[data-status]').last()).toHaveText('0');
+});
+
 test('debug preview boots php-dbg', async ({ page }) => {
 	await page.goto('dbg-preview.html?path=/preload/test_www/hello-world.php&no-service-worker', {
 		waitUntil: 'domcontentloaded'

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 vi.mock('../components/Header', () => ({
 	default: function HeaderMock() {
@@ -29,5 +29,14 @@ describe('Home', () => {
 
 		expect(within(frameworkLink).getByRole('img', {name: 'WordPress logo'})).toBeInTheDocument();
 		expect(frameworkLink).toHaveAttribute('href', '/select-framework.html');
+	});
+
+	it('links to the waitline browser test', () => {
+		render(<Home />);
+
+		fireEvent.click(screen.getByText('More...'));
+
+		expect(screen.getByRole('link', {name: /waitline \/ Readline Test/}))
+			.toHaveAttribute('href', '/waitline-preview.html');
 	});
 });

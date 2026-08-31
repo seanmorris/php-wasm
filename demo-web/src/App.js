@@ -13,6 +13,7 @@ import InstallDemo from './pages/InstallDemo';
 import MultiIframeTest from './pages/MultiIframeTest';
 import SelectFramework from './pages/SelectFramework';
 import VSCodeEditor from './pages/VSCodeEditor';
+import WaitlinePreview from './pages/WaitlinePreview';
 import { basePath, routerBase } from './lib/runtimePaths';
 
 /**
@@ -26,6 +27,7 @@ export function AppRoutes()
 		<Route path = "/embedded-php.html" element = { <Embedded /> } />
 		<Route path = "/dbg-preview.html" element = { <DbgPreview /> } />
 		<Route path = "/cli-preview.html" element = { <CliPreview /> } />
+		<Route path = "/waitline-preview.html" element = { <WaitlinePreview /> } />
 		<Route path = "/select-framework.html" element = { <SelectFramework /> } />
 		<Route path = "/install-demo.html" element = { <InstallDemo /> } />
 		<Route path = "/code-editor.html" element = { <Editor /> } />
