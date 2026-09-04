@@ -131,6 +131,29 @@ test('embedded php hello world runs', async ({ page }) => {
 	).toContain('Hello, World!');
 });
 
+test('Curvature demo serializes the bridged form value', async ({ page }) => {
+	const runtimeFailures = [];
+
+	page.on('pageerror', error => runtimeFailures.push(error.message));
+
+	await page.goto(`embedded-php.html?demo=curvature.php&version=${version}&extensionFlags=0&no-service-worker`, {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page.locator('[data-status]')).toHaveText('php-wasm ready!', {
+		timeout: 180000
+	});
+	await expect(page.locator('#example')).toContainText(
+		'PHP Serialized: a:2:{s:2:"id";s:0:"";s:4:"name";s:0:"";}'
+	);
+	await expect.poll(async () => (
+		(await page.locator('#example p').filter({hasText: 'JSON:'}).textContent())
+			.replace(/\s/g, '')
+	)).toBe('JSON:{"id":"","name":""}');
+	await expect(page.locator('.stderr .scroller').last()).toBeEmpty();
+	expect(runtimeFailures).toEqual([]);
+});
+
 test('cli preview runs a php script without Web Locks', async ({ page }) => {
 	const code = encodeURIComponent('echo "Hello, World!";');
 
