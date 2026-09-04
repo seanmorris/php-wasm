@@ -136,6 +136,7 @@ declare module 'php-wasm/PhpBase' {
 			HEAPU8?: Uint8Array,
 			hasVrzno?: boolean,
 			zvalToJS?: Function,
+			consumeZval?: Function,
 			onRefresh?: Set<Function>,
 			FS?: {
 				syncfs?: (populate: boolean, callback: (error?: Error) => void) => void

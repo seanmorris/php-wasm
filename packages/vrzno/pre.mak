@@ -2,7 +2,8 @@
 WITH_VRZNO?=1
 
 ifeq (${WITH_VRZNO},1)
-VRZNO_BRANCH?=master
+VRZNO_REPOSITORY?=https://github.com/seanmorris/vrzno.git
+VRZNO_REF?=2090b1579197b042f822bd0158c9527a20e1f959
 EXTRA_FLAGS+= -D WITH_VRZNO=1
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4 # third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 CONFIGURE_FLAGS+= --enable-vrzno
@@ -12,4 +13,3 @@ CGI_DEPENDENCIES+= third_party/vrzno/vrzno.c
 DBG_DEPENDENCIES+= third_party/vrzno/vrzno.c
 TEST_LIST+=$(shell ls packages/vrzno/test/*.mjs)
 endif
-

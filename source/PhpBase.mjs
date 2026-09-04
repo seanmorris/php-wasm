@@ -403,7 +403,7 @@ export class PhpBase extends EventTarget
 
 			code = `vrzno_zval( ${code} );`;
 
-			return phpModule.zvalToJS(await this.exec(code));
+			return phpModule.consumeZval(await this.exec(code));
 		}
 		else
 		{

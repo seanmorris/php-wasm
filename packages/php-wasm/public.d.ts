@@ -64,6 +64,7 @@ export interface PhpBinaryRuntime {
 	HEAPU8?: Int8Array;
 	hasVrzno?: boolean;
 	zvalToJS?: Function;
+	consumeZval?: Function;
 	onRefresh?: Set<Function>;
 	FS?: {
 		syncfs?: (populate: boolean, callback: (error?: Error) => void) => void;
