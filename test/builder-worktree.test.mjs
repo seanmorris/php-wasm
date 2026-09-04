@@ -267,6 +267,32 @@ test('node-cli-mjs output follows PHP_BUILDER_DIR package paths instead of the t
 	);
 });
 
+test('node-cli-mjs includes the base module required by PhpCliNode', t => {
+	const { workspaceDir, env } = createMakeWorkspace(t, 'php-wasm-builder-cli-base-');
+	const phpDistDir = path.join(workspaceDir, 'packages/php-cli-wasm');
+	const result = spawnSync(
+		'make',
+		[
+			'--no-print-directory'
+			, '--silent'
+			, 'PHP_VERSION=8.4'
+			, `PHP_BUILDER_DIR=${workspaceDir}`
+			, '--eval'
+			, "print-node-cli-mjs: ; @printf '%s\\n' '$(NODE_CLI_MJS)'"
+			, 'print-node-cli-mjs'
+		],
+		{
+			cwd: repoRoot
+			, encoding: 'utf8'
+			, env
+		}
+	);
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, new RegExp(escapeRegExp(path.join(phpDistDir, 'PhpBase.mjs'))));
+	assert.match(result.stdout, new RegExp(escapeRegExp(path.join(phpDistDir, 'PhpCliNode.mjs'))));
+});
+
 test('node-dbg-mjs output follows PHP_BUILDER_DIR package paths instead of the target root', t => {
 	const { workspaceDir, env } = createMakeWorkspace(t, 'php-wasm-builder-dbg-');
 	const target = path.join(workspaceDir, 'packages/php-dbg-wasm/PhpDbgNode.mjs');

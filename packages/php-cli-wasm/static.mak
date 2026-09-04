@@ -20,7 +20,7 @@ WORKER_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWorker.mjs php${PHP_SUFFIX
 WORKER_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliWorker.js php${PHP_SUFFIX}-cli-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliWebview.mjs php${PHP_SUFFIX}-cli-webview.mjs ${MJS_HELPERS_WEB})
 WEBVIEW_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliWebview.js php${PHP_SUFFIX}-cli-webview.js ${CJS_HELPERS_WEB})
-NODE_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpCliNode.mjs php${PHP_SUFFIX}-cli-node.mjs ${MJS_HELPERS_WEB})
+NODE_CLI_MJS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.mjs PhpCliNode.mjs php${PHP_SUFFIX}-cli-node.mjs ${MJS_HELPERS_WEB})
 NODE_CLI_JS=$(addprefix ${PHP_CLI_DIST_DIR}/,PhpBase.js PhpCliNode.js php${PHP_SUFFIX}-cli-node.js ${CJS_HELPERS})
 
 WEB_CLI_MJS_ASSETS= $(addprefix ${PHP_CLI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
