@@ -15,6 +15,7 @@ import SelectFramework from './pages/SelectFramework';
 import VSCodeEditor from './pages/VSCodeEditor';
 import WaitlinePreview from './pages/WaitlinePreview';
 import { basePath, routerBase } from './lib/runtimePaths';
+import { useVisualViewportProperties } from './lib/visualViewport';
 
 /**
  * Declares the route table used by the demo application.
@@ -101,6 +102,8 @@ export function AppRoutes()
  */
 export default function App()
 {
+	useVisualViewportProperties();
+
 	return <BrowserRouter basename = {routerBase}>
 		<AppRoutes />
 	</BrowserRouter>;

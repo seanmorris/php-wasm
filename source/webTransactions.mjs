@@ -8,9 +8,23 @@
  * @typedef {object} TransactionalWrapper
  * @property {Promise<PersistentPhpRuntime>} binary Deferred runtime instance used for transaction work.
  * @property {boolean|Promise<void>} transactionStarted Tracks the currently active transaction, if any.
+ * @property {PersistentPhpRuntime|null} [transactionRuntime] Runtime captured when the active transaction started.
  */
 
 const fallbackLocks = new Map();
+
+/**
+ * Clears transaction state if it still belongs to the supplied transaction.
+ * @param {TransactionalWrapper} wrapper Runtime wrapper coordinating FS transactions.
+ * @param {Promise<void>} transactionStarted Transaction whose state should be cleared.
+ */
+const clearTransaction = (wrapper, transactionStarted) => {
+	if(wrapper.transactionStarted === transactionStarted)
+	{
+		wrapper.transactionStarted = false;
+		wrapper.transactionRuntime = null;
+	}
+};
 
 /**
  * Runs a callback while holding a named Web Lock when the API is available.
@@ -54,6 +68,12 @@ export function requestWebLock(name, callback)
  */
 export async function startTransaction(wrapper)
 {
+	if(wrapper.transactionStarted)
+	{
+		await wrapper.transactionStarted;
+		return;
+	}
+
 	const php = await wrapper.binary;
 
 	if(!php.persist)
@@ -67,20 +87,42 @@ export async function startTransaction(wrapper)
 		return;
 	}
 
-	wrapper.transactionStarted = new Promise((accept, reject) => {
-		return php.FS.syncfs(true, error => {
+	let acceptStart, rejectStart;
+	const transactionStarted = new Promise((accept, reject) => {
+		acceptStart = accept;
+		rejectStart = reject;
+	});
+
+	wrapper.transactionRuntime = php;
+	wrapper.transactionStarted = transactionStarted;
+
+	try
+	{
+		php.FS.syncfs(true, error => {
 			if(error)
 			{
-				reject(error);
+				rejectStart(error);
 			}
 			else
 			{
-				accept();
+				acceptStart();
 			}
 		});
-	});
+	}
+	catch(error)
+	{
+		rejectStart(error);
+	}
 
-	return await wrapper.transactionStarted;
+	try
+	{
+		return await transactionStarted;
+	}
+	catch(error)
+	{
+		clearTransaction(wrapper, transactionStarted);
+		throw error;
+	}
 }
 
 /**
@@ -91,35 +133,52 @@ export async function startTransaction(wrapper)
  */
 export async function commitTransaction(wrapper, readOnly = false)
 {
-	const php = await wrapper.binary;
+	const transactionStarted = wrapper.transactionStarted;
 
-	if(!php.persist)
+	if(!transactionStarted)
 	{
-		return;
-	}
+		const php = await wrapper.binary;
 
-	if(!wrapper.transactionStarted)
-	{
+		if(!php.persist)
+		{
+			return;
+		}
+
 		throw new Error('No transaction initialized.');
 	}
 
-	if(readOnly)
+	const php = wrapper.transactionRuntime;
+
+	if(!php)
 	{
-		wrapper.transactionStarted = false;
-		return Promise.resolve();
+		clearTransaction(wrapper, transactionStarted);
+		throw new Error('No transaction initialized.');
 	}
 
-	return await new Promise((accept, reject) => {
-		return php.FS.syncfs(false, error => {
-			if(error)
-			{
-				reject(error);
-			}
-			else
-			{
-				wrapper.transactionStarted = false;
-				accept();
-			}
+	try
+	{
+		await transactionStarted;
+
+		if(readOnly)
+		{
+			return;
+		}
+
+		return await new Promise((accept, reject) => {
+			return php.FS.syncfs(false, error => {
+				if(error)
+				{
+					reject(error);
+				}
+				else
+				{
+					accept();
+				}
+			});
 		});
-	});
+	}
+	finally
+	{
+		clearTransaction(wrapper, transactionStarted);
+	}
 }

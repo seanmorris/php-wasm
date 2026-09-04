@@ -82,7 +82,7 @@ function Home()
 	}, [offset, scrollState]);
 
 	return (
-		<div className = "home">
+		<div className = "home viewport-page">
 			<div className='home-menu bevel'>
 				<Header />
 				<h2>Select a demo:</h2>

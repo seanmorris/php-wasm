@@ -151,7 +151,10 @@ export default function Terminal({
 			return;
 		}
 
-		timeout.current = setTimeout(() => stdIn.current.scrollIntoView(), 32);
+		timeout.current = setTimeout(() => stdIn.current.scrollIntoView({
+			block: 'nearest'
+			, inline: 'nearest'
+		}), 32);
 	}, []);
 
 	const focusInput = useCallback(() => {
@@ -163,7 +166,7 @@ export default function Terminal({
 
 		if(window.getSelection().toString() === '')
 		{
-			stdIn.current?.focus();
+			stdIn.current?.focus({preventScroll: true});
 		}
 	}, [acceptsInput, scrollToEnd]);
 
@@ -391,7 +394,7 @@ export default function Terminal({
 		}
 
 		await php.provideInput(inputValue);
-		stdIn.current?.focus();
+		stdIn.current?.focus({preventScroll: true});
 	}, [lineInput, localEcho, prompt, scrollToEnd]);
 
 	const checkEnter = async event => {

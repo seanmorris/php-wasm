@@ -2,11 +2,6 @@
 	display: flex;
 }
 
-.dbg-preview:not([data-iframed="1"]) {
-	width: calc(100% - 1rem);
-	height: calc(100dvh - 1rem);
-}
-
 .dbg-preview .warning {
 	filter: opacity(0.75) saturate(0.75);
 	color: #CCC;
@@ -309,4 +304,3 @@
 .phpdbg-panel.phpdbg-functions > div:active > span {
 	color: #999;
 }
-

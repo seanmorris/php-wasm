@@ -39,14 +39,21 @@ describe('InstallDemo', () => {
 
 		bus = {
 			runtimeReady: vi.fn(async () => true)
+			, awaitFilesystem: vi.fn(async () => true)
 			, analyzePath: vi.fn(async () => ({exists: false}))
 			, getSettings: vi.fn(async () => ({vHosts: []}))
+			, readFile: vi.fn(async path => new TextEncoder().encode(
+				path.endsWith('settings.php')
+					? '<?php // settings'
+					: '%2Fpersist%2Fdrupal-11.4.5%2Fweb'
+			))
 			, writeFile: vi.fn(async () => undefined)
+			, unlink: vi.fn(async () => undefined)
 			, setSettings: vi.fn(async () => undefined)
 			, storeInit: vi.fn(async () => undefined)
 			, refresh: vi.fn(async () => undefined)
-			, execSql: vi.fn(async () => undefined)
-			, runSql: vi.fn(async () => undefined)
+			, replaceSql: vi.fn(async () => undefined)
+			, runSql: vi.fn(async () => ({rows: [{ready: true}]}))
 		};
 
 		getPhpBus.mockResolvedValue(bus);
@@ -71,6 +78,13 @@ describe('InstallDemo', () => {
 			{
 				return {
 					arrayBuffer: async () => new ArrayBuffer(8)
+				};
+			}
+
+			if(String(url).endsWith('/backups/drupal-11.4.5-pgsql.sql'))
+			{
+				return {
+					text: async () => 'CREATE TABLE drupal_demo (id integer);'
 				};
 			}
 
@@ -206,6 +220,213 @@ describe('InstallDemo', () => {
 				}
 			]
 		});
+	});
+
+	it('installs the Drupal PostgreSQL variant with matching files and database identity', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=pgsql');
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+		let installLockReleased = false;
+
+		navigator.locks.request.mock.results[0].value.then(() => {
+			installLockReleased = true;
+		});
+		await Promise.resolve();
+		expect(installLockReleased).toBe(false);
+
+		expect(bus.analyzePath).toHaveBeenCalledWith(
+			'/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		);
+		expect(bus.setSettings).not.toHaveBeenCalled();
+
+		await act(async () => {
+			await terminalProps.current.setExitCode(0);
+		});
+
+		const database = 'idb://host=drupal-11-pg18 dbname=postgres port=5432';
+		const settingsWrite = bus.writeFile.mock.calls.find(([path]) => (
+			path === '/persist/drupal-11.4.5-pgsql/web/sites/default/settings.php'
+		));
+		const templateWrite = bus.writeFile.mock.calls.find(([path]) => (
+			path.endsWith('/core/themes/olivero/templates/includes/get-started.html.twig')
+		));
+
+		expect(settingsWrite).toBeDefined();
+		expect(new TextDecoder().decode(settingsWrite[1])).toContain(
+			"'host' => 'drupal-11-pg18'"
+		);
+		expect(new TextDecoder().decode(settingsWrite[1])).toContain(
+			"'database' => 'postgres'"
+		);
+		expect(new TextDecoder().decode(settingsWrite[1])).toContain(
+			'set_time_limit(180);'
+		);
+		expect(templateWrite).toBeDefined();
+		expect(new TextDecoder().decode(templateWrite[1])).toContain(
+			'%2Fpersist%2Fdrupal-11.4.5-pgsql%2Fweb'
+		);
+		expect(fetchMock.mock.calls.some(([url]) => (
+			String(url).endsWith('/backups/drupal-11.4.5-pgsql.sql')
+		))).toBe(true);
+		expect(bus.replaceSql).toHaveBeenCalledWith(
+			database
+			, 'CREATE TABLE drupal_demo (id integer);'
+		);
+		expect(bus.runSql).not.toHaveBeenCalled();
+		expect(bus.setSettings).toHaveBeenCalledWith({
+			vHosts: [
+				{
+					pathPrefix: '/cgi-bin/drupal'
+					, directory: '/persist/drupal-11.4.5-pgsql/web'
+					, entrypoint: 'index.php'
+				}
+			]
+		});
+		const markerWrite = bus.writeFile.mock.calls.find(([path]) => (
+			path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		));
+
+		expect(markerWrite).toBeDefined();
+		expect(new TextDecoder().decode(markerWrite[1])).toBe('complete\n');
+		expect(bus.awaitFilesystem).toHaveBeenCalledTimes(1);
+		expect(bus.refresh).not.toHaveBeenCalled();
+		await waitFor(() => expect(installLockReleased).toBe(true));
+	});
+
+	it('keeps SQLite as the default Drupal backend', async () => {
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+
+		await act(async () => {
+			await terminalProps.current.setExitCode(0);
+		});
+
+		expect(bus.analyzePath).toHaveBeenCalledWith('/persist/drupal-11.4.5/web');
+		expect(bus.replaceSql).not.toHaveBeenCalled();
+	});
+
+	it('rejects an unsupported Drupal database option', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=mysql');
+
+		render(<InstallDemo />);
+
+		await screen.findByText('Invalid database selected.');
+		expect(bus.runtimeReady).not.toHaveBeenCalled();
+		expect(bus.analyzePath).not.toHaveBeenCalled();
+	});
+
+	it('rejects inherited object keys as Drupal database options', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=constructor');
+
+		render(<InstallDemo />);
+
+		await screen.findByText('Invalid database selected.');
+		expect(bus.runtimeReady).not.toHaveBeenCalled();
+		expect(bus.analyzePath).not.toHaveBeenCalled();
+	});
+
+	it('reactivates an existing PostgreSQL Drupal install before opening it', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=pgsql');
+		bus.analyzePath.mockResolvedValue({exists: true});
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(bus.awaitFilesystem).toHaveBeenCalledTimes(1));
+
+		expect(bus.refresh).not.toHaveBeenCalled();
+		expect(bus.runSql).toHaveBeenCalledWith(
+			'idb://host=drupal-11-pg18 dbname=postgres port=5432'
+			, expect.stringContaining("to_regclass('public.users_field_data')")
+		);
+		expect(bus.setSettings).toHaveBeenCalledWith({
+			vHosts: [
+				{
+					pathPrefix: '/cgi-bin/drupal'
+					, directory: '/persist/drupal-11.4.5-pgsql/web'
+					, entrypoint: 'index.php'
+				}
+			]
+		});
+		expect(terminalProps.current).toBeNull();
+		expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('.zip'))).toBe(false);
+	});
+
+	it('reinstalls PostgreSQL when a restored marker has no matching database', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=pgsql');
+		bus.analyzePath.mockResolvedValue({exists: true});
+		bus.runSql.mockResolvedValue({rows: [{ready: false}]});
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+
+		expect(bus.unlink).toHaveBeenCalledWith(
+			'/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		);
+		expect(fetchMock.mock.calls.some(([url]) => (
+			String(url).endsWith('/backups/drupal-11.4.5.zip')
+		))).toBe(true);
+		expect(bus.setSettings).not.toHaveBeenCalled();
+	});
+
+	it('surfaces a PostgreSQL import failure without refreshing CGI', async () => {
+		window.history.pushState({}, '', '/install-demo.html?framework=drupal-11&database=pgsql');
+		bus.replaceSql.mockRejectedValue({
+			action: 'replaceSql'
+			, error: 'Could not import the Drupal snapshot.'
+		});
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+		await act(async () => {
+			await terminalProps.current.setExitCode(0);
+		});
+
+		await screen.findByText(
+			'Installer request "replaceSql" failed: Could not import the Drupal snapshot.'
+		);
+		expect(bus.writeFile.mock.calls.some(([path]) => (
+			path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		))).toBe(false);
+		expect(bus.setSettings).not.toHaveBeenCalled();
+		expect(bus.refresh).not.toHaveBeenCalled();
+	});
+
+	it('clears an existing PostgreSQL marker before a failed overwrite', async () => {
+		window.history.pushState(
+			{}
+			, ''
+			, '/install-demo.html?framework=drupal-11&database=pgsql&overwrite=true'
+		);
+		bus.analyzePath.mockResolvedValue({exists: true});
+		bus.replaceSql.mockRejectedValue({
+			action: 'replaceSql'
+			, error: 'Could not import the Drupal snapshot.'
+		});
+
+		render(<InstallDemo />);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+		expect(bus.unlink).toHaveBeenCalledWith(
+			'/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		);
+		expect(bus.runSql).not.toHaveBeenCalled();
+
+		await act(async () => {
+			await terminalProps.current.setExitCode(0);
+		});
+
+		await screen.findByText(
+			'Installer request "replaceSql" failed: Could not import the Drupal snapshot.'
+		);
+		expect(bus.writeFile.mock.calls.some(([path]) => (
+			path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		))).toBe(false);
+		expect(bus.setSettings).not.toHaveBeenCalled();
 	});
 
 	it('surfaces analyzePath failures instead of hanging on the status text', async () => {

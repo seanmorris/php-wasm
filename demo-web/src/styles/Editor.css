@@ -4,6 +4,11 @@
 	align-self: stretch;
 }
 
+.editor.viewport-page {
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+
 .editor > .bevel {
 	display: flex;
 	flex-direction: column;

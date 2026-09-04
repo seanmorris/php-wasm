@@ -122,7 +122,7 @@ export default function WaitlinePreview()
 		<div className = "row start toolbar" data-status>{exitCode}</div>
 	</div>);
 
-	return (<div className = "dbg-preview waitline-preview margined">
+	return (<div className = "dbg-preview waitline-preview viewport-page margined">
 		<div className = "bevel column">
 			{topBar}
 			<div className = "inset frame">

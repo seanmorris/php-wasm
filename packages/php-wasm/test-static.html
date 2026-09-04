@@ -3,10 +3,10 @@
         <script async type = "module" src = "./php-tags.mjs"></script>
         <script type = "text/php" data-stdout = "#output" data-stderr = "#error"
         data-imports = '{
-            "https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js": ["PGlite"]
+            "https://cdn.jsdelivr.net/npm/@electric-sql/pglite@0.5.8/dist/index.js": ["PGlite"]
         }'><?php
             //phpinfo();
-            $pdo = new PDO('pgsql:idb-storage');
+            $pdo = new PDO('pgsql:idb://pdo-pglite-pg18');
             $stm = $pdo->prepare('SELECT * FROM pg_catalog.pg_tables WHERE schemaname = :schema');
             $out = fopen('php://stdout', 'w');
             $stm->execute([

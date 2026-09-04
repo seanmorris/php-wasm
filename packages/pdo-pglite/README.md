@@ -8,11 +8,12 @@ It does not expose a separate JavaScript entrypoint from this folder. At runtime
 ## Requirements
 
 `pdo_pglite` requires PHP 8.1 or newer.
+Custom builds must also keep the Vrzno extension enabled (`WITH_VRZNO=1`).
 
 ## Install
 
 ```sh
-npm install php-wasm pdo-pglite @electric-sql/pglite
+npm install php-wasm pdo-pglite @electric-sql/pglite@^0.5.8
 ```
 
 ## Usage
@@ -27,10 +28,21 @@ const php = new PhpWeb({
 });
 
 await php.run(`<?php
-  $pdo = new PDO('pgsql:idb-storage');
+  $pdo = new PDO('pgsql:idb://pdo-pglite-pg18');
   var_dump($pdo instanceof PDO);
 `);
 ```
+
+## Upgrading Persisted Databases
+
+PGlite 0.5 uses PostgreSQL 18. A database directory created by PGlite 0.2
+(PostgreSQL 16) cannot be opened in place. Export it logically with the old
+PGlite version, restore it into a new database name such as
+`idb://pdo-pglite-pg18`, and switch the PDO DSN only after the restore.
+Do not copy a `dumpDataDir()` archive between these PostgreSQL versions.
+
+See the [PGlite upgrade guide](https://pglite.dev/docs/upgrade) and
+[PGlite tools documentation](https://pglite.dev/docs/pglite-tools).
 
 ## Custom Builds
 

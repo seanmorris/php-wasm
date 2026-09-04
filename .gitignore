@@ -2,6 +2,7 @@
 .env
 .env*
 configured
+persist/
 
 .cache/
 /docs/

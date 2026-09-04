@@ -496,7 +496,7 @@ export default function Editor()
 	const handleLeave = () => openDbg.current?.leave();
 
 	return (
-		<div className = "editor" data-show-left = {showLeft}>
+		<div className = "editor viewport-page" data-show-left = {showLeft}>
 			<div className='bevel'>
 				<Header />
 				<div className = "row toolbar inset tight">

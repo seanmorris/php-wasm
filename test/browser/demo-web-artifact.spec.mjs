@@ -9,6 +9,7 @@ test('home page uses the production base path', async ({ page }) => {
 
 	await expect(page).toHaveURL(/\/php-wasm\/home\.html\?no-service-worker$/);
 	await expect(page.getByRole('heading', { name: 'Select a demo:' })).toBeVisible();
+	await expect(page.locator('.home')).toHaveClass(/\bviewport-page\b/);
 
 	const embeddedLink = page.getByRole('link', { name: /PHP Embedded Demo/ });
 	const frameworkLink = page.getByRole('link', { name: /PHP CGI Demo/ });
@@ -18,6 +19,86 @@ test('home page uses the production base path', async ({ page }) => {
 		'/php-wasm/embedded-php.html?demo=sdl-sine.php'
 	);
 	await expect(frameworkLink).toHaveAttribute('href', '/php-wasm/select-framework.html');
+
+	const heightRules = await page.evaluate(() => {
+		const bodyHeightRules = [];
+		const duplicateViewportRules = [];
+		const installerCardWidths = [];
+		const installerMessageWrapRules = [];
+		const viewportPageHeightRules = [];
+		const fullscreenSelectors = new Set([
+			'#root'
+			, '.home'
+			, '.Embedded'
+			, '.dbg-preview'
+			, '.editor'
+			, '.install-demo'
+			, '.select-framework'
+			, '.Confirm'
+		]);
+
+		for(const sheet of document.styleSheets)
+		{
+			for(const rule of sheet.cssRules)
+			{
+				if(!(rule instanceof CSSStyleRule) || !rule.style.height)
+				{
+					continue;
+				}
+
+				const selectors = rule.selectorText
+					.split(',')
+					.map(selector => selector.trim());
+
+				if(selectors.includes('body'))
+				{
+					bodyHeightRules.push(rule.style.height);
+				}
+
+				if(selectors.includes('.viewport-page'))
+				{
+					viewportPageHeightRules.push(rule.style.height);
+				}
+
+				if(selectors.includes('.install-demo > .bevel'))
+				{
+					installerCardWidths.push(rule.style.width);
+				}
+
+				if(selectors.includes('.install-demo h2'))
+				{
+					installerMessageWrapRules.push(rule.style.overflowWrap);
+				}
+
+				if(
+					rule.style.height.includes('100dvh')
+					&& selectors.some(selector => fullscreenSelectors.has(selector))
+				) {
+					duplicateViewportRules.push(rule.cssText);
+				}
+			}
+		}
+
+		return {
+			bodyHeightRules
+			, duplicateViewportRules
+			, installerCardWidths
+			, installerMessageWrapRules
+			, viewportPageHeightRules
+		};
+	});
+
+	// A 100vh body is taller than the 100dvh application while mobile browser
+	// chrome is expanded, exposing a scrollable strip beneath the application.
+	expect(heightRules.bodyHeightRules).toContain('100%');
+	expect(heightRules.bodyHeightRules).not.toContain('100vh');
+	expect(heightRules.viewportPageHeightRules).toHaveLength(1);
+	expect(heightRules.viewportPageHeightRules[0]).toContain('--visual-viewport-height');
+	expect(heightRules.duplicateViewportRules).toEqual([]);
+	expect(heightRules.installerCardWidths).toHaveLength(1);
+	expect(heightRules.installerCardWidths[0]).toContain('45rem');
+	expect(heightRules.installerCardWidths[0]).toContain('100%');
+	expect(heightRules.installerMessageWrapRules).toEqual(['anywhere']);
 });
 
 test('home demo query redirects into the embedded demo', async ({ page }) => {
@@ -40,6 +121,7 @@ test('embedded php hello world runs', async ({ page }) => {
 	await page.goto(`embedded-php.html?demo=hello-world.php&version=${version}&extensionFlags=0&no-service-worker`, {
 		waitUntil: 'domcontentloaded'
 	});
+	await expect(page.locator('.Embedded')).toHaveClass(/\bviewport-page\b/);
 
 	const outputFrame = page.locator('iframe').nth(1);
 
@@ -53,6 +135,28 @@ test('cli preview runs a php script without Web Locks', async ({ page }) => {
 	const code = encodeURIComponent('echo "Hello, World!";');
 
 	await page.addInitScript(() => {
+		const keyboardOffset = 100;
+		const visualViewport = new EventTarget();
+
+		Object.defineProperties(visualViewport, {
+			height: {
+				get: () => Math.max(
+					1
+					, document.documentElement.clientHeight - keyboardOffset
+				)
+			}
+			, offsetTop: {get: () => keyboardOffset}
+			, offsetLeft: {get: () => 0}
+			, pageTop: {get: () => keyboardOffset}
+			, pageLeft: {get: () => 0}
+			, scale: {get: () => 1}
+		});
+
+		Object.defineProperty(window, 'visualViewport', {
+			configurable: true
+			, value: visualViewport
+		});
+
 		Object.defineProperty(navigator, 'locks', {
 			configurable: true
 			, value: undefined
@@ -65,6 +169,32 @@ test('cli preview runs a php script without Web Locks', async ({ page }) => {
 
 	await expect(page.getByText('php-cli-wasm preview')).toBeVisible({ timeout: 180000 });
 	await expect(page.getByText('Hello, World!')).toBeVisible({ timeout: 180000 });
+
+	const viewportProperties = await page.evaluate(() => {
+		const root = document.documentElement;
+		const preview = document.querySelector('.viewport-page');
+		const previewBounds = preview.getBoundingClientRect();
+		const margin = Number.parseFloat(getComputedStyle(preview).marginTop);
+
+		return {
+			height: root.style.getPropertyValue('--visual-viewport-height')
+			, offsetTop: root.style.getPropertyValue('--visual-viewport-offset-top')
+			, expectedHeight: `${root.clientHeight - 100}px`
+			, previewHeight: previewBounds.height
+			, previewTop: previewBounds.top
+			, expectedPreviewHeight: root.clientHeight - 100 - (2 * margin)
+			, expectedPreviewTop: 100 + margin
+		};
+	});
+
+	expect(viewportProperties.height).toBe(viewportProperties.expectedHeight);
+	expect(viewportProperties.offsetTop).toBe('100px');
+	expect(viewportProperties.previewHeight).toBeCloseTo(
+		viewportProperties.expectedPreviewHeight
+	);
+	expect(viewportProperties.previewTop).toBeCloseTo(
+		viewportProperties.expectedPreviewTop
+	);
 });
 
 test('interactive cli uses the active readline prompt', async ({ page }) => {
@@ -79,6 +209,19 @@ test('interactive cli uses the active readline prompt', async ({ page }) => {
 
 	await expect(input).toBeEnabled({ timeout: 180000 });
 	await expect(prompt).toHaveText('php> ');
+
+	const outerScroll = await page.evaluate(() => {
+		const scrollingElement = document.scrollingElement;
+		const scrollRange = scrollingElement.scrollHeight - scrollingElement.clientHeight;
+
+		window.scrollTo(0, scrollingElement.scrollHeight);
+
+		return {scrollRange, scrollY: window.scrollY};
+	});
+
+	expect(outerScroll.scrollRange).toBeLessThanOrEqual(1);
+	expect(outerScroll.scrollY).toBeLessThanOrEqual(1);
+
 	await input.fill('var_dump(readline("Enter your command: "));');
 	await input.press('Enter');
 
@@ -139,6 +282,35 @@ test('select framework service worker serves CGI', async ({ page }) => {
 	await page.goto('select-framework.html', {waitUntil: 'domcontentloaded'});
 
 	await expect(page.getByText('Select a Framework:')).toBeVisible({ timeout: 180000 });
+	await expect(page.locator('.select-framework')).toHaveClass(/\bviewport-page\b/);
+
+	const drupalCard = page.locator('.frameworks .column', {
+		has: page.getByRole('img', {name: 'drupal 11'})
+	});
+
+	await drupalCard.getByRole('button', {name: 'Start'}).click();
+
+	const databaseDialog = page.getByRole('dialog', {name: 'Choose a Drupal database'});
+	const databaseForm = databaseDialog.locator('form');
+	const postgresOption = databaseDialog.getByRole('radio', {name: /PostgreSQL/});
+
+	await expect(databaseDialog.getByRole('radio', {name: 'SQLite'})).toBeChecked();
+	await expect(databaseDialog.getByText('Slow')).toBeVisible();
+	await expect(databaseDialog.locator('.drupal-database-warning img')).toHaveAttribute(
+		'src'
+		, /(?:alert-16(?:\.[^/]*)?\.png|data:image\/png;base64)/
+	);
+	await postgresOption.check();
+	await expect(postgresOption).toBeChecked();
+	await expect(databaseForm).toHaveAttribute('method', 'get');
+	await expect(databaseForm).toHaveAttribute('rel', 'opener');
+	await expect(databaseForm).toHaveAttribute('target', '_blank');
+	expect(await databaseForm.evaluate(form => Object.fromEntries(new FormData(form)))).toEqual({
+		framework: 'drupal-11'
+		, database: 'pgsql'
+	});
+	await databaseDialog.getByRole('button', {name: 'Cancel'}).click();
+	await expect(databaseDialog).not.toBeVisible();
 
 	await expect.poll(
 		async () => {
@@ -162,12 +334,73 @@ test('select framework service worker serves CGI', async ({ page }) => {
 		{ timeout: 180000 }
 	).toContain('/php-wasm/cgi-worker.js');
 
+	await page.evaluate(() => {
+		const openDatabase = indexedDB.open.bind(indexedDB);
+
+		indexedDB.open = (name, ...args) => (
+			name === '/persist' || name === '/config'
+				? {}
+				: openDatabase(name, ...args)
+		);
+	});
+	await page.getByRole('button', {name: 'Clear'}).click();
+	await page.getByRole('button', {name: 'Confirm'}).click();
+
+	const clearingOverlay = page.locator('.overlay > .install-demo');
+
+	await expect(clearingOverlay).toContainText('Clearing IDBFS...');
+
+	const clearingGeometry = await clearingOverlay.evaluate(container => {
+		const overlayBounds = container.parentElement.getBoundingClientRect();
+		const dialogBounds = container.querySelector(':scope > .center').getBoundingClientRect();
+
+		return {
+			horizontalOffset: Math.abs(
+				(dialogBounds.left + dialogBounds.right) / 2
+				- (overlayBounds.left + overlayBounds.right) / 2
+			)
+			, verticalOffset: Math.abs(
+				(dialogBounds.top + dialogBounds.bottom) / 2
+				- (overlayBounds.top + overlayBounds.bottom) / 2
+			)
+		};
+	});
+
+	expect(clearingGeometry.horizontalOffset).toBeLessThanOrEqual(1);
+	expect(clearingGeometry.verticalOffset).toBeLessThanOrEqual(1);
+
 	const response = await page.goto('cgi-bin/test/hello-world.php', {
 		waitUntil: 'domcontentloaded'
 	});
 
 	expect(response?.status()).toBe(200);
 	await expect(page.locator('body')).toContainText('Hello, World!', { timeout: 180000 });
+});
+
+test('Drupal database modal opens the selected installer with an opener', async ({ page }) => {
+	await page.goto('select-framework.html?no-service-worker', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const drupalCard = page.locator('.frameworks .column', {
+		has: page.getByRole('img', {name: 'drupal 11'})
+	});
+
+	await drupalCard.getByRole('button', {name: 'Start'}).click();
+
+	const databaseDialog = page.getByRole('dialog', {name: 'Choose a Drupal database'});
+
+	await databaseDialog.getByRole('radio', {name: /PostgreSQL/}).check();
+
+	const popupPromise = page.waitForEvent('popup');
+
+	await databaseDialog.getByRole('button', {name: 'Start'}).click();
+
+	const popup = await popupPromise;
+
+	await expect(popup).toHaveURL(/install-demo\.html\?framework=drupal-11&database=pgsql/);
+	expect(await popup.evaluate(() => window.opener === window.opener?.top)).toBe(true);
+	await popup.close();
 });
 
 test('framework chooser popup acquires service-worker control from a cross-origin iframe', async ({ page }) => {
@@ -344,6 +577,53 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 	await page.getByRole('button', { name: 'Log in' }).click();
 	await expect(page).not.toHaveURL(/\/user\/login(?:\?|$)/, { timeout: 180000 });
 	await expect(page.locator('body')).toContainText('admin', { timeout: 180000 });
+});
+
+test('Drupal 11.4.5 installs and runs with PostgreSQL in PGlite', async ({ page }) => {
+	test.setTimeout(600000);
+
+	const runtimeFailures = [];
+
+	page.on('pageerror', error => runtimeFailures.push(error.message));
+
+	await page.goto('install-demo.html?framework=drupal-11&database=pgsql', {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/\/php-wasm\/cgi-bin\/drupal\/?$/, {
+		timeout: 540000
+	});
+	await expect(page.locator('body')).toContainText('Drupal 11 on PHP-WASM', {
+		timeout: 180000
+	});
+
+	const welcomeMessage = page.locator('.php-wasm-demo-login');
+	const loginLink = welcomeMessage.getByRole('link', { name: 'Log in' });
+	const editLink = welcomeMessage.getByRole('link', {
+		name: 'Click here to edit this template!'
+	});
+	const editUrl = new URL(await editLink.getAttribute('href'), page.url());
+	const drupalPrefix = '/php-wasm/cgi-bin/drupal/';
+
+	await expect(welcomeMessage).toContainText('Drupal 11 is running in the browser!');
+	expect(editUrl.searchParams.get('path')).toBe(
+		'/persist/drupal-11.4.5-pgsql/web/core/themes/olivero/templates/includes/get-started.html.twig'
+	);
+
+	await loginLink.click();
+	await expect(page).toHaveURL(`${drupalPrefix}user/login`);
+	await page.locator('input[name="name"]').fill('admin');
+	await page.locator('input[name="pass"]').fill('admin');
+	await page.getByRole('button', { name: 'Log in' }).click();
+	await expect(page).not.toHaveURL(/\/user\/login(?:\?|$)/, { timeout: 180000 });
+
+	await page.goto(`${drupalPrefix}admin/reports/status`, {
+		waitUntil: 'domcontentloaded'
+	});
+	await expect(page.locator('body')).toContainText('PostgreSQL', {
+		timeout: 180000
+	});
+	expect(runtimeFailures).toEqual([]);
 });
 
 test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async ({ page }) => {

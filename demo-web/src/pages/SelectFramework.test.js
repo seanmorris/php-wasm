@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 
 const { bus, getPhpBus } = vi.hoisted(() => {
 	Object.defineProperty(globalThis.navigator, 'serviceWorker', {
@@ -13,6 +13,7 @@ const { bus, getPhpBus } = vi.hoisted(() => {
 				exists: path === '/persist/cakephp-5'
 			};
 		})
+		, runSql: vi.fn(async () => ({rows: [{ready: true}]}))
 	};
 
 	const getPhpBus = vi.fn(async () => bus);
@@ -68,6 +69,8 @@ describe('SelectFramework', () => {
 		bus.analyzePath.mockImplementation(async path => ({
 			exists: path === '/persist/cakephp-5'
 		}));
+		bus.runSql.mockReset();
+		bus.runSql.mockResolvedValue({rows: [{ready: true}]});
 		getPhpBus.mockClear();
 		window.history.pushState({}, '', '/select-framework.html');
 	});
@@ -111,10 +114,126 @@ describe('SelectFramework', () => {
 
 		expect(form).not.toBeNull();
 		expect(form).toHaveAttribute('method', 'get');
+		expect(form).toHaveAttribute('rel', 'opener');
 		expect(form).toHaveAttribute('target', '_blank');
 		expect(form.action).toMatch(/\/code-editor\.html$/);
 		expect(pathInput).not.toBeNull();
 		expect(pathInput).toHaveValue('/persist/cakephp-5/webroot/index.php');
+	});
+
+	it('opens a Drupal database modal and submits the selected backend', async () => {
+		render(<SelectFramework />);
+
+		const drupalCard = screen.getByRole('img', {name: 'drupal 11'}).closest('.column');
+		const card = within(drupalCard);
+
+		expect(screen.getAllByRole('img', {name: 'drupal 11'})).toHaveLength(1);
+		expect(card.queryByRole('combobox')).not.toBeInTheDocument();
+		fireEvent.click(card.getByRole('button', {name: 'Start'}));
+
+		const dialog = screen.getByRole('dialog', {name: 'Choose a Drupal database'});
+		const options = within(dialog);
+		const sqlite = options.getByRole('radio', {name: 'SQLite'});
+		const postgres = options.getByRole('radio', {name: /PostgreSQL/});
+		const form = dialog.querySelector('form');
+		const warning = options.getByText('Slow');
+
+		expect(sqlite).toBeChecked();
+		expect(postgres).not.toBeChecked();
+		expect(warning.querySelector('img')).toHaveAttribute(
+			'src'
+			, expect.stringContaining('alert-16.png')
+		);
+		expect(form).toHaveAttribute('method', 'get');
+		expect(form).toHaveAttribute('rel', 'opener');
+		expect(form).toHaveAttribute('target', '_blank');
+		expect(new URL(form.action).pathname).toBe('/install-demo.html');
+		expect(form).toHaveFormValues({framework: 'drupal-11', database: 'sqlite'});
+
+		fireEvent.click(postgres);
+		expect(form).toHaveFormValues({framework: 'drupal-11', database: 'pgsql'});
+
+		fireEvent.click(options.getByRole('button', {name: 'Cancel'}));
+		expect(screen.queryByRole('dialog', {name: 'Choose a Drupal database'}))
+			.not.toBeInTheDocument();
+	});
+
+	it('selects an installed PostgreSQL backend when SQLite is absent', async () => {
+		bus.analyzePath.mockImplementation(async path => ({
+			exists: path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		}));
+
+		render(<SelectFramework />);
+
+		const drupalCard = screen.getByRole('img', {name: 'drupal 11'}).closest('.column');
+		const card = within(drupalCard);
+		const openButton = await card.findByRole('button', {name: 'Open Demo'});
+		const resetForm = card.getByRole('button', {name: 'Reset'}).closest('form');
+		const ideForm = card.getByRole('button', {name: 'IDE'}).closest('form');
+		const drupalIcon = card.getByRole('img', {name: 'drupal 11'});
+
+		expect(new URL(drupalIcon.closest('a').href).searchParams.get('database')).toBe('pgsql');
+		expect(openButton.closest('form')).toHaveFormValues({
+			framework: 'drupal-11'
+			, database: 'pgsql'
+		});
+		expect(resetForm).toHaveFormValues({
+			framework: 'drupal-11'
+			, database: 'pgsql'
+			, overwrite: 'true'
+		});
+		expect(ideForm).toHaveFormValues({
+			path: '/persist/drupal-11.4.5-pgsql/web/index.php'
+		});
+		expect(card.queryByRole('combobox')).not.toBeInTheDocument();
+	});
+
+	it('does not mark a restored PostgreSQL filesystem as installed without its database', async () => {
+		bus.analyzePath.mockImplementation(async path => ({
+			exists: path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		}));
+		bus.runSql.mockResolvedValue({rows: [{ready: false}]});
+
+		render(<SelectFramework />);
+
+		await waitFor(() => expect(bus.runSql).toHaveBeenCalledTimes(1));
+
+		const drupalCard = screen.getByRole('img', {name: 'drupal 11'}).closest('.column');
+		const card = within(drupalCard);
+
+		expect(card.getByRole('button', {name: 'Start'})).toBeInTheDocument();
+		expect(card.queryByRole('button', {name: 'Open Demo'})).not.toBeInTheDocument();
+	});
+
+	it('refreshes the Drupal controls when the installer popup reports completion', async () => {
+		render(<SelectFramework />);
+
+		const drupalCard = screen.getByRole('img', {name: 'drupal 11'}).closest('.column');
+		const card = within(drupalCard);
+
+		fireEvent.click(card.getByRole('button', {name: 'Start'}));
+
+		const dialog = screen.getByRole('dialog', {name: 'Choose a Drupal database'});
+		const dialogControls = within(dialog);
+
+		fireEvent.click(dialogControls.getByRole('radio', {name: /PostgreSQL/}));
+		fireEvent.submit(dialog.querySelector('form'));
+		await waitFor(() => {
+			expect(screen.queryByRole('dialog', {name: 'Choose a Drupal database'}))
+				.not.toBeInTheDocument();
+		});
+
+		await waitFor(() => expect(bus.analyzePath).toHaveBeenCalledTimes(7));
+
+		bus.analyzePath.mockImplementation(async path => ({
+			exists: path === '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		}));
+		fireEvent(window, new CustomEvent('install-complete', {detail: 'drupal-11'}));
+
+		await card.findByRole('button', {name: 'Open Demo'});
+		expect(card.getByRole('button', {name: 'IDE'})).toBeInTheDocument();
+		expect(card.getByRole('button', {name: 'Reset'})).toBeInTheDocument();
+		expect(card.queryByRole('button', {name: 'Start'})).not.toBeInTheDocument();
 	});
 
 	it('does not start the CGI bus when service workers are disabled', async () => {

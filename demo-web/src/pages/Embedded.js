@@ -720,7 +720,7 @@ function Embedded()
 		<div></div>
 	</div>);
 
-	return (<div className="Embedded margined" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1 : 0} data-iframed = {isIframe ? 1 : 0}>
+	return (<div className="Embedded viewport-page margined" data-display-mode = {displayMode} data-output-mode = {outputMode} data-running = {running ? 1 : 0} data-iframed = {isIframe ? 1 : 0}>
 		<div className='bevel column'>
 			{topBar}
 			<div className = "row body">

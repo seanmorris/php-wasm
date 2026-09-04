@@ -1,7 +1,26 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { requestWebLock } from '../source/webTransactions.mjs';
+import {
+	commitTransaction
+	, requestWebLock
+	, startTransaction
+} from '../source/webTransactions.mjs';
+
+const createRuntime = ({startError = null, commitError = null} = {}) => {
+	const syncCalls = [];
+	const runtime = {
+		persist: true
+		, FS: {
+			syncfs: (populate, callback) => {
+				syncCalls.push(populate);
+				queueMicrotask(() => callback(populate ? startError : commitError));
+			}
+		}
+	};
+
+	return {runtime, syncCalls};
+};
 
 test('requestWebLock delegates to the browser Web Locks API', async () => {
 	const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
@@ -88,4 +107,65 @@ test('requestWebLock serializes callbacks when Web Locks are unavailable', async
 			delete globalThis.navigator;
 		}
 	}
+});
+
+test('commitTransaction uses the runtime captured by startTransaction', async () => {
+	const original = createRuntime();
+	const replacement = createRuntime();
+	const wrapper = {
+		binary: Promise.resolve(original.runtime)
+		, transactionStarted: false
+	};
+
+	await startTransaction(wrapper);
+	wrapper.binary = Promise.resolve(replacement.runtime);
+	await commitTransaction(wrapper);
+
+	assert.deepEqual(original.syncCalls, [true, false]);
+	assert.deepEqual(replacement.syncCalls, []);
+	assert.equal(wrapper.transactionStarted, false);
+	assert.equal(wrapper.transactionRuntime, null);
+});
+
+test('startTransaction clears failed state so a later transaction can retry', async () => {
+	const startError = new Error('populate failed');
+	const failed = createRuntime({startError});
+	const replacement = createRuntime();
+	const wrapper = {
+		binary: Promise.resolve(failed.runtime)
+		, transactionStarted: false
+	};
+
+	await assert.rejects(startTransaction(wrapper), startError);
+	assert.equal(wrapper.transactionStarted, false);
+	assert.equal(wrapper.transactionRuntime, null);
+
+	wrapper.binary = Promise.resolve(replacement.runtime);
+	await startTransaction(wrapper);
+	await commitTransaction(wrapper);
+
+	assert.deepEqual(failed.syncCalls, [true]);
+	assert.deepEqual(replacement.syncCalls, [true, false]);
+});
+
+test('commitTransaction clears failed state so a later transaction can retry', async () => {
+	const commitError = new Error('commit failed');
+	const failed = createRuntime({commitError});
+	const replacement = createRuntime();
+	const wrapper = {
+		binary: Promise.resolve(failed.runtime)
+		, transactionStarted: false
+	};
+
+	await startTransaction(wrapper);
+	await assert.rejects(commitTransaction(wrapper), commitError);
+	assert.equal(wrapper.transactionStarted, false);
+	assert.equal(wrapper.transactionRuntime, null);
+
+	wrapper.binary = Promise.resolve(replacement.runtime);
+	await startTransaction(wrapper);
+	await commitTransaction(wrapper);
+
+	assert.deepEqual(failed.syncCalls, [true, false]);
+	assert.deepEqual(replacement.syncCalls, [true, false]);
 });

@@ -146,28 +146,60 @@ test('runs a cli script in the browser harness', async ({ page }) => {
 	await expect(page.locator('[data-testid="stderr"]')).toHaveText('');
 });
 
-test('boots phpdbg in the browser harness', async ({ page }) => {
+test('inspects a live phpdbg frame in the browser harness', async ({ page }) => {
 	const params = new URLSearchParams({
 		libType,
-		path: '/preload/test_www/hello-world.php',
+		inspect: '1',
+		path: '/preload/test_www/phpdbg-inspection.php',
 		version,
 	});
 
 	await page.goto(`harness/dbg.html?${params.toString()}`, {waitUntil: 'domcontentloaded'});
 	await waitForHarnessStatus(page, 'ready');
 
-	await expect(async () => {
-		const currentFile = await page.locator('[data-testid="current-file"]').textContent();
-		const stdout = await page.locator('[data-testid="stdout"]').textContent();
+	const inspection = JSON.parse(
+		await page.locator('[data-testid="inspection"]').textContent()
+	);
 
-		expect(
-			currentFile === '/preload/test_www/hello-world.php'
-			|| (stdout ?? '').includes('/preload/test_www/hello-world.php')
-		).toBe(true);
-	}).toPass({
-		timeout: 30000,
-		intervals: [250, 500, 1000, 2000]
+	expect(inspection).toMatchObject({
+		currentFile: '/preload/test_www/phpdbg-inspection.php',
+		breakpointCount: 1,
+		isExecuting: true,
+		isRunning: true,
+		variables: {
+			argument: 'outer-value',
+			localString: 'local-value',
+			localNumber: 42,
+			localBoolean: true,
+			localNull: null,
+			arrayAnswer: 42,
+			objectLabel: 'object-value',
+			globalReference: 'global-value',
+		},
+		hasServerSuperglobal: true,
+		constants: {
+			main: 'constant-value',
+			included: 'included-constant-value',
+		},
+		functions: {
+			inner: {filename: '/preload/test_www/phpdbg-inspection.php'},
+			included: {filename: '/preload/test_www/phpdbg-inspection-include.php'},
+		},
+		classes: {
+			class: {filename: '/preload/test_www/phpdbg-inspection.php'},
+			interface: {filename: '/preload/test_www/phpdbg-inspection.php'},
+			trait: {filename: '/preload/test_www/phpdbg-inspection.php'},
+			included: {filename: '/preload/test_www/phpdbg-inspection-include.php'},
+		},
+		frames: {
+			oldFrame: 0,
+			outerValue: 'outer-value',
+			restoredFrame: 1,
+		},
 	});
+	expect(inspection.currentLine).toBeGreaterThan(0);
+	expect(inspection.files).toContain('/preload/test_www/phpdbg-inspection-include.php');
+	expect(inspection.backtrace.length).toBeGreaterThanOrEqual(2);
 });
 
 test('serves php through the cgi worker harness', async ({ page }) => {

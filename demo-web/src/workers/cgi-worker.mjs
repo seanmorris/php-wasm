@@ -4,6 +4,7 @@
 /* global __DEMO_BUILD_TYPE__, __DEMO_LIB_TYPE__ */
 import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 import Dom from 'php-wasm-dom';
 import Gd from 'php-wasm-gd';
 import Iconv from 'php-wasm-iconv';
@@ -61,6 +62,20 @@ const files = [
 const cgiPrefix = basePath('cgi-bin/');
 const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')];
 
+class DemoPGlite extends PGlite
+{
+	constructor(dataDir, options = {})
+	{
+		super(dataDir, {
+			...options
+			, extensions: {
+				pg_trgm
+				, ...options.extensions
+			}
+		});
+	}
+}
+
 /**
  * Returns true only for requests that should wake the PHP-CGI runtime.
  */
@@ -84,6 +99,19 @@ const onRequest = (request, response) => {
 	console.log(logLine);
 };
 
+const withPGlite = async (database, callback) => {
+	const pglite = new DemoPGlite(database);
+
+	try
+	{
+		return await callback(pglite);
+	}
+	finally
+	{
+		await pglite.close();
+	}
+};
+
 /**
  * Returns a simple HTML 404 response for unmatched worker routes.
  */
@@ -96,15 +124,21 @@ const notFound = request => {
 
 const actions = {
 	runtimeReady: () => true
+	, awaitFilesystem: () => navigator.locks.request(
+		'php-wasm-fs-lock'
+		, () => true
+	)
 	, runSql: (php, database, sql) => {
-		console.log({database});
-		const pglite = new PGlite(database);
-		return pglite.query(sql);
+		return withPGlite(database, pglite => pglite.query(sql));
 	}
-	, execSql: (php, database, sql) => {
-		console.log({database});
-		const pglite = new PGlite(database);
-		return pglite.exec(sql);
+	, replaceSql: (php, database, sql) => {
+		return withPGlite(database, pglite => pglite.exec([
+			'BEGIN;'
+			, 'DROP SCHEMA IF EXISTS public CASCADE;'
+			, 'CREATE SCHEMA public;'
+			, sql
+			, 'COMMIT;'
+		].join('\n')));
 	}
 };
 
@@ -133,7 +167,7 @@ const init = () => {
 		, notFound
 		, sharedLibs
 		, files
-		, PGlite
+		, PGlite: DemoPGlite
 		, actions
 		, staticFS: false
 		, prefix: basePath('cgi-bin/')

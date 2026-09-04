@@ -127,6 +127,8 @@ export default forwardRef(function Debugger({
 			{
 				stdIn.current.scrollIntoView({
 					behavior: 'smooth'
+					, block: 'nearest'
+					, inline: 'nearest'
 				});
 				return;
 			}
@@ -176,7 +178,7 @@ export default forwardRef(function Debugger({
 			return;
 		}
 
-		stdIn.current?.focus();
+		stdIn.current?.focus({preventScroll: true});
 	}, [scrollToEnd]);
 
 	const updateExecutionPanel = useCallback(async panel => {
@@ -264,7 +266,7 @@ export default forwardRef(function Debugger({
 
 		if(!silent)
 		{
-			stdIn.current?.focus();
+			stdIn.current?.focus({preventScroll: true});
 		}
 
 		if(isRunning)
