@@ -25,7 +25,8 @@ const baseSharedLibs = [];
 const canToggleExtensions = libType === 'dynamic';
 const toggleableModules = {};
 const dynamicExtensionDependencies = {
-	dom: ['libxml']
+	gd: ['zlib']
+	, dom: ['libxml']
 	, simplexml: ['libxml']
 	, xml: ['libxml']
 	, xmlwriter: ['libxml']
@@ -72,7 +73,7 @@ const dynamicLibs = libType === 'dynamic'
 	? [await import('php-wasm-yaml')]
 	: [];
 
-const resolveDynamicExtensionModules = async toggleState => {
+export const resolveDynamicExtensionModules = async toggleState => {
 	const activeNames = new Set();
 	const queue = Object.entries(toggleState)
 		.filter(([, toggle]) => toggle.active)

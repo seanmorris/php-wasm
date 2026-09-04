@@ -37,4 +37,4 @@ packages/phar/php${PHP_VERSION}-phar.so: ${PHPIZE} third_party/php${PHP_VERSION}
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_PHAR} cp ../../packages/phar/phar.mak .
 	${DOCKER_RUN_IN_EXT_PHAR} emmake make -f phar.mak -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include/';
-	${DOCKER_RUN_IN_EXT_PHAR} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/phar.a
+	${DOCKER_RUN_IN_EXT_PHAR} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/phar.a

@@ -71,7 +71,7 @@ lib/lib/libiconv.a: third_party/libiconv-1.17/README
 	${DOCKER_RUN_IN_ICONV} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 
 lib/lib/libiconv.so: lib/lib/libiconv.a
-	${DOCKER_RUN_IN_ICONV} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_ICONV} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/iconv/libiconv.so: lib/lib/libiconv.so
 	cp -Lp $^ $@
@@ -92,4 +92,4 @@ packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so 
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic#-all-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_ICONV} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/iconv.a /src/packages/iconv/libiconv.so
+	${DOCKER_RUN_IN_EXT_ICONV} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/iconv.a /src/packages/iconv/libiconv.so

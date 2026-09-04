@@ -57,7 +57,7 @@ lib/lib/libyaml.a: third_party/libyaml/.gitignore
 	${DOCKER_RUN_IN_LIB_YAML} emmake make install
 
 lib/lib/libyaml.so: lib/lib/libyaml.a
-	${DOCKER_RUN_IN_LIB_YAML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIB_YAML} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 PHP_YAML_VERSION=2.3.0
 
@@ -87,4 +87,4 @@ packages/libyaml/php${PHP_VERSION}-yaml.so: ${PHPIZE} packages/libyaml/libyaml.s
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_YAML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_YAML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/yaml.a /src/packages/libyaml/libyaml.so
+	${DOCKER_RUN_IN_EXT_YAML} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/yaml.a /src/packages/libyaml/libyaml.so

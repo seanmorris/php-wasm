@@ -43,4 +43,4 @@ ifeq (${PHP_VERSION},8.5)
 else
 	${DOCKER_RUN_IN_EXT_DOM} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
 endif
-	${DOCKER_RUN_IN_EXT_DOM} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/dom.a /src/packages/libxml/libxml2.so
+	${DOCKER_RUN_IN_EXT_DOM} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/dom.a /src/packages/libxml/libxml2.so

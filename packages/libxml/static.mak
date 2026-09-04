@@ -59,7 +59,7 @@ lib/lib/libxml2.a: third_party/libxml2/.gitignore
 	${DOCKER_RUN_IN_LIBXML} emmake make install
 
 lib/lib/libxml2.so: lib/lib/libxml2.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libxml/libxml2.so: lib/lib/libxml2.so
 	cp -L $^ $@
@@ -78,4 +78,4 @@ packages/libxml/php${PHP_VERSION}-libxml.so: ${PHPIZE} packages/libxml/libxml2.s
 	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_LIBXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_LIBXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/libxml.a /src/packages/libxml/libxml2.so
+	${DOCKER_RUN_IN_EXT_LIBXML} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/libxml.a /src/packages/libxml/libxml2.so

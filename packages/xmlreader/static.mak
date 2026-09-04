@@ -44,4 +44,4 @@ packages/xmlreader/php${PHP_VERSION}-xmlreader.so: ${PHPIZE} third_party/php${PH
 	${DOCKER_RUN_IN_EXT_XMLREADER} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_XMLREADER} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_XMLREADER} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_XMLREADER} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/xmlreader.a /src/packages/libxml/libxml2.so
+	${DOCKER_RUN_IN_EXT_XMLREADER} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/xmlreader.a /src/packages/libxml/libxml2.so

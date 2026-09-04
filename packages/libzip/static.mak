@@ -65,7 +65,7 @@ lib/lib/libzip.a: third_party/libzip/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBZIP} emmake make install;
 
 lib/lib/libzip.so: lib/lib/libzip.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/libzip/libzip.so: lib/lib/libzip.so
 	cp -Lp $^ $@
@@ -82,4 +82,4 @@ packages/libzip/php${PHP_VERSION}-zip.so: ${PHPIZE} packages/libzip/libzip.so th
 	${DOCKER_RUN_IN_EXT_ZIP} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZIP} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZIP} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_ZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/zip.a /src/packages/libzip/libzip.so
+	${DOCKER_RUN_IN_EXT_ZIP} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/zip.a /src/packages/libzip/libzip.so

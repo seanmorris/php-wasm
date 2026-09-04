@@ -71,10 +71,10 @@ lib/lib/libssl.a: third_party/openssl/.gitignore
 	${DOCKER_RUN_IN_OPENSSL} emmake make install_sw
 
 lib/lib/libssl.so: lib/lib/libssl.a
-	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 lib/lib/libcrypto.so: lib/lib/libcrypto.a
-	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/openssl/libssl.so: lib/lib/libssl.so
 	cp -Lp $^ $@
@@ -98,4 +98,4 @@ packages/openssl/php${PHP_VERSION}-openssl.so: ${PHPIZE} packages/openssl/libssl
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_OPENSSL} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/openssl.a /src/packages/openssl/libcrypto.so /src/packages/openssl/libssl.so
+	${DOCKER_RUN_IN_EXT_OPENSSL} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/openssl.a /src/packages/openssl/libcrypto.so /src/packages/openssl/libssl.so

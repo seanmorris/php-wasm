@@ -139,6 +139,10 @@ DOCKER_COMPOSE?=docker compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
+# Keep native i64 signatures at every dynamic-linking boundary. Emscripten can
+# otherwise choose a legalized web ABI while side modules retain native i64.
+WASM_BIGINT_FLAG?=-sWASM_BIGINT=1
+SIDE_MODULE_FLAGS?=-sSIDE_MODULE=1 ${WASM_BIGINT_FLAG}
 DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e EMCC_FORCE_STDLIBS=libc++abi,libc++ -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
@@ -446,6 +450,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-s EXIT_RUNTIME=1                   \
 		-s INVOKE_RUN=0                     \
 		-s MAIN_MODULE=${MAIN_MODULE}       \
+		${WASM_BIGINT_FLAG}                 \
 		-s MODULARIZE=1                     \
 		-s AUTO_NATIVE_LIBRARIES=0          \
 		-s AUTO_JS_LIBRARIES=0              \

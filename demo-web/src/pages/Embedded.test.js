@@ -67,7 +67,7 @@ vi.mock('../lib/runtimePaths', () => ({
 	, defaultPhpVersion: '8.4'
 }));
 
-import Embedded from './Embedded';
+import Embedded, {resolveDynamicExtensionModules} from './Embedded';
 
 describe('Embedded', () => {
 	const phpCode = `<?php //{"autorun":true,"persist":false,"single-expression":false,"render-as":"text"}
@@ -144,5 +144,16 @@ echo "Hello, World!";
 		});
 
 		expect(editor.getValue).toHaveBeenCalled();
+	});
+
+	it('loads zlib whenever the GD extension is selected', async () => {
+		const gd = {default: 'gd'};
+		const zlib = {default: 'zlib'};
+		const modules = await resolveDynamicExtensionModules({
+			gd: {active: true, module: Promise.resolve(gd)}
+			, zlib: {active: false, module: Promise.resolve(zlib)}
+		});
+
+		expect(modules).toEqual(['gd', 'zlib']);
 	});
 });
