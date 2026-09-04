@@ -80,13 +80,14 @@ third_party/php${PHP_VERSION}-iconv/config.m4: third_party/php${PHP_VERSION}-src
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/iconv /src/third_party/php${PHP_VERSION}-iconv
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-iconv/config.m4
 
-packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so third_party/php${PHP_VERSION}-iconv/config.m4
+packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so third_party/php${PHP_VERSION}-iconv/config.m4 packages/iconv/static.mak
 	@ echo -e "\e[33;4mBuilding php-iconv\e[0m"
 	${DOCKER_RUN_IN_EXT_ICONV} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ICONV} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	# Cache the known libiconv symbol and PHP's own cross-compilation defaults.
-	# This avoids a no-prototype link probe (invalid for strict Wasm signatures)
-	# and runtime probes whose SIDE_MODULE is outside the probe's working dir.
+	# PHP <= 8.3 still runs the errno/IGNORE probes despite those cache values,
+	# so keep the SIDE_MODULE beside the generated Wasm test executable as well.
+	${DOCKER_RUN_IN_EXT_ICONV} cp /src/packages/iconv/libiconv.so .;
 	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${ICONV_CONFIGURE_VARS} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic#-all-static#g' Makefile;
