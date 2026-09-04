@@ -2,8 +2,8 @@
 title: .php-wasm-rc
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/compiling/php-wasm-rc.md
+Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/compiling/php-wasm-rc.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/Makefile
@@ -31,6 +31,14 @@ PHP_CGI_DIST_DIR=./public
 
 # Build the cgi package's extensions to a directory other than the current one (RELATIVE path)
 PHP_CGI_ASSET_DIR=./public
+
+# Build the cli package and its extensions to relative output directories
+PHP_CLI_DIST_DIR=./public
+PHP_CLI_ASSET_DIR=./public
+
+# Build the phpdbg package and its extensions to relative output directories
+PHP_DBG_DIST_DIR=./public
+PHP_DBG_ASSET_DIR=./public
 
 # Space separated list of files/directories to include under /preload.
 # Relative paths are resolved from the current project directory.
@@ -62,7 +70,9 @@ Use the `PRELOAD_ASSETS` key in your `.php-wasm-rc` file to define a list of fil
 
 The files and directories will be collected into a single directory. Individual files & directories will appear in the top level, while directories will maintain their internal structure.
 
-When you use `php-wasm-builder`, relative entries are resolved from the current project directory. Anchored paths such as `/path/to/file.txt` and `~/path/to/file.txt` are copied as-is.
+When you use `php-wasm-builder`, relative entries are resolved from the current project directory. Anchored paths such as `/path/to/file.txt` and `~/path/to/file.txt` are left unprefixed so the shell can resolve them normally.
+
+`PRELOAD_ASSETS` is a whitespace-delimited Make variable. Paths containing spaces are not supported.
 
 These files & directories will be available under `/preload` in the final package, packaged into the `.data` file that is built along with the `.wasm` file.
 

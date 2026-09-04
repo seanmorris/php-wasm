@@ -79,14 +79,22 @@ async function validateCustomBuilds(page)
 {
 	const builderSource = readLocal(builderScript);
 	const blocksText = page.blocks.map(block => block.code).join('\n');
+	const markdown = readLocal(path.join(docsRoot, page.file));
 
 	assert.match(blocksText, /php-wasm-builder build worker cgi mjs/);
 	assert.match(blocksText, /php-wasm-builder build node cli mjs/);
 	assert.match(blocksText, /php-wasm-builder build node dbg mjs/);
+	assert.match(markdown, /Environment \| `web`, `node`, `worker`, `webview` \| `web`/);
+	assert.match(markdown, /Module format \| `js`, `mjs` \| `js`/);
+	assert.match(markdown, /Package \| `base`, `cgi`, `cli`, `dbg` \| `base`/);
+	assert.match(markdown, /selectors can be provided in any order/);
+	assert.match(markdown, /Unknown or conflicting\s+selectors fail before Make starts\./);
 	assert.match(builderSource, /const buildModuleTypes = new Map/);
 	assert.match(builderSource, /const buildPackageTypes = new Map/);
 	assert.match(builderSource, /const parseBuildArgs = buildArgs =>/);
 	assert.match(builderSource, /PACKAGE_TYPE: \[base, cgi, cli, dbg\]/);
+	assert.match(builderSource, /throw new Error\(`Error: Unrecognized build argument/);
+	assert.match(builderSource, /return result\.status \?\? 1/);
 
 	return coverAll(
 		page,
@@ -104,18 +112,22 @@ async function validatePhpWasmRc(page)
 	const markdown = readLocal(path.join(docsRoot, page.file));
 
 	for(const token of [
-		'PHP_VERSION',
-		'PHP_DIST_DIR',
-		'PHP_ASSET_DIR',
-		'PHP_CGI_DIST_DIR',
-		'PHP_CGI_ASSET_DIR',
-		'PRELOAD_ASSETS',
-		'INITIAL_MEMORY',
-		'ASSERTIONS',
-		'WITH_GD',
-		'WITH_LIBPNG',
-		'WITH_LIBJPEG',
-		'WITH_FREETYPE',
+		'PHP_VERSION'
+		, 'PHP_DIST_DIR'
+		, 'PHP_ASSET_DIR'
+		, 'PHP_CGI_DIST_DIR'
+		, 'PHP_CGI_ASSET_DIR'
+		, 'PHP_CLI_DIST_DIR'
+		, 'PHP_CLI_ASSET_DIR'
+		, 'PHP_DBG_DIST_DIR'
+		, 'PHP_DBG_ASSET_DIR'
+		, 'PRELOAD_ASSETS'
+		, 'INITIAL_MEMORY'
+		, 'ASSERTIONS'
+		, 'WITH_GD'
+		, 'WITH_LIBPNG'
+		, 'WITH_LIBJPEG'
+		, 'WITH_FREETYPE'
 	])
 	{
 		assert.match(text, new RegExp(`\\b${token}\\b`));
@@ -124,9 +136,14 @@ async function validatePhpWasmRc(page)
 
 	assert.match(makefile, /BUILD_TYPE \?=js/);
 	assert.match(makefile, /PHP_DIST_DIR/);
+	assert.match(makefile, /builder_resolve_path = .*filter \/% ~%/);
+	assert.match(makefile, /PRELOAD_ASSET_SOURCES=\$\(foreach asset,\$\{PRELOAD_ASSETS\}/);
 	assert.match(envFiles, /WITH_GD=static/);
 	assert.match(markdown, /php-?8\.x-pdo-sqlite\.so/);
 	assert.match(markdown, /8\.0\|8\.1\|8\.2\|\*\*8\.3\*\*|8\.0\|8\.1\|8\.2\|8\.3\|8\.4\|8\.5/);
+	assert.match(markdown, /Relative paths are resolved from the current project directory\./);
+	assert.match(markdown, /Anchored paths such as `\/path\/to\/file\.txt` and `~\/path\/to\/file\.txt` are left unprefixed/);
+	assert.match(markdown, /Paths containing spaces are not supported\./);
 
 	return coverAll(
 		page,
@@ -313,13 +330,17 @@ async function validateFsOperations(page)
 	await php.rmdir('/docs');
 
 	const text = page.blocks.map(block => block.code).join('\n');
-	assert.match(text, /sendMessage\('writeFile'/);
-	assert.match(text, /sendMessage\('refresh'/);
+	const markdown = readLocal(path.join(docsRoot, page.file));
+	assert.match(text, /bus\.writeFile\('/);
+	assert.match(text, /bus\.analyzePath\('/);
+	assert.match(text, /bus\.refresh\(\)/);
+	assert.match(markdown, /`quickbus` client/);
+	assert.doesNotMatch(markdown, /msg-bus/);
 
 	return coverAll(
 		page,
 		'executable_node',
-		'Filesystem helper methods were executed through PhpNode; worker msg-bus examples were source-validated.',
+		'Filesystem helper methods were executed through PhpNode; worker quickbus examples were source-validated.',
 		{ runtimeVersion: getAvailablePhpNodeVersion() }
 	);
 }
@@ -330,6 +351,7 @@ async function validateLoadingFiles(page)
 		const preloadFile = path.join(directory, 'hello.txt');
 		await writeTree(directory, { 'hello.txt': 'Hello, world!\n' });
 		const text = page.blocks.map(block => block.code).join('\n');
+		const markdown = readLocal(path.join(docsRoot, page.file));
 
 		const php = await createPhpNode({
 			files: [
@@ -350,6 +372,13 @@ async function validateLoadingFiles(page)
 		await php.writeFile('/persist/round-trip.txt', 'persisted', { encoding: 'utf8' });
 		assert.equal(await php.readFile('/persist/round-trip.txt', { encoding: 'utf8' }), 'persisted');
 		assert.match(text, /locateFile/);
+		assert.match(text, /import os from 'node:os'/);
+		assert.match(text, /import path from 'node:path'/);
+		assert.match(text, /import \{ PhpNode \} from 'php-wasm\/PhpNode\.mjs'/);
+		assert.match(text, /path\.join\(os\.homedir\(\), 'your-files'\)/);
+		assert.match(markdown, /NodeFS \(Node\.js Only\)/);
+		assert.match(markdown, /NodeFS in `PhpNode`/);
+		assert.doesNotMatch(text, /localPath:\s*['"]~\//);
 	});
 
 	return coverAll(
@@ -425,6 +454,16 @@ async function validateUsingExtensions(page)
 
 async function validateVrzno(page)
 {
+	const markdown = readLocal(path.join(docsRoot, page.file));
+
+	assert.match(markdown, /Vrzno 0\.2 requires PHP 8\.0 or newer/);
+	assert.match(markdown, /PHP 8\.0 through 8\.5/);
+	assert.match(markdown, /wasm32 memory\s+model/);
+	assert.match(markdown, /vrzno_shared\(\$name\)/);
+	assert.match(markdown, /cannot be\s+cloned or serialized/);
+	assert.match(markdown, /RuntimeException/);
+	assert.match(markdown, /ReferenceError/);
+
 	const runtimeVersion = getAvailablePhpNodeVersion();
 	const php = await createPhpNode({ version: runtimeVersion });
 	const io = capturePhpIo(php);
@@ -453,7 +492,7 @@ async function validateVrzno(page)
 		$Date = $window->Date;
 		var_dump($Date->now());
 	`), 0);
-	assert.match(io.stdout, /^int\(-?\d+\)\n$/);
+	const dateNowOutput = io.stdout;
 
 	io.reset();
 	assert.equal(await php.run(`<?php
@@ -465,24 +504,46 @@ async function validateVrzno(page)
 	assert.match(io.stdout, /^string\(24\) "\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z"\n$/);
 
 	io.reset();
-	assert.equal(await php.r`<?php
-		$window = new Vrzno;
-		$Promise = $window->Promise;
-		$p = new $Promise(function($accept, $reject) {
-			$accept('Pass.');
-		});
-		$dump = fn($value) => var_dump($value);
-		$p->then($dump)->catch($dump);
-	`, 0);
-	assert.equal(io.stdout, "string(5) \"Pass.\"\n");
+	assert.equal(await php.run(`<?php
+		try {
+			serialize(new Vrzno);
+		} catch (Throwable $error) {
+			echo get_class($error), '|', $error->getMessage();
+		}
+	`), 0);
+	const serializationOutput = io.stdout;
+
+	if(
+		!/^float\(-?\d+(?:\.\d+)?\)\n$/.test(dateNowOutput)
+		|| !/^(?:Exception|Error)\|Serialization of 'Vrzno' is not allowed$/.test(serializationOutput)
+	) {
+		return coverAll(
+			page,
+			'allowed_gap',
+			'The selected local runtime predates Vrzno 0.2 value, nonserialization, and lifecycle semantics; the source guidance was validated.',
+			{
+				gap: 'vrzno_0_2_runtime_unavailable'
+				, runtimeVersion
+				, dateNowOutput
+				, serializationOutput
+			}
+		);
+	}
 
 	const fetched = await php.x`${{ value: 'from-js' }}`;
 	assert.deepEqual(fetched, { value: 'from-js' });
 
+	const staleCallback = await php.x`function() { return 321; }`;
+	await php.refresh();
+	assert.throws(
+		() => staleCallback(),
+		error => error?.name === 'ReferenceError' && /previous PHP runtime/.test(error.message)
+	);
+
 	return coverAll(
 		page,
 		'executable_node',
-		'Documented Vrzno PHP snippets were executed through PhpNode, with JS-to-PHP marshalling validated through php.x.',
+		'Documented Vrzno semantics were exercised through PhpNode, including number conversion, nonserialization, marshalling, and stale-proxy invalidation.',
 		{ runtimeVersion }
 	);
 }
@@ -490,15 +551,24 @@ async function validateVrzno(page)
 async function validatePdoPglite(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
+	const markdown = readLocal(path.join(docsRoot, page.file));
 
-	assert.match(text, /@electric-sql\/pglite/);
-	assert.match(text, /new PDO\('pgsql:idb-storage'\)/);
+	assert.match(text, /@electric-sql\/pglite@\^0\.5\.8/);
+	assert.match(text, /@electric-sql\/pglite@0\.5\.8\/dist\/index\.js/);
+	assert.match(markdown, /WITH_PDO_PGLITE=1/);
+	assert.match(markdown, /WITH_VRZNO=1/);
+	assert.match(text, /new PDO\('pgsql:idb:\/\/pdo-pglite-pg18'\)/);
 	assert.match(text, /data-imports/);
+	assert.match(markdown, /PGlite 0\.5 uses PostgreSQL 18/);
+	assert.match(markdown, /PGlite 0\.2\s+\(PostgreSQL 16\)/);
+	assert.match(markdown, /Export the old database logically/);
+	assert.match(markdown, /Do not copy a `dumpDataDir\(\)` archive directly/);
+	assert.doesNotMatch(markdown, /pgsql:idb-storage/);
 
 	return coverAll(
 		page,
 		'allowed_gap',
-		'PGlite examples were source-validated, but the documented idb-storage flow still needs a browser/IDB harness for runtime execution.',
+		'PGlite 0.5.8, PostgreSQL 18 migration, custom-build flags, and idb:// examples were source-validated; runtime execution still needs a browser/IDB harness.',
 		{ gap: 'browser_pglite_runtime' }
 	);
 }
@@ -506,9 +576,16 @@ async function validatePdoPglite(page)
 async function validatePdoCfd1(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
+	const markdown = readLocal(path.join(docsRoot, page.file));
 
-	assert.match(text, /cfd1: \{ mainDb: event\.env\.mainDb \}/);
+	assert.match(text, /import \{ PhpWorker \} from 'php-wasm\/PhpWorker\.mjs'/);
+	assert.match(text, /mainDb: env\.mainDb/);
 	assert.match(text, /new PDO\('cfd1:mainDb'\)/);
+	assert.match(text, /WITH_PDO_CFD1=1/);
+	assert.match(markdown, /PDO_CFD1_DEV_PATH/);
+	assert.match(markdown, /Only positional replacement tokens are supported\./);
+	assert.match(markdown, /Database error propagation remains limited\./);
+	assert.doesNotMatch(markdown, /@todo:/);
 
 	return coverAll(
 		page,
@@ -566,16 +643,22 @@ async function validateCgiServiceWorker(page)
 	const text = page.blocks.map(block => block.code).join('\n');
 
 	for(const snippet of [
-		"php-cgi-wasm/PhpCgiWorker",
-		"php-cgi-wasm/msg-bus",
-		"handleInstallEvent",
-		"handleActivateEvent",
-		"handleFetchEvent",
-		"handleMessageEvent",
+		"php-cgi-wasm/PhpCgiWorker"
+		, "import { Client } from 'quickbus'"
+		, "quickbus@^1.0.2"
+		, "Client.forServiceWorker(navigator.serviceWorker)"
+		, "Client.forServiceWorkerRegistration(registration)"
+		, "handleInstallEvent"
+		, "handleActivateEvent"
+		, "handleFetchEvent"
+		, "handleMessageEvent"
 	])
 	{
 		assert.match(text, new RegExp(snippet.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	}
+	assert.match(text, /navigator\.serviceWorker\.ready/);
+	assert.match(text, /register\(SERVICE_WORKER_SCRIPT_URL, \{type: 'module'\}\)/);
+	assert.doesNotMatch(text, /msg-bus/);
 
 	return coverAll(
 		page,
@@ -587,6 +670,14 @@ async function validateCgiServiceWorker(page)
 
 async function validateMethodsPhpCgi(page)
 {
+	const markdown = readLocal(path.join(docsRoot, page.file));
+
+	assert.match(
+		markdown,
+		/alternateName:\n\s+- PhpCgiNode\n\s+- PhpCgiWorker/
+	);
+	assert.doesNotMatch(markdown, /alternateName: PhpCgi/);
+
 	await withTempDir(async directory => {
 		await writeTree(directory, {
 			'persist/public/index.php': '<?php echo getenv("APP_ENV") . "|OK";',
@@ -652,6 +743,19 @@ async function validateMethodsPhpCgi(page)
 
 async function validateMethodsPhpWasm(page)
 {
+	const markdown = readLocal(path.join(docsRoot, page.file));
+	const phpWebSource = readLocal(path.join(sourceRoot, 'PhpWeb.mjs'));
+	const phpNodeSource = readLocal(path.join(sourceRoot, 'PhpNode.mjs'));
+
+	assert.match(markdown, /alternateName:\n\s+- PhpNode\n\s+- PhpWeb/);
+	assert.doesNotMatch(markdown, /alternateName: Php(?:Node|Web)/);
+	assert.match(markdown, /`_sdl` selects the SDL-enabled `PhpWeb` runtime/);
+	assert.match(markdown, /`PhpNode` currently supports only the standard empty variant\./);
+	assert.match(markdown, /variant: '_sdl'/);
+	assert.doesNotMatch(markdown, /variant: '-debug'/);
+	assert.match(phpWebSource, /case '8\.4_sdl':/);
+	assert.doesNotMatch(phpNodeSource, /_sdl/);
+
 	const runtimeVersion = getAvailablePhpNodeVersion();
 	let hasVrzno = false;
 

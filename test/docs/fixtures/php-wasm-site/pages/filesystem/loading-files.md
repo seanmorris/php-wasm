@@ -2,8 +2,8 @@
 title: Loading Files
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/filesystem/loading-files.md
+Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/filesystem/loading-files.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -68,13 +68,20 @@ const php = new PhpWeb({persist: {mountPath: '/persist'}});
 
 ### NodeFS (Node.js Only)
 
-To use NodeFS in PhpWeb, pass a `persist` object with `mountPath` & `localPath` keys.
+To use NodeFS in `PhpNode`, pass a `persist` object with `mountPath` and `localPath` keys.
 
 `localPath` will be used as the path to the HOST directory to expose to PHP.
 `mountPath` will be used as the path to the persistent directory within the PHP environment.
 
 ```javascript
-const { PhpNode } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpNode.mjs');
+import os from 'node:os';
+import path from 'node:path';
+import { PhpNode } from 'php-wasm/PhpNode.mjs';
 
-const php = new PhpNode({persist: {mountPath: '/persist', localPath: '~/your-files'}});
+const php = new PhpNode({
+    persist: {
+        mountPath: '/persist',
+        localPath: path.join(os.homedir(), 'your-files'),
+    },
+});
 ```

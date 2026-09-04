@@ -20,7 +20,8 @@
     "test:packaging": "node --test test/packaging.test.mjs",
     "test:docs": "node --test test/docs.test.mjs",
     "test:docs-cgi": "node --test test/docs-cgi.test.mjs",
-    "docs:coverage": "node ./bin/docs-snippet-report.js"
+    "docs:coverage": "node ./bin/docs-snippet-report.js",
+    "docs:sync-fixtures": "node ./test/docs/sync-site-fixtures.mjs"
   },
   "dependencies": {
     "@babel/cli": "^7.8.4",
