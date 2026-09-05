@@ -42,4 +42,18 @@ That is the default for the main `php-wasm` runtime.
 - `VRZNO_REF`: exact Git commit to build. The default pins the Vrzno 0.2.0 integration revision.
 - `VRZNO_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `vrzno` repository during the build.
 
-Local source imports refresh every extension translation unit, so changes to shared headers cannot leave stale object files in incremental builds.
+Imports verify the active source identity and file contents on every build. Switching commits or development checkouts, changing headers, or adding/removing inputs refreshes the extension and its configuration. Unchanged imports preserve timestamps and do not trigger recompilation.
+
+The managed inputs are root-level C, header, and PHP stub files, `config.m4`, `CREDITS`, and `LICENSE`. Development checkouts are read-only inputs and may live outside the Docker mount; only these files are transferred. All imported files and state are written by the builder, so root-owned Docker outputs do not require host-side writes or ownership changes.
+
+Generated manifests and a pending-import record let the next build repair interrupted imports. Existing imports without a valid manifest adopt the managed input classes above; Git metadata, compiled objects, and unrelated files are preserved. Do not use an import destination as `VRZNO_DEV_PATH`.
+
+Run the lightweight real-Make regression suite with:
+
+```sh
+node --test test/build/vrzno-importer.test.mjs
+docker build -f test/build/vrzno-importer.Dockerfile -t php-wasm-vrzno-importer test/build
+VRZNO_IMPORTER_DOCKER=1 node --test test/build/vrzno-importer.test.mjs
+```
+
+The Docker variant requires a non-root host user and Docker access. CI requires both variants; root-only local checks are not a substitute for the ownership test.

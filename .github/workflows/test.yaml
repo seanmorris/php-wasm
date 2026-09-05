@@ -14,7 +14,26 @@ env:
 
 jobs:
 
+  vrzno-importer:
+    name: Test Vrzno Source Importer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Test the real Make importer without PHP builds
+        run: node --test test/build/vrzno-importer.test.mjs
+      - name: Build the lightweight root-owned importer fixture
+        run: docker build -f test/build/vrzno-importer.Dockerfile -t php-wasm-vrzno-importer test/build
+      - name: Require nonroot host and root builder ownership tests
+        env:
+          VRZNO_IMPORTER_DOCKER: '1'
+        run: node --test test/build/vrzno-importer.test.mjs
+
   test-8-5-static:
+    needs: vrzno-importer
     name: Test 8.5 Static
     runs-on: ubuntu-latest
     steps:
@@ -31,6 +50,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-static:
+    needs: vrzno-importer
     name: Test 8.4 Static
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +67,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-static:
+    needs: vrzno-importer
     name: Test 8.3 Static
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +84,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-static:
+    needs: vrzno-importer
     name: Test 8.2 Static
     runs-on: ubuntu-latest
     steps:
@@ -79,6 +101,7 @@ jobs:
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-static:
+    needs: vrzno-importer
     name: Test 8.1 Static
     runs-on: ubuntu-latest
     steps:
@@ -95,6 +118,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-static:
+    needs: vrzno-importer
     name: Test 8.0 Static
     runs-on: ubuntu-latest
     steps:
@@ -111,6 +135,7 @@ jobs:
       - run: PHP_VERSION=8.0 make test
 
   test-8-5-dynamic:
+    needs: vrzno-importer
     name: Test 8.5 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -127,6 +152,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-dynamic:
+    needs: vrzno-importer
     name: Test 8.4 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -143,6 +169,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-dynamic:
+    needs: vrzno-importer
     name: Test 8.3 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -159,6 +186,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-dynamic:
+    needs: vrzno-importer
     name: Test 8.2 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -175,6 +203,7 @@ jobs:
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-dynamic:
+    needs: vrzno-importer
     name: Test 8.1 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -191,6 +220,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-dynamic:
+    needs: vrzno-importer
     name: Test 8.0 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -207,6 +237,7 @@ jobs:
       - run: PHP_VERSION=8.0 make test
 
   test-8-5-shared:
+    needs: vrzno-importer
     name: Test 8.5 Shared
     runs-on: ubuntu-latest
     steps:
@@ -223,6 +254,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-shared:
+    needs: vrzno-importer
     name: Test 8.4 Shared
     runs-on: ubuntu-latest
     steps:
@@ -239,6 +271,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-shared:
+    needs: vrzno-importer
     name: Test 8.3 Shared
     runs-on: ubuntu-latest
     steps:
@@ -255,6 +288,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-shared:
+    needs: vrzno-importer
     name: Test 8.2 Shared
     runs-on: ubuntu-latest
     steps:
@@ -268,6 +302,7 @@ jobs:
       - run:  PHP_VERSION=8.2 make test
 
   test-8-1-shared:
+    needs: vrzno-importer
     name: Test 8.1 Shared
     runs-on: ubuntu-latest
     steps:
@@ -284,6 +319,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-shared:
+    needs: vrzno-importer
     name: Test 8.0 Shared
     runs-on: ubuntu-latest
     steps:
