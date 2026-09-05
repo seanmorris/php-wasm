@@ -3,7 +3,7 @@ WITH_VRZNO?=1
 
 ifeq (${WITH_VRZNO},1)
 VRZNO_REPOSITORY?=https://github.com/seanmorris/vrzno.git
-VRZNO_REF?=2090b1579197b042f822bd0158c9527a20e1f959
+VRZNO_REF?=8f189484ee12c2d973b8825ca4297ca5813243a4
 EXTRA_FLAGS+= -D WITH_VRZNO=1
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4 # third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c
 CONFIGURE_FLAGS+= --enable-vrzno
