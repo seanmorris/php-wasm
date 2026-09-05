@@ -1,8 +1,8 @@
-import { after, test } from 'node:test';
+import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { createServer } from 'node:http';
 import { PhpNode as BasePhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { nodeRuntimeOptions } from '../../../test/lib/node-runtime-options.mjs';
+import { withHttpServer } from '../../../test/lib/http-server.mjs';
 
 class PhpNode extends BasePhpNode
 {
@@ -18,13 +18,7 @@ const capture = php => {
 	return () => stderr;
 };
 
-const server = createServer(async (request, response) => {
-	const chunks = [];
-	for await(const chunk of request)
-	{
-		chunks.push(chunk);
-	}
-
+const handleRequest = async (request, response) => {
 	if(request.url === '/ok')
 	{
 		response.setHeader('X-Vrzno-Test', 'yes');
@@ -34,6 +28,13 @@ const server = createServer(async (request, response) => {
 
 	if(request.url === '/echo')
 	{
+		// Deno 2.5.6 can stall when draining a bodyless GET request.
+		const chunks = [];
+		for await(const chunk of request)
+		{
+			chunks.push(chunk);
+		}
+
 		response.setHeader('Content-Type', 'application/json');
 		response.end(JSON.stringify({
 			method: request.method,
@@ -45,7 +46,9 @@ const server = createServer(async (request, response) => {
 
 	if(request.url === '/drop')
 	{
-		request.socket.destroy();
+		// Truncate the body: Deno 2.5.6's HTTP socket.destroy() does not abort fetch.
+		response.writeHead(200, {'Content-Length': '100', Connection: 'close'});
+		response.end('partial');
 		return;
 	}
 
@@ -53,21 +56,9 @@ const server = createServer(async (request, response) => {
 	response.statusMessage = 'Missing';
 	response.setHeader('X-Vrzno-Missing', 'yes');
 	response.end('missing response');
-});
+};
 
-await new Promise((resolve, reject) => {
-	server.once('error', reject);
-	server.listen(0, '127.0.0.1', resolve);
-});
-
-after(() => new Promise((resolve, reject) => {
-	server.close(error => error ? reject(error) : resolve());
-}));
-
-const { port } = server.address();
-const origin = `http://127.0.0.1:${port}`;
-
-test('Fetch stream wrapper returns local content and response headers', async () => {
+test('Fetch stream wrapper returns local content and response headers', () => withHttpServer(handleRequest, async origin => {
 	const php = new PhpNode();
 	await php.binary;
 
@@ -78,9 +69,9 @@ test('Fetch stream wrapper returns local content and response headers', async ()
 
 	assert.equal(result.body, 'local response');
 	assert.ok([...result.headers].some(header => header.toLowerCase() === 'x-vrzno-test: yes'));
-});
+}));
 
-test('Fetch stream wrapper forwards method, headers, and binary-safe content', async () => {
+test('Fetch stream wrapper forwards method, headers, and binary-safe content', () => withHttpServer(handleRequest, async origin => {
 	const php = new PhpNode();
 	const stderr = capture(php);
 	await php.binary;
@@ -100,9 +91,9 @@ test('Fetch stream wrapper forwards method, headers, and binary-safe content', a
 		header: 'forwarded',
 		body: 'hello\0world',
 	});
-});
+}));
 
-test('Fetch stream wrapper follows ignore_errors for HTTP failures', async () => {
+test('Fetch stream wrapper follows ignore_errors for HTTP failures', () => withHttpServer(handleRequest, async origin => {
 	const php = new PhpNode();
 	await php.binary;
 
@@ -123,12 +114,12 @@ test('Fetch stream wrapper follows ignore_errors for HTTP failures', async () =>
 	assert.match(result.defaultHeaders[0], /^HTTP\/1\.1 404 /);
 	assert.equal(result.ignoredBody, 'missing response');
 	assert.match(result.ignoredHeaders[0], /^HTTP\/1\.1 404 /);
-});
+}));
 
-test('Fetch stream wrapper reports network failures without crashing', async () => {
+test('Fetch stream wrapper reports network failures without crashing', () => withHttpServer(handleRequest, async origin => {
 	const php = new PhpNode();
 	await php.binary;
 
 	const result = await php.x`@file_get_contents(${`${origin}/drop`})`;
 	assert.equal(result, false);
-});
+}));
