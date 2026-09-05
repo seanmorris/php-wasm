@@ -24,14 +24,15 @@ jobs:
         with:
           node-version: '22'
       - name: Test the real Make importer without PHP builds
-        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs
+        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
       - name: Build the lightweight root-owned importer fixture
         run: docker build -f test/build/vrzno-importer.Dockerfile -t php-wasm-vrzno-importer test/build
       - name: Require nonroot host and root builder ownership tests
         env:
           VRZNO_IMPORTER_DOCKER: '1'
           PDO_PGLITE_IMPORTER_DOCKER: '1'
-        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs
+          WAITLINE_IMPORTER_DOCKER: '1'
+        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
 
   test-8-5-static:
     needs: vrzno-importer

@@ -8,6 +8,7 @@ const version = process.env.PHP_VERSION ?? '8.4';
 const createPhp = args => new PhpCliNode(nodeRuntimeOptions({
 	runtime: 'cli'
 	, version
+	, ini: 'display_errors=Off\nlog_errors=On\nerror_log=/dev/stderr\nhtml_errors=Off\nerror_reporting=E_ALL\n'
 	, ...args
 }));
 
@@ -75,7 +76,7 @@ test('waitline exposes the readline API and persistent history', async () => {
 	const php = createPhp({code});
 	const output = captureOutput(php);
 
-	assert.equal(await php.run(), 0);
+	assert.equal(await php.run(), 0, output.stderr() || output.stdout());
 	assert.equal(output.stderr(), '');
 	const alwaysTrueReturn = version === '8.5' ? 'true' : 'bool';
 
@@ -121,7 +122,7 @@ test('readline consumes php-cli-wasm line input, including Unicode and blank lin
 		}
 	});
 
-	assert.equal(await php.run(), 0);
+	assert.equal(await php.run(), 0, output.stderr() || output.stdout());
 	assert.equal(output.stderr(), '');
 	assert.equal(
 		output.stdout()
@@ -154,7 +155,7 @@ test('the interactive CLI continues after a blank line and exits cleanly', {time
 		}
 	});
 
-	assert.equal(await php.run(), 0);
+	assert.equal(await php.run(), 0, output.stderr() || output.stdout());
 	assert.equal(output.stderr(), '');
 	assert.match(output.stdout(), /first\n/);
 	assert.match(output.stdout(), /second\n/);

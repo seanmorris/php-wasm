@@ -130,10 +130,14 @@ test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test
 	delete cleanEnv.WITH_WAITLINE;
 	delete cleanEnv.MAKEFLAGS;
 	delete cleanEnv.MAKELEVEL;
+	// Deno 2.5.6 merges omitted child env keys with the parent environment.
+	const waitlineArgument = enabled === undefined
+		? '--eval=undefine WITH_WAITLINE'
+		: `WITH_WAITLINE=${enabled}`;
 	const result = spawnSync('make', [
 		'--no-print-directory', '-j4', '-f', 'Makefile', '-f', overrides
 		, 'ENV_FILE=/dev/null', 'PHP_VERSION=8.3', `PHP_BUILDER_DIR=${workspaceDir}`
-		, ...(enabled === undefined ? [] : [`WITH_WAITLINE=${enabled}`]), target
+		, waitlineArgument, target
 	], { cwd: repoRoot, encoding: 'utf8', env: cleanEnv });
 	return {
 		result
@@ -155,15 +159,27 @@ test('every waitline TEST_LIST consumer builds CLI MJS before clean parallel tes
 });
 
 test('disabled and default waitline preserve existing runtime prerequisites', t => {
-	for(const enabled of [0, undefined])
+	const previous = process.env.WITH_WAITLINE;
+	process.env.WITH_WAITLINE = '1';
+
+	try
 	{
-		for(const target of waitlineTestTargets)
+		for(const enabled of [0, undefined])
 		{
-			const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled });
-			assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
-			assert.equal(cliBuilt, target === 'test-node-standard', target);
-			assert.doesNotMatch(tests, /packages\/waitline\/test\//, target);
+			for(const target of waitlineTestTargets)
+			{
+				const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled });
+				const label = `${target} (WITH_WAITLINE=${enabled ?? 'unset'})`;
+				assert.equal(result.status, 0, `${label}: ${result.stdout}${result.stderr}`);
+				assert.equal(cliBuilt, target === 'test-node-standard', label);
+				assert.doesNotMatch(tests, /packages\/waitline\/test\//, label);
+			}
 		}
+	}
+	finally
+	{
+		if(previous === undefined) delete process.env.WITH_WAITLINE;
+		else process.env.WITH_WAITLINE = previous;
 	}
 });
 
