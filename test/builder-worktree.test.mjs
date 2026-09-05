@@ -95,6 +95,97 @@ function runBuilderFromWorkspace(t, args, options = {})
 	};
 }
 
+/**
+ * Exercise production prerequisites while replacing expensive build recipes.
+ * @param {object} t Node test context.
+ * @param {object} options Target and waitline configuration.
+ * @param {string} options.target Test target to exercise.
+ * @param {number} [options.enabled] Explicit waitline flag; omit to test its default.
+ * @param {boolean} [options.omitDependency] Remove the production rule as a negative control.
+ * @returns {object} Make result and observed fixture outputs.
+ */
+function runWaitlineMakeFixture(t, { target, enabled, omitDependency = false })
+{
+	const { workspaceDir, env } = createMakeWorkspace(t, 'php-wasm-waitline-deps-');
+	const packageDir = path.join(workspaceDir, 'waitline');
+	fs.mkdirSync(packageDir);
+	const preMake = fs.readFileSync(path.join(repoRoot, 'packages/waitline/pre.mak'), 'utf8');
+	const dependency = /^test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno: node-cli-mjs\r?\n/m;
+	if(omitDependency) assert.match(preMake, dependency, 'The negative control must remove the actual prerequisite rule');
+	fs.writeFileSync(path.join(packageDir, 'pre.mak'), omitDependency ? preMake.replace(dependency, '') : preMake);
+	writeExecutable(path.join(workspaceDir, 'bin/npm'), '#!/usr/bin/env bash\nprintf "%s\\n" "$WAITLINE_FIXTURE_PACKAGE"\n');
+	const overrides = path.join(workspaceDir, 'recipes.mak');
+	// Override recipes, not prerequisites: the production Make graph decides
+	// whether CLI MJS is built before the test recipe can consume it.
+	fs.writeFileSync(overrides, `
+node-mjs node-cgi-mjs node-js node-cli-js node-dbg-js node-dbg-mjs:
+\t@:
+node-cli-mjs:
+\t@printf 'built\\n' > '\${PHP_BUILDER_DIR}/cli-mjs'
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-browser:
+\t@printf '%s\\n' '\${TEST_LIST}' > '\${PHP_BUILDER_DIR}/tests'
+\t@if test '\${WITH_WAITLINE}' = 1 && test '$@' != test-bun && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
+`);
+	const cleanEnv = { ...env, WAITLINE_FIXTURE_PACKAGE: packageDir };
+	delete cleanEnv.WITH_WAITLINE;
+	delete cleanEnv.MAKEFLAGS;
+	delete cleanEnv.MAKELEVEL;
+	const result = spawnSync('make', [
+		'--no-print-directory', '-j4', '-f', 'Makefile', '-f', overrides
+		, 'ENV_FILE=/dev/null', 'PHP_VERSION=8.3', `PHP_BUILDER_DIR=${workspaceDir}`
+		, ...(enabled === undefined ? [] : [`WITH_WAITLINE=${enabled}`]), target
+	], { cwd: repoRoot, encoding: 'utf8', env: cleanEnv });
+	return {
+		result
+		, cliBuilt: fs.existsSync(path.join(workspaceDir, 'cli-mjs'))
+		, tests: fs.existsSync(path.join(workspaceDir, 'tests')) ? fs.readFileSync(path.join(workspaceDir, 'tests'), 'utf8') : ''
+	};
+}
+
+const waitlineTestTargets = ['test-node', 'test-node-standard', 'test-node-cjs', 'test-node-cjs-standard', 'test-deno'];
+
+test('every waitline TEST_LIST consumer builds CLI MJS before clean parallel tests', t => {
+	for(const target of waitlineTestTargets)
+	{
+		const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled: 1 });
+		assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
+		assert.equal(cliBuilt, true, target);
+		assert.match(tests, /packages\/waitline\/test\/basic\.mjs/, target);
+	}
+});
+
+test('disabled and default waitline preserve existing runtime prerequisites', t => {
+	for(const enabled of [0, undefined])
+	{
+		for(const target of waitlineTestTargets)
+		{
+			const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled });
+			assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
+			assert.equal(cliBuilt, target === 'test-node-standard', target);
+			assert.doesNotMatch(tests, /packages\/waitline\/test\//, target);
+		}
+	}
+});
+
+test('waitline does not add CLI prerequisites to focused Bun or browser tests', t => {
+	for(const target of ['test-bun', 'test-browser'])
+	{
+		const { result, cliBuilt } = runWaitlineMakeFixture(t, { target, enabled: 1 });
+		assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
+		assert.equal(cliBuilt, false, target);
+	}
+});
+
+test('waitline dependency regression rejects the original missing-prerequisite graph', t => {
+	for(const target of waitlineTestTargets.filter(target => target !== 'test-node-standard'))
+	{
+		const { result, cliBuilt } = runWaitlineMakeFixture(t, { target, enabled: 1, omitDependency: true });
+		assert.notEqual(result.status, 0, target);
+		assert.match(result.stderr, /CLI MJS prerequisite missing/, target);
+		assert.equal(cliBuilt, false, target);
+	}
+});
+
 test('php-wasm-builder build scaffolds runtime package trees in the target directory before invoking make', t => {
 	const { result, workspaceDir, log } = runBuilderFromWorkspace(t, ['build', 'node', 'cgi', 'mjs']);
 

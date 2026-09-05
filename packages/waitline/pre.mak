@@ -10,5 +10,6 @@ DEPENDENCIES+= third_party/waitline/waitline.c
 CGI_DEPENDENCIES+= third_party/waitline/waitline.c
 # DBG_DEPENDENCIES+= third_party/waitline/waitline.c
 TEST_LIST+=$(shell ls packages/waitline/test/*.mjs)
+# All TEST_LIST consumers run the ESM waitline tests, including CJS lanes.
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno: node-cli-mjs
 endif
-

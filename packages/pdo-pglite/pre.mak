@@ -1,17 +1,20 @@
 #!/usr/bin/env make
 WITH_PDO_PGLITE?=1
 
-ifeq (${WITH_PDO_PGLITE}, 1)
+ifeq (${WITH_PDO_PGLITE},1)
 WITH_VRZNO?=1
 ifneq (${WITH_VRZNO},1)
 $(error WITH_PDO_PGLITE=1 requires WITH_VRZNO=1)
 endif
 
 EXTRA_FLAGS+= -D WITH_PDO_PGLITE=1
-PHP_CONFIGURE_DEPS+= third_party/pdo-pglite/config.m4  third_party/pdo-pglite/README.md
+PDO_PGLITE_SOURCE_STAMP=third_party/pdo-pglite/.php-wasm-source.json
+PDO_PGLITE_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/pdo_pglite/.php-wasm-source.json
+PHP_CONFIGURE_DEPS+= ${PDO_PGLITE_EXTENSION_STAMP}
 CONFIGURE_FLAGS+= --enable-pdo-pglite
-DEPENDENCIES+= third_party/php${PHP_VERSION}-src/ext/pdo_pglite/pdo_pglite.c
-CGI_DEPENDENCIES+=  third_party/php${PHP_VERSION}-src/ext/pdo_pglite/pdo_pglite.c
-DBG_DEPENDENCIES+=  third_party/php${PHP_VERSION}-src/ext/pdo_pglite/pdo_pglite.c
-TEST_LIST+=$(shell ls packages/pdo-pglite/test/*.mjs)
+DEPENDENCIES+= ${PDO_PGLITE_EXTENSION_STAMP}
+CLI_DEPENDENCIES+= ${PDO_PGLITE_EXTENSION_STAMP}
+CGI_DEPENDENCIES+= ${PDO_PGLITE_EXTENSION_STAMP}
+DBG_DEPENDENCIES+= ${PDO_PGLITE_EXTENSION_STAMP}
+TEST_LIST+=$(wildcard packages/pdo-pglite/test/*.mjs)
 endif

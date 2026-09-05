@@ -9,6 +9,7 @@
   "version": "0.1.0",
   "files": [
     "README.md",
+    "import-source.mjs",
     "pre.mak",
     "static.mak"
   ],

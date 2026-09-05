@@ -3,6 +3,11 @@ import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../test/lib/PhpNode.mjs';
 import { PGlite } from '@electric-sql/pglite';
 
+const createPhp = () => new PhpNode({
+	PGlite,
+	ini: 'display_errors=Off\nlog_errors=On\nerror_log=/dev/stderr\nhtml_errors=Off\nerror_reporting=E_ALL\n',
+});
+
 const captureOutput = php => {
 	let stdout = '';
 	let stderr = '';
@@ -17,7 +22,7 @@ const captureOutput = php => {
 };
 
 test('PDO PGlite supports Drupal PostgreSQL connection attributes', {timeout: 30_000}, async () => {
-	const php = new PhpNode({PGlite});
+	const php = createPhp();
 	const output = captureOutput(php);
 
 	await php.binary;
@@ -56,7 +61,7 @@ test('PDO PGlite supports Drupal PostgreSQL connection attributes', {timeout: 30
 		echo json_encode($result, JSON_THROW_ON_ERROR);
 	`);
 
-	assert.equal(exitCode, 0);
+	assert.equal(exitCode, 0, output.stderr());
 	assert.equal(output.stderr(), '');
 
 	const result = JSON.parse(output.stdout());
@@ -74,8 +79,91 @@ test('PDO PGlite supports Drupal PostgreSQL connection attributes', {timeout: 30
 	assert.equal(result.client_version, result.server_version);
 });
 
+test('PDO PGlite STRINGIFY_FETCHES tracks connection state and fetched types', {timeout: 30_000}, async () => {
+	const php = createPhp();
+	const output = captureOutput(php);
+
+	await php.binary;
+
+	const exitCode = await php.run(String.raw`<?php
+		$options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+		$pdo = new PDO('pgsql:', NULL, NULL, $options);
+		$stringified = new PDO('pgsql:', NULL, NULL, $options + [
+			PDO::ATTR_STRINGIFY_FETCHES => TRUE,
+		]);
+		$native = new PDO('pgsql:', NULL, NULL, $options + [
+			PDO::ATTR_STRINGIFY_FETCHES => FALSE,
+		]);
+		$sql = <<<'SQL'
+			SELECT 42::integer, 1.5::double precision, TRUE, FALSE, NULL::integer, '007'::text
+		SQL;
+		$fetch = static fn (PDO $connection): array => $connection
+			->query($sql)->fetch(PDO::FETCH_NUM);
+
+		$result = [
+			'initial_attributes' => [
+				$pdo->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+				$stringified->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+				$native->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+			],
+			'initial_rows' => [$fetch($pdo), $fetch($stringified), $fetch($native)],
+			'changes' => [],
+		];
+
+		foreach([TRUE, FALSE, TRUE, FALSE] as $enabled)
+		{
+			$result['changes'][] = [
+				'set' => $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, $enabled),
+				'attribute' => $pdo->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+				'row' => $fetch($pdo),
+				'other_attributes' => [
+					$stringified->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+					$native->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+				],
+			];
+		}
+		$result['other_rows'] = [$fetch($stringified), $fetch($native)];
+
+		// Fetching an already-executed statement observes the current PDO state.
+		foreach([TRUE, FALSE] as $enabled)
+		{
+			$statement = $pdo->query($sql);
+			$result['deferred_fetch'][] = [
+				'set' => $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, $enabled),
+				'attribute' => $pdo->getAttribute(PDO::ATTR_STRINGIFY_FETCHES),
+				'row' => $statement->fetch(PDO::FETCH_NUM),
+			];
+		}
+
+		echo json_encode($result, JSON_THROW_ON_ERROR);
+	`);
+
+	assert.equal(exitCode, 0, output.stderr());
+	assert.equal(output.stderr(), '');
+
+	const native = [42, 1.5, true, false, null, '007'];
+	const stringified = ['42', '1.5', '1', '0', null, '007'];
+
+	assert.deepEqual(JSON.parse(output.stdout()), {
+		initial_attributes: [false, true, false]
+		, initial_rows: [native, stringified, native]
+		, changes: [true, false, true, false].map(enabled => ({
+			set: true
+			, attribute: enabled
+			, row: enabled ? stringified : native
+			, other_attributes: [true, false]
+		}))
+		, other_rows: [stringified, native]
+		, deferred_fetch: [true, false].map(enabled => ({
+			set: true
+			, attribute: enabled
+			, row: enabled ? stringified : native
+		}))
+	});
+});
+
 test('PDO PGlite supports PDO queries, values, and transactions', {timeout: 30_000}, async () => {
-	const php = new PhpNode({PGlite});
+	const php = createPhp();
 	const output = captureOutput(php);
 
 	await php.binary;
@@ -275,7 +363,7 @@ test('PDO PGlite supports PDO queries, values, and transactions', {timeout: 30_0
 		echo json_encode($result, JSON_THROW_ON_ERROR);
 	`);
 
-	assert.equal(exitCode, 0);
+	assert.equal(exitCode, 0, output.stderr());
 	assert.equal(output.stderr(), '');
 
 	const result = JSON.parse(output.stdout());

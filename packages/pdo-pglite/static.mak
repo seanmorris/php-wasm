@@ -1,25 +1,31 @@
 #!/usr/bin/env make
 
+PDO_PGLITE_IMPORTER:=$(patsubst $(CURDIR)/%,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))import-source.mjs
 PDO_PGLITE_REPOSITORY?=https://github.com/seanmorris/pdo-pglite.git
-PDO_PGLITE_REF?=429bfeae617e74e47550fe2a3e6be0c681cc2a8c
+PDO_PGLITE_REF?=6303e1f0e337b06f04cef162e6d1ca62ab4bd1ce
+PDO_PGLITE_SOURCE_STAMP?=third_party/pdo-pglite/.php-wasm-source.json
+PDO_PGLITE_EXTENSION_STAMP?=third_party/php${PHP_VERSION}-src/ext/pdo_pglite/.php-wasm-source.json
+pdo_pglite_shell_quote = '$(subst ','"'"',$(1))'
 
-third_party/pdo-pglite/README.md: third_party/pdo-pglite/pdo_pglite.c
-third_party/pdo-pglite/config.m4: third_party/pdo-pglite/pdo_pglite.c
+.PHONY: pdo-pglite-import-check
+pdo-pglite-import-check:
 
+# Check content and active identity every time, preserving mtimes on no-ops.
+${PDO_PGLITE_SOURCE_STAMP}: SHELL := /bin/bash
+${PDO_PGLITE_SOURCE_STAMP}: .SHELLFLAGS := -e -o pipefail -c
+${PDO_PGLITE_SOURCE_STAMP}: pdo-pglite-import-check
 ifdef PDO_PGLITE_DEV_PATH
-third_party/pdo-pglite/pdo_pglite.c: $(wildcard ${PDO_PGLITE_DEV_PATH}/*)
-	echo -e "\e[33;4mImporting pdo-pglite\e[0m"
-	- ${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) third_party/pdo-pglite
-	cp -Lrfv ${PDO_PGLITE_DEV_PATH} third_party/
+	@node $(call pdo_pglite_shell_quote,${PDO_PGLITE_IMPORTER}) snapshot $(call pdo_pglite_shell_quote,${PDO_PGLITE_DEV_PATH}) $(call pdo_pglite_shell_quote,${PHP_VERSION}) | ${DOCKER_RUN} node $(call pdo_pglite_shell_quote,${PDO_PGLITE_IMPORTER}) stage --stdin
 else
-third_party/pdo-pglite/pdo_pglite.c:
-	@ echo -e "\e[33;4mDownloading and importing pdo-pglite\e[0m"
-	${DOCKER_RUN} git init third_party/pdo-pglite
-	${DOCKER_RUN} git -C third_party/pdo-pglite remote add origin ${PDO_PGLITE_REPOSITORY}
-	${DOCKER_RUN} git -C third_party/pdo-pglite fetch --depth 1 origin ${PDO_PGLITE_REF}
-	${DOCKER_RUN} git -C third_party/pdo-pglite checkout --detach FETCH_HEAD
+	@${DOCKER_RUN} node $(call pdo_pglite_shell_quote,${PDO_PGLITE_IMPORTER}) stage $(call pdo_pglite_shell_quote,${PDO_PGLITE_REPOSITORY}) $(call pdo_pglite_shell_quote,${PDO_PGLITE_REF})
 endif
 
-third_party/php${PHP_VERSION}-src/ext/pdo_pglite/%: third_party/pdo-pglite/% third_party/php${PHP_VERSION}-src/patched
-	@ echo -e "\e[33;4mimporting pdo_pglite\e[0m"
-	${DOCKER_RUN} cp -TLrfv third_party/pdo-pglite/ third_party/php${PHP_VERSION}-src/ext/pdo_pglite
+${PDO_PGLITE_EXTENSION_STAMP}: ${PDO_PGLITE_SOURCE_STAMP} third_party/php${PHP_VERSION}-src/.gitignore pdo-pglite-import-check
+	@${DOCKER_RUN} node $(call pdo_pglite_shell_quote,${PDO_PGLITE_IMPORTER}) sync $(call pdo_pglite_shell_quote,${PHP_VERSION})
+
+# Compatibility targets only verify imported files; the builder owns writes.
+third_party/pdo-pglite/pdo_pglite.c third_party/pdo-pglite/config.m4 third_party/pdo-pglite/README.md: ${PDO_PGLITE_SOURCE_STAMP}
+	@test -f "$@"
+
+third_party/php${PHP_VERSION}-src/ext/pdo_pglite/pdo_pglite.c third_party/php${PHP_VERSION}-src/ext/pdo_pglite/config.m4: ${PDO_PGLITE_EXTENSION_STAMP}
+	@test -f "$@"
