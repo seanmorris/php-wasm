@@ -3,7 +3,7 @@ WITH_VRZNO?=1
 
 ifeq (${WITH_VRZNO},1)
 VRZNO_REPOSITORY?=https://github.com/seanmorris/vrzno.git
-VRZNO_REF?=8f189484ee12c2d973b8825ca4297ca5813243a4
+VRZNO_REF?=cd59c956df6680344122eff5a4ccc96ab7c11b31
 EXTRA_FLAGS+= -D WITH_VRZNO=1
 VRZNO_SOURCE_STAMP=third_party/vrzno/.php-wasm-source.json
 VRZNO_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/vrzno/.php-wasm-source.json
