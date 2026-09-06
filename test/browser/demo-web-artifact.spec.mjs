@@ -41,7 +41,8 @@ test('home page uses the production base path', async ({ page }) => {
 		{
 			for(const rule of sheet.cssRules)
 			{
-				if(!(rule instanceof CSSStyleRule) || !rule.style.height)
+				// Width-only and wrapping-only rules must reach their checks too.
+				if(!(rule instanceof CSSStyleRule))
 				{
 					continue;
 				}
@@ -50,22 +51,22 @@ test('home page uses the production base path', async ({ page }) => {
 					.split(',')
 					.map(selector => selector.trim());
 
-				if(selectors.includes('body'))
+				if(selectors.includes('body') && rule.style.height)
 				{
 					bodyHeightRules.push(rule.style.height);
 				}
 
-				if(selectors.includes('.viewport-page'))
+				if(selectors.includes('.viewport-page') && rule.style.height)
 				{
 					viewportPageHeightRules.push(rule.style.height);
 				}
 
-				if(selectors.includes('.install-demo > .bevel'))
+				if(selectors.includes('.install-demo > .bevel') && rule.style.width)
 				{
 					installerCardWidths.push(rule.style.width);
 				}
 
-				if(selectors.includes('.install-demo h2'))
+				if(selectors.includes('.install-demo h2') && rule.style.overflowWrap)
 				{
 					installerMessageWrapRules.push(rule.style.overflowWrap);
 				}
@@ -420,8 +421,11 @@ test('Drupal database modal opens the selected installer with an opener', async 
 	await databaseDialog.getByRole('button', {name: 'Start'}).click();
 
 	const popup = await popupPromise;
+	const installerUrl = /install-demo\.html\?framework=drupal-11&database=pgsql/;
 
-	await expect(popup).toHaveURL(/install-demo\.html\?framework=drupal-11&database=pgsql/);
+	// The popup event can arrive while its initial blank document is unloading.
+	await popup.waitForURL(installerUrl, {waitUntil: 'domcontentloaded', timeout: 5000});
+	await expect(popup).toHaveURL(installerUrl);
 	expect(await popup.evaluate(() => window.opener === window.opener?.top)).toBe(true);
 	await popup.close();
 });
