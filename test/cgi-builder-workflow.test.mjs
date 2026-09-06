@@ -9,6 +9,7 @@ import { test } from 'node:test';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const workflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test-cgi-node-step.yaml'), 'utf8');
 const nodeWorkflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test-node-step.yaml'), 'utf8');
+const testWorkflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test.yaml'), 'utf8');
 const guardPath = path.join(repoRoot, '.github/bin/verify-builder-git.sh');
 const guard = fs.readFileSync(guardPath, 'utf8');
 const builderImage = process.env.BUILDER_GIT_TEST_IMAGE;
@@ -94,6 +95,56 @@ test('CGI preparation contract rejects missing steps, wrong ordering and stale c
 		mutations.push(workflow.replace(a, '__FIRST_STEP__').replace(b, a).replace('__FIRST_STEP__', b));
 	}
 	for(const contents of mutations) assert.throws(() => assertPreparedBuilder(contents));
+});
+
+/**
+ * Check that the fast gate installs locked development dependencies before tests.
+ * @param {string} contents Workflow source.
+ * @returns {void} Nothing.
+ */
+function assertFastGateDependencies(contents)
+{
+	const gate = contents.split(/^  vrzno-importer:\n/m)[1]?.split(/^  [\w-]+:\n/m)[0];
+	assert.ok(gate, 'The build infrastructure gate must exist');
+	const install = step(gate, 'Install locked dependencies');
+	const node = step(gate, 'Test build helpers under inherited Make settings (Node)');
+	const deno = step(gate, 'Test build helpers under inherited Make settings (Deno)');
+	const setup = gate.indexOf('      - uses: actions/setup-node@v6\n');
+	assert.notEqual(setup, -1, 'The gate must prepare Node before installing dependencies');
+	assert.ok(setup < gate.indexOf(install), 'Dependencies must use the prepared Node version');
+	assert.match(install, /^        run: npm ci$/m, 'Install the lockfile, including the Node types used by Deno');
+	assert.doesNotMatch(install, /^        (?:if|working-directory):/m, 'Every gate run needs the root development dependencies');
+	for(const consumer of [node, deno])
+	{
+		assert.ok(gate.indexOf(install) < gate.indexOf(consumer), 'Install dependencies before each runtime test suite');
+		assert.match(consumer, /test\/cgi-builder-workflow\.test\.mjs/, 'The gate must run its own preparation regression');
+	}
+	assert.match(node, /^        run: node --test /m);
+	assert.match(deno, /^        run: deno test /m);
+	assert.doesNotMatch(deno, /--no-check\b/, 'Do not suppress typechecking to hide missing development dependencies');
+}
+
+test('fast build gate installs locked dependencies before Node and typechecked Deno tests', () => {
+	assertFastGateDependencies(testWorkflow);
+});
+
+test('fast gate dependency contract rejects missing installs, late installs and disabled typechecking', () => {
+	const install = step(testWorkflow, 'Install locked dependencies');
+	const mutations = [
+		testWorkflow.replace(install, '')
+		, testWorkflow.replace('run: npm ci', 'run: npm install')
+		, testWorkflow.replace('run: npm ci', 'run: npm ci --omit=dev')
+		, testWorkflow.replace('run: npm ci', "if: false\n        run: npm ci")
+		, testWorkflow.replace('run: deno test ', 'run: deno test --no-check ')
+	];
+	for(const name of [
+		'Test build helpers under inherited Make settings (Node)'
+		, 'Test build helpers under inherited Make settings (Deno)'
+	]){
+		const consumer = step(testWorkflow, name);
+		mutations.push(testWorkflow.replace(install, '__INSTALL_STEP__').replace(consumer, install).replace('__INSTALL_STEP__', consumer));
+	}
+	for(const contents of mutations) assert.throws(() => assertFastGateDependencies(contents));
 });
 
 /**

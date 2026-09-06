@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci
       - name: Install Deno
         run: npm install -g deno@2.5.6
       - name: Test build helpers under inherited Make settings (Node)
