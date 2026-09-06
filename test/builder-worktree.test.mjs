@@ -5,6 +5,9 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
+import makeEnvironment from '../bin/make-environment.cjs';
+
+const { independentMakeEnvironment } = makeEnvironment;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const builderScript = path.join(repoRoot, 'bin/php-wasm-builder.js');
@@ -14,6 +17,39 @@ const runtimePackages = [
 	, 'php-cli-wasm'
 	, 'php-dbg-wasm'
 ];
+const inheritedMakeCases = [
+	{ name: 'source environment', flags: {} }
+	, { name: 'debug flags', flags: { MAKEFLAGS: '--debug=basic', MFLAGS: '--debug=basic' } }
+	, { name: 'command-line overrides'
+		, flags: {
+			MAKEFLAGS: '-- PHP_VERSION=8.3 LIB_TYPE=dynamic'
+			, MAKEOVERRIDES: '${-*-command-variables-*-}'
+		}
+	}
+	, { name: 'debug flags and overrides'
+		, flags: {
+			MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=dynamic'
+			, MFLAGS: '--debug=basic'
+			, MAKEOVERRIDES: '${-*-command-variables-*-}'
+		}
+	}
+	, { name: 'GNU-specific debug flags', flags: { GNUMAKEFLAGS: '--debug=basic' } }
+];
+
+/**
+ * Construct a contaminated outer-Make environment for subprocess regressions.
+ * @param {object} flags Invocation state to add to the environment.
+ * @returns {object} Environment passed unchanged to the process under test.
+ */
+function inheritedMakeEnvironment(flags = {})
+{
+	return {
+		...process.env,
+		MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', MAKELEVEL: '2', GNUMAKEFLAGS: ''
+		, PHP_VERSION: '8.3', LIB_TYPE: 'dynamic'
+		, ...flags
+	};
+}
 
 function escapeRegExp(value)
 {
@@ -69,7 +105,7 @@ exit 0
 	return {
 		workspaceDir
 		, env: {
-			...process.env,
+			...independentMakeEnvironment(),
 			PATH: `${binDir}:${process.env.PATH ?? ''}`
 		}
 	};
@@ -94,6 +130,70 @@ function runBuilderFromWorkspace(t, args, options = {})
 		, log: fs.existsSync(logFile) ? fs.readFileSync(logFile, 'utf8') : ''
 	};
 }
+
+test('independent Make environments explicitly clear invocation state and preserve configuration', () => {
+	const original = inheritedMakeEnvironment({
+		MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3'
+		, MAKEFILES: '/fixture/config.mak'
+		, ENV_FILE: '/fixture/.php-wasm-rc'
+		, PHP_ASSET_DIR: '/fixture/assets'
+	});
+	const environment = independentMakeEnvironment(original);
+	const controls = ['MAKEFLAGS', 'MFLAGS', 'MAKEOVERRIDES', 'MAKELEVEL', 'GNUMAKEFLAGS'];
+
+	assert.notEqual(environment, original);
+	assert.equal(original.MAKEFLAGS, '--debug=basic -- PHP_VERSION=8.3');
+
+	for(const key of controls)
+	{
+		assert.ok(Object.hasOwn(environment, key), `${key} must not be omitted: Deno restores omitted parent keys`);
+		assert.equal(environment[key], '', key);
+	}
+
+	for(const key of Object.keys(original).filter(key => !controls.includes(key)))
+	{
+		assert.equal(environment[key], original[key], `${key} must retain its original configuration value`);
+	}
+});
+
+test('independent Make queries separate inherited flags and overrides from PHP environment settings', async t => {
+	for(const { name, flags } of inheritedMakeCases)
+	{
+		await t.test(name, () => {
+			const environment = independentMakeEnvironment(inheritedMakeEnvironment(flags));
+			const options = ['--no-print-directory', '-f', 'info.mak', 'get-php-version', 'ENV_FILE=/dev/null'];
+			const configured = spawnSync('make', options, { cwd: repoRoot, encoding: 'utf8', env: environment });
+			const fallback = spawnSync('make', ['--eval=undefine PHP_VERSION', ...options], {
+				cwd: repoRoot, encoding: 'utf8', env: environment
+			});
+
+			assert.equal(configured.status, 0, configured.stderr);
+			assert.equal(configured.stdout.trim(), '8.3', 'ordinary environment configuration must remain available');
+			assert.equal(fallback.status, 0, fallback.stderr);
+			assert.equal(fallback.stdout.trim(), '8.4', 'the default query must not inherit command-line overrides');
+		});
+	}
+});
+
+test('normal builder builds preserve inherited Make invocation state and configuration', t => {
+	const { workspaceDir, binDir } = createBuilderWorkspace(t);
+	const values = {
+		MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3'
+		, MFLAGS: '--debug=basic', MAKEOVERRIDES: '${-*-command-variables-*-}'
+		, MAKELEVEL: '2'
+		, GNUMAKEFLAGS: '--warn-undefined-variables', MAKEFILES: '/fixture/config.mak'
+		, PHP_VERSION: '8.3', LIB_TYPE: 'shared', PHP_ASSET_DIR: '/fixture/assets'
+	};
+	writeExecutable(path.join(binDir, 'make'), '#!/usr/bin/env node\n'
+		+ `process.stdout.write(JSON.stringify(Object.fromEntries(${JSON.stringify(Object.keys(values))}.map(key => [key, process.env[key]]))));\n`);
+	const result = spawnSync('node', [builderScript, 'build', 'node', 'mjs'], {
+		cwd: workspaceDir, encoding: 'utf8'
+		, env: { ...process.env, ...values, PATH: `${binDir}:${process.env.PATH ?? ''}` }
+	});
+
+	assert.equal(result.status, 0, result.stderr);
+	assert.deepEqual(JSON.parse(result.stdout), values);
+});
 
 /**
  * Exercise production prerequisites while replacing expensive build recipes.
@@ -128,8 +228,6 @@ test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test
 `);
 	const cleanEnv = { ...env, WAITLINE_FIXTURE_PACKAGE: packageDir };
 	delete cleanEnv.WITH_WAITLINE;
-	delete cleanEnv.MAKEFLAGS;
-	delete cleanEnv.MAKELEVEL;
 	// Deno 2.5.6 merges omitted child env keys with the parent environment.
 	const waitlineArgument = enabled === undefined
 		? '--eval=undefine WITH_WAITLINE'
@@ -466,6 +564,7 @@ test('info.mak resolves a relative PHP_ASSET_DIR from PHP_BUILDER_DIR', t => {
 		{
 			cwd: repoRoot
 			, encoding: 'utf8'
+			, env: independentMakeEnvironment()
 		}
 	);
 
@@ -489,6 +588,7 @@ test('info.mak defaults PHP_VERSION to 8.4 for copy-assets filtering', () => {
 		{
 			cwd: repoRoot
 			, encoding: 'utf8'
+			, env: independentMakeEnvironment()
 		}
 	);
 
@@ -496,7 +596,15 @@ test('info.mak defaults PHP_VERSION to 8.4 for copy-assets filtering', () => {
 	assert.equal(result.stdout.trim(), '8.4');
 });
 
-test('php-wasm-builder copy-assets copies shared libraries and data files into PHP_ASSET_DIR in the workspace', t => {
+/**
+ * Create isolated package assets and a CLI launcher that preserves its input env.
+ * @param {object} t Test context owning the fixture cleanup.
+ * @param {object} options Fixture configuration.
+ * @param {boolean} [options.withRc] Include a workspace PHP configuration file.
+ * @returns {object} Fixture paths and the production CLI launcher.
+ */
+function createCopyAssetsWorkspace(t, { withRc = true } = {})
+{
 	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-builder-copy-assets-'));
 	const binDir = path.join(workspaceDir, 'bin');
 	const dependencyDir = path.join(workspaceDir, 'node_modules', 'fixture-dependency');
@@ -541,30 +649,103 @@ exit 1
 	fs.writeFileSync(path.join(dependencyDir, 'dist', 'php8.4-example.so'), 'matching\n', 'utf8');
 	fs.writeFileSync(path.join(dependencyDir, 'dist', 'php8.3-example.so'), 'mismatch\n', 'utf8');
 	fs.writeFileSync(path.join(dependencyDir, 'dist', 'example.dat'), 'data\n', 'utf8');
-	fs.writeFileSync(
-		rcFile,
-		[
-			'PHP_VERSION=8.4'
-			, 'PHP_ASSET_DIR=./public/assets'
-			, ''
-		].join('\n'),
-		'utf8'
-	);
+	if(withRc)
+	{
+		fs.writeFileSync(
+			rcFile,
+			[
+				'PHP_VERSION=8.4'
+				, 'PHP_ASSET_DIR=./public/assets'
+				, ''
+			].join('\n'),
+			'utf8'
+		);
+	}
 
-	const result = spawnSync('node', [builderScript, 'copy-assets'], {
-		cwd: workspaceDir
-		, encoding: 'utf8'
-		, env: {
-			...process.env,
-			PATH: `${binDir}:${process.env.PATH ?? ''}`
-			, WORKSPACE_DIR: workspaceDir
-		}
-	});
+	return {
+		workspaceDir, binDir, outputDir
+		, run: (environment = process.env, executable = 'node') => spawnSync(executable, [builderScript, 'copy-assets'], {
+			cwd: workspaceDir
+			, encoding: 'utf8'
+			, env: {
+				...environment,
+				PATH: `${binDir}:${environment.PATH ?? ''}`
+				, WORKSPACE_DIR: workspaceDir
+			}
+		})
+	};
+}
+
+test('php-wasm-builder copy-assets copies shared libraries and data files into PHP_ASSET_DIR in the workspace', async t => {
+	for(const { name, flags } of inheritedMakeCases)
+	{
+		await t.test(name, t => {
+			const { outputDir, run } = createCopyAssetsWorkspace(t);
+			// Do not isolate this launcher: the production metadata queries must do it.
+			const result = run(inheritedMakeEnvironment(flags));
+
+			assert.equal(result.status, 0, result.stderr);
+			assert.ok(fs.existsSync(path.join(outputDir, 'root-support.dat')));
+			assert.ok(fs.existsSync(path.join(outputDir, 'libexample.so')));
+			assert.ok(fs.existsSync(path.join(outputDir, 'php8.4-example.so')));
+			assert.ok(fs.existsSync(path.join(outputDir, 'example.dat')));
+			assert.ok(!fs.existsSync(path.join(outputDir, 'php8.3-example.so')));
+		});
+	}
+});
+
+test('copy-assets preserves environment configuration when no rc file selects a PHP version', t => {
+	const { outputDir, run } = createCopyAssetsWorkspace(t, { withRc: false });
+	const result = run(inheritedMakeEnvironment({ ENV_FILE: '/dev/null', PHP_ASSET_DIR: './public/assets' }));
 
 	assert.equal(result.status, 0, result.stderr);
-	assert.ok(fs.existsSync(path.join(outputDir, 'root-support.dat')));
-	assert.ok(fs.existsSync(path.join(outputDir, 'libexample.so')));
-	assert.ok(fs.existsSync(path.join(outputDir, 'php8.4-example.so')));
-	assert.ok(fs.existsSync(path.join(outputDir, 'example.dat')));
-	assert.ok(!fs.existsSync(path.join(outputDir, 'php8.3-example.so')));
+	assert.ok(fs.existsSync(path.join(outputDir, 'php8.3-example.so')));
+	assert.ok(!fs.existsSync(path.join(outputDir, 'php8.4-example.so')));
+});
+
+test('copy-assets rejects failed or invalid metadata before creating the asset destination', async t => {
+	const failures = [
+		{ name: 'nonzero status', script: 'echo fixture-query-error >&2; exit 23', error: /exit status 23.*fixture-query-error/ }
+		, { name: 'signal', script: 'kill -TERM $$', error: /signal SIGTERM/ }
+		, { name: 'empty output', script: 'exit 0', error: /empty output/ }
+		, { name: 'multiline output', script: 'printf "first\\nsecond\\n"; exit 0', error: /multiline output/ }
+	];
+
+	for(const target of ['get-asset-path', 'get-php-version'])
+	{
+		for(const { name, script, error } of failures)
+		{
+			await t.test(`${target}: ${name}`, t => {
+				const { binDir, outputDir, run } = createCopyAssetsWorkspace(t);
+				writeExecutable(path.join(binDir, 'make'), `#!/usr/bin/env bash
+if [ "$1" = '${target}' ]; then
+  ${script}
+fi
+case "$1" in
+  get-asset-path) printf '%s\\n' "$WORKSPACE_DIR/public/assets" ;;
+  get-php-version) printf '8.4\\n' ;;
+esac
+`);
+				const result = run();
+
+				assert.equal(result.status, 1);
+				assert.match(result.stderr, new RegExp(`Make query ${target}`));
+				assert.match(result.stderr, error);
+				assert.equal(fs.existsSync(outputDir), false, 'invalid metadata must not create an asset destination');
+			});
+		}
+	}
+
+	await t.test('spawn error', t => {
+		const { binDir, outputDir, run } = createCopyAssetsWorkspace(t);
+		const node = spawnSync('node', ['-p', 'process.execPath'], { encoding: 'utf8' });
+		assert.equal(node.status, 0, node.stderr);
+		fs.symlinkSync('/bin/bash', path.join(binDir, 'bash'));
+		// Use the already-permitted Node executable, but do not let PATH find Make.
+		const result = run({ ...process.env, PATH: binDir }, node.stdout.trim());
+
+		assert.equal(result.status, 1, result.error?.message ?? result.stderr);
+		assert.match(result.stderr, /Make query get-asset-path failed:.*ENOENT/);
+		assert.equal(fs.existsSync(outputDir), false);
+	});
 });

@@ -5,6 +5,9 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
+import makeEnvironment from '../bin/make-environment.cjs';
+
+const { independentMakeEnvironment } = makeEnvironment;
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -65,7 +68,7 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 			cwd: repoRoot
 			, encoding: 'utf8'
 			, env: {
-				...process.env,
+				...independentMakeEnvironment(),
 				HOME: homeDir
 				, PATH: `${binDir}:${process.env.PATH ?? ''}`
 			}
@@ -124,7 +127,7 @@ test('package pre.mak additions remain available to builder preload collection',
 			cwd: repoRoot
 			, encoding: 'utf8'
 			, env: {
-				...process.env,
+				...independentMakeEnvironment(),
 				PATH: `${binDir}:${process.env.PATH ?? ''}`
 			}
 		}

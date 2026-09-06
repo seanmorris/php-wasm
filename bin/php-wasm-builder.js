@@ -2,6 +2,7 @@
 const child_process = require('node:child_process');
 const path = require('path');
 const fs  = require("fs");
+const { independentMakeEnvironment } = require('./make-environment.cjs');
 var tty = require('tty');
 
 const args = process.argv.slice(2);
@@ -102,6 +103,35 @@ const runMake = options => {
 	}
 
 	return result.status ?? 1;
+};
+
+const queryMake = (target, options) => {
+	const result = child_process.spawnSync('make', [target, ...options], {
+		cwd: repoRoot,
+		encoding: 'utf8',
+		env: independentMakeEnvironment(),
+	});
+
+	if(result.error)
+	{
+		throw new Error(`Make query ${target} failed: ${result.error.message}`, {cause: result.error});
+	}
+
+	if(result.signal || result.status !== 0)
+	{
+		const reason = result.signal ? `signal ${result.signal}` : `exit status ${result.status}`;
+		const detail = result.stderr?.trim();
+		throw new Error(`Make query ${target} failed (${reason})${detail ? `: ${detail}` : ''}`);
+	}
+
+	const value = result.stdout.trim();
+
+	if(!value || /[\r\n]/.test(value))
+	{
+		throw new Error(`Make query ${target} returned ${value ? 'multiline' : 'empty'} output`);
+	}
+
+	return value;
 };
 
 const parseBuildArgs = buildArgs => {
@@ -294,16 +324,8 @@ Build the docker image used by php-wasm-builder.
 			options.push(`ENV_FILE=${rcFile}`);
 		}
 
-		const getAssetPath = child_process.spawnSync(`make`, ['get-asset-path'].concat(options), {
-			cwd: __dirname + '/..', encoding : 'utf8'
-		});
-
-		const getPhpVersion = child_process.spawnSync(`make`, ['get-php-version'].concat(options), {
-			cwd: __dirname + '/..', encoding : 'utf8'
-		});
-
-		const assetPath  = getAssetPath.stdout.trim();
-		const phpVersion = getPhpVersion.stdout.trim();
+		const assetPath = queryMake('get-asset-path', options);
+		const phpVersion = queryMake('get-php-version', options);
 
 		fs.mkdirSync(assetPath, {recursive: true});
 
