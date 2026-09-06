@@ -15,12 +15,12 @@ if [[ ! "${DELAY_SECONDS}" =~ ^[0-9]+$ ]]; then
 	exit 2
 fi
 
-if (( $# != 2 )); then
-	echo "usage: retry-download.sh <url> <output-file>" >&2
+if (( $# < 2 )); then
+	echo "usage: retry-download.sh <url> <output-file> [fallback-url ...]" >&2
 	exit 2
 fi
 
-URL="$1"
+URLS=("$1" "${@:3}")
 OUTPUT_FILE="$2"
 PART_FILE="${OUTPUT_FILE}.part.$$"
 trap 'rm -f "${PART_FILE}"' EXIT
@@ -29,6 +29,10 @@ attempt=1
 delay="${DELAY_SECONDS}"
 
 while true; do
+	# Share the bounded attempt budget across sources. Existing two-argument
+	# callers keep retrying the same URL; fallback callers rotate after failures.
+	url_index=$(( (attempt - 1) % ${#URLS[@]} ))
+	URL="${URLS[url_index]}"
 	echo "download attempt ${attempt}/${MAX_ATTEMPTS}: ${URL}" >&2
 	rm -f "${PART_FILE}"
 

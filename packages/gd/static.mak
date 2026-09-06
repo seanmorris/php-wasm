@@ -191,7 +191,10 @@ packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/
 
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
-	${DOCKER_RUN} /src/.github/bin/retry-download.sh https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz freetype-${FREETYPE_VERSION}.tar.gz
+	${DOCKER_RUN} /src/.github/bin/retry-download.sh \
+		https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz \
+		freetype-${FREETYPE_VERSION}.tar.gz \
+		https://downloads.sourceforge.net/project/freetype/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 
