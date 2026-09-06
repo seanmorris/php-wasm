@@ -31,6 +31,29 @@ jobs:
           cp -p .github/.env_${{ inputs.phpVersion }}.${{ inputs.libType }}.ci .env
           touch -d '1970-01-01 00:00:00 UTC' .env
 
+      - name: Cache Docker image
+        id: cache-docker-image
+        uses: actions/cache@v5
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh') }}
+
+      - name: Load builder image if cached
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar && rm -f /tmp/builder-image.tar
+
+      - name: Create builder image (if not cached)
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          time make --debug=basic image
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+
+      - name: Verify Docker Compose
+        run: docker compose version
+
+      - name: Verify builder Git cache ownership support
+        run: bash .github/bin/verify-builder-git.sh
+
       - name: Download Artifact
         uses: actions/download-artifact@v8
         with:
@@ -46,6 +69,13 @@ jobs:
 
       - name: Flatten mtimes after extraction
         run: find . \( -name node_modules -o -name .git \) -type d -prune -o -type f -print0 | xargs -0 touch -d '1970-01-01 00:00:00 UTC'
+
+      - name: Apply executable cache
+        run: |
+          shopt -s nullglob
+          for CACHE in ./.cache/executables-*; do
+            xargs -r -a "${CACHE}" chmod +x
+          done
 
       - name: Install NPM packages
         run: |

@@ -5,6 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { assertRestoredArtifactCache } from './importer-artifact-roundtrip.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dockerMode = process.env.VRZNO_IMPORTER_DOCKER === '1';
@@ -156,6 +157,13 @@ test('real Make imports pinned sources and preserves all no-op mtimes and downst
 		assert.equal(fs.statSync(path.join(f.workspace, stage, stateName)).uid, 0);
 		assert.throws(() => fs.writeFileSync(path.join(f.workspace, extension, 'host-write'), ''), { code: 'EACCES' });
 	}
+});
+
+test('a restored artifact cache preserves same-pin inputs and refreshes a changed pin', t => {
+	assertRestoredArtifactCache(fixture(t), {
+		stage, extension, dockerMode
+		, changedFiles: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n' }
+	});
 });
 
 test('A to B to A selects actual source bytes and deletes only previously managed inputs', t => {

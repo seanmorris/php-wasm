@@ -5,6 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { assertRestoredArtifactCache } from './importer-artifact-roundtrip.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const dockerMode = process.env.WAITLINE_IMPORTER_DOCKER === '1';
@@ -184,6 +185,13 @@ test('the immutable default and legacy branch override feed every configure/runt
 	f.run({ branch: 'legacy-fixture' });
 	assert.equal(f.read(`${extension}/waitline.c`), '/* A */\n');
 	assert.equal(JSON.parse(f.read(`${stage}/${stateName}`)).identity.ref, f.a);
+});
+
+test('a restored artifact cache preserves same-pin inputs and refreshes a changed pin', t => {
+	assertRestoredArtifactCache(fixture(t), {
+		stage, extension, dockerMode
+		, changedFiles: { 'waitline.c': '/* B */\n', 'config.m4': 'dnl B\n' }
+	});
 });
 
 test('A to B to A selects actual source bytes and deletes only previously managed inputs', t => {
