@@ -143,3 +143,11 @@ test('PECL extension downloads use retry-download', () => {
 		assert.doesNotMatch(contents, /wget .*https:\/\/pecl\.php\.net\/get\//);
 	}
 });
+
+test('FreeType downloads use atomic retries without changing the selected version or source', () => {
+	const contents = fs.readFileSync(path.join(repoRoot, 'packages/gd/static.mak'), 'utf8');
+
+	assert.match(contents, /FREETYPE_VERSION\?=2\.10\.0/);
+	assert.match(contents, /\/src\/\.github\/bin\/retry-download\.sh https:\/\/download-mirror\.savannah\.gnu\.org\/releases\/freetype\/freetype-\$\{FREETYPE_VERSION\}\.tar\.gz freetype-\$\{FREETYPE_VERSION\}\.tar\.gz/);
+	assert.doesNotMatch(contents, /wget .*freetype-/);
+});

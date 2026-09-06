@@ -15,7 +15,7 @@ env:
 jobs:
 
   vrzno-importer:
-    name: Test Extension Source Importers
+    name: Test Build Infrastructure
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
@@ -23,6 +23,18 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
+      - name: Install Deno
+        run: npm install -g deno@2.5.6
+      - name: Test build helpers under inherited Make settings (Node)
+        env:
+          MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+        run: node --test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs
+      - name: Test build helpers under inherited Make settings (Deno)
+        env:
+          MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+        run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
+      - name: Verify packaged builder helpers
+        run: node --test test/build/builder-tools-packaging.test.mjs
       - name: Test the real Make importer without PHP builds
         run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
       - name: Build the lightweight root-owned importer fixture
