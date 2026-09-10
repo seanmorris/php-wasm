@@ -163,6 +163,8 @@
 
 .schema-tree summary {
 	cursor: pointer;
+	list-style-position: outside;
+	margin-inline-start: 1em;
 }
 
 .schema-tree ul {

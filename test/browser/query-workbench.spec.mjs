@@ -177,12 +177,70 @@ test('framework DB button opens its installed database like the IDE popup', asyn
 		await expect(popup).toHaveURL(/\/php-wasm\/query-workbench\.html\?/);
 		await expect(popup.getByRole('button', {name: 'Run', exact: true})).toBeEnabled({timeout: 180000});
 		await expect(popup.getByRole('textbox', {name: 'SQLite database path'})).toHaveValue(target);
-		await expect(popup.getByText('main.workbench_fixture', {exact: true})).toBeVisible();
+		const table = popup.locator('.schema-tree summary').filter({hasText: /^workbench_fixture$/});
+		await expect(table).toBeVisible();
+		await expect(table).toHaveAttribute('title', /main\.workbench_fixture/);
 		await expect(popup.getByRole('table', {name: 'Query result 1'})).toHaveCount(0);
 	}
 	finally
 	{
 		await popup.close();
+	}
+});
+
+test('query workbench keeps native disclosure markers beside wrapping table names', async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 900});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	const name = 'workbench table with a very long name '.repeat(5).trim();
+	await execute(page, fixture, `CREATE TABLE "${name}" (id INTEGER PRIMARY KEY)`);
+	await connect(page, fixture);
+	const summary = page.locator('.schema-tree summary').filter({hasText: name});
+	const details = summary.locator('..');
+	const short = page.locator('.schema-tree summary').filter({hasText: /^workbench_fixture$/});
+	await expect(summary).toHaveText(name);
+	await expect(summary).toHaveAttribute('title', `main.${name} (table)`);
+
+	for(const viewport of [{width: 1280, height: 900}, {width: 390, height: 740}])
+	{
+		await page.setViewportSize(viewport);
+		await summary.scrollIntoViewIfNeeded();
+		const layout = await summary.evaluate(element => {
+			const style = getComputedStyle(element);
+			const sidebar = element.closest('.schema-panel');
+			return {
+				whiteSpace: style.whiteSpace, display: style.display
+				, marker: style.listStyleType, markerPosition: style.listStylePosition
+				, gutter: element.getBoundingClientRect().left - element.parentElement.getBoundingClientRect().left
+				, fontSize: parseFloat(style.fontSize), overflowWrap: style.overflowWrap
+				, sidebarOverflow: sidebar.scrollWidth - sidebar.clientWidth
+				, pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+			};
+		});
+		expect(layout).toMatchObject({
+			whiteSpace: 'normal', display: 'list-item'
+			, markerPosition: 'outside', overflowWrap: 'anywhere'
+		});
+		expect(layout.marker).not.toBe('none');
+		expect(layout.gutter).toBeGreaterThanOrEqual(layout.fontSize - 0.5);
+		expect(layout.sidebarOverflow).toBeLessThanOrEqual(1);
+		expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+		expect((await summary.boundingBox()).height).toBeGreaterThan((await short.boundingBox()).height * 2);
+
+		// The native marker gets its own gutter beside the first text line.
+		// Wrapped summaries remain both pointer- and keyboard-operable.
+		await expect(details).not.toHaveAttribute('open');
+		await summary.click();
+		await expect(details).toHaveAttribute('open', '');
+		await expect(details.getByRole('button', {name: 'Select rows', exact: true})).toBeVisible();
+		await summary.focus();
+		await summary.press('Enter');
+		await expect(details).not.toHaveAttribute('open');
+		await summary.press('Enter');
+		await expect(details).toHaveAttribute('open', '');
+		await summary.click();
+		await expect(details).not.toHaveAttribute('open');
 	}
 });
 
@@ -357,7 +415,7 @@ test('query workbench editable cells respond throughout their padding and tall-r
 		(1, 'first field', 'line 1\nline 2\nline 3\nline 4\nline 5'),
 		(2, 'second field', 'short neighbor')`);
 	await connect(page, fixture);
-	await page.getByText('main.workbench_click_targets', {exact: true}).click();
+	await page.locator('.schema-tree summary').filter({hasText: /^workbench_click_targets$/}).click();
 	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
 	const button = page.getByRole('button', {name: 'Edit row 1 label', exact: true});
 	const cell = button.locator('..');
@@ -399,7 +457,7 @@ test('query workbench field drawer spans the results box and stays usable on mob
 	const fixture = await createFixture(page, 'sqlite');
 	await connect(page, fixture);
 	await expect(page.getByRole('complementary', {name: 'Database navigator'})).toBeVisible();
-	await page.getByText('main.workbench_fixture', {exact: true}).click();
+	await page.locator('.schema-tree summary').filter({hasText: /^workbench_fixture$/}).click();
 	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
 	const cell = page.getByRole('button', {name: 'Edit row 1 label', exact: true});
 	await cell.click();
@@ -514,7 +572,7 @@ const testStickyHeaderCoverage = async ({page}) => {
 		SELECT id, 'scroll row ' || id FROM numbers
 	`);
 	await connect(page, fixture);
-	await page.getByText('main.workbench_fixture', {exact: true}).click();
+	await page.locator('.schema-tree summary').filter({hasText: /^workbench_fixture$/}).click();
 	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
 	const table = page.getByRole('table', {name: 'Query result 1'});
 	const cell = table.getByRole('button', {name: 'Edit row 3 label', exact: true});
@@ -648,7 +706,7 @@ for(const engine of ['sqlite', 'pgsql'])
 		await expect(page.getByRole('button', {name: 'Run', exact: true})).toBeEnabled({timeout: 180000});
 		expect((await fetchFixture(page, fixture))[0]).toEqual({id: 1, label: 'from workbench'});
 
-		await page.getByText(`${engine === 'pgsql' ? 'public' : 'main'}.workbench_fixture`, {exact: true}).click();
+		await page.locator('.schema-tree summary').filter({hasText: /^workbench_fixture$/}).click();
 		await page.getByRole('button', {name: 'Select rows', exact: true}).click();
 		// Grid position is not row identity: PostgreSQL UPDATE can move a tuple.
 		const keyedRow = resultTable.getByRole('row').filter({

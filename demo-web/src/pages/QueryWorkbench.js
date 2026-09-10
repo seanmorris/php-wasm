@@ -520,7 +520,7 @@ export default function QueryWorkbench()
 						{!active.connected && <p>Connect to inspect tables and views. No database is created automatically.</p>}
 						{active.connected && !active.schema.length && <p>No tables or views.</p>}
 						{active.schema.map(table => <details key={`${table.schema}.${table.name}`}>
-							<summary title={table.type}>{table.schema ? `${table.schema}.` : ''}{table.name}</summary>
+							<summary title={`${[table.schema, table.name].filter(Boolean).join('.')} (${table.type})`}>{table.name}</summary>
 							<button className="preview-table" onClick={() => previewTable(table)} disabled={!!busy}>Select rows</button>
 							<ul>{table.columns.map(column => <li key={column.name}><span>{column.name}</span><small>{column.type}</small></li>)}</ul>
 						</details>)}

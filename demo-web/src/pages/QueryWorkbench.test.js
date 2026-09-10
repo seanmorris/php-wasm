@@ -40,7 +40,7 @@ const connect = async () => {
 
 const preview = async () => {
 	await connect();
-	fireEvent.click(screen.getByText('main.items'));
+	fireEvent.click(screen.getByTitle('main.items (table)'));
 	fireEvent.click(screen.getByRole('button', {name: 'Select rows'}));
 	await screen.findByRole('button', {name: 'Edit row 1 label'});
 };
@@ -236,6 +236,21 @@ describe('QueryWorkbench', () => {
 		expect(screen.queryByRole('button', {name: /Edit row/})).not.toBeInTheDocument();
 	});
 
+	it.each([['sqlite', 'main'], ['pgsql', 'public']])('shows only table names for %s while preserving schema-qualified previews', async (engine, schema) => {
+		const target = engine === 'pgsql' ? pgTarget : sqliteTarget;
+		window.history.replaceState({}, '', `/query-workbench.html?${new URLSearchParams({engine, target})}`);
+		bus.queryWorkbenchSchema.mockResolvedValueOnce([{schema, name: 'items', type: 'table', columns: []}]);
+		render(<QueryWorkbench />);
+		await connect();
+		const summary = screen.getByTitle(`${schema}.items (table)`);
+		expect(summary.textContent).toBe('items');
+		fireEvent.click(summary);
+		fireEvent.click(screen.getByRole('button', {name: 'Select rows'}));
+		await screen.findByRole('table');
+		expect(bus.queryWorkbenchTable).toHaveBeenCalledWith({engine, target, schema, table: 'items', maxRows: 100});
+		expect(screen.getByRole('textbox', {name: 'SQL query'})).toHaveValue(`SELECT * FROM "${schema}"."items" LIMIT 100;`);
+	});
+
 	it('keeps each query tab bound to its own database and SQL', async () => {
 		render(<QueryWorkbench />);
 		await connect();
@@ -308,7 +323,7 @@ describe('QueryWorkbench', () => {
 		bus.queryWorkbenchTable.mockReturnValueOnce(new Promise(done => {resolve = done;}));
 		const {container} = render(<QueryWorkbench />);
 		await connect();
-		fireEvent.click(screen.getByText('main.items'));
+		fireEvent.click(screen.getByTitle('main.items (table)'));
 		fireEvent.click(screen.getByRole('button', {name: 'Select rows'}));
 		await waitFor(() => expect(bus.queryWorkbenchTable).toHaveBeenCalledOnce());
 		expect(screen.getByText('Loading…')).toBeInTheDocument();
@@ -487,7 +502,7 @@ describe('QueryWorkbench', () => {
 		bus.queryWorkbenchTable.mockResolvedValue({...tableResult, edit: {...tableResult.edit, keyColumns: []}});
 		render(<QueryWorkbench />);
 		await connect();
-		fireEvent.click(screen.getByText('main.items'));
+		fireEvent.click(screen.getByTitle('main.items (table)'));
 		fireEvent.click(screen.getByRole('button', {name: 'Select rows'}));
 		await screen.findByRole('table');
 		expect(screen.queryByRole('button', {name: /Edit row/})).not.toBeInTheDocument();
@@ -556,7 +571,7 @@ describe('QueryWorkbench', () => {
 		bus.queryWorkbenchTable.mockResolvedValue({...tableResult, results: [{...tableResult.results[0], rows: [[key, 'before', null]]}]});
 		render(<QueryWorkbench />);
 		await connect();
-		fireEvent.click(screen.getByText('main.items'));
+		fireEvent.click(screen.getByTitle('main.items (table)'));
 		fireEvent.click(screen.getByRole('button', {name: 'Select rows'}));
 		await screen.findByRole('table');
 		expect(screen.queryByRole('button', {name: /Edit row/})).not.toBeInTheDocument();
