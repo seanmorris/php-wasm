@@ -120,6 +120,44 @@ describe('query workbench PostgreSQL contract with a real engine', () => {
 	});
 });
 
+it.each([false, true])('discovers existing SQLite files including Laravel with PostgreSQL installed=%s, without opening an engine', async installed => {
+	const laravelTarget = '/persist/laravel-11/database/database.sqlite';
+	const drupalTarget = '/persist/drupal-11.4.5/web/sites/default/files/.sqlite';
+	const wordpressTarget = '/persist/wordpress-7.1/wp-content/database/.ht.sqlite';
+	const analyzePath = vi.fn(async path => ({exists: path !== wordpressTarget, object: {isFolder: path === drupalTarget}}));
+	const queryWorkbenchSqlite = vi.fn();
+	const open = vi.fn();
+	const postgresExists = vi.fn(async () => installed);
+	const discover = createWorkbenchActions({withLock: callback => callback(), withPGlite: open, postgresExists});
+	const found = await discover.queryWorkbenchTargets({analyzePath, queryWorkbenchSqlite});
+	expect(found).toEqual([
+		{engine: 'sqlite', target: laravelTarget, label: 'Laravel / SQLite'}
+		, ...(installed ? [{engine: 'pgsql', target: drupalPgsqlDatabase, label: 'Drupal / PostgreSQL (PGlite)'}] : [])
+	]);
+	expect(analyzePath.mock.calls.map(([path]) => path)).toEqual([drupalTarget, wordpressTarget, laravelTarget]);
+	expect(postgresExists).toHaveBeenCalledExactlyOnceWith(drupalPgsqlDatabase);
+	expect(queryWorkbenchSqlite).not.toHaveBeenCalled();
+	expect(open).not.toHaveBeenCalled();
+});
+
+it('does not create an IndexedDB store when discovering databases on an empty installation', async () => {
+	const indexedDb = {databases: vi.fn(async () => []), open: vi.fn()};
+	vi.stubGlobal('indexedDB', indexedDb);
+	try
+	{
+		const open = vi.fn();
+		const discover = createWorkbenchActions({withLock: callback => callback(), withPGlite: open});
+		expect(await discover.queryWorkbenchTargets({analyzePath: vi.fn(async () => ({exists: false}))})).toEqual([]);
+		expect(indexedDb.databases).toHaveBeenCalledOnce();
+		expect(indexedDb.open).not.toHaveBeenCalled();
+		expect(open).not.toHaveBeenCalled();
+	}
+	finally
+	{
+		vi.unstubAllGlobals();
+	}
+});
+
 it('validates targets and does not open a missing PostgreSQL database', async () => {
 	expect(() => validateWorkbenchTarget({engine: 'sqlite', target: '/persist/../etc/test.db'})).toThrow();
 	expect(() => validateWorkbenchTarget({engine: 'pgsql', target: 'idb://new-database'})).toThrow();

@@ -18,7 +18,7 @@
 	flex-shrink: 0;
 }
 
-.workbench-heading, .workbench-toolbar, .sql-files, .connection-actions {
+.workbench-heading, .connection-actions {
 	display: flex;
 	align-items: center;
 	gap: 0.4rem;
@@ -39,17 +39,60 @@
 	font-size: 0.9rem;
 }
 
-.workbench-toolbar {
+.query-workbench .workbench-toolbar,
+.query-workbench .result-toolbar {
+	display: flex;
+	align-items: stretch;
 	flex-wrap: wrap;
-	padding: 0.2rem;
+	flex-shrink: 0;
+	gap: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.workbench-toolbar > button,
+.workbench-toolbar > label {
+	min-height: 2.25rem;
+}
+
+.workbench-toolbar > button,
+.result-toolbar > button {
+	height: auto;
+	margin: 0;
 }
 
 .workbench-toolbar label {
+	display: flex;
 	white-space: nowrap;
 }
 
+.workbench-toolbar label > span {
+	display: flex;
+	align-items: center;
+	padding: 0 0.4rem;
+}
+
+.query-workbench .workbench-toolbar select {
+	height: auto;
+	margin: 0;
+}
+
+.sql-file-action {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2rem;
+}
+
+.sql-file-action img {
+	width: 16px;
+	height: 16px;
+}
+
 .query-hint {
+	align-self: center;
 	margin-left: auto;
+	padding: 0.25rem 0.4rem;
 	font-size: 0.85rem;
 }
 
@@ -191,18 +234,22 @@
 
 .query-connection-strip {
 	display: flex;
+	align-items: baseline;
 	gap: 1rem;
 	font-size: 0.8rem;
+	line-height: 1.4;
 	padding: 0.3rem;
 	background: #ddd;
 	min-width: 0;
 }
 
 .query-connection-strip span:first-child {
+	flex-shrink: 0;
 	white-space: nowrap;
 }
 
 .query-connection-strip span:last-child {
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -214,29 +261,6 @@
 	background: #272822;
 }
 
-.sql-files {
-	flex-wrap: wrap;
-	padding: 0.3rem;
-	font-size: 0.85rem;
-}
-
-.sql-files input {
-	flex: 1;
-	min-width: 8rem;
-}
-
-.sql-files button {
-	display: flex;
-	align-items: center;
-	gap: 0.2rem;
-	font-size: 0.85rem;
-}
-
-.sql-files img {
-	width: 16px;
-	height: 16px;
-}
-
 .query-results {
 	display: flex;
 	flex-direction: column;
@@ -246,24 +270,39 @@
 	color: #222;
 }
 
-.result-toolbar {
-	display: flex;
+.query-workbench .result-toolbar {
 	background: #aaa;
-	flex-shrink: 0;
-	gap: 0.25rem;
-	padding: 0.2rem;
-	flex-wrap: wrap;
+	border-width: 2px 0 0;
+}
+
+.result-toolbar > button,
+.result-toolbar > label {
+	min-height: 2rem;
 }
 
 .editor-size {
 	display: flex;
 	align-items: center;
 	margin-left: auto;
+	padding: 0 0.4rem;
 	font-size: 0.75rem;
 }
 
 .editor-size input {
 	width: 5rem;
+}
+
+.result-scroll-toggle {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0 0.4rem;
+	font-size: 0.75rem;
+	white-space: nowrap;
+}
+
+.result-scroll-toggle input {
+	min-height: 0;
 }
 
 .query-results[data-collapsed="true"] {
@@ -285,13 +324,20 @@
 	min-height: 0;
 }
 
+.result-scroll {
+	isolation: isolate;
+}
+
 .result-placeholder, .result-summary, .action-output p {
 	margin: 0.7rem;
 	font-size: 0.85rem;
 }
 
 .query-results table {
-	border-collapse: collapse;
+	/* Collapsed borders scroll separately and expose cells above sticky headers. */
+	border-collapse: separate;
+	border-spacing: 0;
+	border-left: 1px solid #bbb;
 	font: 0.85rem monospace;
 	min-width: 100%;
 }
@@ -300,15 +346,37 @@
 	text-align: left;
 	padding: 0.4rem 0.6rem;
 	border: 1px solid #bbb;
+	border-top-width: 0;
+	border-left-width: 0;
 	max-width: 32rem;
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 }
 
 .query-results thead th {
+	border-top-width: 1px;
 	position: sticky;
 	top: 0;
+	z-index: 1;
 	background: #ccc;
+}
+
+.query-results td {
+	/* Keep positioned cell buttons, including their active state, below headers. */
+	position: relative;
+	z-index: 0;
+}
+
+.result-scroll[data-horizontal-scroll="true"] table {
+	width: max-content;
+}
+
+.result-scroll[data-horizontal-scroll="true"] th,
+.result-scroll[data-horizontal-scroll="true"] td,
+.result-scroll[data-horizontal-scroll="true"] .editable-cell {
+	max-width: none;
+	white-space: pre;
+	overflow-wrap: normal;
 }
 
 .query-results tbody tr:nth-child(even) {
@@ -332,29 +400,73 @@
 	width: 100%;
 }
 
-.editable-cell:hover:not(:disabled) {
+.query-results .editable-cell,
+.query-results .editable-cell:active {
+	/* Anchor the hit area to the cell, not just the inset text button. */
+	position: static;
+	border: 0;
+}
+
+.editable-cell::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+}
+
+.editable-cell:hover:not(:disabled)::after {
 	outline: 1px dotted #006b9c;
+	outline-offset: -1px;
+}
+
+.query-workbench .editable-cell:focus-visible {
+	outline: none;
+}
+
+.editable-cell:focus-visible::after {
+	outline: 2px solid #006b9c;
+	outline-offset: -2px;
 }
 
 .row-edit {
 	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
+	flex-direction: column;
 	gap: 0.4rem;
 	padding: 0.5rem;
 	background: #c3c3c3;
 	flex-shrink: 0;
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+	box-sizing: border-box;
 }
 
 .row-edit input:not([type="checkbox"]) {
 	display: block;
 	width: 100%;
+	min-width: 0;
 	box-sizing: border-box;
 }
 
-.row-edit label:first-child {
-	flex: 1;
-	min-width: 9rem;
+.row-edit-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.row-edit-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.row-edit-actions label {
+	display: flex;
+	align-items: center;
+	margin-right: auto;
 }
 
 .action-output ol {
@@ -383,6 +495,42 @@
 	outline-offset: -2px;
 }
 
+.query-workbench .overlay {
+	position: fixed;
+	inset: 0;
+}
+
+.query-workbench .Confirm {
+	padding: 1rem;
+	background: #0004;
+}
+
+.query-workbench .Confirm .query-sql-file-dialog {
+	width: 28rem;
+	max-width: 100%;
+	gap: 0.5rem;
+}
+
+.query-sql-file-dialog h2 {
+	margin: 0;
+	font-size: 1.1rem;
+}
+
+.query-sql-file-dialog input {
+	min-width: 0;
+}
+
+.query-sql-file-dialog .right {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.4rem;
+}
+
+.query-sql-file-dialog [role="alert"] {
+	margin: 0;
+	color: #9b1818;
+}
+
 @media (max-width: 760px) {
 	.query-workbench > .bevel {
 		padding: 0.35rem;
@@ -407,10 +555,6 @@
 	.query-main {
 		min-height: 32rem;
 		flex-shrink: 0;
-	}
-
-	.sql-files label {
-		width: 100%;
 	}
 
 	.query-connection-strip {

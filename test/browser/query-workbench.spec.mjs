@@ -152,9 +152,44 @@ test('query workbench has one Extras entry using the production base path', asyn
 	await expect(page.getByRole('combobox', {name: 'Database engine'})).toBeVisible();
 });
 
+test('framework DB button opens its installed database like the IDE popup', async ({page}) => {
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	const target = '/persist/laravel-11/database/database.sqlite';
+	await rpc(page, 'mkdir', '/persist/laravel-11');
+	await rpc(page, 'mkdir', '/persist/laravel-11/database');
+	await rpc(page, 'rename', fixture.target, target);
+	await page.goto('select-framework.html', {waitUntil: 'domcontentloaded'});
+	const card = page.locator('.frameworks .column', {has: page.getByRole('img', {name: 'laravel 11', exact: true})});
+	const db = card.getByRole('button', {name: 'DB', exact: true});
+	await expect(db).toBeVisible({timeout: 180000});
+	const form = db.locator('..');
+	await expect(form).toHaveAttribute('action', new URL('/php-wasm/query-workbench.html', page.url()).href);
+	await expect(form).toHaveAttribute('method', 'get');
+	await expect(form).toHaveAttribute('target', '_blank');
+	await expect(form).toHaveAttribute('rel', 'opener');
+	expect(await form.evaluate(form => Object.fromEntries(new FormData(form)))).toEqual({engine: 'sqlite', target, connect: '1'});
+	const [popup] = await Promise.all([page.waitForEvent('popup'), db.click()]);
+	try
+	{
+		await popup.waitForURL(/\/php-wasm\/query-workbench\.html\?/, {waitUntil: 'domcontentloaded'});
+		await expect(popup).toHaveURL(/\/php-wasm\/query-workbench\.html\?/);
+		await expect(popup.getByRole('button', {name: 'Run', exact: true})).toBeEnabled({timeout: 180000});
+		await expect(popup.getByRole('textbox', {name: 'SQLite database path'})).toHaveValue(target);
+		await expect(popup.getByText('main.workbench_fixture', {exact: true})).toBeVisible();
+		await expect(popup.getByRole('table', {name: 'Query result 1'})).toHaveCount(0);
+	}
+	finally
+	{
+		await popup.close();
+	}
+});
+
 test('query workbench keeps mobile controls reachable without horizontal page overflow', async ({page}) => {
 	await page.setViewportSize({width: 390, height: 740});
 	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
 	await expect(page.getByRole('combobox', {name: 'Database engine'})).toBeVisible();
 	const toggle = page.getByRole('button', {name: 'Toggle schemas', exact: true});
 	await toggle.click();
@@ -162,7 +197,15 @@ test('query workbench keeps mobile controls reachable without horizontal page ov
 	await expect(page.getByRole('complementary', {name: 'Database navigator'})).toBeHidden();
 	await page.locator('#query-editor').scrollIntoViewIfNeeded();
 	await expect(page.locator('#query-editor')).toBeVisible();
-	await page.getByRole('textbox', {name: 'SQL file path', exact: true}).scrollIntoViewIfNeeded();
+	await expect(page.getByRole('textbox', {name: 'SQL file path', exact: true})).toHaveCount(0);
+	await page.getByRole('button', {name: 'Save SQL', exact: true}).click();
+	const dialog = page.getByRole('dialog', {name: 'Save SQL', exact: true});
+	await expect(dialog.getByRole('textbox', {name: 'SQL file path', exact: true})).toBeVisible();
+	const dialogBounds = await dialog.boundingBox();
+	expect(dialogBounds.x).toBeGreaterThanOrEqual(0);
+	expect(dialogBounds.x + dialogBounds.width).toBeLessThanOrEqual(390);
+	await dialog.getByRole('button', {name: 'Cancel', exact: true}).click();
+	await expect(dialog).toHaveCount(0);
 	const width = await page.evaluate(() => ({
 		viewport: document.documentElement.clientWidth,
 		page: document.documentElement.scrollWidth,
@@ -176,6 +219,396 @@ test('query workbench keeps mobile controls reachable without horizontal page ov
 	await expect(page.getByRole('combobox', {name: 'Database engine'})).toBeVisible();
 });
 
+test('query workbench saves and loads SQL through transient file dialogs', async ({page}) => {
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const path = `/persist/workbench-modal-${randomUUID()}.sql`;
+	const sql = "SELECT 'saved café 🚀' AS saved_value;\n-- modal round trip";
+	await page.locator('#query-editor').click();
+	await page.keyboard.press('ControlOrMeta+A');
+	await page.keyboard.insertText(sql);
+	await expect(page.getByRole('textbox', {name: 'SQL file path', exact: true})).toHaveCount(0);
+	await page.getByRole('button', {name: 'Save SQL', exact: true}).click();
+	const saveDialog = page.getByRole('dialog', {name: 'Save SQL', exact: true});
+	await saveDialog.getByRole('textbox', {name: 'SQL file path', exact: true}).fill(path);
+	await saveDialog.getByRole('button', {name: 'Save', exact: true}).click();
+	await expect(saveDialog).toHaveCount(0);
+	expect(await rpc(page, 'readFile', path, {encoding: 'utf8'})).toBe(sql);
+
+	await rpc(page, 'refresh');
+	await page.reload({waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	await expect(page.locator('#query-editor')).not.toContainText('saved café 🚀');
+	await page.getByRole('button', {name: 'Load SQL', exact: true}).click();
+	const loadDialog = page.getByRole('dialog', {name: 'Load SQL', exact: true});
+	await loadDialog.getByRole('textbox', {name: 'SQL file path', exact: true}).fill(path);
+	await loadDialog.getByRole('button', {name: 'Load', exact: true}).click();
+	await expect(loadDialog).toHaveCount(0);
+	await expect(page.locator('#query-editor')).toContainText('saved café 🚀');
+	await expect(page.locator('#query-editor')).toContainText('-- modal round trip');
+	await expect(page.getByRole('textbox', {name: 'SQL file path', exact: true})).toHaveCount(0);
+	await expect(page.getByRole('table', {name: 'Query result 1'})).toHaveCount(0);
+});
+
+test('query workbench top controls adjoin and fill the hint toolbar height', async ({page}) => {
+	await page.setViewportSize({width: 1600, height: 900});
+	const query = new URLSearchParams({engine: 'pgsql', target: pgsqlTarget});
+	await page.goto(`query-workbench.html?${query}`, {waitUntil: 'domcontentloaded'});
+	const toolbar = page.locator('.workbench-toolbar');
+	await expect(toolbar.getByRole('button', {name: 'Save SQL', exact: true})).toBeVisible();
+	const buttonNames = ['Toggle schemas', '+ Query tab', 'Save SQL', 'Load SQL', 'Run'];
+	await expect(toolbar.getByRole('button')).toHaveCount(buttonNames.length);
+	const bounds = await toolbar.evaluate(element => {
+		const rect = element.getBoundingClientRect();
+		const style = getComputedStyle(element);
+		const controls = [...element.querySelectorAll('button, select')].map(control => {
+			const bounds = control.getBoundingClientRect();
+			return {top: bounds.top, bottom: bounds.bottom, left: bounds.left, right: bounds.right};
+		});
+		return {
+			top: rect.top + parseFloat(style.borderTopWidth)
+			, bottom: rect.bottom - parseFloat(style.borderBottomWidth)
+			, left: rect.left + parseFloat(style.borderLeftWidth)
+			, rowLimitLeft: element.querySelector('label').getBoundingClientRect().left
+			, controls
+		};
+	});
+	expect(bounds.controls).toHaveLength(buttonNames.length + 1);
+	for(const control of bounds.controls)
+	{
+		expect(Math.abs(control.top - bounds.top)).toBeLessThan(0.5);
+		expect(Math.abs(control.bottom - bounds.bottom)).toBeLessThan(0.5);
+	}
+	expect(Math.abs(bounds.controls[0].left - bounds.left)).toBeLessThan(0.5);
+	for(let index = 1; index < buttonNames.length; index++)
+	{
+		expect(Math.abs(bounds.controls[index].left - bounds.controls[index - 1].right)).toBeLessThan(0.5);
+	}
+	expect(Math.abs(bounds.rowLimitLeft - bounds.controls[buttonNames.length - 1].right)).toBeLessThan(0.5);
+	for(const [index, name] of buttonNames.entries())
+	{
+		await expect(toolbar.getByRole('button').nth(index)).toHaveAccessibleName(name);
+	}
+	await expect(toolbar.locator('button, select').last()).toHaveAccessibleName('Row limit');
+
+	const connection = page.locator('.query-connection-strip > span');
+	await expect(connection).toHaveCount(2);
+	await expect(connection.last()).toHaveText(pgsqlTarget);
+	const alignment = await connection.evaluateAll(spans => spans.map(span => {
+		const rect = span.getBoundingClientRect();
+		const range = document.createRange();
+		range.selectNodeContents(span);
+		const text = range.getBoundingClientRect();
+		return {top: rect.top, bottom: rect.bottom, textTop: text.top, textBottom: text.bottom};
+	}));
+	for(const edge of ['top', 'bottom', 'textTop', 'textBottom'])
+	{
+		expect(Math.abs(alignment[0][edge] - alignment[1][edge])).toBeLessThan(0.5);
+	}
+});
+
+test('query workbench toggles wide results between wrapping and horizontal scrolling', async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 900});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	await connect(page, fixture);
+	const longValue = 'wide-result-value-'.repeat(30);
+	const columns = Array.from({length: 6}, (_, index) => `'${longValue}' AS wide_column_${index + 1}`);
+	await runInEditor(page, `SELECT ${columns.join(', ')}`);
+	const table = page.getByRole('table', {name: 'Query result 1'});
+	await expect(table.getByRole('columnheader')).toHaveCount(7);
+	const toggle = page.getByRole('checkbox', {name: 'Horizontal scroll', exact: true});
+	const scroller = page.locator('.result-scroll');
+	const overflowWidth = () => scroller.evaluate(element => element.scrollWidth - element.clientWidth);
+	await expect(toggle).toBeChecked();
+	await expect.poll(overflowWidth).toBeGreaterThan(200);
+	const unwrappedHeight = (await table.locator('tbody td').first().boundingBox()).height;
+	await scroller.evaluate(element => {element.scrollLeft = 150;});
+	await expect.poll(() => scroller.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+
+	await toggle.uncheck();
+	await expect(toggle).not.toBeChecked();
+	await expect.poll(overflowWidth).toBeLessThanOrEqual(1);
+	await expect.poll(() => scroller.evaluate(element => element.scrollLeft)).toBe(0);
+	// Wrapping must remove the overflow rather than merely hide its scrollbar.
+	await scroller.evaluate(element => {element.scrollLeft = 150;});
+	expect(await scroller.evaluate(element => element.scrollLeft)).toBe(0);
+	const wrappedHeight = (await table.locator('tbody td').first().boundingBox()).height;
+	expect(wrappedHeight).toBeGreaterThan(unwrappedHeight);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+
+	await toggle.check();
+	await expect(toggle).toBeChecked();
+	await expect.poll(overflowWidth).toBeGreaterThan(200);
+	expect((await table.locator('tbody td').first().boundingBox()).height).toBeLessThan(wrappedHeight);
+	await scroller.evaluate(element => {element.scrollLeft = 150;});
+	await expect.poll(() => scroller.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('query workbench editable cells respond throughout their padding and tall-row corners', async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 1000});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	await execute(page, fixture, 'CREATE TABLE workbench_click_targets (id INTEGER PRIMARY KEY, label TEXT, detail TEXT)');
+	await execute(page, fixture, `INSERT INTO workbench_click_targets VALUES
+		(1, 'first field', 'line 1\nline 2\nline 3\nline 4\nline 5'),
+		(2, 'second field', 'short neighbor')`);
+	await connect(page, fixture);
+	await page.getByText('main.workbench_click_targets', {exact: true}).click();
+	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
+	const button = page.getByRole('button', {name: 'Edit row 1 label', exact: true});
+	const cell = button.locator('..');
+	const drawer = page.getByRole('form', {name: 'Edit row', exact: true});
+	await expect(button).toBeVisible();
+	expect((await cell.boundingBox()).height).toBeGreaterThan((await button.boundingBox()).height + 40);
+
+	for(const [horizontal, vertical] of [[0, 0], [1, 0], [1, 1], [0, 1]])
+	{
+		await cell.scrollIntoViewIfNeeded();
+		const bounds = await cell.boundingBox();
+		// Real pointer events near each cell edge, outside the button's text box.
+		await page.mouse.click(
+			bounds.x + (horizontal ? bounds.width - 3 : 3)
+			, bounds.y + (vertical ? bounds.height - 3 : 3)
+		);
+		await expect(drawer.getByRole('textbox', {name: 'Cell value', exact: true})).toHaveValue('first field');
+		await expect(drawer.locator('.row-edit-field')).toContainText('Row 1 · label');
+		await drawer.getByRole('button', {name: 'Cancel edit', exact: true}).click();
+		await expect(drawer).toHaveCount(0);
+	}
+
+	await button.click();
+	const other = page.getByRole('button', {name: 'Edit row 2 label', exact: true});
+	await expect(other).toBeDisabled();
+	await other.locator('..').scrollIntoViewIfNeeded();
+	const otherBounds = await other.locator('..').boundingBox();
+	await page.mouse.click(otherBounds.x + 3, otherBounds.y + otherBounds.height - 3);
+	await expect(drawer.getByRole('textbox', {name: 'Cell value', exact: true})).toHaveValue('first field');
+	await expect(drawer.locator('.row-edit-field')).toContainText('Row 1 · label');
+	await drawer.getByRole('button', {name: 'Cancel edit', exact: true}).click();
+	await expect(other).toBeEnabled();
+});
+
+test('query workbench field drawer spans the results box and stays usable on mobile', async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 900});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	await connect(page, fixture);
+	await expect(page.getByRole('complementary', {name: 'Database navigator'})).toBeVisible();
+	await page.getByText('main.workbench_fixture', {exact: true}).click();
+	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
+	const cell = page.getByRole('button', {name: 'Edit row 1 label', exact: true});
+	await cell.click();
+	const drawer = page.getByRole('form', {name: 'Edit row', exact: true});
+	const value = drawer.getByRole('textbox', {name: 'Cell value', exact: true});
+	const assertFullWidth = async () => {
+		await expect(page.locator('.query-results > .row-edit')).toHaveCount(1);
+		const bounds = await drawer.evaluate(form => {
+			const drawer = form.getBoundingClientRect();
+			const style = getComputedStyle(form);
+			const parent = form.parentElement;
+			const results = parent.getBoundingClientRect();
+			const parentStyle = getComputedStyle(parent);
+			const toolbar = parent.querySelector('.result-toolbar').getBoundingClientRect();
+			const input = form.querySelector('input:not([type="checkbox"])').getBoundingClientRect();
+			return {
+				left: drawer.left, right: drawer.right, bottom: drawer.bottom
+				, resultsLeft: results.left + parseFloat(parentStyle.borderLeftWidth) + parseFloat(parentStyle.paddingLeft)
+				, resultsRight: results.right - parseFloat(parentStyle.borderRightWidth) - parseFloat(parentStyle.paddingRight)
+				, toolbarTop: toolbar.top
+				, inputLeft: input.left, inputRight: input.right, inputBottom: input.bottom
+				, innerLeft: drawer.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft)
+				, innerRight: drawer.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight)
+				, controlsTop: [...form.querySelectorAll('button, input[type="checkbox"]')].map(control => control.getBoundingClientRect().top)
+			};
+		});
+		expect(Math.abs(bounds.left - bounds.resultsLeft)).toBeLessThan(0.5);
+		expect(Math.abs(bounds.right - bounds.resultsRight)).toBeLessThan(0.5);
+		expect(bounds.toolbarTop).toBeGreaterThanOrEqual(bounds.bottom);
+		expect(Math.abs(bounds.inputLeft - bounds.innerLeft)).toBeLessThan(0.5);
+		expect(Math.abs(bounds.inputRight - bounds.innerRight)).toBeLessThan(0.5);
+		for(const top of bounds.controlsTop) expect(top).toBeGreaterThanOrEqual(bounds.inputBottom);
+	};
+	await assertFullWidth();
+	await drawer.getByRole('checkbox', {name: 'Set NULL', exact: true}).check();
+	await expect(value).toBeDisabled();
+	await drawer.getByRole('checkbox', {name: 'Set NULL', exact: true}).uncheck();
+	await value.fill('cancelled drawer edit');
+	await drawer.getByRole('button', {name: 'Cancel edit', exact: true}).click();
+	await expect(drawer).toHaveCount(0);
+	expect((await fetchFixture(page, fixture))[0].label).toBe('seed;value');
+
+	await cell.click();
+	await page.setViewportSize({width: 390, height: 740});
+	await drawer.scrollIntoViewIfNeeded();
+	await assertFullWidth();
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+	const updated = `full-width drawer café 🚀 ${'value '.repeat(40)}`;
+	await value.fill(updated);
+	await drawer.getByRole('button', {name: 'Save row', exact: true}).click();
+	await expect(drawer).toHaveCount(0);
+	expect((await fetchFixture(page, fixture))[0].label).toBe(updated);
+	await expect.poll(() => page.locator('.result-scroll').evaluate(element => element.scrollWidth - element.clientWidth)).toBeGreaterThan(0);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('query workbench keeps bottom result controls anchored while dragging editor height', async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 900});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const slider = page.getByRole('slider', {name: 'Editor height', exact: true});
+	await expect(slider).toBeVisible();
+	const toolbar = page.locator('.result-toolbar');
+	const editor = page.locator('.sql-editor');
+
+	for(const panel of ['Result Grid', 'Action Output'])
+	{
+		await page.getByRole('button', {name: new RegExp(`^${panel}`)}).click();
+		expect(await toolbar.evaluate(element => {
+			const style = getComputedStyle(element);
+			return [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth];
+		})).toEqual(['2px', '0px', '0px', '0px']);
+		const content = page.locator(panel === 'Result Grid' ? '.result-scroll' : '.action-output');
+		const initial = await toolbar.boundingBox();
+		const range = await slider.boundingBox();
+		const y = range.y + range.height / 2;
+		const initialValue = Number(await slider.inputValue());
+		await page.mouse.move(range.x + 8 + (range.width - 16) * (initialValue - 20) / 60, y);
+		await page.mouse.down();
+		try
+		{
+			for(const fraction of [0.1, 0.9, 0.3, 0.7])
+			{
+				const previousHeight = (await editor.boundingBox()).height;
+				await page.mouse.move(range.x + 8 + (range.width - 16) * fraction, y, {steps: 5});
+				await expect.poll(async () => Math.abs((await editor.boundingBox()).height - previousHeight)).toBeGreaterThan(10);
+				const currentRange = await slider.boundingBox();
+				const currentToolbar = await toolbar.boundingBox();
+				const currentContent = await content.boundingBox();
+				expect(Math.abs(currentRange.y + currentRange.height / 2 - y)).toBeLessThan(0.5);
+				expect(Math.abs(currentToolbar.y + currentToolbar.height - initial.y - initial.height)).toBeLessThan(0.5);
+				expect(currentContent.y + currentContent.height).toBeLessThanOrEqual(currentToolbar.y + 0.5);
+			}
+		}
+		finally
+		{
+			await page.mouse.up();
+		}
+	}
+});
+
+const testStickyHeaderCoverage = async ({page}) => {
+	await page.setViewportSize({width: 1280, height: 900});
+	await page.goto('query-workbench.html', {waitUntil: 'domcontentloaded'});
+	await waitForWorker(page);
+	const fixture = await createFixture(page, 'sqlite');
+	await execute(page, fixture, `
+		WITH RECURSIVE numbers(id) AS (
+			VALUES (4) UNION ALL SELECT id + 1 FROM numbers WHERE id < 80
+		)
+		INSERT INTO workbench_fixture (id, label)
+		SELECT id, 'scroll row ' || id FROM numbers
+	`);
+	await connect(page, fixture);
+	await page.getByText('main.workbench_fixture', {exact: true}).click();
+	await page.getByRole('button', {name: 'Select rows', exact: true}).click();
+	const table = page.getByRole('table', {name: 'Query result 1'});
+	const cell = table.getByRole('button', {name: 'Edit row 3 label', exact: true});
+	await expect(table.getByRole('button', {name: /^Edit row \d+ label$/})).toHaveCount(80);
+	const scroller = page.locator('.result-scroll');
+	expect(await scroller.evaluate(element => element.scrollHeight > element.clientHeight)).toBe(true);
+
+	const scrollCellUnderHeader = async () => {
+		await cell.evaluate(button => {
+			const table = button.closest('table');
+			const scroller = table.closest('.result-scroll');
+			const header = table.querySelectorAll('thead th')[button.closest('td').cellIndex];
+			const buttonRect = button.getBoundingClientRect();
+			const headerCenter = scroller.getBoundingClientRect().top + scroller.clientTop
+				+ header.getBoundingClientRect().height / 2;
+			scroller.scrollTop += buttonRect.top + buttonRect.height / 2 - headerCenter;
+		});
+		await expect.poll(() => cell.evaluate(button => {
+			const table = button.closest('table');
+			const header = table.querySelectorAll('thead th')[button.closest('td').cellIndex];
+			const buttonRect = button.getBoundingClientRect();
+			const headerRect = header.getBoundingClientRect();
+			const x = buttonRect.left + buttonRect.width / 2;
+			const y = buttonRect.top + buttonRect.height / 2;
+			return {
+				scrolled: table.closest('.result-scroll').scrollTop > 0
+				, overlapsHeader: x > headerRect.left && x < headerRect.right
+					&& y > headerRect.top && y < headerRect.bottom
+				// Hit testing checks the browser's real paint order, not a CSS value.
+				, headerOnTop: document.elementFromPoint(x, y)?.closest('th') === header
+			};
+		})).toEqual({scrolled: true, overlapsHeader: true, headerOnTop: true});
+	};
+
+	await scrollCellUnderHeader();
+	// Offset from a row boundary so a coincident body border cannot hide a gap.
+	await scroller.evaluate(element => {element.scrollTop += 4;});
+	const readHeaderEdge = async () => page.evaluate(async screenshot => {
+		const image = new Image();
+		image.src = `data:image/png;base64,${screenshot}`;
+		await image.decode();
+		const canvas = document.createElement('canvas');
+		canvas.width = image.width;
+		canvas.height = image.height;
+		const context = canvas.getContext('2d');
+		context.drawImage(image, 0, 0);
+		const scroller = document.querySelector('.result-scroll');
+		const y = Math.floor((scroller.getBoundingClientRect().top + scroller.clientTop) * devicePixelRatio);
+		return [...scroller.querySelectorAll('thead th')].map(header => {
+			const rect = header.getBoundingClientRect();
+			const x = Math.ceil((rect.left + 1) * devicePixelRatio);
+			const width = Math.floor((rect.width - 2) * devicePixelRatio);
+			return Array.from(context.getImageData(x, y, width, Math.ceil(devicePixelRatio)).data);
+		});
+	}, (await page.screenshot()).toString('base64'));
+	// Changing only cells hidden below the header must not change its first
+	// physical pixel row(s), including at fractional CSS-pixel scrollport edges.
+	const bodyColor = await page.addStyleTag({content: '.query-results tbody th, .query-results tbody td { background: #f0f; }'});
+	try
+	{
+		const before = await readHeaderEdge();
+		await bodyColor.evaluate(style => {style.textContent = '.query-results tbody th, .query-results tbody td { background: #0ff; }';});
+		expect(await readHeaderEdge()).toEqual(before);
+	}
+	finally
+	{
+		await bodyColor.evaluate(style => style.remove());
+	}
+	await scroller.evaluate(element => {element.scrollTop = 0;});
+	await cell.scrollIntoViewIfNeeded();
+	const bounds = await cell.boundingBox();
+	await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+	await page.mouse.down();
+	try
+	{
+		await expect.poll(() => cell.evaluate(button => button.matches(':active'))).toBe(true);
+		await scrollCellUnderHeader();
+		await expect.poll(() => cell.evaluate(button => button.matches(':active'))).toBe(true);
+	}
+	finally
+	{
+		await page.mouse.move(0, 0);
+		await page.mouse.up();
+	}
+};
+
+for(const deviceScaleFactor of [1, 2])
+{
+	test.describe(`query workbench at ${deviceScaleFactor}x pixel density`, () => {
+		test.use({deviceScaleFactor});
+		test('sticky headers cover scrolled editable cells, including pressed buttons', testStickyHeaderCoverage);
+	});
+}
+
 for(const engine of ['sqlite', 'pgsql'])
 {
 	test(`${engine} workbench executes against the persisted CGI database without URL autorun`, async ({page}) => {
@@ -188,11 +621,11 @@ for(const engine of ['sqlite', 'pgsql'])
 		await waitForWorker(page);
 		const fixture = await createFixture(page, engine);
 		const query = new URLSearchParams({
-			engine, target: fixture.target, sql: 'DELETE FROM workbench_fixture', autorun: 'true'
+			engine, target: fixture.target, connect: '1', sql: 'DELETE FROM workbench_fixture', autorun: 'true'
 		});
 		await page.goto(`query-workbench.html?${query}`, {waitUntil: 'domcontentloaded'});
 		await waitForWorker(page);
-		await connect(page, fixture);
+		await expect(page.getByRole('button', {name: 'Run', exact: true})).toBeEnabled({timeout: 180000});
 
 		const schema = await rpc(page, 'queryWorkbenchSchema', fixture);
 		expect(schema).toEqual(expect.arrayContaining([

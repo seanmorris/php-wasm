@@ -4,7 +4,13 @@ Expand **More...** on the demo home page and open **Query Workbench**, or visit 
 
 Choose **SQLite** and an existing database file in the demo's persisted filesystem, or **PostgreSQL** for the installed Drupal PGlite database. Click **Connect**, write or select a statement, and click **Run**. PostgreSQL uses the browser's PGlite database; it is not a remote PostgreSQL connection.
 
+Installed Drupal, WordPress, and Laravel demos also provide a **DB** button beside **IDE** in the framework chooser. It opens the workbench using `engine`, `target`, and `connect=1` URL parameters and loads that database's schema automatically. This never runs SQL from the URL or creates a missing database.
+
 Queries use each engine's native SQL. Results show column names, rows, affected-row information, and errors. The schema navigator helps identify tables and columns. SQL files can be opened and saved in the demo filesystem. Opening a file, loading a URL, choosing a database, and connecting do not execute its SQL.
+
+The top toolbar follows the editor's flush control styling: Toggle Leftbar, + Query Tab, **Save**, **Load**, **Run**, and Row Limit. Save and Load prompt for a `.sql` path inside `/persist/`; no path field remains in the editor. Ctrl/Cmd+S saves the current file directly, or prompts for a path for a new query. Save can also choose a different filename.
+
+The bottom toolbar switches between Result Grid and Action Output and adjusts editor height without moving the slider. **Horizontal scroll** is enabled by default to keep wide values unwrapped and scroll the grid sideways; turn it off to wrap cells.
 
 ## Editing rows
 
@@ -23,6 +29,7 @@ The workbench uses the same databases as the CGI demos. Writes change live demo 
 | Drupal 11 | SQLite | `/persist/drupal-11.4.5/web/sites/default/files/.sqlite` |
 | Drupal 11 | PostgreSQL/PGlite | `idb://host=drupal-11-pg18 dbname=postgres port=5432` |
 | WordPress 7.1 | SQLite | `/persist/wordpress-7.1/wp-content/database/.ht.sqlite` |
+| Laravel 11 | SQLite | `/persist/laravel-11/database/database.sqlite` |
 
 SQLite paths refer to the worker's filesystem, not files on your computer. Embedded examples using a nonpersistent `people.db` run in a separate runtime and are not this CGI database.
 

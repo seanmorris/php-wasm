@@ -9,9 +9,11 @@ import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-sql';
 import 'ace-builds/src-noconflict/theme-monokai';
 import Header from '../components/Header';
+import QuerySqlFileDialog from '../components/QuerySqlFileDialog';
 import {getPhpBus} from '../lib/phpBus';
 import toggleIcon from '../assets/nuvola/view_choose.png';
 import saveIcon from '../assets/nuvola/3floppy_unmount.png';
+import openIcon from '../assets/nomo-dark/folder.open.svg';
 import databaseIcon from '../assets/icons/rolodex-icon-32.png';
 
 const engineLabel = engine => engine === 'pgsql' ? 'PostgreSQL' : 'SQLite';
@@ -61,6 +63,13 @@ export function displayCell(cell)
  */
 export default function QueryWorkbench()
 {
+	const [requestedConnection] = useState(() => {
+		const query = new URLSearchParams(window.location.search);
+		return query.get('connect') === '1' && ['sqlite', 'pgsql'].includes(query.get('engine')) && query.get('target')
+			? {engine: query.get('engine'), target: query.get('target')}
+			: null;
+	});
+	const pendingConnection = useRef(requestedConnection);
 	const [tabs, setTabs] = useState(() => {
 		const query = new URLSearchParams(window.location.search);
 		return [makeTab(1, query.get('engine') === 'pgsql' ? 'pgsql' : 'sqlite', query.get('target') ?? '')];
@@ -75,6 +84,9 @@ export default function QueryWorkbench()
 	const [outputPanel, setOutputPanel] = useState('results');
 	const [editorShare, setEditorShare] = useState(50);
 	const [resultsCollapsed, setResultsCollapsed] = useState(false);
+	const [horizontalScroll, setHorizontalScroll] = useState(true);
+	const [fileDialog, setFileDialog] = useState(null);
+	const focusEditorAfterDialog = useRef(false);
 	const nextId = useRef(2);
 	const operation = useRef(null);
 	const editor = useRef(null);
@@ -221,13 +233,32 @@ export default function QueryWorkbench()
 		}
 	}, [appendOutput]);
 
-	const connect = () => perform(active, 'Connect', async (bus, ensureCurrent) => {
-		updateTab(active.id, {connected: false, schema: []});
-		const schema = await bus.queryWorkbenchSchema({engine: active.engine, target: active.target});
-		ensureCurrent();
-		updateTab(active.id, {schema, connected: true});
-		appendOutput(active.id, `Connected to ${engineLabel(active.engine)}: ${active.target}`);
-	});
+	const connect = useCallback(() => {
+		pendingConnection.current = null;
+		return perform(active, 'Connect', async (bus, ensureCurrent) => {
+			updateTab(active.id, {connected: false, schema: []});
+			const schema = await bus.queryWorkbenchSchema({engine: active.engine, target: active.target});
+			ensureCurrent();
+			updateTab(active.id, {schema, connected: true});
+			appendOutput(active.id, `Connected to ${engineLabel(active.engine)}: ${active.target}`);
+		});
+	}, [active, perform, updateTab, appendOutput]);
+
+	useEffect(() => {
+		const request = pendingConnection.current;
+		if(!request) return;
+		if(active.id !== 1 || active.engine !== request.engine || active.target !== request.target)
+		{
+			pendingConnection.current = null;
+			return;
+		}
+		if(loadingTargets || busy || fileDialog) return;
+		pendingConnection.current = null;
+		if(targetError) return;
+		// A framework DB link opens schema metadata once, never SQL from the URL.
+		// The worker validates that the explicitly requested database already exists.
+		void connect();
+	}, [active, loadingTargets, busy, fileDialog, targetError, connect]);
 
 	const run = useCallback(() => {
 		if(!active.connected || operation.current || active.rowDraft)
@@ -269,22 +300,22 @@ export default function QueryWorkbench()
 		return path;
 	};
 
-	const openSql = () => perform(active, 'Open SQL', async (bus, ensureCurrent) => {
-		const path = sqlFilePath(active.path);
-		if(active.dirty && !window.confirm('Discard unsaved changes in this query tab?'))
+	const openSql = (requestedPath, tab) => perform(tab, 'Open SQL', async (bus, ensureCurrent) => {
+		const path = sqlFilePath(requestedPath);
+		if(tab.dirty && !window.confirm('Discard unsaved changes in this query tab?'))
 		{
 			return;
 		}
 		const data = await bus.readFile(path);
 		ensureCurrent();
 		const sql = typeof data === 'string' ? data : new TextDecoder().decode(data);
-		updateTab(active.id, {sql, name: path.split('/').pop(), savedPath: path, dirty: false});
-		appendOutput(active.id, `Opened ${path}`);
+		updateTab(tab.id, {sql, path, name: path.split('/').pop(), savedPath: path, dirty: false});
+		appendOutput(tab.id, `Opened ${path}`);
 	});
 
-	const saveSql = useCallback(() => perform(active, 'Save SQL', async (bus, ensureCurrent) => {
-		const path = sqlFilePath(active.path);
-		if(path !== active.savedPath)
+	const saveSql = useCallback((requestedPath, tab) => perform(tab, 'Save SQL', async (bus, ensureCurrent) => {
+		const path = sqlFilePath(requestedPath);
+		if(path !== tab.savedPath)
 		{
 			const existing = await bus.analyzePath(path);
 			ensureCurrent();
@@ -293,14 +324,42 @@ export default function QueryWorkbench()
 				return;
 			}
 		}
-		await bus.writeFile(path, new TextEncoder().encode(active.sql));
+		await bus.writeFile(path, new TextEncoder().encode(tab.sql));
 		ensureCurrent();
-		updateTab(active.id, {name: path.split('/').pop(), savedPath: path, dirty: false});
-		appendOutput(active.id, `Saved ${path}`);
-	}), [active, perform, updateTab, appendOutput]);
+		updateTab(tab.id, {path, name: path.split('/').pop(), savedPath: path, dirty: false});
+		appendOutput(tab.id, `Saved ${path}`);
+	}), [perform, updateTab, appendOutput]);
+
+	const chooseSqlFile = mode => setFileDialog({mode, tabId: active.id, path: active.path});
+	const confirmSqlFile = path => {
+		const tab = tabs.find(tab => tab.id === fileDialog.tabId);
+		focusEditorAfterDialog.current = true;
+		setFileDialog(null);
+		if(tab)
+		{
+			void (fileDialog.mode === 'save' ? saveSql(path, tab) : openSql(path, tab));
+		}
+	};
+
+	useEffect(() => {
+		if(!fileDialog && focusEditorAfterDialog.current)
+		{
+			focusEditorAfterDialog.current = false;
+			// The toolbar opener is disabled during the file RPC; keep keyboard focus in the editor.
+			editor.current?.focus();
+		}
+	}, [fileDialog]);
 
 	useEffect(() => {
 		const handleKey = event => {
+			if(fileDialog)
+			{
+				if((event.ctrlKey || event.metaKey) && (event.key === 'Enter' || event.key.toLowerCase() === 's'))
+				{
+					event.preventDefault();
+				}
+				return;
+			}
 			if((event.ctrlKey || event.metaKey) && event.key === 'Enter')
 			{
 				event.preventDefault();
@@ -309,14 +368,25 @@ export default function QueryWorkbench()
 			if((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's')
 			{
 				event.preventDefault();
-				void saveSql();
+				if(!operation.current)
+				{
+					if(active.savedPath)
+					{
+						void saveSql(active.savedPath, active);
+					}
+					else
+					{
+						setFileDialog({mode: 'save', tabId: active.id, path: active.path});
+					}
+				}
 			}
 		};
 		window.addEventListener('keydown', handleKey);
 		return () => window.removeEventListener('keydown', handleKey);
-	}, [run, saveSql]);
+	}, [active, fileDialog, run, saveSql]);
 
 	const addTab = () => {
+		pendingConnection.current = null;
 		const tab = makeTab(nextId.current++, active.engine, active.target);
 		setTabs(current => [...current, tab]);
 		setActiveId(tab.id);
@@ -350,16 +420,19 @@ export default function QueryWorkbench()
 			document.getElementById(`query-tab-${tabs[next].id}`)?.focus();
 		}
 	};
-	const changeTarget = (engine, target) => updateTab(active.id, {
-		engine
-		, target
-		, connected: false
-		, schema: []
-		, results: []
-		, edit: null
-		, preview: null
-		, rowDraft: null
-	});
+	const changeTarget = (engine, target) => {
+		pendingConnection.current = null;
+		updateTab(active.id, {
+			engine
+			, target
+			, connected: false
+			, schema: []
+			, results: []
+			, edit: null
+			, preview: null
+			, rowDraft: null
+		});
+	};
 	const previewTable = table => {
 		if(operation.current)
 		{
@@ -410,16 +483,19 @@ export default function QueryWorkbench()
 	};
 	const availableTargets = targets.filter(target => target.engine === active.engine);
 	const knownTarget = availableTargets.some(target => target.target === active.target);
+	const loadingResults = busy?.tabId === active.id && ['Run query', 'Select rows', 'Save row'].includes(busy.label);
 
 	return <div className="query-workbench viewport-page" data-show-schemas={showSchemas}>
 		<div className="bevel">
 			<Header />
 			<div className="workbench-heading"><img src={databaseIcon} alt="" /><h1>Query Workbench</h1><span>Browser-local databases</span></div>
-			<div className="workbench-toolbar inset">
+			<div className="workbench-toolbar row toolbar inset tight">
 				<button className="square" title="Toggle schemas" aria-label="Toggle schemas" aria-controls="query-schemas" aria-expanded={showSchemas} onClick={() => setShowSchemas(value => !value)}><img src={toggleIcon} alt="" /></button>
 				<button onClick={addTab}>+ Query tab</button>
+				<button className="sql-file-action" aria-label="Save SQL" onClick={() => chooseSqlFile('save')} disabled={!!busy}><img src={saveIcon} alt="" />Save</button>
+				<button className="sql-file-action" aria-label="Load SQL" onClick={() => chooseSqlFile('load')} disabled={!!busy}><img src={openIcon} alt="" />Load</button>
 				<button aria-label="Run" onClick={() => void run()} disabled={!!busy || !!active.rowDraft || !active.connected || !active.sql.trim()} title="Run selection or buffer (Ctrl/Cmd+Enter)">▶ Run</button>
-				<label>Row limit <select aria-label="Row limit" value={maxRows} onChange={event => setMaxRows(Number(event.target.value))} disabled={!!busy}><option value={100}>100</option><option value={500}>500</option><option value={1000}>1000</option></select></label>
+				<label><span>Row limit</span><select className="bevel" aria-label="Row limit" value={maxRows} onChange={event => setMaxRows(Number(event.target.value))} disabled={!!busy}><option value={100}>100</option><option value={500}>500</option><option value={1000}>1000</option></select></label>
 				<span className="query-hint">One statement · Ctrl/Cmd+Enter to run selection or buffer</span>
 			</div>
 			<div className="workbench-body">
@@ -462,11 +538,9 @@ export default function QueryWorkbench()
 						<div className="sql-editor inset">
 							<AceEditor key={active.id} name="query-editor" mode="sql" theme="monokai" value={active.sql} onChange={sql => updateTab(active.id, {sql, dirty: true})} onLoad={instance => {editor.current = instance; instance.textInput?.getElement().setAttribute('aria-label', 'SQL query');}} width="100%" height="100%" fontSize={14} showPrintMargin={false} setOptions={{useWorker: false}} readOnly={!!busy} />
 						</div>
-						<div className="sql-files inset"><label htmlFor="query-file-path">SQL file path</label><input id="query-file-path" value={active.path} disabled={!!busy} onChange={event => updateTab(active.id, {path: event.target.value})} /><button onClick={() => void openSql()} disabled={!!busy}>Open SQL</button><button onClick={() => void saveSql()} disabled={!!busy}><img src={saveIcon} alt="" />Save SQL</button></div>
 						<div className="query-results inset" data-collapsed={resultsCollapsed}>
-							<div className="result-toolbar"><button aria-pressed={outputPanel === 'results'} onClick={() => {setOutputPanel('results'); setResultsCollapsed(false);}}>Result Grid</button><button aria-pressed={outputPanel === 'output'} onClick={() => {setOutputPanel('output'); setResultsCollapsed(false);}}>{`Action Output (${active.output.length})`}</button><label className="editor-size">Editor height<input type="range" aria-label="Editor height" min={20} max={80} value={editorShare} onChange={event => setEditorShare(Number(event.target.value))} /></label><button aria-label={resultsCollapsed ? 'Show results' : 'Hide results'} aria-expanded={!resultsCollapsed} onClick={() => setResultsCollapsed(value => !value)}>{resultsCollapsed ? '▴' : '▾'}</button></div>
-							{outputPanel === 'results' ? <div className="result-scroll">
-								{!active.results.length && <p className="result-placeholder">Results appear here. SQL runs only when you click Run.</p>}
+							{outputPanel === 'results' ? <div className="result-scroll" data-horizontal-scroll={horizontalScroll} aria-busy={loadingResults}>
+								{!active.results.length && <p className="result-placeholder">{loadingResults ? 'Loading…' : 'Results appear here. SQL runs only when you click Run.'}</p>}
 								{active.results.map((result, index) => <section key={index}>
 									<p className="result-summary">{result.returnedRows} rows returned{result.affectedRows !== null && result.affectedRows !== undefined ? ` · ${result.affectedRows} rows affected` : ''}{result.truncated ? ' · Result truncated at the row or size limit' : ''}</p>
 									<p className="result-summary">{active.edit?.keyColumns?.length ? 'Table preview: click a value to edit. Key and binary columns are read-only.' : 'Read-only results. To edit rows, select a table with a usable key from Schemas.'}</p>
@@ -474,15 +548,19 @@ export default function QueryWorkbench()
 								</section>)}
 							</div> : <section className="action-output" aria-label="Action output"><ol>{active.output.map((entry, index) => <li key={index} className={entry.failed ? 'failed' : ''}>{entry.message}</li>)}</ol>{!active.output.length && <p>No actions yet.</p>}</section>}
 							{active.rowDraft && <form className="row-edit inset" aria-label="Edit row" onSubmit={event => {event.preventDefault(); saveRow();}}>
-								<label>Row {active.rowDraft.rowIndex + 1} · {active.rowDraft.column}<input aria-label="Cell value" value={active.rowDraft.value} disabled={!!busy || active.rowDraft.isNull} onChange={event => updateTab(active.id, {rowDraft: {...active.rowDraft, value: event.target.value}})} /></label>
-								<label><input type="checkbox" checked={active.rowDraft.isNull} disabled={!!busy} onChange={event => updateTab(active.id, {rowDraft: {...active.rowDraft, isNull: event.target.checked}})} />Set NULL</label>
-								<button disabled={!!busy || !active.connected || !active.edit} type="submit">Save row</button><button disabled={!!busy} type="button" onClick={() => updateTab(active.id, {rowDraft: null})}>Cancel edit</button>
+								<label className="row-edit-field">Row {active.rowDraft.rowIndex + 1} · {active.rowDraft.column}<input aria-label="Cell value" value={active.rowDraft.value} disabled={!!busy || active.rowDraft.isNull} onChange={event => updateTab(active.id, {rowDraft: {...active.rowDraft, value: event.target.value}})} /></label>
+								<div className="row-edit-actions">
+									<label><input type="checkbox" checked={active.rowDraft.isNull} disabled={!!busy} onChange={event => updateTab(active.id, {rowDraft: {...active.rowDraft, isNull: event.target.checked}})} />Set NULL</label>
+									<button disabled={!!busy || !active.connected || !active.edit} type="submit">Save row</button><button disabled={!!busy} type="button" onClick={() => updateTab(active.id, {rowDraft: null})}>Cancel edit</button>
+								</div>
 							</form>}
+							<div className="result-toolbar row toolbar tight"><button aria-pressed={outputPanel === 'results'} onClick={() => {setOutputPanel('results'); setResultsCollapsed(false);}}>Result Grid</button><button aria-pressed={outputPanel === 'output'} onClick={() => {setOutputPanel('output'); setResultsCollapsed(false);}}>{`Action Output (${active.output.length})`}</button><label className="result-scroll-toggle"><input type="checkbox" checked={horizontalScroll} onChange={event => setHorizontalScroll(event.target.checked)} />Horizontal scroll</label><label className="editor-size">Editor height<input type="range" aria-label="Editor height" min={20} max={80} value={editorShare} onChange={event => setEditorShare(Number(event.target.value))} /></label><button aria-label={resultsCollapsed ? 'Show results' : 'Hide results'} aria-expanded={!resultsCollapsed} onClick={() => setResultsCollapsed(value => !value)}>{resultsCollapsed ? '▴' : '▾'}</button></div>
 						</div>
 					</section>
 				</main>
 			</div>
 			<div className="workbench-status inset" role="status">{busy ? `${busy.label} (Query ${busy.tabId})…${busy.slow ? ' Still running; waiting for the worker. Closing this page does not cancel the query.' : ''}` : 'Ready. Queries change the demo database immediately; saved SQL files do not include database data.'}</div>
 		</div>
+		{fileDialog && <div className="overlay"><QuerySqlFileDialog mode={fileDialog.mode} initialPath={fileDialog.path} onConfirm={confirmSqlFile} onCancel={() => setFileDialog(null)} /></div>}
 	</div>;
 }

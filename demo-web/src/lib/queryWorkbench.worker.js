@@ -182,6 +182,7 @@ export const createWorkbenchActions = ({withLock, withPGlite, postgresExists = p
 			for(const [target, label] of [
 				['/persist/drupal-11.4.5/web/sites/default/files/.sqlite', 'Drupal / SQLite']
 				, ['/persist/wordpress-7.1/wp-content/database/.ht.sqlite', 'WordPress / SQLite']
+				, ['/persist/laravel-11/database/database.sqlite', 'Laravel / SQLite']
 			]){
 				const info = await php.analyzePath(target);
 				if(info.exists && !info.object?.isFolder) targets.push({engine: 'sqlite', target, label});
