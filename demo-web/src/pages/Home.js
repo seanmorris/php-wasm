@@ -12,7 +12,7 @@ import laminasIcon from '../assets/frameworks/laminas-icon.svg';
 import wordpressIcon from '../assets/frameworks/wordpress-icon.svg';
 import reactIcon from '../assets/frameworks/react-icon.svg';
 
-// import rolodexIcon from '../assets/icons/rolodex-icon-32.png';
+import rolodexIcon from '../assets/icons/rolodex-icon-32.png';
 import editorIcon from '../assets/icons/editor-icon-32.png';
 import vscodeIcon from '../assets/icons/vscode-32.png';
 import donateIcon from '../assets/icons/donate-icon-32.png';
@@ -117,10 +117,6 @@ function Home()
 							<img src = {vscodeIcon} className = "icon" alt = "Code Editor" />
 							VSCode
 						</button>
-						{/* <button>
-							<img src = {rolodexIcon} className = "icon" alt = "SQL Editor" />
-							SQL Editor
-						</button> */}
 					</div>
 					<div>
 						<button onClick = {() => window.open('https://github.com/seanmorris/php-wasm?tab=readme-ov-file#-php-wasm')}>
@@ -140,6 +136,11 @@ function Home()
 
 				<h3><button onClick = { () => {setShowMore(!showMore);}} className='square'><img src = {showMore ? upIcon : downIcon} alt = "" /></button><span onClick = { () => {setShowMore(!showMore);}}>More...</span></h3>
 				{ showMore && ( <div className = "inset extra-demos">
+					<a href = {basePath('query-workbench.html')} className="icon-box">
+						<img src = {rolodexIcon} alt = "" />
+						<span>Query Workbench</span>
+					</a>
+
 					<a target = "_blank" href = {basePath('waitline-preview.html')} className="icon-box" rel="noreferrer">
 						<img src = {cmdIcon} alt = "waitline Readline Test" />
 						<span>waitline / Readline Test</span>

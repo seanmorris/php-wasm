@@ -1,0 +1,419 @@
+.query-workbench {
+	display: flex;
+	min-width: 0;
+}
+
+.query-workbench > .bevel {
+	margin: 0.5rem;
+	padding: 0.75rem;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+	gap: 0.4rem;
+}
+
+.query-workbench .header {
+	flex-shrink: 0;
+}
+
+.workbench-heading, .workbench-toolbar, .sql-files, .connection-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+}
+
+.workbench-heading img {
+	width: 24px;
+	height: 24px;
+}
+
+.workbench-heading h1 {
+	font-size: 1.2rem;
+	margin: 0;
+}
+
+.workbench-heading > span {
+	margin-left: auto;
+	font-size: 0.9rem;
+}
+
+.workbench-toolbar {
+	flex-wrap: wrap;
+	padding: 0.2rem;
+}
+
+.workbench-toolbar label {
+	white-space: nowrap;
+}
+
+.query-hint {
+	margin-left: auto;
+	font-size: 0.85rem;
+}
+
+.workbench-body {
+	display: flex;
+	flex: 1;
+	min-height: 0;
+	gap: 0.4rem;
+}
+
+.schema-panel {
+	background: #333;
+	color: #ddd;
+	width: 17rem;
+	flex-shrink: 0;
+	padding: 0.6rem;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+.query-workbench[data-show-schemas="false"] .schema-panel {
+	display: none;
+}
+
+.schema-panel h2 {
+	font-size: 1rem;
+	border-bottom: 1px solid #666;
+	padding-bottom: 0.35rem;
+	margin: 0.3rem 0 0.7rem;
+}
+
+.schema-panel h2:not(:first-child) {
+	margin-top: 1rem;
+}
+
+.schema-panel h2 span {
+	float: right;
+}
+
+.schema-panel > label {
+	display: block;
+	font-size: 0.9rem;
+	margin-bottom: 0.25rem;
+}
+
+.schema-panel input, .schema-panel select {
+	width: 100%;
+	box-sizing: border-box;
+	margin-bottom: 0.6rem;
+	min-width: 0;
+}
+
+.query-workbench input, .query-workbench select {
+	font: inherit;
+	font-size: 0.9rem;
+	min-height: 1.8rem;
+}
+
+.connection-hint, .schema-tree p {
+	font-size: 0.85rem;
+	line-height: 1.35;
+}
+
+.schema-tree details {
+	margin-bottom: 0.45rem;
+	overflow-wrap: anywhere;
+}
+
+.schema-tree summary {
+	cursor: pointer;
+}
+
+.schema-tree ul {
+	list-style: none;
+	margin: 0.4rem 0 0.5rem;
+	padding-left: 1rem;
+}
+
+.schema-tree li {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: space-between;
+	margin: 0.3rem 0;
+}
+
+.schema-tree small {
+	color: #bbb;
+}
+
+.preview-table {
+	font-size: 0.8rem;
+	margin: 0.4rem 0 0 1rem;
+}
+
+.query-main, .query-panel {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	min-width: 0;
+	min-height: 0;
+}
+
+.query-tabs {
+	display: flex;
+	background: #272822;
+	gap: 0.25rem;
+	padding: 0.25rem;
+	overflow-x: auto;
+	flex-shrink: 0;
+}
+
+.query-tab {
+	display: flex;
+	flex-shrink: 0;
+	background: #666;
+}
+
+.query-tab button {
+	border: 0;
+	background: transparent;
+	padding: 0.35rem;
+	color: #fff;
+}
+
+.query-tab[data-active="true"] {
+	background: #c3c3c3;
+}
+
+.query-tab[data-active="true"] button {
+	color: #111;
+}
+
+.query-tab small {
+	display: block;
+	font-size: 0.75rem;
+	text-align: left;
+	margin-top: 0.2rem;
+}
+
+.query-connection-strip {
+	display: flex;
+	gap: 1rem;
+	font-size: 0.8rem;
+	padding: 0.3rem;
+	background: #ddd;
+	min-width: 0;
+}
+
+.query-connection-strip span:first-child {
+	white-space: nowrap;
+}
+
+.query-connection-strip span:last-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.sql-editor {
+	flex: 1 1 var(--editor-share, 50%);
+	min-height: 8rem;
+	background: #272822;
+}
+
+.sql-files {
+	flex-wrap: wrap;
+	padding: 0.3rem;
+	font-size: 0.85rem;
+}
+
+.sql-files input {
+	flex: 1;
+	min-width: 8rem;
+}
+
+.sql-files button {
+	display: flex;
+	align-items: center;
+	gap: 0.2rem;
+	font-size: 0.85rem;
+}
+
+.sql-files img {
+	width: 16px;
+	height: 16px;
+}
+
+.query-results {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 calc(100% - var(--editor-share, 50%));
+	min-height: 6rem;
+	background: #eee;
+	color: #222;
+}
+
+.result-toolbar {
+	display: flex;
+	background: #aaa;
+	flex-shrink: 0;
+	gap: 0.25rem;
+	padding: 0.2rem;
+	flex-wrap: wrap;
+}
+
+.editor-size {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+	font-size: 0.75rem;
+}
+
+.editor-size input {
+	width: 5rem;
+}
+
+.query-results[data-collapsed="true"] {
+	flex: 0 0 auto;
+	min-height: 0;
+}
+
+.query-results[data-collapsed="true"] > :not(.result-toolbar) {
+	display: none;
+}
+
+.result-toolbar button[aria-pressed="true"] {
+	background: #eee;
+}
+
+.result-scroll, .action-output {
+	overflow: auto;
+	flex: 1;
+	min-height: 0;
+}
+
+.result-placeholder, .result-summary, .action-output p {
+	margin: 0.7rem;
+	font-size: 0.85rem;
+}
+
+.query-results table {
+	border-collapse: collapse;
+	font: 0.85rem monospace;
+	min-width: 100%;
+}
+
+.query-results th, .query-results td {
+	text-align: left;
+	padding: 0.4rem 0.6rem;
+	border: 1px solid #bbb;
+	max-width: 32rem;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.query-results thead th {
+	position: sticky;
+	top: 0;
+	background: #ccc;
+}
+
+.query-results tbody tr:nth-child(even) {
+	background: #fff;
+}
+
+.null-cell {
+	color: #666;
+	font-style: italic;
+}
+
+.editable-cell {
+	font: inherit;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	padding: 0;
+	text-align: left;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	width: 100%;
+}
+
+.editable-cell:hover:not(:disabled) {
+	outline: 1px dotted #006b9c;
+}
+
+.row-edit {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	padding: 0.5rem;
+	background: #c3c3c3;
+	flex-shrink: 0;
+}
+
+.row-edit input:not([type="checkbox"]) {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.row-edit label:first-child {
+	flex: 1;
+	min-width: 9rem;
+}
+
+.action-output ol {
+	padding-left: 2rem;
+	font-size: 0.85rem;
+}
+
+.action-output li {
+	padding: 0.3rem;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.action-output .failed {
+	color: #9b1818;
+}
+
+.workbench-status {
+	padding: 0.35rem;
+	font-size: 0.8rem;
+	flex-shrink: 0;
+}
+
+.query-workbench :focus-visible {
+	outline: 2px solid #006b9c;
+	outline-offset: -2px;
+}
+
+@media (max-width: 760px) {
+	.query-workbench > .bevel {
+		padding: 0.35rem;
+		margin: 0.25rem;
+		overflow: auto;
+	}
+
+	.workbench-heading > span, .query-hint {
+		display: none;
+	}
+
+	.workbench-body {
+		flex-direction: column;
+		overflow: auto;
+	}
+
+	.schema-panel {
+		width: 100%;
+		max-height: 15rem;
+	}
+
+	.query-main {
+		min-height: 32rem;
+		flex-shrink: 0;
+	}
+
+	.sql-files label {
+		width: 100%;
+	}
+
+	.query-connection-strip {
+		gap: 0.4rem;
+	}
+}

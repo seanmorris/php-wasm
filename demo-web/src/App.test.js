@@ -42,9 +42,17 @@ vi.mock('./pages/WaitlinePreview', () => ({
 	default: () => React.createElement('div', null, 'Waitline Preview')
 }));
 
+vi.mock('./pages/QueryWorkbench', () => ({
+	default: () => React.createElement('div', null, 'Query Workbench')
+}));
+
 import { AppRoutes } from './App';
 
 describe('AppRoutes', () => {
+	it('renders the query workbench HTML entry', () => {
+		render(<MemoryRouter initialEntries={['/query-workbench.html?engine=sqlite']}><AppRoutes /></MemoryRouter>);
+		expect(screen.getByText('Query Workbench')).toBeInTheDocument();
+	});
 	it('renders the home page direct entry', () => {
 		render(
 			React.createElement(

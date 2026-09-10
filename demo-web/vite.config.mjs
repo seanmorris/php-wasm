@@ -35,6 +35,7 @@ const htmlEntryPaths = [
 	, '/install-demo.html'
 	, '/select-framework.html'
 	, '/code-editor.html'
+	, '/query-workbench.html'
 	, '/vscode.html'
 ];
 

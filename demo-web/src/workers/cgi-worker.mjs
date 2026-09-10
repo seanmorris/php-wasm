@@ -23,6 +23,8 @@ import Yaml from 'php-wasm-yaml';
 import Zlib from 'php-wasm-zlib';
 import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { coordinateDemoDatabase, withDemoDatabaseLock } from '../lib/demoDatabaseRuntime.worker.js';
+import { createWorkbenchActions } from '../lib/queryWorkbench.worker.js';
 
 const sharedLibs = [];
 const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
@@ -58,6 +60,7 @@ const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
 	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' }
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
+	, { parent: '/preload/query-workbench/', name: 'query-workbench.php', url: './scripts/query-workbench.php' }
 ];
 const cgiPrefix = basePath('cgi-bin/');
 const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')];
@@ -129,20 +132,22 @@ const actions = {
 		, () => true
 	)
 	, runSql: (php, database, sql) => {
-		return withPGlite(database, pglite => pglite.query(sql));
+		return withDemoDatabaseLock(() => withPGlite(database, pglite => pglite.query(sql)));
 	}
 	, replaceSql: (php, database, sql) => {
-		return withPGlite(database, pglite => pglite.exec([
+		return withDemoDatabaseLock(() => withPGlite(database, pglite => pglite.exec([
 			'BEGIN;'
 			, 'DROP SCHEMA IF EXISTS public CASCADE;'
 			, 'CREATE SCHEMA public;'
 			, sql
 			, 'COMMIT;'
-		].join('\n')));
+		].join('\n'))));
 	}
+	, ...createWorkbenchActions({withLock: withDemoDatabaseLock, withPGlite})
 };
 
 let phpLoader = null;
+const DemoPhpCgiWorker = coordinateDemoDatabase(PhpCgiWorker);
 
 /**
  * Loads the runtime assets required for the current build type and creates the worker.
@@ -161,7 +166,7 @@ const init = () => {
 	}
 
 	// Spawn the PHP-CGI binary
-	return phpLoader = new PhpCgiWorker({
+	return phpLoader = new DemoPhpCgiWorker({
 		version: '8.3'
 		, onRequest
 		, notFound
