@@ -2,8 +2,6 @@ name: Test
 
 on:
   push:
-    paths-ignore:
-      - '.cloudflare/pages/functions/\[\[path\]\].js'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,6 +35,17 @@ jobs:
         run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
       - name: Verify packaged builder helpers
         run: node --test test/build/builder-tools-packaging.test.mjs
+      - name: Verify Cloudflare wrapper, profile, artifact and D1 regressions
+        run: >-
+          node --test test/php-cloudflare.test.mjs
+          test/php-base-queue.test.mjs
+          test/builder-help.test.mjs
+          test/build/cloudflare-build.test.mjs
+          test/build/pdo-cfd1-driver.test.mjs
+          test/build/pdo-cfd1-importer.test.mjs
+          test/cloudflare/artifacts.test.mjs
+      - name: Verify Pages routing and safe nightly promotion
+        run: npm run test:cloudflare-pages
       - name: Test the real Make importer without PHP builds
         run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
       - name: Build the lightweight root-owned importer fixture

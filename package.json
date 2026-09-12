@@ -18,6 +18,8 @@
     "tsc": "tsc -p jsconfig.json --noEmit",
     "test": "make test",
     "test:packaging": "node --test test/packaging.test.mjs",
+    "test:cloudflare": "node --test test/cloudflare/*.test.mjs",
+    "test:cloudflare-pages": "node --test test/cloudflare-pages/*.test.mjs test/cloudflare-release/*.test.mjs",
     "test:docs": "node --test test/docs.test.mjs",
     "test:docs-cgi": "node --test test/docs-cgi.test.mjs",
     "docs:coverage": "node ./bin/docs-snippet-report.js",
@@ -33,6 +35,7 @@
     "pdo-pglite": "./packages/pdo-pglite",
     "php-cgi-wasm": "./packages/php-cgi-wasm",
     "php-cli-wasm": "./packages/php-cli-wasm",
+    "php-cloud-wasm": "./packages/php-cloud-wasm",
     "php-dbg-wasm": "./packages/php-dbg-wasm",
     "php-wasm": "./packages/php-wasm",
     "php-wasm-dom": "./packages/dom",
@@ -105,7 +108,9 @@
     "eslint-plugin-jsdoc": "^62.9.0",
     "globals": "^17.5.0",
     "jsdoc": "^4.0.5",
+    "miniflare": "4.20260730.0",
     "sm-no-saccade-style": "^0.1.1",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "wrangler": "4.131.1"
   }
 }

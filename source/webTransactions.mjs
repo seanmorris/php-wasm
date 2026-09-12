@@ -16,7 +16,7 @@ const fallbackLocks = new Map();
 /**
  * Clears transaction state if it still belongs to the supplied transaction.
  * @param {TransactionalWrapper} wrapper Runtime wrapper coordinating FS transactions.
- * @param {Promise<void>} transactionStarted Transaction whose state should be cleared.
+ * @param {boolean|Promise<void>} transactionStarted Transaction state whose identity should be cleared.
  */
 const clearTransaction = (wrapper, transactionStarted) => {
 	if(wrapper.transactionStarted === transactionStarted)
@@ -87,7 +87,10 @@ export async function startTransaction(wrapper)
 		return;
 	}
 
-	let acceptStart, rejectStart;
+	/** @type {(value?: void) => void} */
+	let acceptStart;
+	/** @type {(reason?: unknown) => void} */
+	let rejectStart;
 	const transactionStarted = new Promise((accept, reject) => {
 		acceptStart = accept;
 		rejectStart = reject;

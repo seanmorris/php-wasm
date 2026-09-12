@@ -32,7 +32,7 @@ test('php-wasm-builder help build reflects current build targets and defaults', 
 	assert.equal(result.status, 0, result.stderr);
 	assert.equal(result.stderr, '');
 	assert.match(result.stdout, /Usage: php-wasm-builder build \[ENV_NAME\] \[MODULE_TYPE\] \[PACKAGE_TYPE\]/);
-	assert.match(result.stdout, /ENV_NAME: \[web, node, worker, webview\]/);
+	assert.match(result.stdout, /ENV_NAME: \[web, node, worker, webview, cloudflare\]/);
 	assert.match(result.stdout, /js:\s+build a CommonJS module \(default\)/);
 	assert.match(result.stdout, /mjs:\s+build an ES module/);
 	assert.match(result.stdout, /PACKAGE_TYPE: \[base, cgi, cli, dbg\]/);

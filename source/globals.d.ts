@@ -8,8 +8,11 @@ declare interface PhpModuleGlobal {
 declare const Module: PhpModuleGlobal;
 
 declare interface PhpModuleFactory {
-	default: new (args: object) => object;
+	default: PhpRuntimeFactory;
 }
+
+declare type PhpRuntimeFactory = ((args: PhpRuntimeArgs) => object | Promise<object>)
+	| (new (args: PhpRuntimeArgs) => object);
 
 declare type PhpRuntimeVersion = '8.0' | '8.1' | '8.2' | '8.3' | '8.4' | '8.5';
 declare type PhpRuntimeVariant = '' | '_sdl';
@@ -92,7 +95,7 @@ declare interface PhpRuntimeArgs {
 	dynamicLibs?: PhpLibraryList;
 	debug?: boolean;
 	ini?: string;
-	persist?: object;
+	persist?: object | boolean;
 	staticFS?: boolean;
 	vHosts?: PhpVhostList;
 	[key: string]: object | string | number | boolean | Function | undefined;
@@ -120,7 +123,7 @@ declare module 'php-wasm/php-worker.mjs' {
 
 declare module 'php-wasm/PhpBase' {
 	export class PhpBase extends EventTarget {
-		constructor(phpBinLoader: Promise<PhpModuleFactory>, args?: PhpRuntimeArgs, sapi?: string);
+		constructor(phpBinLoader: Promise<PhpModuleFactory | PhpRuntimeFactory>, args?: PhpRuntimeArgs, sapi?: string, phpSettings?: PhpRuntimeArgs);
 		binary: Promise<{
 			inputDataQueue?: string[],
 			awaitingInput?: ((value: string | undefined) => void) | null,
@@ -143,7 +146,7 @@ declare module 'php-wasm/PhpBase' {
 				syncfs?: (populate: boolean, callback: (error?: Error) => void) => void
 			} & object
 		}>;
-		queue: Array<[PhpQueuedCallback, PhpQueueParams, PhpQueueResolve, PhpQueueReject]>;
+		queue: Array<[PhpQueuedCallback, PhpQueueParams, PhpQueueResolve, PhpQueueReject, boolean?]>;
 		autoTransaction: boolean;
 		transactionStarted: boolean | Promise<void>;
 		flush(): void;

@@ -1,6 +1,6 @@
 {
   "name": "pdo-cfd1",
-  "description": "PGlite connector for pdo & php-wasm.",
+  "description": "Cloudflare D1 connector for PDO and php-wasm.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/seanmorris/php-wasm.git"
@@ -10,6 +10,8 @@
   "files": [
     "README.md",
     "pre.mak",
-    "static.mak"
+    "static.mak",
+    "import-source.mjs",
+    "compatibility.patch"
   ]
 }

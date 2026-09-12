@@ -32,6 +32,7 @@ _PHP in WebAssembly, npm not required._
 * `php-wasm`, `php-cgi-wasm`, and `php-dbg-wasm` currently default to PHP `8.4`; `php-cli-wasm` currently defaults to PHP `8.3`. Pass `version` explicitly when your asset filenames need to line up.
 * Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, and `zlib`.
 * [Vrzno](https://github.com/seanmorris/vrzno), [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1), and [pdo_pglite](https://github.com/seanmorris/pdo-pglite) are maintained as separate packages.
+* [Cloudflare embedded PHP](CLOUDFLARE.md) has a dedicated static ES-module build and local workerd tests for PHP `8.0` through `8.5`; final assets use the existing nightly distribution.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 

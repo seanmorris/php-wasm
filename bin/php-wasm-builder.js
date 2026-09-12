@@ -18,6 +18,7 @@ const buildEnvironments = new Map([
 	['node', 'node'],
 	['worker', 'worker'],
 	['webview', 'webview'],
+	['cloudflare', 'cloudflare'],
 ]);
 const buildModuleTypes = new Map([
 	['js', 'js'],
@@ -191,9 +192,16 @@ const parseBuildArgs = buildArgs => {
 		throw new Error(`Error: Unrecognized build argument "${buildArg}". Run \`php-wasm-builder help build\`.`);
 	}
 
+	if(selections.get('environment') === 'cloudflare'
+		&& ((selections.get('moduleType') !== null && selections.get('moduleType') !== 'mjs')
+			|| (selections.get('packageType') !== null && selections.get('packageType') !== 'base')))
+	{
+		throw new Error('Error: Cloudflare supports embedded PHP ESM only: build cloudflare mjs.');
+	}
+
 	return {
 		environment: selections.get('environment') ?? 'web',
-		moduleType: selections.get('moduleType') ?? 'js',
+		moduleType: selections.get('moduleType') ?? (selections.get('environment') === 'cloudflare' ? 'mjs' : 'js'),
 		packageType: selections.get('packageType') ?? 'base',
 	};
 };
@@ -211,19 +219,26 @@ const parseBuildArgs = buildArgs => {
 
 		const options = [
 			targetName,
-			`PHP_BUILDER_DIR=${cwd}`,
 			`BUILD_TYPE=${moduleType}`,
 			`IS_TTY=${tty.isatty(process.stdout.fd) ? 1 : 0}`
 		];
 
-		options.push(`ENV_DIR=${cwd}/`);
+		if(environment === 'cloudflare')
+		{
+			options.push(`CLOUDFLARE_OUTPUT_DIR=${path.join(cwd, 'packages/php-cloud-wasm')}`);
+			options.push(`CLOUDFLARE_CACHE_DIR=${path.join(cwd, '.cache/cloudflare')}`);
+		}
+		else
+		{
+			options.push(`PHP_BUILDER_DIR=${cwd}`, `ENV_DIR=${cwd}/`);
+		}
 
-		if(fs.existsSync(cwd + '/.php-wasm-rc'))
+		if(environment !== 'cloudflare' && fs.existsSync(cwd + '/.php-wasm-rc'))
 		{
 			options.push(`ENV_FILE=${rcFile}`);
 		}
 
-		ensureRuntimePackageTrees(cwd);
+		if(environment !== 'cloudflare') ensureRuntimePackageTrees(cwd);
 
 		return runMake(options);
 	};
@@ -233,11 +248,12 @@ const parseBuildArgs = buildArgs => {
 
 Build one php-wasm package, optionally using a .php-wasm-rc file in the current directory.
 
-  ENV_NAME: [web, node, worker, webview]
+  ENV_NAME: [web, node, worker, webview, cloudflare]
     web:     build the web runtime (default)
     node:    build the Node.js runtime
     worker:  build the worker runtime
     webview: build the webview runtime
+    cloudflare: build isolated embedded PHP ESM (mjs only; ignores .php-wasm-rc)
 
   MODULE_TYPE: [js, mjs]
     js:   build a CommonJS module (default)

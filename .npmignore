@@ -10,4 +10,5 @@ demo-web/*
 packages/*
 docs/*
 .env*
+/.cache/
 @todo

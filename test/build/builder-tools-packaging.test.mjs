@@ -14,6 +14,9 @@ test('the packed builder includes Make isolation and download helpers without sh
 	const fixture = path.join(temporary, 'builder');
 	fs.mkdirSync(path.join(fixture, '.github/bin'), { recursive: true });
 	fs.mkdirSync(path.join(fixture, '.github/workflows'));
+	fs.mkdirSync(path.join(fixture, '.cache/cloudflare/source'), { recursive: true });
+	fs.writeFileSync(path.join(fixture, '.cache/cloudflare/build.log'), 'local build diagnostic fixture\n');
+	fs.writeFileSync(path.join(fixture, '.cache/cloudflare/source/Makefile'), 'local snapshot fixture\n');
 	for(const name of ['package.json', '.npmignore'])
 	{
 		fs.copyFileSync(path.join(repoRoot, name), path.join(fixture, name));
@@ -36,4 +39,5 @@ test('the packed builder includes Make isolation and download helpers without sh
 	}
 	assert.equal(files.has('package/.github/workflows/not-for-package.yaml'), false);
 	assert.equal(files.has('package/.github/bin/not-for-package.sh'), false);
+	assert.equal([...files].some(name => name.startsWith('package/.cache/')), false, 'Local build caches must not ship');
 });

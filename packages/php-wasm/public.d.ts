@@ -39,15 +39,19 @@ export interface PhpRuntimeArgs {
 	dynamicLibs?: Array<string | URL | PhpSharedLibrary>;
 	debug?: boolean;
 	ini?: string;
-	persist?: object;
+	persist?: object | boolean;
 	staticFS?: boolean;
 	vHosts?: PhpVhost[];
 	[key: string]: object | string | number | boolean | Function | undefined;
 }
 
+export type PhpRuntimeFactory = ((args: PhpRuntimeArgs) => PhpBinaryRuntime | Promise<PhpBinaryRuntime>)
+	| (new (args: PhpRuntimeArgs) => PhpBinaryRuntime);
+
 export interface PhpBaseModuleFactory {
-	default: new (args: object) => object;
+	default: PhpRuntimeFactory;
 }
+
 
 export interface PhpBinaryRuntime {
 	inputDataQueue?: string[];
@@ -73,25 +77,25 @@ export interface PhpBinaryRuntime {
 }
 
 export declare class PhpBase extends EventTarget {
-	constructor(phpBinLoader: Promise<PhpBaseModuleFactory>, args?: PhpRuntimeArgs, sapi?: string);
+	constructor(phpBinLoader: Promise<PhpBaseModuleFactory | PhpRuntimeFactory>, args?: PhpRuntimeArgs, sapi?: string, phpSettings?: PhpRuntimeArgs);
 	autoTransaction: boolean;
 	transactionStarted: boolean | Promise<void>;
 	phpVersion?: PhpRuntimeVersion;
 	phpVariant?: PhpRuntimeVariant;
 	phpArgs: PhpRuntimeArgs;
-	queue: Array<[Function, Array<string | number | boolean | object | undefined>, (value?: PhpRuntimeValue) => void, (reason?: object | string | number | boolean | Error) => void]>;
+	queue: Array<[Function, Array<string | number | boolean | object | undefined>, (value?: PhpRuntimeValue) => void, (reason?: object | string | number | boolean | Error) => void, boolean?]>;
 	binary: Promise<PhpBinaryRuntime>;
 	inputString(byteString: string): void;
 	input(items: Iterable<number>): void;
 	flush(): void;
-	tokenize(phpCode: string): string[];
+	tokenize(phpCode: string): Promise<string>;
 	startTransaction(): Promise<void>;
 	commitTransaction(readOnly?: boolean): Promise<void>;
 	run(phpCode: string): Promise<number>;
 	exec(phpCode: string): Promise<PhpRuntimeValue>;
 	x(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<PhpRuntimeValue>;
-	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<string>;
-	refresh(): Promise<void>;
+	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<number>;
+	refresh(): Promise<PhpRuntimeValue>;
 	analyzePath(path: string): Promise<object>;
 	readdir(path: string): Promise<string[]>;
 	readFile(path: string, options?: object): Promise<string | Uint8Array>;
