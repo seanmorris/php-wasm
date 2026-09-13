@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { fileURLToPath } from 'node:url';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 
@@ -607,17 +606,8 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 	await expect(page.locator('body')).toContainText('admin', { timeout: 180000 });
 });
 
-test('Drupal 11.4.5 installs and runs with PostgreSQL in PGlite', async ({ page, context }) => {
+test('Drupal 11.4.5 installs and runs with PostgreSQL in PGlite', async ({ page }) => {
 	test.setTimeout(600000);
-
-	// First-run cron checks release metadata. Keep the install/login test
-	// independent of changes to Drupal's external release-history feed.
-	await context.route('https://updates.drupal.org/release-history/drupal/current?*', route => route.fulfill({
-		status: 200
-		, contentType: 'text/xml'
-		, headers: {'access-control-allow-origin': '*'}
-		, path: fileURLToPath(new URL('./fixtures/drupal-release-history.xml', import.meta.url))
-	}));
 
 	const runtimeFailures = [];
 
