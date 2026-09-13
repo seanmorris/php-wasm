@@ -9,6 +9,7 @@ Changes
 * CLI `run()` accepts optional string flags. Node CLI can resolve to `undefined` for runtime errors without an exit status; browser CLI rejects those errors. Embedded `run()` requires PHP source. Browser refresh methods return `Promise<void>`, embedded refresh returns a numeric result, and CGI refresh returns its binary. CGI `putEnv()` returns a number, and CGI wrappers do not inherit `EventTarget`. Debugger declarations now include `isRunning()`, synchronous `dumpSymbols()`, optional symbol tables, file arrays, and structured backtraces.
 * Added `npm run test:types` with pinned Deno 2.5.6, strict isolated npm fixtures, declaration checking, and coverage for all six generated Cloudflare versions. Both CI workflows run these checks before native builds. Regenerate CommonJS declarations and export mappings with `npm run generate:types`.
 * Artifact packaging now stages every declared wrapper with `make runtime-wrappers`, independent of the selected native profile. The isolated type fixtures use the same Make target and verify every explicit package export is present in the npm tarball.
+* The Drupal/PostgreSQL artifact test uses fixed external release metadata so the install, login, and database checks do not depend on changes to Drupal's live update feed.
 
 ## v0.1.0 - Aiming for the (GitHub) Stars
 
