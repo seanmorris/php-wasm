@@ -291,6 +291,8 @@ test('query workbench saves and loads SQL through transient file dialogs', async
 	await saveDialog.getByRole('textbox', {name: 'SQL file path', exact: true}).fill(path);
 	await saveDialog.getByRole('button', {name: 'Save', exact: true}).click();
 	await expect(saveDialog).toHaveCount(0);
+	// The dialog closes before the asynchronous overwrite check and write finish.
+	await expect(page.getByRole('button', {name: 'Save SQL', exact: true})).toBeEnabled();
 	expect(await rpc(page, 'readFile', path, {encoding: 'utf8'})).toBe(sql);
 
 	await rpc(page, 'refresh');
