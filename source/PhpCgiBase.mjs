@@ -766,6 +766,25 @@ export class PhpCgiBase
 	 */
 	async request(request)
 	{
+		try
+		{
+			return await this._request(request);
+		}
+		catch(error)
+		{
+			// Initialization of a replacement runtime can fail before PHP runs.
+			return this._errorResponse(request, error);
+		}
+	}
+
+	/**
+	 * Routes one request and serializes its PHP execution.
+	 * @private
+	 * @param {RuntimeRequest} request Request to serve.
+	 * @returns {Promise<Response|string|undefined>} Generated response.
+	 */
+	async _request(request)
+	{
 		const {
 			url
 			, method = 'GET'
@@ -919,16 +938,18 @@ export class PhpCgiBase
 			}
 		}
 
-		let exitCode = -1;
+		const requestLock = globalThis.navigator?.locks?.request
+			? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
+			: callback => callback();
 
-		try
-		{
-			const requestLock = globalThis.navigator?.locks?.request
-				? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
-				: callback => callback();
+		return requestLock(async () => {
+			// A preceding failed request may have replaced the instance while this
+			// request was queued. Static responses above do not need this lock.
+			const php = await this.binary;
+			let exitCode = -1;
 
-			// We need "return await" otherwise the finally block will run before the lock releases.
-			return await requestLock(async () => {
+			try
+			{
 				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '').split('') : [];
 				this.output = [];
 				this.error = [];
@@ -1017,48 +1038,63 @@ export class PhpCgiBase
 				this.onRequest(request, response);
 
 				return response;
-			});
-		}
-		catch(error)
-		{
-			console.error(error);
-
-			const response = new Response(
-				`500: Internal Server Error.\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `Stacktrace:\n${error.stack}\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
-					+ `=`.repeat(80) + `\n\n`
-				, {
-					status: 500
-					, headers: {
-						'Cache-Control': 'no-store'
-						, 'Content-Type': 'text/plain; charset=utf-8'
-					}
+			}
+			catch(error)
+			{
+				return this._errorResponse(request, error);
+			}
+			finally
+			{
+				if(exitCode === 0)
+				{
+					await this._afterRequest();
 				}
-			);
+				else
+				{
+					console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+					console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
 
-			this.onRequest(request, response);
-
-			return response;
-		}
-		finally
-		{
-			if(exitCode === 0)
-			{
-				await this._afterRequest();
+					// Keep the failed replacement promise on binary for the next caller,
+					// while handling this background refresh's rejection immediately.
+					this.refresh().catch(error => console.error(error));
+				}
 			}
-			else
-			{
-				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
-				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+		});
+	}
 
-				this.refresh();
+	/**
+	 * Reports a failed request without caching its error response.
+	 * @private
+	 * @param {RuntimeRequest} request Failed request.
+	 * @param {unknown} error Runtime failure, including non-Error rejection values.
+	 * @returns {Response} Non-cacheable HTTP 500 response.
+	 */
+	_errorResponse(request, error)
+	{
+		console.error(error);
+		const stack = error && typeof error === 'object' && 'stack' in error ? error.stack : undefined;
+
+		const response = new Response(
+			`500: Internal Server Error.\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `Stacktrace:\n${String(stack ?? error)}\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
+				+ `=`.repeat(80) + `\n\n`
+			, {
+				status: 500
+				, headers: {
+					'Cache-Control': 'no-store'
+					, 'Content-Type': 'text/plain; charset=utf-8'
+				}
 			}
-		}
+		);
+
+		this.onRequest(request, response);
+
+		return response;
 	}
 
 	/**

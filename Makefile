@@ -152,7 +152,10 @@ LTO_FLAG?=-flto
 # Keep native i64 signatures at every dynamic-linking boundary. Emscripten can
 # otherwise choose a legalized web ABI while side modules retain native i64.
 WASM_BIGINT_FLAG?=-sWASM_BIGINT=1
-SIDE_MODULE_FLAGS?=-sSIDE_MODULE=1 ${WASM_BIGINT_FLAG}
+# Side modules can call PHP callbacks and imports which suspend (for example,
+# libxml error handlers writing to an async database). Save those library frames
+# too, including calls to imports whose implementation lives in the main module.
+SIDE_MODULE_FLAGS?=-sSIDE_MODULE=1 ${WASM_BIGINT_FLAG} -sASYNCIFY=${ASYNCIFY} '-sASYNCIFY_IMPORTS=*'
 DOCKER_ENV=PHP_DIST_DIR=$(abspath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e EMCC_FORCE_STDLIBS=libc++abi,libc++ -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder

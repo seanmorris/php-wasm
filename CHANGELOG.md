@@ -9,6 +9,8 @@ Changes
 * CLI `run()` accepts optional string flags. Node CLI can resolve to `undefined` for runtime errors without an exit status; browser CLI rejects those errors. Embedded `run()` requires PHP source. Browser refresh methods return `Promise<void>`, embedded refresh returns a numeric result, and CGI refresh returns its binary. CGI `putEnv()` returns a number, and CGI wrappers do not inherit `EventTarget`. Debugger declarations now include `isRunning()`, synchronous `dumpSymbols()`, optional symbol tables, file arrays, and structured backtraces.
 * Added `npm run test:types` with pinned Deno 2.5.6, strict isolated npm fixtures, declaration checking, and coverage for all six generated Cloudflare versions. Both CI workflows run these checks before native builds. Regenerate CommonJS declarations and export mappings with `npm run generate:types`.
 * Artifact packaging now stages every declared wrapper with `make runtime-wrappers`, independent of the selected native profile. The isolated type fixtures use the same Make target and verify every explicit package export is present in the npm tarball.
+* Dynamic extensions and support libraries now preserve their native frames when PHP callbacks await JavaScript. This fixes crashes when libxml warning handlers perform asynchronous work, such as database logging. Rebuild side modules with the current Make flags.
+* Asyncify import rejections and failed unwinds or rewinds now reach the caller with the original error. Failed instances reject later native calls. CGI returns a non-cacheable HTTP 500 and replaces the runtime before queued requests proceed; replacement initialization failures also produce HTTP 500 responses.
 
 ## v0.1.0 - Aiming for the (GitHub) Stars
 

@@ -35,10 +35,156 @@ index ac51fe7..0b9c8df 100644
 
        callback(null);
 diff --git a/src/lib/libasync.js b/src/lib/libasync.js
-index 9f9a2d3..fddbef7 100644
 --- a/src/lib/libasync.js
 +++ b/src/lib/libasync.js
-@@ -514,7 +514,7 @@ addToLibrary({
+@@ -116,6 +116,8 @@
+ #if ASYNCIFY == 1
+     instrumentFunction(original) {
+       var wrapper = (...args) => {
++        // A failed rewind leaves native stacks unusable. Reject later calls too.
++        if (Asyncify.error) throw Asyncify.error.value;
+ #if ASYNCIFY_DEBUG >= 2
+         dbg(`ASYNCIFY: ${'  '.repeat(Asyncify.exportCallStack.length)} try ${original}`);
+ #endif
+@@ -213,6 +215,22 @@
+     callStackId: 0,
+     asyncPromiseHandlers: null, // { resolve, reject } pair for when *all* asynchronicity is done
+     sleepCallbacks: [], // functions to call every time we sleep
++    error: null,
++
++    reject(error) {
++      // Never re-enter Wasm to free or restore a stack after a failed async call.
++      // The embedder must discard this instance and create a fresh runtime.
++      Asyncify.error ??= { value: error };
++      ABORT = true;
++      Asyncify.state = Asyncify.State.Disabled;
++      var handlers = Asyncify.asyncPromiseHandlers;
++      Asyncify.asyncPromiseHandlers = null;
++      if (handlers) {
++        handlers.reject(Asyncify.error.value);
++      } else {
++        throw Asyncify.error.value;
++      }
++    },
+ 
+     getCallStackId(func) {
+ #if ASSERTIONS
+@@ -252,6 +270,7 @@
+     },
+ 
+     whenDone() {
++      if (Asyncify.error) return Promise.reject(Asyncify.error.value);
+ #if ASSERTIONS
+       assert(Asyncify.currData, 'tried to wait for an async operation when none is in progress');
+       assert(!Asyncify.asyncPromiseHandlers, 'cannot have multiple async operations in flight at once');
+@@ -322,7 +341,20 @@
+       // BigInt`.
+       func = func.bind(0, ...Asyncify.restoreRewindArguments(original));
+ #endif
+-      return callUserCallback(func);
++      return callUserCallback(() => {
++        try {
++          return func();
++        } catch (error) {
++#if !MINIMAL_RUNTIME
++          // Preserve Emscripten's normal exit and event-loop control flow.
++          if (error instanceof ExitStatus || error == 'unwind') throw error;
++#endif
++          // An awaited native call owns its failure. Do not report it globally
++          // (or set Node's exit code) before rejecting the caller's promise.
++          if (!Asyncify.asyncPromiseHandlers) throw error;
++          Asyncify.reject(error);
++        }
++      });
+     },
+ 
+     // This receives a function to call to start the async operation, and
+@@ -366,45 +398,28 @@
+ #if ASYNCIFY_DEBUG
+           dbg(`ASYNCIFY: start rewind ${Asyncify.currData}`);
+ #endif
+-          Asyncify.state = Asyncify.State.Rewinding;
+-          runAndAbortIfError(() => _asyncify_start_rewind(Asyncify.currData));
+-          if (typeof MainLoop != 'undefined' && MainLoop.func) {
+-            MainLoop.resume();
++          var asyncWasmReturnValue;
++          try {
++            Asyncify.state = Asyncify.State.Rewinding;
++            runAndAbortIfError(() => _asyncify_start_rewind(Asyncify.currData));
++            if (typeof MainLoop != 'undefined' && MainLoop.func) {
++              MainLoop.resume();
++            }
++            asyncWasmReturnValue = Asyncify.doRewind(Asyncify.currData);
++          } catch (error) {
++            // Errors can occur before handleSleep stops the rewind, while
++            // currData is still set. They must settle the pending call too.
++            Asyncify.reject(error);
++            return;
+           }
+-          var asyncWasmReturnValue, isError = false;
+-          try {
+-            asyncWasmReturnValue = Asyncify.doRewind(Asyncify.currData);
+-          } catch (err) {
+-            asyncWasmReturnValue = err;
+-            isError = true;
+-          }
+-          // Track whether the return value was handled by any promise handlers.
+-          var handled = false;
+           if (!Asyncify.currData) {
+-            // All asynchronous execution has finished.
+-            // `asyncWasmReturnValue` now contains the final
+-            // return value of the exported async WASM function.
+-            //
+-            // Note: `asyncWasmReturnValue` is distinct from
+-            // `Asyncify.handleSleepReturnValue`.
+-            // `Asyncify.handleSleepReturnValue` contains the return
+-            // value of the last C function to have executed
+-            // `Asyncify.handleSleep()`, whereas `asyncWasmReturnValue`
+-            // contains the return value of the exported WASM function
+-            // that may have called C functions that
+-            // call `Asyncify.handleSleep()`.
+-            var asyncPromiseHandlers = Asyncify.asyncPromiseHandlers;
+-            if (asyncPromiseHandlers) {
++            // All asynchronous execution has finished. This is the exported
++            // Wasm function's result, not the last sleeping import's result.
++            var handlers = Asyncify.asyncPromiseHandlers;
++            if (handlers) {
+               Asyncify.asyncPromiseHandlers = null;
+-              (isError ? asyncPromiseHandlers.reject : asyncPromiseHandlers.resolve)(asyncWasmReturnValue);
+-              handled = true;
++              handlers.resolve(asyncWasmReturnValue);
+             }
+-          }
+-          if (isError && !handled) {
+-            // If there was an error and it was not handled by now, we have no choice but to
+-            // rethrow that error into the global scope where it can be caught only by
+-            // `onerror` or `onunhandledpromiserejection`.
+-            throw asyncWasmReturnValue;
+           }
+         });
+         reachedAfterCallback = true;
+@@ -444,8 +459,18 @@
+     // This is particularly useful for native JS `async` functions where the
+     // returned value will "just work" and be passed back to C++.
+     handleAsync: (startAsync) => Asyncify.handleSleep(async (wakeUp) => {
+-      // TODO: add error handling as a second param when handleSleep implements it.
+-      wakeUp(await startAsync());
++      var value;
++      try {
++        value = await startAsync();
++      } catch (error) {
++        // startAsync may throw before the first await. Let the stack unwind
++        // and ccall register its promise handlers before reporting the failure.
++        await Promise.resolve();
++        if (Asyncify.error) return;
++        Asyncify.reject(error);
++        return;
++      }
++      wakeUp(value);
+     }),
+ 
+ #elif ASYNCIFY == 2
+@@ -514,7 +539,7 @@
      });
    },
  
@@ -47,7 +193,7 @@ index 9f9a2d3..fddbef7 100644
    $Fibers: {
      nextFiber: 0,
      trampolineRunning: false,
-@@ -559,7 +559,7 @@ addToLibrary({
+@@ -559,7 +584,7 @@
          {{{ makeSetValue('newFiber', C_STRUCTS.emscripten_fiber_s.entry, 0, '*') }}};
  
          var userData = {{{ makeGetValue('newFiber', C_STRUCTS.emscripten_fiber_s.user_data, '*') }}};
@@ -56,6 +202,43 @@ index 9f9a2d3..fddbef7 100644
        } else {
          var asyncifyData = newFiber + {{{ C_STRUCTS.emscripten_fiber_s.asyncify_data }}};
          Asyncify.currData = asyncifyData;
+diff --git a/src/lib/libccall.js b/src/lib/libccall.js
+--- a/src/lib/libccall.js
++++ b/src/lib/libccall.js
+@@ -81,7 +81,19 @@
+     // Data for a previous async operation that was in flight before us.
+     var previousAsync = Asyncify.currData;
+ #endif
+-    var ret = func(...cArgs);
++    var ret;
++    try {
++      ret = func(...cArgs);
++    } catch (error) {
++#if ASYNCIFY == 1
++      // A failure during the initial unwind can escape before whenDone has
++      // registered a promise. Stop its pending callback from resuming later.
++      if (Asyncify.currData != previousAsync && Asyncify.currData) {
++        Asyncify.reject(error);
++      }
++#endif
++      throw error;
++    }
+     function onDone(ret) {
+ #if ASYNCIFY == 1
+       runtimeKeepalivePop();
+@@ -114,7 +126,11 @@
+ #if ASSERTIONS
+       assert(asyncMode, `The call to ${ident} is running asynchronously. If this was intended, add the async option to the ccall/cwrap call.`);
+ #endif
+-      return Asyncify.whenDone().then(onDone);
++      return Asyncify.whenDone().then(onDone, (error) => {
++        runtimeKeepalivePop();
++        // The failed runtime is unusable; do not restore its native stack.
++        throw error;
++      });
+     }
+ #endif
+ 
 diff --git a/src/lib/libdylink.js b/src/lib/libdylink.js
 --- a/src/lib/libdylink.js
 +++ b/src/lib/libdylink.js
