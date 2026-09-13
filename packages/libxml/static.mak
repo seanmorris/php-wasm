@@ -74,7 +74,7 @@ packages/libxml/php${PHP_VERSION}-libxml.so: ${PHPIZE} packages/libxml/libxml2.s
 	${DOCKER_RUN_IN_EXT_LIBXML} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_LIBXML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_LIBXML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_LIBXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-libxml=/src/lib;
+	${DOCKER_RUN_IN_EXT_LIBXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-libxml=/src/lib;
 	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_LIBXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_LIBXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

@@ -88,7 +88,7 @@ packages/iconv/php${PHP_VERSION}-iconv.so: ${PHPIZE} packages/iconv/libiconv.so 
 	# PHP <= 8.3 still runs the errno/IGNORE probes despite those cache values,
 	# so keep the SIDE_MODULE beside the generated Wasm test executable as well.
 	${DOCKER_RUN_IN_EXT_ICONV} cp /src/packages/iconv/libiconv.so .;
-	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${ICONV_CONFIGURE_VARS} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_ICONV} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} ${ICONV_CONFIGURE_VARS} --with-iconv=/src/lib --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} sed -i 's#-export-dynamic#-all-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ICONV} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';

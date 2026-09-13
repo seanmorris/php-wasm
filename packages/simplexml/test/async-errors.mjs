@@ -2,12 +2,16 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import { PhpNode } from '../../../packages/php-wasm/PhpNode.mjs';
 import { nodeRuntimeOptions } from '../../../test/lib/node-runtime-options.mjs';
+import { env } from 'node:process';
+import libxml from 'php-wasm-libxml';
+import simplexml from 'php-wasm-simplexml';
 
 test('libxml error handlers can await JavaScript and resume parsing', {timeout: 10000}, async () => {
 	let waits = 0;
 	let stdout = '', stderr = '';
 	const php = new PhpNode(nodeRuntimeOptions({
-		waitForError: async () => {
+		sharedLibs: env.WITH_SIMPLEXML === 'dynamic' ? [libxml, simplexml] : []
+		, waitForError: async () => {
 			await Promise.resolve();
 			++waits;
 		}
@@ -29,7 +33,7 @@ test('libxml error handlers can await JavaScript and resume parsing', {timeout: 
 		var_dump((string) simplexml_load_string('<root>resumed</root>'));
 	`);
 
-	assert.equal(result, 0);
+	assert.equal(result, 0, stderr || stdout);
 	assert.equal(waits, 3);
 	assert.equal(stdout, 'bool(false)\nwarnings:3\nstring(7) "resumed"\n');
 	assert.equal(stderr, '');

@@ -113,7 +113,9 @@ EXTRA_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
-PHP_CONFIGURE_VARS=
+# Configure's link probes load the same side modules as the final PHP runtime.
+# They must provide the Asyncify globals required by those libraries too.
+PHP_CONFIGURE_VARS=LDFLAGS='-sASYNCIFY=${ASYNCIFY}'
 
 ## More Options
 builder_resolve_path = $(if $(strip $(1)),$(if $(filter /% ~%,$(1)),$(1),$(abspath ${PHP_BUILDER_DIR}/$(1))))

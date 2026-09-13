@@ -75,7 +75,7 @@ packages/sqlite/php${PHP_VERSION}-sqlite.so: ${PHPIZE} third_party/php${PHP_VERS
 	${DOCKER_RUN_IN_EXT_SQLITE} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_SQLITE} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SQLITE} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' sqlite3.c;
-	${DOCKER_RUN_IN_EXT_SQLITE} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_SQLITE} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_SQLITE} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_SQLITE} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include';
@@ -114,7 +114,7 @@ packages/sqlite/php${PHP_VERSION}-pdo-sqlite.so: ${PHPIZE} third_party/php${PHP_
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' pdo_sqlite.c;
-	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-pdo-sqlite=/src/lib;
+	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache --with-pdo-sqlite=/src/lib;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_PDO_SQLITE} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include' RE2C=re2c;
