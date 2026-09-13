@@ -258,13 +258,17 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
+# libpng also passes CMAKE_C_FLAGS directly to its header generator. Keep the
+# shell-quoted Emscripten link options out of that preprocessing command.
 lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 	@ echo -e "\e[33;4mBuilding LIBPNG\e[0m"
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE}" \
+		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" \
+		-DCMAKE_SHARED_LINKER_FLAGS="${SIDE_MODULE_FLAGS}" \
+		-DCMAKE_EXE_LINKER_FLAGS="${SIDE_MODULE_FLAGS}" \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
