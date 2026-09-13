@@ -113,6 +113,9 @@ jobs:
           sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
           time make --debug=basic web-mjs WITH_SDL=1
 
+      - name: Stage every declared runtime wrapper
+        run: make --debug=basic runtime-wrappers
+
       - name: Take Snapshot
         run: |
           sudo chown -R ${USER}:${USER} .

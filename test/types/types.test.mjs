@@ -5,7 +5,6 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { transformFileAsync } from '@babel/core';
 import { generateRuntimeTypes, runtimePackages } from '../../bin/generate-runtime-types.mjs';
 import { packageCloudflare, verifyCloudflare } from '../../bin/package-cloudflare.mjs';
 
@@ -45,15 +44,16 @@ async function temporary(t)
 // Exercise fresh source wrappers. Tiny native factories stand in for the PHP
 // build only; no declaration may be loaded from a checkout's generated output.
 /**
- * Copies a current wrapper and its imports, using the build's Babel settings.
+ * Copies source wrappers or verifies wrappers freshly staged by Make.
  * @param {string} directory Destination directory.
  * @param {string} name Wrapper filename.
  * @param {object} options Output formats.
- * @param {boolean} options.commonjs Whether to also emit CommonJS.
+ * @param {boolean} options.commonjs Whether the package includes CommonJS.
+ * @param {boolean} options.staged Whether Make already staged the wrappers.
  * @param {Set<string>} visited Already staged modules.
  * @returns {Promise<void>} Resolves after staging the module graph.
  */
-async function copyWrapper(directory, name, {commonjs = false} = {}, visited = new Set())
+async function copyWrapper(directory, name, {commonjs = false, staged = false} = {}, visited = new Set())
 {
 	if(visited.has(name)) return;
 	visited.add(name);
@@ -66,16 +66,11 @@ async function copyWrapper(directory, name, {commonjs = false} = {}, visited = n
 	}
 	const source = path.join(repoRoot, 'source', name);
 	const content = await fs.readFile(source, 'utf8');
-	await fs.writeFile(path.join(directory, name), content);
-	if(commonjs)
-	{
-		const transformed = await transformFileAsync(source, {configFile: path.join(repoRoot, '.babelrc'), babelrc: false});
-		const cjs = transformed.code.replaceAll('import.meta', '(undefined /*import.meta*/)')
-			.replace(/require\("(\..+?)\.mjs"\)/g, 'require("$1.js")');
-		await fs.writeFile(path.join(directory, name.replace(/\.mjs$/, '.js')), cjs);
-	}
+	if(staged) assert.equal(await fs.readFile(path.join(directory, name), 'utf8'), content, `Make must stage current source: ${name}`);
+	else await fs.writeFile(path.join(directory, name), content);
+	if(commonjs) await fs.access(path.join(directory, name.replace(/\.mjs$/, '.js')));
 	for(const match of content.matchAll(/(?:from\s*|import\s*\(|loadRuntime\()['"`]\.\/([^'"`]+\.mjs)['"`]/g))
-		await copyWrapper(directory, match[1], {commonjs}, visited);
+		await copyWrapper(directory, match[1], {commonjs, staged}, visited);
 }
 
 /**
@@ -142,6 +137,18 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 	await fs.mkdir(installed);
 	const esm = [], cjs = [], smoke = [], requireSmoke = [];
 	let index = 0;
+	// Use the same staging target as native artifact jobs. No native outputs
+	// exist here, so omitted wrappers cannot hide behind a previous local build.
+	const stageRoot = path.join(root, 'stage');
+	run('make', ['--no-print-directory', '-j2', 'runtime-wrappers'
+		, 'ENV_FILE=/dev/null', 'EXTENSION_PACKAGE_DIRS=', 'DOCKER_COMPOSE=false'
+		, `PHP_DIST_DIR=${path.join(stageRoot, 'php-wasm')}`
+		, `PHP_CGI_DIST_DIR=${path.join(stageRoot, 'php-cgi-wasm')}`
+		, `PHP_CLI_DIST_DIR=${path.join(stageRoot, 'php-cli-wasm')}`
+		, `PHP_DBG_DIST_DIR=${path.join(stageRoot, 'php-dbg-wasm')}`
+		, `PHP_CLOUD_WRAPPER_DIR=${path.join(stageRoot, 'php-cloud-wasm')}`]);
+	for(const name of runtimePackages)
+		assert.ok((await fs.readdir(path.join(stageRoot, name))).every(file => !/^php8\.|\.wasm$/.test(file)), 'Wrapper staging must preserve native JS/Wasm outputs');
 	for(const name of runtimePackages)
 	{
 		const template = path.join(repoRoot, 'packages', name);
@@ -153,10 +160,10 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 		const commonjs = name !== 'php-cloud-wasm';
 		const visited = new Set();
 		for(const file of declarations.filter(file => file.endsWith('.d.mts')))
-			await copyWrapper(stage, file.replace('.d.mts', '.mjs'), {commonjs}, visited);
+			await copyWrapper(stage, file.replace('.d.mts', '.mjs'), {commonjs: commonjs && !file.startsWith('php-tags'), staged: true}, visited);
 		const pkg = JSON.parse(await fs.readFile(path.join(stage, 'package.json'), 'utf8'));
 		for(const value of Object.values(pkg.exports))
-			if(value?.import?.endsWith?.('.mjs') && !value.import.includes('*')) await copyWrapper(stage, value.import.slice(2), {commonjs}, visited);
+			if(value?.import?.endsWith?.('.mjs') && !value.import.includes('*')) await copyWrapper(stage, value.import.slice(2), {commonjs: commonjs && !value.import.startsWith('./php-tags'), staged: true}, visited);
 		if(!commonjs)
 		{
 			assert.equal(pkg.dependencies, undefined, 'Cloudflare must remain standalone');
@@ -170,6 +177,15 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 			for(const version of versions) await verifyCloudflare(stage, version);
 		}
 		const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', root], stage).stdout);
+		const packedFiles = new Set(packed.files.map(file => file.path));
+		const metadata = [pkg.main, pkg.module, pkg.types, pkg.exports];
+		while(metadata.length)
+		{
+			const value = metadata.pop();
+			if(value && typeof value === 'object') metadata.push(...Object.values(value));
+			else if(typeof value === 'string' && !value.includes('*'))
+				assert.ok(packedFiles.has(value.replace(/^\.\//, '')), `${name} metadata target is missing from npm pack output: ${value}`);
+		}
 		const target = path.join(installed, 'node_modules', name);
 		await fs.mkdir(target, {recursive: true});
 		run('tar', ['-xzf', path.join(root, packed.filename), '--strip-components=1', '-C', target]);

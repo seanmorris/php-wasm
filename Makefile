@@ -11,7 +11,7 @@
 	test-all-versions x-all-versions php-clean-all-versions \
 	demo-versions null \
 	archives assets rebuild reconfigure \
-	dynamic dynamic-libs.json
+	dynamic dynamic-libs.json runtime-wrappers
 
 CLOUDFLARE_GOALS := cloudflare-mjs _cloudflare-mjs test-cloudflare
 ifneq ($(filter ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
@@ -890,6 +890,24 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-webview.mjs.wasm.map ${PHP_DIST_DIR}
 
 ########## Package files ###########
+
+# Every declared wrapper ships regardless of the selected native build profile.
+# This target only copies/transpiles source wrappers; it never builds PHP/Wasm.
+runtime_wrapper_mjs = $(patsubst %.d.mts,%.mjs,$(notdir $(wildcard packages/$(1)/Php*.d.mts)))
+PHP_CLOUD_WRAPPER_DIR?=${ENV_DIR}/packages/php-cloud-wasm
+RUNTIME_WRAPPERS=$(addprefix ${PHP_DIST_DIR}/,$(call runtime_wrapper_mjs,php-wasm) ${MJS_HELPERS_WEB} $(notdir ${HELPER_MJS})) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cgi-wasm) ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB}) \
+	$(addprefix ${PHP_CLI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cli-wasm) ${MJS_HELPERS_WEB}) \
+	$(addprefix ${PHP_DBG_DIST_DIR}/,$(call runtime_wrapper_mjs,php-dbg-wasm) ${MJS_HELPERS_WEB})
+RUNTIME_WRAPPERS_CJS=$(patsubst %.mjs,%.js,$(filter-out ${HELPER_MJS},${RUNTIME_WRAPPERS}))
+CLOUD_WRAPPERS=$(addprefix ${PHP_CLOUD_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-cloud-wasm) ${MJS_HELPERS})
+
+runtime-wrappers:
+	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR}
+	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS}
+
+${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
+	cp $< $@
 
 ${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
