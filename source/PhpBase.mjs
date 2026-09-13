@@ -52,7 +52,7 @@ export class PhpBase extends EventTarget
 
 	/**
 	 * Creates a PHP runtime wrapper for a specific module loader and SAPI.
-	 * @param {Promise<import('../packages/php-wasm/public').PhpBaseModuleFactory|import('../packages/php-wasm/public').PhpRuntimeFactory>} phpBinLoader Deferred PHP factory or constructor loader.
+	 * @param {Promise<PhpModuleFactory|PhpRuntimeFactory>} phpBinLoader Deferred PHP factory or constructor loader.
 	 * @param {PhpRuntimeArgs} args Runtime configuration for the PHP instance.
 	 * @param {string} sapi SAPI identifier to initialize inside the module.
 	 * @param {PhpRuntimeArgs} phpSettings Optional environment-specific replacement for global settings.

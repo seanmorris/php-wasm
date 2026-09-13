@@ -4,12 +4,17 @@
   "description": "php-cli for wasm.",
   "main": "./PhpCliNode.js",
   "module": "./PhpCliNode.mjs",
-  "types": "./PhpCliNode.d.mts",
+  "types": "./PhpCliNode.d.cts",
   "exports": {
     ".": {
-      "types": "./PhpCliNode.d.mts",
-      "import": "./PhpCliNode.mjs",
-      "require": "./PhpCliNode.js",
+      "import": {
+        "types": "./PhpCliNode.d.mts",
+        "default": "./PhpCliNode.mjs"
+      },
+      "require": {
+        "types": "./PhpCliNode.d.cts",
+        "default": "./PhpCliNode.js"
+      },
       "default": "./PhpCliNode.mjs"
     },
     "./package.json": "./package.json",
@@ -18,27 +23,66 @@
       "default": "./public.d.ts"
     },
     "./PhpBase": {
-      "types": "./PhpBase.d.mts",
-      "import": "./PhpBase.mjs",
-      "require": "./PhpBase.js",
+      "import": {
+        "types": "./PhpBase.d.mts",
+        "default": "./PhpBase.mjs"
+      },
+      "require": {
+        "types": "./PhpBase.d.cts",
+        "default": "./PhpBase.js"
+      },
       "default": "./PhpBase.mjs"
     },
     "./PhpCliNode": {
-      "types": "./PhpCliNode.d.mts",
-      "import": "./PhpCliNode.mjs",
-      "require": "./PhpCliNode.js",
+      "import": {
+        "types": "./PhpCliNode.d.mts",
+        "default": "./PhpCliNode.mjs"
+      },
+      "require": {
+        "types": "./PhpCliNode.d.cts",
+        "default": "./PhpCliNode.js"
+      },
       "default": "./PhpCliNode.mjs"
     },
     "./PhpCliWeb": {
-      "types": "./PhpCliWeb.d.mts",
-      "import": "./PhpCliWeb.mjs",
-      "require": "./PhpCliWeb.js",
+      "import": {
+        "types": "./PhpCliWeb.d.mts",
+        "default": "./PhpCliWeb.mjs"
+      },
+      "require": {
+        "types": "./PhpCliWeb.d.cts",
+        "default": "./PhpCliWeb.js"
+      },
       "default": "./PhpCliWeb.mjs"
     },
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
     "./*.data": "./*.data",
-    "./*.wasm": "./*.wasm"
+    "./*.wasm": "./*.wasm",
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.js": {
+      "types": "./PhpBase.d.cts",
+      "default": "./PhpBase.js"
+    },
+    "./PhpCliNode.mjs": {
+      "types": "./PhpCliNode.d.mts",
+      "default": "./PhpCliNode.mjs"
+    },
+    "./PhpCliNode.js": {
+      "types": "./PhpCliNode.d.cts",
+      "default": "./PhpCliNode.js"
+    },
+    "./PhpCliWeb.mjs": {
+      "types": "./PhpCliWeb.d.mts",
+      "default": "./PhpCliWeb.mjs"
+    },
+    "./PhpCliWeb.js": {
+      "types": "./PhpCliWeb.d.cts",
+      "default": "./PhpCliWeb.js"
+    }
   },
   "repository": {
     "type": "git",
@@ -74,6 +118,7 @@
     "NOTICE",
     "README.md",
     "package.json",
-    "public.d.ts"
+    "public.d.ts",
+    "*.d.cts"
   ]
 }

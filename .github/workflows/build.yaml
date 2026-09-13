@@ -16,7 +16,11 @@ concurrency:
 
 jobs:
 
+  runtime-types:
+    uses: ./.github/workflows/test-types-step.yaml
+
   generate-lib-group-matrix:
+    needs: [runtime-types]
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.libgroups }}
@@ -153,7 +157,7 @@ jobs:
       libType: shared
 
   build-php-static:
-    needs: []
+    needs: [runtime-types]
     strategy:
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']

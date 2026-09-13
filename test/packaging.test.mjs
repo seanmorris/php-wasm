@@ -8,10 +8,11 @@ import { strict as assert } from 'node:assert';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirs = [
-	'packages/php-wasm',
-	'packages/php-cgi-wasm',
-	'packages/php-cli-wasm',
-	'packages/php-dbg-wasm',
+	'packages/php-wasm'
+	, 'packages/php-cgi-wasm'
+	, 'packages/php-cli-wasm'
+	, 'packages/php-dbg-wasm'
+	, 'packages/php-cloud-wasm'
 ];
 const packageRoot = path.join(repoRoot, 'packages');
 

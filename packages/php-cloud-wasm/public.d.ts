@@ -45,11 +45,78 @@ export interface PhpRuntimeArgs {
 	[key: string]: object | string | number | boolean | Function | undefined;
 }
 
-export type PhpRuntimeFactory = ((args: PhpRuntimeArgs) => PhpBinaryRuntime | Promise<PhpBinaryRuntime>)
-	| (new (args: PhpRuntimeArgs) => PhpBinaryRuntime);
+export type PhpRuntimeFactory<Args = PhpRuntimeArgs> = ((args: Args) => PhpBinaryRuntime | Promise<PhpBinaryRuntime>)
+	| (new (args: Args) => PhpBinaryRuntime);
 
 export interface PhpBaseModuleFactory {
 	default: PhpRuntimeFactory;
+}
+
+
+export interface PhpBinaryRuntime {
+	inputDataQueue?: string[];
+	awaitingInput?: ((value: string | undefined) => void) | null;
+	triggerStdin?: (prompt?: string | null) => void;
+	persist?: boolean;
+	ccall?: Function;
+	lengthBytesUTF8?: Function;
+	_malloc?: Function;
+	_free?: Function;
+	stringToUTF8?: Function;
+	setValue?: Function;
+	UTF8ToString?: Function;
+	getValue?: Function;
+	HEAPU8?: Uint8Array;
+	hasVrzno?: boolean;
+	zvalToJS?: Function;
+	consumeZval?: Function;
+	onRefresh?: Set<Function>;
+	FS?: {
+		syncfs?: (populate: boolean, callback: (error?: Error) => void) => void;
+	} & object;
+}
+
+/** Serializable filesystem node metadata returned by mkdir and analyzePath. */
+export interface PhpFileNode {
+	id: number;
+	mode: number;
+	mount: { mountpoint: string; mounts: string[] };
+	isDevice: boolean;
+	isFolder: boolean;
+	read: boolean;
+	write: boolean;
+}
+
+export type PhpPathAnalysis = { exists: false } | {
+	exists: boolean;
+	object: PhpFileNode & { exists: true };
+	parentObject: undefined;
+	path: string | null;
+	name: string | null;
+	parentExists: boolean;
+	parentPath: string | null;
+	error: number;
+};
+
+export interface PhpFileStat {
+	dev: number;
+	ino: number;
+	mode: number;
+	nlink: number;
+	uid: number;
+	gid: number;
+	rdev: number;
+	size: number;
+	atime: Date;
+	mtime: Date;
+	ctime: Date;
+	blksize: number;
+	blocks: number;
+}
+
+export interface PhpReadFileOptions {
+	encoding?: 'binary' | 'utf8';
+	flags?: string | number;
 }
 
 /** Configuration supported by a statically linked Cloudflare runtime. */
@@ -78,56 +145,4 @@ export interface PhpCloudflareArgs extends PhpCloudflareRuntimeOptions {
 	version: PhpRuntimeVersion;
 }
 
-export interface PhpBinaryRuntime {
-	inputDataQueue?: string[];
-	awaitingInput?: ((value: string | undefined) => void) | null;
-	triggerStdin?: () => void;
-	persist?: boolean;
-	ccall?: Function;
-	lengthBytesUTF8?: Function;
-	_malloc?: Function;
-	_free?: Function;
-	stringToUTF8?: Function;
-	setValue?: Function;
-	UTF8ToString?: Function;
-	getValue?: Function;
-	HEAPU8?: Int8Array;
-	hasVrzno?: boolean;
-	zvalToJS?: Function;
-	consumeZval?: Function;
-	onRefresh?: Set<Function>;
-	FS?: {
-		syncfs?: (populate: boolean, callback: (error?: Error) => void) => void;
-	} & object;
-}
-
-export declare class PhpBase extends EventTarget {
-	constructor(phpBinLoader: Promise<PhpBaseModuleFactory | PhpRuntimeFactory>, args?: PhpRuntimeArgs, sapi?: string, phpSettings?: PhpRuntimeArgs);
-	autoTransaction: boolean;
-	transactionStarted: boolean | Promise<void>;
-	phpVersion?: PhpRuntimeVersion;
-	phpVariant?: PhpRuntimeVariant;
-	phpArgs: PhpRuntimeArgs;
-	queue: Array<[Function, Array<string | number | boolean | object | undefined>, (value?: PhpRuntimeValue) => void, (reason?: object | string | number | boolean | Error) => void, boolean?]>;
-	binary: Promise<PhpBinaryRuntime>;
-	inputString(byteString: string): void;
-	input(items: Iterable<number>): void;
-	flush(): void;
-	tokenize(phpCode: string): Promise<string>;
-	startTransaction(): Promise<void>;
-	commitTransaction(readOnly?: boolean): Promise<void>;
-	run(phpCode: string): Promise<number>;
-	exec(phpCode: string): Promise<PhpRuntimeValue>;
-	x(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<PhpRuntimeValue>;
-	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<number>;
-	refresh(): Promise<PhpRuntimeValue>;
-	analyzePath(path: string): Promise<object>;
-	readdir(path: string): Promise<string[]>;
-	readFile(path: string, options?: object): Promise<string | Uint8Array>;
-	stat(path: string): Promise<object>;
-	mkdir(path: string): Promise<void>;
-	rmdir(path: string): Promise<void>;
-	rename(path: string, newPath: string): Promise<void>;
-	writeFile(path: string, data: string | Uint8Array | ArrayBufferLike | Iterable<number>, options?: object): Promise<void>;
-	unlink(path: string): Promise<void>;
-}
+export type { PhpBase } from './PhpBase.mjs';

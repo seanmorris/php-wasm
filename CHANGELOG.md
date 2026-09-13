@@ -2,6 +2,13 @@
 
 Changes
 
+## Unreleased
+
+* Corrected runtime declarations and package exports for Deno, TypeScript Bundler/NodeNext resolution, and CommonJS. Existing wrapper import paths remain supported; CommonJS entrypoints now select matching `.d.cts` declarations. Constructor values come from the wrapper modules, while `public` exposes types.
+* TypeScript consumers should await `tokenize()` for its serialized string result, use the metadata returned by `mkdir()`, and expect unsigned `HEAPU8` bytes. `readFile()` now distinguishes UTF-8 text from binary bytes; `writeFile()` accepts strings and ArrayBuffer views, matching Emscripten FS.
+* CLI `run()` accepts optional string flags; embedded `run()` requires PHP source. Browser refresh methods return `Promise<void>`, embedded refresh returns a numeric result, and CGI refresh returns its binary. CGI `putEnv()` returns a number, and CGI wrappers do not inherit `EventTarget`. Debugger declarations now include `isRunning()`, synchronous `dumpSymbols()`, optional symbol tables, file arrays, and structured backtraces.
+* Added `npm run test:types` with pinned Deno 2.5.6, strict isolated npm fixtures, declaration checking, and coverage for all six generated Cloudflare versions. Both CI workflows run these checks before native builds. Regenerate CommonJS declarations and export mappings with `npm run generate:types`.
+
 ## v0.1.0 - Aiming for the (GitHub) Stars
 
 * Rebuilt `demo-web` around Vite, reorganized it into `pages`, `components`, `lib`, and `assets`, and added the newer browser/e2e harnesses plus runtime path helpers for the worker and page builds.

@@ -4,31 +4,85 @@
   "description": "phpdbg for wasm.",
   "main": "./PhpDbgNode.js",
   "module": "./PhpDbgNode.mjs",
-  "types": "./PhpDbgNode.d.mts",
+  "types": "./PhpDbgNode.d.cts",
   "exports": {
     ".": {
-      "types": "./PhpDbgNode.d.mts",
-      "import": "./PhpDbgNode.mjs",
-      "require": "./PhpDbgNode.js",
+      "import": {
+        "types": "./PhpDbgNode.d.mts",
+        "default": "./PhpDbgNode.mjs"
+      },
+      "require": {
+        "types": "./PhpDbgNode.d.cts",
+        "default": "./PhpDbgNode.js"
+      },
       "default": "./PhpDbgNode.mjs"
     },
     "./package.json": "./package.json",
     "./PhpDbgNode": {
-      "types": "./PhpDbgNode.d.mts",
-      "import": "./PhpDbgNode.mjs",
-      "require": "./PhpDbgNode.js",
+      "import": {
+        "types": "./PhpDbgNode.d.mts",
+        "default": "./PhpDbgNode.mjs"
+      },
+      "require": {
+        "types": "./PhpDbgNode.d.cts",
+        "default": "./PhpDbgNode.js"
+      },
       "default": "./PhpDbgNode.mjs"
     },
     "./PhpDbgWeb": {
-      "types": "./PhpDbgWeb.d.mts",
-      "import": "./PhpDbgWeb.mjs",
-      "require": "./PhpDbgWeb.js",
+      "import": {
+        "types": "./PhpDbgWeb.d.mts",
+        "default": "./PhpDbgWeb.mjs"
+      },
+      "require": {
+        "types": "./PhpDbgWeb.d.cts",
+        "default": "./PhpDbgWeb.js"
+      },
       "default": "./PhpDbgWeb.mjs"
     },
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
     "./*.data": "./*.data",
-    "./*.wasm": "./*.wasm"
+    "./*.wasm": "./*.wasm",
+    "./PhpBase": {
+      "import": {
+        "types": "./PhpBase.d.mts",
+        "default": "./PhpBase.mjs"
+      },
+      "require": {
+        "types": "./PhpBase.d.cts",
+        "default": "./PhpBase.js"
+      },
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.js": {
+      "types": "./PhpBase.d.cts",
+      "default": "./PhpBase.js"
+    },
+    "./PhpDbgNode.mjs": {
+      "types": "./PhpDbgNode.d.mts",
+      "default": "./PhpDbgNode.mjs"
+    },
+    "./PhpDbgNode.js": {
+      "types": "./PhpDbgNode.d.cts",
+      "default": "./PhpDbgNode.js"
+    },
+    "./PhpDbgWeb.mjs": {
+      "types": "./PhpDbgWeb.d.mts",
+      "default": "./PhpDbgWeb.mjs"
+    },
+    "./PhpDbgWeb.js": {
+      "types": "./PhpDbgWeb.d.cts",
+      "default": "./PhpDbgWeb.js"
+    },
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    }
   },
   "repository": {
     "type": "git",
@@ -66,6 +120,7 @@
     "NOTICE",
     "README.md",
     "package.json",
-    "*.d.ts"
+    "*.d.ts",
+    "*.d.cts"
   ]
 }

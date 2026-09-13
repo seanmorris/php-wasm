@@ -22,7 +22,6 @@
     },
     "./PhpCloudflare.mjs": {
       "types": "./PhpCloudflare.d.mts",
-      "import": "./PhpCloudflare.mjs",
       "default": "./PhpCloudflare.mjs"
     },
     "./php*-cloudflare.mjs": {
@@ -31,7 +30,16 @@
       "default": "./php*-cloudflare.mjs"
     },
     "./*.mjs": "./*.mjs",
-    "./*.wasm": "./*.wasm"
+    "./*.wasm": "./*.wasm",
+    "./PhpBase": {
+      "types": "./PhpBase.d.mts",
+      "import": "./PhpBase.mjs",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    }
   },
   "files": [
     "*.mjs",

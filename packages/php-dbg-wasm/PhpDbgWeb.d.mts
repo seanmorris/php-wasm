@@ -1,7 +1,7 @@
-import type { PhpRuntimeArgs, PhpRuntimeValue } from 'php-wasm/PhpBase.mjs';
-import { PhpBase } from 'php-wasm/PhpBase.mjs';
+import type { PhpRuntimeArgs, PhpRuntimeValue } from './PhpBase.mjs';
+import type { PhpBase } from './PhpBase.mjs';
 
-export class PhpDbgWeb extends PhpBase {
+export class PhpDbgWeb extends PhpBase<[], void> {
 	running: boolean;
 	paused: boolean;
 	currentFilePtr: number | null;
@@ -14,16 +14,18 @@ export class PhpDbgWeb extends PhpBase {
 	provideInput(line: string): Promise<void>;
 	getPrompt(): Promise<string>;
 	isExecuting(): Promise<number>;
+	isRunning(): Promise<number>;
 	currentFile(): Promise<string>;
 	currentLine(): Promise<number>;
 	bpCount(): Promise<number>;
-	dumpVars(): Promise<object>;
-	dumpGlobals(): Promise<object>;
-	dumpConstants(): Promise<object>;
+	dumpSymbols(ptr: number, php: import('./public.d.ts').PhpBinaryRuntime): object;
+	dumpVars(): Promise<object | undefined>;
+	dumpGlobals(): Promise<object | undefined>;
+	dumpConstants(): Promise<object | undefined>;
 	dumpFunctions(): Promise<object>;
 	dumpClasses(): Promise<object>;
-	dumpFiles(): Promise<object>;
-	dumpBacktrace(): Promise<object>;
+	dumpFiles(): Promise<string[]>;
+	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number}>>;
 	switchFrame(frame: number): Promise<number>;
 	refresh(): Promise<void>;
 	_enqueue(callback: (...params: Array<string | number | boolean | object | undefined>) => Promise<PhpRuntimeValue>, params?: Array<string | number | boolean | object | undefined>, readOnly?: boolean): Promise<PhpRuntimeValue>;

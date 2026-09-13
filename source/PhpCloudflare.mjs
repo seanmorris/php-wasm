@@ -9,7 +9,7 @@ export class PhpCloudflare extends PhpBase
 {
 	/**
 	 * Creates a runtime from a matching factory and precompiled Wasm module.
-	 * @param {import('../packages/php-cloud-wasm/public').PhpCloudflareArgs} args Runtime configuration.
+	 * @param {PhpCloudflareArgs} args Runtime configuration.
 	 */
 	constructor(args)
 	{

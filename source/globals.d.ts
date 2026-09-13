@@ -101,13 +101,24 @@ declare interface PhpRuntimeArgs {
 	[key: string]: object | string | number | boolean | Function | undefined;
 }
 
-declare module './php*.mjs' {
-	const PhpBinary: new (args: object) => object;
+// Native modules are generated beside the wrappers at build time.
+declare module '*-web.mjs' {
+	const PhpBinary: PhpRuntimeFactory;
 	export default PhpBinary;
 }
 
-declare module './php-worker' {
-	const PhpBinary: Promise<PhpModuleFactory>;
+declare module '*-worker.mjs' {
+	const PhpBinary: PhpRuntimeFactory;
+	export default PhpBinary;
+}
+
+declare module '*-webview.mjs' {
+	const PhpBinary: PhpRuntimeFactory;
+	export default PhpBinary;
+}
+
+declare module '*-node.mjs' {
+	const PhpBinary: PhpRuntimeFactory;
 	export default PhpBinary;
 }
 
@@ -153,3 +164,8 @@ declare module 'php-wasm/PhpBase' {
 		refresh(): Promise<PhpRuntimeValue>;
 	}
 }
+
+// Declaration dependencies belong to source checking, never copied wrappers.
+declare type PhpCloudflareArgs = import('../packages/php-cloud-wasm/public.d.ts').PhpCloudflareArgs;
+declare type PhpCgiRuntimeArgs = import('../packages/php-cgi-wasm/public.d.ts').PhpCgiRuntimeArgs;
+declare type PhpCgiModuleFactory = import('../packages/php-cgi-wasm/public.d.ts').PhpCgiModuleFactory;

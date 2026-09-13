@@ -1,7 +1,7 @@
-import type { PhpCloudflareArgs } from './public';
-import { PhpBase } from './public';
+import type { PhpCloudflareArgs } from './public.d.ts';
+import type { PhpBase } from './PhpBase.mjs';
 
-export type { PhpCloudflareArgs, PhpCloudflareOptions, PhpCloudflareRuntimeOptions } from './public';
+export type { PhpCloudflareArgs, PhpCloudflareOptions, PhpCloudflareRuntimeOptions } from './public.d.ts';
 
 export declare class PhpCloudflare extends PhpBase {
 	constructor(args: PhpCloudflareArgs);

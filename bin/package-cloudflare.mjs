@@ -93,7 +93,7 @@ async function finalizeCloudflare(root, version, wasmName, provenance)
 	const entrypoint = `php${version}-cloudflare.mjs`;
 	const adapter = `// Generated after content-addressing. Import inside a Worker module; instantiate inside fetch.\nimport { PhpCloudflare as CloudflareBase } from './PhpCloudflare.mjs';\nimport runtime from './${runtime}';\nimport wasmModule from './${wasmName}';\n\nexport class PhpCloudflare extends CloudflareBase {\n\tconstructor(args = {}) { super({...args, version: '${version}', runtime, wasmModule}); }\n}\nexport default PhpCloudflare;\n`;
 	await fs.writeFile(path.join(root, entrypoint), adapter);
-	const declaration = `import type { PhpCloudflareOptions } from './public';\nimport { PhpBase } from './public';\nexport declare class PhpCloudflare extends PhpBase { constructor(args?: PhpCloudflareOptions); }\nexport default PhpCloudflare;\n`;
+	const declaration = `import type { PhpCloudflareOptions } from './public.d.ts';\nimport type { PhpBase } from './PhpBase.mjs';\nexport declare class PhpCloudflare extends PhpBase { constructor(args?: PhpCloudflareOptions); }\nexport default PhpCloudflare;\n`;
 	await fs.writeFile(path.join(root, `php${version}-cloudflare.d.mts`), declaration);
 	const names = new Set([entrypoint, runtime, wasmName, `php${version}-cloudflare.d.mts`, ...declarations, ...cloudflarePackageFiles]);
 	async function imports(name)

@@ -1,0 +1,23 @@
+name: Runtime Types
+
+on:
+  workflow_call:
+
+jobs:
+  types:
+    name: Check runtime types and wrappers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Check source and isolated npm declarations with pinned Deno
+        run: npm run test:types
+      - name: Verify queues, wrappers and Cloudflare packaging
+        run: >-
+          node --test test/php-base-queue.test.mjs test/php-cloudflare.test.mjs
+          test/php-cgi-routing.test.mjs test/runtime-env.test.mjs
+          test/web-locks.test.mjs test/build/cloudflare-build.test.mjs

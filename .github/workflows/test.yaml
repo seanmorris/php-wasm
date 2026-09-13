@@ -12,7 +12,11 @@ env:
 
 jobs:
 
+  runtime-types:
+    uses: ./.github/workflows/test-types-step.yaml
+
   vrzno-importer:
+    needs: runtime-types
     name: Test Build Infrastructure
     runs-on: ubuntu-latest
     steps:

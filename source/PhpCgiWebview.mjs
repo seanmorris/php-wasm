@@ -2,8 +2,6 @@ import { PhpCgiWebBase } from './PhpCgiWebBase.mjs';
 
 const defaultVersion = '8.4';
 
-/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
-
 /**
  * WebView-hosted PHP CGI wrapper.
  */

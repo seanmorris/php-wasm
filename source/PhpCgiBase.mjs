@@ -3,8 +3,6 @@ import { breakoutRequest } from './breakoutRequest.mjs';
 import { fsOps } from './fsOps.mjs';
 import { resolveDependencies } from './resolveDependencies.mjs';
 
-/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
-
 /**
  * An object representing a dynamically loaded data file.
  * @typedef {string|object} FileDef
@@ -400,7 +398,7 @@ export class PhpCgiBase
 
 	/**
 	 * Creates a new PHP CGI runtime wrapper.
-	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
+	 * @param {Promise<PhpCgiModuleFactory>} phpBinLoader Deferred PHP module loader.
 	 * @param {PhpCgiRuntimeArgs} [options] Runtime configuration for the CGI wrapper.
 	 */
 	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, dynamicLibs, actions, files, ...args} = {})
