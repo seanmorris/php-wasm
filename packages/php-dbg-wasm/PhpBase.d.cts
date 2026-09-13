@@ -3,7 +3,7 @@ import type { PhpBaseModuleFactory, PhpRuntimeFactory, PhpRuntimeArgs, PhpRuntim
 
 export type * from './public.d.ts';
 
-export declare class PhpBase<RunArgs extends unknown[] = [phpCode: string], RefreshResult = number> extends EventTarget {
+export declare class PhpBase<RunArgs extends unknown[] = [phpCode: string], RefreshResult = number, RunResult = number> extends EventTarget {
 	constructor(phpBinLoader: Promise<PhpBaseModuleFactory | PhpRuntimeFactory>, args?: PhpRuntimeArgs, sapi?: string, phpSettings?: PhpRuntimeArgs);
 	autoTransaction: boolean;
 	transactionStarted: boolean | Promise<void>;
@@ -21,10 +21,10 @@ export declare class PhpBase<RunArgs extends unknown[] = [phpCode: string], Refr
 	tokenize(phpCode: string): Promise<string>;
 	startTransaction(): Promise<void>;
 	commitTransaction(readOnly?: boolean): Promise<void>;
-	run(...args: RunArgs): Promise<number>;
+	run(...args: RunArgs): Promise<RunResult>;
 	exec(phpCode: string): Promise<PhpRuntimeValue>;
 	x(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<PhpRuntimeValue>;
-	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<number>;
+	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<RunResult>;
 	refresh(): Promise<RefreshResult>;
 	analyzePath(path: string): Promise<PhpPathAnalysis>;
 	readdir(path: string): Promise<string[]>;

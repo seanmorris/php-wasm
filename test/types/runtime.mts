@@ -50,7 +50,7 @@ embedded.run(['-v']);
 embedded.writeFile('/example/a', new ArrayBuffer(8));
 
 for (const cli of [new PhpCliNode(), new PhpCliWeb()]) {
-	const exit: Promise<number> = cli.run(['-r', 'echo 1;']);
+	const exit: Promise<number | undefined> = cli.run(['-r', 'echo 1;']);
 	cli.run();
 	const tokenText: Promise<string> = cli.tokenize('<?php echo 1;');
 	// @ts-expect-error CLI run accepts a flag array.
@@ -58,6 +58,9 @@ for (const cli of [new PhpCliNode(), new PhpCliWeb()]) {
 	// @ts-expect-error Every CLI flag must be a string.
 	cli.run([1]);
 }
+const browserCliExit: Promise<number> = new PhpCliWeb().run();
+// @ts-expect-error Node CLI can resolve undefined when an error has no exit status.
+const nodeCliExit: Promise<number> = new PhpCliNode().run();
 const cgi = new PhpCgiNode({ docroot: '/www' });
 const response: Promise<Response | string | undefined> = cgi.request(new Request('https://example.com/'));
 const cgiRuntime: Promise<PhpBinaryRuntime> = cgi.refresh();
