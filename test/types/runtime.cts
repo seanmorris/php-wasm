@@ -9,7 +9,11 @@ const status: Promise<number> = php.run('<?php echo 1;');
 const tokens: Promise<string> = php.tokenize('<?php echo 1;');
 new base.PhpBase(Promise.resolve(async () => ({ HEAPU8: new Uint8Array(8) })));
 new cli.PhpCliNode().run(['-v']);
-new cgi.PhpCgiNode().request(new Request('https://example.com/'));
+const cgiArgs: cgi.PhpCgiRuntimeArgs = { docroot: '/www' };
+const cgiBase: cgi.PhpCgiBase = new cgi.PhpCgiNode(cgiArgs);
+cgiBase.request(new Request('https://example.com/'));
+// @ts-expect-error The root exports the base type; its constructor has its own entrypoint.
+new cgi.PhpCgiBase(Promise.resolve({ default: () => ({}) }));
 new dbg.PhpDbgNode().run();
 // @ts-expect-error CLI accepts flags in CommonJS too.
 new cli.PhpCliNode().run('<?php echo 1;');

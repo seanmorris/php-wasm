@@ -4,6 +4,7 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import { PhpCliNode } from 'php-cli-wasm';
 import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb.mjs';
 import { PhpCgiNode } from 'php-cgi-wasm';
+import type { PhpCgiRuntimeArgs, PhpCgiBase as RootCgiBase } from 'php-cgi-wasm';
 import { PhpCgiBase } from 'php-cgi-wasm/PhpCgiBase';
 import { PhpCgiWebBase } from 'php-cgi-wasm/PhpCgiWebBase';
 import { PhpDbgNode } from 'php-dbg-wasm';
@@ -61,7 +62,9 @@ for (const cli of [new PhpCliNode(), new PhpCliWeb()]) {
 const browserCliExit: Promise<number> = new PhpCliWeb().run();
 // @ts-expect-error Node CLI can resolve undefined when an error has no exit status.
 const nodeCliExit: Promise<number> = new PhpCliNode().run();
-const cgi = new PhpCgiNode({ docroot: '/www' });
+const cgiArgs: PhpCgiRuntimeArgs = { docroot: '/www' };
+const cgi = new PhpCgiNode(cgiArgs);
+const rootCgiBase: RootCgiBase = cgi;
 const response: Promise<Response | string | undefined> = cgi.request(new Request('https://example.com/'));
 const cgiRuntime: Promise<PhpBinaryRuntime> = cgi.refresh();
 const putenv: Promise<number> = cgi.putEnv('APP_ENV', 'test');
