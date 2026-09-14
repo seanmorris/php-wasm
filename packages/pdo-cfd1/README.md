@@ -6,8 +6,8 @@ This package exists mainly so custom `php-wasm` builds can vendor and compile th
 It does not ship a separate JavaScript entrypoint from this folder.
 At runtime, support is enabled by passing Cloudflare D1 bindings into the PHP runtime.
 
-The bundled, patched driver targets PHP 8.0–8.5. Upstream requires PHP 8.1;
-the compatibility patch includes the PHP 8.0 PDO callback adapters.
+The pinned upstream driver targets PHP 8.0–8.5 and includes the PHP 8.0 PDO
+callback adapters. Its source is imported directly without a compatibility patch.
 
 ## Runtime Setup
 
@@ -106,17 +106,16 @@ Build-related variables:
 - `WITH_PDO_CFD1`: defaults to `0`. Set it to `1` to compile the extension into a custom build.
 - `WITH_VRZNO`: must be `1`; the driver uses Vrzno's value conversion bridge.
 - `PDO_CFD1_REPOSITORY`: defaults to `https://github.com/seanmorris/pdo-cfd1.git`.
-- `PDO_CFD1_REF`: defaults to immutable commit `6fad4b3f69cab57c816af7460ee737e8e2903f5c`.
+- `PDO_CFD1_REF`: defaults to immutable commit `2ae7992f9bf4c0dbd2fceb014d84430f4cc04a48`.
 - `PDO_CFD1_DEV_PATH`: optional external checkout, read without modifying it.
 
-The importer applies the shipped `compatibility.patch` in a temporary snapshot
-before publishing source files. Both the resolved commit (or development path)
-and the patch's SHA-256 are recorded in `.php-wasm-source.json`, together with
-the hashes of the patched input files. The PHP configure/build dependencies use
-that manifest. Unchanged imports preserve modification times; changed or missing
-inputs are repaired before the next build.
+The importer records the resolved commit (or development path) and each source
+file's SHA-256 in `.php-wasm-source.json`. The PHP configure/build dependencies
+use that manifest. Unchanged imports preserve modification times; changed or
+missing inputs are repaired before the next build. Restored manifests from the
+previous patched driver are migrated to the directly imported source.
 
-Custom refs and development checkouts must accept the shipped patch cleanly.
-Changing a patched upstream file may require updating the patch as well. An
-inapplicable patch fails before replacing a successful staged source tree; there
-is no unpatched or stale-source fallback.
+Custom refs and development checkouts supply the driver source as-is. Choose a
+revision compatible with the target PHP version. Driver unit tests are maintained
+in the upstream PDO-CFD1 repository; php-wasm keeps importer, packaging, and real
+PHP/Asyncify/D1 integration coverage.
