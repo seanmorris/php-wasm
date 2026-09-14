@@ -2,11 +2,17 @@
 WITH_PDO_CFD1?=0
 
 ifeq (${WITH_PDO_CFD1},1)
+WITH_VRZNO?=1
+ifneq (${WITH_VRZNO},1)
+$(error WITH_PDO_CFD1=1 requires WITH_VRZNO=1)
+endif
 EXTRA_FLAGS+= -D WITH_PDO_CFD1=1
-PHP_CONFIGURE_DEPS+= third_party/pdo-cfd1/config.m4
+PDO_CFD1_SOURCE_STAMP=third_party/pdo-cfd1/.php-wasm-source.json
+PDO_CFD1_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/.php-wasm-source.json
+PHP_CONFIGURE_DEPS+= ${PDO_CFD1_EXTENSION_STAMP}
 CONFIGURE_FLAGS+= --enable-pdo-cfd1
-DEPENDENCIES+= third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/pdo_cfd1.c
-CGI_DEPENDENCIES+=  third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/pdo_cfd1.c
-DBG_DEPENDENCIES+=  third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/pdo_cfd1.c
-# TEST_LIST+=$(shell ls packages/pdo-cfd1/test/*.mjs)
+DEPENDENCIES+= ${PDO_CFD1_EXTENSION_STAMP}
+CLI_DEPENDENCIES+= ${PDO_CFD1_EXTENSION_STAMP}
+CGI_DEPENDENCIES+= ${PDO_CFD1_EXTENSION_STAMP}
+DBG_DEPENDENCIES+= ${PDO_CFD1_EXTENSION_STAMP}
 endif

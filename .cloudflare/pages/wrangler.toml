@@ -2,6 +2,11 @@ name = "php-wasm-nightly"
 compatibility_date = "2024-12-01"
 pages_build_output_dir = "./dist"
 
+[limits]
+cpu_ms = 1000
+
+# Release staging preserves this binding and supplies NIGHTLY_PHP_DB from an
+# explicitly provided D1 UUID. Do not deploy this source-only config directly.
 [[r2_buckets]]
 binding = 'NIGHTLY_BUILDS'
 bucket_name = 'php-wasm'

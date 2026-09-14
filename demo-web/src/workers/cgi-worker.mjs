@@ -4,6 +4,7 @@
 /* global __DEMO_BUILD_TYPE__, __DEMO_LIB_TYPE__ */
 import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
 import { PGlite } from '@electric-sql/pglite';
+import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 import Dom from 'php-wasm-dom';
 import Gd from 'php-wasm-gd';
 import Iconv from 'php-wasm-iconv';
@@ -22,6 +23,8 @@ import Yaml from 'php-wasm-yaml';
 import Zlib from 'php-wasm-zlib';
 import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { coordinateDemoDatabase, withDemoDatabaseLock } from '../lib/demoDatabaseRuntime.worker.js';
+import { createWorkbenchActions } from '../lib/queryWorkbench.worker.js';
 
 const sharedLibs = [];
 const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
@@ -57,9 +60,24 @@ const files = [
 	{ parent: '/preload/test_www/', name: 'hello-world.php',     url: './scripts/hello-world.php' }
 	, { parent: '/preload/test_www/', name: 'phpinfo.php',         url: './scripts/phpinfo.php' }
 	, { parent: '/preload/',          name: 'list-extensions.php', url: './scripts/list-extensions.php' }
+	, { parent: '/preload/query-workbench/', name: 'query-workbench.php', url: './scripts/query-workbench.php' }
 ];
 const cgiPrefix = basePath('cgi-bin/');
 const excludedFetchPrefixes = [basePath('cgi-bin/~!@'), basePath('cgi-bin/.')];
+
+class DemoPGlite extends PGlite
+{
+	constructor(dataDir, options = {})
+	{
+		super(dataDir, {
+			...options
+			, extensions: {
+				pg_trgm
+				, ...options.extensions
+			}
+		});
+	}
+}
 
 /**
  * Returns true only for requests that should wake the PHP-CGI runtime.
@@ -84,6 +102,19 @@ const onRequest = (request, response) => {
 	console.log(logLine);
 };
 
+const withPGlite = async (database, callback) => {
+	const pglite = new DemoPGlite(database);
+
+	try
+	{
+		return await callback(pglite);
+	}
+	finally
+	{
+		await pglite.close();
+	}
+};
+
 /**
  * Returns a simple HTML 404 response for unmatched worker routes.
  */
@@ -95,19 +126,28 @@ const notFound = request => {
 };
 
 const actions = {
-	runSql: (php, database, sql) => {
-		console.log({database});
-		const pglite = new PGlite(database);
-		return pglite.query(sql);
+	runtimeReady: () => true
+	, awaitFilesystem: () => navigator.locks.request(
+		'php-wasm-fs-lock'
+		, () => true
+	)
+	, runSql: (php, database, sql) => {
+		return withDemoDatabaseLock(() => withPGlite(database, pglite => pglite.query(sql)));
 	}
-	, execSql: (php, database, sql) => {
-		console.log({database});
-		const pglite = new PGlite(database);
-		return pglite.exec(sql);
+	, replaceSql: (php, database, sql) => {
+		return withDemoDatabaseLock(() => withPGlite(database, pglite => pglite.exec([
+			'BEGIN;'
+			, 'DROP SCHEMA IF EXISTS public CASCADE;'
+			, 'CREATE SCHEMA public;'
+			, sql
+			, 'COMMIT;'
+		].join('\n'))));
 	}
+	, ...createWorkbenchActions({withLock: withDemoDatabaseLock, withPGlite})
 };
 
 let phpLoader = null;
+const DemoPhpCgiWorker = coordinateDemoDatabase(PhpCgiWorker);
 
 /**
  * Loads the runtime assets required for the current build type and creates the worker.
@@ -126,13 +166,13 @@ const init = () => {
 	}
 
 	// Spawn the PHP-CGI binary
-	return phpLoader = new PhpCgiWorker({
+	return phpLoader = new DemoPhpCgiWorker({
 		version: '8.3'
 		, onRequest
 		, notFound
 		, sharedLibs
 		, files
-		, PGlite
+		, PGlite: DemoPGlite
 		, actions
 		, staticFS: false
 		, prefix: basePath('cgi-bin/')

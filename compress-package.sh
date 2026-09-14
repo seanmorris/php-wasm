@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-PACKAGE_DIR=${1}
-cd ${PACKAGE_DIR}/
 set -euo pipefail
+PACKAGE_DIR=${1:?Usage: compress-package.sh PACKAGE_DIR}
+cd -- "${PACKAGE_DIR}/"
 
 # rm -f [0123456789abcdef]*.wasm
 

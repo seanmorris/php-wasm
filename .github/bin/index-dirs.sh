@@ -21,18 +21,25 @@ find . -type d | while read DIR; do {
 	perl -pi -e "s#^</head>#<style> html { background-color: black; } body { filter: invert(1); } </style></head>#" index.html
 	perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 	perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
+	if [[ "${DIR:2}" == "php-cloud-wasm" ]]; then
+		perl -pi -e 's#</body>#<p><a href="/php/">Run PHP on Cloudflare</a></p></body>#' index.html
+	fi
 	shopt -s nullglob
+		for SCRIPT in *.mjs *.js; do
+			brotli -kfZ "${SCRIPT}"
+			gzip -n -kf9 "${SCRIPT}"
+		done;
 		for BINARY in *.wasm; do
 			brotli -kfZ "${BINARY}"
-			gzip -n -k9 "${BINARY}"
+			gzip -n -kf9 "${BINARY}"
 		done;
 		for BINARY in *.so; do
 			brotli -kfZ "${BINARY}"
-			gzip -n -k9 "${BINARY}"
+			gzip -n -kf9 "${BINARY}"
 		done;
 		for DAT in *.dat; do
 			brotli -kfZ "${DAT}"
-			gzip -n -k9 "${DAT}"
+			gzip -n -kf9 "${DAT}"
 		done;
 	shopt -u nullglob
 	popd > /dev/null;
@@ -45,6 +52,7 @@ ls -d */ | while read DIR; do {
 	[[ "${DIR::-1}" == "pdo-pglite" ]] && continue;
 	[[ "${DIR::-1}" == "vrzno" ]]      && continue;
 	[[ "${DIR::-1}" == "waitline" ]]   && continue;
+	[[ "${DIR::-1}" == "php-cloud-wasm" ]] && continue;
 	[[ "${DIR::-1}" == "." ]]          && continue;
 
 	[[ ! -f "${DIR::-1}/index.mjs" ]] && continue;
@@ -57,3 +65,4 @@ tree ${TREE_FLAGS} -H "./" -T 'php-wasm/' -I "index.html" > index.html;
 perl -pi -e "s#^</head>#<style> html { background-color: black; } body { filter: invert(1); } </style></head>#" index.html
 perl -pi -e "s#^</p>#at $(date)</p>#" index.html
 perl -pi -e "s#\t</p>#\t<br /><br />php-wasm © 2021-$(date +%Y) Sean Morris</p>#" index.html
+perl -pi -e 's#</body>#<p><a href="/php/">Run PHP on Cloudflare</a></p></body>#' index.html

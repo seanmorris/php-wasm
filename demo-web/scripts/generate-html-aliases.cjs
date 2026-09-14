@@ -15,9 +15,11 @@ const aliases = [
 	, 'embedded-php.html'
 	, 'dbg-preview.html'
 	, 'cli-preview.html'
+	, 'waitline-preview.html'
 	, 'install-demo.html'
 	, 'select-framework.html'
 	, 'code-editor.html'
+	, 'query-workbench.html'
 	, 'vscode.html'
 ];
 

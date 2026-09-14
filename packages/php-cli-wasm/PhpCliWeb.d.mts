@@ -1,7 +1,7 @@
-import type { PhpRuntimeArgs, PhpRuntimeValue } from './public';
-import { PhpBase } from './PhpBase.mjs';
+import type { PhpRuntimeArgs, PhpRuntimeValue } from './public.d.ts';
+import type { PhpBase } from './PhpBase.mjs';
 
-export class PhpCliWeb extends PhpBase {
+export class PhpCliWeb extends PhpBase<[flags?: string[]], void> {
 	interactive: boolean;
 	script?: string;
 	code?: string;
@@ -9,7 +9,7 @@ export class PhpCliWeb extends PhpBase {
 	startTransaction(): Promise<void>;
 	commitTransaction(readOnly?: boolean): Promise<void>;
 	provideInput(line: string): Promise<void>;
-	run(flags?: string[]): Promise<PhpRuntimeValue>;
+	run(flags?: string[]): Promise<number>;
 	refresh(): Promise<void>;
 	_enqueue(callback: (...params: Array<string | number | boolean | object | undefined>) => Promise<PhpRuntimeValue>, params?: Array<string | number | boolean | object | undefined>, readOnly?: boolean): Promise<PhpRuntimeValue>;
 }

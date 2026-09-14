@@ -59,10 +59,12 @@ RUN cd /emsdk/upstream/emscripten && {\
 COPY .github/bin/retry-embuilder.sh /usr/local/bin/retry-embuilder
 COPY .github/bin/verify-emscripten-profile-runtime.sh /usr/local/bin/verify-emscripten-profile-runtime
 COPY .github/bin/verify-emscripten-fibers.sh /usr/local/bin/verify-emscripten-fibers
+COPY .github/bin/verify-emscripten-async-errors.sh /usr/local/bin/verify-emscripten-async-errors
 
 RUN retry-embuilder build USER
 
 RUN bash /usr/local/bin/verify-emscripten-profile-runtime
 RUN bash /usr/local/bin/verify-emscripten-fibers
+RUN bash /usr/local/bin/verify-emscripten-async-errors
 
 RUN emcc --check

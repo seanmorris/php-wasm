@@ -2,8 +2,8 @@
 title: FS Operations
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/filesystem/fs-operations.md
+Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/filesystem/fs-operations.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -97,19 +97,19 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 
 ## Accessing the FileSystem of a Service Worker
 
-***Note:*** If you're using php-web in conjunction with php-cgi-worker to work on the filesystem, you'll need to `refresh` the filesystem in the worker. You can do that with the following call using `msg-bus` (as shown below).
+***Note:*** If you're using php-web in conjunction with php-cgi-worker to work on the filesystem, you'll need to `refresh` the filesystem in the worker. You can do that with the `quickbus` client from the Service Worker guide.
 
 ```javascript
 // Write a file
-await sendMessage('writeFile', ['/path/to/your/file', 'contents', {encoding: 'utf8'}]);
+await bus.writeFile('/path/to/your/file', 'contents', {encoding: 'utf8'});
 
 // Check the path
-const result = await sendMessage('analyzePath', ['/path/to/your/file']);
+const result = await bus.analyzePath('/path/to/your/file');
 ```
 
 If you modify the filesystem outside of the service worker, you can refresh its filesystem with a call to `refresh`.
 
 ```javascript
 // Tell the worker that the FS has been updated
-await sendMessage('refresh');
+await bus.refresh();
 ```

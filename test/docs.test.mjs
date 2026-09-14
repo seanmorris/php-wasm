@@ -4,7 +4,14 @@ import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 
 import { buildDocsCoverageReport } from './docs/report.mjs';
-import { docsFixtureRoot, phpWasmSiteDocsRoot } from './docs/lib/paths.mjs';
+import siteAudit from './docs/lib/site-audit.cjs';
+import {
+	docsFixtureRoot,
+	phpWasmSiteDocsRoot,
+	phpWasmSiteRoot,
+} from './docs/lib/paths.mjs';
+
+const { auditGeneratedSite } = siteAudit;
 
 function walkMarkdownFiles(directory, results = [])
 {
@@ -77,5 +84,24 @@ test(
 
 			assert.equal(siteSource, fixtureSource, `Docs page drifted: ${relativePath}`);
 		}
+	}
+);
+
+test(
+	'Generated php-wasm-site links, metadata, sitemap, and static assets are valid',
+	{
+		skip: !fs.existsSync(path.join(phpWasmSiteRoot, 'docs/sitemap.xml'))
+			&& 'Generated php-wasm-site checkout not available.'
+	},
+	() => {
+		const result = auditGeneratedSite({
+			docsRoot: path.join(phpWasmSiteRoot, 'docs')
+			, sourceStaticRoot: path.join(phpWasmSiteRoot, 'static')
+			, origin: 'https://php-wasm.seanmorr.is'
+		});
+
+		assert.ok(result.htmlPages > 20);
+		assert.ok(result.linksChecked > 100);
+		assert.ok(result.sitemapUrls > 20);
 	}
 );

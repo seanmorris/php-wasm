@@ -1,0 +1,55 @@
+{
+  "name": "php-cloud-wasm",
+  "version": "0.1.0",
+  "description": "Statically linked embedded PHP for Cloudflare Workers, with Vrzno, ZIP/zlib and PDO-CFD1",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris<php-wasm@seanmorr.is>",
+  "license": "Apache-2.0",
+  "exports": {
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./PhpCloudflare": {
+      "types": "./PhpCloudflare.d.mts",
+      "import": "./PhpCloudflare.mjs",
+      "default": "./PhpCloudflare.mjs"
+    },
+    "./PhpCloudflare.mjs": {
+      "types": "./PhpCloudflare.d.mts",
+      "default": "./PhpCloudflare.mjs"
+    },
+    "./php*-cloudflare.mjs": {
+      "types": "./php*-cloudflare.d.mts",
+      "import": "./php*-cloudflare.mjs",
+      "default": "./php*-cloudflare.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.wasm": "./*.wasm",
+    "./PhpBase": {
+      "types": "./PhpBase.d.mts",
+      "import": "./PhpBase.mjs",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    }
+  },
+  "files": [
+    "*.mjs",
+    "*.d.mts",
+    "*.d.ts",
+    "[0-9a-f]*.wasm",
+    "php*-cloudflare.manifest.json",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "package.json"
+  ]
+}

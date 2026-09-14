@@ -27,6 +27,11 @@ const definedTypes = [
 	'PhpQueueReject',
 	'PhpQueueResolve',
 	'PhpQueuedCallback',
+	'PhpModuleFactory',
+	'PhpRuntimeFactory',
+	'PhpCloudflareArgs',
+	'PhpCgiRuntimeArgs',
+	'PhpCgiModuleFactory',
 	'PhpRuntimeArgs',
 	'PhpRuntimeHook',
 	'PhpRuntimeValue',
@@ -36,6 +41,7 @@ const definedTypes = [
 	'PhpVhostList',
 	'RuntimeFetchEvent',
 	'RuntimeLifecycleEvent',
+	'RuntimeMessageEvent',
 	'RuntimeRequest'
 ];
 

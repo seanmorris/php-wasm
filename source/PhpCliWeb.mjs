@@ -1,5 +1,5 @@
 import { PhpBase } from './PhpBase.mjs';
-import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { commitTransaction, requestWebLock, startTransaction } from './webTransactions.mjs';
 
 const NUM = 'number';
 const STR = 'string';
@@ -68,7 +68,9 @@ export class PhpCliWeb extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
-			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'));
+			php.triggerStdin = prompt => this.dispatchEvent(new CustomEvent('stdin-request', {
+				detail: {prompt: prompt ?? null}
+			}));
 			this.addEventListener('stdin-request', async () => this.flush());
 			return php;
 		});
@@ -235,7 +237,7 @@ export class PhpCliWeb extends PhpBase
 
 		this.queue.push([callback, params, _accept, _reject]);
 
-		navigator.locks.request('php-wasm-fs-lock', async () => {
+		requestWebLock('php-wasm-fs-lock', async () => {
 			if(!this.queue.length)
 			{
 				return;

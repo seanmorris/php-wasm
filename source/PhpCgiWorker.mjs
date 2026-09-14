@@ -16,8 +16,6 @@ const runtimes = {
 	, '8.5': Php85CgiWorker
 };
 
-/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
-
 /**
  * Worker-hosted PHP CGI wrapper.
  */

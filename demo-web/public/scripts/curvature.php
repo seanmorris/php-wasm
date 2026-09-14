@@ -26,7 +26,7 @@ $view = $View->from('<div style = "display:flex;flex-direction:row;margin:1rem;w
 </div>');
 
 $form->bindTo('json', function($json = NULL) use($view, $form) {
-    $view->args->serialized = serialize($form->args->value);
+    $view->args->serialized = serialize((array) $form->args->value);
     $view->args->json = $json;
 });
 

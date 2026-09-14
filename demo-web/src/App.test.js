@@ -38,9 +38,21 @@ vi.mock('./pages/VSCodeEditor', () => ({
 	default: () => React.createElement('div', null, 'VSCode Editor')
 }));
 
+vi.mock('./pages/WaitlinePreview', () => ({
+	default: () => React.createElement('div', null, 'Waitline Preview')
+}));
+
+vi.mock('./pages/QueryWorkbench', () => ({
+	default: () => React.createElement('div', null, 'Query Workbench')
+}));
+
 import { AppRoutes } from './App';
 
 describe('AppRoutes', () => {
+	it('renders the query workbench HTML entry', () => {
+		render(<MemoryRouter initialEntries={['/query-workbench.html?engine=sqlite']}><AppRoutes /></MemoryRouter>);
+		expect(screen.getByText('Query Workbench')).toBeInTheDocument();
+	});
 	it('renders the home page direct entry', () => {
 		render(
 			React.createElement(
@@ -63,6 +75,18 @@ describe('AppRoutes', () => {
 		);
 
 		expect(screen.getByText('Install Demo')).toBeInTheDocument();
+	});
+
+	it('renders the waitline browser test entry', () => {
+		render(
+			React.createElement(
+				MemoryRouter
+				, { initialEntries: ['/waitline-preview.html'] }
+				, React.createElement(AppRoutes)
+			)
+		);
+
+		expect(screen.getByText('Waitline Preview')).toBeInTheDocument();
 	});
 
 	it.each([

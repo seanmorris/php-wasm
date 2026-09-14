@@ -114,7 +114,9 @@ export class PhpCliNode extends PhpBase
 		this.binary = this.binary.then((php) => {
 			php.inputDataQueue = [];
 			php.awaitingInput = null;
-			php.triggerStdin = () => this.dispatchEvent(new CustomEvent('stdin-request'));
+			php.triggerStdin = prompt => this.dispatchEvent(new CustomEvent('stdin-request', {
+				detail: {prompt: prompt ?? null}
+			}));
 			this.addEventListener('stdin-request', async () => this.flush());
 			return php;
 		});
@@ -164,7 +166,7 @@ export class PhpCliNode extends PhpBase
 			/**
 			 * Executes queued CLI flags.
 			 * @param {...PhpQueueParam} params Queued CLI flag payload.
-			 * @returns {Promise<number>} Resolves with the CLI execution result.
+			 * @returns {Promise<number|undefined>} Exit status, or undefined for errors without a status.
 			 */
 			(...params) => this._run(/** @type {string[]} */ (params[0] ?? [])),
 			[cliFlags]
@@ -174,7 +176,7 @@ export class PhpCliNode extends PhpBase
 	/**
 	 * Executes the PHP CLI binary with a prepared flag list.
 	 * @param {string[]} flags CLI flags to pass to the PHP process.
-	 * @returns {Promise<number>} Resolves with the PHP process exit status.
+	 * @returns {Promise<number|undefined>} Exit status, or undefined for errors without a status.
 	 */
 	async _run(flags = [])
 	{

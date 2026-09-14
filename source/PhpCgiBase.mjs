@@ -3,8 +3,6 @@ import { breakoutRequest } from './breakoutRequest.mjs';
 import { fsOps } from './fsOps.mjs';
 import { resolveDependencies } from './resolveDependencies.mjs';
 
-/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
-
 /**
  * An object representing a dynamically loaded data file.
  * @typedef {string|object} FileDef
@@ -37,6 +35,42 @@ const putEnv = (php, key, value) => php.ccall(
 );
 
 const requestTimes = new WeakMap;
+
+/**
+ * Converts thrown runtime values into structured-clone-safe RPC errors.
+ * @param {unknown} error Value thrown while starting or handling the runtime.
+ * @returns {object} Serializable error details for the RPC response.
+ */
+const serializeMessageError = error => {
+	if(error && typeof error === 'object')
+	{
+		const serialized = {};
+
+		for(const property of ['name', 'message', 'stack', 'code'])
+		{
+			if(property in error && error[property] !== undefined)
+			{
+				serialized[property] = String(error[property]);
+			}
+		}
+
+		try
+		{
+			Object.assign(serialized, JSON.parse(JSON.stringify(error)));
+		}
+		catch
+		{
+			// Error details collected above are sufficient when custom fields are circular.
+		}
+
+		if(Object.keys(serialized).length)
+		{
+			return serialized;
+		}
+	}
+
+	return {message: String(error)};
+};
 
 const noTrailingSlash = s => s.slice(-1) !== '/' ? s : s.slice(0, -1);
 const noLeadingSlash = s => s.slice(0, 1) !== '/' ? s : s.slice(1);
@@ -364,7 +398,7 @@ export class PhpCgiBase
 
 	/**
 	 * Creates a new PHP CGI runtime wrapper.
-	 * @param {Promise<{default: new (args: object) => object}>} phpBinLoader Deferred PHP module loader.
+	 * @param {Promise<PhpCgiModuleFactory>} phpBinLoader Deferred PHP module loader.
 	 * @param {PhpCgiRuntimeArgs} [options] Runtime configuration for the CGI wrapper.
 	 */
 	constructor(phpBinLoader, {version, docroot, prefix, exclude, rewrite, entrypoint, cookies, types, onRequest, notFound, sharedLibs, dynamicLibs, actions, files, ...args} = {})
@@ -424,10 +458,24 @@ export class PhpCgiBase
 
 	/**
 	 * Handles control messages sent to the CGI runtime.
-	 * @param {MessageEvent} event Message event carrying a control action.
+	 * @param {RuntimeMessageEvent} event Message event carrying a control action.
 	 * @returns {Promise<void>} Resolves after the action response has been posted back.
 	 */
-	async handleMessageEvent(event)
+	handleMessageEvent(event)
+	{
+		const work = this._handleMessageEvent(event);
+
+		event.waitUntil?.(work);
+
+		return work;
+	}
+
+	/**
+	 * Runs one control action after the runtime has initialized.
+	 * @param {RuntimeMessageEvent} event Message event carrying a control action.
+	 * @returns {Promise<void>} Resolves after the action response has been posted back.
+	 */
+	async _handleMessageEvent(event)
 	{
 		const { data, source } = event;
 		const { action, token, params = [] } = data;
@@ -451,45 +499,34 @@ export class PhpCgiBase
 			, 'storeInit'
 		];
 
-		await this.binary;
+		const builtInAction = actions.includes(action);
+		const extraAction = action in this.extraActions;
 
-		if(actions.includes(action))
+		if(!builtInAction && !extraAction)
 		{
-			let result, error;
-
-			try
-			{
-				result = await this[action](...params);
-			}
-			catch(_error)
-			{
-				error = JSON.parse(JSON.stringify(_error));
-				console.warn(_error);
-			}
-			finally
-			{
-				if(action === 'refresh') result = !!result;
-
-				source.postMessage({re: token, result, error});
-			}
+			return;
 		}
-		else if(action in this.extraActions)
-		{
-			let result, error;
 
-			try
-			{
-				result = await this.extraActions[action](this, ...params);
-			}
-			catch(_error)
-			{
-				error = JSON.parse(JSON.stringify(_error));
-				console.warn(_error);
-			}
-			finally
-			{
-				source.postMessage({re: token, result, error});
-			}
+		let result, error;
+
+		try
+		{
+			await this.binary;
+
+			result = builtInAction
+				? await this[action](...params)
+				: await this.extraActions[action](this, ...params);
+		}
+		catch(_error)
+		{
+			error = serializeMessageError(_error);
+			console.warn(_error);
+		}
+		finally
+		{
+			if(action === 'refresh') result = !!result;
+
+			source.postMessage({re: token, result, error});
 		}
 	}
 
@@ -729,6 +766,25 @@ export class PhpCgiBase
 	 */
 	async request(request)
 	{
+		try
+		{
+			return await this._request(request);
+		}
+		catch(error)
+		{
+			// Initialization of a replacement runtime can fail before PHP runs.
+			return this._errorResponse(request, error);
+		}
+	}
+
+	/**
+	 * Routes one request and serializes its PHP execution.
+	 * @private
+	 * @param {RuntimeRequest} request Request to serve.
+	 * @returns {Promise<Response|string|undefined>} Generated response.
+	 */
+	async _request(request)
+	{
 		const {
 			url
 			, method = 'GET'
@@ -882,16 +938,18 @@ export class PhpCgiBase
 			}
 		}
 
-		let exitCode = -1;
+		const requestLock = globalThis.navigator?.locks?.request
+			? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
+			: callback => callback();
 
-		try
-		{
-			const requestLock = globalThis.navigator?.locks?.request
-				? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
-				: callback => callback();
+		return requestLock(async () => {
+			// A preceding failed request may have replaced the instance while this
+			// request was queued. Static responses above do not need this lock.
+			const php = await this.binary;
+			let exitCode = -1;
 
-			// We need "return await" otherwise the finally block will run before the lock releases.
-			return await requestLock(async () => {
+			try
+			{
 				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '').split('') : [];
 				this.output = [];
 				this.error = [];
@@ -980,48 +1038,63 @@ export class PhpCgiBase
 				this.onRequest(request, response);
 
 				return response;
-			});
-		}
-		catch(error)
-		{
-			console.error(error);
-
-			const response = new Response(
-				`500: Internal Server Error.\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `Stacktrace:\n${error.stack}\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
-					+ `=`.repeat(80) + `\n\n`
-					+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
-					+ `=`.repeat(80) + `\n\n`
-				, {
-					status: 500
-					, headers: {
-						'Cache-Control': 'no-store'
-						, 'Content-Type': 'text/plain; charset=utf-8'
-					}
+			}
+			catch(error)
+			{
+				return this._errorResponse(request, error);
+			}
+			finally
+			{
+				if(exitCode === 0)
+				{
+					await this._afterRequest();
 				}
-			);
+				else
+				{
+					console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+					console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
 
-			this.onRequest(request, response);
-
-			return response;
-		}
-		finally
-		{
-			if(exitCode === 0)
-			{
-				await this._afterRequest();
+					// Keep the failed replacement promise on binary for the next caller,
+					// while handling this background refresh's rejection immediately.
+					this.refresh().catch(error => console.error(error));
+				}
 			}
-			else
-			{
-				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
-				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+		});
+	}
 
-				this.refresh();
+	/**
+	 * Reports a failed request without caching its error response.
+	 * @private
+	 * @param {RuntimeRequest} request Failed request.
+	 * @param {unknown} error Runtime failure, including non-Error rejection values.
+	 * @returns {Response} Non-cacheable HTTP 500 response.
+	 */
+	_errorResponse(request, error)
+	{
+		console.error(error);
+		const stack = error && typeof error === 'object' && 'stack' in error ? error.stack : undefined;
+
+		const response = new Response(
+			`500: Internal Server Error.\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `Stacktrace:\n${String(stack ?? error)}\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `STDERR:\n${new TextDecoder().decode(new Uint8Array(this.error).buffer)}\n`
+				+ `=`.repeat(80) + `\n\n`
+				+ `STDOUT:\n${new TextDecoder().decode(new Uint8Array(this.output).buffer)}\n`
+				+ `=`.repeat(80) + `\n\n`
+			, {
+				status: 500
+				, headers: {
+					'Cache-Control': 'no-store'
+					, 'Content-Type': 'text/plain; charset=utf-8'
+				}
 			}
-		}
+		);
+
+		this.onRequest(request, response);
+
+		return response;
 	}
 
 	/**

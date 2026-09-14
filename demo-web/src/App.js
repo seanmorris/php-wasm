@@ -11,9 +11,12 @@ import Embedded from './pages/Embedded';
 import Home from './pages/Home';
 import InstallDemo from './pages/InstallDemo';
 import MultiIframeTest from './pages/MultiIframeTest';
+import QueryWorkbench from './pages/QueryWorkbench';
 import SelectFramework from './pages/SelectFramework';
 import VSCodeEditor from './pages/VSCodeEditor';
+import WaitlinePreview from './pages/WaitlinePreview';
 import { basePath, routerBase } from './lib/runtimePaths';
+import { useVisualViewportProperties } from './lib/visualViewport';
 
 /**
  * Declares the route table used by the demo application.
@@ -26,9 +29,23 @@ export function AppRoutes()
 		<Route path = "/embedded-php.html" element = { <Embedded /> } />
 		<Route path = "/dbg-preview.html" element = { <DbgPreview /> } />
 		<Route path = "/cli-preview.html" element = { <CliPreview /> } />
+		<Route path = "/waitline-preview.html" element = { <WaitlinePreview /> } />
 		<Route path = "/select-framework.html" element = { <SelectFramework /> } />
 		<Route path = "/install-demo.html" element = { <InstallDemo /> } />
 		<Route path = "/code-editor.html" element = { <Editor /> } />
+		<Route path = "/query-workbench.html" element = { <QueryWorkbench /> } />
+		<Route
+			path = "/query-workbench"
+			element = { <Navigate to = {basePath(`query-workbench.html${window.location.search}`)} />}
+		/>
+		<Route
+			path = "/php-wasm/query-workbench"
+			element = { <Navigate to = {basePath(`query-workbench.html${window.location.search}`)} />}
+		/>
+		<Route
+			path = "/php-wasm/query-workbench.html"
+			element = { <Navigate to = {basePath(`query-workbench.html${window.location.search}`)} />}
+		/>
 		<Route
 			path = "/code-editor"
 			element = { <Navigate to = {basePath(`code-editor.html${window.location.search}`)} />}
@@ -99,6 +116,8 @@ export function AppRoutes()
  */
 export default function App()
 {
+	useVisualViewportProperties();
+
 	return <BrowserRouter basename = {routerBase}>
 		<AppRoutes />
 	</BrowserRouter>;

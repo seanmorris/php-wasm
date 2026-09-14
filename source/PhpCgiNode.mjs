@@ -20,8 +20,6 @@ const loadRuntime = specifier => {
 	return import(specifier).then(normalizeRuntimeModule);
 };
 
-/** @import { PhpCgiRuntimeArgs } from 'php-cgi-wasm/public' */
-
 /**
  * Node.js-hosted PHP CGI wrapper.
  */

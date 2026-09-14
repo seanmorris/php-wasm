@@ -1,26 +1,11 @@
 .Embedded {
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-	height: 100dvh;
-	display: flex;
-}
-
-[data-iframed="0"].Embedded {
-	width: calc(100% - 1rem);
-	height: calc(100dvh - 1rem);
 }
 
 .Embedded > .bevel {
 	flex-grow: 1;
 	padding: 0.5rem;
-}
-
-@font-face {
-    src: url('../assets/fonts/fsex302-webfont.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-	font-family: 'fixedsys';
 }
 
 @media screen and (max-width: 1300px) {
@@ -57,22 +42,6 @@
 	.Embedded .row.toolbar.header .rows.spread {
 		justify-content: flex-start;
 	}
-}
-
-body {
-	font-family: 'fixedsys';
-	display: flex;
-	flex-direction: column;
-	align-items: stretch;
-	height: 100vh;
-	padding: 0px;
-	margin: 0px;
-	background-color: #aaa;
-}
-
-button {
-	font-family: fixedsys;
-	font-size: 1rem;
 }
 
 .output .scroller {

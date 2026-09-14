@@ -1,5 +1,7 @@
 import type { PhpCgiRuntimeArgs, RuntimeRequest } from './public.d.ts';
-import { PhpCgiBase } from './PhpCgiBase.mjs';
+import type { PhpCgiBase } from './PhpCgiBase.mjs';
+
+export type * from './public.d.ts';
 
 export class PhpCgiNode extends PhpCgiBase {
 	constructor(args?: PhpCgiRuntimeArgs);

@@ -11,9 +11,19 @@
 	test-all-versions x-all-versions php-clean-all-versions \
 	demo-versions null \
 	archives assets rebuild reconfigure \
-	dynamic dynamic-libs.json
+	dynamic dynamic-libs.json runtime-wrappers
 
-MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables --shuffle=random
+CLOUDFLARE_GOALS := cloudflare-mjs _cloudflare-mjs test-cloudflare
+ifneq ($(filter ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
+ifneq ($(filter-out ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
+$(error Cloudflare targets must run separately from other build targets)
+endif
+# Select this before any environment file or extension makefile is evaluated.
+override ENV_FILE := profiles/cloudflare.mak
+else
+MAKEFLAGS += --shuffle=random
+endif
+MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables
 
 ## Defaults:
 
@@ -103,13 +113,15 @@ EXTRA_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
-PHP_CONFIGURE_VARS=
+# Configure's link probes load the same side modules as the final PHP runtime.
+# They must provide the Asyncify globals required by those libraries too.
+PHP_CONFIGURE_VARS=LDFLAGS='-sASYNCIFY=${ASYNCIFY}'
 
 ## More Options
+builder_resolve_path = $(if $(strip $(1)),$(if $(filter /% ~%,$(1)),$(1),$(abspath ${PHP_BUILDER_DIR}/$(1))))
+
 ifdef PHP_BUILDER_DIR
 ENV_DIR:=${PHP_BUILDER_DIR}
-PHP_DIST_DIR:=$(realpath ${ENV_DIR}/${PHP_DIST_DIR})
-PHP_ASSET_DIR:=$(realpath ${ENV_DIR}/${PHP_ASSET_DIR})
 endif
 PHP_DIST_DIR?=${ENV_DIR}/packages/php-wasm
 INITIAL_MEMORY ?=128MB
@@ -139,7 +151,14 @@ DOCKER_COMPOSE?=docker compose
 CPU_COUNT=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
-DOCKER_ENV=PHP_DIST_DIR=$(realpath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
+# Keep native i64 signatures at every dynamic-linking boundary. Emscripten can
+# otherwise choose a legalized web ABI while side modules retain native i64.
+WASM_BIGINT_FLAG?=-sWASM_BIGINT=1
+# Side modules can call PHP callbacks and imports which suspend (for example,
+# libxml error handlers writing to an async database). Save those library frames
+# too, including calls to imports whose implementation lives in the main module.
+SIDE_MODULE_FLAGS?=-sSIDE_MODULE=1 ${WASM_BIGINT_FLAG} -sASYNCIFY=${ASYNCIFY} '-sASYNCIFY_IMPORTS=*'
+DOCKER_ENV=PHP_DIST_DIR=$(abspath ${PHP_DIST_DIR}) ${DOCKER_COMPOSE} -p phpwasm run -T --rm -e PKG_CONFIG_PATH=${PKG_CONFIG_PATH} -e OUTER_UID=${UID}
 DOCKER_RUN=${DOCKER_ENV} emscripten-builder
 DOCKER_RUN_IN_PHP=${DOCKER_ENV} -e EMCC_FORCE_STDLIBS=libc++abi,libc++ -w /src/third_party/php${PHP_VERSION}-src/ emscripten-builder
 MAKEFLAGS+= "-l${MAX_LOAD}"
@@ -212,7 +231,17 @@ ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
 PHP_ASSET_DIR?=${PHP_DIST_DIR}
+PHP_STDLIB_DIR?=${PHP_DIST_DIR}/stdlib
 SHARED_ASSET_PATHS=${PHP_ASSET_DIR}
+
+ifdef PHP_BUILDER_DIR
+PHP_DIST_DIR:=$(call builder_resolve_path,${PHP_DIST_DIR})
+PHP_ASSET_DIR:=$(call builder_resolve_path,${PHP_ASSET_DIR})
+PHP_STDLIB_DIR:=$(call builder_resolve_path,${PHP_STDLIB_DIR})
+PRELOAD_ASSET_SOURCES=$(foreach asset,${PRELOAD_ASSETS},$(call builder_resolve_path,$(asset)))
+else
+PRELOAD_ASSET_SOURCES=${PRELOAD_ASSETS}
+endif
 
 PRELOAD_NAME=php
 NOTPARALLEL=
@@ -220,12 +249,13 @@ NOTPARALLEL=
 all:
 	$(MAKE) _all
 
-TOP_LEVEL=$(addprefix ${CURDIR}/node_modules/,php-wasm php-cgi-wasm php-cli-wasm php-dbg-wasm)
+TOP_LEVEL=$(addprefix ${CURDIR}/node_modules/,php-wasm php-cloud-wasm php-cgi-wasm php-cli-wasm php-dbg-wasm)
+EXTENSION_PACKAGE_DIRS ?= $(filter-out ${TOP_LEVEL},$(shell npm ls -p))
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-cli-wasm/pre.mak
 -include packages/php-dbg-wasm/pre.mak
--include $(addsuffix /pre.mak,$(filter-out ${TOP_LEVEL},$(shell npm ls -p)))
+-include $(addsuffix /pre.mak,${EXTENSION_PACKAGE_DIRS})
 
 ifneq (${PRELOAD_ASSETS},)
 # DEPENDENCIES+=
@@ -242,7 +272,7 @@ CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
--include $(addsuffix /static.mak,$(filter-out ${TOP_LEVEL},$(shell npm ls -p)))
+-include $(addsuffix /static.mak,${EXTENSION_PACKAGE_DIRS})
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-cli-wasm/static.mak
 -include packages/php-dbg-wasm/static.mak
@@ -254,15 +284,11 @@ third_party/php${PHP_VERSION}-src/patched: third_party/php${PHP_VERSION}-src/.gi
 	${DOCKER_RUN} mkdir -p third_party/php${PHP_VERSION}-src/preload/Zend
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/patched
 
-.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSETS} ${ENV_FILE}
+.cache/preload-collected: third_party/php${PHP_VERSION}-src/patched ${PRELOAD_ASSET_SOURCES} ${ENV_FILE}
 	${DOCKER_RUN} rm -rf /src/third_party/preload
 ifneq (${PRELOAD_ASSETS},)
 	@ mkdir -p third_party/preload
-ifdef PHP_BUILDER_DIR
-	@ cp -prfL $(addprefix ${PHP_BUILDER_DIR},${PRELOAD_ASSETS}) third_party/preload/
-else
-	@ cp -prfL ${PRELOAD_ASSETS} third_party/preload/
-endif
+	@ cp -prfL ${PRELOAD_ASSET_SOURCES} third_party/preload/
 	@ ${DOCKER_RUN} touch .cache/preload-collected
 endif
 
@@ -446,6 +472,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-s EXIT_RUNTIME=1                   \
 		-s INVOKE_RUN=0                     \
 		-s MAIN_MODULE=${MAIN_MODULE}       \
+		${WASM_BIGINT_FLAG}                 \
 		-s MODULARIZE=1                     \
 		-s AUTO_NATIVE_LIBRARIES=0          \
 		-s AUTO_JS_LIBRARIES=0              \
@@ -489,14 +516,14 @@ NODE_MJS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULE
 NODE_JS_ASSETS= $(addprefix ${PHP_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
 
 ifneq (${PRELOAD_ASSETS},)
-WEB_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEB_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WORKER_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-WEBVIEW_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_MJS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
-NODE_JS_ASSETS+= ${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEB_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WORKER_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+WEBVIEW_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_MJS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
+NODE_JS_ASSETS+= ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data
 endif
 
 ifeq (${WITH_SOURCEMAPS},1)
@@ -524,28 +551,60 @@ STDLIB_WEBVIEW_TARGET=
 
 ifneq ($(filter ${WITH_LIBXML},dynamic),)
 ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
-STDLIB_NODE_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs
-STDLIB_WEB_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs
-STDLIB_WORKER_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs
-STDLIB_WEBVIEW_TARGET=packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs
+STDLIB_NODE_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs
+STDLIB_WEB_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs
+STDLIB_WORKER_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs
+STDLIB_WEBVIEW_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs
 endif
 endif
 
 stdlib: ${STDLIB_NODE_TARGET} ${STDLIB_WEB_TARGET} ${STDLIB_WORKER_TARGET} ${STDLIB_WEBVIEW_TARGET}
 
-packages/php-wasm/stdlib/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Node > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Web > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Worker > $@
 
-packages/php-wasm/stdlib/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-node.mjs ${PHP_DIST_DIR}/PhpNode.mjs
+	mkdir -p $(dir $@)
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 # Single Builds
+
+.PHONY: cloudflare-mjs _cloudflare-mjs test-cloudflare
+cloudflare_shell_quote = '$(subst ','"'"',$(1))'
+CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
+CLOUDFLARE_CACHE_DIR ?= .cache/cloudflare
+cloudflare-mjs:
+	node bin/build-cloudflare.mjs --php-version $(call cloudflare_shell_quote,${PHP_VERSION}) --output $(call cloudflare_shell_quote,${CLOUDFLARE_OUTPUT_DIR}) --cache-root $(call cloudflare_shell_quote,${CLOUDFLARE_CACHE_DIR})
+
+# Only the isolated container invokes this target. Never reuse another profile's
+# configured PHP tree or libraries, even if its output directory is different.
+_cloudflare-mjs:
+	@test "$${PHP_WASM_CLOUDFLARE_ISOLATED:-}" = 1 || { echo 'Use make cloudflare-mjs to isolate native build state.' >&2; exit 1; }
+	mkdir -p '${PHP_DIST_DIR}' .cache lib
+	$(MAKE) ${PHP_CONFIGURE_DEPS} ${ARCHIVES} ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs' ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpCloudflare.mjs ${MJS_HELPERS}) ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+
+${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: BUILD_TYPE=mjs
+${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ENVIRONMENT=worker
+${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: FS_TYPE=-lidbfs.js
+${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ${DEPENDENCIES} third_party/php${PHP_VERSION}-src/configured | ${ORDER_ONLY}
+	${DOCKER_RUN_IN_PHP} emmake make cli ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS='' SAPI_CLI_PATH='sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs'
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs $@
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.wasm $@.wasm
+	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' $@
+
+test-cloudflare:
+	PHP_VERSION='${PHP_VERSION}' node --test test/cloudflare/*.test.mjs
 
 web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
@@ -836,6 +895,24 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-webview.mjs.wasm.map ${PHP_DIST_DIR}
 
 ########## Package files ###########
+
+# Every declared wrapper ships regardless of the selected native build profile.
+# This target only copies/transpiles source wrappers; it never builds PHP/Wasm.
+runtime_wrapper_mjs = $(patsubst %.d.mts,%.mjs,$(notdir $(wildcard packages/$(1)/Php*.d.mts)))
+PHP_CLOUD_WRAPPER_DIR?=${ENV_DIR}/packages/php-cloud-wasm
+RUNTIME_WRAPPERS=$(addprefix ${PHP_DIST_DIR}/,$(call runtime_wrapper_mjs,php-wasm) ${MJS_HELPERS_WEB} $(notdir ${HELPER_MJS})) \
+	$(addprefix ${PHP_CGI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cgi-wasm) ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB}) \
+	$(addprefix ${PHP_CLI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cli-wasm) ${MJS_HELPERS_WEB}) \
+	$(addprefix ${PHP_DBG_DIST_DIR}/,$(call runtime_wrapper_mjs,php-dbg-wasm) ${MJS_HELPERS_WEB})
+RUNTIME_WRAPPERS_CJS=$(patsubst %.mjs,%.js,$(filter-out ${HELPER_MJS},${RUNTIME_WRAPPERS}))
+CLOUD_WRAPPERS=$(addprefix ${PHP_CLOUD_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-cloud-wasm) ${MJS_HELPERS})
+
+runtime-wrappers:
+	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR}
+	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS}
+
+${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
+	cp $< $@
 
 ${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
@@ -1187,7 +1264,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash
+	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
 
 # Bun uses JavaScriptCore, like Safari, but the focused lane deliberately avoids
 # heavyweight application bootstraps.  Drupal remains covered by the browser

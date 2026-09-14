@@ -1,5 +1,8 @@
 .circleci/*
 .github/*
+!.github/bin
+.github/bin/*
+!.github/bin/retry-download.sh
 emscripten/**
 emscripten/tools/*
 demo-node/*
@@ -7,4 +10,5 @@ demo-web/*
 packages/*
 docs/*
 .env*
+/.cache/
 @todo

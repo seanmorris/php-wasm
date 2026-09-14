@@ -1,7 +1,7 @@
-import type { PhpRuntimeArgs } from 'php-wasm/PhpBase.mjs';
-import { PhpBase } from 'php-wasm/PhpBase.mjs';
+import type { PhpRuntimeArgs } from './PhpBase.mjs';
+import type { PhpBase } from './PhpBase.mjs';
 
-export class PhpDbgNode extends PhpBase {
+export class PhpDbgNode extends PhpBase<[], number> {
 	running: boolean;
 	paused: boolean;
 	currentFilePtr: number | null;
@@ -16,6 +16,7 @@ export class PhpDbgNode extends PhpBase {
 	currentFile(): Promise<string>;
 	currentLine(): Promise<number>;
 	bpCount(): Promise<number>;
+	dumpSymbols(ptr: number, php: import('./public.d.ts').PhpBinaryRuntime): object;
 	dumpVars(): Promise<object | undefined>;
 	dumpGlobals(): Promise<object | undefined>;
 	dumpConstants(): Promise<object | undefined>;

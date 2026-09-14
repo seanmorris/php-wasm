@@ -56,7 +56,7 @@ lib/lib/libz.a: third_party/zlib/.gitignore
 	${DOCKER_RUN_IN_ZLIB} chown -R $(or ${UID},1000):$(or ${GID},1000) ./
 
 lib/lib/libz.so: lib/lib/libz.a
-	${DOCKER_RUN_IN_ZLIB} emcc -shared -o /src/$@ -fPIC -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_ZLIB} emcc -shared -o /src/$@ -fPIC ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/zlib/libz.so: lib/lib/libz.so
 	cp -Lp $^ $@
@@ -70,8 +70,8 @@ packages/zlib/php${PHP_VERSION}-zlib.so: ${PHPIZE} packages/zlib/libz.so third_p
 	${DOCKER_RUN_IN_EXT_ZLIB} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_ZLIB} cp config0.m4 config.m4
 	${DOCKER_RUN_IN_EXT_ZLIB} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_ZLIB} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --with-zlib=/src/lib --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_ZLIB} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --with-zlib=/src/lib --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_ZLIB} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -s EXPORT_ALL=1 -O0 -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so
+	${DOCKER_RUN_IN_EXT_ZLIB} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -s EXPORT_ALL=1 -O0 -Wl,--whole-archive .libs/zlib.a /src/packages/zlib/libz.so

@@ -1,18 +1,30 @@
 import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
 import { test } from 'node:test';
 
 import { PhpDbgNode } from '../../packages/php-dbg-wasm/PhpDbgNode.mjs';
 import { nodeRuntimeOptions } from '../lib/node-runtime-options.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
-const scriptPath = '/preload/test_www/hello-world.php';
+const scriptPath = '/preload/test_www/phpdbg-inspection.php';
+const includedScriptPath = '/preload/test_www/phpdbg-inspection-include.php';
 const legacyBootVersion = '8.1';
+const fixtureUrl = new URL('../browser/fixtures/scripts/phpdbg-inspection.php', import.meta.url);
+const fixtureSource = fs.readFileSync(fixtureUrl, 'utf8');
+const breakpointLine = fixtureSource
+	.split(/\r?\n/)
+	.findIndex(line => line.includes('PHPDBG_INSPECTION_BREAKPOINT')) + 1;
 
 const preloadFiles = [
 	{
 		parent: '/preload/test_www/'
-		, name: 'hello-world.php'
-		, url: new URL('../browser/fixtures/scripts/hello-world.php', import.meta.url)
+		, name: 'phpdbg-inspection.php'
+		, url: fixtureUrl
+	}
+	, {
+		parent: '/preload/test_www/'
+		, name: 'phpdbg-inspection-include.php'
+		, url: new URL('../browser/fixtures/scripts/phpdbg-inspection-include.php', import.meta.url)
 	}
 ];
 
@@ -86,11 +98,10 @@ const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 		const output = stdOut();
 
 		if(
-			/\[Set execution context: \/preload\/test_www\/hello-world\.php\]/.test(output)
-			&& /\[Successful compilation of \/preload\/test_www\/hello-world\.php\]/.test(output)
+			output.includes(`[Set execution context: ${scriptPath}]`)
+			&& output.includes(`[Successful compilation of ${scriptPath}]`)
 			&& /prompt>/i.test(prompt)
-		)
-		{
+		) {
 			return prompt;
 		}
 
@@ -100,7 +111,36 @@ const waitForReadyState = async (php, stdOut, stdErr, timeoutMs) => {
 	throw new Error(formatDiagnostics('readiness', stdOut, stdErr));
 };
 
-test(`boots phpdbg in Node for PHP ${version}`, async () => {
+const waitForBreakpoint = async (php, stdOut, stdErr, timeoutMs) => {
+	const start = Date.now();
+
+	while(Date.now() - start < timeoutMs)
+	{
+		const [isExecuting, currentFile, currentLine, breakpointCount] = await Promise.all([
+			php.isExecuting().catch(() => 0)
+			, php.currentFile().catch(() => '')
+			, php.currentLine().catch(() => 0)
+			, php.bpCount().catch(() => 0)
+		]);
+
+		if(
+			isExecuting
+			&& currentFile === scriptPath
+			&& currentLine === breakpointLine
+			&& breakpointCount === 1
+		) {
+			return;
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	throw new Error(formatDiagnostics('breakpoint', stdOut, stdErr));
+};
+
+test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
+	assert.ok(breakpointLine > 0, 'inspection fixture breakpoint marker is missing');
+
 	const php = new PhpDbgNode(nodeRuntimeOptions({runtime: 'dbg', files: preloadFiles, version}));
 	const {stdOut, stdErr} = attachOutput(php);
 
@@ -124,6 +164,68 @@ test(`boots phpdbg in Node for PHP ${version}`, async () => {
 		timeoutForVersion(45000, 20000)
 	);
 
+	await php.provideInput(`break ${scriptPath}:${breakpointLine}`);
+	await php.provideInput('run');
+
+	await waitForBreakpoint(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(45000, 20000)
+	);
+
+	const [variables, globals, constants, functions, classes, files, backtrace] = await Promise.all([
+		php.dumpVars()
+		, php.dumpGlobals()
+		, php.dumpConstants()
+		, php.dumpFunctions()
+		, php.dumpClasses()
+		, php.dumpFiles()
+		, php.dumpBacktrace()
+	]);
+
+	assert.equal(variables.argument, 'outer-value');
+	assert.equal(variables.localString, 'local-value');
+	assert.equal(variables.localNumber, 42);
+	assert.equal(variables.localBoolean, true);
+	assert.equal(variables.localNull, null);
+	assert.equal(variables.localArray.nested.answer, 42);
+	assert.equal(variables.localObject.label, 'object-value');
+	assert.equal(variables.phpdbgInspectionGlobal, 'global-value');
+
+	assert.ok(globals._SERVER, 'superglobals are unavailable');
+	assert.equal(constants.PHPDBG_INSPECTION_CONSTANT, 'constant-value');
+	assert.equal(constants.PHPDBG_INCLUDED_CONSTANT, 'included-constant-value');
+
+	assert.equal(functions.phpdbg_inspection_inner.name, 'phpdbg_inspection_inner');
+	assert.equal(functions.phpdbg_inspection_inner.filename, scriptPath);
+	assert.ok(functions.phpdbg_inspection_inner.lineNo > 0);
+	assert.equal(functions.phpdbg_inspection_included_function.filename, includedScriptPath);
+	assert.equal(classes.PhpDbgInspectionClass.filename, scriptPath);
+	assert.equal(classes.PhpDbgInspectionContract.filename, scriptPath);
+	assert.equal(classes.PhpDbgInspectionTrait.filename, scriptPath);
+	assert.equal(classes.PhpDbgIncludedClass.filename, includedScriptPath);
+	assert.ok(files.includes(includedScriptPath), `included files: ${JSON.stringify(files)}`);
+	assert.ok(backtrace.length >= 2, 'nested debugger frames are unavailable');
+	assert.equal(backtrace[0].filename, scriptPath);
+	assert.ok(await php.isRunning(), 'phpdbg did not report an active run');
+
+	const oldFrame = await php.switchFrame(1);
+	const outerVariables = await php.dumpVars();
+
+	assert.equal(oldFrame, 0);
+	assert.equal(outerVariables.outerValue, 'outer-value');
+	assert.equal(await php.switchFrame(oldFrame), 1);
+
+	await php.provideInput('continue');
+
+	const completionStart = Date.now();
+
+	while(!stdOut().includes('inspection-complete:') && Date.now() - completionStart < 20000)
+	{
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
 	await php.provideInput('quit');
 
 	const exitCode = await process.catch(error => {
@@ -136,8 +238,9 @@ test(`boots phpdbg in Node for PHP ${version}`, async () => {
 	});
 
 	assert.match(prompt, /prompt>/i);
-	assert.match(stdOut(), /\[Set execution context: \/preload\/test_www\/hello-world\.php\]/);
-	assert.match(stdOut(), /\[Successful compilation of \/preload\/test_www\/hello-world\.php\]/);
+	assert.ok(stdOut().includes(`[Set execution context: ${scriptPath}]`));
+	assert.ok(stdOut().includes(`[Successful compilation of ${scriptPath}]`));
+	assert.ok(stdOut().includes('inspection-complete:outer-value:local-value:42:true:null:42:object-value:global-value'));
 	assert.equal(stdErr(), '');
 	assert.equal(exitCode, 0);
 });

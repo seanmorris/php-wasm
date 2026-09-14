@@ -4,6 +4,12 @@ DOCKER_RUN_IN_EXT_SIMPLEXML =${DOCKER_ENV} -e NOCONFIGURE=1 -e EMCC_CFLAGS='-fPI
 
 WITH_SIMPLEXML?=dynamic
 
+SIMPLEXML_TEST_LIST=$(filter-out packages/simplexml/test/async-errors.mjs,$(wildcard packages/simplexml/test/*.mjs))
+# Awaiting JavaScript in a PHP callback requires the optional Vrzno bridge.
+ifeq (${WITH_VRZNO},1)
+SIMPLEXML_TEST_LIST+=packages/simplexml/test/async-errors.mjs
+endif
+
 ifeq ($(filter ${WITH_SIMPLEXML},0 1 static dynamic),)
 $(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
@@ -17,14 +23,14 @@ ifeq ($(filter ${WITH_LIBXML},static),)
 $(error WITH_SIMPLEXML=static REQUIRES WITH_LIBXML=static. WITH_LIBXML: '${WITH_LIBXML}' WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
 CONFIGURE_FLAGS+= --enable-simplexml
-TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
+TEST_LIST+=${SIMPLEXML_TEST_LIST}
 endif
 
 ifeq (${WITH_SIMPLEXML},dynamic)
 ifeq ($(filter ${WITH_LIBXML},1 static shared dynamic),)
 $(error WITH_SIMPLEXML=dynamic REQUIRES WITH_LIBXML=[static|shared]. WITH_LIBXML: '${WITH_LIBXML}' WITH_SIMPLEXML: '${WITH_SIMPLEXML}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
 endif
-TEST_LIST+=$(shell ls packages/simplexml/test/*.mjs)
+TEST_LIST+=${SIMPLEXML_TEST_LIST}
 EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
@@ -36,8 +42,8 @@ packages/simplexml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PH
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's|#include "php.h"|#include "config.h"\n#include "php.h"\n|g' simplexml.c;
-	${DOCKER_RUN_IN_EXT_SIMPLEXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
+	${DOCKER_RUN_IN_EXT_SIMPLEXML} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_SIMPLEXML} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_SIMPLEXML} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/simplexml.a /src/packages/libxml/libxml2.so
+	${DOCKER_RUN_IN_EXT_SIMPLEXML} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/simplexml.a /src/packages/libxml/libxml2.so

@@ -2,15 +2,15 @@
 pagetitle: Custom Builds with php-wasm-builder
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/compiling/custom-builds.md
+Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/compiling/custom-builds.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/bin/php-wasm-builder.js
 -->
 # Custom Builds with php-wasm-builder
 
-The `php-wasm-builder` *package* is the set of source files needed to build php-wasm & php-cgi-wasm.
+The `php-wasm-builder` *package* is the set of source files needed to build php-wasm, php-cgi-wasm, php-cli-wasm, & php-dbg-wasm.
 
 The `php-wasm-builder` *command* is a wrapper script for the build process that allows the user to easily configure the underlying build process & drop the build assets wherever is necessary.
 
@@ -23,7 +23,7 @@ Install `php-wasm-builder` globally:
 ***Requires:***
 
 * Docker
-* Docker Compose
+* Docker Compose v2 (`docker compose`)
 * Coreutils
 * Wget
 * Make
@@ -50,11 +50,23 @@ $ php-wasm-builder clean
 
 ### build
 
-Use this to build custom version of php-wasm. It's recommended to build this to an empty directory using a `.php-wasm-rc` file.
+Use this to build a custom version of `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, or `php-dbg-wasm`. It's recommended to build this into an empty directory using a `.php-wasm-rc` file.
 
 ```bash
 npx php-wasm-builder build
 ```
+
+The optional selectors can be provided in any order:
+
+| Selector | Values | Default |
+| --- | --- | --- |
+| Environment | `web`, `node`, `worker`, `webview` | `web` |
+| Module format | `js`, `mjs` | `js` |
+| Package | `base`, `cgi`, `cli`, `dbg` | `base` |
+
+`base`, `cgi`, `cli`, and `dbg` build `php-wasm`, `php-cgi-wasm`,
+`php-cli-wasm`, and `php-dbg-wasm`, respectively. Unknown or conflicting
+selectors fail before Make starts.
 
 ### image
 
@@ -127,7 +139,14 @@ $ cd ~/my-project
 $ php-wasm-builder build node
 ```
 
-## ESM Modules:
+Worker and webview targets use the same selector format:
+
+```sh
+$ php-wasm-builder build worker mjs
+$ php-wasm-builder build webview mjs
+```
+
+## ESM Modules
 
 Build ESM modules with:
 
@@ -138,7 +157,7 @@ $ php-wasm-builder build node mjs
 
 The current builder script defaults to `js` output unless you pass `mjs`.
 
-## CGI Modules:
+## CGI Modules
 
 Build CGI modules with:
 
@@ -147,6 +166,25 @@ $ php-wasm-builder build web cgi mjs
 $ php-wasm-builder build node cgi mjs
 $ php-wasm-builder build worker cgi mjs
 ```
+
+## CLI Modules
+
+Build `php-cli-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node cli mjs
+$ php-wasm-builder build web cli mjs
+```
+
+## DBG Modules
+
+Build `php-dbg-wasm` modules with:
+
+```sh
+$ php-wasm-builder build node dbg mjs
+$ php-wasm-builder build web dbg mjs
+```
+
 ## PHP_DIST_DIR
 
 This will build the package inside of the current directory (or in `PHP_DIST_DIR`, *see [.php-wasm-rc](/compiling/php-wasm-rc.html) for more info.*)

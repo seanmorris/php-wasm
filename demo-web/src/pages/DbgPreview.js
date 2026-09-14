@@ -46,7 +46,7 @@ export default function DbgPreview()
 		<div className = "row start wide toolbar" data-status>{statusMessage}</div>
 	</div>);
 
-	return (<div className = "dbg-preview margined">
+	return (<div className = "dbg-preview viewport-page margined" data-iframed = {isIframe ? 1 : 0}>
 		<div className='bevel column'>
 			{topBar}
 			<div className='inset frame'>

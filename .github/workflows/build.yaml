@@ -2,8 +2,7 @@ name: Build Artifacts
 
 on:
   push:
-    paths-ignore:
-      - '.cloudflare/pages/functions/\[\[path\]\].js'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,11 +11,16 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A publishing run must finish its verification/rollback transaction.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/develop' }}
 
 jobs:
 
+  runtime-types:
+    uses: ./.github/workflows/test-types-step.yaml
+
   generate-lib-group-matrix:
+    needs: [runtime-types]
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.libgroups }}
@@ -47,7 +51,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh', '.github/bin/verify-emscripten-async-errors.sh') }}
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
@@ -90,7 +94,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: /tmp/builder-image.tar
-          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh') }}
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh', '.github/bin/verify-emscripten-async-errors.sh') }}
 
       - name: Load builder image if cached
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
@@ -153,7 +157,7 @@ jobs:
       libType: shared
 
   build-php-static:
-    needs: []
+    needs: [runtime-types]
     strategy:
       matrix:
         phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
@@ -161,6 +165,26 @@ jobs:
     with:
       phpVersion: ${{ matrix.phpVersion }}
       libType: static
+
+  build-php-cloudflare:
+    needs: [generate-lib-group-matrix]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./.github/workflows/cloudflare-build-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
+
+  test-php-cloudflare:
+    needs: [build-php-cloudflare]
+    strategy:
+      fail-fast: false
+      matrix:
+        phpVersion: ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']
+    uses: ./.github/workflows/test-cloudflare-step.yaml
+    with:
+      phpVersion: ${{ matrix.phpVersion }}
 
   verify-sdl-dynamic:
     name: Verify SDL ${{ matrix.phpVersion }} w/${{ matrix.libType }} libs
@@ -711,13 +735,34 @@ jobs:
     name: Post nightly build to Cloudflare
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
+    concurrency:
+      group: php-wasm-nightly-publication
+      cancel-in-progress: false
     needs:
       - test-browser-dynamic-compressed
       - test-node-dynamic-compressed
       - test-cgi-node-dynamic-compressed
+      - test-php-cloudflare
     steps:
       - name: Check out repository code
         uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.5.0'
+          cache: npm
+
+      - name: Install pinned deployment tools
+        run: npm ci
+
+      - name: Require the dedicated nightly D1 binding
+        env:
+          NIGHTLY_PHP_D1_DATABASE_ID: ${{ vars.NIGHTLY_PHP_D1_DATABASE_ID }}
+        run: |
+          node -e 'if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(process.env.NIGHTLY_PHP_D1_DATABASE_ID || "")) throw new Error("Configure NIGHTLY_PHP_D1_DATABASE_ID for the dedicated php-wasm-nightly-demo D1 database before publishing.")'
+
+      - name: Verify nightly release and Pages regressions
+        run: npm run test:cloudflare-pages
 
       - name: Disable man-db auto-update
         run: |
@@ -737,8 +782,23 @@ jobs:
             tar -xzf ${TAR}
           done;
 
-      - name: Install Brotli & GZip
-        run: sudo apt install brotli gzip
+      - name: Download tested Cloudflare final packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: php-cloudflare-final-*
+          merge-multiple: true
+          path: cloudflare-download
+
+      - name: Merge validated final Cloudflare assets
+        run: |
+          for VERSION in 8.0 8.1 8.2 8.3 8.4 8.5; do
+            mkdir -p "cloudflare-stage/$VERSION"
+            tar -xzf "cloudflare-download/php-cloudflare-final-$VERSION.tar.gz" -C "cloudflare-stage/$VERSION"
+          done
+          node bin/merge-cloudflare.mjs packages/php-cloud-wasm cloudflare-stage/*/packages/php-cloud-wasm
+
+      - name: Install directory indexing and compression tools
+        run: sudo apt-get install -y brotli gzip tree
 
       - name: Index Package Directories
         run: ./.github/bin/index-dirs.sh packages/
@@ -768,6 +828,23 @@ jobs:
           echo "STAMP=$( date -u +'%Y%m%d%H%M%S' )" >> $GITHUB_ENV
           echo "SHORT_SHA=$( git rev-parse --short $GITHUB_SHA )" >> $GITHUB_ENV
 
+      - name: Stage the exact tested PHP 8.5 Pages modules
+        env:
+          NIGHTLY_PHP_D1_DATABASE_ID: ${{ vars.NIGHTLY_PHP_D1_DATABASE_ID }}
+        run: |
+          node bin/stage-cloudflare-pages.mjs \
+            --artifact-root packages/php-cloud-wasm \
+            --output-dir .cache/nightly-pages \
+            --php-version 8.5 \
+            --database-id "$NIGHTLY_PHP_D1_DATABASE_ID" \
+            --build-id "$STAMP-$SHORT_SHA"
+
+      - name: Exercise the staged Pages modules with local D1 and R2
+        env:
+          CLOUDFLARE_PAGES_PROJECT_DIR: .cache/nightly-pages
+          CLOUDFLARE_ARTIFACT_ROOT: packages/php-cloud-wasm
+        run: node --test test/cloudflare-pages/runtime.integration.mjs
+
       - name: Upload to Cloudflare
         uses: ryand56/r2-upload-action@latest
         with:
@@ -778,16 +855,27 @@ jobs:
           r2-bucket: php-wasm
           source-dir: packages
 
-      - name: Install Wrangler
-        run: npm install -g wrangler
-
-      - name: Deploy Cloudflare Pages Function
+      - name: Verify preview, deploy production and verify live PHP with D1
         run: |
-          cd .cloudflare/pages
-          wrangler pages deploy --branch=main --project-name=php-wasm-nightly
+          node bin/deploy-cloudflare-nightly.mjs \
+            --project-dir .cache/nightly-pages \
+            --artifact-root packages/php-cloud-wasm \
+            --php-version 8.5 \
+            --build-id "$STAMP-$SHORT_SHA"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+
+      - name: Preserve deployment diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nightly-pages-deployment
+          path: |
+            .cache/nightly-pages/stage.manifest.json
+            .cache/nightly-pages/release*.json
+          include-hidden-files: true
+          if-no-files-found: warn
 
       - name: Notify Discord on success
         if: ${{ success() }}

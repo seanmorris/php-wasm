@@ -39,21 +39,36 @@
       "default": "./OutputBuffer.mjs"
     },
     "./PhpBase": {
-      "types": "./PhpBase.d.mts",
-      "import": "./PhpBase.mjs",
-      "require": "./PhpBase.js",
+      "import": {
+        "types": "./PhpBase.d.mts",
+        "default": "./PhpBase.mjs"
+      },
+      "require": {
+        "types": "./PhpBase.d.cts",
+        "default": "./PhpBase.js"
+      },
       "default": "./PhpBase.mjs"
     },
     "./PhpNode": {
-      "types": "./PhpNode.d.mts",
-      "import": "./PhpNode.mjs",
-      "require": "./PhpNode.js",
+      "import": {
+        "types": "./PhpNode.d.mts",
+        "default": "./PhpNode.mjs"
+      },
+      "require": {
+        "types": "./PhpNode.d.cts",
+        "default": "./PhpNode.js"
+      },
       "default": "./PhpNode.mjs"
     },
     "./PhpWeb": {
-      "types": "./PhpWeb.d.mts",
-      "import": "./PhpWeb.mjs",
-      "require": "./PhpWeb.js",
+      "import": {
+        "types": "./PhpWeb.d.mts",
+        "default": "./PhpWeb.mjs"
+      },
+      "require": {
+        "types": "./PhpWeb.d.cts",
+        "default": "./PhpWeb.js"
+      },
       "default": "./PhpWeb.mjs"
     },
     "./_Event": {
@@ -95,7 +110,69 @@
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
     "./*.wasm": "./*.wasm",
-    "./*.data": "./*.data"
+    "./*.data": "./*.data",
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.js": {
+      "types": "./PhpBase.d.cts",
+      "default": "./PhpBase.js"
+    },
+    "./PhpNode.mjs": {
+      "types": "./PhpNode.d.mts",
+      "default": "./PhpNode.mjs"
+    },
+    "./PhpNode.js": {
+      "types": "./PhpNode.d.cts",
+      "default": "./PhpNode.js"
+    },
+    "./PhpWeb.mjs": {
+      "types": "./PhpWeb.d.mts",
+      "default": "./PhpWeb.mjs"
+    },
+    "./PhpWeb.js": {
+      "types": "./PhpWeb.d.cts",
+      "default": "./PhpWeb.js"
+    },
+    "./PhpWebview": {
+      "import": {
+        "types": "./PhpWebview.d.mts",
+        "default": "./PhpWebview.mjs"
+      },
+      "require": {
+        "types": "./PhpWebview.d.cts",
+        "default": "./PhpWebview.js"
+      },
+      "default": "./PhpWebview.mjs"
+    },
+    "./PhpWebview.mjs": {
+      "types": "./PhpWebview.d.mts",
+      "default": "./PhpWebview.mjs"
+    },
+    "./PhpWebview.js": {
+      "types": "./PhpWebview.d.cts",
+      "default": "./PhpWebview.js"
+    },
+    "./PhpWorker": {
+      "import": {
+        "types": "./PhpWorker.d.mts",
+        "default": "./PhpWorker.mjs"
+      },
+      "require": {
+        "types": "./PhpWorker.d.cts",
+        "default": "./PhpWorker.js"
+      },
+      "default": "./PhpWorker.mjs"
+    },
+    "./PhpWorker.mjs": {
+      "types": "./PhpWorker.d.mts",
+      "default": "./PhpWorker.mjs"
+    },
+    "./PhpWorker.js": {
+      "types": "./PhpWorker.d.cts",
+      "default": "./PhpWorker.js"
+    }
   },
   "files": [
     "*.js",
@@ -109,6 +186,7 @@
     "README.md",
     "package.json",
     "stdlib/*.mjs",
-    "mapped/*"
+    "mapped/*",
+    "*.d.cts"
   ]
 }

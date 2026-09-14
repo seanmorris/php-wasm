@@ -4,12 +4,17 @@
   "description": "php-cgi for wasm.",
   "main": "./PhpCgiNode.js",
   "module": "./PhpCgiNode.mjs",
-  "types": "./public.d.ts",
+  "types": "./PhpCgiNode.d.cts",
   "exports": {
     ".": {
-      "types": "./public.d.ts",
-      "import": "./PhpCgiNode.mjs",
-      "require": "./PhpCgiNode.js",
+      "import": {
+        "types": "./PhpCgiNode.d.mts",
+        "default": "./PhpCgiNode.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiNode.d.cts",
+        "default": "./PhpCgiNode.js"
+      },
       "default": "./PhpCgiNode.mjs"
     },
     "./package.json": "./package.json",
@@ -18,33 +23,123 @@
       "default": "./public.d.ts"
     },
     "./PhpCgiBase": {
-      "types": "./PhpCgiBase.d.mts",
-      "import": "./PhpCgiBase.mjs",
-      "require": "./PhpCgiBase.js",
+      "import": {
+        "types": "./PhpCgiBase.d.mts",
+        "default": "./PhpCgiBase.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiBase.d.cts",
+        "default": "./PhpCgiBase.js"
+      },
       "default": "./PhpCgiBase.mjs"
     },
     "./PhpCgiNode": {
-      "types": "./PhpCgiNode.d.mts",
-      "import": "./PhpCgiNode.mjs",
-      "require": "./PhpCgiNode.js",
+      "import": {
+        "types": "./PhpCgiNode.d.mts",
+        "default": "./PhpCgiNode.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiNode.d.cts",
+        "default": "./PhpCgiNode.js"
+      },
       "default": "./PhpCgiNode.mjs"
     },
     "./PhpCgiWebBase": {
-      "types": "./PhpCgiWebBase.d.mts",
-      "import": "./PhpCgiWebBase.mjs",
-      "require": "./PhpCgiWebBase.js",
+      "import": {
+        "types": "./PhpCgiWebBase.d.mts",
+        "default": "./PhpCgiWebBase.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiWebBase.d.cts",
+        "default": "./PhpCgiWebBase.js"
+      },
       "default": "./PhpCgiWebBase.mjs"
     },
     "./PhpCgiWorker": {
-      "types": "./PhpCgiWorker.d.mts",
-      "import": "./PhpCgiWorker.mjs",
-      "require": "./PhpCgiWorker.js",
+      "import": {
+        "types": "./PhpCgiWorker.d.mts",
+        "default": "./PhpCgiWorker.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiWorker.d.cts",
+        "default": "./PhpCgiWorker.js"
+      },
       "default": "./PhpCgiWorker.mjs"
     },
     "./*.mjs": "./*.mjs",
     "./*.js": "./*.js",
     "./*.data": "./*.data",
-    "./*.wasm": "./*.wasm"
+    "./*.wasm": "./*.wasm",
+    "./PhpCgiBase.mjs": {
+      "types": "./PhpCgiBase.d.mts",
+      "default": "./PhpCgiBase.mjs"
+    },
+    "./PhpCgiBase.js": {
+      "types": "./PhpCgiBase.d.cts",
+      "default": "./PhpCgiBase.js"
+    },
+    "./PhpCgiNode.mjs": {
+      "types": "./PhpCgiNode.d.mts",
+      "default": "./PhpCgiNode.mjs"
+    },
+    "./PhpCgiNode.js": {
+      "types": "./PhpCgiNode.d.cts",
+      "default": "./PhpCgiNode.js"
+    },
+    "./PhpCgiWeb": {
+      "import": {
+        "types": "./PhpCgiWeb.d.mts",
+        "default": "./PhpCgiWeb.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiWeb.d.cts",
+        "default": "./PhpCgiWeb.js"
+      },
+      "default": "./PhpCgiWeb.mjs"
+    },
+    "./PhpCgiWeb.mjs": {
+      "types": "./PhpCgiWeb.d.mts",
+      "default": "./PhpCgiWeb.mjs"
+    },
+    "./PhpCgiWeb.js": {
+      "types": "./PhpCgiWeb.d.cts",
+      "default": "./PhpCgiWeb.js"
+    },
+    "./PhpCgiWebBase.mjs": {
+      "types": "./PhpCgiWebBase.d.mts",
+      "default": "./PhpCgiWebBase.mjs"
+    },
+    "./PhpCgiWebBase.js": {
+      "types": "./PhpCgiWebBase.d.cts",
+      "default": "./PhpCgiWebBase.js"
+    },
+    "./PhpCgiWebview": {
+      "import": {
+        "types": "./PhpCgiWebview.d.mts",
+        "default": "./PhpCgiWebview.mjs"
+      },
+      "require": {
+        "types": "./PhpCgiWebview.d.cts",
+        "default": "./PhpCgiWebview.js"
+      },
+      "default": "./PhpCgiWebview.mjs"
+    },
+    "./PhpCgiWebview.mjs": {
+      "types": "./PhpCgiWebview.d.mts",
+      "default": "./PhpCgiWebview.mjs"
+    },
+    "./PhpCgiWebview.js": {
+      "types": "./PhpCgiWebview.d.cts",
+      "default": "./PhpCgiWebview.js"
+    },
+    "./PhpCgiWorker.mjs": {
+      "types": "./PhpCgiWorker.d.mts",
+      "default": "./PhpCgiWorker.mjs"
+    },
+    "./PhpCgiWorker.js": {
+      "types": "./PhpCgiWorker.d.cts",
+      "default": "./PhpCgiWorker.js"
+    }
   },
   "repository": {
     "type": "git",
@@ -82,6 +177,7 @@
     "LICENSE",
     "NOTICE",
     "README.md",
-    "package.json"
+    "package.json",
+    "*.d.cts"
   ]
 }

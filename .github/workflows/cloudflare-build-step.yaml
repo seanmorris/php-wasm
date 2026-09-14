@@ -1,0 +1,74 @@
+name: Build Cloudflare PHP
+
+on:
+  workflow_call:
+    inputs:
+      phpVersion:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Cloudflare PHP ${{ inputs.phpVersion }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.5.0'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Gate Cloudflare builds on wrapper, profile, artifact and D1 regressions
+        run: >-
+          node --test test/php-cloudflare.test.mjs
+          test/php-base-queue.test.mjs
+          test/builder-help.test.mjs
+          test/build/cloudflare-build.test.mjs
+          test/build/pdo-cfd1-importer.test.mjs
+          test/cloudflare/artifacts.test.mjs
+      - name: Cache builder image only
+        id: image
+        uses: actions/cache@v5
+        with:
+          path: /tmp/builder-image.tar
+          key: ${{ runner.os }}-docker-${{ hashFiles('emscripten-builder.dockerfile', 'patch/emscripten-6.0.6.patch', '.github/bin/retry-embuilder.sh', '.github/bin/verify-emscripten-profile-runtime.sh', '.github/bin/verify-emscripten-fibers.sh', '.github/bin/verify-emscripten-async-errors.sh') }}
+      - name: Load cached builder image
+        if: steps.image.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/builder-image.tar
+      - name: Build builder image
+        if: steps.image.outputs.cache-hit != 'true'
+        run: |
+          make image ENV_FILE=/dev/null
+          docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
+      - name: Build isolated Cloudflare profile and final package
+        env:
+          PHP_VERSION: ${{ inputs.phpVersion }}
+        run: make cloudflare-mjs PHP_VERSION="$PHP_VERSION"
+      - name: Validate and archive only final manifest assets
+        env:
+          PHP_VERSION: ${{ inputs.phpVersion }}
+        run: |
+          node test/cloudflare/artifacts.mjs packages/php-cloud-wasm "$PHP_VERSION" > cloudflare-files.list
+          tar --null -T cloudflare-files.list -czf "php-cloudflare-final-$PHP_VERSION.tar.gz"
+      - name: Upload final package
+        uses: actions/upload-artifact@v6
+        with:
+          name: php-cloudflare-final-${{ inputs.phpVersion }}
+          path: php-cloudflare-final-${{ inputs.phpVersion }}.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+      - name: Upload build diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: failure-cloudflare-build-${{ inputs.phpVersion }}
+          path: |
+            .cache/cloudflare/**/*.log
+            .cache/cloudflare/**/*.json
+          include-hidden-files: true
+          if-no-files-found: warn

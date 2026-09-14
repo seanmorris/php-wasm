@@ -1,0 +1,6 @@
+*.mjs
+*.wasm
+*.br
+*.gz
+php8.*-cloudflare.d.mts
+php8.*-cloudflare.manifest.json

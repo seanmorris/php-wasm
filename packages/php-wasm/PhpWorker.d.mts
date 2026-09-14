@@ -1,7 +1,7 @@
-import type { PhpRuntimeArgs, PhpRuntimeValue } from './public';
-import { PhpBase } from './PhpBase.mjs';
+import type { PhpRuntimeArgs, PhpRuntimeValue } from './public.d.ts';
+import type { PhpBase } from './PhpBase.mjs';
 
-export class PhpWorker extends PhpBase {
+export class PhpWorker extends PhpBase<[phpCode: string], void> {
 	constructor(args?: PhpRuntimeArgs);
 	startTransaction(): Promise<void>;
 	commitTransaction(readOnly?: boolean): Promise<void>;

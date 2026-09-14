@@ -2,8 +2,6 @@ name: Test
 
 on:
   push:
-    paths-ignore:
-      - '.cloudflare/pages/functions/\[\[path\]\].js'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,7 +12,56 @@ env:
 
 jobs:
 
+  runtime-types:
+    uses: ./.github/workflows/test-types-step.yaml
+
+  vrzno-importer:
+    needs: runtime-types
+    name: Test Build Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Deno
+        run: npm install -g deno@2.5.6
+      - name: Test build helpers under inherited Make settings (Node)
+        env:
+          MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+        run: node --test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs
+      - name: Test build helpers under inherited Make settings (Deno)
+        env:
+          MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+        run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
+      - name: Verify packaged builder helpers
+        run: node --test test/build/builder-tools-packaging.test.mjs
+      - name: Verify Cloudflare wrapper, profile, artifact and D1 regressions
+        run: >-
+          node --test test/php-cloudflare.test.mjs
+          test/php-base-queue.test.mjs
+          test/builder-help.test.mjs
+          test/build/cloudflare-build.test.mjs
+          test/build/pdo-cfd1-importer.test.mjs
+          test/cloudflare/artifacts.test.mjs
+      - name: Verify Pages routing and safe nightly promotion
+        run: npm run test:cloudflare-pages
+      - name: Test the real Make importer without PHP builds
+        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
+      - name: Build the lightweight root-owned importer fixture
+        run: docker build -f test/build/vrzno-importer.Dockerfile -t php-wasm-vrzno-importer test/build
+      - name: Require nonroot host and root builder ownership tests
+        env:
+          VRZNO_IMPORTER_DOCKER: '1'
+          PDO_PGLITE_IMPORTER_DOCKER: '1'
+          WAITLINE_IMPORTER_DOCKER: '1'
+        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
+
   test-8-5-static:
+    needs: vrzno-importer
     name: Test 8.5 Static
     runs-on: ubuntu-latest
     steps:
@@ -31,6 +78,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-static:
+    needs: vrzno-importer
     name: Test 8.4 Static
     runs-on: ubuntu-latest
     steps:
@@ -47,6 +95,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-static:
+    needs: vrzno-importer
     name: Test 8.3 Static
     runs-on: ubuntu-latest
     steps:
@@ -63,6 +112,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-static:
+    needs: vrzno-importer
     name: Test 8.2 Static
     runs-on: ubuntu-latest
     steps:
@@ -79,6 +129,7 @@ jobs:
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-static:
+    needs: vrzno-importer
     name: Test 8.1 Static
     runs-on: ubuntu-latest
     steps:
@@ -95,6 +146,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-static:
+    needs: vrzno-importer
     name: Test 8.0 Static
     runs-on: ubuntu-latest
     steps:
@@ -111,6 +163,7 @@ jobs:
       - run: PHP_VERSION=8.0 make test
 
   test-8-5-dynamic:
+    needs: vrzno-importer
     name: Test 8.5 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -127,6 +180,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-dynamic:
+    needs: vrzno-importer
     name: Test 8.4 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -143,6 +197,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-dynamic:
+    needs: vrzno-importer
     name: Test 8.3 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -159,6 +214,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-dynamic:
+    needs: vrzno-importer
     name: Test 8.2 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -175,6 +231,7 @@ jobs:
       - run: PHP_VERSION=8.2 make test
 
   test-8-1-dynamic:
+    needs: vrzno-importer
     name: Test 8.1 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -191,6 +248,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-dynamic:
+    needs: vrzno-importer
     name: Test 8.0 Dynamic
     runs-on: ubuntu-latest
     steps:
@@ -207,6 +265,7 @@ jobs:
       - run: PHP_VERSION=8.0 make test
 
   test-8-5-shared:
+    needs: vrzno-importer
     name: Test 8.5 Shared
     runs-on: ubuntu-latest
     steps:
@@ -223,6 +282,7 @@ jobs:
       - run: PHP_VERSION=8.5 make test
 
   test-8-4-shared:
+    needs: vrzno-importer
     name: Test 8.4 Shared
     runs-on: ubuntu-latest
     steps:
@@ -239,6 +299,7 @@ jobs:
       - run: PHP_VERSION=8.4 make test
 
   test-8-3-shared:
+    needs: vrzno-importer
     name: Test 8.3 Shared
     runs-on: ubuntu-latest
     steps:
@@ -255,6 +316,7 @@ jobs:
       - run: PHP_VERSION=8.3 make test
 
   test-8-2-shared:
+    needs: vrzno-importer
     name: Test 8.2 Shared
     runs-on: ubuntu-latest
     steps:
@@ -268,6 +330,7 @@ jobs:
       - run:  PHP_VERSION=8.2 make test
 
   test-8-1-shared:
+    needs: vrzno-importer
     name: Test 8.1 Shared
     runs-on: ubuntu-latest
     steps:
@@ -284,6 +347,7 @@ jobs:
       - run: PHP_VERSION=8.1 make test
 
   test-8-0-shared:
+    needs: vrzno-importer
     name: Test 8.0 Shared
     runs-on: ubuntu-latest
     steps:

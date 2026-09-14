@@ -183,15 +183,18 @@ packages/gd/php${PHP_VERSION}-gd.so: ${PHPIZE} third_party/php${PHP_VERSION}-gd/
 	@ echo -e "\e[33;4mBuilding php-gd\e[0m"
 	${DOCKER_RUN_IN_EXT_GD} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_GD} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_GD} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} WEBP_LIBS='-L/src/lib/lib -lwebp -lsharpyuv' --prefix='/src/lib/php${PHP_VERSION}' --with-php-config='/src/lib/php${PHP_VERSION}/bin/php-config' ${GD_FLAGS} --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_GD} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} WEBP_LIBS='-L/src/lib/lib -lwebp -lsharpyuv' --prefix='/src/lib/php${PHP_VERSION}' --with-php-config='/src/lib/php${PHP_VERSION}/bin/php-config' ${GD_FLAGS} --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_GD} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_GD} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_GD} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_GD} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/gd.a $(addprefix /src/,${GD_LIBS})
+	${DOCKER_RUN_IN_EXT_GD} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/gd.a $(addprefix /src/,${GD_LIBS})
 
 third_party/freetype-${FREETYPE_VERSION}/README:
 	@ echo -e "\e[33;4mDownloading FREETYPE\e[0m"
-	${DOCKER_RUN} wget --tries=5 --waitretry=2 --timeout=20 -q https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz
+	${DOCKER_RUN} /src/.github/bin/retry-download.sh \
+		https://download-mirror.savannah.gnu.org/releases/freetype/freetype-${FREETYPE_VERSION}.tar.gz \
+		freetype-${FREETYPE_VERSION}.tar.gz \
+		https://downloads.sourceforge.net/project/freetype/freetype2/${FREETYPE_VERSION}/freetype-${FREETYPE_VERSION}.tar.gz
 	${DOCKER_RUN} tar -xvzf freetype-${FREETYPE_VERSION}.tar.gz -C third_party
 	${DOCKER_RUN} rm freetype-${FREETYPE_VERSION}.tar.gz
 
@@ -208,7 +211,7 @@ lib/lib/libfreetype.a: third_party/freetype-${FREETYPE_VERSION}/README lib/lib/l
 
 lib/lib/libfreetype.so: lib/lib/libfreetype.a lib/lib/libpng.so lib/lib/libz.a
 	@ echo -e "\e[33;4mBuilding FREETYPE\e[0m"
-	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/gd/libfreetype.so: lib/lib/libfreetype.so
 	cp -Lp $^ $@
@@ -228,7 +231,7 @@ lib/lib/libjpeg.a: third_party/jpeg-9f/README
 	${DOCKER_RUN_IN_LIBJPEG} emmake make install
 
 lib/lib/libjpeg.so: lib/lib/libjpeg.a
-	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/gd/libjpeg.so: lib/lib/libjpeg.so
 	cp -rL $^ $@
@@ -255,13 +258,17 @@ lib/lib/libpng.a: third_party/libpng/.gitignore lib/lib/libz.a
 	${DOCKER_RUN_IN_LIBPNG} emmake make -j1;
 	${DOCKER_RUN_IN_LIBPNG} emmake make install;
 
+# libpng also passes CMAKE_C_FLAGS directly to its header generator. Keep the
+# shell-quoted Emscripten link options out of that preprocessing command.
 lib/lib/libpng.so: third_party/libpng/.gitignore lib/lib/libz.so
 	@ echo -e "\e[33;4mBuilding LIBPNG\e[0m"
 	${DOCKER_RUN_IN_LIBPNG} emcmake cmake . \
 		-DCMAKE_INSTALL_PREFIX=/src/lib/ \
 		-DCMAKE_PROJECT_INCLUDE=/src/source/force-shared.cmake \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS="-fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE}" \
+		-DCMAKE_C_FLAGS="-fPIC -flto -O${SUB_OPTIMIZE}" \
+		-DCMAKE_SHARED_LINKER_FLAGS="${SIDE_MODULE_FLAGS}" \
+		-DCMAKE_EXE_LINKER_FLAGS="${SIDE_MODULE_FLAGS}" \
 		-DZLIB_LIBRARY="/src/lib/lib/libz.so" \
 		-DZLIB_INCLUDE_DIR="/src/lib/include/" \
 		-DPNG_SHARED="ON"
@@ -281,7 +288,7 @@ third_party/libwebp-${LIBWEBP_TAG}/README.md:
 lib/lib/libsharpyuv.a: lib/lib/libwebp.a
 
 lib/lib/libwebp.so: lib/lib/libwebp.a lib/lib/libsharpyuv.a
-	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive $(addprefix /src/,$^)
+	${DOCKER_RUN} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive $(addprefix /src/,$^)
 
 lib/lib/libwebp.a: third_party/libwebp-${LIBWEBP_TAG}/README.md
 	@ echo -e "\e[33;4mBuilding LIBWEBP\e[0m"

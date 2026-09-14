@@ -266,7 +266,7 @@ export default function VSCodeEditor()
 		};
 	}, [configure, openFile, path, ready, version]);
 
-	return (<div className = "editor">
+	return (<div className = "editor viewport-page">
 		<div className='bevel'>
 			<Header />
 			<VSCode className='inset' />

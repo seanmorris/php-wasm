@@ -47,7 +47,7 @@ export default function CliPreview()
 		<div className = "row start toolbar" data-status>{exitCode}</div>
 	</div>);
 
-	return (<div className = "dbg-preview margined">
+	return (<div className = "dbg-preview viewport-page margined" data-iframed = {isIframe ? 1 : 0}>
 		<div className='bevel column'>
 			{topBar}
 			<div className='inset frame'>

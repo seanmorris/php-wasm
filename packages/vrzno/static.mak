@@ -1,26 +1,30 @@
 #!/usr/bin/env make
 
-DOCKER_RUN_IN_EXT_VRZNO=${DOCKER_ENV} -w /src/third_party/php${PHP_VERSION}-vrzno/ emscripten-builder
+VRZNO_IMPORTER:=$(patsubst $(CURDIR)/%,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))import-source.mjs
+VRZNO_SOURCE_STAMP?=third_party/vrzno/.php-wasm-source.json
+VRZNO_EXTENSION_STAMP?=third_party/php${PHP_VERSION}-src/ext/vrzno/.php-wasm-source.json
+vrzno_shell_quote = '$(subst ','"'"',$(1))'
 
+.PHONY: vrzno-import-check
+vrzno-import-check:
+
+# Check content and active identity every time, preserving mtimes on no-ops.
+${VRZNO_SOURCE_STAMP}: SHELL := /bin/bash
+${VRZNO_SOURCE_STAMP}: .SHELLFLAGS := -e -o pipefail -c
+${VRZNO_SOURCE_STAMP}: vrzno-import-check
 ifdef VRZNO_DEV_PATH
-third_party/vrzno/vrzno.c: $(wildcard ${VRZNO_DEV_PATH}/*.c) $(wildcard ${VRZNO_DEV_PATH}/*.h)
-	echo -e "\e[33;4mImporting VRZNO\e[0m"
-	- ${DOCKER_RUN} chown -R $(or ${UID},1000):$(or ${GID},1000) ./third_party/vrzno/
-	cp -prfv ${VRZNO_DEV_PATH} third_party/
-	touch third_party/vrzno/vrzno.c
-
+	@node $(call vrzno_shell_quote,${VRZNO_IMPORTER}) snapshot $(call vrzno_shell_quote,${VRZNO_DEV_PATH}) $(call vrzno_shell_quote,${PHP_VERSION}) | ${DOCKER_RUN} node $(call vrzno_shell_quote,${VRZNO_IMPORTER}) stage --stdin
 else
-third_party/vrzno/vrzno.c:
-	@ echo -e "\e[33;4mDownloading and importing VRZNO\e[0m"
-	${DOCKER_RUN} git clone https://github.com/seanmorris/vrzno.git third_party/vrzno \
-		--branch ${VRZNO_BRANCH} \
-		--single-branch          \
-		--depth 1
+	@${DOCKER_RUN} node $(call vrzno_shell_quote,${VRZNO_IMPORTER}) stage $(call vrzno_shell_quote,${VRZNO_REPOSITORY}) $(call vrzno_shell_quote,${VRZNO_REF})
 endif
 
-third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
-	@ ${DOCKER_RUN} cp -prf third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
+${VRZNO_EXTENSION_STAMP}: ${VRZNO_SOURCE_STAMP} third_party/php${PHP_VERSION}-src/.gitignore vrzno-import-check
+	@${DOCKER_RUN} node $(call vrzno_shell_quote,${VRZNO_IMPORTER}) sync $(call vrzno_shell_quote,${PHP_VERSION})
 
-third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: third_party/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/.gitignore
-	@ ${DOCKER_RUN} cp -prf third_party/vrzno third_party/php${PHP_VERSION}-src/ext/
-#	@ ${DOCKER_RUN} touch third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4
+# Compatibility targets verify imported files without touching Docker-owned
+# files on the host, or creating an empty source file to satisfy Make.
+third_party/vrzno/vrzno.c: ${VRZNO_SOURCE_STAMP}
+	@test -f "$@"
+
+third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: ${VRZNO_EXTENSION_STAMP}
+	@test -f "$@"

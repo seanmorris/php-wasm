@@ -1,0 +1,52 @@
+name: Test final Cloudflare PHP artifact
+
+on:
+  workflow_call:
+    inputs:
+      phpVersion:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Cloudflare PHP ${{ inputs.phpVersion }} final artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24.5.0'
+          cache: npm
+      - name: Install pinned local test runtime
+        run: npm ci
+      - name: Download exact final artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: php-cloudflare-final-${{ inputs.phpVersion }}
+          path: cloudflare-download
+      - name: Extract final assets away from checkout outputs
+        env:
+          PHP_VERSION: ${{ inputs.phpVersion }}
+        run: |
+          mkdir cloudflare-artifact
+          tar -xzf "cloudflare-download/php-cloudflare-final-$PHP_VERSION.tar.gz" -C cloudflare-artifact
+      - name: Test packaged assets without rebuilding
+        env:
+          PHP_VERSION: ${{ inputs.phpVersion }}
+          CLOUDFLARE_ARTIFACT_ROOT: cloudflare-artifact/packages/php-cloud-wasm
+        run: |
+          set -o pipefail
+          make test-cloudflare PHP_VERSION="$PHP_VERSION" 2>&1 | tee cloudflare-test.log
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: cloudflare-test-results-${{ inputs.phpVersion }}
+          path: |
+            cloudflare-test.log
+            cloudflare-artifact/packages/php-cloud-wasm/*.manifest.json
+          if-no-files-found: warn

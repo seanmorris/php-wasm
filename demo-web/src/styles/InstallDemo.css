@@ -1,9 +1,42 @@
 .install-demo {
-	width: 100%;
-	height: 100dvh;
 	display: flex;
+	overflow: auto;
+}
+
+.overlay > .install-demo {
+	width: 100%;
+	height: 100%;
 	align-items: center;
 	justify-content: center;
+}
+
+.install-demo > .bevel {
+	margin: auto;
+	width: min(45rem, calc(100% - 2rem));
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.install-demo > .bevel > .inset {
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+.install-demo h2 {
+	overflow-wrap: anywhere;
+}
+
+.install-demo .install-terminal {
+	position: relative;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	min-height: max(
+		12rem
+		, min(30rem, calc(var(--visual-viewport-height, 100dvh) - 12rem))
+	);
+	resize: both;
 }
 
 .install-demo .loader-icon {

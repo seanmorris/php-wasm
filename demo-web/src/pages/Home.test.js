@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 
 vi.mock('../components/Header', () => ({
 	default: function HeaderMock() {
@@ -29,5 +29,24 @@ describe('Home', () => {
 
 		expect(within(frameworkLink).getByRole('img', {name: 'WordPress logo'})).toBeInTheDocument();
 		expect(frameworkLink).toHaveAttribute('href', '/select-framework.html');
+	});
+
+	it('links to the waitline browser test', () => {
+		render(<Home />);
+
+		fireEvent.click(screen.getByText('More...'));
+
+		expect(screen.getByRole('link', {name: /waitline \/ Readline Test/}))
+			.toHaveAttribute('href', '/waitline-preview.html');
+	});
+
+	it('puts one Query Workbench link in Extras, not the main demo buttons', () => {
+		render(<Home />);
+		expect(screen.queryByRole('link', {name: 'Query Workbench'})).not.toBeInTheDocument();
+		fireEvent.click(screen.getByText('More...'));
+		const link = screen.getByRole('link', {name: 'Query Workbench'});
+		expect(link).toHaveAttribute('href', '/query-workbench.html');
+		expect(link.closest('.extra-demos')).not.toBeNull();
+		expect(screen.queryByRole('button', {name: 'Query Workbench'})).not.toBeInTheDocument();
 	});
 });

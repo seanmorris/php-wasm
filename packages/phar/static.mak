@@ -32,9 +32,9 @@ packages/phar/php${PHP_VERSION}-phar.so: ${PHPIZE} third_party/php${PHP_VERSION}
 	${DOCKER_RUN_IN_EXT_PHAR} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's|#define PHAR_MAIN 1|#define PHAR_MAIN 1\n#include "config.h"|g' phar.c;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#test -f "$$ac_f"#test -f "./$$ac_f"#' configure
-	${DOCKER_RUN_IN_EXT_PHAR} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-openssl=/src/lib --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_PHAR} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-openssl=/src/lib --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_PHAR} sed -i 's#-export-dynamic##g' Makefile;
 	${DOCKER_RUN_IN_EXT_PHAR} cp ../../packages/phar/phar.mak .
 	${DOCKER_RUN_IN_EXT_PHAR} emmake make -f phar.mak -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src -I/src/lib/include/';
-	${DOCKER_RUN_IN_EXT_PHAR} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/phar.a
+	${DOCKER_RUN_IN_EXT_PHAR} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive .libs/phar.a

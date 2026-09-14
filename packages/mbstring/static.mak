@@ -78,7 +78,7 @@ lib/lib/libonig.a: third_party/oniguruma/.gitignore
 	${DOCKER_RUN_IN_ONIGURUMA} emmake make install
 
 lib/lib/libonig.so: lib/lib/libonig.a
-	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
+	${DOCKER_RUN_IN_LIBZIP} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O${SUB_OPTIMIZE} -Wl,--whole-archive /src/$^
 
 packages/mbstring/libonig.so: lib/lib/libonig.so
 	cp -Lp $^ $@
@@ -91,8 +91,8 @@ packages/mbstring/php${PHP_VERSION}-mbstring.so: ${PHPIZE} third_party/php${PHP_
 	@ echo -e "\e[33;4mBuilding php-mbstring\e[0m"
 	${DOCKER_RUN_IN_EXT_MBSTRING} chmod +x /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
 	${DOCKER_RUN_IN_EXT_MBSTRING} /src/third_party/php${PHP_VERSION}-src/scripts/phpize;
-	${DOCKER_RUN_IN_EXT_MBSTRING} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
+	${DOCKER_RUN_IN_EXT_MBSTRING} emconfigure ./configure PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ${PHP_CONFIGURE_VARS} --prefix='/src/lib/php${PHP_VERSION}' --with-php-config=/src/lib/php${PHP_VERSION}/bin/php-config --cache-file=/tmp/config-cache;
 	${DOCKER_RUN_IN_EXT_MBSTRING} sed -i 's#-shared#-static#g' Makefile;
 	${DOCKER_RUN_IN_EXT_MBSTRING} sed -i 's#include "libmbfl/config.h"#include "config.h#g' Makefile;
 	${DOCKER_RUN_IN_EXT_MBSTRING} emmake make -j${CPU_COUNT} EXTRA_INCLUDES='-I/src/third_party/php${PHP_VERSION}-src';
-	${DOCKER_RUN_IN_EXT_MBSTRING} emcc -shared -o /src/$@ -fPIC -flto -sSIDE_MODULE=1 -O1 -Wl,--whole-archive .libs/mbstring.a /src/packages/mbstring/libonig.so
+	${DOCKER_RUN_IN_EXT_MBSTRING} emcc -shared -o /src/$@ -fPIC -flto ${SIDE_MODULE_FLAGS} -O1 -Wl,--whole-archive .libs/mbstring.a /src/packages/mbstring/libonig.so

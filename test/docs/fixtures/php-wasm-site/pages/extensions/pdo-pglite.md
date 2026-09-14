@@ -2,127 +2,124 @@
 title: pdo-pglite
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/extensions/pdo-pglite.md
+Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/extensions/pdo-pglite.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
 # pdo-pglite
 
-*pdo driver for pglite & php-wasm*
+`pdo-pglite` is the PostgreSQL-flavored PDO driver for `php-wasm`, powered by
+[`@electric-sql/pglite`](https://electric-sql.com/). It lets PHP use a
+browser-local PGlite database through the standard PDO API.
 
-pdo_pglite requires PHP 8.1+.
+PHP 8.1 or newer and the Vrzno extension are required. Custom builds must set
+both `WITH_PDO_PGLITE=1` and `WITH_VRZNO=1`.
 
-Pass the PGlite object into the php-wasm constructor to enable pdo_pglite support:
+## Install and Enable
+
+Install matching runtime and database packages:
+
+```sh
+npm install php-wasm pdo-pglite @electric-sql/pglite@^0.5.8
+```
+
+Pass the `PGlite` constructor into the runtime. The `pgsql:` PDO driver becomes
+available once the constructor is present.
 
 ```javascript
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
 import { PGlite } from '@electric-sql/pglite';
+
+const php = new PhpWeb({
+    version: '8.4',
+    PGlite,
+});
+```
+
+PGlite can also be imported from a pinned CDN URL:
+
+```javascript
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite@0.5.8/dist/index.js';
+
 const php = new PhpWeb({PGlite});
 ```
 
-You can also load PGlite from a CDN:
+If `PGlite` is not passed into the runtime, a `pgsql:` connection cannot create
+its backing database.
+
+## Open and Query a Database
+
+This DSN opens an IndexedDB-backed PGlite database named
+`pdo-pglite-pg18`:
 
 ```javascript
-import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
-const php = new PhpWeb({PGlite});
-```
-
-## Connect & Configure
-
-Once PGlite is passed in, `pgsql:` will be available as a PDO driver.
-
-```javascript
-import { PGlite } from 'https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js';
-const php = new PhpWeb({PGlite});
-
-php.run(`<?php
-    $pdo = new PDO('pgsql:idb-storage');
+await php.run(`<?php
+    $pdo = new PDO('pgsql:idb://pdo-pglite-pg18');
+    var_dump($pdo instanceof PDO);
 `);
 ```
 
-## Usage
-
-Use pdo-pglite like you'd use any other PDO connector. Prepared statements, as well as positional & named placeholders are supported.
+Prepared statements support both positional and named placeholders.
 
 ```javascript
-import { PGlite } from '@electric-sql/pglite';
-const php = new PhpWeb({PGlite});
+await php.run(`<?php
+    $pdo = new PDO('pgsql:idb://pdo-pglite-pg18');
 
-php.run(`<?php
-    $pdo = new PDO('pgsql:idb-storage');
-    $stm = $pdo->prepare(
-        'SELECT * FROM pg_catalog.pg_tables WHERE schemaname = :schema'
-    );
-    $out = fopen('php://stdout', 'w');
+    $pdo->exec('
+        CREATE TABLE IF NOT EXISTS notes (
+            id   SERIAL PRIMARY KEY,
+            body TEXT NOT NULL
+        )
+    ');
 
-    $stm->execute([
-        'schema' => 'pg_catalog'
-    ]);
+    $insert = $pdo->prepare('INSERT INTO notes (body) VALUES (:body)');
+    $insert->execute(['body' => 'hello from php']);
 
-    $headers = false;
-    while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-        if (!$headers) {
-            fputcsv($out, array_keys($row));
-            $headers = true;
-        }
-        fputcsv($out, $row);
+    foreach ($pdo->query('SELECT id, body FROM notes ORDER BY id') as $row) {
+        var_dump($row);
     }
 `);
 ```
 
-### PHP/PostgreSQL in Static HTML
+## Static HTML
 
-PGlite can also be used right from static HTML. Just pass it in the `data-imports` attribute on the php script tag, with the URL of the module as the key, where the value lists the imports from that module as an array.
-
-```html
-<script type = "text/php" data-imports = '{
-    "https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js": ["PGlite"]
-}'>
-```
-
-You can see an example of this running in codepen:
-
-<https://codepen.io/SeanMorris227/pen/GRVqYzR?editors=1000>
+Import `PGlite` through `data-imports`, then connect through PDO from PHP:
 
 ```html
-<html>
-<body>
-    <script async type = "module" src = "./php-tags.mjs"></script>
-    <script type = "text/php" data-stdout = "#output" data-stderr = "#error" data-imports = '{
-        "https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js": ["PGlite"]
-    }'><?php
-        $pdo = new PDO('pgsql:idb-storage');
-        $stm = $pdo->prepare(
-            'SELECT * FROM pg_catalog.pg_tables WHERE schemaname = :schema'
-        );
-        $out = fopen('php://stdout', 'w');
+<script async type="module" src="./php-tags.mjs"></script>
 
-        $stm->execute([
-            'schema' => 'pg_catalog'
-        ]);
+<script
+    type="text/php"
+    data-stdout="#output"
+    data-stderr="#error"
+    data-imports='{
+        "https://cdn.jsdelivr.net/npm/@electric-sql/pglite@0.5.8/dist/index.js": ["PGlite"]
+    }'
+><?php
+    $pdo = new PDO('pgsql:idb://pdo-pglite-pg18');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS messages (body TEXT NOT NULL)');
+    $pdo->prepare('INSERT INTO messages (body) VALUES (?)')->execute(['hello']);
 
-        $headers = false;
-        while ($row = $stm->fetch(PDO::FETCH_ASSOC)) {
-            if (!$headers) {
-                fputcsv($out, array_keys($row));
-                $headers = true;
-            }
-            fputcsv($out, $row);
-        }
-    </script>
-    <pre id = "output"></pre>
-    <pre id = "error"></pre>
-</body>
-</html>
+    foreach ($pdo->query('SELECT body FROM messages') as $row) {
+        echo $row['body'], PHP_EOL;
+    }
+?></script>
+
+<pre id="output"></pre>
+<pre id="error"></pre>
 ```
 
-## @electric-sql/pglite
+## Upgrade Persisted Databases
 
-`pdo_pglite` is powered by [@electric-sql/pglite](https://electric-sql.com/).
+PGlite 0.5 uses PostgreSQL 18. A database directory created by PGlite 0.2
+(PostgreSQL 16) cannot be opened in place by PGlite 0.5.
 
-<https://github.com/electric-sql/pglite>
+Export the old database logically with its original PGlite version, restore it
+into a new database name such as `idb://pdo-pglite-pg18`, and change the PDO DSN
+only after the restore succeeds. Do not copy a `dumpDataDir()` archive directly
+between these PostgreSQL versions.
 
-<https://electric-sql.com/>
-
-
-
+See the [PGlite upgrade guide](https://pglite.dev/docs/upgrade) and
+[PGlite tools documentation](https://pglite.dev/docs/pglite-tools).

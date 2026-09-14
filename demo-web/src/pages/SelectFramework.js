@@ -16,12 +16,46 @@ import { getPhpBus } from '../lib/phpBus';
 import { popupTarget, resolvePopupHref, resolvePopupRequest } from '../lib/popupNavigation';
 
 import reactIcon from '../assets/frameworks/react-icon.svg';
+import alertIcon from '../assets/icons/alert-16.png';
 import floppyIcon from '../assets/icons/floppy-icon-32.png';
 import nukeIcon from '../assets/icons/nuke-icon-32.png';
 import cabinetIcon from '../assets/icons/file-cabinet-icon-32.png';
 import DoWithFile from '../components/DoWithFile';
 import ErrorDialog from '../components/ErrorDialog';
 import Confirm from '../components/Confirm';
+import {
+	drupalPgsqlDatabase
+	, drupalPgsqlReadyQuery
+	, isDrupalPgsqlReady
+} from '../lib/drupalDatabase';
+
+const drupalDatabaseVariants = {
+	sqlite: {
+		installPath: '/persist/drupal-11.4.5/web'
+		, editorPath: '/persist/drupal-11.4.5/web/index.php'
+		, databaseTarget: '/persist/drupal-11.4.5/web/sites/default/files/.sqlite'
+	}
+	, pgsql: {
+		installPath: '/persist/drupal-11.4.5-pgsql/.php-wasm-install-complete'
+		, editorPath: '/persist/drupal-11.4.5-pgsql/web/index.php'
+		, databaseTarget: drupalPgsqlDatabase
+	}
+};
+
+const sqliteDatabaseTargets = {
+	drupal: drupalDatabaseVariants.sqlite.databaseTarget
+	, laravel: '/persist/laravel-11/database/database.sqlite'
+	, wordpress: '/persist/wordpress-7.1/wp-content/database/.ht.sqlite'
+};
+
+const queryWorkbenchUrlFor = (engine, target) => (
+	`query-workbench.html?${new URLSearchParams({engine, target, connect: '1'})}`
+);
+
+const drupalInstallUrlFor = database => (
+	'install-demo.html?framework=drupal-11'
+	+ `&database=${database}`
+);
 
 /**
  * Anchor wrapper that preserves popup opener semantics for demo launches.
@@ -46,6 +80,7 @@ const PopupButton = ({children, path}) => (
 		action = {resolvePopupRequest(path).action}
 		className = "popup-form"
 		method = "get"
+		rel = "opener"
 		target = {popupTarget}
 	>
 		{resolvePopupRequest(path).params.map(([name, value], index) => (
@@ -61,6 +96,81 @@ const PopupButton = ({children, path}) => (
 );
 
 /**
+ * Prompts for the Drupal database before opening the installer popup.
+ */
+const DrupalDatabaseDialog = ({defaultDatabase, onCancel, onSelect}) => {
+	const [database, setDatabase] = useState(defaultDatabase);
+	const installRequest = resolvePopupRequest('install-demo.html?framework=drupal-11');
+
+	const onSubmit = () => {
+		onSelect(database);
+		window.setTimeout(onCancel, 0);
+	};
+
+	return (
+		<div
+			aria-labelledby = "drupal-database-dialog-title"
+			aria-modal = "true"
+			className = "Confirm"
+			role = "dialog"
+		>
+			<form
+				action = {installRequest.action}
+				className = "dialog bevel column drupal-database-dialog"
+				method = "get"
+				onSubmit = {onSubmit}
+				rel = "opener"
+				target = {popupTarget}
+			>
+				<h2 id = "drupal-database-dialog-title">Choose a Drupal database</h2>
+				{installRequest.params.map(([name, value], index) => (
+					<input
+						key = {`${name}:${value}:${index}`}
+						name = {name}
+						type = "hidden"
+						value = {value}
+					/>
+				))}
+				<div className = "inset padded column drupal-database-options">
+					<label className = "drupal-database-option">
+						<span>
+							<input
+								checked = {database === 'sqlite'}
+								name = "database"
+								onChange = {() => setDatabase('sqlite')}
+								type = "radio"
+								value = "sqlite"
+							/>
+							SQLite
+						</span>
+					</label>
+					<label className = "drupal-database-option">
+						<span>
+							<input
+								checked = {database === 'pgsql'}
+								name = "database"
+								onChange = {() => setDatabase('pgsql')}
+								type = "radio"
+								value = "pgsql"
+							/>
+							PostgreSQL
+						</span>
+						<span className = "drupal-database-warning">
+							<img alt = "" aria-hidden = "true" src = {alertIcon} />
+							Slow
+						</span>
+					</label>
+				</div>
+				<div className = "right">
+					<button className = "padded" type = "submit">Start</button>
+					<button className = "padded" onClick = {onCancel} type = "button">Cancel</button>
+				</div>
+			</form>
+		</div>
+	);
+};
+
+/**
  * Renders the framework picker and tracks which demo installs are present.
  */
 function SelectFramework()
@@ -70,10 +180,15 @@ function SelectFramework()
 
 	const [cakeInstalled, setCakeInstalled] = useState(false);
 	const [codeigniterInstalled, setCodeigniterInstalled] = useState(false);
-	const [drupalInstalled, setDrupalInstalled] = useState(false);
+	const [drupalInstalled, setDrupalInstalled] = useState({
+		sqlite: false
+		, pgsql: false
+	});
+	const [drupalDatabase, setDrupalDatabase] = useState('sqlite');
 	const [laravelInstalled, setLaravelInstalled] = useState(false);
 	const [laminasInstalled, setLaminasInstalled] = useState(false);
 	const [wordpressInstalled, setWordpressInstalled] = useState(false);
+	const [sqliteDatabases, setSqliteDatabases] = useState({});
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const serviceWorkerDisabled = query.has('no-service-worker');
@@ -89,25 +204,77 @@ function SelectFramework()
 			const [
 				cakePath
 				, codeigniterPath
-				, drupalPath
+				, drupalSqlitePath
+				, drupalPgsqlPath
 				, laravelPath
 				, laminasPath
 				, wordpressPath
+				, sqlitePaths
 			] = await Promise.all([
 				bus.analyzePath('/persist/cakephp-5')
 				, bus.analyzePath('/persist/codeigniter-4')
-				, bus.analyzePath('/persist/drupal-11.4.5/web')
+				, bus.analyzePath(drupalDatabaseVariants.sqlite.installPath)
+				, bus.analyzePath(drupalDatabaseVariants.pgsql.installPath)
 				, bus.analyzePath('/persist/laravel-11')
 				, bus.analyzePath('/persist/laminas-3')
 				, bus.analyzePath('/persist/wordpress-7.1')
+				, Promise.all(Object.entries(sqliteDatabaseTargets).map(async ([framework, target]) => {
+					const info = await bus.analyzePath(target);
+					return [framework, info.exists && !info.object?.isFolder];
+				}))
 			]);
 
 			setCakeInstalled(cakePath.exists);
 			setCodeigniterInstalled(codeigniterPath.exists);
-			setDrupalInstalled(drupalPath.exists);
+			let drupalPgsqlInstalled = false;
+
+			if(drupalPgsqlPath.exists)
+			{
+				try
+				{
+					drupalPgsqlInstalled = isDrupalPgsqlReady(
+						await bus.runSql(drupalPgsqlDatabase, drupalPgsqlReadyQuery)
+					);
+				}
+				catch(error)
+				{
+					console.warn('Could not validate the Drupal PostgreSQL demo.', error);
+				}
+			}
+
+			const nextDrupalInstalled = {
+				sqlite: drupalSqlitePath.exists
+				, pgsql: drupalPgsqlInstalled
+			};
+			let activeDrupalDatabase;
+
+			if(nextDrupalInstalled.sqlite && nextDrupalInstalled.pgsql)
+			{
+				try
+				{
+					const settings = await bus.getSettings();
+					const activeHost = settings.vHosts?.find(host => host.pathPrefix === basePath('cgi-bin/drupal'));
+					activeDrupalDatabase = Object.entries(drupalDatabaseVariants).find(([, variant]) => (
+						variant.editorPath === `${activeHost?.directory}/index.php`
+					))?.[0];
+				}
+				catch(error)
+				{
+					console.warn('Could not determine the active Drupal backend.', error);
+				}
+			}
+
+			setDrupalInstalled(nextDrupalInstalled);
+			setDrupalDatabase(current => (
+				activeDrupalDatabase ?? (nextDrupalInstalled[current]
+				|| (!nextDrupalInstalled.sqlite && !nextDrupalInstalled.pgsql)
+					? current
+					: nextDrupalInstalled.pgsql ? 'pgsql' : 'sqlite')
+			));
 			setLaravelInstalled(laravelPath.exists);
 			setLaminasInstalled(laminasPath.exists);
 			setWordpressInstalled(wordpressPath.exists);
+			setSqliteDatabases(Object.fromEntries(sqlitePaths));
 		})();
 	}, [serviceWorkerDisabled]);
 
@@ -176,10 +343,11 @@ function SelectFramework()
 			setOverlay(<Clear onComplete = { () => {
 				setCakeInstalled(false);
 				setCodeigniterInstalled(false);
-				setDrupalInstalled(false);
+				setDrupalInstalled({sqlite: false, pgsql: false});
 				setLaravelInstalled(false);
 				setLaminasInstalled(false);
 				setWordpressInstalled(false);
+				setSqliteDatabases({});
 				setOverlay(null);
 			} } />);
 		} }
@@ -189,8 +357,17 @@ function SelectFramework()
 		)}
 	/>);
 
+	const selectedDrupal = drupalDatabaseVariants[drupalDatabase];
+	const selectedDrupalInstalled = drupalInstalled[drupalDatabase];
+	const drupalInstallUrl = drupalInstallUrlFor(drupalDatabase);
+	const chooseDrupalDatabase = () => setOverlay(<DrupalDatabaseDialog
+		defaultDatabase = {drupalDatabase}
+		onCancel = {() => setOverlay(null)}
+		onSelect = {setDrupalDatabase}
+	/>);
+
 	return (
-		<div className = "select-framework" data-iframed = {isIframe ? 1 : 0}>
+		<div className = "select-framework viewport-page" data-iframed = {isIframe ? 1 : 0}>
 			<div className='framework-menu bevel'>
 				{isIframe || <Header />}
 				<div className='frameworks'>
@@ -223,16 +400,27 @@ function SelectFramework()
 							</span>)}
 						</div>
 						<div className='column center'>
-							<PopupLink path = "install-demo.html?framework=drupal-11">
-								<img src = {drupalIcon} alt = "drupal 11" /> {drupalInstalled}
-							</PopupLink>
-							{drupalInstalled && (<span className = "contents">
-								<PopupButton path = {basePath('cgi-bin/drupal')}>Open Demo</PopupButton>
-								<PopupButton path = "code-editor.html?path=/persist/drupal-11.4.5/web/index.php">IDE</PopupButton>
-								<PopupButton path = "install-demo.html?framework=drupal-11&overwrite=true">Reset</PopupButton>
+							{selectedDrupalInstalled
+								? <PopupLink path = {drupalInstallUrl}>
+									<img src = {drupalIcon} alt = "drupal 11" />
+								</PopupLink>
+								: <button
+									className = "popup-link drupal-start-icon"
+									onClick = {chooseDrupalDatabase}
+									type = "button"
+								>
+									<img src = {drupalIcon} alt = "drupal 11" />
+								</button>}
+							{selectedDrupalInstalled && (<span className = "contents">
+								<PopupButton path = {drupalInstallUrl}>Open Demo</PopupButton>
+								<PopupButton path = {`code-editor.html?path=${selectedDrupal.editorPath}`}>IDE</PopupButton>
+								{(drupalDatabase === 'pgsql' || sqliteDatabases.drupal) && (
+									<PopupButton path = {queryWorkbenchUrlFor(drupalDatabase, selectedDrupal.databaseTarget)}>DB</PopupButton>
+								)}
+								<PopupButton path = {`${drupalInstallUrl}&overwrite=true`}>Reset</PopupButton>
 							</span>)}
-							{drupalInstalled || (<span className = "contents">
-								<PopupButton path = "install-demo.html?framework=drupal-11">Start</PopupButton>
+							{selectedDrupalInstalled || (<span className = "contents">
+								<button onClick = {chooseDrupalDatabase} type = "button">Start</button>
 							</span>)}
 						</div>
 						<div className='column center'>
@@ -242,6 +430,9 @@ function SelectFramework()
 							{laravelInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/laravel-11')}>Open Demo</PopupButton>
 								<PopupButton path = "code-editor.html?path=/persist/laravel-11/public/index.php">IDE</PopupButton>
+								{sqliteDatabases.laravel && (
+									<PopupButton path = {queryWorkbenchUrlFor('sqlite', sqliteDatabaseTargets.laravel)}>DB</PopupButton>
+								)}
 								<PopupButton path = "install-demo.html?framework=laravel-11&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{laravelInstalled || (<span className = "contents">
@@ -268,6 +459,9 @@ function SelectFramework()
 							{wordpressInstalled && (<span className = "contents">
 								<PopupButton path = {basePath('cgi-bin/wordpress')}>Open Demo</PopupButton>
 								<PopupButton path = "code-editor.html?path=/persist/wordpress-7.1/index.php">IDE</PopupButton>
+								{sqliteDatabases.wordpress && (
+									<PopupButton path = {queryWorkbenchUrlFor('sqlite', sqliteDatabaseTargets.wordpress)}>DB</PopupButton>
+								)}
 								<PopupButton path = "install-demo.html?framework=wordpress-7.1&overwrite=true">Reset</PopupButton>
 							</span>)}
 							{wordpressInstalled || (<span className = "contents">
