@@ -1,7 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 
@@ -10,7 +8,6 @@ const sourceDirectory = 'third_party/pdo-cfd1';
 const stateName = '.php-wasm-source.json';
 const pendingName = '.php-wasm-pending.json';
 const hash = data => createHash('sha256').update(data).digest('hex');
-const patchPath = path.join(path.dirname(fileURLToPath(import.meta.url)), 'compatibility.patch');
 const isInput = name => typeof name === 'string'
 	&& !name.includes('/') && !name.includes('\\')
 	&& /^(?:.+\.(?:c|h)|config\.(?:m4|w32)|README\.md|CREDITS|LICENSE)$/.test(name);
@@ -57,7 +54,9 @@ function normalizeSnapshot(snapshot, withData = true)
 	{
 		throw new Error('Invalid CFD1 source identity');
 	}
-	if(identity.patch !== undefined && !/^[a-f0-9]{64}$/.test(identity.patch)) throw new Error('Invalid CFD1 patch identity');
+	// Retain legacy patch identity during comparison so restored manifests are
+	// rewritten when the same source bytes are imported directly from upstream.
+	if(identity.patch !== undefined && !/^[a-f0-9]{64}$/.test(identity.patch)) throw new Error('Invalid legacy CFD1 patch identity');
 	const names = new Set;
 	const files = snapshot.files.map(file => {
 		if(!isInput(file.name) || names.has(file.name) || !/^[a-f0-9]{64}$/.test(file.sha256))
@@ -147,35 +146,6 @@ function pinnedSnapshot(repository, ref)
 		files.push(input(name, git('cat-file', 'blob', object)));
 	}
 	return normalizeSnapshot({ schema: 1, identity: { mode: 'pinned', repository, ref, commit }, files });
-}
-
-// Patch the snapshot before publication so its identity describes the exact
-// compiled bytes. Patch failures never mutate an active staged/extension tree.
-function compatibleSnapshot(snapshot)
-{
-	const patch = fs.readFileSync(patchPath);
-	const patchHash = hash(patch);
-	if(snapshot.identity.patch !== undefined)
-	{
-		if(snapshot.identity.patch !== patchHash) throw new Error('CFD1 snapshot uses a different compatibility patch');
-		return normalizeSnapshot(snapshot);
-	}
-	const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'pdo-cfd1-patch-'));
-	try
-	{
-		for(const file of snapshot.files)
-		{
-			fs.writeFileSync(path.join(temporary, file.name), Buffer.from(file.data, 'base64'));
-		}
-		execFileSync('git', ['apply', '--check', '-'], { cwd: temporary, input: patch, stdio: ['pipe', 'pipe', 'pipe'] });
-		execFileSync('git', ['apply', '-'], { cwd: temporary, input: patch, stdio: ['pipe', 'pipe', 'pipe'] });
-		const files = fs.readdirSync(temporary).filter(isInput).sort().map(name => input(name, fs.readFileSync(path.join(temporary, name))));
-		return normalizeSnapshot({ schema: 1, identity: { ...snapshot.identity, patch: patchHash }, files });
-	}
-	finally
-	{
-		fs.rmSync(temporary, { recursive: true, force: true });
-	}
 }
 
 function readState(directory)
@@ -286,16 +256,12 @@ async function main()
 			snapshot = JSON.parse(Buffer.concat(chunks).toString());
 		}
 		else snapshot = pinnedSnapshot(first, second);
-		synchronize(sourceDirectory, compatibleSnapshot(normalizeSnapshot(snapshot)));
+		synchronize(sourceDirectory, snapshot);
 	}
 	else if(command === 'sync')
 	{
 		const state = readState(sourceDirectory);
 		if(!state) throw new Error('CFD1 staging manifest is missing');
-		if(state.identity.patch !== hash(fs.readFileSync(patchPath)))
-		{
-			throw new Error('CFD1 staged source uses a different compatibility patch; stage it again before syncing');
-		}
 		const files = state.files.map(file => ({ ...file,
 			data: fs.readFileSync(checkedPath(path.join(sourceDirectory, file.name))).toString('base64'),
 		}));

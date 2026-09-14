@@ -48,14 +48,11 @@ function fixture(t, { installed = false } = {})
 	}
 	else
 	{
-		for(const name of ['pre.mak', 'static.mak', 'import-source.mjs', 'compatibility.patch', 'package.json'])
+		for(const name of ['pre.mak', 'static.mak', 'import-source.mjs', 'package.json'])
 		{
 			fs.copyFileSync(path.join(repoRoot, 'packages/pdo-cfd1', name), path.join(packagePath, name));
 		}
 	}
-	// Exercise patch publication independently of the upstream C implementation.
-	const fixturePatch = 'diff --git a/php_wasm_compatibility.h b/php_wasm_compatibility.h\nnew file mode 100644\n--- /dev/null\n+++ b/php_wasm_compatibility.h\n@@ -0,0 +1 @@\n+/* compatibility A */\n';
-	fs.writeFileSync(path.join(packagePath, 'compatibility.patch'), fixturePatch);
 	const git = (...args) => execFileSync('git', ['-C', repository, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 	git('init', '--quiet');
 	git('config', 'user.email', 'importer-test@example.invalid');
@@ -81,7 +78,7 @@ function fixture(t, { installed = false } = {})
 	git('commit', '--quiet', '-m', 'A');
 	const a = git('rev-parse', 'HEAD');
 	// Keep the translation-unit entry point and configure script unchanged.
-	// PDO CFD1 includes the database C files from its main translation unit.
+	// Any managed C/header change must invalidate the main translation unit.
 	fs.writeFileSync(path.join(repository, 'pdo_cfd1_db.c'), '/* other B */\n');
 	fs.writeFileSync(path.join(repository, 'php_pdo_cfd1.h'), '/* header B */\n');
 	fs.unlinkSync(path.join(repository, 'obsolete.c'));
@@ -375,7 +372,8 @@ test('the published importer package includes its executable helper', t => {
 		cwd: repoRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']
 	}));
 	const names = packed[0].files.map(file => file.path);
-	for(const name of ['pre.mak', 'static.mak', 'import-source.mjs', 'compatibility.patch']) assert.ok(names.includes(name), name);
+	for(const name of ['pre.mak', 'static.mak', 'import-source.mjs']) assert.ok(names.includes(name), name);
+	assert.ok(!names.includes('compatibility.patch'));
 });
 
 test('an actual packed package invokes its helper from a consumer node_modules layout', t => {
@@ -389,37 +387,58 @@ test('an actual packed package invokes its helper from a consumer node_modules l
 	assert.deepEqual(f.mtimes(), before);
 });
 
-test('patch hash and patched bytes are part of both source identities before configure', t => {
+test('restored patch identities migrate even when upstream source bytes are unchanged', t => {
 	const f = fixture(t);
 	f.run();
-	const patchPath = path.join(f.workspace, f.packageRelative, 'compatibility.patch');
-	const patchHash = () => createHash('sha256').update(fs.readFileSync(patchPath)).digest('hex');
 	for(const directory of [stage, extension])
 	{
-		assert.equal(JSON.parse(f.read(`${directory}/${stateName}`)).identity.patch, patchHash());
-		assert.equal(f.read(`${directory}/php_wasm_compatibility.h`), '/* compatibility A */\n');
+		const state = JSON.parse(f.read(`${directory}/${stateName}`));
+		state.identity.patch = 'a'.repeat(64);
+		f.write(`${directory}/${stateName}`, JSON.stringify(state));
 	}
-	const before = f.read('build.log');
-	fs.writeFileSync(patchPath, fs.readFileSync(patchPath, 'utf8').replace('compatibility A', 'compatibility B'));
 	f.run();
 	for(const directory of [stage, extension])
 	{
-		assert.equal(JSON.parse(f.read(`${directory}/${stateName}`)).identity.patch, patchHash());
-		assert.equal(f.read(`${directory}/php_wasm_compatibility.h`), '/* compatibility B */\n');
+		const state = JSON.parse(f.read(`${directory}/${stateName}`));
+		assert.equal(state.identity.commit, f.a);
+		assert.ok(!Object.hasOwn(state.identity, 'patch'));
+		assert.equal(f.read(`${directory}/pdo_cfd1.c`), '/* A */\n');
 	}
-	assert.equal(f.read('build.log'), before + 'configure\nbuild\n');
+	assert.equal(f.read('build.log'), 'configure\nbuild\n'.repeat(2));
+	const before = f.mtimes();
+	f.run();
+	assert.deepEqual(f.mtimes(), before);
+	assert.equal(f.read('build.log'), 'configure\nbuild\n'.repeat(2));
 });
 
-test('a failed compatibility patch leaves successful sources, manifests and mtimes untouched', t => {
+test('switching from cached patched inputs imports raw upstream files and removes only managed patch files', t => {
 	const f = fixture(t);
 	f.run();
-	const before = f.mtimes();
-	const state = f.read(`${stage}/${stateName}`);
-	fs.writeFileSync(path.join(f.workspace, f.packageRelative, 'compatibility.patch'),
-		'diff --git a/missing.c b/missing.c\n--- a/missing.c\n+++ b/missing.c\n@@ -1 +1 @@\n-missing\n+replacement\n');
-	f.run({ success: false });
-	assert.deepEqual(f.mtimes(), before);
-	assert.equal(f.read(`${stage}/${stateName}`), state);
+	const patched = '/* old patched entry point */\n';
+	const obsolete = '/* retired patch helper */\n';
+	for(const directory of [stage, extension])
+	{
+		const state = JSON.parse(f.read(`${directory}/${stateName}`));
+		state.identity.patch = 'a'.repeat(64);
+		state.files.find(file => file.name === 'pdo_cfd1.c').sha256 = createHash('sha256').update(patched).digest('hex');
+		state.files.push({ name: 'php_wasm_compatibility.h', sha256: createHash('sha256').update(obsolete).digest('hex') });
+		f.write(`${directory}/pdo_cfd1.c`, patched);
+		f.write(`${directory}/php_wasm_compatibility.h`, obsolete);
+		f.write(`${directory}/unmanaged.c`, 'preserved');
+		f.write(`${directory}/${stateName}`, JSON.stringify(state));
+	}
+	f.run({ ref: f.b });
+	for(const directory of [stage, extension])
+	{
+		const state = JSON.parse(f.read(`${directory}/${stateName}`));
+		assert.equal(state.identity.commit, f.b);
+		assert.ok(!Object.hasOwn(state.identity, 'patch'));
+		assert.equal(f.read(`${directory}/pdo_cfd1.c`), '/* A */\n');
+		assert.equal(f.read(`${directory}/php_pdo_cfd1.h`), '/* header B */\n');
+		assert.equal(f.read(`${directory}/unmanaged.c`), 'preserved');
+		assert.ok(!fs.existsSync(path.join(f.workspace, directory, 'php_wasm_compatibility.h')));
+	}
+	assert.equal(f.read('build.log'), 'configure\nbuild\n'.repeat(2));
 });
 
 test('CFD1 explicitly requires Vrzno when enabled', t => {
