@@ -25,6 +25,7 @@
     "docs:coverage": "node ./bin/docs-snippet-report.js",
     "docs:sync-fixtures": "node ./test/docs/sync-site-fixtures.mjs",
     "generate:types": "node bin/generate-runtime-types.mjs",
+    "test:importers": "node --test test/build/*-importer.test.mjs",
     "test:types": "npm exec --yes --package=deno@2.5.6 -- node --test test/types/*.test.mjs"
   },
   "dependencies": {

@@ -14,6 +14,8 @@ jobs:
           node-version: '22'
       - name: Install locked dependencies
         run: npm ci
+      - name: Verify shared extension importer and source/package contracts
+        run: npm run test:importers
       - name: Check source and isolated npm declarations with pinned Deno
         run: npm run test:types
       - name: Verify queues, wrappers and Cloudflare packaging

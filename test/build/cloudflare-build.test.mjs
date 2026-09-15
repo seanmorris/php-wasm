@@ -521,7 +521,7 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	assert.equal(packed.status, 0, packed.stderr);
 	const metadata = JSON.parse(packed.stdout)[0];
 	assert.ok(!metadata.files.some(file => file.path.startsWith('packages/')));
-	for(const name of ['bin/build-cloudflare.mjs', 'bin/package-cloudflare.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak']) assert.ok(metadata.files.some(file => file.path === name), name);
+	for(const name of ['bin/build-cloudflare.mjs', 'bin/package-cloudflare.mjs', 'bin/source-importer.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak']) assert.ok(metadata.files.some(file => file.path === name), name);
 
 	const installed = path.join(root, 'project/node_modules/php-wasm-builder');
 	await fs.mkdir(installed, {recursive: true});
@@ -532,10 +532,18 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	{
 		const dependency = path.join(root, 'project/node_modules', packageName);
 		await fs.mkdir(dependency);
-		await fs.writeFile(path.join(dependency, 'package.json'), JSON.stringify({name: packageName, version: '0.0.0', exports: {'./package.json': './package.json'}}));
+		if(['vrzno', 'pdo-cfd1'].includes(folder))
+		{
+			const packedDependency = spawnSync('npm', ['pack', '--json', '--ignore-scripts', path.join(repoRoot, 'packages', folder), '--pack-destination', root, '--cache', path.join(root, 'npm-cache')], {cwd: root, encoding: 'utf8'});
+			assert.equal(packedDependency.status, 0, packedDependency.stderr);
+			const filename = JSON.parse(packedDependency.stdout)[0].filename;
+			const extractedDependency = spawnSync('tar', ['-xzf', path.join(root, filename), '-C', dependency, '--strip-components=1'], {encoding: 'utf8'});
+			assert.equal(extractedDependency.status, 0, extractedDependency.stderr);
+		}
+		else await fs.writeFile(path.join(dependency, 'package.json'), JSON.stringify({name: packageName, version: '0.0.0', exports: {'./package.json': './package.json'}}));
 		// The published extension packages carry build source; runtime packages
 		// carry declarations, but their pre/static makefiles are not published.
-		if(['vrzno', 'pdo-cfd1', 'zlib', 'libzip'].includes(folder))
+		if(['zlib', 'libzip'].includes(folder))
 		{
 			await fs.writeFile(path.join(dependency, 'static.mak'), `# ${packageName} fixture\n`);
 		}
@@ -550,11 +558,44 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	await snapshot(destination, installed);
 	for(const folder of ['vrzno', 'pdo-cfd1', 'zlib', 'libzip'])
 	{
-		assert.match(await fs.readFile(path.join(destination, 'packages', folder, 'static.mak'), 'utf8'), /fixture/);
+		const makefile = await fs.readFile(path.join(destination, 'packages', folder, 'static.mak'), 'utf8');
+		if(['vrzno', 'pdo-cfd1'].includes(folder)) assert.equal(makefile, await fs.readFile(path.join(repoRoot, 'packages', folder, 'static.mak'), 'utf8'));
+		else assert.match(makefile, /fixture/);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, '.env')).then(() => true, () => false), false);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, 'unneeded.wasm')).then(() => true, () => false), false);
 	}
 	assert.ok(await fs.stat(path.join(destination, 'packages/php-cloud-wasm/public.d.ts')));
+	assert.equal(await fs.readFile(path.join(destination, 'bin/source-importer.mjs'), 'utf8'), await fs.readFile(path.join(installed, 'bin/source-importer.mjs'), 'utf8'));
+	// Execute the package callers from the installed builder and its isolated
+	// snapshot. Both layouts use the builder's single shared implementation.
+	for(const [folder, extension] of [['vrzno', 'vrzno'], ['pdo-cfd1', 'pdo_cfd1']])
+	{
+		const repository = path.join(root, `${folder}-upstream`);
+		await fs.mkdir(repository);
+		await fs.writeFile(path.join(repository, `${extension}.c`), '/* snapshot fixture */\n');
+		await fs.writeFile(path.join(repository, 'config.m4'), 'dnl snapshot fixture\n');
+		for(const args of [['init', '--quiet'], ['add', '.'], ['-c', 'user.name=Snapshot test', '-c', 'user.email=snapshot@example.invalid', 'commit', '--quiet', '-m', 'fixture']])
+		{
+			const result = spawnSync('git', args, {cwd: repository, encoding: 'utf8'});
+			assert.equal(result.status, 0, result.stderr);
+		}
+		const revision = spawnSync('git', ['rev-parse', 'HEAD'], {cwd: repository, encoding: 'utf8'});
+		assert.equal(revision.status, 0, revision.stderr);
+		for(const [cwd, helper] of [
+			[installed, path.join(root, 'project/node_modules', folder, 'import-source.mjs')]
+			, [destination, path.join(destination, 'packages', folder, 'import-source.mjs')]
+		]) {
+			for(const args of [['stage', repository, revision.stdout.trim()], ['sync', '8.3']])
+			{
+				const result = spawnSync(process.execPath, [helper, ...args], {cwd, encoding: 'utf8'});
+				assert.equal(result.status, 0, result.stderr);
+			}
+			const imported = path.join(cwd, 'third_party/php8.3-src/ext', extension);
+			assert.equal(await fs.readFile(path.join(imported, `${extension}.c`), 'utf8'), '/* snapshot fixture */\n');
+			const state = JSON.parse(await fs.readFile(path.join(imported, '.php-wasm-source.json'), 'utf8'));
+			assert.equal(state.identity.commit, revision.stdout.trim());
+		}
+	}
 
 	const bin = path.join(root, 'fake-bin');
 	await fs.mkdir(bin);
