@@ -27,8 +27,16 @@ const cases = {
 		, label: 'CFD1'
 		, header: 'php_pdo_cfd1.h'
 		, other: 'pdo_cfd1_db.c'
-		, extra: { 'config.w32': '// Windows config A\n', 'README.md': 'README A\n' }
-		, changed: { 'pdo_cfd1_db.c': '/* other B */\n', 'php_pdo_cfd1.h': '/* header B */\n' }
+		, extra: {
+			'config.w32': '// Windows config A\n', 'README.md': 'README A\n'
+			, 'Makefile.frag': '# Make rules A\n'
+			, 'pdo_cfd1_js.h.in': '#include "pdo_cfd1_init.js"\n'
+			, 'pdo_cfd1_init.js': 'return "A";\n'
+		}
+		, changed: {
+			'pdo_cfd1_db.c': '/* other B */\n', 'php_pdo_cfd1.h': '/* header B */\n'
+			, 'pdo_cfd1_init.js': 'return "B";\n'
+		}
 		, excluded: ['ignored.stub.php']
 		, requiresVrzno: true
 	}

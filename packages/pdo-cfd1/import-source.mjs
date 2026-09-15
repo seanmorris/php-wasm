@@ -9,7 +9,7 @@ await runSourceImporter({
 	, extension: 'pdo_cfd1'
 	, prefix: 'PDO_CFD1'
 	, label: 'CFD1'
-	, inputs: String.raw`^(?:.+\.(?:c|h)|config\.(?:m4|w32)|README\.md|CREDITS|LICENSE)$`
+	, inputs: String.raw`^(?:.+\.(?:c|h)|pdo_cfd1_[a-z_]+\.js|pdo_cfd1_js\.h\.in|Makefile\.frag|config\.(?:m4|w32)|README\.md|CREDITS|LICENSE)$`
 	, required: ['pdo_cfd1.c', 'config.m4']
 	, legacyPatchIdentity: true
 });
