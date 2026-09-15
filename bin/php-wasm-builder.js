@@ -226,14 +226,14 @@ const parseBuildArgs = buildArgs => {
 		if(environment === 'cloudflare')
 		{
 			options.push(`CLOUDFLARE_OUTPUT_DIR=${path.join(cwd, 'packages/php-cloud-wasm')}`);
-			options.push(`CLOUDFLARE_CACHE_DIR=${path.join(cwd, '.cache/cloudflare')}`);
+			options.push(`BUILD_WORKSPACE=${path.join(cwd, '.cache/build')}`);
 		}
 		else
 		{
 			options.push(`PHP_BUILDER_DIR=${cwd}`, `ENV_DIR=${cwd}/`);
 		}
 
-		if(environment !== 'cloudflare' && fs.existsSync(cwd + '/.php-wasm-rc'))
+		if(fs.existsSync(rcFile))
 		{
 			options.push(`ENV_FILE=${rcFile}`);
 		}
@@ -253,7 +253,7 @@ Build one php-wasm package, optionally using a .php-wasm-rc file in the current 
     node:    build the Node.js runtime
     worker:  build the worker runtime
     webview: build the webview runtime
-    cloudflare: build isolated embedded PHP ESM (mjs only; ignores .php-wasm-rc)
+    cloudflare: build embedded PHP ESM with the Cloudflare profile or .php-wasm-rc (mjs only)
 
   MODULE_TYPE: [js, mjs]
     js:   build a CommonJS module (default)

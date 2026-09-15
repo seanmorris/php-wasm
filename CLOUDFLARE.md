@@ -11,17 +11,40 @@ With the project dependencies and builder Docker image available:
 
 ```sh
 npm ci
-make cloudflare-mjs PHP_VERSION=8.3
+make cloudflare-mjs ENV_FILE=profiles/cloudflare.mak PHP_VERSION=8.3
 make test-cloudflare PHP_VERSION=8.3
 ```
 
 The builder CLI also accepts `php-wasm-builder build cloudflare mjs`. Cloudflare
 is embedded PHP only: JavaScript/CommonJS, CGI, CLI and debugger combinations
-are rejected. The profile uses isolated native/configuration/library state;
-general-purpose dependency snapshots and configuration files are not imported.
-Build diagnostics are kept in `.cache/cloudflare` in the checkout or CLI caller's
-project, not a globally installed builder's directory. Direct Make invocations
-can set `CLOUDFLARE_OUTPUT_DIR` and `CLOUDFLARE_CACHE_DIR` to other writable paths.
+are rejected. `profiles/cloudflare.mak` is the default Make configuration for
+this target. Select another file with `ENV_FILE`, or include the profile from
+your `.php-wasm-rc` when using the CLI:
+
+```make
+include profiles/cloudflare.mak
+INITIAL_MEMORY = 48MB
+```
+
+Compilation uses the ordinary Make and Docker Compose recipes. The profile
+opts into the shared `BUILD_WORKSPACE` mechanism, which keeps native sources,
+libraries and configure caches under `.cache/build`. Native inputs, the selected
+configuration, Make overrides and builder image identify the workspace. Repeated
+builds reuse it; wrapper-only changes refresh their files without rebuilding PHP.
+Changing native settings selects separate state and preserves earlier builds.
+
+Use `BUILD_WORKSPACE=/path/to/cache` to place this state elsewhere. The older
+`CLOUDFLARE_CACHE_DIR` setting remains an alias in the default profile. A caller
+managing a dedicated clean checkout can pass `BUILD_WORKSPACE=` to build directly
+there. Do not reuse native state from a different configuration in that mode.
+The CLI keeps workspace state in the caller's project and honors its
+`.php-wasm-rc`. `CLOUDFLARE_OUTPUT_DIR` selects the final package destination.
+
+Make retains its raw JavaScript/Wasm outputs separately from the final package.
+The packaging helper hashes a copy, generates the static Wasm import and
+declarations, records provenance, and validates the package before replacing
+public artifacts. Configure diagnostics remain in each workspace's
+`third_party/php<version>-src/config.log`; CI also uploads the Make build log.
 
 The build produces the standalone `php-cloud-wasm` package under
 `packages/php-cloud-wasm`:

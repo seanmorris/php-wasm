@@ -4,7 +4,7 @@ services:
 
   emscripten-builder:
     # user: "${UID:-0}:${GID:-0}"
-    image: seanmorris/php-emscripten-builder
+    image: ${BUILD_IMAGE:-seanmorris/php-emscripten-builder}
     build:
       context: ./
       dockerfile: emscripten-builder.dockerfile

@@ -1,4 +1,5 @@
 #!/usr/bin/env make
+.DEFAULT_GOAL := all
 .PHONY: all web js cjs mjs \
 	web-mjs web-js \
 	worker-mjs worker-js node-mjs \
@@ -13,15 +14,13 @@
 	archives assets rebuild reconfigure \
 	dynamic dynamic-libs.json runtime-wrappers
 
-CLOUDFLARE_GOALS := cloudflare-mjs _cloudflare-mjs test-cloudflare
+CLOUDFLARE_GOALS := cloudflare-mjs test-cloudflare
 ifneq ($(filter ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 ifneq ($(filter-out ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 $(error Cloudflare targets must run separately from other build targets)
 endif
-# Select this before any environment file or extension makefile is evaluated.
-override ENV_FILE := profiles/cloudflare.mak
-else
-MAKEFLAGS += --shuffle=random
+# A default configuration, just like the other builds' .env files.
+ENV_FILE ?= profiles/cloudflare.mak
 endif
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables
 
@@ -29,7 +28,13 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 
 ENV_DIR?=.
 ENV_FILE?=.env
--include ${ENV_FILE}
+make_empty :=
+make_space := ${make_empty} ${make_empty}
+make_path = $(subst ${make_space},\${make_space},$(1))
+shell_quote = '$(subst ','"'"',$(1))'
+make_command_variables = $(foreach name,${.VARIABLES},$(if $(filter command line,$(origin ${name})),${name}))
+make_overrides = $(foreach name,$(filter-out $(1),${make_command_variables}),$(call shell_quote,${name}=$(${name})))
+-include $(call make_path,${ENV_FILE})
 LIB_TYPE ?=$(shell basename '${ENV_FILE}' | sed -n 's/^\.env_[0-9][0-9.]*\.\([^.]*\)\.ci$$/\1/p')
 
 ## PHP Version
@@ -37,7 +42,23 @@ PHP_VERSION_DEFAULT=8.4
 PHP_VERSION?=${PHP_VERSION_DEFAULT}
 PHP_VARIANT?=
 
--include ${ENV_FILE}.${PHP_VERSION}
+-include $(call make_path,${ENV_FILE}.${PHP_VERSION})
+MAKE_SHUFFLE ?= --shuffle=random
+MAKEFLAGS += ${MAKE_SHUFFLE}
+
+CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
+.PHONY: test-cloudflare
+# Artifact tests use the caller's package and installed test dependencies. When
+# requested together, finish the native build before running them in this tree.
+test-cloudflare: $(filter cloudflare-mjs,${MAKECMDGOALS})
+	CLOUDFLARE_ARTIFACT_ROOT=$(call shell_quote,$(or ${CLOUDFLARE_ARTIFACT_ROOT},${CLOUDFLARE_OUTPUT_DIR})) PHP_VERSION='${PHP_VERSION}' node --test test/cloudflare/*.test.mjs
+
+# Optional source workspaces use these same recipes and ordinary Docker Compose.
+# Keep this dispatch before evaluating rules for any native build state.
+BUILD_WORKSPACE ?=
+ifneq ($(strip ${BUILD_WORKSPACE}),)
+include build-workspace.mak
+else
 
 ## Default libraries
 WITH_BCMATH  ?=1
@@ -148,7 +169,7 @@ SHELL=bash -euo pipefail
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 DOCKER_COMPOSE?=docker compose
-CPU_COUNT=`nproc || echo 1`
+CPU_COUNT?=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
 # Keep native i64 signatures at every dynamic-linking boundary. Emscripten can
@@ -226,7 +247,7 @@ PHP_AR=libphp7
 EXTRA_FLAGS+= -s EMULATE_FUNCTION_POINTER_CASTS=1
 endif
 
-EXTRA_CFLAGS=
+EXTRA_CFLAGS?=
 ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
@@ -578,33 +599,24 @@ ${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-
 
 # Single Builds
 
-.PHONY: cloudflare-mjs _cloudflare-mjs test-cloudflare
-cloudflare_shell_quote = '$(subst ','"'"',$(1))'
-CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
-CLOUDFLARE_CACHE_DIR ?= .cache/cloudflare
+.PHONY: cloudflare-mjs test-cloudflare
 cloudflare-mjs:
-	node bin/build-cloudflare.mjs --php-version $(call cloudflare_shell_quote,${PHP_VERSION}) --output $(call cloudflare_shell_quote,${CLOUDFLARE_OUTPUT_DIR}) --cache-root $(call cloudflare_shell_quote,${CLOUDFLARE_CACHE_DIR})
-
-# Only the isolated container invokes this target. Never reuse another profile's
-# configured PHP tree or libraries, even if its output directory is different.
-_cloudflare-mjs:
-	@test "$${PHP_WASM_CLOUDFLARE_ISOLATED:-}" = 1 || { echo 'Use make cloudflare-mjs to isolate native build state.' >&2; exit 1; }
+	@test '${MAIN_MODULE}' = 0 || { echo 'Cloudflare requires MAIN_MODULE=0; select ENV_FILE=profiles/cloudflare.mak.' >&2; exit 1; }
+	${DOCKER_RUN} emcc --version | head -1 | grep -E '(^|[[:space:]])6[.]0[.]6([[:space:]]|$$)'
 	mkdir -p '${PHP_DIST_DIR}' .cache lib
-	$(MAKE) ${PHP_CONFIGURE_DEPS} ${ARCHIVES} ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
-	$(MAKE) '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs' ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
-	$(MAKE) $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpCloudflare.mjs ${MJS_HELPERS}) ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) ${PHP_CONFIGURE_DEPS} ${ARCHIVES} $(call make_overrides,) EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs' '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm' $(call make_overrides,) EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	INITIAL_MEMORY='${INITIAL_MEMORY}' MAXIMUM_MEMORY='${MAXIMUM_MEMORY}' node bin/package-cloudflare.mjs --build $(call shell_quote,${PHP_DIST_DIR}) '${PHP_VERSION}' $(call shell_quote,${CLOUDFLARE_OUTPUT_DIR})
 
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: BUILD_TYPE=mjs
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ENVIRONMENT=worker
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: FS_TYPE=-lidbfs.js
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ${DEPENDENCIES} third_party/php${PHP_VERSION}-src/configured | ${ORDER_ONLY}
+CLOUDFLARE_RUNTIME = ${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: BUILD_TYPE=mjs
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: ENVIRONMENT=worker
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: FS_TYPE=-lidbfs.js
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm &: ${DEPENDENCIES} third_party/php${PHP_VERSION}-src/configured | ${ORDER_ONLY}
 	${DOCKER_RUN_IN_PHP} emmake make cli ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS='' SAPI_CLI_PATH='sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs'
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs $@
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.wasm $@.wasm
-	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' $@
-
-test-cloudflare:
-	PHP_VERSION='${PHP_VERSION}' node --test test/cloudflare/*.test.mjs
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs ${CLOUDFLARE_RUNTIME}
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.wasm ${CLOUDFLARE_RUNTIME}.wasm
+	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' ${CLOUDFLARE_RUNTIME}
 
 web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
@@ -1485,3 +1497,5 @@ serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run start --prefix ./demo-web
 
 null:
+
+endif # BUILD_WORKSPACE

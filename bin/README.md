@@ -17,7 +17,7 @@ There is no generation step. The `php-wasm-builder` package ships the shared
 implementation once in `bin`; extension packages ship only their callers and
 policies. Make runs from the builder workspace, so each caller loads
 `bin/source-importer.mjs` relative to the current directory. This also works with
-hoisted npm dependencies and Cloudflare snapshots, which already include `bin`.
+hoisted npm dependencies and prepared build workspaces, which include `bin`.
 The import commands require that builder workspace; an extension tarball alone
 does not carry the shared implementation. No new npm dependency is needed.
 

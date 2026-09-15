@@ -4,6 +4,7 @@ Changes
 
 ## Unreleased
 
+* Cloudflare builds now use the ordinary Make/Docker Compose flow and a selectable configuration file. The CLI honors `.php-wasm-rc`; shared build workspaces preserve incremental native state across unchanged builds and isolate different configurations. Packaging leaves the raw JavaScript/Wasm pair intact.
 * Consolidated the PGlite, CFD1, Vrzno, and Waitline source importers and their regression fixtures. Each package command passes its policy to one shared importer in the builder workspace; refs, input policies, manifests, and build behavior are preserved. CI covers checkout, installed builder, Cloudflare snapshot, and Docker ownership layouts, including CFD1. See the [importer maintenance notes](bin/README.md).
 * Import the PHP 8.0–8.5 PDO-CFD1 driver directly from its upstream commit. The driver fixes and unit tests now live in PDO-CFD1; php-wasm no longer applies or ships a compatibility patch. Existing imported-source manifests migrate to the direct source on the next build.
 * Corrected runtime declarations and package exports for Deno, TypeScript Bundler/NodeNext resolution, and CommonJS. Existing wrapper import paths remain supported; CommonJS entrypoints now select matching `.d.cts` declarations. Constructor values come from the wrapper modules, while `public` exposes types.
