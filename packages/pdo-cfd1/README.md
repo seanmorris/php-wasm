@@ -190,7 +190,7 @@ Build-related variables:
 - `WITH_PDO_CFD1`: defaults to `0`. Set it to `1` to compile the extension into a custom build.
 - `WITH_VRZNO`: must be `1`; the driver uses Vrzno's value conversion bridge.
 - `PDO_CFD1_REPOSITORY`: defaults to `https://github.com/seanmorris/pdo-cfd1.git`.
-- `PDO_CFD1_REF`: defaults to immutable commit `5997596650fe4c060c41e46b26ea5ed65ff5b20d`.
+- `PDO_CFD1_REF`: defaults to immutable commit `85c9153ae3a5fb231ae987dfc3a81ea379a5ab77`.
 - `PDO_CFD1_DEV_PATH`: optional external checkout, read without modifying it.
 
 The importer records the resolved commit (or development path) and each source

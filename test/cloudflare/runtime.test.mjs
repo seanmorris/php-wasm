@@ -281,7 +281,7 @@ test('D1 batch rollback, preflight rejection and error modes leave no partial or
 });
 
 test('D1 batch methods guard uninitialized objects and publish metadata and bound columns', { timeout }, async () => {
-	assert.deepEqual(await d1('batch-method'), [true, false, true, true, 'value', 'integer', true, 7]);
+	assert.deepEqual(await d1('batch-method'), [true, false, true, true, true, 'value', 'integer', true, 7]);
 });
 
 test('D1 prepare-only bindings keep ordinary queries usable without batch support', { timeout }, async () => {

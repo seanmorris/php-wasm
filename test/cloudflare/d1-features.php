@@ -165,6 +165,9 @@ switch ($feature) {
         $uninitialized = (new ReflectionClass(PDO::class))->newInstanceWithoutConstructor();
         try { $uninitialized->cfd1Batch([]); $guarded = false; }
         catch (PDOException $error) { $guarded = strpos($error->getMessage(), 'cfd1 PDO connection') !== false; }
+        try { $uninitialized->__construct('cfd1:missing'); } catch (PDOException $error) {}
+        try { $uninitialized->cfd1Batch([]); $failedConnection = false; }
+        catch (PDOException $error) { $failedConnection = strpos($error->getMessage(), 'cfd1 PDO connection') !== false; }
         $invalid = (new ReflectionClass(PDOStatement::class))->newInstanceWithoutConstructor();
         try { $pdo->cfd1Batch([$invalid]); $invalidStatement = false; }
         catch (PDOException $error) { $invalidStatement = $error->errorInfo[0] === 'HY000'; }
@@ -173,7 +176,7 @@ switch ($feature) {
         $stmt->bindColumn('value', $bound, PDO::PARAM_INT);
         $pdo->cfd1Batch([$stmt]); $metadata = $stmt->getColumnMeta(0);
         $fetched = $stmt->fetch(PDO::FETCH_BOUND, PDO::FETCH_ORI_LAST);
-        echo json_encode([$method->isPublic(), $method->isDeprecated(), $guarded, $invalidStatement,
+        echo json_encode([$method->isPublic(), $method->isDeprecated(), $guarded, $failedConnection, $invalidStatement,
             $metadata['name'], $metadata['native_type'], $fetched, $bound]);
         break;
 
