@@ -284,6 +284,10 @@ test('D1 batch methods guard uninitialized objects and publish metadata and boun
 	assert.deepEqual(await d1('batch-method'), [true, false, true, true, true, 'value', 'integer', true, 7]);
 });
 
+test('D1 batches retain statements while BLOB stream callbacks change input references', { timeout }, async () => {
+	assert.deepEqual(await d1('batch-references'), [true, true, true, 2, '0080ff', false, 1]);
+});
+
 test('D1 prepare-only bindings keep ordinary queries usable without batch support', { timeout }, async () => {
 	assert.deepEqual(await d1('prepare-only', { prepareOnly: true }), ['before', 'HYC00', 'after', true]);
 });

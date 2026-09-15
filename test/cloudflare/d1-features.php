@@ -180,6 +180,46 @@ switch ($feature) {
             $metadata['name'], $metadata['native_type'], $fetched, $bound]);
         break;
 
+    case 'batch-references':
+        class BatchOwnedStatement extends PDOStatement {
+            public static $released = 0;
+            public function __destruct() { self::$released++; }
+        }
+        class BatchBlobStream {
+            public $context;
+            private $sent = false;
+            public function stream_open($path, $mode, $options, &$openedPath) { return true; }
+            public function stream_read($count) {
+                global $insert, $select;
+                if ($this->sent) return '';
+                $this->sent = true;
+                $insert = null;
+                $select = null;
+                return hex2bin('0080ff');
+            }
+            public function stream_eof() { return $this->sent; }
+            public function stream_stat() { return []; }
+        }
+        stream_wrapper_register('batchblob', BatchBlobStream::class);
+        $pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [BatchOwnedStatement::class]);
+        $pdo->exec('CREATE TABLE batch_reference_features(payload BLOB)');
+        $insert = $pdo->prepare('INSERT INTO batch_reference_features(payload) VALUES (?)');
+        $select = $pdo->prepare('SELECT payload FROM batch_reference_features');
+        $stream = fopen('batchblob://payload', 'rb');
+        $insert->bindValue(1, $stream, PDO::PARAM_LOB);
+        $ok = $pdo->cfd1Batch([&$insert, &$select]);
+        $released = BatchOwnedStatement::$released;
+        $payload = bin2hex($pdo->query('SELECT payload FROM batch_reference_features')->fetchColumn());
+        $unused = $pdo->prepare('SELECT 1');
+        $beforeInvalid = BatchOwnedStatement::$released;
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+        $invalid = $pdo->cfd1Batch([$unused, new stdClass]);
+        unset($unused);
+        echo json_encode([$ok, $insert === null, $select === null, $released, $payload,
+            $invalid, BatchOwnedStatement::$released - $beforeInvalid]);
+        fclose($stream);
+        break;
+
     case 'prepare-only':
         $stmt = $pdo->prepare('SELECT :value AS value'); $stmt->execute(['value' => 'before']);
         $before = $stmt->fetchColumn();
