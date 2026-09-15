@@ -1,7 +1,7 @@
 # php-cloud-wasm
 
 Embedded PHP 8.0–8.5 for Cloudflare Workers, with statically linked Vrzno,
-ordinary ZIP/deflate, zlib and the prepared-query subset of PDO-CFD1.
+ordinary ZIP/deflate, zlib and PDO-CFD1 with native parameters and atomic batches.
 This package is independent of the browser/Node `php-wasm` package.
 
 Use a version-specific entry inside a Worker module:
@@ -31,9 +31,15 @@ these automatically. There is no implicit latest-version root entry.
 
 PDO-CFD1 is compiled into PHP. Supply a request-local binding map and use
 `new PDO('cfd1:mainDb', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION])`
-with positional prepared queries. Transactions and general PDO APIs outside the
-prepared-query subset are unsupported. Never expose arbitrary PHP/SQL execution
-or arbitrary D1-binding names to untrusted HTTP clients.
+with positional or named parameters supplied through `execute([...])`, or explicit
+bindings when needed. The driver also supports `exec()`, `quote()`, `lastInsertId()`,
+BLOB strings/streams, buffered scroll cursors, and observed column metadata.
+`$pdo->cfd1Batch([$insert, $select])` atomically executes distinct, already bound
+statements from the same connection. Ordinary execution does not require explicit
+binding. Open PDO transactions remain unsupported; see the
+[PDO-CFD1 contract](https://github.com/seanmorris/php-wasm/blob/develop/packages/pdo-cfd1/README.md)
+for details and backend limits. Never expose arbitrary PHP/SQL execution or
+arbitrary D1-binding names to untrusted HTTP clients.
 
 Wasm memory is initially 64 MiB, with a 96 MiB maximum, per instance. Workers'
 128 MB isolate budget is shared by concurrent requests and JavaScript overhead;

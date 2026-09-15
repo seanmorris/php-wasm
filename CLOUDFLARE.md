@@ -1,9 +1,10 @@
 # Cloudflare embedded PHP
 
 The Cloudflare profile builds embedded PHP 8.0–8.5 as ES modules for Workers.
-It includes Vrzno, statically linked zip/zlib, and the supported PDO-CFD1
-prepared-query subset. It is separate from the general browser, Node and CGI
-builds: neither the normal worker artifact nor `LIB_TYPE=static` selects it.
+It includes Vrzno, statically linked zip/zlib, and PDO-CFD1 with native
+parameters, binary values, and atomic batches. It is separate from the general
+browser, Node and CGI builds: neither the normal worker artifact nor
+`LIB_TYPE=static` selects it.
 
 ## Build and test locally
 
@@ -153,16 +154,23 @@ archive and mocked fetch, plus ZIP creation/readback and zlib round-trips.
 
 ## D1 scope and limitations
 
-The profile includes a checked PHP 8.0 ABI backport of PDO-CFD1. The supported
-subset is positional `?` prepared queries, `execute`, numeric `bindValue` and
-`bindParam`, associative `fetch`/`fetchAll`, and SELECT/INSERT/UPDATE/DELETE.
-Repeated execution, scalar and NULL parameters, and write `rowCount()` are
-covered by local-D1 tests. A missing binding or failed query reports a PDO error;
-exception mode produces `PDOException`.
+The profile includes PDO-CFD1 for PHP 8.0–8.5. Ordinary queries accept
+positional or named parameter arrays through `execute([...])`; explicit binding
+is optional. The driver supports numbered placeholders, `query`, `exec`, SQLite
+quoting, connection-local insert IDs, BLOB strings/streams, and buffered scroll
+cursors. Write `rowCount()` uses D1's affected-row metadata.
 
-Named/numbered placeholders, transactions, `lastInsertId`, `quote`, and direct
-PDO `exec` are unsupported and must fail explicitly. This is not complete PDO
-or D1 API parity. Dynamic/shared extensions, browser filesystem persistence,
+`$pdo->cfd1Batch([$insert, $select])` executes distinct, already bound PDO
+statements from that connection in one atomic D1 batch. Results remain on their
+statements for normal fetching, and ordinary `execute([...])` remains available
+before and afterward. A failed batch follows PDO's error mode and does not expose
+partial results. See the [PDO-CFD1 API and examples](packages/pdo-cfd1/README.md).
+
+D1 does not support PDO transactions held open across PHP calls. Persistent
+connections, output parameters, streaming cursors, and multiple result sets
+remain unsupported. Metadata is limited to information D1 actually returns;
+empty results and duplicate column names have documented limitations.
+Dynamic/shared extensions, browser filesystem persistence,
 and the CGI HTTP request adapter are outside this profile. Zip/zlib operate on
 the instance's in-memory filesystem. Archive support is ordinary ZIP/deflate;
 encrypted AES archives are omitted from this minimal static profile.
