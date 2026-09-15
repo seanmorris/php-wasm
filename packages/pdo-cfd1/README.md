@@ -190,7 +190,7 @@ Build-related variables:
 - `WITH_PDO_CFD1`: defaults to `0`. Set it to `1` to compile the extension into a custom build.
 - `WITH_VRZNO`: must be `1`; the extension's build configuration declares a Vrzno dependency.
 - `PDO_CFD1_REPOSITORY`: defaults to `https://github.com/seanmorris/pdo-cfd1.git`.
-- `PDO_CFD1_REF`: defaults to immutable commit `1fd59a38565cc7e1b76fa2eeb7d0bc5825598402`.
+- `PDO_CFD1_REF`: defaults to immutable commit `7da4435299868e7a2ee6cecf001cc7dabe2351db`.
 - `PDO_CFD1_DEV_PATH`: optional external checkout, read without modifying it.
 
 The importer records the resolved commit (or development path) and each source
@@ -201,8 +201,10 @@ previous patched driver are migrated to the directly imported source.
 
 JavaScript bodies (`pdo_cfd1_*.js`), the `pdo_cfd1_js.h.in` template, and
 `Makefile.frag` are included in that source inventory. The driver's normal PHP
-Make build expands the template's JS includes into an `EM_JS`/`EM_ASYNC_JS`
-header before compilation. Generated headers stay in the build directory and
+Make build uses Emscripten's directives-only preprocessor to expand the template's
+JS includes into an `EM_JS`/`EM_ASYNC_JS` header, preserving JS identifiers and
+comments. The compiler records nested include dependencies for incremental
+rebuilds. Generated headers and dependency files stay in the build directory and
 are not imported; the JavaScript remains embedded in the compiled driver object.
 
 Custom refs and development checkouts supply the driver source as-is. Choose a
