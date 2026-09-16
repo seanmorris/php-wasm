@@ -7,7 +7,7 @@ import { createImporterFixture, importerCase, stateName } from './source-importe
 
 testImporter('vrzno');
 
-test('JS-only edits rebuild Vrzno while generated headers and npm tooling stay outside imports', t => {
+test('JS-only edits rebuild Vrzno and imports include locked build inputs without generated files', t => {
 	const f = createImporterFixture(t, 'vrzno');
 	const { stage, extension } = importerCase('vrzno');
 	fs.mkdirSync(path.join(f.dev, 'generated'));
@@ -16,10 +16,10 @@ test('JS-only edits rebuild Vrzno while generated headers and npm tooling stay o
 	for(const directory of [stage, extension])
 	{
 		const state = JSON.parse(f.read(`${directory}/${stateName}`));
-		for(const name of ['Makefile.frag', 'vrzno_js.h.in', 'vrzno_fetch_js.h.in', 'vrzno_init.js', 'php_stream_fetch_real_open.js'])
+		for(const name of ['Makefile.frag', 'vrzno_js.h.in', 'vrzno_fetch_js.h.in', 'vrzno_init.js', 'php_stream_fetch_real_open.js', 'vrzno_weakermap.mjs', 'vrzno_bundle.mjs', 'package.json', 'package-lock.json', 'NOTICE'])
 			assert.ok(state.files.some(file => file.name === name), name);
 		assert.ok(!fs.existsSync(path.join(f.workspace, directory, 'generated')));
-		assert.ok(!fs.existsSync(path.join(f.workspace, directory, 'package.json')));
+		assert.ok(!fs.existsSync(path.join(f.workspace, directory, 'node_modules')));
 	}
 	fs.appendFileSync(path.join(f.dev, 'vrzno_init.js'), '// JS-only edit\n');
 	f.run({ source: f.dev });

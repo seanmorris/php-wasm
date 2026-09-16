@@ -52,9 +52,14 @@ const cases = {
 			, 'vrzno_fetch_js.h.in': '#include "php_stream_fetch_real_open.js"\n'
 			, 'vrzno_init.js': 'return "A";\n'
 			, 'php_stream_fetch_real_open.js': 'return await Promise.resolve(1);\n'
+			, 'vrzno_weakermap.mjs': 'import {WeakerMap} from "weakermap";\n'
+			, 'vrzno_bundle.mjs': '// pinned dependency bundler\n'
+			, 'package.json': '{"dependencies":{"weakermap":"0.0.13"}}\n'
+			, 'package-lock.json': '{"lockfileVersion":3}\n'
+			, NOTICE: 'Dependency attribution\n'
 		}
 		, changed: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n', 'vrzno_init.js': 'return "B";\n' }
-		, excluded: ['README.md', 'config.w32', 'unrelated.js', 'eslint.config.mjs', 'package.json', 'package-lock.json']
+		, excluded: ['README.md', 'config.w32', 'unrelated.js', 'unrelated.mjs', 'eslint.config.mjs']
 	}
 	, waitline: {
 		extensionName: 'waitline'
