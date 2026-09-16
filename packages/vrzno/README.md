@@ -39,7 +39,7 @@ That is the default for the main `php-wasm` runtime.
 
 - `WITH_VRZNO`: defaults to `1`. Set it to `0` to remove the extension from a custom build.
 - `VRZNO_REPOSITORY`: optional Git repository override. Defaults to the upstream Vrzno repository.
-- `VRZNO_REF`: exact Git commit to build. The default pins the Vrzno 0.2.0 integration revision.
+- `VRZNO_REF`: exact Git commit to build. The default pins the Vrzno 0.2.0 bridge with Make-embedded JavaScript.
 - `VRZNO_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `vrzno` repository during the build.
 
 Imports verify the active source identity and file contents on every build. Switching commits or development checkouts, changing headers, or adding/removing inputs refreshes the extension and its configuration. Unchanged imports preserve timestamps and do not trigger recompilation.
