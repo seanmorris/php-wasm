@@ -93,8 +93,9 @@ export function testImporter(name)
 
 		test('pinned to older dev to same pin restores content; dev snapshots remain external and read-only', t => {
 			const f = fixture(t);
-			const before = fs.readdirSync(f.dev).map(file => [file, fs.readFileSync(path.join(f.dev, file), 'utf8')]);
-			for(const file of fs.readdirSync(f.dev)) fs.utimesSync(path.join(f.dev, file), 1, 1);
+			const sourceFiles = fs.readdirSync(f.dev, { recursive: true }).filter(file => fs.lstatSync(path.join(f.dev, file)).isFile());
+			const before = sourceFiles.map(file => [file, fs.readFileSync(path.join(f.dev, file), 'utf8')]);
+			for(const file of sourceFiles) fs.utimesSync(path.join(f.dev, file), 1, 1);
 			f.run();
 			f.run({ source: f.dev });
 			assert.equal(f.read(`${extension}/${main}`), '/* DEV */\n');
@@ -107,8 +108,8 @@ export function testImporter(name)
 			assert.equal(f.read('build.log'), builds);
 			f.run();
 			assert.equal(f.read(`${extension}/${main}`), '/* A */\n');
-			assert.deepEqual(fs.readdirSync(f.dev).map(file => [file, fs.readFileSync(path.join(f.dev, file), 'utf8')]), before);
-			for(const file of fs.readdirSync(f.dev)) assert.equal(fs.statSync(path.join(f.dev, file)).mtimeMs, 1000);
+			assert.deepEqual(sourceFiles.map(file => [file, fs.readFileSync(path.join(f.dev, file), 'utf8')]), before);
+			for(const file of sourceFiles) assert.equal(fs.statSync(path.join(f.dev, file)).mtimeMs, 1000);
 			if(f.dockerMode) assert.equal(f.builder('process.stdout.write(String(require("fs").existsSync(process.argv[1])))', f.dev), 'false');
 		});
 
@@ -155,6 +156,72 @@ export function testImporter(name)
 			assert.equal(f.read(`${stage}/${main}`), '/* A */\n');
 			assert.equal(f.read(`${extension}/${header}`), '/* header A */\n');
 			assert.equal(f.read(`${extension}/config.m4`), 'dnl A\n');
+		});
+
+		test('JS directory edits, removals and interrupted publications preserve unrelated inputs', t => {
+			const f = fixture(t);
+			const body = Object.keys(f.files).find(file => file.startsWith('js/') && file.endsWith('.js'));
+			const added = `js/${spec.extensionName}_added.js`;
+			f.run();
+			f.write(`${extension}/js/unrelated.js`, 'preserved');
+			const previous = f.read(`${extension}/${stateName}`);
+			fs.writeFileSync(path.join(f.dev, added), 'return 42;\n');
+			fs.unlinkSync(path.join(f.dev, body));
+			fs.writeFileSync(path.join(f.workspace, 'interrupt.cjs'), `
+const fs = require('node:fs');
+const rename = fs.renameSync;
+fs.renameSync = (source, destination) => {
+  if(destination.endsWith('/ext/${spec.extensionName}/${main}')) throw new Error('Injected nested publication failure');
+  return rename(source, destination);
+};
+`);
+			const failed = f.run({ source: f.dev, interrupt: true, success: false });
+			assert.match(failed.stderr, /Injected nested publication failure/);
+			assert.equal(f.read(`${extension}/${stateName}`), previous);
+			assert.equal(f.read(`${extension}/${added}`), 'return 42;\n');
+			f.run();
+			assert.equal(f.read(`${extension}/${body}`), f.files[body]);
+			assert.equal(fs.existsSync(path.join(f.workspace, extension, added)), false);
+			f.run({ source: f.dev });
+			assert.equal(fs.existsSync(path.join(f.workspace, extension, body)), false);
+			assert.equal(f.read(`${extension}/${added}`), 'return 42;\n');
+			assert.equal(f.read(`${extension}/js/unrelated.js`), 'preserved');
+		});
+
+		if(['vrzno', 'pdo-cfd1'].includes(name)) test('root JS imports migrate into js and can roll back without stale copies', t => {
+			const f = fixture(t);
+			const body = Object.keys(f.files).find(file => file.startsWith('js/') && file.endsWith('.js'));
+			const legacy = path.basename(body);
+			fs.renameSync(path.join(f.dev, body), path.join(f.dev, legacy));
+			f.run({ source: f.dev });
+			assert.equal(f.read(`${extension}/${legacy}`), f.files[body].replaceAll('A', 'DEV'));
+			f.run();
+			for(const directory of [stage, extension])
+			{
+				assert.equal(fs.existsSync(path.join(f.workspace, directory, legacy)), false);
+				assert.equal(f.read(`${directory}/${body}`), f.files[body]);
+			}
+			f.run({ source: f.dev });
+			assert.equal(fs.existsSync(path.join(f.workspace, extension, body)), false);
+			assert.equal(f.read(`${extension}/${legacy}`), f.files[body].replaceAll('A', 'DEV'));
+		});
+
+		test('JS destination symlinks and traversal in pending inventories fail before modifying files', t => {
+			const f = fixture(t);
+			f.run();
+			f.write(`${extension}/sentinel.c`, 'preserved');
+			f.write(`${extension}/.php-wasm-pending.json`, JSON.stringify({ schema: 1, files: ['js/../sentinel.c'] }));
+			assert.match(f.run({ success: false }).stderr, /Invalid pending .* input inventory/);
+			assert.equal(f.read(`${extension}/sentinel.c`), 'preserved');
+			f.remove(`${extension}/.php-wasm-pending.json`);
+			f.builder(`
+const fs = require('fs');
+fs.renameSync(process.argv[1] + '/js', process.argv[1] + '/saved-js');
+fs.symlinkSync('saved-js', process.argv[1] + '/js');
+`, extension);
+			assert.match(f.run({ success: false }).stderr, /Refusing symlinked import destination/);
+			for(const [file, contents] of Object.entries(f.files).filter(([file]) => file.startsWith('js/')))
+				assert.equal(f.read(`${extension}/saved-${file}`), contents);
 		});
 
 		test('warm legacy checkouts and corrupt manifests recover without deleting Git metadata', t => {

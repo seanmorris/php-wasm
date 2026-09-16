@@ -12,20 +12,20 @@ const fixture = t => createImporterFixture(t, 'pdo-cfd1');
 
 test('JS-only edits invalidate builds while generated EM_JS headers stay outside source snapshots', t => {
 	const f = fixture(t);
-	fs.mkdirSync(path.join(f.dev, 'generated'));
+	fs.mkdirSync(path.join(f.dev, 'generated'), { recursive: true });
 	fs.writeFileSync(path.join(f.dev, 'generated/pdo_cfd1_js.h'), '/* stale build output */\n');
 	f.run({ source: f.dev });
 	for(const directory of [stage, extension])
 	{
 		const state = JSON.parse(f.read(`${directory}/${stateName}`));
-		for(const name of ['Makefile.frag', 'pdo_cfd1_js.h.in', 'pdo_cfd1_init.js'])
+		for(const name of ['Makefile.frag', 'pdo_cfd1_js.h.in', 'js/pdo_cfd1_init.js'])
 			assert.ok(state.files.some(file => file.name === name), name);
 		assert.ok(!fs.existsSync(path.join(f.workspace, directory, 'generated')));
 	}
-	fs.appendFileSync(path.join(f.dev, 'pdo_cfd1_init.js'), '// JS-only edit\n');
+	fs.appendFileSync(path.join(f.dev, 'js/pdo_cfd1_init.js'), '// JS-only edit\n');
 	f.run({ source: f.dev });
 	assert.equal(f.read('build.log'), 'configure\nbuild\n'.repeat(2));
-	assert.match(f.read(`${extension}/pdo_cfd1_init.js`), /JS-only edit/);
+	assert.match(f.read(`${extension}/js/pdo_cfd1_init.js`), /JS-only edit/);
 	const before = f.mtimes();
 	f.run({ source: f.dev });
 	assert.deepEqual(f.mtimes(), before);

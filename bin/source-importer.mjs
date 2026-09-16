@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process';
  * @param {string[]} [argv] Command and arguments.
  * @returns {Promise<void>} Completes after publication or reports a failing exit status.
  */
-export async function runSourceImporter({ name, extension, prefix, label, inputs, required, legacyPatchIdentity = false }, argv = process.argv.slice(2))
+export async function runSourceImporter({ name, extension, prefix, label, inputs, required, directories = [], legacyPatchIdentity = false }, argv = process.argv.slice(2))
 {
 	const root = fs.realpathSync(process.cwd());
 	const sourceDirectory = `third_party/${name}`;
@@ -18,9 +18,32 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 	const hash = data => createHash('sha256').update(data).digest('hex');
 	const inputPattern = new RegExp(inputs);
 	const isInput = name => typeof name === 'string'
-		&& !name.includes('/') && !name.includes('\\')
+		&& !name.includes('\\')
+		&& name.split('/').every(part => part && part !== '.' && part !== '..')
 		&& inputPattern.test(name);
 	const inside = (parent, child) => child === parent || child.startsWith(parent + path.sep);
+
+	// Inspect only the package's declared source directories, never dependency,
+	// generated, or unrelated trees. The same inventory repairs legacy imports.
+	function inputNames(directory)
+	{
+		const names = [];
+		for(const relative of ['', ...directories])
+		{
+			const filename = path.join(directory, relative);
+			let stat;
+			try
+			{ stat = fs.lstatSync(filename); }
+			catch(error)
+			{
+				if(error.code === 'ENOENT') continue;
+				throw error;
+			}
+			if(!stat.isDirectory()) throw new Error(`Not a regular input directory: ${filename}`);
+			names.push(...fs.readdirSync(filename).map(name => path.posix.join(relative, name)).filter(isInput));
+		}
+		return names.sort();
+	}
 
 	function extensionDirectory(version)
 	{
@@ -59,8 +82,8 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 		const identity = snapshot.identity;
 		if(!identity || !['dev', 'pinned'].includes(identity.mode)
 			|| (identity.mode === 'dev' && typeof identity.path !== 'string')
-			|| (identity.mode === 'pinned' && ['repository', 'ref', 'commit'].some(key => typeof identity[key] !== 'string')))
-		{
+			|| (identity.mode === 'pinned' && ['repository', 'ref', 'commit'].some(key => typeof identity[key] !== 'string'))
+		){
 			throw new Error(`Invalid ${label} source identity`);
 		}
 		// Keep old patch identities distinct until their next successful import.
@@ -115,7 +138,7 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 				throw new Error(`${prefix}_DEV_PATH must not overlap an importer destination`);
 			}
 		}
-		const files = fs.readdirSync(source).filter(isInput).sort().map(name => {
+		const files = inputNames(source).map(name => {
 			const filename = path.join(source, name);
 			if(!fs.statSync(filename).isFile()) throw new Error(`Not a regular source file: ${filename}`);
 			return input(name, fs.readFileSync(filename));
@@ -129,13 +152,14 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 		const cache = checkedPath(`.cache/${name}-import/${hash(repository)}`);
 		fs.mkdirSync(cache, { recursive: true });
 		const git = (...args) => execFileSync('git', ['-c', `safe.directory=${cache}`, '-C', cache, ...args], {
-			stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 16 * 1024 * 1024,
+			stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 16 * 1024 * 1024
 		});
 		if(!fs.existsSync(path.join(cache, 'HEAD'))) git('init', '--bare', '.');
 		let commit;
 		if(/^[a-f0-9]{40}$/i.test(ref))
 		{
-			try { commit = git('rev-parse', '--verify', `${ref}^{commit}`).toString().trim(); }
+			try
+			{ commit = git('rev-parse', '--verify', `${ref}^{commit}`).toString().trim(); }
 			catch { /* Immutable commits are fetched only when absent from the cache. */ }
 		}
 		if(!commit)
@@ -144,7 +168,7 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 			commit = git('rev-parse', '--verify', 'FETCH_HEAD^{commit}').toString().trim();
 		}
 		const files = [];
-		for(const entry of git('ls-tree', '-z', commit).toString().split('\0').filter(Boolean))
+		for(const entry of git('ls-tree', '-r', '-z', commit).toString().split('\0').filter(Boolean))
 		{
 			const tab = entry.indexOf('\t');
 			const name = entry.slice(tab + 1);
@@ -193,9 +217,9 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 		}
 		const names = new Set(desired.files.map(file => file.name));
 		// Migrate old imports (or recover an invalid marker) by adopting only the
-		// documented root-level input classes, never build outputs or whole trees.
+		// documented input classes, never build outputs or whole trees.
 		const managed = previous?.files ?? (fs.existsSync(destination)
-			? fs.readdirSync(destination).filter(isInput).map(name => ({ name })) : []);
+			? inputNames(destination).map(name => ({ name })) : []);
 		const managedNames = new Set([...managed.map(file => file.name), ...(pending?.files ?? [])]);
 		const obsolete = [...managedNames].filter(name => !names.has(name)).map(name => ({ name }));
 		let changed = pending !== null || JSON.stringify(previous) !== JSON.stringify(desired);
@@ -220,6 +244,7 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 			// A no-op import leaves both input and manifest mtimes untouched.
 			for(const file of snapshot.files)
 			{
+				fs.mkdirSync(path.dirname(path.join(temporary, file.name)), { recursive: true });
 				fs.writeFileSync(path.join(temporary, file.name), Buffer.from(file.data, 'base64'));
 			}
 			fs.writeFileSync(path.join(temporary, stateName), JSON.stringify(desired, null, 2) + '\n');
@@ -231,6 +256,7 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 			fs.renameSync(path.join(temporary, pendingName), pendingPath);
 			for(const file of snapshot.files)
 			{
+				fs.mkdirSync(checkedPath(path.dirname(path.join(relative, file.name))), { recursive: true });
 				fs.renameSync(path.join(temporary, file.name), path.join(destination, file.name));
 			}
 			for(const file of obsolete)
@@ -274,7 +300,7 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 			const state = readState(sourceDirectory);
 			if(!state) throw new Error(`${label} staging manifest is missing`);
 			const files = state.files.map(file => ({ ...file,
-				data: fs.readFileSync(checkedPath(path.join(sourceDirectory, file.name))).toString('base64'),
+				data: fs.readFileSync(checkedPath(path.join(sourceDirectory, file.name))).toString('base64')
 			}));
 			synchronize(extensionDirectory(first), { ...state, files });
 		}
@@ -282,7 +308,8 @@ export async function runSourceImporter({ name, extension, prefix, label, inputs
 	}
 
 
-	try { await main(); }
+	try
+	{ await main(); }
 	catch(error)
 	{
 		process.stderr.write(`${label} import failed: ${error.message}\n`);

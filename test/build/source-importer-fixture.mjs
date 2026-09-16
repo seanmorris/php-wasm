@@ -17,8 +17,13 @@ const cases = {
 		, label: 'PGlite'
 		, header: 'php_pdo_pglite.h'
 		, other: 'pdo_pglite_db.c'
-		, extra: { 'config.w32': '// Windows config A\n', 'README.md': 'README A\n' }
-		, changed: { 'pdo_pglite_db.c': '/* other B */\n', 'php_pdo_pglite.h': '/* header B */\n' }
+		, extra: {
+			'config.w32': '// Windows config A\n', 'README.md': 'README A\n'
+			, 'Makefile.frag': '# Make rules A\n'
+			, 'pdo_pglite_js.h.in': '#include \"js/pdo_pglite_open.js\"\n'
+			, 'js/pdo_pglite_open.js': 'return \"A\";\n'
+		}
+		, changed: { 'pdo_pglite_db.c': '/* other B */\n', 'php_pdo_pglite.h': '/* header B */\n', 'js/pdo_pglite_open.js': 'return \"B\";\n' }
 		, excluded: ['ignored.stub.php']
 		, requiresVrzno: true
 	}
@@ -30,12 +35,12 @@ const cases = {
 		, extra: {
 			'config.w32': '// Windows config A\n', 'README.md': 'README A\n'
 			, 'Makefile.frag': '# Make rules A\n'
-			, 'pdo_cfd1_js.h.in': '#include "pdo_cfd1_init.js"\n'
-			, 'pdo_cfd1_init.js': 'return "A";\n'
+			, 'pdo_cfd1_js.h.in': '#include "js/pdo_cfd1_init.js"\n'
+			, 'js/pdo_cfd1_init.js': 'return "A";\n'
 		}
 		, changed: {
 			'pdo_cfd1_db.c': '/* other B */\n', 'php_pdo_cfd1.h': '/* header B */\n'
-			, 'pdo_cfd1_init.js': 'return "B";\n'
+			, 'js/pdo_cfd1_init.js': 'return "B";\n'
 		}
 		, excluded: ['ignored.stub.php']
 		, requiresVrzno: true
@@ -48,17 +53,17 @@ const cases = {
 		, extra: {
 			'vrzno.stub.php': '<?php // stub A\n', 'vrzno_arginfo.h': '/* arginfo A */\n'
 			, 'Makefile.frag': '# Make rules A\n'
-			, 'vrzno_js.h.in': '#include "vrzno_init.js"\n'
-			, 'vrzno_fetch_js.h.in': '#include "php_stream_fetch_real_open.js"\n'
-			, 'vrzno_init.js': 'return "A";\n'
-			, 'php_stream_fetch_real_open.js': 'return await Promise.resolve(1);\n'
-			, 'vrzno_weakermap.mjs': 'import {WeakerMap} from "weakermap";\n'
-			, 'vrzno_bundle.mjs': '// pinned dependency bundler\n'
+			, 'vrzno_js.h.in': '#include "js/vrzno_init.js"\n'
+			, 'vrzno_fetch_js.h.in': '#include "js/php_stream_fetch_real_open.js"\n'
+			, 'js/vrzno_init.js': 'return "A";\n'
+			, 'js/php_stream_fetch_real_open.js': 'return await Promise.resolve(1);\n'
+			, 'js/vrzno_weakermap.mjs': 'import {WeakerMap} from "weakermap";\n'
+			, 'js/vrzno_bundle.mjs': '// pinned dependency bundler\n'
 			, 'package.json': '{"dependencies":{"weakermap":"0.0.13"}}\n'
 			, 'package-lock.json': '{"lockfileVersion":3}\n'
 			, NOTICE: 'Dependency attribution\n'
 		}
-		, changed: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n', 'vrzno_init.js': 'return "B";\n' }
+		, changed: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n', 'js/vrzno_init.js': 'return "B";\n' }
 		, excluded: ['README.md', 'config.w32', 'unrelated.js', 'unrelated.mjs', 'eslint.config.mjs']
 	}
 	, waitline: {
@@ -72,8 +77,11 @@ const cases = {
 			, 'README.md': 'README A\n'
 			, 'waitline.stub.php': '<?php // stub A\n'
 			, 'waitline_arginfo.h': '/* arginfo A */\n'
+			, 'Makefile.frag': '# Make rules A\n'
+			, 'waitline_js.h.in': '#include \"js/waitline_real_read_line.js\"\n'
+			, 'js/waitline_real_read_line.js': 'return \"A\";\n'
 		}
-		, changed: { 'waitline.c': '/* B */\n', 'config.m4': 'dnl B\n' }
+		, changed: { 'waitline.c': '/* B */\n', 'config.m4': 'dnl B\n', 'js/waitline_real_read_line.js': 'return \"B\";\n' }
 		, excluded: []
 	}
 };
@@ -107,7 +115,7 @@ export function importerCase(name)
 			, LICENSE: 'Test license\n'
 			, ...spec.extra
 		}
-		, excluded: ['.env', 'lib.js', 'compiled.o', ...spec.excluded]
+		, excluded: ['.env', 'lib.js', 'compiled.o', 'js/.env', 'js/unrelated.js', 'generated/ignored.h', 'tests/ignored.c', ...spec.excluded]
 	};
 }
 
@@ -188,11 +196,15 @@ export function createImporterFixture(t, name, { installed = false } = {})
 	git('config', 'user.name', 'Importer test');
 	for(const [file, contents] of Object.entries(files))
 	{
+		fs.mkdirSync(path.dirname(path.join(repository, file)), { recursive: true });
+		fs.mkdirSync(path.dirname(path.join(dev, file)), { recursive: true });
 		fs.writeFileSync(path.join(repository, file), contents);
 		fs.writeFileSync(path.join(dev, file), contents.replaceAll('A', 'DEV'));
 	}
 	for(const file of spec.excluded)
 	{
+		fs.mkdirSync(path.dirname(path.join(repository, file)), { recursive: true });
+		fs.mkdirSync(path.dirname(path.join(dev, file)), { recursive: true });
 		fs.writeFileSync(path.join(repository, file), 'DO_NOT_COPY=fixture\n');
 		fs.writeFileSync(path.join(dev, file), 'DO_NOT_COPY=fixture\n');
 	}
@@ -254,7 +266,7 @@ settings:
 	const write = (relative, contents) => builder('require("fs").writeFileSync(process.argv[1],process.argv[2])', relative, contents);
 	const remove = relative => builder('require("fs").unlinkSync(process.argv[1])', relative);
 	const mtimes = () => Object.fromEntries([stage, extension].flatMap(directory =>
-		fs.readdirSync(path.join(workspace, directory)).filter(file => !file.startsWith('.php-wasm-import-'))
+		fs.readdirSync(path.join(workspace, directory), { recursive: true }).filter(file => !file.startsWith('.php-wasm-import-'))
 			.map(file => [`${directory}/${file}`, fs.statSync(path.join(workspace, directory, file), { bigint: true }).mtimeNs.toString()])));
 	return { ...spec, workspace, repository, dev, a, b, run, read, write, remove, builder, mtimes, dockerMode, packageRelative };
 }

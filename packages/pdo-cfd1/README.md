@@ -197,9 +197,10 @@ The importer records the resolved commit (or development path) and each source
 file's SHA-256 in `.php-wasm-source.json`. The PHP configure/build dependencies
 use that manifest. Unchanged imports preserve modification times; changed or
 missing inputs are repaired before the next build. Restored manifests from the
-previous patched driver are migrated to the directly imported source.
+previous patched driver are migrated to the directly imported source. Older pins
+with root-level JS remain supported; switching layouts removes obsolete copies.
 
-JavaScript bodies (`pdo_cfd1_*.js`), the `pdo_cfd1_js.h.in` template, and
+JavaScript bodies (`js/pdo_cfd1_*.js`), the `pdo_cfd1_js.h.in` template, and
 `Makefile.frag` are included in that source inventory. The driver's normal PHP
 Make build uses Emscripten's directives-only preprocessor to expand the template's
 JS includes into an `EM_JS`/`EM_ASYNC_JS` header, preserving JS identifiers and

@@ -9,6 +9,7 @@ await runSourceImporter({
 	, extension: 'pdo_pglite'
 	, prefix: 'PDO_PGLITE'
 	, label: 'PGlite'
-	, inputs: String.raw`^(?:.+\.(?:c|h)|config\.(?:m4|w32)|README\.md|CREDITS|LICENSE)$`
+	, inputs: String.raw`^(?:[^/]+\.(?:c|h)|js/pdo_pglite_[a-z_]+\.js|pdo_pglite_js\.h\.in|Makefile\.frag|config\.(?:m4|w32)|README\.md|CREDITS|LICENSE)$`
+	, directories: ['js']
 	, required: ['pdo_pglite.c', 'config.m4']
 });

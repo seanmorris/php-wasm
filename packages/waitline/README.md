@@ -40,7 +40,7 @@ Important distinction:
 
 Imports verify source identity and contents on every build. Changing refs or development checkouts, editing headers (including generated arginfo), or adding/removing inputs refreshes both the staged source and the PHP extension. Unchanged imports preserve timestamps and avoid recompilation. PHP configuration, base, CLI, CGI, and debugger builds all depend on the active extension manifest.
 
-Managed inputs are root-level C, header, and PHP stub files, `config.m4`, `config.w32`, `README.md`, `CREDITS`, and `LICENSE`. Development checkouts are read-only inputs and may live outside the Docker mount; only managed inputs are transferred. The builder owns all destination writes, so cached root-owned outputs require no host-side ownership changes.
+Managed inputs are root-level C, header, and PHP stub files, `js/waitline_*.js`, `waitline_js.h.in`, `Makefile.frag`, `config.m4`, `config.w32`, `README.md`, `CREDITS`, and `LICENSE`. Make embeds the JS into the native object through Emscripten’s directives-only preprocessor; generated headers and dependencies stay in the build directory. Development checkouts are read-only inputs and may live outside the Docker mount; only managed inputs are transferred. The builder owns all destination writes, so cached root-owned outputs require no host-side ownership changes.
 
 Source manifests and a pending-import record repair interrupted updates. Legacy imports without a valid manifest adopt the managed input classes above; Git metadata, compiled objects, and unrelated files are preserved. Do not use an import destination as `WAITLINE_DEV_PATH`.
 
