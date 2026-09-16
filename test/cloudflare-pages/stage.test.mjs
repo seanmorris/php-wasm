@@ -37,6 +37,7 @@ test('Pages staging copies only the selected raw module inventory and attests co
 	assert.match(config, /NIGHTLY_PHP_DB/);
 	assert.match(config, new RegExp(fixture.options.databaseId));
 	assert.match(config, /cpu_ms = 1000/);
+	assert.match(config, /compatibility_flags = \["enable_weak_ref"\]/);
 	assert.match(config, /database_name = "php-wasm-nightly-demo"/);
 	assert.deepEqual(JSON.parse(await fs.readFile(path.join(fixture.options.outputDir, 'stage.manifest.json'), 'utf8')), result);
 });

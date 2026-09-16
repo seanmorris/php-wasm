@@ -79,7 +79,7 @@ CLOUDFLARE_ARTIFACT_ROOT=/path/to/extracted/packages/php-cloud-wasm \
 ```
 
 The harness uses pinned Miniflare 4.20260730.0, compatibility date `2024-02-01`,
-and no compatibility flags or unsafe-eval permissions. It creates local D1
+and the `enable_weak_ref` compatibility flag. It creates local D1
 databases, rejects unexpected outbound requests, and serves a deterministic
 archive fixture. Build and test require no Cloudflare account or credentials.
 See the [Miniflare module](https://developers.cloudflare.com/workers/testing/miniflare/core/modules/)
@@ -87,6 +87,11 @@ and [local D1](https://developers.cloudflare.com/workers/testing/miniflare/stora
 documentation for the engine facilities used by the tests.
 
 ## Worker usage
+
+Vrzno requires `WeakRef` and `FinalizationRegistry`. Use compatibility date
+`2025-05-05` or newer, or add `compatibility_flags = ["enable_weak_ref"]` to
+your Wrangler configuration. The checked-in Pages configuration retains its
+existing date and enables the flag explicitly. No eval permission is required.
 
 Copy the final package assets from the existing nightly distribution into your
 application and preserve their relative paths. This example assumes the copied

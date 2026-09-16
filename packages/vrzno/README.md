@@ -5,6 +5,9 @@
 It lets PHP code interact with JavaScript objects, classes, promises, callbacks, and values on `globalThis`.
 The standard `php-wasm` runtime already includes Vrzno by default, so most consumers do not need to import anything from this package directly. This folder mainly exists for custom-build plumbing.
 
+Vrzno requires `WeakRef` and `FinalizationRegistry`. Cloudflare Workers using a
+compatibility date before `2025-05-05` must enable `enable_weak_ref`.
+
 ## Usage
 
 ```js
@@ -44,7 +47,7 @@ That is the default for the main `php-wasm` runtime.
 
 Imports verify the active source identity and file contents on every build. Switching commits or development checkouts, changing headers, or adding/removing inputs refreshes the extension and its configuration. Unchanged imports preserve timestamps and do not trigger recompilation.
 
-The managed inputs are root-level C, header, header-template (`.h.in`), and PHP stub files; `vrzno_*.js` and `php_stream_fetch_real_open.js` bodies; `Makefile.frag`, `config.m4`, `CREDITS`, and `LICENSE`. Make embeds the JS through Emscripten's directives-only preprocessor before compiling each native object. Generated headers and npm development tools are excluded from imports. Development checkouts are read-only inputs and may live outside the Docker mount; only these files are transferred. All imported files and state are written by the builder, so root-owned Docker outputs do not require host-side writes or ownership changes.
+The managed inputs are root-level C, header, header-template (`.h.in`), and PHP stub files; `vrzno_*.js` and `php_stream_fetch_real_open.js` bodies; `vrzno_weakermap.mjs`, `vrzno_bundle.mjs`, `package.json`, `package-lock.json`, `Makefile.frag`, `config.m4`, `CREDITS`, `LICENSE`, and `NOTICE`. Make installs locked build dependencies under the build directory, bundles weakermap with its adapter, and embeds the JS through Emscripten's directives-only preprocessor before compiling each native object. Generated files, `node_modules`, and development configuration are excluded from imports. Development checkouts are read-only inputs and may live outside the Docker mount; only these files are transferred. All imported files and state are written by the builder, so root-owned Docker outputs do not require host-side writes or ownership changes.
 
 Generated manifests and a pending-import record let the next build repair interrupted imports. Existing imports without a valid manifest adopt the managed input classes above; Git metadata, compiled objects, and unrelated files are preserved. Do not use an import destination as `VRZNO_DEV_PATH`.
 

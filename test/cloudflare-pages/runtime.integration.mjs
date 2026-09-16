@@ -67,7 +67,7 @@ before(async () => {
 				name: 'nightly'
 				, modules
 				, modulesRoot: path.join(stageRoot, 'dist/_worker.js')
-				, compatibilityDate: '2024-12-01', compatibilityFlags: [], r2Buckets
+				, compatibilityDate: '2024-12-01', compatibilityFlags: ['enable_weak_ref'], r2Buckets
 				, d1Databases: {NIGHTLY_PHP_DB: 'nightly-pages-d1'}
 				, bindings: {LEAK_CANARY: canary}
 				, outboundService() { throw new Error('Unexpected Pages demo outbound fetch'); }
@@ -291,6 +291,7 @@ test('pinned Wrangler offline multipart includes configured bindings and unchang
 	assert.equal(metadata.bindings.find(binding => binding.type === 'r2_bucket' && binding.name === 'NIGHTLY_BUILDS')?.bucket_name, 'php-wasm');
 	assert.equal(metadata.limits?.cpu_ms, 1000);
 	assert.equal(metadata.compatibility_date, compatibilityDate);
+	assert.ok(metadata.compatibility_flags?.includes('enable_weak_ref'), 'Pages upload must enable Vrzno weak references');
 	assert.ok(parts.has(metadata.main_module), 'Upload metadata must reference the emitted entrypoint');
 	assert.equal(stage.assets.length, 9, 'Exactly one version and its raw runtime closure are tested');
 	for(const asset of stage.assets)

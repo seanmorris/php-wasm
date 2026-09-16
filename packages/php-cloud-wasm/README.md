@@ -4,6 +4,10 @@ Embedded PHP 8.0–8.5 for Cloudflare Workers, with statically linked Vrzno,
 ordinary ZIP/deflate, zlib and PDO-CFD1 with native parameters and atomic batches.
 This package is independent of the browser/Node `php-wasm` package.
 
+Vrzno requires `WeakRef` and `FinalizationRegistry`. Use compatibility date
+`2025-05-05` or newer, or add `compatibility_flags = ["enable_weak_ref"]` to
+your Wrangler configuration when retaining an older date.
+
 Use a version-specific entry inside a Worker module:
 
 ```js

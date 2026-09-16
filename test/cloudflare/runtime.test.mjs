@@ -67,7 +67,7 @@ export default createWorker(PhpCloudflare, factory, wasm);
 		modules
 		, modulesRoot: temporaryDirectory
 		, compatibilityDate: '2024-02-01'
-		, compatibilityFlags: []
+		, compatibilityFlags: ['enable_weak_ref']
 		, d1Databases: { DB: 'cloudflare-test-main', SECOND_DB: 'cloudflare-test-second' }
 		, d1Persist: false
 		, outboundService(request) {
