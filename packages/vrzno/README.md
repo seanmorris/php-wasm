@@ -44,7 +44,7 @@ That is the default for the main `php-wasm` runtime.
 
 Imports verify the active source identity and file contents on every build. Switching commits or development checkouts, changing headers, or adding/removing inputs refreshes the extension and its configuration. Unchanged imports preserve timestamps and do not trigger recompilation.
 
-The managed inputs are root-level C, header, and PHP stub files, `config.m4`, `CREDITS`, and `LICENSE`. Development checkouts are read-only inputs and may live outside the Docker mount; only these files are transferred. All imported files and state are written by the builder, so root-owned Docker outputs do not require host-side writes or ownership changes.
+The managed inputs are root-level C, header, header-template (`.h.in`), and PHP stub files; `vrzno_*.js` and `php_stream_fetch_real_open.js` bodies; `Makefile.frag`, `config.m4`, `CREDITS`, and `LICENSE`. Make embeds the JS through Emscripten's directives-only preprocessor before compiling each native object. Generated headers and npm development tools are excluded from imports. Development checkouts are read-only inputs and may live outside the Docker mount; only these files are transferred. All imported files and state are written by the builder, so root-owned Docker outputs do not require host-side writes or ownership changes.
 
 Generated manifests and a pending-import record let the next build repair interrupted imports. Existing imports without a valid manifest adopt the managed input classes above; Git metadata, compiled objects, and unrelated files are preserved. Do not use an import destination as `VRZNO_DEV_PATH`.
 

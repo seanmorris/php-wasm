@@ -45,9 +45,16 @@ const cases = {
 		, label: 'Vrzno'
 		, header: 'php_vrzno.h'
 		, other: 'vrzno_other.c'
-		, extra: { 'vrzno.stub.php': '<?php // stub A\n', 'vrzno_arginfo.h': '/* arginfo A */\n' }
-		, changed: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n' }
-		, excluded: ['README.md', 'config.w32']
+		, extra: {
+			'vrzno.stub.php': '<?php // stub A\n', 'vrzno_arginfo.h': '/* arginfo A */\n'
+			, 'Makefile.frag': '# Make rules A\n'
+			, 'vrzno_js.h.in': '#include "vrzno_init.js"\n'
+			, 'vrzno_fetch_js.h.in': '#include "php_stream_fetch_real_open.js"\n'
+			, 'vrzno_init.js': 'return "A";\n'
+			, 'php_stream_fetch_real_open.js': 'return await Promise.resolve(1);\n'
+		}
+		, changed: { 'vrzno.c': '/* B */\n', 'config.m4': 'dnl B\n', 'vrzno_init.js': 'return "B";\n' }
+		, excluded: ['README.md', 'config.w32', 'unrelated.js', 'eslint.config.mjs', 'package.json', 'package-lock.json']
 	}
 	, waitline: {
 		extensionName: 'waitline'
