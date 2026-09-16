@@ -2,7 +2,7 @@
 
 PDO_CFD1_IMPORTER:=$(patsubst $(CURDIR)/%,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))import-source.mjs
 PDO_CFD1_REPOSITORY?=https://github.com/seanmorris/pdo-cfd1.git
-PDO_CFD1_REF?=699c2e6cd334ca0906458d05c6296420c1a153f8
+PDO_CFD1_REF?=5bb7272373bb391c34dac4226a8ed4832472189c
 PDO_CFD1_SOURCE_STAMP?=third_party/pdo-cfd1/.php-wasm-source.json
 PDO_CFD1_EXTENSION_STAMP?=third_party/php${PHP_VERSION}-src/ext/pdo_cfd1/.php-wasm-source.json
 pdo_cfd1_shell_quote = '$(subst ','"'"',$(1))'

@@ -34,7 +34,7 @@ Important distinction:
 
 - `WITH_WAITLINE`: defaults to `0` in the custom builder. Set it to `1` to compile the extension in.
 - `WAITLINE_REPOSITORY`: optional Git repository override. Defaults to the upstream Waitline repository.
-- `WAITLINE_REF`: Git commit or ref to build. The default pins `acd126e69f56f281a9dccb0e4eea24786403f46d`, the readline API and interactive-input implementation used by the integration tests.
+- `WAITLINE_REF`: Git commit or ref to build. The default pins `6dd8d818d737a301f21c938c05523de345a604ff`, the readline API and interactive-input implementation used by the integration tests.
 - `WAITLINE_BRANCH`: legacy branch override, used only when `WAITLINE_REF` is not explicitly set. It no longer defaults to `master`, which lacks the readline API.
 - `WAITLINE_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `waitline` repository during the build.
 

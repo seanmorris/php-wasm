@@ -2,7 +2,7 @@
 
 PDO_PGLITE_IMPORTER:=$(patsubst $(CURDIR)/%,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))import-source.mjs
 PDO_PGLITE_REPOSITORY?=https://github.com/seanmorris/pdo-pglite.git
-PDO_PGLITE_REF?=6303e1f0e337b06f04cef162e6d1ca62ab4bd1ce
+PDO_PGLITE_REF?=b5589d95f28c57829a4b0b490d292521c912f43e
 PDO_PGLITE_SOURCE_STAMP?=third_party/pdo-pglite/.php-wasm-source.json
 PDO_PGLITE_EXTENSION_STAMP?=third_party/php${PHP_VERSION}-src/ext/pdo_pglite/.php-wasm-source.json
 pdo_pglite_shell_quote = '$(subst ','"'"',$(1))'
