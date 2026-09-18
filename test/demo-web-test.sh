@@ -18,7 +18,7 @@ until curl -fsS "http://127.0.0.1:${PORT}/php-wasm/home.html" >/dev/null; do
 	sleep 0.1
 done
 
-PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/demo-web-artifact.spec.mjs test/browser/query-workbench.spec.mjs)
+PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/demo-web-artifact.spec.mjs test/browser/query-workbench.spec.mjs test/browser/editor.spec.mjs)
 
 PHP_VERSION="${PHP_VERSION:-8.4}" \
 BROWSER_TEST_PORT="${PORT}" \

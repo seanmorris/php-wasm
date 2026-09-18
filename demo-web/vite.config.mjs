@@ -144,6 +144,7 @@ export default defineConfig(() => ({
 		, preserveSymlinks: true
 	}
 	, publicDir: 'public'
+	, worker: {format: 'es'}
 	, build: {
 		outDir: 'build'
 		, sourcemap: false

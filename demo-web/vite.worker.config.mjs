@@ -23,8 +23,8 @@ const sharedSupportLibsPath = path.resolve(
 
 export default defineConfig({
 	define: {
-		__DEMO_LIB_TYPE__: JSON.stringify(libType),
-		__DEMO_BUILD_TYPE__: JSON.stringify(libType)
+		__DEMO_LIB_TYPE__: JSON.stringify(libType)
+		, __DEMO_BUILD_TYPE__: JSON.stringify(libType)
 	}
 	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, resolve: {

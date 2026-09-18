@@ -25,6 +25,7 @@ import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { coordinateDemoDatabase, withDemoDatabaseLock } from '../lib/demoDatabaseRuntime.worker.js';
 import { createWorkbenchActions } from '../lib/queryWorkbench.worker.js';
+import { createEditorFilesystemActions } from '../lib/editorFilesystem.worker.js';
 
 const sharedLibs = [];
 const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
@@ -144,6 +145,7 @@ const actions = {
 		].join('\n'))));
 	}
 	, ...createWorkbenchActions({withLock: withDemoDatabaseLock, withPGlite})
+	, ...createEditorFilesystemActions({withLock: withDemoDatabaseLock})
 };
 
 let phpLoader = null;

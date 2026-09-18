@@ -1,19 +1,11 @@
 /**
- * Lightweight in-browser editor backed by the CGI worker filesystem and PHP debugger.
+ * Lightweight editor with explicit saves, checked file operations and PHP debugging.
  */
 import '../styles/Common.css';
 import '../styles/Editor.css';
-
-import { useCallback, useEffect, useRef, useState } from 'react';
-
-import EditorFolder from '../components/EditorFolder';
-import Header from '../components/Header';
-import { getPhpBus } from '../lib/phpBus';
-import { basePath } from '../lib/runtimePaths';
-
-import ace from 'ace-builds';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import ace, {Range} from 'ace-builds';
 import AceEditor from 'react-ace';
-import { Range } from "ace-builds";
 import 'ace-builds/src-noconflict/mode-css';
 import 'ace-builds/src-noconflict/mode-html';
 import 'ace-builds/src-noconflict/mode-javascript';
@@ -24,594 +16,540 @@ import 'ace-builds/src-noconflict/mode-text';
 import 'ace-builds/src-noconflict/mode-xml';
 import 'ace-builds/src-noconflict/mode-yaml';
 import 'ace-builds/src-noconflict/theme-monokai';
-
-import reactIcon from '../assets/frameworks/react-icon.svg';
-import toggleIcon from '../assets/nuvola/view_choose.png';
+import Header from '../components/Header';
+import Debugger from '../components/Debugger';
+import EditorFolder from '../components/EditorFolder';
+import EditorDialog from '../components/EditorDialog';
+import EditorQuickOpen from '../components/EditorQuickOpen';
+import {useEditorWorkspace} from '../lib/useEditorWorkspace';
+import {useEditorRecovery} from '../lib/useEditorRecovery';
+import {editorFilesystem as filesystem} from '../lib/editorFilesystem';
+import {editorPath, isPersistentPath, parentPath, withinPath} from '../lib/editorPaths';
+import {basePath} from '../lib/runtimePaths';
+import {encodeEditorFile} from '../lib/EditorDocuments';
+import {droppedEntries, pickerEntries, importEntries, exportEntries} from '../lib/editorTransfers';
 import saveIcon from '../assets/nuvola/3floppy_unmount.png';
 import vsCodeIcon from '../assets/icons/vscode-16.png';
 
-import Debugger from '../components/Debugger';
-
 const modes = {
-	'php': 'ace/mode/php'
-	, 'phtml': 'ace/mode/php'
-	, 'module': 'ace/mode/php'
-	, 'inc': 'ace/mode/php'
-	, 'js': 'ace/mode/javascript'
-	, 'json': 'ace/mode/json'
-	, 'html': 'ace/mode/html'
-	, 'css': 'ace/mode/css'
-	, 'md': 'ace/mode/markdown'
-	, 'mjs': 'ace/mode/javascript'
-	, 'txt': 'ace/mode/text'
-	, 'xml': 'ace/mode/xml'
-	, 'yml': 'ace/mode/yaml'
-	, 'yaml': 'ace/mode/yaml'
+	php: 'php'
+	, phtml: 'php'
+	, module: 'php'
+	, inc: 'php'
+	, js: 'javascript'
+	, mjs: 'javascript'
+	, json: 'json'
+	, html: 'html'
+	, css: 'css'
+	, md: 'markdown'
+	, xml: 'xml'
+	, yml: 'yaml'
+	, yaml: 'yaml'
+};
+const modeFor = path => 'ace/mode/' + (modes[path?.split('.').pop()?.toLowerCase()] || 'text');
+const createSession = (text, path) => {
+	const session = ace.createEditSession(text);
+	session.setUseWorker?.(false);
+	session.setMode(modeFor(path));
+	return session;
+};
+const cancel = {action: 'cancel', label: 'Cancel'};
+
+/** Download bytes without rewriting binary contents or leaving object URLs alive. */
+const download = (bytes, name, type = 'application/octet-stream') => {
+	const url = URL.createObjectURL(new Blob([bytes], {type}));
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = name;
+	link.click();
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-/**
- * Renders the filesystem tree, file tabs, editor surface, and inline debugger panel.
- */
+/** Render the workspace while keeping Ace and debugger references out of file ownership. */
 export default function Editor()
 {
-	const [openFiles, setOpenFiles] = useState([]);
+	const editor = useRef(null);
+	const emptySession = useRef(null);
+	const openDbg = useRef(null);
+	const breakpoints = useRef(new Map());
+	const currentBreak = useRef({});
+	const marker = useRef(null);
+	const started = useRef(false);
+	const initialPath = useRef(new URLSearchParams(window.location.search).get('path'));
+	const uploadInput = useRef(null);
+	const folderInput = useRef(null);
+	const zipInput = useRef(null);
+	const uploadDestination = useRef('/persist');
+	const [ready, setReady] = useState(false);
 	const [showLeft, setShowLeft] = useState(true);
 	const [debuggerActive, setDebuggerActive] = useState(false);
 	const [debuggerStartFile, setDebuggerStartFile] = useState(null);
-	const [debuggerInitCommands, setDebuggerInitCommands] = useState([]);
+	const [debuggerCommands, setDebuggerCommands] = useState([]);
 	const [isExecuting, setIsExecuting] = useState(false);
-	const [editorReady, setEditorReady] = useState(false);
+	const [phpVersion, setPhpVersion] = useState('8.3');
+	const [filter, setFilter] = useState('');
+	const [sidebarWidth, setSidebarWidth] = useState(288);
+	const [preview, setPreview] = useState(null);
+	const [storage, setStorage] = useState(null);
+	const [showQuickOpen, setShowQuickOpen] = useState(false);
+	const workspace = useEditorWorkspace({
+		createSession
+		, onMove(from, to) {
+			const next = new Map();
+			for(const [key, id] of breakpoints.current)
+			{
+				const separator = key.lastIndexOf(':');
+				const path = key.slice(0, separator);
+				next.set((withinPath(path, from) ? to + path.slice(from.length) : path) + key.slice(separator), id);
+			}
+			breakpoints.current = next;
+			if(debuggerActive)
+			{
+				setDebuggerActive(false);
+				setIsExecuting(false);
+			}
+		}
+		, onDelete(path) {
+			for(const key of breakpoints.current.keys()) if(withinPath(key.slice(0, key.lastIndexOf(':')), path)) breakpoints.current.delete(key);
+			if(debuggerActive)
+			{
+				setDebuggerActive(false);
+				setIsExecuting(false);
+			}
+		}
+	});
+	const w = workspace;
+	const recovery = useEditorRecovery(w);
+	const workspaceRef = useRef(w);
+	workspaceRef.current = w;
+	const doc = w.model.active;
+	const documents = [...w.model.documents.values()];
+	const blocked = !!w.busy || debuggerActive;
+	useEffect(() => {
+		if(!ready || !editor.current?.container || typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver(() => editor.current?.resize());
+		observer.observe(editor.current.container);
+		return () => observer.disconnect();
+	}, [ready]);
 
-	const aceRef = useRef(null);
-	const editorInstance = useRef(null);
-	const activeLines = useRef(new Set);
-	const breakpoints = useRef(new Map);
-	const currentBreak = useRef({});
-	const currentPath = useRef(null);
-	const openDbg = useRef(null);
-	const openFilesMap = useRef(new Map());
-	const pathStates = useRef(new Map());
-	const pendingOpenPath = useRef(null);
-	const sessionsMap = useRef(new WeakMap);
-	const tabBox = useRef(null);
-
-	const lastFile = useRef(null);
-	const lastLine = useRef(null);
-
-	const versionSelector = useRef(null);
-	const version = useRef('8.3');
-
-	const query = useRef(null);
-	const startPath = useRef('/');
-
-	if(!query.current)
-	{
-		query.current = new URLSearchParams(window.location.search);
-		startPath.current = query.current.get('path') || '/';
-	}
-
-	const updateOpenFiles = useCallback(() => {
-		setOpenFiles([...openFilesMap.current.values()]);
+	const handleEditorLoad = useCallback(instance => {
+		editor.current = instance;
+		emptySession.current = createSession('', null);
+		instance.setSession(emptySession.current);
+		instance.setReadOnly(true);
+		instance.textInput?.getElement().setAttribute('aria-label', 'File contents');
+		setReady(true);
 	}, []);
 
-	const handleSave = useCallback(async () => {
-		if(!currentPath.current)
+	useEffect(() => {
+		if(!ready) return;
+		const instance = editor.current;
+		const session = doc?.loaded && !doc.loading ? doc.session : emptySession.current;
+		if(instance.getSession() !== session)
 		{
-			return;
+			if(marker.current)
+			{
+				marker.current.session.removeMarker(marker.current.id);
+				marker.current = null;
+			}
+			instance.setSession(session);
 		}
+		session?.setMode?.(modeFor(doc?.path));
+		instance.setReadOnly(debuggerActive || !doc?.loaded || doc.binary || doc.writable === false || !!doc.loading);
+		const query = new URLSearchParams(window.location.search);
+		if(doc?.path) query.set('path', doc.path); else query.delete('path');
+		window.history.replaceState({}, '', window.location.pathname + (query.size ? '?' + query : ''));
+	}, [w.version, ready, debuggerActive, doc]);
 
-		const entry = openFilesMap.current.get(currentPath.current);
+	useEffect(() => {
+		if(!ready || !recovery.ready || started.current) return;
+		started.current = true;
+		const path = initialPath.current;
+		if(path && path !== '/') void workspaceRef.current.openFile(path);
+	}, [ready, recovery.ready]);
 
-		if(!entry)
-		{
-			return;
-		}
-
-		entry.dirty = false;
-		const bus = await getPhpBus();
-
-		await bus.writeFile(
-			currentPath.current
-			, new TextEncoder().encode(editorInstance.current.getValue())
-		);
-
-		updateOpenFiles();
-	}, [updateOpenFiles]);
-
-	const handleOpenVsCode = useCallback(() => {
-		if(currentPath.current)
-		{
-			window.location.href = basePath(`vscode.html?path=${currentPath.current}`);
-			return;
-		}
-
-		window.location.href = basePath('vscode.html');
+	const gotoFile = useCallback(async (path, line) => {
+		if(typeof path !== 'string' || !path.startsWith('/')) return;
+		const opened = await workspaceRef.current.openFile(path);
+		if(!opened || workspaceRef.current.model.active !== opened || !editor.current) return;
+		editor.current.setSession(opened.session);
+		if(marker.current) marker.current.session.removeMarker(marker.current.id);
+		if(!Number.isInteger(line) || line < 1) return;
+		const id = opened.session.addMarker(new Range(line - 1, 0, line - 1, Infinity), 'active_breakpoint', 'fullLine', true);
+		marker.current = {session: opened.session, id};
+		editor.current.scrollToLine(line - 1, true, true, () => {});
 	}, []);
 
-	const handleWindowKeyDown = useCallback(event => {
-		if((event.ctrlKey || event.metaKey) && event.key === 's')
+	useEffect(() => {
+		if(!ready) return;
+		const instance = editor.current;
+		const onGutter = async event => {
+			const current = workspaceRef.current.model.active;
+			const cell = event.domEvent.target?.closest?.('.ace_gutter-cell');
+			if(!current?.path || !cell || event.clientX > cell.getBoundingClientRect().left + 28) return;
+			const line = event.getDocumentPosition().row;
+			const key = current.path + ':' + (line + 1);
+			try
+			{
+				if(breakpoints.current.has(key))
+				{
+					if(openDbg.current) await openDbg.current.clearBreakpoint(breakpoints.current.get(key));
+					current.session.clearBreakpoint(line);
+					breakpoints.current.delete(key);
+				}
+				else
+				{
+					const id = openDbg.current ? await openDbg.current.setBreakpoint(current.path, line + 1) : breakpoints.current.size;
+					current.session.setBreakpoint(line);
+					breakpoints.current.set(key, id);
+				}
+				instance.renderer?.updateBreakpoints();
+			}
+			catch(failure)
+			{
+				workspaceRef.current.setError({label: 'Breakpoint', message: failure.message});
+			}
+			event.domEvent.preventDefault();
+			event.stop?.();
+		};
+		instance.on('guttermousedown', onGutter);
+		return () => instance.off('guttermousedown', onGutter);
+	}, [ready]);
+
+	const save = () => w.perform('Save', () => w.saveDocument(w.model.active));
+	const startDebugger = () => {
+		if(debuggerActive)
+		{
+			setDebuggerActive(false);
+			setIsExecuting(false);
+			if(marker.current)
+			{
+				marker.current.session.removeMarker(marker.current.id);
+				marker.current = null;
+			}
+			return;
+		}
+		void w.perform('Start debugger', async () => {
+			if(!w.model.active) throw new Error('Open a PHP file first.');
+			if(w.model.dirty)
+			{
+				const choice = await w.ask({title: 'Save before debugging?', message: 'The debugger runs files from the filesystem. Save all changed files before starting.', choices: [{action: 'save', label: 'Save and start'}, cancel]});
+				if(choice.action !== 'save') return false;
+				await w.saveAll();
+			}
+			if(!w.model.active.path) return false;
+			setDebuggerStartFile(w.model.active.path);
+			setDebuggerCommands([...breakpoints.current.keys()].map(key => 'b ' + key).concat('run'));
+			setDebuggerActive(true);
+			return true;
+		});
+	};
+	const navigate = path => w.perform('Leave editor', async () => {
+		if(!await w.guard()) return false;
+		await recovery.flush();
+		w.allowNavigationOnce();
+		window.location.href = typeof path === 'function' ? path() : path;
+		return true;
+	});
+	const openVsCode = () => {
+		void navigate(() => {
+			const path = w.model.active?.path;
+			const query = new URLSearchParams(path ? {path} : {});
+			return basePath('vscode.html') + (query.size ? '?' + query : '');
+		});
+	};
+	const openByPath = () => w.perform('Open file', async () => {
+		const path = await w.promptPath('Open file by path', doc?.path || w.directory + '/');
+		if(!path) return false;
+		return !!await w.openFile(path);
+	});
+	const quickOpen = () => setShowQuickOpen(true);
+
+	useEffect(() => {
+		const handler = event => {
+			if(workspaceRef.current.dialog || showQuickOpen || event.defaultPrevented || !(event.ctrlKey || event.metaKey)) return;
+			const current = workspaceRef.current;
+			if(current.busy || debuggerActive) return;
+			const key = event.key.toLowerCase();
+			if(key === 's')
+			{
+				event.preventDefault();
+				void current.perform(event.shiftKey ? 'Save All' : 'Save', () => event.shiftKey ? current.saveAll() : current.saveDocument(current.model.active));
+			}
+			if(key === 'o')
+			{
+				event.preventDefault();
+				void openByPath();
+			}
+			if(key === 'p')
+			{
+				event.preventDefault();
+				quickOpen();
+			}
+			if(key === 'n')
+			{
+				event.preventDefault();
+				current.newDocument();
+			}
+			if(key === 'w')
+			{
+				event.preventDefault();
+				if(current.model.active) void current.closeDocuments([current.model.active]);
+			}
+			if(key === 't' && event.shiftKey)
+			{
+				event.preventDefault();
+				if(current.model.closed[0]) void current.openFile(current.model.closed[0]);
+			}
+		};
+		window.addEventListener('keydown', handler);
+		return () => window.removeEventListener('keydown', handler);
+	});
+
+	useEffect(() => {
+		const mime = {png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', avif: 'image/avif', svg: 'image/svg+xml'}[doc?.path?.split('.').pop()?.toLowerCase()];
+		if(!doc?.bytes || !mime)
+		{
+			setPreview(null);
+			return;
+		}
+		const url = URL.createObjectURL(new Blob([doc.bytes], {type: mime}));
+		setPreview(url);
+		return () => URL.revokeObjectURL(url);
+	}, [doc?.path, doc?.bytes]);
+	useEffect(() => {
+		navigator.storage?.estimate?.().then(setStorage).catch(() => setStorage(null));
+	}, [w.refresh]);
+
+	const entryMenu = async entry => {
+		if(blocked) return;
+		const choice = await w.ask({title: entry.path
+			, choices: [
+				{action: 'rename', label: 'Rename', disabled: entry.protected}
+				, {action: 'duplicate', label: 'Duplicate', disabled: entry.protected}
+				, {action: 'copy', label: 'Copy', disabled: entry.protected}
+				, {action: 'cut', label: 'Cut', disabled: entry.protected}
+				, {action: 'move', label: 'Move…', disabled: entry.protected}
+				, {action: 'delete', label: 'Delete…', disabled: entry.protected}
+				, {action: 'download', label: entry.kind === 'directory' ? 'Export folder as ZIP' : 'Download file'}
+				, cancel
+			]
+		});
+		const current = workspaceRef.current;
+		if(choice.action === 'rename') void current.rename(entry);
+		if(choice.action === 'duplicate') void current.duplicate(entry);
+		if(choice.action === 'copy') void current.copySelection(false);
+		if(choice.action === 'cut') void current.copySelection(true);
+		if(choice.action === 'move') void current.moveSelection();
+		if(choice.action === 'delete') void current.removeSelected();
+		if(choice.action === 'download')
+		{
+			if(entry.kind === 'directory') void exportFolder(entry.path);
+			else void current.perform('Download file', async () => {
+				const file = await filesystem.read(entry.path);
+				download(file.bytes, entry.name);
+				return true;
+			});
+		}
+	};
+	const upload = async (entries, destination) => {
+		await w.perform('Import files', async () => importEntries(await entries, destination, {ask: w.ask, progress: w.setStatus}));
+		await w.checkExternal();
+	};
+	const pickUpload = input => {
+		uploadDestination.current = w.directory;
+		input.current.click();
+	};
+	const picked = event => {
+		const files = [...event.target.files];
+		event.target.value = '';
+		void upload(Promise.resolve().then(() => pickerEntries(files)), uploadDestination.current);
+	};
+	const importZip = event => {
+		const file = event.target.files[0];
+		event.target.value = '';
+		if(!file) return;
+		void w.perform('Import ZIP', async () => {
+			let destination = uploadDestination.current;
+			if(destination === '/') destination = await w.promptPath('Import ZIP into folder', '/persist');
+			if(!destination) return false;
+			if(destination === '/') throw new Error('Choose a folder below the filesystem root.');
+			if(file.size > 64 * 1024 * 1024) throw new Error('ZIP input exceeds 64 MiB.');
+			const {editorArchive} = await import('../lib/editorArchives');
+			w.setStatus('Validating and decompressing ZIP…');
+			const entries = await editorArchive('unpack', new Uint8Array(await file.arrayBuffer()));
+			try
+			{
+				return await importEntries(entries, destination, {ask: w.ask, progress: w.setStatus});
+			}
+			finally
+			{
+				w.invalidate();
+			}
+		});
+	};
+	const exportFolder = path => w.perform('Export ZIP', async () => {
+		const {editorArchive} = await import('../lib/editorArchives');
+		const entries = await exportEntries(path, w.setStatus);
+		w.setStatus('Compressing folder…');
+		const bytes = await editorArchive('pack', entries);
+		download(bytes, (path.split('/').pop() || 'filesystem') + '.zip', 'application/zip');
+		return true;
+	});
+	const drop = (event, entry) => {
+		event.preventDefault();
+		event.stopPropagation();
+		if(blocked) return;
+		const raw = event.dataTransfer.getData('application/x-php-wasm-paths');
+		if(!raw)
+		{
+			void upload(droppedEntries(event.dataTransfer), entry.kind === 'directory' ? entry.path : parentPath(entry.path));
+			return;
+		}
+		void w.perform('Move dropped files', async () => {
+			const paths = JSON.parse(raw).map(editorPath);
+			const entries = await Promise.all(paths.filter(path => !paths.some(other => path !== other && withinPath(path, other))).map(path => filesystem.inspect(path)));
+			return w.transfer(entries, entry.kind === 'directory' ? entry.path : parentPath(entry.path), true);
+		});
+	};
+	const downloadCurrent = () => {
+		if(!doc?.loaded) return;
+		const bytes = doc.binary ? doc.bytes : encodeEditorFile(doc.session.getValue(), doc.bom);
+		download(bytes, doc.name);
+	};
+	const treeKeys = event => {
+		if(!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) return;
+		const rows = [...event.currentTarget.querySelectorAll('[role="treeitem"]')];
+		const current = event.target.closest('[role="treeitem"]');
+		const index = rows.indexOf(current);
+		const next = event.key === 'Home' ? 0 : event.key === 'End' ? rows.length - 1 : index + (event.key === 'ArrowDown' ? 1 : -1);
+		if(rows[next])
 		{
 			event.preventDefault();
-			void handleSave();
+			rows[next].focus();
 		}
-	}, [handleSave]);
+	};
 
-	const toggleLeftBar = useCallback(() => {
-		setShowLeft(showLeft => !showLeft);
-	}, []);
-
-	const openFile = useCallback(async path => {
-		const editor = editorInstance.current;
-
-		if(!editor)
-		{
-			pendingOpenPath.current = path;
-			return;
-		}
-
-		const name = path.split('/').pop();
-		const newFile = openFilesMap.current.has(path)
-			? openFilesMap.current.get(path)
-			: {name, path};
-
-			query.current.set('path', path);
-
-		if(!openDbg.current)
-		{
-			window.history.replaceState({}, null, window.location.pathname + '?' + query.current);
-		}
-
-		if(currentPath.current !== path)
-		{
-			activeLines.current.forEach(marker => {
-				editor.session.removeMarker(marker);
-				activeLines.current.delete(marker);
-			});
-		}
-
-		currentPath.current = path;
-
-		editor.setReadOnly(debuggerActive);
-
-		if(!newFile.session)
-		{
-			openFilesMap.current.set(path, newFile);
-		}
-
-		for(const file of openFilesMap.current.values())
-		{
-			file.active = false;
-		}
-
-		newFile.active = true;
-		updateOpenFiles();
-
-		if(newFile.loading)
-		{
-			editor.setSession(await newFile.loading);
-			return;
-		}
-
-		let acceptLoading;
-		newFile.loading = new Promise(accept => acceptLoading = accept);
-
-		const extension = path.split('.').pop();
-		const mode = modes[extension] ?? 'ace/mode/text';
-		const bus = await getPhpBus();
-
-		const code = new TextDecoder().decode(
-			await bus.readFile(path)
-		);
-
-		newFile.session = ace.createEditSession(code, mode);
-		sessionsMap.current.set(newFile.session, newFile);
-		editor.setSession(newFile.session);
-		acceptLoading(newFile.session);
-
-		newFile.dirty = false;
-
-		newFile.session.on('change', () => {
-			newFile.dirty = true;
-			updateOpenFiles();
-		});
-
-		tabBox.current?.scrollTo({left: -tabBox.current.scrollWidth, behavior: 'smooth'});
-	}, [debuggerActive, updateOpenFiles]);
-
-	const closeFile = useCallback(async path => {
-		const entry = openFilesMap.current.get(path);
-
-		if(!entry)
-		{
-			return;
-		}
-
-		openFilesMap.current.delete(path);
-
-		if(entry.active)
-		{
-			if(openFilesMap.current.size)
+	return <div className="editor viewport-page" data-show-left={showLeft} style={{'--editor-sidebar-width': sidebarWidth + 'px'}}>
+		<div className="bevel" inert={w.dialog || showQuickOpen ? true : undefined} onClickCapture={event => {
+			const link = event.target.closest('a[href]');
+			if(link && w.model.dirty)
 			{
-				const first = [...openFilesMap.current.values()][0];
-				first.active = true;
-				currentPath.current = first.path;
-				editorInstance.current.setSession(first.session);
+				event.preventDefault();
+				event.stopPropagation();
+				void navigate(link.href);
 			}
-			else
-			{
-				currentPath.current = null;
-				editorInstance.current.setSession(ace.createEditSession('', 'ace/mode/text'));
-				editorInstance.current.setReadOnly(true);
-			}
-		}
-
-		updateOpenFiles();
-	}, [updateOpenFiles]);
-
-	const gotoFile = useCallback(async (file, line) => {
-		const editor = editorInstance.current;
-
-		if(!editor)
-		{
-			return;
-		}
-
-		const bus = await getPhpBus();
-		const { exists } = await bus.analyzePath(file);
-
-		if(exists)
-		{
-			await openFile(file);
-			editor.scrollToLine(-1 + line, true, true, () => {});
-		}
-
-		if(line === undefined)
-		{
-			return;
-		}
-
-		activeLines.current.forEach(marker => {
-			editor.session.removeMarker(marker);
-			activeLines.current.delete(marker);
-		});
-
-		const marker = editor.session.addMarker(
-			new Range(-1 + line, 0, -1 + line, Infinity)
-			, 'active_breakpoint'
-			, 'fullLine'
-			, true
-		);
-
-		activeLines.current.add(marker);
-	}, [openFile]);
-
-	const handleDebuggerStdIn = useCallback(async () => {
-		const editor = editorInstance.current;
-		const file = currentBreak.current.file;
-		const line = currentBreak.current.line;
-
-		if(!(editor && file && line))
-		{
-			return;
-		}
-
-		if(file === lastFile.current && line === lastLine.current)
-		{
-			return;
-		}
-
-		const bus = await getPhpBus();
-		const { exists } = await bus.analyzePath(file);
-
-		if(exists)
-		{
-			await openFile(file);
-
-			activeLines.current.forEach(marker => {
-				editor.session.removeMarker(marker);
-				activeLines.current.delete(marker);
-			});
-
-			const marker = editor.session.addMarker(
-				new Range(-1 + line, 0, -1 + line, Infinity)
-				, 'active_breakpoint'
-				, 'fullLine'
-				, true
-			);
-
-			activeLines.current.add(marker);
-			editor.scrollToLine(-1 + line, true, true, () => {});
-
-			lastFile.current = file;
-			lastLine.current = line;
-			return;
-		}
-
-		activeLines.current.forEach(marker => {
-			editor.session.removeMarker(marker);
-			activeLines.current.delete(marker);
-		});
-	}, [openFile]);
-
-	const startDebugger = useCallback(() => {
-		const editor = editorInstance.current;
-
-		if(!editor)
-		{
-			return;
-		}
-
-		if(openDbg.current)
-		{
-			activeLines.current.forEach(marker => {
-				editor.session.removeMarker(marker);
-				activeLines.current.delete(marker);
-			});
-
-			editor.setReadOnly(false);
-			setDebuggerActive(false);
-			setDebuggerStartFile(null);
-			setDebuggerInitCommands([]);
-			setIsExecuting(false);
-			return;
-		}
-
-		editor.setReadOnly(true);
-		setDebuggerStartFile(currentPath.current);
-		setDebuggerInitCommands([
-			...[...breakpoints.current.keys()].map(bp => `b ${bp}`)
-			, 'run'
-		]);
-		setDebuggerActive(true);
-	}, []);
-
-	useEffect(() => {
-		window.addEventListener('keydown', handleWindowKeyDown);
-		return () => {
-			window.removeEventListener('keydown', handleWindowKeyDown);
-		};
-	}, [handleWindowKeyDown]);
-
-	useEffect(() => {
-		if(!editorReady)
-		{
-			return;
-		}
-
-		if(startPath.current !== '/' && !pendingOpenPath.current)
-		{
-			pendingOpenPath.current = startPath.current;
-		}
-
-		if(!pendingOpenPath.current)
-		{
-			return;
-		}
-
-		const path = pendingOpenPath.current;
-		pendingOpenPath.current = null;
-		void openFile(path);
-	}, [editorReady, openFile]);
-
-	useEffect(() => {
-		if(!editorReady)
-		{
-			return;
-		}
-
-		const editor = editorInstance.current;
-
-		if(!editor)
-		{
-			return;
-		}
-
-		const onGutter = async event => {
-			const session = editor.getSession();
-			const target = event.domEvent.target;
-			const gutterCell = target?.closest?.('.ace_gutter-cell')
-				|| (typeof target?.className === 'string' && target.className.indexOf('ace_gutter-cell') !== -1
-					? target
-					: null
-				);
-
-			if(!gutterCell)
-			{
-				return;
-			}
-
-			if(!sessionsMap.current.has(session) && currentPath.current)
-			{
-				sessionsMap.current.set(session, {path: currentPath.current});
-			}
-
-			if(!sessionsMap.current.has(session))
-			{
-				console.trace('Unmapped session!');
-				return;
-			}
-
-			const {path} = sessionsMap.current.get(session);
-
-			if(event.clientX > 28 + gutterCell.getBoundingClientRect().left)
-			{
-				return;
-			}
-
-			const line = event.getDocumentPosition().row;
-			const breakpointKey = `${path}:${1 + line}`;
-
-				if(!breakpoints.current.has(breakpointKey))
-				{
-					event.editor.session.setBreakpoint(line);
-
-					let id = breakpoints.current.size;
-
-					if(openDbg.current)
+		}}>
+			<Header />
+			<div className="row toolbar inset tight editor-toolbar">
+				<button title="Toggle explorer" aria-label="Toggle explorer" aria-expanded={showLeft} onClick={() => setShowLeft(value => !value)}>☰</button>
+				<details className="editor-menu" onClick={event => {
+					if(event.target.closest('button')) event.currentTarget.open = false;
+				}}><summary>File</summary><div className="bevel">
+						<button disabled={blocked} onClick={w.newDocument}>New untitled file</button>
+						<button disabled={blocked} onClick={() => w.newEntry(false)}>New file in folder…</button>
+						<button disabled={blocked} onClick={() => w.newEntry(true)}>New folder…</button>
+						<button disabled={blocked} onClick={openByPath}>Open by path…</button>
+						<button disabled={blocked || !doc || doc.binary || !doc.loaded} onClick={save}>Save</button>
+						<button disabled={blocked || !doc || doc.binary || !doc.loaded} onClick={() => w.perform('Save As', () => w.saveDocument(doc, true))}>Save As…</button>
+						<button disabled={blocked || !w.model.dirty} onClick={() => w.perform('Save All', w.saveAll)}>Save All</button>
+						<button disabled={blocked || !doc?.path} onClick={() => w.revert(doc)}>Revert…</button>
+						<button disabled={!doc?.loaded} onClick={downloadCurrent}>Download current file</button>
+						<button disabled={blocked} onClick={() => pickUpload(uploadInput)}>Upload files…</button>
+						<button disabled={blocked} onClick={() => pickUpload(folderInput)}>Upload folder…</button>
+						<button disabled={blocked} onClick={() => pickUpload(zipInput)}>Import ZIP…</button>
+						<button disabled={blocked} onClick={() => exportFolder(w.directory)}>Export folder as ZIP</button>
+						<button disabled={blocked || !documents.length} onClick={() => w.closeDocuments(documents)}>Close all</button>
+						<button disabled={blocked || documents.length < 2} onClick={() => w.closeDocuments(documents.filter(item => item !== doc))}>Close others</button>
+						<button disabled={blocked || !w.model.closed.length} onClick={() => w.openFile(w.model.closed[0])}>Reopen closed file</button>
+					</div></details>
+				<button aria-label="Save file" title="Save (Ctrl/Cmd+S)" disabled={blocked || !doc?.loaded || doc.binary} onClick={save}><img src={saveIcon} alt="" /></button>
+				<button disabled={blocked} onClick={quickOpen} title="Quick open (Ctrl/Cmd+P)">Quick open…</button>
+				{recovery.available && <button disabled={blocked} onClick={() => w.perform('Recover drafts', recovery.recover)}>Recover drafts…</button>}
+				<button disabled={blocked} onClick={openVsCode} aria-label="Open in VSCode" title="Open in VSCode"><img src={vsCodeIcon} alt="" /></button>
+				<select aria-label="PHP version" value={phpVersion} disabled={debuggerActive} onChange={event => setPhpVersion(event.target.value)}>{['8.5', '8.4', '8.3', '8.2', '8.1', '8.0'].map(value => <option key={value}>{value}</option>)}</select>
+				<button disabled={!!w.busy || !doc} title={debuggerActive ? 'Stop debugger' : 'Start debugger'} aria-label={debuggerActive ? 'Stop debugger' : 'Start debugger'} onClick={startDebugger}>{debuggerActive ? '⏹' : '▶'}</button>
+				{isExecuting && ['step', 'continue', 'until', 'next', 'finish', 'leave'].map(command => <button key={command} onClick={() => openDbg.current?.[command]?.()}>{command}</button>)}
+			</div>
+			<div className="row editor-main">
+				<aside className="file-area frame inset" aria-label="File explorer">
+					<div className="editor-explorer-toolbar">
+						<button disabled={blocked} onClick={() => w.newEntry(false)} title="New file">+ File</button>
+						<button disabled={blocked} onClick={() => w.newEntry(true)} title="New folder">+ Folder</button>
+						<button onClick={() => void w.checkExternal()}>Refresh</button>
+						<button disabled={blocked} onClick={() => pickUpload(uploadInput)}>Upload…</button>
+						<button disabled={blocked} onClick={w.changeRoot}>Root…</button>
+						<button disabled={!doc?.path} onClick={() => {
+							if(!withinPath(doc.path, w.root)) w.setRoot('/');
+							w.select({path: doc.path, name: doc.name, kind: 'file'}, false);
+							w.reveal(doc.path);
+						}}>Reveal</button>
+						<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(false)}>Copy</button>
+						<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(true)}>Cut</button>
+						<button disabled={blocked} onClick={w.paste}>Paste</button>
+						<button disabled={blocked || !w.selected.size} onClick={w.removeSelected}>Delete…</button>
+						<input aria-label="Filter visible files" placeholder="Filter visible files" value={filter} onChange={event => setFilter(event.target.value)} />
+					</div>
+					<div className="editor-tree-scroll"><ul role="tree" aria-label="Filesystem" aria-multiselectable="true" onKeyDown={treeKeys}>
+						<EditorFolder entry={{path: w.root, name: w.root, kind: 'directory', protected: ['/', '/persist', '/config'].includes(w.root)}} expanded={w.expanded} onExpand={w.expand} selected={w.selected} onSelect={w.select} onOpenFile={path => void w.openFile(path)} onMenu={entryMenu} onDrop={drop} refresh={w.refresh} filter={filter} />
+					</ul></div>
+					<label className="editor-sidebar-size">Explorer width<input type="range" min="180" max="600" value={sidebarWidth} onChange={event => {
+						setSidebarWidth(Number(event.target.value));
+						editor.current?.resize();
+					}} /></label>
+				</aside>
+				<div className="edit-area">
+					<nav className="editor-breadcrumbs" aria-label="Current file path">{doc?.path ? doc.path.split('/').filter(Boolean).map((part, index, parts) => <button key={index} title={'/' + parts.slice(0, index + 1).join('/')} onClick={() => {const path = '/' + parts.slice(0, index + 1).join('/'); if(index < parts.length - 1)
 					{
-						id = await openDbg.current.setBreakpoint(path, 1 + line);
-					}
-
-					breakpoints.current.set(breakpointKey, id);
-				}
-			else
-			{
-				const id = breakpoints.current.get(breakpointKey);
-
-					event.editor.session.clearBreakpoint(line);
-
-					if(openDbg.current)
-					{
-						await openDbg.current.clearBreakpoint(id);
-					}
-
-					breakpoints.current.delete(breakpointKey);
-			}
-
-				event.editor.renderer.updateBreakpoints();
-				event.domEvent.preventDefault();
-				event.domEvent.stopPropagation();
-				event.stop();
-		};
-
-		editor.on('guttermousedown', onGutter);
-
-		return () => {
-			editor.off('guttermousedown', onGutter);
-		};
-	}, [editorReady]);
-
-	const handleEditorLoad = useCallback(editor => {
-		editorInstance.current = editor;
-		editor.setSession(ace.createEditSession('', 'ace/mode/text'));
-		editor.setReadOnly(true);
-		setEditorReady(true);
-	}, []);
-
-	const handleStep = () => openDbg.current?.step();
-	const handleContinue = () => openDbg.current?.continue();
-	const handleUntil = () => openDbg.current?.until();
-	const handleNext = () => openDbg.current?.next();
-	const handleFinish = () => openDbg.current?.finish();
-	const handleLeave = () => openDbg.current?.leave();
-
-	return (
-		<div className = "editor viewport-page" data-show-left = {showLeft}>
-			<div className='bevel'>
-				<Header />
-				<div className = "row toolbar inset tight">
-					<button className='square' onClick = {toggleLeftBar}>
-						<img src = {toggleIcon} alt = "" />
-					</button>
-					<button className='square' onClick = {handleSave}>
-						<img src = {saveIcon} alt = "" />
-					</button>
-					<button className='square' onClick = {handleOpenVsCode}>
-						<img src = {vsCodeIcon} alt = "" />
-					</button>
-					{!isExecuting ? (
-						<>
-							{debuggerActive ? '' : <select className='bevel' defaultValue = {version.current} ref={versionSelector} onChange={() => version.current = versionSelector.current.value}>
-								<option>8.5</option>
-								<option>8.4</option>
-								<option>8.3</option>
-								<option>8.2</option>
-								<option>8.1</option>
-								<option>8.0</option>
-							</select>}
-							<button className='square' title = "Debugger" onClick = {startDebugger}>
-								{debuggerActive ? '⏹' : '▶'}
-							</button>
-						</>
-					) : (
-						<span className='contents'>
-							<button className='square' title = "Stop Debugger" onClick = {startDebugger}>
-								⏹
-							</button>
-							<button title = "Step" className='square' onClick = {handleStep}>
-								⇥
-							</button>
-							<button title = "Continue" className='square' onClick = {handleContinue}>
-								→
-							</button>
-							<button title = "Until" className='square' onClick = {handleUntil}>
-								⤻
-							</button>
-							<button title = "Next" className='square' onClick = {handleNext}>
-								↦
-							</button>
-							<button title = "Finish" className='square' onClick = {handleFinish}>
-								↑
-							</button>
-							<button title = "Leave" className='square' onClick = {handleLeave}>
-								↳
-							</button>
-						</span>
-					)}
-				</div>
-				<div className = "row">
-					<div className = "file-area frame inset">
-						<div className = "scroller">
-							<EditorFolder
-								name = "/"
-								onOpenFile = {openFile}
-								path = "/"
-								pathStates = {pathStates}
-								startPath = {startPath.current}
-							/>
+						w.setRoot(path);
+						w.expand(path, true);
+						w.select({path, name: part, kind: 'directory'}, false);
+					} else w.reveal(path);}}>{part}</button>) : <span>{doc?.name || 'No file open'}</span>}</nav>
+					<div className="tab-area frame" role="tablist" tabIndex={-1} aria-label="Open files" onKeyDown={event => {
+						if(event.target.getAttribute('role') !== 'tab' || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+						const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
+						const index = tabs.indexOf(event.target);
+						const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+						event.preventDefault(); tabs[next].click(); tabs[next].focus();
+					}}>{documents.map(file => <div className="tab" key={file.id} data-active={file.id === w.model.activeId}>
+							<button role="tab" tabIndex={file.id === w.model.activeId ? 0 : -1} aria-selected={file.id === w.model.activeId} aria-controls="editor-document-panel" id={'tab-' + file.id} title={file.path || file.name} onClick={() => {
+								w.selectDocument(file);
+								if(file.path && !file.loaded) void w.openFile(file.path);
+							}}>{documents.some(other => other !== file && other.name === file.name) ? file.path || file.name : file.name}{file.dirty ? ' *' : ''}{file.loading ? ' …' : ''}{file.saving ? ' (saving)' : ''}</button>
+							<button aria-label={'Close ' + file.name} disabled={blocked || !!file.saving} onClick={() => w.closeDocuments([file])}>×</button>
+						</div>)}</div>
+					{w.error && <div className="editor-error" role="alert"><strong>{w.error.label}: </strong>{w.error.message} <button onClick={() => w.setError(null)}>Dismiss</button><button onClick={() => void w.checkExternal()}>Refresh filesystem</button></div>}
+					{doc?.external && <div className="editor-notice" role="status">This file was {doc.external} on disk. Your buffer is unchanged. <button disabled={blocked} onClick={() => w.revert(doc)}>Reload…</button><button disabled={blocked} onClick={() => w.perform('Save As', () => w.saveDocument(doc, true))}>Save As…</button></div>}
+					<div className="editor-document" role="tabpanel" id="editor-document-panel" aria-labelledby={doc ? 'tab-' + doc.id : undefined}>
+						{!doc && <div className="editor-empty">Open a file from the explorer, create a new file, or use Open by path.</div>}
+						{doc?.loading && <div className="editor-empty" role="status">Loading {doc.name}…</div>}
+						{doc?.error && !doc.loaded && <div className="editor-empty"><button onClick={() => w.openFile(doc.path)}>Retry opening {doc.name}</button></div>}
+						{doc?.binary && <div className="editor-empty">Binary or unsupported text encoding. Text editing is disabled.<button onClick={downloadCurrent}>Download original file</button>{preview && <img className="editor-image-preview" src={preview} alt={doc.name} />}</div>}
+						<div id="edit-root" hidden={!doc || doc.binary || !!doc.loading || !doc.loaded}>
+							<AceEditor name="input" width="100%" height="100%" theme="monokai" onLoad={handleEditorLoad} setOptions={{useWorker: false}} />
 						</div>
 					</div>
-					<div className='edit-area'>
-						<div className = "inset column grow">
-							<div className = "tab-area frame">
-								<div className='scroller' ref = {tabBox}>
-									{openFiles.map(file =>
-										<div className='tab' key = {file.path} data-active = {file.active}>
-											<div onClick = {() => openFile(file.path)}>
-												{file.name} {file.dirty ? '!' : ''}
-											</div>
-											<div onClick = {() => closeFile(file.path)}>×</div>
-										</div>
-									)}
-								</div>
-							</div>
-							<div className='frame grow'>
-								<div id = "edit-root" className = "scroller">
-									<AceEditor
-										height = "100%"
-										mode = "php"
-										name = "input"
-										onLoad = {handleEditorLoad}
-										ref = {aceRef}
-										theme = "monokai"
-										width = "100%"
-									/>
-								</div>
-							</div>
-						</div>
-						{debuggerActive && (
-							<div className='inset row grow'>
-								<div className='frame grow'>
-									<Debugger
-										file = {debuggerStartFile}
-										initCommands = {debuggerInitCommands}
-										onStdIn = {handleDebuggerStdIn}
-										openFile = {gotoFile}
-										ref = {openDbg}
-										setCurrentFile = {file => currentBreak.current.file = file}
-										setCurrentLine = {line => currentBreak.current.line = line}
-										setIsExecuting = {setIsExecuting}
-										version = {version.current}
-									/>
-								</div>
-							</div>
-						)}
+					{debuggerActive && <div className="editor-debugger inset"><Debugger file={debuggerStartFile} initCommands={debuggerCommands} onStdIn={() => void gotoFile(currentBreak.current.file, currentBreak.current.line)} openFile={gotoFile} ref={openDbg} setCurrentFile={file => currentBreak.current.file = file} setCurrentLine={line => currentBreak.current.line = line} setIsExecuting={setIsExecuting} version={phpVersion} /></div>}
+					<div className="editor-file-info">
+						<span>{recovery.status}</span>
+						{doc?.writable === false && <span>Read-only file — use Save As to create an editable copy</span>}
+						<span>{doc?.path ? isPersistentPath(doc.path) ? 'Persistent browser storage' : 'Temporary filesystem — download to keep a copy' : 'Unsaved document'}</span>
+						{doc && !doc.binary && <><span>{doc.bom ? 'UTF-8 with BOM' : 'UTF-8'}</span><select aria-label="Line endings" disabled={blocked} value={doc.eol} onChange={event => {
+							doc.eol = event.target.value;
+							doc.session.setNewLineMode(doc.eol);
+							doc.dirty = !doc.path || doc.session.getValue() !== doc.baseline;
+							w.model.emit();
+						}}><option value="unix">LF</option><option value="windows">CRLF</option></select></>}
+						{storage && <span title="Storage is shared by this site's demos">{(storage.usage / 1048576).toFixed(1)} MiB used / {(storage.quota / 1048576).toFixed(0)} MiB available quota</span>}
 					</div>
-				</div>
-				<div className = "inset right demo-bar">
-					<span>Demo powered by React</span> <img src = {reactIcon} className='small-icon' alt = "React logo" />
 				</div>
 			</div>
+			<div className="editor-status inset" role="status" aria-live="polite">{w.status}</div>
 		</div>
-	);
+		{w.dialog && <EditorDialog key={w.dialog.key} dialog={w.dialog} finish={w.finish} />}
+		{showQuickOpen && <EditorQuickOpen root={w.root} recent={w.model.recent} onOpen={w.openFile} onClose={() => setShowQuickOpen(false)} />}
+		<input ref={uploadInput} type="file" multiple hidden onChange={picked} aria-label="Upload files" />
+		<input ref={folderInput} type="file" multiple webkitdirectory="" hidden onChange={picked} aria-label="Upload folder" />
+		<input ref={zipInput} type="file" accept=".zip,application/zip" hidden onChange={importZip} aria-label="Import ZIP" />
+	</div>;
 }
