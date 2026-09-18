@@ -1,5 +1,5 @@
 import { PhpCgiBase } from './PhpCgiBase.mjs';
-import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { commitTransaction, startTransaction, requestWebLock } from './webTransactions.mjs';
 import { resolveDependencies } from './resolveDependencies.mjs';
 
 const STR = 'string';
@@ -209,35 +209,52 @@ export class PhpCgiWebBase extends PhpCgiBase
 	 */
 	async _enqueue(callback, params = [], readOnly = false)
 	{
-		let accept, reject;
+		// Runtime initialization also owns this lock; never wait for it while locked.
+		const binary = this.binary;
+		await binary;
 
-		const coordinator = new Promise((a,r) => [accept, reject] = [a, r]);
-
-		this.queue.push([callback, params, accept, reject]);
-
-		navigator.locks.request('php-wasm-fs-lock', async () => {
-
-			if(!this.queue.length)
+		return requestWebLock('php-wasm-fs-lock', async () => {
+			if(this.binary !== binary)
 			{
-				return;
+				throw new Error('PHP runtime changed before the filesystem operation started.');
 			}
 
-			await (this.autoTransaction ? this.startTransaction() : Promise.resolve());
+			let started = false;
+			let result, failure;
+			let failed = false;
 
-			do
+			try
 			{
-				const [callback, params, accept, reject] = this.queue.shift();
-				await callback(...params).then(accept).catch(reject);
-				let lockChecks = 5;
-				while(!this.queue.length && lockChecks--)
+				if(this.autoTransaction)
 				{
-					await new Promise(a => setTimeout(a, 5));
+					await this.startTransaction();
+					started = true;
 				}
-			} while(this.queue.length);
+				result = await callback(...params);
+			}
+			catch(error)
+			{
+				failure = error;
+				failed = true;
+			}
 
-			await (this.autoTransaction ? this.commitTransaction(readOnly) : Promise.resolve());
+			if(started)
+			{
+				try
+				{
+					await this.commitTransaction(readOnly);
+				}
+				catch(error)
+				{
+					failure = failed
+						? new AggregateError([failure, error], 'PHP operation and transaction commit failed')
+						: error;
+					failed = true;
+				}
+			}
+
+			if(failed) throw failure;
+			return result;
 		});
-
-		return coordinator;
 	}
 }
