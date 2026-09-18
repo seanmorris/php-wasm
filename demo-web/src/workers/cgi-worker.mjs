@@ -13,6 +13,7 @@ import Libxml from 'php-wasm-libxml';
 import Libzip from 'php-wasm-libzip';
 import Mbstring from 'php-wasm-mbstring';
 import Openssl from 'php-wasm-openssl';
+import Phar from 'php-wasm-phar';
 import Simplexml from 'php-wasm-simplexml';
 import Sqlite from 'php-wasm-sqlite';
 import Tidy from 'php-wasm-tidy';
@@ -40,6 +41,7 @@ const dynamicSupportLibs = [
 	, Iconv
 	, Intl
 	, Openssl
+	, Phar
 	, Mbstring
 	, Sqlite
 	, Xml

@@ -829,22 +829,32 @@ export class PhpCgiBase
 		}
 
 		const rewrite = this.rewrite(url.pathname);
-		let rewritePath = typeof rewrite === 'string'
+		const rewritePath = typeof rewrite === 'string'
 			? rewrite
 			: rewrite?.path ?? url.pathname;
+		const explicitScript = rewrite && typeof rewrite === 'object';
+		const routePrefix = vHostPrefix || this.prefix;
+		const relativePath = explicitScript ? rewritePath : rewritePath.substr(routePrefix.length);
+		let path = joinPaths(docroot, relativePath);
+		let scriptName = explicitScript ? rewrite.scriptName : joinPaths(routePrefix, relativePath);
+		let pathInfo = '';
 
-		let scriptName, path;
-
-		if(rewrite && typeof rewrite === 'object')
+		// Archive members belong to PHP's phar:// wrapper, not Emscripten FS.
+		// Only split at an existing file; directories may also end in .phar.
+		for(const match of relativePath.matchAll(/\.phar\//g))
 		{
-			scriptName = rewrite.scriptName;
-			path = docroot + rewrite.path;
-		}
-		else
-		{
+			const archiveEnd = match.index + '.phar'.length;
+			const archiveRelativePath = relativePath.slice(0, archiveEnd);
+			const archivePath = joinPaths(docroot, archiveRelativePath);
+			const aboutArchive = php.FS.analyzePath(archivePath);
 
-			path = joinPaths(docroot, rewritePath.substr((vHostPrefix || this.prefix).length));
-			scriptName = path;
+			if(aboutArchive.exists && php.FS.isFile(aboutArchive.object.mode))
+			{
+				path = archivePath;
+				pathInfo = relativePath.slice(archiveEnd);
+				scriptName = explicitScript ? scriptName : joinPaths(routePrefix, archiveRelativePath);
+				break;
+			}
 		}
 
 		let aboutPath = php.FS.analyzePath(path);
@@ -863,29 +873,16 @@ export class PhpCgiBase
 			if(aboutIndex.exists && php.FS.isFile(aboutIndex.object.mode))
 			{
 				path = indexPath;
-				rewritePath = joinPaths(rewritePath, 'index.php');
-				scriptName = rewrite && typeof rewrite === 'object'
-					? rewrite.scriptName
-					: path;
+				scriptName = explicitScript ? scriptName : joinPaths(scriptName, 'index.php');
 				aboutPath = aboutIndex;
 			}
 		}
 
-		if(vHostEntrypoint)
-		{
-			if(!aboutPath.exists || aboutPath.object.isFolder) // Rewrite SCRIPT_NAME to the entrypoint if we don't have a php file...
-			{
-				scriptName = joinPaths(vHostPrefix, vHostEntrypoint);
-			}
-			else
-			{
-				scriptName = joinPaths(vHostPrefix, rewritePath.substr(vHostPrefix.length));
-			}
-		}
-
 		const extension = path.split('.').pop();
+		const entrypoint = vHostEntrypoint ?? this.entrypoint ?? 'index.php';
+		const archiveFallback = !aboutPath.exists && entrypoint.endsWith('.phar');
 
-		if(extension !== 'php' && extension !== 'phar')
+		if((extension !== 'php' && extension !== 'phar') || archiveFallback)
 		{
 			if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
 			{
@@ -910,7 +907,13 @@ export class PhpCgiBase
 			}
 
 			// Rewrite to entrypoint or index.php
-			path = joinPaths(docroot, vHostEntrypoint ?? 'index.php');
+			path = joinPaths(docroot, entrypoint);
+			scriptName = explicitScript ? scriptName : joinPaths(routePrefix, entrypoint);
+
+			if(path.endsWith('.phar'))
+			{
+				pathInfo = '/' + noLeadingSlash(relativePath);
+			}
 		}
 
 		// Ensure query parameters are preserved.
@@ -978,6 +981,7 @@ export class PhpCgiBase
 				putEnv(php, 'REQUEST_URI', originalPath);
 				putEnv(php, 'SCRIPT_NAME', scriptName);
 				putEnv(php, 'SCRIPT_FILENAME', path);
+				putEnv(php, 'PATH_INFO', pathInfo || this.env.PATH_INFO || '');
 				putEnv(php, 'PATH_TRANSLATED', path);
 
 				putEnv(php, 'QUERY_STRING', get);

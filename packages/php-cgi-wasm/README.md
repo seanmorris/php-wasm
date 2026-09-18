@@ -43,3 +43,34 @@ const php = new PhpCgiNode({
 ```
 
 Runtime-loadable extension helper JS packages remain ESM-only; pass extension assets manually when you need to manage them directly.
+
+## Phar applications
+
+For a dynamic build, enable Phar and, for gzip support, zlib:
+
+```javascript
+import { PhpCgiWorker } from 'php-cgi-wasm/PhpCgiWorker.mjs';
+import phar from 'php-wasm-phar';
+import zlib from 'php-wasm-zlib';
+
+const php = new PhpCgiWorker({
+	prefix: '/php-wasm/'
+	, docroot: '/persist/www'
+	, sharedLibs: [zlib, phar]
+	, entrypoint: 'app.phar'
+});
+```
+
+Place the archive at `/persist/www/app.phar` and use a `Phar::webPhar()` stub in it.
+Requests to `/php-wasm/app.phar/index.php` execute the archive with
+`SCRIPT_NAME=/php-wasm/app.phar` and `PATH_INFO=/index.php`. PHP handles the archive's
+scripts, assets and missing members. Direct archive requests redirect within the
+URL prefix rather than including the filesystem docroot.
+
+The optional `entrypoint` also routes fallback requests such as
+`/php-wasm/hello.txt` into the archive. Existing physical files and directory
+`index.php` files take precedence. A virtual host's `entrypoint` overrides the
+runtime default. Object rewrites retain their explicit `scriptName`.
+
+Archives remain read-only by default. Static builds with Phar and zlib compiled
+in do not need the `sharedLibs` entries above.

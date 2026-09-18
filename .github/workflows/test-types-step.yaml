@@ -23,6 +23,7 @@ jobs:
           node --test test/php-base-queue.test.mjs test/php-cgi-queue.test.mjs test/php-cloudflare.test.mjs
           test/php-cgi-routing.test.mjs test/runtime-env.test.mjs
           test/web-locks.test.mjs test/build/cloudflare-build.test.mjs
+          test/phar-packaging.test.mjs
       - name: Install locked demo dependencies
         working-directory: demo-web
         run: npm ci

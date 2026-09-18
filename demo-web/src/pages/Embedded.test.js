@@ -62,8 +62,8 @@ vi.mock('../components/Confirm', () => ({
 
 vi.mock('../lib/runtimePaths', () => ({
 	basePath: (path = '') => `/php-wasm/${path}`
-	, libType: 'static'
-	, buildType: 'static'
+	, libType: 'dynamic'
+	, buildType: 'dynamic'
 	, defaultPhpVersion: '8.4'
 }));
 
@@ -155,5 +155,18 @@ echo "Hello, World!";
 		});
 
 		expect(modules).toEqual(['gd', 'zlib']);
+	});
+
+	it.each([
+		['phar', 32768, ['php8.0-phar.so']]
+		, ['zlib', 16384, ['php8.0-zlib.so', 'libz.so']]
+	])('loads %s with its own extension flag', async (name, flag, libraries) => {
+		window.history.replaceState({}, '', `?demo=hello-world.php&version=8.0&extensionFlags=${flag}`);
+		render(<Embedded />);
+
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+
+		const [{sharedLibs}] = PhpWeb.mock.calls[0];
+		expect(sharedLibs.flatMap(module => module.getLibs({phpVersion: '8.0'}).map(lib => lib.name))).toEqual(libraries);
 	});
 });

@@ -57,6 +57,8 @@ if(libType === 'dynamic')
 	toggleableModules['sqlite']    = import('php-wasm-sqlite');
 	toggleableModules['xml']       = import('php-wasm-xml');
 	toggleableModules['zlib']      = import('php-wasm-zlib');
+	// Append new toggles to preserve the existing extensionFlags bit positions.
+	toggleableModules['phar']      = import('php-wasm-phar');
 }
 else if(libType === 'shared')
 {

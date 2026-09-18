@@ -88,7 +88,7 @@ describe('Debugger', () => {
 			expect(dumpGlobals).toHaveBeenCalledTimes(1);
 		});
 
-		expect(screen.getByText('[Circular]')).toBeInTheDocument();
+		expect(await screen.findByText('[Circular]')).toBeInTheDocument();
 		expect(screen.getByText('foo:')).toBeInTheDocument();
 	});
 });

@@ -4,8 +4,15 @@ import {test, expect} from '@playwright/test';
 test.skip(!process.env.DEMO_WEB_ARTIFACT_ROOT, 'Requires the built demo-web artifact.');
 test.use({actionTimeout: 20000});
 
-/** Exercise the same service-worker action used by the UI, without exposing test globals. */
+/**
+ * Exercise the same service-worker action used by the UI, without exposing test globals.
+ * @param {object} page Playwright page.
+ * @param {string} action Worker action name.
+ * @param {...unknown} params Action arguments; byte arrays are restored before writes.
+ * @returns {Promise<unknown>} Worker response.
+ */
 const rpc = (page, action, ...params) => page.evaluate(({action, params}) => new Promise((resolve, reject) => {
+	if(action === 'writeFile' && Array.isArray(params[1])) params[1] = new Uint8Array(params[1]);
 	const token = crypto.randomUUID();
 	const listener = event => {
 		if(event.data?.re !== token) return;
@@ -47,7 +54,41 @@ const disk = async (page, path) => {
 	return typeof result === 'string' ? result : new TextDecoder().decode(Uint8Array.from(Object.values(result)));
 };
 
-/** Produce small ZIP fixtures, including inventories a safe importer must reject. */
+test('CGI serves an uploaded Phar application and its internal files', async ({page}) => {
+	await start(page);
+	const archive = await fs.readFile(new URL('../../packages/phar/test/fixtures/webapp.phar', import.meta.url));
+	await rpc(page, 'writeFile', '/persist/webapp.phar', [...archive]);
+	const prefix = '/php-wasm/cgi-bin/phar-test';
+	await rpc(page, 'setSettings', {vHosts: [{pathPrefix: prefix, directory: '/persist', entrypoint: 'webapp.phar'}]});
+
+	const results = await page.evaluate(async prefix => {
+		const redirected = await fetch(`${prefix}/webapp.phar`);
+		const index = await fetch(`${prefix}/webapp.phar/index.php?value=1`);
+		const asset = await fetch(`${prefix}/webapp.phar/hello.txt`);
+		const fallback = await fetch(`${prefix}/hello.txt`);
+		const missing = await fetch(`${prefix}/webapp.phar/missing.txt`);
+		return {
+			redirected: {status: redirected.status, url: redirected.url}
+			, index: {status: index.status, body: await index.json()}
+			, asset: {status: asset.status, body: await asset.text()}
+			, fallback: {status: fallback.status, body: await fallback.text()}
+			, missing: missing.status
+		};
+	}, prefix);
+	expect(results.redirected.status).toBe(200);
+	expect(new URL(results.redirected.url).pathname).toBe(`${prefix}/webapp.phar/index.php`);
+	expect(results.index.status).toBe(200);
+	expect(results.index.body).toEqual({path: '/index.php', query: {value: '1'}});
+	expect(results.asset).toEqual({status: 200, body: 'web asset\n'});
+	expect(results.fallback).toEqual({status: 200, body: 'web asset\n'});
+	expect(results.missing).toBe(404);
+});
+
+/**
+ * Produces small ZIP fixtures, including inventories a safe importer must reject.
+ * @param {Array<{name: string, data?: string, size?: number, mode?: number}>} entries Archive members.
+ * @returns {Buffer} Encoded ZIP bytes.
+ */
 const zipFixture = entries => {
 	const local = [], central = [];
 	let offset = 0;
