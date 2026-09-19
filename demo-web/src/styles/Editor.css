@@ -154,12 +154,63 @@ select.bevel option {
 .editor-main { min-height: 0; overflow: hidden; }
 .editor .file-area { width: var(--editor-sidebar-width, 288px); min-width: 180px; display: flex; flex-direction: column; }
 .editor .edit-area { min-width: 0; min-height: 0; overflow: hidden; }
-.editor .editor-toolbar { flex-wrap: wrap; gap: 0.2rem; }
-.editor-toolbar img { width: 16px; height: 16px; }
+.editor .editor-toolbar {
+	align-items: stretch;
+	flex-wrap: wrap;
+	flex-shrink: 0;
+	gap: 0;
+}
+
+.editor-toolbar > button,
+.editor .editor-toolbar > select,
+.editor-menu > summary {
+	box-sizing: border-box;
+	min-width: 2rem;
+	height: 2rem;
+	margin: 0;
+	padding: 0.25rem;
+	font: inherit;
+	line-height: 1.25;
+	white-space: nowrap;
+}
+
+.editor-toolbar > button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.editor .editor-toolbar > select { padding: 0 0.25rem; }
+.editor-toolbar img { display: block; width: 16px; height: 16px; }
 .editor-menu { position: relative; }
-.editor-menu summary { cursor: pointer; padding: 0.3rem 0.6rem; }
-.editor-menu > div { position: absolute; z-index: 20; min-width: 14rem; display: flex; flex-direction: column; }
-.editor-menu button { text-align: left; padding: 0.35rem 0.6rem; }
+
+.editor-menu > summary {
+	cursor: pointer;
+	user-select: none;
+	border: 2px solid;
+	border-image: url(../assets/ui/border.png) 2 2 2 2;
+	background-color: #c3c3c3;
+}
+
+.editor-menu[open] > summary,
+.editor-menu > summary:active {
+	border-image: url(../assets/ui/border-inset.png) 2 2 2 2;
+}
+
+.editor-menu > div {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 20;
+	min-width: 14rem;
+	max-height: calc(100dvh - 10rem);
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow-y: auto;
+}
+
+.editor-menu button { text-align: left; padding: 0.25rem 0.5rem; }
 .editor-explorer-toolbar { display: flex; flex-wrap: wrap; gap: 0.2rem; padding: 0.3rem; }
 .editor-explorer-toolbar input { width: 100%; min-width: 0; box-sizing: border-box; }
 .editor-tree-scroll { flex: 1; overflow: auto; min-height: 0; }
