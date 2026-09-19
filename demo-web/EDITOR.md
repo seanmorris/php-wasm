@@ -81,6 +81,11 @@ and folder types in one read-only transaction. File Bus falls back to
 errors propagate, and writes still wait for persistence before acknowledgment.
 The lightweight editor keeps its existing dedicated filesystem actions.
 
+The VS Code page starts PHP readiness and prepares its debug files while the
+iframe loads. It waits for both before configuring the editor and opening the
+requested file. React development-mode effect replay does not repeat debug-file
+setup or enqueue duplicate directory creation requests.
+
 The framework chooser, installer and VS Code bridge check PHP readiness before
 using the shared CGI runtime. Registration, replacement and PHP readiness
 failures get two automatic retries, after 1 and 2 seconds, with progress shown

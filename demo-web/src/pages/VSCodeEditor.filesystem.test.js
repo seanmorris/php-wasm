@@ -3,7 +3,12 @@ import VSCodeEditor from './VSCodeEditor';
 
 const bridge = vi.hoisted(() => ({
 	options: null
-	, bus: {readdir: vi.fn()}
+	, bus: {
+		readdir: vi.fn()
+		, analyzePath: async () => ({exists: false})
+		, mkdir: async () => {}
+		, writeFile: async () => {}
+	}
 	, ready: new Promise(() => {})
 }));
 

@@ -220,11 +220,38 @@ export default function VSCodeEditor()
 	useEffect(() => {
 		let cancelled = false;
 
-		void ready.then(async () => {
+		// Prepare PHP while the iframe loads, including during React effect replay.
+		const debugFilesReady = (async () => {
 			try
 			{
 				const bus = await getReadyPhpBus();
+
+				if(cancelled)
+				{
+					return;
+				}
+
 				await ensureDebugFiles(bus, version);
+			}
+			catch(error)
+			{
+				if(!cancelled)
+				{
+					console.warn('Failed to prepare VS Code debug files.', error);
+				}
+			}
+		})();
+
+		void ready.then(async () => {
+			await debugFilesReady;
+
+			if(cancelled)
+			{
+				return;
+			}
+
+			try
+			{
 				await callClientMethodWithRetry(
 					{configure}
 					, 'configure'
@@ -258,6 +285,11 @@ export default function VSCodeEditor()
 			catch(error)
 			{
 				console.error(`Failed to open the requested VS Code file: ${path}`, error);
+			}
+		}, error => {
+			if(!cancelled)
+			{
+				console.error('Failed to start the VS Code bridge.', error);
 			}
 		});
 
