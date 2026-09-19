@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
+Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -215,7 +215,7 @@ All `PhpBase` implementations also expose the queued helper methods below:
 - `php.inputString(string)`
 - `php.input(bytes)`
 - `php.analyzePath(path)`
-- `php.readdir(path)`
+- `php.readdir(path, options?)`
 - `php.readFile(path, options)`
 - `php.stat(path)`
 - `php.mkdir(path)`
@@ -225,3 +225,9 @@ All `PhpBase` implementations also expose the queued helper methods below:
 - `php.unlink(path)`
 
 These methods run through the same queueing and transaction logic as `run`, `exec`, `r`, and `x`.
+
+`readdir` returns `string[]` by default. With `{withFileTypes: true}`, it returns
+`Array<{name: string, isFolder: boolean}>`. Both forms include `.` and `..`;
+classification follows links and metadata errors reject the call. See
+[Filesystem Operations](/filesystem/fs-operations.html#php.readdir) and
+[Transactions](/filesystem/transactions.html) for persistence behavior.

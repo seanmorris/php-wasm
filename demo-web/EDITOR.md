@@ -3,6 +3,11 @@ files. Draft recovery is a separate IndexedDB store; it never writes an edit int
 the live PHP filesystem. A browser crash can lose the last 500 ms of typing before
 the next recovery snapshot. Recovery failures are shown in the status area.
 
+An empty workspace opens a saveable untitled document. Closing or deleting the
+last tab creates another untitled document; Save prompts for its destination.
+Opening `code-editor.html` without a `path` starts this way. A `path` query
+parameter identifies a file to open, such as `/persist/example.php`.
+
 File commands support untitled buffers, New File/Folder, Open by path, Save As,
 Save All, Revert, rename, move, duplicate, copy/cut/paste, multiple selection,
 recursive deletion and drag/drop. Destructive commands compare the revision the
@@ -67,3 +72,24 @@ wrappers staged by `make runtime-wrappers`. `make test-demo-web` also runs the
 built-browser editor suite against each static/shared/dynamic demo artifact.
 No new native builds are needed for local wrapper changes; regenerate wrappers
 and rebuild the demo before testing it.
+
+The separate VS Code example at `vscode.html` uses `vscode-react` and File Bus.
+Its directory expansion and recursive file search request
+`readdir(path, {withFileTypes: true})`, so a compatible CGI worker returns names
+and folder types in one read-only transaction. File Bus falls back to
+`analyzePath` for hosts that return strings. Listings are not cached; filesystem
+errors propagate, and writes still wait for persistence before acknowledgment.
+The lightweight editor keeps its existing dedicated filesystem actions.
+
+The host bridge must forward the options argument. `vscode-react` 0.2.2 already
+does this; updating its package is not needed. The VS Code host must contain a
+rebuilt File Bus extension as well as the updated PHP demo worker. In the host
+checkout, run `npm ci` and `npm run compile` in `extra_extensions/file-bus`, then
+`make all` at the host root. This stages the extension and regenerates the host
+page; publishing that host is a separate step. For local testing, the demo accepts
+`vscode.html?vscodeUrl=http://127.0.0.1:9416/`.
+
+`node --test test/filesystem.test.mjs` checks constant refresh counts for 100 and
+1,000 entries, transaction ownership, failures, and write sequencing. File Bus's
+`npm test` covers directory expansion, recursive search and legacy hosts. The
+built-browser editor suite checks native listing types and persisted mutations.

@@ -8,8 +8,8 @@ microdata:
         - PhpCgiWorker
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/methods/php-cgi-wasm.md
+Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
+Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/methods/php-cgi-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiBase.mjs
@@ -223,7 +223,11 @@ const php = new PhpCgiWorker({
 
 *boolean*
 
-Defaults to `true`. Controls whether request handling and filesystem operations automatically wrap themselves in filesystem transactions.
+Defaults to `true`. Controls whether queued browser CGI filesystem operations
+start and commit their own transactions. Read-only calls hydrate storage without
+flushing; mutating calls wait for persistence. With `false`, the caller owns
+transaction boundaries and coordination. HTTP request synchronization is handled
+separately. See [Transactions](/filesystem/transactions.html).
 
 ### maxRequestAge
 
@@ -331,7 +335,7 @@ This will discard the current PHP instance and spin up a brand new one.
 `PhpCgiBase` also exposes:
 
 - `analyzePath(path)`
-- `readdir(path)`
+- `readdir(path, options?)`
 - `readFile(path, options)`
 - `stat(path)`
 - `mkdir(path)`
@@ -345,3 +349,13 @@ This will discard the current PHP instance and spin up a brand new one.
 - `getEnvs()`
 - `setEnvs(env)`
 - `storeInit()`
+
+`readdir` returns `string[]` by default. With `{withFileTypes: true}`, it returns
+`Array<{name: string, isFolder: boolean}>`. Both forms include `.` and `..`;
+classification follows links and metadata errors reject the call.
+
+With automatic browser transactions enabled, `analyzePath`, `readdir`, `readFile`,
+and `stat` refresh storage before reading and do not flush it afterward. Mutations
+wait for persistence before resolving. Concurrent filesystem calls remain
+separate transactions; a typed directory listing obtains all entry types in one
+call. See [Transactions](/filesystem/transactions.html).

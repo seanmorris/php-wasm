@@ -33,6 +33,11 @@ The generic `php-cloud-wasm/PhpCloudflare` adapter additionally requires a match
 `runtime`, precompiled `wasmModule`, and `version`. Version-bound entries supply
 these automatically. There is no implicit latest-version root entry.
 
+The filesystem is local to each instance. `await php.readdir(path)` returns
+names; `await php.readdir(path, {withFileTypes: true})` returns serializable
+`{name, isFolder}` entries. Both include `.` and `..`; types follow links and
+metadata errors reject the operation. This does not enable persistent storage.
+
 PDO-CFD1 is compiled into PHP. Supply a request-local binding map and use
 `new PDO('cfd1:mainDb', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION])`
 with positional or named parameters supplied through `execute([...])`, or explicit

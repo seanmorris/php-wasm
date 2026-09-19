@@ -68,7 +68,7 @@ $ npm i php-wasm-builder
             <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laminas-3">Laminas Demo</a>
         </td>
         <td width = "500px">
-            <a href = "https://seanmorris.github.io/php-wasm/code-editor.html?path=/persist">Code Editor</a>
+            <a href = "https://seanmorris.github.io/php-wasm/code-editor.html">Code Editor</a>
         </td>
     </tr>
 </table>
@@ -617,12 +617,10 @@ const php = new PhpNode({
 
 The following EmscriptenFS methods are exposed via the php object:
 
-***Note:*** If you're using php-web in conjunction with php-cgi-worker to work on the filesystem, you'll need to `refresh` the filesystem in the worker. You can do that with the following call using `msg-bus` (see below).
-
-```javascript
-// Tell the worker that the FS has been updated
-await sendMessage('refresh');
-```
+Browser CGI filesystem calls refresh persisted storage automatically when
+`autoTransaction` is enabled. Await the writer's persistence before reading from
+another runtime. `refresh()` recreates the PHP runtime and discards temporary
+files and in-memory PHP state; it is not required before each CGI filesystem read.
 
 #### php.analyzePath
 
@@ -634,10 +632,31 @@ await php.analyzePath(path);
 
 #### php.readdir
 
-Get a list of files and folders in a directory.
+Get entry names as `string[]`:
 
 ```javascript
 await php.readdir(path);
+```
+
+Pass `{withFileTypes: true}` to get serializable `{name: string, isFolder: boolean}`
+entries in one queued operation:
+
+```javascript
+const entries = await php.readdir(path, {withFileTypes: true});
+```
+
+Both forms preserve filesystem order and include `.` and `..`. Types follow
+symbolic links, as `analyzePath` does. Listing and metadata errors, including
+dangling links, reject the operation. Omitted options or `withFileTypes: false`
+keep the name-only result. The option is available in embedded, CLI, CGI,
+debugger, and Cloudflare runtimes; the declaration overloads reflect each result.
+
+In browser CGI, a typed listing uses one storage refresh for the directory and
+all its entry types. This avoids a separate `analyzePath` request per entry.
+It is also available over the service worker message bridge:
+
+```javascript
+const entries = await sendMessage('readdir', [path, {withFileTypes: true}]);
 ```
 
 #### php.readFile
@@ -708,11 +727,26 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 
 **Web and Worker only!**
 
-The web and worker builds use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensures multiple tabs and the service worker can interact with the filesystem without overwriting each other's work. Before any filesystem operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is loaded back into IDBFS.
+With persistence enabled, browser runtimes synchronize their mounted IDBFS
+storage while holding the `php-wasm-fs-lock` Web Lock.
 
-The operations are enqueued asynchronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
+Browser CGI gives each queued filesystem call its own transaction. Storage is
+refreshed before the operation. `analyzePath`, `readdir`, `readFile`, and `stat`
+are read-only and do not flush afterward. Mutations wait for persistence before
+their promises resolve or the service worker sends its reply. A persistence
+failure rejects the call, and subsequent operations can still run.
 
-To suppress this behavior and take explicit control of FS mirroring, you can pass the `{autoTransaction: false}` option to the constructor. Doing this requires you to call `php.startTransaction()` before any FS operations take place, and then `php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
+Concurrent CGI calls remain separate transactions, including calls started with
+`Promise.all`. Use a typed `readdir` to obtain names and entry types in one
+transaction. `PhpWeb` and `PhpWorker` retain their batched queues; their operation
+results can become available before the shared transaction commits.
+
+With `{autoTransaction: false}`, the caller owns transaction boundaries and
+serialization across runtimes. `startTransaction()` loads persisted storage;
+`commitTransaction()` flushes changes. These methods do not hold a Web Lock
+across a sequence of public calls. Do not acquire `php-wasm-fs-lock` and then
+await a public queued method that needs the same lock. Prefer automatic
+transactions unless you provide coordination for the complete operation.
 
 #### php.startTransaction
 
@@ -725,6 +759,10 @@ await php.startTransaction();
 ```javascript
 await php.commitTransaction();
 ```
+
+For a manually managed transaction that performed only reads, use
+`await php.commitTransaction(true)` to close it without flushing. Never pass
+`true` after a mutation that must be persisted.
 
 ### msg-bus
 
@@ -746,7 +784,8 @@ import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
 const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
-navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL);
+await navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL, {type: 'module'});
+await navigator.serviceWorker.ready;
 
 navigator.serviceWorker.addEventListener('message', onMessage);
 

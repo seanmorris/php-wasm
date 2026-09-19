@@ -2,8 +2,8 @@
 title: Transactions
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/filesystem/transactions.md
+Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
+Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/filesystem/transactions.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -13,15 +13,37 @@ Validation refs:
 
 **Note: This feature is available for Web and Worker environments only!**
 
-The web and worker builds utilize `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensures that multiple tabs and the service worker can interact with the filesystem without overwriting each other's work.
+With persistence enabled, browser runtimes synchronize their mounted IDBFS
+storage while holding the `php-wasm-fs-lock` Web Lock.
 
-Before any filesystem operation occurs, the entire filesystem is loaded from IDBFS, and before releasing the lock, the entire filesystem is loaded back into IDBFS.
+## Browser CGI
 
-The operations are enqueued asynchronously, meaning that **if multiple requests are generated before one transaction closes, they will be automatically batched.** This also applies to multiple requests generated before the lock is acquired. Generally, there is no need to take explicit control of filesystem mirroring.
+Each queued filesystem call gets its own transaction. Storage is refreshed
+before the operation. `analyzePath`, `readdir`, `readFile`, and `stat` are
+read-only and do not flush afterward. Mutations wait for persistence before
+their promises resolve or the service worker sends its reply. A persistence
+failure rejects the call, and subsequent operations can still run.
+
+Concurrent calls remain separate transactions, including calls started with
+`Promise.all`. For a directory's names and types, request
+`readdir(path, {withFileTypes: true})`: all metadata is read inside that one
+transaction, with one refresh and no flush. File Bus uses this option for VS Code
+directory expansion and recursive file search when the host supports it.
+
+## Embedded browser runtimes
+
+`PhpWeb` and `PhpWorker` retain their batched queues. Their operation results can
+become available before the shared transaction commits. The per-call persistence
+acknowledgment described above applies to browser CGI filesystem methods.
 
 ## Manual Control of FS Mirroring
 
-If you prefer to suppress this automatic behavior and take explicit control over filesystem mirroring, you can pass the `{autoTransaction: false}` option to the constructor. In this case, you will need to call `php.startTransaction()` before any filesystem operations, and then `php.commitTransaction()` when you are done. **Using this incorrectly may leave your filesystem in a corrupted state.**
+With `{autoTransaction: false}`, the caller owns transaction boundaries and
+serialization across runtimes. `startTransaction()` loads persisted storage;
+`commitTransaction()` flushes changes. These methods do not hold a Web Lock
+across a sequence of public calls. Do not acquire `php-wasm-fs-lock` and then
+await a public queued method that needs the same lock. Prefer automatic
+transactions unless you provide coordination for the complete operation.
 
 ### php.startTransaction
 
@@ -34,3 +56,7 @@ await php.startTransaction();
 ```javascript
 await php.commitTransaction();
 ```
+
+For a manually managed transaction that performed only reads, use
+`await php.commitTransaction(true)` to close it without flushing. Never pass
+`true` after a mutation that must be persisted.
