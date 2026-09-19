@@ -44,6 +44,20 @@ const php = new PhpCgiNode({
 
 Runtime-loadable extension helper JS packages remain ESM-only; pass extension assets manually when you need to manage them directly.
 
+## Directory listings and persistence
+
+`await php.readdir(path)` still returns `string[]`. For directory names and types
+in one operation, use `await php.readdir(path, {withFileTypes: true})`. Each entry
+is a serializable `{name: string, isFolder: boolean}` object. Both forms preserve
+filesystem order and include `.` and `..`. Types follow symbolic links, as
+`analyzePath` does; listing and metadata errors reject the operation.
+
+With automatic browser transactions enabled, `analyzePath`, `readdir`, `readFile`,
+and `stat` refresh persisted storage before reading but do not flush it afterward.
+A typed listing resolves every entry's type inside that single transaction.
+Writes still resolve only after persistence finishes. With `autoTransaction: false`,
+the caller retains ownership of transaction boundaries.
+
 ## Phar applications
 
 For a dynamic build, enable Phar and, for gzip support, zlib:

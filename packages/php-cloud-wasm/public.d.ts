@@ -76,6 +76,17 @@ export interface PhpBinaryRuntime {
 	} & object;
 }
 
+/** Options for listing names or serializable directory entry types. */
+export interface PhpReadDirectoryOptions {
+	withFileTypes?: boolean;
+}
+
+/** Entry type resolved using the same link-following behavior as analyzePath. */
+export interface PhpDirectoryEntry {
+	name: string;
+	isFolder: boolean;
+}
+
 /** Serializable filesystem node metadata returned by mkdir and analyzePath. */
 export interface PhpFileNode {
 	id: number;

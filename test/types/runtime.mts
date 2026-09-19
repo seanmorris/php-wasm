@@ -64,6 +64,18 @@ const browserCliExit: Promise<number> = new PhpCliWeb().run();
 const nodeCliExit: Promise<number> = new PhpCliNode().run();
 const cgiArgs: PhpCgiRuntimeArgs = { docroot: '/www' };
 const cgi = new PhpCgiNode(cgiArgs);
+for (const filesystem of [embedded, cgi, new PhpCliNode(), new PhpDbgWeb()]) {
+	const names: Promise<string[]> = filesystem.readdir('/persist');
+	const legacy: Promise<string[]> = filesystem.readdir('/persist', { withFileTypes: false });
+	const entries: Promise<Array<{ name: string; isFolder: boolean }>> = filesystem.readdir('/persist', { withFileTypes: true });
+	const optional: Promise<string[] | Array<{ name: string; isFolder: boolean }>> = filesystem.readdir('/persist', { withFileTypes: Math.random() > 0.5 });
+	// @ts-expect-error Typed listings resolve entries, not names.
+	const wrongNames: Promise<string[]> = filesystem.readdir('/persist', { withFileTypes: true });
+	// @ts-expect-error Legacy listings still resolve names.
+	const wrongEntries: Promise<Array<{ name: string; isFolder: boolean }>> = filesystem.readdir('/persist');
+	// @ts-expect-error The option is a boolean, not a string.
+	filesystem.readdir('/persist', { withFileTypes: 'true' });
+}
 const rootCgiBase: RootCgiBase = cgi;
 const response: Promise<Response | string | undefined> = cgi.request(new Request('https://example.com/'));
 const cgiRuntime: Promise<PhpBinaryRuntime> = cgi.refresh();

@@ -579,11 +579,12 @@ export class PhpBase extends EventTarget
 	/**
 	 * Lists a directory in the virtual filesystem.
 	 * @param {string} path Directory path to list.
+	 * @param {{withFileTypes?: boolean}} [options] Include serializable entry types.
 	 * @returns {Promise<PhpRuntimeValue>} Directory entries for the path.
 	 */
-	readdir(path)
+	readdir(path, options)
 	{
-		return this._enqueue(fsOps.readdir, [this.binary, path]);
+		return this._enqueue(fsOps.readdir, [this.binary, path, options]);
 	}
 
 	/**

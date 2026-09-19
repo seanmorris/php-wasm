@@ -114,8 +114,8 @@ export default function VSCodeEditor()
 	const sendDebugAdapterMessageRef = useRef(null);
 
 	const fsHandlers = useMemo(() => ({
-		readdir(path) {
-			return getPhpBus().then(bus => bus.readdir(path));
+		readdir(path, options) {
+			return getPhpBus().then(bus => bus.readdir(path, options));
 		}
 
 		, async readFile(path) {

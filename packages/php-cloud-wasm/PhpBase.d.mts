@@ -1,4 +1,4 @@
-import type { PhpBaseModuleFactory, PhpRuntimeFactory, PhpRuntimeArgs, PhpRuntimeVersion, PhpRuntimeVariant, PhpRuntimeValue, PhpTemplateValue, PhpBinaryRuntime, PhpPathAnalysis, PhpFileNode, PhpFileStat, PhpReadFileOptions } from './public.d.ts';
+import type { PhpBaseModuleFactory, PhpRuntimeFactory, PhpRuntimeArgs, PhpRuntimeVersion, PhpRuntimeVariant, PhpRuntimeValue, PhpTemplateValue, PhpBinaryRuntime, PhpPathAnalysis, PhpFileNode, PhpFileStat, PhpReadFileOptions, PhpReadDirectoryOptions, PhpDirectoryEntry } from './public.d.ts';
 
 export type * from './public.d.ts';
 
@@ -26,7 +26,9 @@ export declare class PhpBase<RunArgs extends unknown[] = [phpCode: string], Refr
 	r(fragments: TemplateStringsArray, ...values: PhpTemplateValue[]): Promise<RunResult>;
 	refresh(): Promise<RefreshResult>;
 	analyzePath(path: string): Promise<PhpPathAnalysis>;
-	readdir(path: string): Promise<string[]>;
+	readdir(path: string, options?: PhpReadDirectoryOptions & { withFileTypes?: false }): Promise<string[]>;
+	readdir(path: string, options: PhpReadDirectoryOptions & { withFileTypes: true }): Promise<PhpDirectoryEntry[]>;
+	readdir(path: string, options?: PhpReadDirectoryOptions): Promise<string[] | PhpDirectoryEntry[]>;
 	readFile(path: string, options: PhpReadFileOptions & { encoding: 'utf8' }): Promise<string>;
 	readFile(path: string, options?: PhpReadFileOptions & { encoding?: 'binary' }): Promise<Uint8Array>;
 	readFile(path: string, options?: PhpReadFileOptions): Promise<string | Uint8Array>;

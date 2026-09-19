@@ -55,6 +55,53 @@ const disk = async (page, path) => {
 	return typeof result === 'string' ? result : new TextDecoder().decode(Uint8Array.from(Object.values(result)));
 };
 
+test('typed CGI listings classify native filesystem entries and stay fresh after persistence', async ({page}) => {
+	await start(page);
+	await rpc(page, 'writeFile', '/persist/seed-listings.php', `<?php
+mkdir('/persist/listings');
+foreach ([100, 1000] as $count) {
+    mkdir('/persist/listings/n' . $count);
+    for ($index = 0; $index < $count; $index++) {
+        file_put_contents('/persist/listings/n' . $count . '/file-' . $index, 'saved');
+    }
+}
+mkdir('/persist/listings/目录');
+file_put_contents('/persist/listings/café.php', 'original');
+mkdir('/tmp/listing-links');
+symlink('/persist/listings/目录', '/tmp/listing-links/folder');
+symlink('/persist/listings/café.php', '/tmp/listing-links/file');
+echo 'seeded';
+`);
+	await rpc(page, 'setSettings', {vHosts: [{pathPrefix: '/php-wasm/cgi-bin/listing-test', directory: '/persist'}]});
+	expect(await page.evaluate(async () => (await fetch('/php-wasm/cgi-bin/listing-test/seed-listings.php')).text())).toBe('seeded');
+
+	for(const count of [100, 1000])
+	{
+		const path = `/persist/listings/n${count}`;
+		const names = await rpc(page, 'readdir', path);
+		const entries = await rpc(page, 'readdir', path, {withFileTypes: true});
+		expect(entries).toHaveLength(count + 2);
+		expect(entries.map(entry => entry.name)).toEqual(names);
+		expect(entries).toEqual(names.map(name => ({name, isFolder: ['.', '..'].includes(name)})));
+	}
+
+	const links = await rpc(page, 'readdir', '/tmp/listing-links', {withFileTypes: true});
+	expect(links).toContainEqual({name: 'folder', isFolder: true});
+	expect(links).toContainEqual({name: 'file', isFolder: false});
+	await rpc(page, 'rename', '/persist/listings/café.php', '/persist/listings/renamed.php');
+	await rpc(page, 'writeFile', '/persist/listings/renamed.php', 'persisted');
+	await expect(rpc(page, 'readdir', '/tmp/listing-links', {withFileTypes: true})).rejects.toThrow();
+	await rpc(page, 'refresh');
+	expect(await disk(page, '/persist/listings/renamed.php')).toBe('persisted');
+	const entries = await rpc(page, 'readdir', '/persist/listings', {withFileTypes: true});
+	expect(entries).toContainEqual({name: '目录', isFolder: true});
+	expect(entries).toContainEqual({name: 'renamed.php', isFolder: false});
+	expect(entries.some(entry => entry.name === 'café.php')).toBe(false);
+	await rpc(page, 'unlink', '/persist/listings/renamed.php');
+	await rpc(page, 'refresh');
+	expect(await rpc(page, 'readdir', '/persist/listings')).not.toContain('renamed.php');
+});
+
 test('CGI serves an uploaded Phar application and its internal files', async ({page}) => {
 	await start(page);
 	const archive = await fs.readFile(new URL('../../packages/phar/test/fixtures/webapp.phar', import.meta.url));

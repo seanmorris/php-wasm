@@ -1108,17 +1108,18 @@ export class PhpCgiBase
 	 */
 	analyzePath(path)
 	{
-		return this._enqueue(fsOps.analyzePath, [this.binary, path]);
+		return this._enqueue(fsOps.analyzePath, [this.binary, path], true);
 	}
 
 	/**
 	 * Lists a directory in the CGI virtual filesystem.
 	 * @param {string} path Directory path to list.
+	 * @param {{withFileTypes?: boolean}} [options] Include serializable entry types.
 	 * @returns {Promise<PhpRuntimeValue>} Directory entries for the path.
 	 */
-	readdir(path)
+	readdir(path, options)
 	{
-		return this._enqueue(fsOps.readdir, [this.binary, path]);
+		return this._enqueue(fsOps.readdir, [this.binary, path, options], true);
 	}
 
 	/**
@@ -1129,7 +1130,7 @@ export class PhpCgiBase
 	 */
 	readFile(path, options)
 	{
-		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
+		return this._enqueue(fsOps.readFile, [this.binary, path, options], true);
 	}
 
 	/**
@@ -1139,7 +1140,7 @@ export class PhpCgiBase
 	 */
 	stat(path)
 	{
-		return this._enqueue(fsOps.stat, [this.binary, path]);
+		return this._enqueue(fsOps.stat, [this.binary, path], true);
 	}
 
 	/**
