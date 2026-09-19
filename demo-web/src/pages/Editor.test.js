@@ -91,12 +91,65 @@ const open = async () => {
 const edit = value => act(() => editor.session.setValue(value));
 const menu = () => fireEvent.click(screen.getByText('File', {selector: 'summary'}));
 
+/** Verify the empty workspace exposes an editable, saveable document. */
+const blankDocument = async () => {
+	await screen.findByRole('tab', {name: /^Untitled \d+$/});
+	await waitFor(() => expect(editor.session?.getValue()).toBe(''));
+	expect(editor.setReadOnly).toHaveBeenLastCalledWith(false);
+	expect(screen.getByRole('button', {name: 'Save file'})).toBeEnabled();
+	expect(screen.queryByText('No file open')).not.toBeInTheDocument();
+};
+
+it.each([
+	['empty', '']
+	, ['edited', '<?php echo "new document";']
+])('saves the %s initial untitled document through Save As', async (_name, text) => {
+	window.history.replaceState({}, '', '/code-editor.html');
+	filesystem.inspect.mockResolvedValue({exists: false, revision: null});
+	render(<React.StrictMode><Editor /></React.StrictMode>);
+	await blankDocument();
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
+	expect(filesystem.read).not.toHaveBeenCalled();
+	expect(filesystem.write).not.toHaveBeenCalled();
+	const beforeUnload = new Event('beforeunload', {cancelable: true});
+	window.dispatchEvent(beforeUnload);
+	expect(beforeUnload.defaultPrevented).toBe(false);
+	if(text) edit(text);
+	fireEvent.click(screen.getByRole('button', {name: 'Save file'}));
+	fireEvent.click(within(await screen.findByRole('dialog', {name: 'Save As'})).getByRole('button', {name: 'Cancel'}));
+	await waitFor(() => expect(screen.getByRole('button', {name: 'Save file'})).toBeEnabled());
+	expect(editor.session.getValue()).toBe(text);
+	expect(filesystem.write).not.toHaveBeenCalled();
+	fireEvent.click(screen.getByRole('button', {name: 'Save file'}));
+	const prompt = await screen.findByRole('dialog', {name: 'Save As'});
+	fireEvent.change(within(prompt).getByRole('textbox'), {target: {value: '/persist/new.php'}});
+	fireEvent.click(within(prompt).getByRole('button', {name: 'Continue'}));
+	await screen.findByRole('tab', {name: 'new.php', exact: true});
+	expect(filesystem.write).toHaveBeenCalledWith('/persist/new.php', new TextEncoder().encode(text), null);
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
+	expect(window.location.search).toContain('path=%2Fpersist%2Fnew.php');
+});
+
 it('opens the initial path after Ace loads and exposes labeled save controls', async () => {
 	await open();
 	expect(filesystem.read).toHaveBeenCalledWith('/persist/a.php');
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
 	expect(editor.setReadOnly).toHaveBeenCalledWith(false);
 	expect(window.location.search).toContain('path=%2Fpersist%2Fa.php');
 	expect(screen.getByRole('button', {name: 'Save file'})).toBeEnabled();
+});
+
+it('waits for the initial file before deciding whether a blank document is needed', async () => {
+	let finishStat;
+	filesystem.stat.mockReturnValueOnce(new Promise(resolve => {
+		finishStat = resolve;
+	}));
+	render(<React.StrictMode><Editor /></React.StrictMode>);
+	await waitFor(() => expect(filesystem.stat).toHaveBeenCalledWith('/persist/a.php'));
+	expect(screen.queryByRole('tab', {name: /^Untitled/})).not.toBeInTheDocument();
+	await act(async () => finishStat({exists: true, kind: 'file', size: 20}));
+	await screen.findByRole('tab', {name: 'a.php', exact: true});
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
 });
 
 it('asks before closing a dirty file and cancel preserves its buffer', async () => {
@@ -110,7 +163,21 @@ it('asks before closing a dirty file and cancel preserves its buffer', async () 
 	await waitFor(() => expect(screen.getByRole('button', {name: 'Close a.php'})).toBeEnabled());
 	fireEvent.click(screen.getByRole('button', {name: 'Close a.php'}));
 	fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', {name: 'Discard'}));
-	await waitFor(() => expect(screen.queryByRole('tab')).not.toBeInTheDocument());
+	await blankDocument();
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
+});
+
+it('keeps one blank document after closing all files', async () => {
+	await open();
+	menu();
+	fireEvent.click(screen.getByRole('button', {name: 'New untitled file'}));
+	edit('discarded draft');
+	menu();
+	fireEvent.click(screen.getByRole('button', {name: 'Close all', exact: true}));
+	fireEvent.click(within(await screen.findByRole('dialog', {name: 'Unsaved changes'})).getByRole('button', {name: 'Discard'}));
+	await blankDocument();
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
+	expect(filesystem.write).not.toHaveBeenCalled();
 });
 
 it('preserves dirty state and reports write failure', async () => {
@@ -148,6 +215,18 @@ it('requires saving changed files before starting the debugger', async () => {
 	fireEvent.click(within(prompt).getByRole('button', {name: 'Save and start'}));
 	await screen.findByText('Debugger running');
 	expect(filesystem.write).toHaveBeenCalledWith('/persist/a.php', new TextEncoder().encode('<?php echo 2;'), 'original');
+});
+
+it('asks to save even an untouched untitled document before debugging', async () => {
+	window.history.replaceState({}, '', '/code-editor.html');
+	filesystem.inspect.mockResolvedValue({exists: false, revision: null});
+	render(<Editor />);
+	await blankDocument();
+	fireEvent.click(screen.getByRole('button', {name: 'Start debugger'}));
+	fireEvent.click(within(await screen.findByRole('dialog', {name: 'Save before debugging?'})).getByRole('button', {name: 'Save and start'}));
+	fireEvent.click(within(await screen.findByRole('dialog', {name: 'Save As'})).getByRole('button', {name: 'Continue'}));
+	await screen.findByText('Debugger running');
+	expect(filesystem.write).toHaveBeenCalledWith('/persist/untitled.php', new TextEncoder().encode(''), null);
 });
 
 it('protects unload and internal navigation while a document is dirty', async () => {
@@ -219,7 +298,8 @@ it('remaps a dirty tab on rename and closes it on confirmed deletion', async () 
 	filesystem.inspect.mockResolvedValue({path: '/persist/renamed.php', revision: 'saved'});
 	fireEvent.click(screen.getByRole('button', {name: 'Delete…'}));
 	fireEvent.click(within(await screen.findByRole('dialog', {name: 'Delete permanently?'})).getByRole('button', {name: 'Delete'}));
-	await waitFor(() => expect(screen.queryByRole('tab')).not.toBeInTheDocument());
+	await blankDocument();
+	expect(screen.getAllByRole('tab')).toHaveLength(1);
 	expect(filesystem.mutate).toHaveBeenLastCalledWith({op: 'delete', path: '/persist/renamed.php', expectedRevision: 'saved'});
 });
 

@@ -81,6 +81,7 @@ export default function Editor()
 	const zipInput = useRef(null);
 	const uploadDestination = useRef('/persist');
 	const [ready, setReady] = useState(false);
+	const [initialized, setInitialized] = useState(false);
 	const [showLeft, setShowLeft] = useState(true);
 	const [debuggerActive, setDebuggerActive] = useState(false);
 	const [debuggerStartFile, setDebuggerStartFile] = useState(null);
@@ -165,8 +166,21 @@ export default function Editor()
 		if(!ready || !recovery.ready || started.current) return;
 		started.current = true;
 		const path = initialPath.current;
-		if(path && path !== '/') void workspaceRef.current.openFile(path);
+		if(path && path !== '/')
+		{
+			void workspaceRef.current.openFile(path).finally(() => setInitialized(true));
+		}
+		else setInitialized(true);
 	}, [ready, recovery.ready]);
+
+	useEffect(() => {
+		if(!initialized || w.model.documents.size) return;
+		// Wait for recovery and the initial path before supplying an editable blank.
+		// It can be saved immediately, but an untouched visit has no edits to discard.
+		const untitled = w.model.create();
+		untitled.dirty = false;
+		w.model.select(untitled);
+	}, [initialized, w.model, w.version]);
 
 	const gotoFile = useCallback(async (path, line) => {
 		if(typeof path !== 'string' || !path.startsWith('/')) return;
@@ -231,10 +245,11 @@ export default function Editor()
 		}
 		void w.perform('Start debugger', async () => {
 			if(!w.model.active) throw new Error('Open a PHP file first.');
-			if(w.model.dirty)
+			if(w.model.dirty || !w.model.active.path)
 			{
 				const choice = await w.ask({title: 'Save before debugging?', message: 'The debugger runs files from the filesystem. Save all changed files before starting.', choices: [{action: 'save', label: 'Save and start'}, cancel]});
 				if(choice.action !== 'save') return false;
+				if(!w.model.active.path && !await w.saveDocument(w.model.active)) return false;
 				await w.saveAll();
 			}
 			if(!w.model.active.path) return false;
@@ -504,7 +519,7 @@ export default function Editor()
 						w.setRoot(path);
 						w.expand(path, true);
 						w.select({path, name: part, kind: 'directory'}, false);
-					} else w.reveal(path);}}>{part}</button>) : <span>{doc?.name || 'No file open'}</span>}</nav>
+					} else w.reveal(path);}}>{part}</button>) : <span>{doc?.name || 'Untitled'}</span>}</nav>
 					<div className="tab-area frame" role="tablist" tabIndex={-1} aria-label="Open files" onKeyDown={event => {
 						if(event.target.getAttribute('role') !== 'tab' || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
 						const tabs = [...event.currentTarget.querySelectorAll('[role="tab"]')];
@@ -521,7 +536,7 @@ export default function Editor()
 					{w.error && <div className="editor-error" role="alert"><strong>{w.error.label}: </strong>{w.error.message} <button onClick={() => w.setError(null)}>Dismiss</button><button onClick={() => void w.checkExternal()}>Refresh filesystem</button></div>}
 					{doc?.external && <div className="editor-notice" role="status">This file was {doc.external} on disk. Your buffer is unchanged. <button disabled={blocked} onClick={() => w.revert(doc)}>Reload…</button><button disabled={blocked} onClick={() => w.perform('Save As', () => w.saveDocument(doc, true))}>Save As…</button></div>}
 					<div className="editor-document" role="tabpanel" id="editor-document-panel" aria-labelledby={doc ? 'tab-' + doc.id : undefined}>
-						{!doc && <div className="editor-empty">Open a file from the explorer, create a new file, or use Open by path.</div>}
+						{!doc && <div className="editor-empty" role="status">Preparing editor…</div>}
 						{doc?.loading && <div className="editor-empty" role="status">Loading {doc.name}…</div>}
 						{doc?.error && !doc.loaded && <div className="editor-empty"><button onClick={() => w.openFile(doc.path)}>Retry opening {doc.name}</button></div>}
 						{doc?.binary && <div className="editor-empty">Binary or unsupported text encoding. Text editing is disabled.<button onClick={downloadCurrent}>Download original file</button>{preview && <img className="editor-image-preview" src={preview} alt={doc.name} />}</div>}

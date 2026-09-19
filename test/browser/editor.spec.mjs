@@ -265,10 +265,11 @@ test('rejects a whole unsafe ZIP inventory before creating destination files', a
 	}
 });
 
-test('saves a new document with a URL-sensitive filename and hands the saved path to VSCode', async ({page}) => {
+test('saves the initial untitled document with a URL-sensitive filename and hands the saved path to VSCode', async ({page}) => {
 	await start(page);
-	await page.getByText('File', {selector: 'summary', exact: true}).click();
-	await page.getByRole('button', {name: 'New untitled file'}).click();
+	await expect(page.getByRole('tab')).toHaveCount(1);
+	await expect(page.getByRole('tab', {selected: true})).toHaveText(/^Untitled \d+$/);
+	await expect(page.getByRole('button', {name: 'Save file', exact: true})).toBeEnabled();
 	await edit(page, '<?php echo "saved before navigation";');
 	await page.getByRole('button', {name: 'Open in VSCode'}).click();
 	await page.getByRole('dialog', {name: 'Unsaved changes'}).getByRole('button', {name: 'Save', exact: true}).click();
