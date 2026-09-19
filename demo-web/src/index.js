@@ -1,5 +1,5 @@
 /**
- * Browser entrypoint that ensures the CGI worker is controlling the page before rendering.
+ * Browser entrypoint that registers the CGI worker alongside the app shell.
  */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -22,16 +22,7 @@ if(!params.has('no-service-worker'))
 				, error: serviceWorker.error
 				, diagnostics: serviceWorker.diagnostics
 			});
-
-			if(serviceWorker.controlSource !== 'timeout')
-			{
-				return;
-			}
-
-			console.log('No Service Worker Detected, Reloading...');
-			await new Promise(a => setTimeout(a, 500));
-			window.location.reload();
-			return;
+			// Runtime consumers own bounded recovery; a reload would interrupt it.
 		}
 	})();
 }

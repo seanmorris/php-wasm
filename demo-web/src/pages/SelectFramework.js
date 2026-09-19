@@ -191,6 +191,7 @@ function SelectFramework()
 	const [sqliteDatabases, setSqliteDatabases] = useState({});
 	const [overlay, setOverlay] = useState(null);
 	const [runtimeError, setRuntimeError] = useState('');
+	const [runtimeStatus, setRuntimeStatus] = useState('');
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const serviceWorkerDisabled = query.has('no-service-worker');
 
@@ -202,7 +203,10 @@ function SelectFramework()
 
 		void (async() => {
 			setRuntimeError('');
-			const bus = await getReadyPhpBus();
+			setRuntimeStatus('Starting PHP runtime...');
+			const bus = await getReadyPhpBus({onProgress: setRuntimeStatus});
+
+			setRuntimeStatus('');
 			const [
 				cakePath
 				, codeigniterPath
@@ -278,6 +282,7 @@ function SelectFramework()
 			setWordpressInstalled(wordpressPath.exists);
 			setSqliteDatabases(Object.fromEntries(sqlitePaths));
 		})().catch(error => {
+			setRuntimeStatus('');
 			setRuntimeError(error?.message ?? error?.error ?? String(error));
 		});
 	}, [serviceWorkerDisabled]);
@@ -376,6 +381,7 @@ function SelectFramework()
 				{isIframe || <Header />}
 				<div className='frameworks'>
 					<h2>Select a Framework:</h2>
+					{runtimeStatus && <p role = "status">{runtimeStatus}</p>}
 					{runtimeError && <div className = "inset padded" role = "alert">
 						<p>{runtimeError}</p>
 						<button type = "button" onClick = {refreshAll}>Retry PHP startup</button>

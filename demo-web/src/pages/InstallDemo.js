@@ -7,7 +7,6 @@ import loader from '../assets/ui/bar-spin.svg';
 import { waitForPhpBusRequest } from '../lib/phpBus';
 import { getReadyPhpBus } from '../lib/phpRuntime';
 import { basePath } from '../lib/runtimePaths';
-import { ensureServiceWorker, serviceWorkerControlTimeoutMs } from '../lib/serviceWorker';
 import {
 	drupalPgsqlDatabase
 	, drupalPgsqlReadyQuery
@@ -128,8 +127,6 @@ const informOpener = (selectedFrameworkName) => {
 	);
 };
 
-const serviceWorkerRetryKey = 'php-wasm-install-demo-service-worker-retry';
-const serviceWorkerReloadDelayMs = 500;
 const installerRpcTimeouts = {
 	awaitFilesystem: 180000
 	, analyzePath: 5000
@@ -269,20 +266,6 @@ export default function InstallDemo()
 			}
 		};
 
-		const failMissingController = async () => {
-			if(!sessionStorage.getItem(serviceWorkerRetryKey))
-			{
-				sessionStorage.setItem(serviceWorkerRetryKey, '1');
-				updateMessage('No Service Worker Detected, Reloading...');
-				await new Promise(resolve => setTimeout(resolve, serviceWorkerReloadDelayMs));
-				window.location.reload();
-				return;
-			}
-
-			sessionStorage.removeItem(serviceWorkerRetryKey);
-			updateMessage('Service worker did not take control of the installer popup. Close this window and try again.');
-		};
-
 		if(!bootstrapPromise.current)
 		{
 			bootstrapPromise.current = (async () => {
@@ -290,53 +273,6 @@ export default function InstallDemo()
 
 				try
 				{
-					const serviceWorker = await ensureServiceWorker({
-						timeoutMs: serviceWorkerControlTimeoutMs
-					});
-
-					if(!serviceWorker.controlled)
-					{
-						if(!disposed.current && serviceWorker.supported !== false)
-						{
-							setCanRetryStartup(true);
-						}
-
-						console.error('CGI service worker startup failed.', {
-							controlSource: serviceWorker.controlSource
-							, error: serviceWorker.error
-							, diagnostics: serviceWorker.diagnostics
-						});
-
-						if(serviceWorker.controlSource === 'error')
-						{
-							updateMessage(
-								serviceWorker.error?.message
-								?? 'Failed to register the CGI service worker for the installer popup.'
-							);
-							return;
-						}
-
-						if(serviceWorker.controlSource === 'unsupported')
-						{
-							updateMessage('This browser does not support service workers for the installer popup.');
-							return;
-						}
-
-						if(serviceWorker.controlSource.endsWith('-timeout'))
-						{
-							updateMessage(
-								serviceWorker.error?.message
-								?? 'The CGI service worker timed out during startup.'
-							);
-							return;
-						}
-
-						await failMissingController();
-						return;
-					}
-
-					sessionStorage.removeItem(serviceWorkerRetryKey);
-
 					const selectedFrameworkName = query.get('framework');
 					const selectedDatabase = query.get('database') ?? 'sqlite';
 					const overwrite = query.get('overwrite') ?? false;
@@ -518,7 +454,7 @@ export default function InstallDemo()
 
 					if(!disposed.current)
 					{
-						setCanRetryStartup(!runtimeReady);
+						setCanRetryStartup(!runtimeReady && Boolean(navigator.serviceWorker));
 					}
 				}
 			})();
