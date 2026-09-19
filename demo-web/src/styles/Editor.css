@@ -241,7 +241,7 @@ select.bevel option {
 .editor-notice { background: #ffeab0; color: #3d2a00; }
 .editor-file-info { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; padding: 0.25rem; background: #333; color: #ddd; }
 .editor-status { padding: 0.3rem; white-space: normal; overflow-wrap: anywhere; }
-.editor-debugger { height: 35%; min-height: 8rem; display: flex; overflow: auto; }
+.editor-debugger { position: relative; height: 35%; min-height: 8rem; display: flex; overflow: auto; }
 .editor-dialog { position: fixed; inset: 0; z-index: 100; background: #0008; }
 .editor-dialog .dialog { width: min(36rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); overflow: auto; box-sizing: border-box; }
 .editor-dialog p { white-space: pre-wrap; overflow-wrap: anywhere; }

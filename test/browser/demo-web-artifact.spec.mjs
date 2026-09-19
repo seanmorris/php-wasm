@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import {expectDebuggerContained} from '../lib/debugger-layout.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 
@@ -300,6 +301,15 @@ test('debug preview boots php-dbg', async ({ page }) => {
 	await expect(page.locator('.console-output')).toContainText('/preload/test_www/hello-world.php', {
 		timeout: 180000
 	});
+	const input = page.locator('.console-input input');
+	await input.fill('help ' + 'w'.repeat(512));
+	await input.press('Enter');
+	await expect(page.locator('.console-output')).toContainText('w'.repeat(512));
+	for(const width of [1280, 375, 320])
+	{
+		await page.setViewportSize({width, height: 812});
+		await expectDebuggerContained(page.locator('.dbg-preview .frame'));
+	}
 });
 
 test('select framework service worker serves CGI', async ({ page }) => {

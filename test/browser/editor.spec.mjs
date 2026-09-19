@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import {test, expect} from '@playwright/test';
+import {expectDebuggerContained} from '../lib/debugger-layout.mjs';
 
 test.skip(!process.env.DEMO_WEB_ARTIFACT_ROOT, 'Requires the built demo-web artifact.');
 test.use({actionTimeout: 20000});
@@ -290,6 +291,24 @@ test('runs the saved buffer in the existing PHP debugger', async ({page}) => {
 	await page.getByRole('dialog', {name: 'Save before debugging?'}).getByRole('button', {name: 'Save and start'}).click();
 	await expect(page.locator('.editor-debugger .phpdbg-console')).toContainText('editor debugger handoff', {timeout: 60000});
 	expect(await disk(page, '/persist/debug-editor.php')).toContain('editor debugger handoff');
+	const panel = page.locator('.editor-debugger');
+	for(const width of [1280, 375])
+	{
+		await page.setViewportSize({width, height: 812});
+		await expectDebuggerContained(panel);
+	}
+	const input = panel.locator('.console-input input');
+	await input.fill('break /persist/debug-editor.php:1');
+	await input.press('Enter');
+	await expect(panel.locator('.console-output')).toContainText('Breakpoint #0 added');
+	await input.fill('run');
+	await input.press('Enter');
+	await expect(panel.locator('.phpdbg-right-panel')).toHaveAttribute('data-current-panel', 'variables');
+	for(const width of [1280, 375])
+	{
+		await page.setViewportSize({width, height: 812});
+		await expectDebuggerContained(panel);
+	}
 	await page.getByRole('button', {name: 'Stop debugger'}).click();
 	await expect(page.getByRole('button', {name: 'Save file', exact: true})).toBeEnabled();
 });
