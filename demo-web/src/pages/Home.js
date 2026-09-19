@@ -141,11 +141,6 @@ function Home()
 						<span>Query Workbench</span>
 					</a>
 
-					<a target = "_blank" href = {basePath('waitline-preview.html')} className="icon-box" rel="noreferrer">
-						<img src = {cmdIcon} alt = "waitline Readline Test" />
-						<span>waitline / Readline Test</span>
-					</a>
-
 					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box" rel="noreferrer">
 						<img src = {cmdIcon} alt = "PHP-CLI Preview" />
 						<span>PHP-CLI Preview</span>
