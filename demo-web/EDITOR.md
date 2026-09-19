@@ -81,6 +81,21 @@ and folder types in one read-only transaction. File Bus falls back to
 errors propagate, and writes still wait for persistence before acknowledgment.
 The lightweight editor keeps its existing dedicated filesystem actions.
 
+The framework chooser, installer and VS Code bridge check PHP readiness before
+using the shared CGI runtime. Startup gets 15 seconds to reply, then one fresh
+service worker registration and another 15-second readiness check. Replacement
+has its own 15-second deadline, including waiting for another tab's recovery.
+Concurrent callers share startup, and tabs reuse a replacement already installed
+by another tab. Recovery preserves `/persist` and `/config`; it does not clear
+browser storage. The chooser and installer show a startup error with **Retry PHP
+startup** if recovery fails. Installation operations are never replayed by this
+recovery path; the installer only offers that retry before installation begins.
+
+The generated CGI entry stays at `cgi-worker.js`. Its hashed JavaScript and native
+dependencies live in `worker-assets/`, without `node_modules` path segments that
+Vite's file watcher ignores when a rebuild adds new hashes. Rebuild
+with `npm run build:worker` after changing worker sources or installed packages.
+
 The host bridge must forward the options argument. `vscode-react` 0.2.2 already
 does this; updating its package is not needed. The VS Code host must contain a
 rebuilt File Bus extension as well as the updated PHP demo worker. In the host

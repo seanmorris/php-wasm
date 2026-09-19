@@ -22,8 +22,8 @@ const { bus, getPhpBus } = vi.hoisted(() => {
 	return {bus, getPhpBus};
 });
 
-vi.mock('../lib/phpBus', () => ({
-	getPhpBus
+vi.mock('../lib/phpRuntime', () => ({
+	getReadyPhpBus: getPhpBus
 }));
 
 vi.mock('../components/Header', () => ({
@@ -75,8 +75,19 @@ describe('SelectFramework', () => {
 		bus.runSql.mockResolvedValue({rows: [{ready: true}]});
 		bus.getSettings.mockReset();
 		bus.getSettings.mockResolvedValue({vHosts: []});
-		getPhpBus.mockClear();
+		getPhpBus.mockReset().mockResolvedValue(bus);
 		window.history.pushState({}, '', '/select-framework.html');
+	});
+
+	it('shows a startup error and retries installation discovery on request', async () => {
+		getPhpBus.mockRejectedValueOnce(new Error('PHP could not start after updating.'));
+		render(<SelectFramework />);
+
+		await screen.findByRole('alert');
+		expect(bus.analyzePath).not.toHaveBeenCalled();
+		fireEvent.click(screen.getByRole('button', {name: 'Retry PHP startup'}));
+		await waitFor(() => expect(bus.analyzePath).toHaveBeenCalled());
+		expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 	});
 
 	it('detects the WordPress install and targets its vhost and entrypoint', async () => {

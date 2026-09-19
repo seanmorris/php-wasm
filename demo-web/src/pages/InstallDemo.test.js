@@ -1,14 +1,16 @@
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-const { ensureServiceWorker, getPhpBus, terminalProps } = vi.hoisted(() => ({
+const { ensureServiceWorker, recoverServiceWorker, getPhpBus, terminalProps } = vi.hoisted(() => ({
 	ensureServiceWorker: vi.fn()
+	, recoverServiceWorker: vi.fn()
 	, getPhpBus: vi.fn()
 	, terminalProps: {current: null}
 }));
 
 vi.mock('../lib/serviceWorker', () => ({
 	ensureServiceWorker
+	, recoverServiceWorker
 	, serviceWorkerControlTimeoutMs: 1500
 }));
 
@@ -35,6 +37,9 @@ describe('InstallDemo', () => {
 	beforeEach(() => {
 		ensureServiceWorker.mockReset();
 		getPhpBus.mockReset();
+		recoverServiceWorker.mockReset().mockImplementation(async () => {
+			navigator.serviceWorker.controller = {};
+		});
 		terminalProps.current = null;
 
 		bus = {
@@ -441,6 +446,40 @@ describe('InstallDemo', () => {
 		await screen.findByText(
 			'Installer request "analyzePath" failed: Timed out waiting for a service worker reply after 5000ms.'
 		);
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
+		expect(recoverServiceWorker).not.toHaveBeenCalled();
+	});
+
+	it('recovers a stale worker before installing exactly once under StrictMode', async () => {
+		bus.runtimeReady.mockRejectedValueOnce(new Error('Wasm asset returned 404'));
+		render(<React.StrictMode><InstallDemo /></React.StrictMode>);
+
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+		expect(recoverServiceWorker).toHaveBeenCalledTimes(1);
+		expect(bus.runtimeReady).toHaveBeenCalledTimes(2);
+		expect(bus.analyzePath).toHaveBeenCalledTimes(1);
+		expect(bus.setSettings).toHaveBeenCalledTimes(1);
+		expect(bus.writeFile).toHaveBeenCalledTimes(2);
+	});
+
+	it('offers a working retry after startup recovery fails without writing any files', async () => {
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		bus.runtimeReady.mockRejectedValue(new Error('Wasm asset returned 404'));
+		render(<InstallDemo />);
+
+		const retry = await screen.findByRole('button', {name: 'Retry PHP startup'});
+
+		expect(screen.queryByAltText('loading spinner')).not.toBeInTheDocument();
+		expect(bus.writeFile).not.toHaveBeenCalled();
+		expect(bus.setSettings).not.toHaveBeenCalled();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(recoverServiceWorker).toHaveBeenCalledTimes(1);
+		bus.runtimeReady.mockResolvedValue(true);
+		fireEvent.click(retry);
+		await waitFor(() => expect(terminalProps.current).not.toBeNull());
+		expect(bus.setSettings).toHaveBeenCalledTimes(1);
+		expect(bus.writeFile).toHaveBeenCalledTimes(2);
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
 	});
 
 	it('waits for the cold PHP runtime before using short filesystem RPC timeouts', async () => {

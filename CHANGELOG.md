@@ -4,6 +4,7 @@ Changes
 
 ## Unreleased
 
+* Recover failed CGI startup with one bounded service worker replacement, preserving saved files and offering a startup retry if recovery fails. Framework and VS Code startup share the readiness check. Worker assets use flat hashed paths so Vite serves rebuilt dependencies reliably.
 * Added typed directory listings with `readdir(path, {withFileTypes: true})` across runtime wrappers and declarations. Browser CGI reads refresh storage without flushing, and writes still wait for persistence. The VS Code bridge forwards listing options so updated File Bus hosts can expand and search directories without per-entry RPCs.
 * Expanded the lightweight editor's file handling with explicit Save, untitled documents, file/folder operations, transfers, recovery, and conflict checks. Empty workspaces retain a saveable untitled document. Removed the redundant standalone Waitline link from the home-page extras.
 * Expanded PDO-CFD1 with named/numbered parameters, direct execution, quoting, insert IDs, binary values, buffered scroll cursors, and result metadata. Atomic `cfd1Batch()` reuses bound PDO statements; ordinary `execute([...])` remains available without explicit binding.

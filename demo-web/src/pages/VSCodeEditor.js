@@ -4,7 +4,7 @@
 import '../styles/Common.css';
 import '../styles/Editor.css';
 import Header from '../components/Header';
-import { getPhpBus } from '../lib/phpBus';
+import { getReadyPhpBus } from '../lib/phpRuntime';
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useVSCode } from 'vscode-react';
@@ -115,36 +115,36 @@ export default function VSCodeEditor()
 
 	const fsHandlers = useMemo(() => ({
 		readdir(path, options) {
-			return getPhpBus().then(bus => bus.readdir(path, options));
+			return getReadyPhpBus().then(bus => bus.readdir(path, options));
 		}
 
 		, async readFile(path) {
-			const bus = await getPhpBus();
+			const bus = await getReadyPhpBus();
 			return Array.from(await bus.readFile(path));
 		}
 
 		, analyzePath(path) {
-			return getPhpBus().then(bus => bus.analyzePath(path));
+			return getReadyPhpBus().then(bus => bus.analyzePath(path));
 		}
 
 		, writeFile(filePath, contents) {
-			return getPhpBus().then(bus => bus.writeFile(filePath, new Uint8Array(contents)));
+			return getReadyPhpBus().then(bus => bus.writeFile(filePath, new Uint8Array(contents)));
 		}
 
 		, rename(...args) {
-			return getPhpBus().then(bus => bus.rename(...args));
+			return getReadyPhpBus().then(bus => bus.rename(...args));
 		}
 
 		, mkdir(...args) {
-			return getPhpBus().then(bus => bus.mkdir(...args));
+			return getReadyPhpBus().then(bus => bus.mkdir(...args));
 		}
 
 		, unlink(...args) {
-			return getPhpBus().then(bus => bus.unlink(...args));
+			return getReadyPhpBus().then(bus => bus.unlink(...args));
 		}
 
 		, rmdir(...args) {
-			return getPhpBus().then(bus => bus.rmdir(...args));
+			return getReadyPhpBus().then(bus => bus.rmdir(...args));
 		}
 
 		, activate(...args) {
@@ -194,7 +194,7 @@ export default function VSCodeEditor()
 		adapterRef.current = new PhpDbgBusSession({
 			runtimeArgs: createPhpDbgRuntimeArgs(version, path || null)
 			, fs: {
-				readFile: path => getPhpBus().then(bus => bus.readFile(path))
+				readFile: path => getReadyPhpBus().then(bus => bus.readFile(path))
 			}
 			, listOpenBreakpoints: () => {
 				return listOpenBreakpointsFor({
@@ -223,7 +223,7 @@ export default function VSCodeEditor()
 		void ready.then(async () => {
 			try
 			{
-				const bus = await getPhpBus();
+				const bus = await getReadyPhpBus();
 				await ensureDebugFiles(bus, version);
 				await callClientMethodWithRetry(
 					{configure}

@@ -8,7 +8,7 @@ const bridge = vi.hoisted(() => ({
 }));
 
 vi.mock('../components/Header', () => ({default: () => null}));
-vi.mock('../lib/phpBus', () => ({getPhpBus: async () => bridge.bus}));
+vi.mock('../lib/phpRuntime', () => ({getReadyPhpBus: async () => bridge.bus}));
 vi.mock('../lib/phpDbgRuntimeArgs', () => ({createPhpDbgRuntimeArgs: () => ({})}));
 vi.mock('../lib/PhpDbgBusSession', () => ({PhpDbgBusSession: class { dispose() {} }}));
 vi.mock('vscode-react', () => ({

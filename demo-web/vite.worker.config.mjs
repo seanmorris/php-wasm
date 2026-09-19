@@ -52,11 +52,12 @@ export default defineConfig({
 				// Keep the service worker registration URL stable, but hash every
 				// other preserved module so browsers cannot stitch together a stale
 				// worker graph across deploys.
+				// Flatten package paths: Vite's watcher ignores node_modules on rebuild.
 				, entryFileNames: chunk => chunk.facadeModuleId === workerEntry
 					? 'cgi-worker.js'
-					: '[name]-[hash].js'
-				, chunkFileNames: '[name]-[hash].js'
-				, assetFileNames: '[name]-[hash][extname]'
+					: `worker-assets/${path.basename(chunk.name)}-[hash].js`
+				, chunkFileNames: 'worker-assets/[name]-[hash].js'
+				, assetFileNames: 'worker-assets/[name]-[hash][extname]'
 			}
 		}
 	}

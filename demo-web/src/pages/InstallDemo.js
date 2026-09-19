@@ -4,7 +4,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Terminal from '../components/Terminal';
 import loader from '../assets/ui/bar-spin.svg';
-import { getPhpBus, waitForPhpBusRequest } from '../lib/phpBus';
+import { waitForPhpBusRequest } from '../lib/phpBus';
+import { getReadyPhpBus } from '../lib/phpRuntime';
 import { basePath } from '../lib/runtimePaths';
 import { ensureServiceWorker, serviceWorkerControlTimeoutMs } from '../lib/serviceWorker';
 import {
@@ -130,8 +131,7 @@ const informOpener = (selectedFrameworkName) => {
 const serviceWorkerRetryKey = 'php-wasm-install-demo-service-worker-retry';
 const serviceWorkerReloadDelayMs = 500;
 const installerRpcTimeouts = {
-	runtimeReady: 180000
-	, awaitFilesystem: 180000
+	awaitFilesystem: 180000
 	, analyzePath: 5000
 	, readFile: 30000
 	, writeFile: 30000
@@ -247,6 +247,8 @@ export default function InstallDemo()
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 	const [message, setMessage] = useState('Initializing...');
 	const [terminal, setTerminal] = useState('');
+	const [startupAttempt, setStartupAttempt] = useState(0);
+	const [canRetryStartup, setCanRetryStartup] = useState(false);
 	const bootstrapPromise = useRef(null);
 	const disposed = useRef(false);
 
@@ -284,6 +286,8 @@ export default function InstallDemo()
 		if(!bootstrapPromise.current)
 		{
 			bootstrapPromise.current = (async () => {
+				let runtimeReady = false;
+
 				try
 				{
 					const serviceWorker = await ensureServiceWorker({
@@ -292,6 +296,11 @@ export default function InstallDemo()
 
 					if(!serviceWorker.controlled)
 					{
+						if(!disposed.current && serviceWorker.supported !== false)
+						{
+							setCanRetryStartup(true);
+						}
+
 						console.error('CGI service worker startup failed.', {
 							controlSource: serviceWorker.controlSource
 							, error: serviceWorker.error
@@ -327,9 +336,6 @@ export default function InstallDemo()
 					}
 
 					sessionStorage.removeItem(serviceWorkerRetryKey);
-					const bus = await getPhpBus({
-						timeoutMs: serviceWorkerControlTimeoutMs
-					});
 
 					const selectedFrameworkName = query.get('framework');
 					const selectedDatabase = query.get('database') ?? 'sqlite';
@@ -360,7 +366,9 @@ export default function InstallDemo()
 						: packages[selectedFrameworkName];
 
 					updateMessage('Starting PHP runtime...');
-					await sendInstallMessage(bus, 'runtimeReady');
+					const bus = await getReadyPhpBus({onProgress: updateMessage});
+
+					runtimeReady = true;
 
 					updateMessage('Downloading init script...');
 					const initPhpCode = await (await fetch(basePath('scripts/init.php'))).text();
@@ -507,6 +515,11 @@ export default function InstallDemo()
 				{
 					console.error(error);
 					updateMessage(formatInstallError(error));
+
+					if(!disposed.current)
+					{
+						setCanRetryStartup(!runtimeReady);
+					}
 				}
 			})();
 		}
@@ -514,7 +527,17 @@ export default function InstallDemo()
 		return () => {
 			disposed.current = true;
 		};
-	}, [query]);
+	}, [query, startupAttempt]);
+
+	/**
+	 * Retries only a failed startup, before any installation work has begun.
+	 */
+	const retryStartup = () => {
+		bootstrapPromise.current = null;
+		setCanRetryStartup(false);
+		setMessage('Initializing...');
+		setStartupAttempt(attempt => attempt + 1);
+	};
 
 	return (
 		<div className = "install-demo viewport-page">
@@ -522,11 +545,14 @@ export default function InstallDemo()
 				<div className = "inset padded">
 					<h2>{message}</h2>
 					{terminal}
-					<img
+					{canRetryStartup ? <>
+						<p>Saved files are preserved. Check your connection and retry.</p>
+						<button type = "button" onClick = {retryStartup}>Retry PHP startup</button>
+					</> : <img
 						className = "loader-icon"
 						src = {loader}
 						alt = "loading spinner"
-					/>
+					/>}
 				</div>
 			</div>
 		</div>
