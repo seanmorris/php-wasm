@@ -111,7 +111,7 @@ test('CGI cookie deadlines and deletions survive worker refresh', async ({page})
 			'/persist/www/cookies.php'
 			, `<?php
 			if(isset($_GET['set'])) {
-				setcookie('reload', 'keep', ['expires' => time() + 3, 'path' => '/']);
+				setcookie('reload', 'keep', ['expires' => time() + 3600, 'path' => '/']);
 			} elseif(isset($_GET['delete'])) {
 				setcookie('reload', '', ['expires' => 1, 'path' => '/']);
 			}
@@ -133,9 +133,10 @@ test('CGI cookie deadlines and deletions survive worker refresh', async ({page})
 	});
 	expect(restored.body).toBe('keep');
 	expect(restored.snapshot.cookies[0].expiresAt).toBe(deadline);
-	await page.waitForFunction(deadline => Date.now() >= deadline, deadline);
+	await page.evaluate(deadline => window.cgiRpc('setCookieTestTime', [deadline]), deadline);
 	expect(await page.evaluate(async () => (await fetch('/php-wasm/cgi-bin/cookies.php')).text())).toBe('expired');
 	await page.evaluate(async () => {
+		await window.cgiRpc('setCookieTestTime');
 		await fetch('/php-wasm/cgi-bin/cookies.php?set');
 		await fetch('/php-wasm/cgi-bin/cookies.php?delete');
 		await window.cgiRpc('refresh');

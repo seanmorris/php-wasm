@@ -14,6 +14,7 @@ let loader = null;
 const prefix = '/php-wasm/cgi-bin/';
 const testPath = `${prefix}test`;
 let resumeConcurrencyTest;
+const realDateNow = Date.now;
 
 // A test-controlled suspension makes filesystem overlap reproducible without sleeps.
 globalThis.cgiConcurrencyPause = () => new Promise(resolve => {
@@ -32,7 +33,11 @@ const init = () => {
 	loader = Promise.resolve(new PhpCgiWorker({
 		docroot: '/persist/www'
 		, actions: {
-			resumeConcurrencyTest: () => {
+			setCookieTestTime: (cgi, time) => {
+				Date.now = time === undefined ? realDateNow : () => time;
+				return true;
+			}
+			, resumeConcurrencyTest: () => {
 				resumeConcurrencyTest?.();
 				resumeConcurrencyTest = null;
 				return true;
