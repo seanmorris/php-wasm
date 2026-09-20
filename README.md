@@ -226,6 +226,14 @@ Include the `php-tags` module from a CDN:
 <script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
+To serve the installed package locally, expose its directory through your HTTP
+server and use its public URL, for example `/node_modules/php-wasm/php-tags.mjs`.
+Keep the package's relative module paths and matching JavaScript/Wasm assets
+together. A relative URL such as `node_modules/...` resolves against the page's
+directory, so nested pages may need a leading `/` or a different public path.
+The loader waits for the initial document to finish parsing, including when
+an `async` module in `<head>` loads before `<body>` exists.
+
 And run some PHP right in the page!
 
 ```html
@@ -799,6 +807,12 @@ const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
 
 const result = await sendMessage(methodName, [param, param, param]);
 ```
+
+After registration, the generated function waits for the selected worker to
+activate before sending a message. Missing registrations, failed installations,
+and message-cloning failures reject the call. Runtime errors, including denied
+persistent storage, also reject through `onMessage`; handle these rejections in
+the page. Private-mode storage availability depends on the browser.
 
 #### php.handleMessageEvent
 

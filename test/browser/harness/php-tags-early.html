@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+	<title>PHP tags during HTML parsing</title>
+	<script>
+		window.releaseTagBody = () => {
+			window.tagModuleRanBeforeBody = document.body === null;
+			const token = new URL(location.href).searchParams.get('token');
+			fetch(`/php-wasm/release-gate?token=${token}`);
+		};
+	</script>
+	<script async type="module" src="/packages/php-wasm/php-tags.mjs" onload="releaseTagBody()" onerror="releaseTagBody()"></script>
+<!-- wait for module execution -->
+</head>
+<body>
+	<pre id="output"></pre>
+	<pre id="error"></pre>
+	<script type="text/php" data-stdout="#output" data-stderr="#error"><?php echo 'parsed-complete'; ?></script>
+	<script type="module" src="./php-tags-options.mjs"></script>
+</body>
+</html>

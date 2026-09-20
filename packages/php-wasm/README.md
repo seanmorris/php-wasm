@@ -32,6 +32,19 @@ const php = new PhpNode();
 
 Runtime-loadable extension helper JS packages are ESM-only. When you need to manage extension assets manually, pass `.so`, `.data`, `.wasm`, and support-library assets with `sharedLibs`, `dynamicLibs`, `files`, and `locateFile`.
 
+## PHP script tags
+
+Load `php-tags.mjs` as a module to execute `<script type="text/php">` elements.
+The loader waits for the initial document to finish parsing, so `async` loading
+from `<head>` works even when local assets arrive before the body. PHP tags added
+afterward are observed too.
+
+For local hosting, use the package's public HTTP URL and retain its relative
+module paths and matching JavaScript/Wasm assets. A path like
+`node_modules/php-wasm/php-tags.mjs` is relative to the page's directory;
+`/node_modules/php-wasm/php-tags.mjs` starts at the server root, when that directory
+is exposed there.
+
 ## Directory listings
 
 `await php.readdir(path)` returns names as `string[]`. Pass

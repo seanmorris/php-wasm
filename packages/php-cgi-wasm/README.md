@@ -44,6 +44,16 @@ const php = new PhpCgiNode({
 
 Runtime-loadable extension helper JS packages remain ESM-only; pass extension assets manually when you need to manage them directly.
 
+## First messages to a service worker
+
+Register the worker and attach `onMessage` from `php-cgi-wasm/msg-bus.mjs` to
+`navigator.serviceWorker` before calling the function returned by
+`sendMessageFor(workerUrl)`. The helper waits through installation and activation,
+so a first request can be made immediately after registration resolves.
+Missing registrations, failed installations, and message-cloning failures
+reject the call. Runtime failures such as denied persistent storage also reject;
+private-mode storage support depends on the browser.
+
 ## Directory listings and persistence
 
 `await php.readdir(path)` still returns `string[]`. For directory names and types

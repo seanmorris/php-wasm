@@ -31,7 +31,23 @@ preparing the artifacts does not publish packages, push images, or deploy sites.
   Replace affected old
   generated PHP assets as a matching JavaScript/Wasm pair; a wrapper-only update
   cannot repair a global hook already embedded in an older generated module.
+- **Local PHP tags (#54):** the loader waits for the initial HTML document to
+  finish parsing. Fast local `async` modules can run in `<head>` without accessing
+  a missing body or reading an incomplete PHP script. Local URLs must still
+  resolve to the served package and its matching JavaScript/Wasm assets.
+- **First CGI messages (#63):** `sendMessageFor()` follows an already-installing
+  worker through activation before sending its first RPC. Failed installations,
+  missing registrations, lookup failures, and message-cloning failures reject
+  instead of leaving the caller pending. The startup failure reproduced in both
+  normal and incognito Chromium. Storage worked in both; an injected storage
+  denial rejects explicitly. This does not establish storage support in every
+  private browser mode.
+- **Class-name corruption (#96):** the published `0.0.8` browser build reproduces
+  truncated JavaScript class names. The current native build already uses the
+  stable `Vrzno` debug name and passes repeated comparisons. A browser regression
+  preserves that behavior; JavaScript constructor names are not restored.
 
 GitHub issue records remain unchanged. The regression suites cover source
 queues and cookies, Node ESM/CommonJS source evaluation, real browser requests
-and worker refresh, native Vrzno object options, and isolated builder installs.
+and worker refresh, early HTML loading, worker activation, native Vrzno object
+options, and isolated builder installs.

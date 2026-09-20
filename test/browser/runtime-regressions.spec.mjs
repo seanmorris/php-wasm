@@ -1,8 +1,69 @@
 import {test, expect} from '@playwright/test';
+import {randomUUID} from 'node:crypto';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 const variant = process.env.PHP_VARIANT ?? '';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
+
+test('async PHP tags initialize when their module executes before the HTML body exists', async ({page}) => {
+	const errors = [];
+	page.on('pageerror', error => errors.push(error.message));
+	const query = new URLSearchParams({version, variant, libType, token: randomUUID()});
+	await page.goto(`harness/php-tags-early.html?${query}`);
+	expect(await page.evaluate(() => window.tagModuleRanBeforeBody)).toBe(true);
+	expect(errors).toEqual([]);
+	await expect(page.locator('#output')).toHaveText('parsed-complete', {timeout: 120000});
+	await expect(page.locator('#error')).toBeEmpty();
+	expect(errors).toEqual([]);
+});
+
+test('legacy message helper delivers the first RPC during service worker installation', async ({page}) => {
+	await page.goto('harness/index.html');
+	const result = await page.evaluate(async token => {
+		const {sendMessageFor, onMessage} = await import('/packages/php-cgi-wasm/msg-bus.mjs');
+		navigator.serviceWorker.addEventListener('message', onMessage);
+		const workerUrl = new URL(`msg-bus-worker.mjs?token=${token}`, location.href);
+		const registration = await navigator.serviceWorker.register(workerUrl, {type: 'module'});
+		const initial = registration.installing?.state;
+		const getRegistration = navigator.serviceWorker.getRegistration.bind(navigator.serviceWorker);
+		let queried;
+		const lookup = new Promise(resolve => queried = resolve);
+		navigator.serviceWorker.getRegistration = async (...args) => {
+			const registration = await getRegistration(...args);
+			queried();
+			return registration;
+		};
+		const reply = sendMessageFor(workerUrl.href)('echo', ['first-message']);
+		await lookup;
+		await fetch(`/php-wasm/release-gate?token=${token}`);
+		const value = await reply;
+		return {initial, value, final: registration.active?.state};
+	}, randomUUID());
+	expect(result).toEqual({initial: 'installing', value: ['first-message'], final: 'activated'});
+});
+
+test('repeated PHP dumps of a JavaScript object retain a stable debug class name', async ({page}) => {
+	await page.goto('harness/index.html');
+	const result = await page.evaluate(async ({version, variant, libType}) => {
+		const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
+		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+		window.__php_action = new (class WindowPhpActionService {})();
+		const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+		let output = '';
+		php.addEventListener('output', event => output += event.detail.join(''));
+		const status = await php.run(`<?php
+		$window = new Vrzno;
+		$headers = [];
+		for($i = 0; $i < 100; $i++) {
+			$dump = print_r($window->__php_action, true);
+			$headers[] = strtok($dump, "\\n");
+		}
+		echo json_encode(array_values(array_unique($headers)));
+		`);
+		return {status, headers: JSON.parse(output)};
+	}, {version, variant, libType});
+	expect(result).toEqual({status: 0, headers: ['Vrzno Object']});
+});
 
 const initializeCgi = async page => {
 	await page.goto(`harness/cgi.html?version=${version}&libType=${libType}`);

@@ -180,6 +180,11 @@ const runPhpScriptTag = async (element) => {
 const phpSelector = 'script[type="text/php"]';
 
 const runPhpTags = (doc) => {
+	if(doc.readyState === 'loading')
+	{
+		doc.addEventListener('DOMContentLoaded', () => runPhpTags(doc), {once: true});
+		return;
+	}
 
 	const phpNodes = doc.querySelectorAll(phpSelector);
 
@@ -203,7 +208,7 @@ const runPhpTags = (doc) => {
 		}
 	});
 
-	observer.observe(document.body.parentElement, {childList: true, subtree: true});
+	observer.observe(doc, {childList: true, subtree: true});
 };
 
 runPhpTags(document);

@@ -4,6 +4,24 @@ import path from 'node:path';
 
 const repoRoot = process.cwd();
 const basePath = '/php-wasm';
+const responseGates = new Map();
+const releasedGates = new Set();
+
+const holdResponse = (res, token, body) => {
+	let timer;
+	const finish = () => {
+		clearTimeout(timer);
+		responseGates.delete(token);
+		if(!res.destroyed) res.end(body);
+	};
+	if(releasedGates.delete(token)) return finish();
+	responseGates.set(token, finish);
+	timer = setTimeout(finish, 30000);
+	res.on('close', () => {
+		clearTimeout(timer);
+		responseGates.delete(token);
+	});
+};
 
 const mimeTypes = {
 	'.br': 'application/octet-stream'
@@ -191,6 +209,32 @@ const resolveMountedFile = pathname => {
 
 const server = http.createServer((req, res) => {
 	const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+	const token = url.searchParams.get('token');
+
+	if(url.pathname === `${basePath}/release-gate`)
+	{
+		const release = responseGates.get(token);
+		if(release) release();
+		else releasedGates.add(token);
+		send(res, 200, 'released');
+		return;
+	}
+
+	if(url.pathname === `${basePath}/install-gate`)
+	{
+		holdResponse(res, token, 'ready');
+		return;
+	}
+
+	if(url.pathname === `${basePath}/harness/php-tags-early.html`)
+	{
+		const fixture = fs.readFileSync(path.resolve(repoRoot, 'test/browser/harness/php-tags-early.html'), 'utf8');
+		const [head, body] = fixture.split('<!-- wait for module execution -->');
+		res.writeHead(200, {'content-type': 'text/html; charset=utf-8'});
+		res.write(head);
+		holdResponse(res, token, body);
+		return;
+	}
 
 	if(url.pathname === '/')
 	{
