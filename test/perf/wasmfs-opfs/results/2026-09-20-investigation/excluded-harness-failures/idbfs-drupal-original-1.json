@@ -1,0 +1,52 @@
+{
+  "backend": "idbfs",
+  "framework": "drupal",
+  "mode": "original",
+  "round": 1,
+  "started": "2026-09-20T17:43:53.241Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    3.06,
+    3.34,
+    3.79
+  ],
+  "measurements": [],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    {
+      "errorMessage": {
+        "errorMessage": "Uncaught SyntaxError: Invalid or unexpected token",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "http://127.0.0.1:9024/bench/staged/PhpCgiWebBase.mjs",
+        "lineNumber": 27,
+        "columnNumber": 6
+      }
+    },
+    {
+      "errorMessage": {
+        "errorMessage": "Uncaught SyntaxError: Invalid or unexpected token",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "http://127.0.0.1:9024/bench/staged/PhpCgiWebBase.mjs",
+        "lineNumber": 27,
+        "columnNumber": -1
+      }
+    },
+    {
+      "errorMessage": {
+        "errorMessage": "Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    }
+  ],
+  "failure": {
+    "message": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed",
+    "stack": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed\n    at /app/test/perf/wasmfs-opfs/diagnose.mjs:42:13"
+  },
+  "finished": "2026-09-20T17:43:53.468Z"
+}

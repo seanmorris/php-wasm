@@ -1,0 +1,238 @@
+import Native from './artifacts/BENCH_BACKEND/packages/php-cgi-wasm/phpBENCH_VERSION-cgi-worker.mjs';
+import {BenchmarkCgi} from './runtime.mjs';
+import {PhpCgiWebBase} from './staged/PhpCgiWebBase.mjs';
+import {PhpCgiWebBase as PreviousCgiWebBase} from './diagnostic-legacy/PhpCgiWebBase.mjs';
+import {enableIncrementalIdbfs} from './staged/idbfsSync.mjs';
+import {frameworks} from './frameworks.mjs';
+import {FilesystemProfile, instrumentOpfs, instrumentIdbfs, trackDirtyMounts, useDirectLocalScan} from './diagnostic-instrumentation.mjs';
+
+const backend = 'BENCH_BACKEND';
+const profile = new FilesystemProfile();
+if(backend === 'opfs') instrumentOpfs(profile);
+let php, runtime, framework, idbfs, dirty;
+let queue = Promise.resolve();
+
+/**
+ * Starts the same CGI adapter and binary used by the retained comparison.
+ * @param {string} id Framework identifier.
+ * @param {boolean} [incremental] Enable the production IDBFS optimizer.
+ * @returns {Promise<object>} Native startup phases.
+ */
+async function start(id, incremental = false)
+{
+	framework = frameworks.find(item => item.id === id);
+	php = new BenchmarkCgi(Promise.resolve({default: Native}), {
+		backend
+		, version: 'BENCH_VERSION'
+		, docroot: '/preload'
+		, prefix: '/php-wasm/cgi-bin/'
+		, staticCacheTime: -1, maxRequestAge: -1
+		, vHosts: [{pathPrefix: `/php-wasm/cgi-bin/${framework.id}/`, directory: `/persist/${framework.directory}/${framework.root}`.replace(/\/$/, ''), entrypoint: 'index.php'}]
+	});
+	runtime = await php.binary;
+	if(incremental) enableIncrementalIdbfs(runtime.FS);
+	if(backend === 'idbfs') idbfs = instrumentIdbfs(runtime, profile);
+	return php.startup;
+}
+
+/**
+ * Runs a CGI request and rejects PHP error pages.
+ * @param {string} path CGI route.
+ * @returns {Promise<object>} Response text and timing.
+ */
+async function request(path)
+{
+	const started = performance.now();
+	const response = await php.request(new Request(new URL(path, location.href)));
+	const body = await response.text();
+	const stderr = new TextDecoder().decode(new Uint8Array(php.error));
+	if(response.status !== 200 || /PHP (?:Fatal error|Parse error)|Uncaught \w+Error/.test(stderr) || /<b>(?:Fatal error|Parse error)<\/b>/i.test(body)) throw new Error(`Invalid diagnostic CGI response: ${response.status} ${stderr} ${body.slice(0, 1000)}`);
+	return {wallMs: performance.now() - started, status: response.status, body, stderr, flushMs: php.lastFlushMs};
+}
+
+/**
+ * Restores a ZIP with independent archive-location and output-write controls.
+ * @param {object} options Restore strategy.
+ * @param {boolean} [options.memoryArchive] Keep the temporary ZIP in MEMFS.
+ * @param {boolean} [options.bufferFiles] Write each decompressed file in one call.
+ * @returns {Promise<object>} Phase timings and browser/backend operation counts.
+ */
+async function restore({memoryArchive = false, bufferFiles = false} = {})
+{
+	const response = await fetch(`./backups/${framework.archive}`);
+	const archive = new Uint8Array(await response.arrayBuffer());
+	const archivePath = `${memoryArchive ? '/tmp' : '/persist'}/restore.zip`;
+	const written = await profile.measure('archive-write', async () => {
+		await runtime.benchmarkFS.writeFile(archivePath, archive);
+		await php._afterRequest(runtime);
+	});
+	await runtime.benchmarkFS.writeFile('/preload/diagnostic-install.php', `<?php
+header('Content-Type: application/json');
+set_time_limit(0);
+$destination = '/persist/${framework.directory}';
+if(!is_dir($destination) && !mkdir($destination, 0777, true)) throw new Exception('mkdir failed');
+$zip = new ZipArchive;
+$opened = $zip->open('${archivePath}', ZipArchive::RDONLY);
+if($opened !== true) throw new Exception('zip open: ' . $opened);
+$count = $zip->count();
+$bytes = 0;
+for($i = 0; $i < $count; ++$i) {
+    $name = $zip->getNameIndex($i);
+    ${bufferFiles ? `
+    $target = $destination . '/' . $name;
+    $directory = str_ends_with($name, '/') ? rtrim($target, '/') : dirname($target);
+    if(!is_dir($directory) && !mkdir($directory, 0777, true)) throw new Exception('mkdir: ' . $directory);
+    if(str_ends_with($name, '/')) continue;
+    $contents = $zip->getFromIndex($i);
+    if($contents === false) throw new Exception('read: ' . $name);
+    $stat = $zip->statIndex($i);
+    if(strlen($contents) !== $stat['size'] || sprintf('%u', crc32($contents)) !== sprintf('%u', $stat['crc'])) throw new Exception('CRC: ' . $name);
+    if(file_put_contents($target, $contents) !== strlen($contents)) throw new Exception('write: ' . $name);
+    touch($target, $stat['mtime']);
+    $bytes += strlen($contents);
+    ` : `if(!$zip->extractTo($destination, $name)) throw new Exception('extract: ' . $name);`}
+}
+$zip->close();
+unlink('${archivePath}');
+echo json_encode(['entries' => $count, 'bufferedBytes' => $bytes, 'php' => PHP_VERSION]);
+`);
+	const extracted = await profile.measure('extract', async () => {
+		const result = await request('/php-wasm/cgi-bin/diagnostic-install.php');
+		return {...result, body: JSON.parse(result.body)};
+	});
+	return {written, extracted, restoreMs: written.wallMs + extracted.wallMs};
+}
+
+/**
+ * Profiles a framework response, including its ordinary end-of-request flush.
+ * @param {string} name Measurement phase.
+ * @returns {Promise<object>} Validated page response and filesystem counters.
+ */
+async function page(name)
+{
+	return profile.measure(name, async () => {
+		const result = await request(`/php-wasm/cgi-bin/${framework.id}/`);
+		if(!result.body.includes(framework.marker)) throw new Error('Framework marker missing');
+		return {...result, body: undefined};
+	});
+}
+
+/**
+ * Compares the previous RPC implementation with restored batching on real IDBFS.
+ * @param {boolean} batched Use the restored 25 ms queue when true.
+ * @param {number} count Number of concurrently queued reads.
+ * @returns {Promise<object>} Complete batch latency and backend counters.
+ */
+async function rpcReads(batched, count)
+{
+	const wrapper = Object.assign(Object.create((batched ? PhpCgiWebBase : PreviousCgiWebBase).prototype), {
+		binary: Promise.resolve(runtime)
+		, autoTransaction: true
+		, transactionStarted: false
+		, _filesystemQueue: [], _filesystemQueueActive: false
+	});
+	const result = await profile.measure(`rpc-${batched ? 'batched' : 'previous'}-${count}`, async () => {
+		const stats = await Promise.all(Array.from({length: count}, () => wrapper.stat(`/persist/${framework.directory}/${framework.root}/index.php`.replaceAll('//', '/'))));
+		return {count: stats.length};
+	});
+	return result;
+}
+
+/**
+ * Checks selected restored bytes or durable test writes without affecting timings.
+ * @param {string[]} paths Absolute filesystem paths.
+ * @returns {Promise<object[]>} Content hashes and lengths.
+ */
+async function verifyFiles(paths)
+{
+	const result = [];
+	for(const path of paths)
+	{
+		const bytes = await runtime.benchmarkFS.readFile(path);
+		const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+		result.push({path, bytes: bytes.length, sha256: [...digest].map(byte => byte.toString(16).padStart(2, '0')).join('')});
+	}
+	return result;
+}
+
+/**
+ * Exercises native mutations, fallback reconciliation, and batched RPC writes.
+ * This is a single-runtime diagnostic, not a complete persistence conformance test.
+ * @returns {Promise<object>} Expected durable bytes and removed paths.
+ */
+async function mutationProbe()
+{
+	const root = '/persist/diagnostic-persistence';
+	runtime.FS.mkdir(root);
+	await dirty.flush(true);
+	await runtime.benchmarkFS.writeFile(`${root}/changed.bin`, new Uint8Array(64).fill(9));
+	await dirty.flush(true);
+	const bytes = new Uint8Array([0, 1, 127, 128, 255, 13, 10]);
+	await runtime.benchmarkFS.writeFile(`${root}/changed.bin`, bytes);
+	runtime.FS.chmod(`${root}/changed.bin`, 0o640);
+	await dirty.flush(true);
+	runtime.FS.writeFile(`${root}/temporary`, 'remove this');
+	runtime.FS.mkdir(`${root}/empty`);
+	await dirty.flush(true);
+	runtime.FS.rename(`${root}/temporary`, `${root}/renamed`);
+	await dirty.flush(true);
+	runtime.FS.unlink(`${root}/renamed`);
+	runtime.FS.rmdir(`${root}/empty`);
+	await dirty.flush(true);
+	const wrapper = Object.assign(Object.create(PhpCgiWebBase.prototype), {
+		binary: Promise.resolve(runtime)
+		, autoTransaction: true
+		, transactionStarted: false
+		, _filesystemQueue: [], _filesystemQueueActive: false
+	});
+	const files = [`${root}/changed.bin`];
+	const batch = await profile.measure('rpc-write-probe', async () => {
+		await Promise.all(Array.from({length: 4}, (_, index) => {
+			const path = `${root}/rpc-${index}.bin`;
+			files.push(path);
+			return wrapper.writeFile(path, bytes);
+		}));
+	});
+	return {files, bytes: [...bytes], batch, absent: [`${root}/temporary`, `${root}/renamed`, `${root}/empty`]};
+}
+
+/**
+ * Dispatches an isolated diagnostic operation.
+ * @param {object} message Command and arguments.
+ * @returns {Promise<unknown>} Serializable evidence.
+ */
+async function command(message)
+{
+	if(message.action === 'start') return start(message.id, message.incremental);
+	if(message.action === 'restore') return restore(message);
+	if(message.action === 'page') return page(message.name);
+	if(message.action === 'sync') return profile.measure(message.name, () => php.sync(runtime, false));
+	if(message.action === 'rpc-reads') return rpcReads(message.batched, message.count);
+	if(message.action === 'verify-files') return verifyFiles(message.paths);
+	if(message.action === 'mutation-probe') return mutationProbe();
+	if(message.action === 'verify-absent') return message.paths.map(path => ({path, exists: runtime.FS.analyzePath(path).exists}));
+	if(message.action === 'direct-local-scan') return useDirectLocalScan(runtime, idbfs.backend, idbfs.mounts, profile);
+	if(message.action === 'dirty-mode')
+	{
+		if(!dirty) dirty = trackDirtyMounts(runtime, idbfs.mounts);
+		php._afterRequest = async () => {
+			const started = performance.now();
+			php.flushedMounts = await dirty.flush(message.incremental);
+			php.lastFlushMs = performance.now() - started;
+		};
+		return true;
+	}
+	if(message.action === 'info') return {startup: php.startup, dirty: dirty ? [...dirty.dirty.keys()].map(mount => mount.mountpoint) : null, flushedMounts: php.flushedMounts};
+	throw new Error(`Unknown diagnostic command: ${message.action}`);
+}
+
+self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
+self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
+self.addEventListener('message', event => {
+	const pending = queue.then(() => command(event.data));
+	queue = pending.catch(() => {});
+	event.waitUntil(pending.then(
+		result => event.ports[0].postMessage({result})
+		, error => event.ports[0].postMessage({error: {message: error.message, stack: error.stack}})
+	));
+});

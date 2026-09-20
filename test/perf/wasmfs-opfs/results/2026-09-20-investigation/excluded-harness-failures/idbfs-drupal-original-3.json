@@ -1,0 +1,50 @@
+{
+  "backend": "idbfs",
+  "framework": "drupal",
+  "mode": "original",
+  "round": 3,
+  "started": "2026-09-20T17:58:30.014Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    2.02,
+    3.53,
+    3.88
+  ],
+  "measurements": [],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10447,
+      "sha256": "4db988da03decaaedc60933991f52e85c6fd6defa0c2736cdcdb3adcc7b96d1d"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 11396,
+      "sha256": "f27a7a22341b1e009304569b772be02484f774f239f0ddf55efa889675ce66d9"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 7776,
+      "sha256": "d72d807fc3675adebdb1ffe24d0fa45df86c3f4794e669ef735849fbbd153816"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9709,
+      "sha256": "67bf6501db7a509cce4d42c48e20caa5c1a229714f91fc81ec50240d1cf13791"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    }
+  ],
+  "failure": {
+    "message": "ENOENT: no such file or directory, open '.cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.wasm'",
+    "stack": "Error: ENOENT: no such file or directory, open '.cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.wasm'\n    at async open (node:internal/fs/promises:639:25)\n    at async Object.readFile (node:internal/fs/promises:1252:14)\n    at async file:///app/test/perf/wasmfs-opfs/diagnose.mjs:69:17"
+  },
+  "finished": "2026-09-20T17:58:30.293Z"
+}

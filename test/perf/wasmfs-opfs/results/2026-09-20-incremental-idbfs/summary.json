@@ -1,0 +1,397 @@
+{
+  "trials": [
+    {
+      "file": "trials/idbfs-cakephp-5-incremental-idbfs-0.json",
+      "sha256": "5882dc9fe31a57ec3fde44d4050685592fa6e43d6d18917974574ff14e4c879b",
+      "framework": "cakephp-5",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 215.650000333786,
+      "flushMedianMs": 14.600000143051147,
+      "restoreMs": 2377,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-cakephp-5-incremental-idbfs-7.json",
+      "sha256": "2a30d0cc6cc5934136f1b01183f660629bde8055c38e385c93475fdde785565d",
+      "framework": "cakephp-5",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 218.75000023841858,
+      "flushMedianMs": 17.700000047683716,
+      "restoreMs": 2258.7999997138977,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-cakephp-5-original-7.json",
+      "sha256": "13134b4458a6678b4d672b75b85190c94d42c6c20957092aeef1a8f9c4dc8cf7",
+      "framework": "cakephp-5",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 468.5499997138977,
+      "flushMedianMs": 268.0499997138977,
+      "restoreMs": 2250.0999999046326,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-codeigniter-4-incremental-idbfs-0.json",
+      "sha256": "e6bfe36ac50d7b72a3083836ebd5d5190579844b4523c24e7942a5278cb00bb5",
+      "framework": "codeigniter-4",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 64.79999995231628,
+      "flushMedianMs": 0.6500000953674316,
+      "restoreMs": 404.90000009536743,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-codeigniter-4-incremental-idbfs-7.json",
+      "sha256": "c8e06539affd13fff9aae742cdb81a7e43256a00cf4a58186582f8d04703eb12",
+      "framework": "codeigniter-4",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 66.89999985694885,
+      "flushMedianMs": 0.6499998569488525,
+      "restoreMs": 278.99999952316284,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-codeigniter-4-original-7.json",
+      "sha256": "a6d27ede109b5a6df22dcc5f3e1165b2de5a1f6a11567ba7a3723a11a789cc96",
+      "framework": "codeigniter-4",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 93.9500002861023,
+      "flushMedianMs": 20.5,
+      "restoreMs": 317.50000047683716,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-drupal-incremental-idbfs-0.json",
+      "sha256": "9385c30f6be7477161b4bf7c4779cf28bbd25edcbd2eafae930ec60c73113e85",
+      "framework": "drupal",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 68.44999980926514,
+      "flushMedianMs": 0.7499997615814209,
+      "restoreMs": 4497.10000038147,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/idbfs-drupal-incremental-idbfs-1.json",
+      "sha256": "b522b021e7330b01399117257e06a5d520347398b66d73f9e5882b8f31591fb0",
+      "framework": "drupal",
+      "mode": "incremental-idbfs",
+      "round": 1,
+      "warmSamples": 6,
+      "warmMedianMs": 67.20000004768372,
+      "flushMedianMs": 0.6999998092651367,
+      "restoreMs": 4373.999999523163,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/idbfs-drupal-incremental-idbfs-7.json",
+      "sha256": "c4495307e5f9eddb38e190df1eee134ea1ea3439c9886e16705276a3e2a04baa",
+      "framework": "drupal",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 68.64999985694885,
+      "flushMedianMs": 0.6999998092651367,
+      "restoreMs": 4433.099999904633,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/idbfs-drupal-original-7.json",
+      "sha256": "ab77593cdac72cd203a8cba106aec5353280693317421c852be23cbfce1a1d2c",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 539.6999998092651,
+      "flushMedianMs": 474.0,
+      "restoreMs": 4577.199999809265,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/idbfs-laminas-3-incremental-idbfs-0.json",
+      "sha256": "235344f8b85e5160399f302b5c11de84994b9071da39fb6f87293e75c5ff2352",
+      "framework": "laminas-3",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 85.95000004768372,
+      "flushMedianMs": 1.0999999046325684,
+      "restoreMs": 1946.7999997138977,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-laminas-3-incremental-idbfs-7.json",
+      "sha256": "e00e9eb56199147fd189726a7a24062cac2b65a89bf26572a4bdc01a91cf3c4c",
+      "framework": "laminas-3",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 89.0,
+      "flushMedianMs": 0.6500000953674316,
+      "restoreMs": 2077.800000190735,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-laminas-3-original-7.json",
+      "sha256": "4f77da21aa7f1608907852e480b5e3526bd862ffbe4fc7acde1ab9acd887814c",
+      "framework": "laminas-3",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 278.14999985694885,
+      "flushMedianMs": 193.45000004768372,
+      "restoreMs": 1988,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-laravel-11-incremental-idbfs-0.json",
+      "sha256": "12b235f401bc16020190c8674362e46369e030b47cb605b6e4ab49e35325ca7c",
+      "framework": "laravel-11",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 251.15000009536743,
+      "flushMedianMs": 0.8500001430511475,
+      "restoreMs": 2585.6000003814697,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-laravel-11-incremental-idbfs-7.json",
+      "sha256": "45a8c0740f8f0a4c3fd47c35a8a9481432dedef7867e14f6879408ee009d41ca",
+      "framework": "laravel-11",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 256.9500000476837,
+      "flushMedianMs": 1.0500001907348633,
+      "restoreMs": 2674.0999999046326,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-laravel-11-original-7.json",
+      "sha256": "8125029876d1c9d0909144a0a86ced1f4bd7193a47bfd96d13e1cc2294495721",
+      "framework": "laravel-11",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 476.25,
+      "flushMedianMs": 229.69999980926514,
+      "restoreMs": 2658.4000005722046,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-wordpress-incremental-idbfs-0.json",
+      "sha256": "6864b462de4132fc64025a595118721bf9f84e6235624715be3b945c6f303ee9",
+      "framework": "wordpress",
+      "mode": "incremental-idbfs",
+      "round": 0,
+      "warmSamples": 6,
+      "warmMedianMs": 734.1499998569489,
+      "flushMedianMs": 0.7999999523162842,
+      "restoreMs": 2065.800000190735,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-wordpress-incremental-idbfs-7.json",
+      "sha256": "d9b303ff55954e291fbab51068f176236e6481bf49561a42a5e4fbf0fba2079a",
+      "framework": "wordpress",
+      "mode": "incremental-idbfs",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 730.3499999046326,
+      "flushMedianMs": 0.8500001430511475,
+      "restoreMs": 2028.1000003814697,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/idbfs-wordpress-original-7.json",
+      "sha256": "96f93f22e7a2d6968ce1e85794ea6b5ff6d0da7c30c3a1d5e4c8d668f32b9969",
+      "framework": "wordpress",
+      "mode": "original",
+      "round": 7,
+      "warmSamples": 6,
+      "warmMedianMs": 849.6500000953674,
+      "flushMedianMs": 102.05000019073486,
+      "restoreMs": 2030.2999997138977,
+      "validatedAfterRestart": true,
+      "browserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "pairedComparisons": [
+    {
+      "framework": "drupal",
+      "control_warm_ms": 539.6999998092651,
+      "production_warm_ms": 68.64999985694885,
+      "first_production_warm_ms": 68.44999980926514,
+      "improvement_percent": 87.27997037591062,
+      "control_flush_ms": 474.0,
+      "production_flush_ms": 0.6999998092651367,
+      "control_restore_ms": 4577.199999809265,
+      "production_restore_ms": 4433.099999904633
+    },
+    {
+      "framework": "wordpress",
+      "control_warm_ms": 849.6500000953674,
+      "production_warm_ms": 730.3499999046326,
+      "first_production_warm_ms": 734.1499998569489,
+      "improvement_percent": 14.041075757940824,
+      "control_flush_ms": 102.05000019073486,
+      "production_flush_ms": 0.8500001430511475,
+      "control_restore_ms": 2030.2999997138977,
+      "production_restore_ms": 2028.1000003814697
+    },
+    {
+      "framework": "laravel-11",
+      "control_warm_ms": 476.25,
+      "production_warm_ms": 256.9500000476837,
+      "first_production_warm_ms": 251.15000009536743,
+      "improvement_percent": 46.04724408447586,
+      "control_flush_ms": 229.69999980926514,
+      "production_flush_ms": 1.0500001907348633,
+      "control_restore_ms": 2658.4000005722046,
+      "production_restore_ms": 2674.0999999046326
+    },
+    {
+      "framework": "cakephp-5",
+      "control_warm_ms": 468.5499997138977,
+      "production_warm_ms": 218.75000023841858,
+      "first_production_warm_ms": 215.650000333786,
+      "improvement_percent": 53.31341364379683,
+      "control_flush_ms": 268.0499997138977,
+      "production_flush_ms": 17.700000047683716,
+      "control_restore_ms": 2250.0999999046326,
+      "production_restore_ms": 2258.7999997138977
+    },
+    {
+      "framework": "codeigniter-4",
+      "control_warm_ms": 93.9500002861023,
+      "production_warm_ms": 66.89999985694885,
+      "first_production_warm_ms": 64.79999995231628,
+      "improvement_percent": 28.791910959850053,
+      "control_flush_ms": 20.5,
+      "production_flush_ms": 0.6499998569488525,
+      "control_restore_ms": 317.50000047683716,
+      "production_restore_ms": 278.99999952316284
+    },
+    {
+      "framework": "laminas-3",
+      "control_warm_ms": 278.14999985694885,
+      "production_warm_ms": 89.0,
+      "first_production_warm_ms": 85.95000004768372,
+      "improvement_percent": 68.00287612950845,
+      "control_flush_ms": 193.45000004768372,
+      "production_flush_ms": 0.6500000953674316,
+      "control_restore_ms": 1988,
+      "production_restore_ms": 2077.800000190735
+    }
+  ]
+}

@@ -1,0 +1,827 @@
+{
+  "backend": "idbfs",
+  "framework": "codeigniter-4",
+  "mode": "incremental-idbfs",
+  "round": 0,
+  "started": "2026-09-20T18:37:42.708Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    1.25,
+    0.88,
+    1.16
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 94.5,
+      "value": {
+        "wallMs": 94.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 2.8000001907348633
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 2.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 77.5,
+      "value": {
+        "wallMs": 77.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 67.7000002861023,
+      "value": {
+        "wallMs": 67.7000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 1.4000000953674316,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 61.89999961853027,
+      "value": {
+        "wallMs": 61.89999961853027,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 56.89999961853027,
+      "value": {
+        "wallMs": 56.89999961853027,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 55.90000009536743,
+      "value": {
+        "wallMs": 55.90000009536743,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.7000002861022949
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 104.69999980926514,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 6.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 6680,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 9.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 91.50000047683716,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 6680,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 2.4999985694885254,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 39.09999990463257,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 1,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 835,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 1.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 11,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 835,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "1bfe823e888e9582564dce68ca94026bbee262a001f38641854d9f4f562cea75",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10684,
+      "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 12502,
+      "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8107,
+      "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/codeigniter-4/system/Database/BaseBuilder.php",
+      "bytes": 101040,
+      "sha256": "ab91355fc4481bfb707aaad8dce4b8991fe7d6f862fc0fc595603f06f1aad9af"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/index.php",
+      "bytes": 1707,
+      "sha256": "d40e3feefba3736a7f9b44c66a3abcf9d9da86fbd22f71b83be91a8d58156847"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/favicon.ico",
+      "bytes": 5430,
+      "sha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 435.40000009536743,
+    "mountHydrateMs": 29.40000009536743,
+    "totalMs": 465.80000019073486
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 10.400000095367432,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 2.6999998092651367,
+          "bytes": 1132114,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 2.6999998092651367,
+          "bytes": 1132114,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 394.5,
+      "value": {
+        "wallMs": 394.5,
+        "status": 200,
+        "body": {
+          "entries": 834,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 121.60000038146973
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 34.200000286102295,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 24.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 835,
+          "ms": 37268.70000743866,
+          "bytes": 3529239,
+          "failures": 0,
+          "paths": [
+            "/persist/codeigniter-4",
+            "/persist/codeigniter-4/LICENSE",
+            "/persist/codeigniter-4/README.md",
+            "/persist/codeigniter-4/app",
+            "/persist/codeigniter-4/app/.htaccess",
+            "/persist/codeigniter-4/app/Common.php",
+            "/persist/codeigniter-4/app/Config",
+            "/persist/codeigniter-4/app/Config/App.php",
+            "/persist/codeigniter-4/app/Config/Autoload.php",
+            "/persist/codeigniter-4/app/Config/Boot",
+            "/persist/codeigniter-4/app/Config/Boot/development.php",
+            "/persist/codeigniter-4/app/Config/Boot/production.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 404.90000009536743
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 171.80000019073486,
+    "value": {
+      "wallMs": 171.80000019073486,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0.6000003814697266
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.2999997138977051,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/codeigniter-4/system/Database/BaseBuilder.php",
+      "bytes": 101040,
+      "sha256": "ab91355fc4481bfb707aaad8dce4b8991fe7d6f862fc0fc595603f06f1aad9af"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/index.php",
+      "bytes": 1707,
+      "sha256": "d40e3feefba3736a7f9b44c66a3abcf9d9da86fbd22f71b83be91a8d58156847"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/favicon.ico",
+      "bytes": 5430,
+      "sha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 440.69999980926514,
+    "mountHydrateMs": 71.7000002861023,
+    "totalMs": 513.6999998092651
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 255.7999997138977,
+    "value": {
+      "wallMs": 255.69999980926514,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0.9000000953674316
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0.20000028610229492,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 1.1999998092651367,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 835,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 1.5999999046325684,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 11.599999904632568,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 835,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 13,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.39999961853027344,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/codeigniter-4/system/Database/BaseBuilder.php",
+      "bytes": 101040,
+      "sha256": "ab91355fc4481bfb707aaad8dce4b8991fe7d6f862fc0fc595603f06f1aad9af"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/index.php",
+      "bytes": 1707,
+      "sha256": "d40e3feefba3736a7f9b44c66a3abcf9d9da86fbd22f71b83be91a8d58156847"
+    },
+    {
+      "path": "/persist/codeigniter-4/public/favicon.ico",
+      "bytes": 5430,
+      "sha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:37:45.558Z"
+}

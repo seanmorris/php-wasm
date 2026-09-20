@@ -1,0 +1,1066 @@
+{
+  "backend": "idbfs",
+  "framework": "cakephp-5",
+  "mode": "incremental-idbfs",
+  "round": 7,
+  "started": "2026-09-20T18:42:03.887Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    2.63,
+    1.63,
+    1.38
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 363.5,
+      "value": {
+        "wallMs": 363.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 17.5
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 9.400000095367432,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 9.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 18.199999809265137,
+          "bytes": 630784,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 237.5,
+      "value": {
+        "wallMs": 237.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 14
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 4.600000381469727,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 4,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 8.099999904632568,
+          "bytes": 933888,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 221.90000009536743,
+      "value": {
+        "wallMs": 221.90000009536743,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 17.90000009536743
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 9.299999713897705,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 4.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 8.900000095367432,
+          "bytes": 1241088,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 215.60000038146973,
+      "value": {
+        "wallMs": 215.60000038146973,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 18
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 9.5,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 8.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 17.40000057220459,
+          "bytes": 1548288,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 199.69999980926514,
+      "value": {
+        "wallMs": 199.69999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 14.199999809265137
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 5.400000095367432,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 4.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 9,
+          "bytes": 1863680,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 215.10000038146973,
+      "value": {
+        "wallMs": 215.10000038146973,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 18.5
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 9,
+          "bytes": 210,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 7.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 2,
+          "ms": 15.300000190734863,
+          "bytes": 2179072,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5/tmp",
+            "/persist/cakephp-5/tmp/debug_kit.sqlite"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 0.09999990463256836,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 1301.6999998092651,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 65.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 70296,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 75.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 1190.800000667572,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 70296,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 30.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 193.40000009536743,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 7.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8787,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 8.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 154,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8787,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 4.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "729faa3a8a586f55f6ee5bdf99d503324a5a6f27e7243d24e75a233578866392",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10684,
+      "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 12502,
+      "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8107,
+      "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/cakephp-5/vendor/cakephp/cakephp/tests/TestCase/View/Helper/FormHelperTest.php",
+      "bytes": 320167,
+      "sha256": "d606945afb9d2fb21ac40aa1611f3c34c099462438f405e24ddcef1f570c34d0"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/index.php",
+      "bytes": 1300,
+      "sha256": "dd56998984bb09270a4114a74d9bb648e64bf3c785d805ca75559b411d2dc940"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/favicon.ico",
+      "bytes": 15086,
+      "sha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 429.30000019073486,
+    "mountHydrateMs": 49.09999990463257,
+    "totalMs": 479.30000019073486
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 50.5,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 17.90000009536743,
+          "bytes": 10526765,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 18,
+          "bytes": 10526765,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 40.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 2208.2999997138977,
+      "value": {
+        "wallMs": 2208.199999809265,
+        "status": 200,
+        "body": {
+          "entries": 8782,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 1109.9000000953674
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 348.5,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 190.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 8783,
+          "ms": 3872745.200017929,
+          "bytes": 33633182,
+          "failures": 0,
+          "paths": [
+            "/persist/cakephp-5",
+            "/persist/cakephp-5/.editorconfig",
+            "/persist/cakephp-5/.htaccess",
+            "/persist/cakephp-5/README.md",
+            "/persist/cakephp-5/bin",
+            "/persist/cakephp-5/bin/bash_completion.sh",
+            "/persist/cakephp-5/bin/cake",
+            "/persist/cakephp-5/bin/cake.bat",
+            "/persist/cakephp-5/bin/cake.php",
+            "/persist/cakephp-5/composer.json",
+            "/persist/cakephp-5/composer.lock",
+            "/persist/cakephp-5/config"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 2258.7999997138977
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 564.0999999046326,
+    "value": {
+      "wallMs": 564.0999999046326,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 6.199999809265137
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 5.200000286102295,
+        "bytes": 210,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 1,
+        "ms": 4.400000095367432,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/persist",
+        "calls": 9,
+        "ms": 28.899999618530273,
+        "bytes": 331861,
+        "failures": 0,
+        "paths": [
+          "/persist/cakephp-5/webroot",
+          "/persist/cakephp-5/webroot/my_app",
+          "/persist/cakephp-5/tmp",
+          "/persist/cakephp-5/tmp/debug_kit.sqlite",
+          "/persist/cakephp-5/tmp/cache/models",
+          "/persist/cakephp-5/tmp/cache/models/myapp_cake_model_debug_kit_requests",
+          "/persist/cakephp-5/tmp/cache/models/myapp_cake_model_debug_kit_panels",
+          "/persist/cakephp-5/tmp/cache/persistent/myapp_cake_core_translations.default.en_US",
+          "/persist/cakephp-5/tmp/cache/persistent/myapp_cake_core_translations.cake.en_US"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/cakephp-5/vendor/cakephp/cakephp/tests/TestCase/View/Helper/FormHelperTest.php",
+      "bytes": 320167,
+      "sha256": "d606945afb9d2fb21ac40aa1611f3c34c099462438f405e24ddcef1f570c34d0"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/index.php",
+      "bytes": 1300,
+      "sha256": "dd56998984bb09270a4114a74d9bb648e64bf3c785d805ca75559b411d2dc940"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/favicon.ico",
+      "bytes": 15086,
+      "sha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 421.19999980926514,
+    "mountHydrateMs": 964.0999999046326,
+    "totalMs": 1386.9000000953674
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 974.6999998092651,
+    "value": {
+      "wallMs": 974.5999999046326,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 39.69999980926514
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0.19999980926513672,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 9.099999904632568,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 8787,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 10.300000190734863,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 141.69999980926514,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 8787,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 166.7000002861023,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 12.599999904632568,
+        "bytes": 210,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 1,
+        "ms": 10.699999809265137,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/cakephp-5/tmp/debug_kit.sqlite-journal"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/persist",
+        "calls": 2,
+        "ms": 21.199999809265137,
+        "bytes": 2486272,
+        "failures": 0,
+        "paths": [
+          "/persist/cakephp-5/tmp",
+          "/persist/cakephp-5/tmp/debug_kit.sqlite"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/cakephp-5/vendor/cakephp/cakephp/tests/TestCase/View/Helper/FormHelperTest.php",
+      "bytes": 320167,
+      "sha256": "d606945afb9d2fb21ac40aa1611f3c34c099462438f405e24ddcef1f570c34d0"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/index.php",
+      "bytes": 1300,
+      "sha256": "dd56998984bb09270a4114a74d9bb648e64bf3c785d805ca75559b411d2dc940"
+    },
+    {
+      "path": "/persist/cakephp-5/webroot/favicon.ico",
+      "bytes": 15086,
+      "sha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:42:13.142Z"
+}

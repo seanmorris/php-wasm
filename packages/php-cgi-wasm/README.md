@@ -62,18 +62,32 @@ is a serializable `{name: string, isFolder: boolean}` object. Both forms preserv
 filesystem order and include `.` and `..`. Types follow symbolic links, as
 `analyzePath` does; listing and metadata errors reject the operation.
 
-With automatic browser transactions enabled, `analyzePath`, `readdir`, `readFile`,
-and `stat` refresh persisted storage before reading but do not flush it afterward.
-A typed listing resolves every entry's type inside that single transaction.
-Writes still resolve only after persistence finishes. With `autoTransaction: false`,
-the caller retains ownership of transaction boundaries.
+With automatic browser transactions enabled, queued filesystem calls share a
+batch, waiting up to 25 ms after the queue becomes idle for more work. Storage
+is refreshed once. A batch containing only `analyzePath`, `readdir`, `readFile`,
+or `stat` does not flush; any mutation makes the batch writable. Every call
+waits for the shared commit, and a commit failure rejects the whole batch.
+`Promise.all` calls can share this work; sequentially awaited calls cannot.
+Batches are bounded to 64 operations or a 250 ms processing window, checked
+between operations. With `autoTransaction: false`, the caller owns transaction
+boundaries and operations are not delayed for automatic batching.
 
 Browser CGI requests, filesystem RPCs, and runtime refreshes share one lock.
 PHP keeps that lock while suspended on asynchronous work and until its writes
-are persisted. Await writes before opening a URL that uses them. Persistence
-failures return a non-cacheable HTTP 500; `onRequest` receives the final response
+are persisted. HTTP CGI requests still flush after each successful PHP request;
+the 25 ms batching window applies to filesystem RPCs. Await writes before
+opening a URL that uses them. Persistence failures return a non-cacheable
+HTTP 500; `onRequest` receives the final response
 after the commit attempt, and later queued work can still run. Without Web Locks,
 serialization is limited to the current JavaScript realm.
+
+Browser CGI journals PHP and filesystem API mutations, committing only changed
+IDBFS records. This includes metadata, renamed trees and deletions. Clean mounts
+need no write transaction. Existing IDBFS storage remains compatible; hydration
+still reconciles remote changes, with a cheaper local-node traversal. Nested
+mounts use ordinary reconciliation. Failed commits retain pending changes and
+retry them before the next hydration. Symlink hydration restores the link's
+metadata without following or changing its target.
 
 ## Persisted cookies
 

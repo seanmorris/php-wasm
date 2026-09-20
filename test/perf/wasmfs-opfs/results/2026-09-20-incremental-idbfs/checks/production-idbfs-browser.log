@@ -1,0 +1,23 @@
+
+Running 14 tests using 1 worker
+
+(node:178787) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:178787) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 test/browser/idbfs.spec.mjs:37:1 › incremental IDBFS commits native writes and metadata without scanning clean entries (1.1s)
+  ✓   2 test/browser/idbfs.spec.mjs:77:1 › incremental IDBFS journals renamed trees, replacement paths and unlinked open files (883ms)
+  ✓   3 test/browser/idbfs.spec.mjs:105:1 › aborted IDBFS commits reject acknowledgments and survive the next hydration (910ms)
+  ✓   4 test/browser/idbfs.spec.mjs:136:1 › mutations during an IDBFS commit remain pending for the following commit (1.1s)
+  ✓   5 test/browser/idbfs.spec.mjs:167:1 › independent runtimes preserve unrelated remote writes and hydrate each other’s changes (1.0s)
+  ✓   6 test/browser/idbfs.spec.mjs:183:1 › quota failures abort the whole batch and retain both writes for retry (978ms)
+  ✓   7 test/browser/idbfs.spec.mjs:206:1 › incremental records remain readable and writable by unmodified IDBFS (721ms)
+  ✓   8 test/browser/idbfs.spec.mjs:224:1 › dangling symlinks and retargeted links hydrate without touching their targets (760ms)
+  ✓   9 test/browser/idbfs.spec.mjs:243:1 › shared memory-map synchronization is persisted through native MEMFS stream operations (727ms)
+  ✓  10 test/browser/idbfs.spec.mjs:261:1 › installing after files exist retains them when the initial full commit fails (960ms)
+  ✓  11 test/browser/idbfs.spec.mjs:292:1 › nested IDBFS mounts retain ordinary reconciliation across mount and unmount (931ms)
+  ✓  12 test/browser/runtime-regressions.spec.mjs:133:1 › CGI preserves PHP and RPC writes across suspension and worker refresh (1.5s)
+  ✓  13 test/browser/runtime-regressions.spec.mjs:169:1 › concurrent CGI iframes receive their own freshly written files (1.9s)
+  ✓  14 test/browser/runtime-regressions.spec.mjs:199:1 › CGI cookie deadlines and deletions survive worker refresh (1.8s)
+
+  14 passed (17.1s)

@@ -1,0 +1,348 @@
+TAP version 13
+# Subtest: Every docs code block is classified by the docs coverage harness
+ok 1 - Every docs code block is classified by the docs coverage harness
+  ---
+  duration_ms: 2032.656706
+  type: 'test'
+  ...
+# Subtest: Docs coverage harness executes a meaningful subset of runtime-backed examples
+ok 2 - Docs coverage harness executes a meaningful subset of runtime-backed examples
+  ---
+  duration_ms: 1500.135049
+  type: 'test'
+  ...
+# Subtest: Docs coverage report tracks known browser/platform gaps explicitly
+ok 3 - Docs coverage report tracks known browser/platform gaps explicitly
+  ---
+  duration_ms: 2066.301254
+  type: 'test'
+  ...
+# Subtest: Vendored docs fixture matches php-wasm-site page content
+ok 4 - Vendored docs fixture matches php-wasm-site page content
+  ---
+  duration_ms: 2.111574
+  type: 'test'
+  ...
+# Subtest: Generated php-wasm-site links, metadata, sitemap, and static assets are valid
+ok 5 - Generated php-wasm-site links, metadata, sitemap, and static assets are valid
+  ---
+  duration_ms: 68.047835
+  type: 'test'
+  ...
+# Subtest: package metadata only references files that ship in the npm tarballs
+ok 6 - package metadata only references files that ship in the npm tarballs
+  ---
+  duration_ms: 53100.23627
+  type: 'test'
+  ...
+# Subtest: runtime package tarballs only ship hashed wasm payloads
+ok 7 - runtime package tarballs only ship hashed wasm payloads
+  ---
+  duration_ms: 48238.89526
+  type: 'test'
+  ...
+# Subtest: package index.mjs relative imports ship in the npm tarballs
+ok 8 - package index.mjs relative imports ship in the npm tarballs
+  ---
+  duration_ms: 8935.423979
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh accepts flags before the npm tag and prints packed files
+ok 9 - publish-packages.sh accepts flags before the npm tag and prints packed files
+  ---
+  duration_ms: 149.22599
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh rejects extra positional arguments
+ok 10 - publish-packages.sh rejects extra positional arguments
+  ---
+  duration_ms: 3.226211
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh skips publishes when npm diff is empty
+ok 11 - publish-packages.sh skips publishes when npm diff is empty
+  ---
+  duration_ms: 115.704536
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh still publishes first-release packages when npm diff returns 404
+ok 12 - publish-packages.sh still publishes first-release packages when npm diff returns 404
+  ---
+  duration_ms: 127.289193
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh uses a fresh otp source for real publishes
+ok 13 - publish-packages.sh uses a fresh otp source for real publishes
+  ---
+  duration_ms: 126.136903
+  type: 'test'
+  ...
+# Subtest: PhpBase serializes concurrent run/exec calls and awaits async run before flushing
+ok 14 - PhpBase serializes concurrent run/exec calls and awaits async run before flushing
+  ---
+  duration_ms: 5.071896
+  type: 'test'
+  ...
+# Subtest: PhpBase awaits transaction acquisition and commit before settling each item
+ok 15 - PhpBase awaits transaction acquisition and commit before settling each item
+  ---
+  duration_ms: 0.580417
+  type: 'test'
+  ...
+# Subtest: PhpBase keeps readOnly metadata on each queued transaction
+ok 16 - PhpBase keeps readOnly metadata on each queued transaction
+  ---
+  duration_ms: 0.572215
+  type: 'test'
+  ...
+# Subtest: PhpBase recovers after synchronous throws and rejected callbacks
+ok 17 - PhpBase recovers after synchronous throws and rejected callbacks
+  ---
+  duration_ms: 0.636069
+  type: 'test'
+  ...
+# Subtest: PhpBase rejects failed acquisition/commit without stranding later work
+ok 18 - PhpBase rejects failed acquisition/commit without stranding later work
+  ---
+  duration_ms: 0.599464
+  type: 'test'
+  ...
+# Subtest: PhpBase preserves callback and commit errors when both fail
+ok 19 - PhpBase preserves callback and commit errors when both fail
+  ---
+  duration_ms: 0.851175
+  type: 'test'
+  ...
+# Subtest: PhpBase leaves manually managed transactions untouched
+ok 20 - PhpBase leaves manually managed transactions untouched
+  ---
+  duration_ms: 0.369544
+  type: 'test'
+  ...
+# Subtest: PhpBase supports both class and ordinary factories and retains global defaults
+ok 21 - PhpBase supports both class and ordinary factories and retains global defaults
+  ---
+  duration_ms: 0.583526
+  type: 'test'
+  ...
+# Subtest: CGI execution keeps uncommitted files safe from concurrent filesystem RPC hydration
+ok 22 - CGI execution keeps uncommitted files safe from concurrent filesystem RPC hydration
+  ---
+  duration_ms: 95.521229
+  type: 'test'
+  ...
+# Subtest: refresh queued during a request does not deadlock its commit or reuse a stale runtime
+ok 23 - refresh queued during a request does not deadlock its commit or reuse a stale runtime
+  ---
+  duration_ms: 2.857842
+  type: 'test'
+  ...
+# Subtest: CGI and filesystem operations serialize without the Web Locks API
+ok 24 - CGI and filesystem operations serialize without the Web Locks API
+  ---
+  duration_ms: 86.311777
+  type: 'test'
+  ...
+# Subtest: a failed request commit reports one error and releases the lock for later work
+ok 25 - a failed request commit reports one error and releases the lock for later work
+  ---
+  duration_ms: 57.094281
+  type: 'test'
+  ...
+# Subtest: cookie snapshots preserve the original deadline through repeated restarts
+ok 26 - cookie snapshots preserve the original deadline through repeated restarts
+  ---
+  duration_ms: 4.953828
+  type: 'test'
+  ...
+# Subtest: cookie overwrite, deletion, and Max-Age precedence survive persistence
+ok 27 - cookie overwrite, deletion, and Max-Age precedence survive persistence
+  ---
+  duration_ms: 28.329219
+  type: 'test'
+  ...
+# Subtest: legacy jars discard unknown relative lifetimes while retaining known lifetimes and session cookies
+ok 28 - legacy jars discard unknown relative lifetimes while retaining known lifetimes and session cookies
+  ---
+  duration_ms: 0.690144
+  type: 'test'
+  ...
+# Subtest: malformed persisted entries do not prevent restoration of valid cookies
+ok 29 - malformed persisted entries do not prevent restoration of valid cookies
+  ---
+  duration_ms: 1.644353
+  type: 'test'
+  ...
+# (node:178684) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: browser CGI batches acknowledgments after persistence and excludes work arriving during commit
+ok 30 - browser CGI batches acknowledgments after persistence and excludes work arriving during commit
+  ---
+  duration_ms: 61.051141
+  type: 'test'
+  ...
+# Subtest: browser CGI waits 25 ms after the queue becomes idle and accepts work during that wait
+ok 31 - browser CGI waits 25 ms after the queue becomes idle and accepts work during that wait
+  ---
+  duration_ms: 3.024811
+  type: 'test'
+  ...
+# Subtest: browser CGI recovers from initialization, callback and commit failures
+ok 32 - browser CGI recovers from initialization, callback and commit failures
+  ---
+  duration_ms: 54.203981
+  type: 'test'
+  ...
+# Subtest: browser CGI retains readOnly metadata and manual transaction ownership
+ok 33 - browser CGI retains readOnly metadata and manual transaction ownership
+  ---
+  duration_ms: 52.834307
+  type: 'test'
+  ...
+# Subtest: browser CGI rejects failed runtime initialization and still accepts a replacement
+ok 34 - browser CGI rejects failed runtime initialization and still accepts a replacement
+  ---
+  duration_ms: 28.02974
+  type: 'test'
+  ...
+# Subtest: browser CGI preserves individual callback failures and commits partial writes
+ok 35 - browser CGI preserves individual callback failures and commits partial writes
+  ---
+  duration_ms: 27.029719
+  type: 'test'
+  ...
+# Subtest: browser CGI bounds batches so a continuous queue cannot defer every acknowledgment
+ok 36 - browser CGI bounds batches so a continuous queue cannot defer every acknowledgment
+  ---
+  duration_ms: 37.174716
+  type: 'test'
+  ...
+# Subtest: browser CGI commits after its processing window even below the operation limit
+ok 37 - browser CGI commits after its processing window even below the operation limit
+  ---
+  duration_ms: 0.742647
+  type: 'test'
+  ...
+# Subtest: browser CGI separates operations queued with different automatic transaction modes
+ok 38 - browser CGI separates operations queued with different automatic transaction modes
+  ---
+  duration_ms: 0.869719
+  type: 'test'
+  ...
+# Subtest: browser CGI rejects queued callbacks for a replaced runtime without stranding later work
+ok 39 - browser CGI rejects queued callbacks for a replaced runtime without stranding later work
+  ---
+  duration_ms: 27.179735
+  type: 'test'
+  ...
+# Subtest: CGI directory requests resolve index.php and retain directory request semantics
+ok 40 - CGI directory requests resolve index.php and retain directory request semantics
+  ---
+  duration_ms: 31.870389
+  type: 'test'
+  ...
+# Subtest: CGI routes Phar members through the archive with URL-based script names
+ok 41 - CGI routes Phar members through the archive with URL-based script names
+  ---
+  duration_ms: 4.829662
+  type: 'test'
+  ...
+# Subtest: CGI honors root and virtual-host Phar entrypoints without replacing static files
+ok 42 - CGI honors root and virtual-host Phar entrypoints without replacing static files
+  ---
+  duration_ms: 2.027855
+  type: 'test'
+  ...
+# Subtest: CGI uses the configured PHP entrypoint for fallback routes
+ok 43 - CGI uses the configured PHP entrypoint for fallback routes
+  ---
+  duration_ms: 0.518501
+  type: 'test'
+  ...
+# Subtest: CGI preserves string and explicit-script rewrites for Phar requests
+ok 44 - CGI preserves string and explicit-script rewrites for Phar requests
+  ---
+  duration_ms: 2.320987
+  type: 'test'
+  ...
+# Subtest: CGI only treats existing Phar files as archives
+ok 45 - CGI only treats existing Phar files as archives
+  ---
+  duration_ms: 1.248985
+  type: 'test'
+  ...
+# Subtest: CGI runtime failures return a non-cacheable 500 and refresh exactly once
+ok 46 - CGI runtime failures return a non-cacheable 500 and refresh exactly once
+  ---
+  duration_ms: 3.852634
+  type: 'test'
+  ...
+# Subtest: CGI control messages extend worker lifetime and reply with runtime initialization errors
+ok 47 - CGI control messages extend worker lifetime and reply with runtime initialization errors
+  ---
+  duration_ms: 0.643725
+  type: 'test'
+  ...
+# Subtest: a rejected async request returns 500 and queued requests use the replacement runtime
+ok 48 - a rejected async request returns 500 and queued requests use the replacement runtime
+  ---
+  duration_ms: 2.991578
+  type: 'test'
+  ...
+# Subtest: CGI handles non-Error rejection: null
+ok 49 - CGI handles non-Error rejection: null
+  ---
+  duration_ms: 1.250339
+  type: 'test'
+  ...
+# Subtest: CGI handles non-Error rejection: native import rejected
+ok 50 - CGI handles non-Error rejection: native import rejected
+  ---
+  duration_ms: 0.807229
+  type: 'test'
+  ...
+# Subtest: a failed background refresh is handled and subsequent requests return 500
+ok 51 - a failed background refresh is handled and subsequent requests return 500
+  ---
+  duration_ms: 14.892212
+  type: 'test'
+  ...
+# Subtest: requestWebLock delegates to the browser Web Locks API
+ok 52 - requestWebLock delegates to the browser Web Locks API
+  ---
+  duration_ms: 1.335151
+  type: 'test'
+  ...
+# Subtest: requestWebLock serializes callbacks when Web Locks are unavailable
+ok 53 - requestWebLock serializes callbacks when Web Locks are unavailable
+  ---
+  duration_ms: 0.506615
+  type: 'test'
+  ...
+# Subtest: commitTransaction uses the runtime captured by startTransaction
+ok 54 - commitTransaction uses the runtime captured by startTransaction
+  ---
+  duration_ms: 0.692691
+  type: 'test'
+  ...
+# Subtest: startTransaction clears failed state so a later transaction can retry
+ok 55 - startTransaction clears failed state so a later transaction can retry
+  ---
+  duration_ms: 1.460943
+  type: 'test'
+  ...
+# Subtest: commitTransaction clears failed state so a later transaction can retry
+ok 56 - commitTransaction clears failed state so a later transaction can retry
+  ---
+  duration_ms: 0.391231
+  type: 'test'
+  ...
+1..56
+# tests 56
+# suites 0
+# pass 56
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 110883.329115

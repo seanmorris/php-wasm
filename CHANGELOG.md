@@ -4,6 +4,8 @@ Changes
 
 ## Unreleased
 
+* Browser CGI now journals filesystem mutations and commits only changed IDBFS records, avoiding full-tree scans at the end of each request. Existing storage remains compatible. Failed commits retain changes for retry; renamed trees, native writes, metadata, symlinks and deletions are covered by browser persistence tests. Symlinks hydrate their own metadata without following their targets.
+* Restored the browser CGI filesystem queue's 25 ms idle batching window. Concurrent calls share hydration and persistence, mixed read/write batches always commit, and acknowledgments wait for the shared commit. Failed commits reject the whole batch, and bounded batches release the lock for other work. HTTP CGI requests retain their per-request flush.
 * Recover failed CGI startup with two automatic retries after 1 and 2 seconds, including registration and replacement failures. Saved files are preserved; a manual startup retry appears only after all three attempts fail. Framework and VS Code startup share the readiness check. Worker assets use flat hashed paths so Vite serves rebuilt dependencies reliably.
 * Added typed directory listings with `readdir(path, {withFileTypes: true})` across runtime wrappers and declarations. Browser CGI reads refresh storage without flushing, and writes still wait for persistence. The VS Code bridge forwards listing options so updated File Bus hosts can expand and search directories without per-entry RPCs.
 * Expanded the lightweight editor's file handling with explicit Save, untitled documents, file/folder operations, transfers, recovery, and conflict checks. Empty workspaces retain a saveable untitled document. Removed the redundant standalone Waitline link from the home-page extras.

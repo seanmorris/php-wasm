@@ -287,8 +287,8 @@ endif
 MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
 CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
 
-MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
-CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
+MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs idbfsSync.mjs
+CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js idbfsSync.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 

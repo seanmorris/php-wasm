@@ -1,0 +1,1406 @@
+{
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "comparisons": [
+    {
+      "framework": "Drupal 11.4.5",
+      "idbfsWarmMs": 545.7499997615814,
+      "opfsWarmMs": 383.15000009536743,
+      "warmChangePercent": -29.79386161012333,
+      "idbfsRestoreMs": 4723.10000038147,
+      "opfsRestoreMs": 84246.90000009537,
+      "idbfsFirstMs": 4524.400000095367,
+      "opfsFirstMs": 45811.90000009537,
+      "idbfsRestartMs": 2576.474276000001,
+      "opfsRestartMs": 492.3028850000119,
+      "idbfsRestartToResponseMs": 4429.674275809266,
+      "opfsRestartToResponseMs": 1278.1316839046194
+    },
+    {
+      "framework": "WordPress 7.1",
+      "idbfsWarmMs": 844.0499999523163,
+      "opfsWarmMs": 1579.9999997615814,
+      "warmChangePercent": 87.19270183648385,
+      "idbfsRestoreMs": 2062.2999997138977,
+      "opfsRestoreMs": 70072.5,
+      "idbfsFirstMs": 1512.4000000953674,
+      "opfsFirstMs": 2690.3999996185303,
+      "idbfsRestartMs": 1077.454410000002,
+      "opfsRestartMs": 492.760214000009,
+      "idbfsRestartToResponseMs": 2765.394124999999,
+      "opfsRestartToResponseMs": 2888.1602140953764
+    },
+    {
+      "framework": "Laravel 11",
+      "idbfsWarmMs": 510.4500000476837,
+      "opfsWarmMs": 922.25,
+      "warmChangePercent": 80.67391515600902,
+      "idbfsRestoreMs": 2653.5,
+      "opfsRestoreMs": 71908,
+      "idbfsFirstMs": 872.6999998092651,
+      "opfsFirstMs": 1285.2000002861023,
+      "idbfsRestartMs": 1576.091204000002,
+      "opfsRestartMs": 487.3728450000053,
+      "idbfsRestartToResponseMs": 2908.6034402861023,
+      "opfsRestartToResponseMs": 2055.7728450953728
+    },
+    {
+      "framework": "CakePHP 5",
+      "idbfsWarmMs": 506.90000009536743,
+      "opfsWarmMs": 1545.5499997138977,
+      "warmChangePercent": 204.90234748927207,
+      "idbfsRestoreMs": 2484,
+      "opfsRestoreMs": 43550,
+      "idbfsFirstMs": 978.2999997138977,
+      "opfsFirstMs": 1464,
+      "idbfsRestartMs": 1679.4973390000014,
+      "opfsRestartMs": 508.32172900000296,
+      "idbfsRestartToResponseMs": 3329.7385058092623,
+      "opfsRestartToResponseMs": 3508.4217289046355
+    },
+    {
+      "framework": "CodeIgniter 4",
+      "idbfsWarmMs": 91.30000019073486,
+      "opfsWarmMs": 230.75,
+      "warmChangePercent": 152.7382251017964,
+      "idbfsRestoreMs": 388.1000003814697,
+      "opfsRestoreMs": 3872.199999809265,
+      "idbfsFirstMs": 195.69999980926514,
+      "opfsFirstMs": 355.69999980926514,
+      "idbfsRestartMs": 635.1262269999997,
+      "opfsRestartMs": 526.1687180000008,
+      "idbfsRestartToResponseMs": 955.5262270953672,
+      "opfsRestartToResponseMs": 1069.837805000001
+    },
+    {
+      "framework": "Laminas 3",
+      "idbfsWarmMs": 315.90000009536743,
+      "opfsWarmMs": 359.64999985694885,
+      "warmChangePercent": 13.849319325221177,
+      "idbfsRestoreMs": 2225.800000190735,
+      "opfsRestoreMs": 41389.7000002861,
+      "idbfsFirstMs": 498.30000019073486,
+      "opfsFirstMs": 539.3000001907349,
+      "idbfsRestartMs": 1477.9452070000007,
+      "opfsRestartMs": 529.5627960000056,
+      "idbfsRestartToResponseMs": 2355.368623095368,
+      "opfsRestartToResponseMs": 1277.0627960000056
+    }
+  ],
+  "rows": [
+    {
+      "framework": "Drupal 11.4.5",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 590.799663,
+      "installMs": 4723.10000038147,
+      "firstMs": 4524.400000095367,
+      "warmMedianMs": 545.7499997615814,
+      "warmP95Ms": 648.3000001907349,
+      "flushMedianMs": 477.94999980926514,
+      "assetMedianMs": 2.200000286102295,
+      "restartMs": 2576.474276000001,
+      "restartMountMs": 2130.0999999046326,
+      "restartedRequestMs": 1875.5999999046326,
+      "restartToResponseMs": 4429.674275809266,
+      "renderMs": 2975.0159310000017,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "Drupal 11.4.5",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 607.982175,
+      "installMs": 84246.90000009537,
+      "firstMs": 45811.90000009537,
+      "warmMedianMs": 383.15000009536743,
+      "warmP95Ms": 459.19999980926514,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.200000286102295,
+      "restartMs": 492.3028850000119,
+      "restartMountMs": 3.6999998092651367,
+      "restartedRequestMs": 780.0999999046326,
+      "restartToResponseMs": 1278.1316839046194,
+      "renderMs": 5544.405838999985,
+      "maxHeapBytes": 161087488
+    },
+    {
+      "framework": "WordPress 7.1",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 603.8685429999999,
+      "installMs": 2062.2999997138977,
+      "firstMs": 1512.4000000953674,
+      "warmMedianMs": 844.0499999523163,
+      "warmP95Ms": 897.5,
+      "flushMedianMs": 101.24999976158142,
+      "assetMedianMs": 2.5999999046325684,
+      "restartMs": 1077.454410000002,
+      "restartMountMs": 631.4000000953674,
+      "restartedRequestMs": 1634.3000001907349,
+      "restartToResponseMs": 2765.394124999999,
+      "renderMs": 885.3247149999988,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "WordPress 7.1",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 631.3008100000001,
+      "installMs": 70072.5,
+      "firstMs": 2690.3999996185303,
+      "warmMedianMs": 1579.9999997615814,
+      "warmP95Ms": 1666.5999999046326,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.8999996185302734,
+      "restartMs": 492.760214000009,
+      "restartMountMs": 6.699999809265137,
+      "restartedRequestMs": 2395.4000000953674,
+      "restartToResponseMs": 2888.1602140953764,
+      "renderMs": 1633.3900960000028,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "Laravel 11",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 609.523351,
+      "installMs": 2653.5,
+      "firstMs": 872.6999998092651,
+      "warmMedianMs": 510.4500000476837,
+      "warmP95Ms": 938.1000003814697,
+      "flushMedianMs": 252.90000009536743,
+      "assetMedianMs": 2.1999998092651367,
+      "restartMs": 1576.091204000002,
+      "restartMountMs": 1115.2000002861023,
+      "restartedRequestMs": 1341.2000002861023,
+      "restartToResponseMs": 2908.6034402861023,
+      "renderMs": 679.7172579999988,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "Laravel 11",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 629.8258850000001,
+      "installMs": 71908,
+      "firstMs": 1285.2000002861023,
+      "warmMedianMs": 922.25,
+      "warmP95Ms": 1192.5,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.200000286102295,
+      "restartMs": 487.3728450000053,
+      "restartMountMs": 7.300000190734863,
+      "restartedRequestMs": 1568.4000000953674,
+      "restartToResponseMs": 2055.7728450953728,
+      "renderMs": 1051.635110000003,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "CakePHP 5",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 648.1980659999999,
+      "installMs": 2484,
+      "firstMs": 978.2999997138977,
+      "warmMedianMs": 506.90000009536743,
+      "warmP95Ms": 606.8999996185303,
+      "flushMedianMs": 297.90000009536743,
+      "assetMedianMs": 2.4000000953674316,
+      "restartMs": 1679.4973390000014,
+      "restartMountMs": 1175.2999997138977,
+      "restartedRequestMs": 1623.9000000953674,
+      "restartToResponseMs": 3329.7385058092623,
+      "renderMs": 6856.501458000001,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "CakePHP 5",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 665.673601,
+      "installMs": 43550,
+      "firstMs": 1464,
+      "warmMedianMs": 1545.5499997138977,
+      "warmP95Ms": 2049.4000000953674,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.4000000953674316,
+      "restartMs": 508.32172900000296,
+      "restartMountMs": 6.800000190734863,
+      "restartedRequestMs": 3000.0999999046326,
+      "restartToResponseMs": 3508.4217289046355,
+      "renderMs": 8708.426969000007,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "CodeIgniter 4",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 639.3106829999999,
+      "installMs": 388.1000003814697,
+      "firstMs": 195.69999980926514,
+      "warmMedianMs": 91.30000019073486,
+      "warmP95Ms": 117.90000009536743,
+      "flushMedianMs": 21.09999990463257,
+      "assetMedianMs": 2.700000286102295,
+      "restartMs": 635.1262269999997,
+      "restartMountMs": 85.09999990463257,
+      "restartedRequestMs": 320.40000009536743,
+      "restartToResponseMs": 955.5262270953672,
+      "renderMs": 125.03819799999974,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "CodeIgniter 4",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 683.27129,
+      "installMs": 3872.199999809265,
+      "firstMs": 355.69999980926514,
+      "warmMedianMs": 230.75,
+      "warmP95Ms": 311,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.4000000953674316,
+      "restartMs": 526.1687180000008,
+      "restartMountMs": 4,
+      "restartedRequestMs": 487.90000009536743,
+      "restartToResponseMs": 1069.837805000001,
+      "renderMs": 272.85146200000054,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "Laminas 3",
+      "backend": "idbfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 650.8225,
+      "installMs": 2225.800000190735,
+      "firstMs": 498.30000019073486,
+      "warmMedianMs": 315.90000009536743,
+      "warmP95Ms": 372.40000009536743,
+      "flushMedianMs": 224.19999980926514,
+      "assetMedianMs": 2.3000001907348633,
+      "restartMs": 1477.9452070000007,
+      "restartMountMs": 981.9000000953674,
+      "restartedRequestMs": 934.4000000953674,
+      "restartToResponseMs": 2355.368623095368,
+      "renderMs": 336.682945999999,
+      "maxHeapBytes": 134217728
+    },
+    {
+      "framework": "Laminas 3",
+      "backend": "opfs",
+      "completedTrials": 3,
+      "failedTrials": 0,
+      "warmSamples": 60,
+      "readyMs": 660.916647,
+      "installMs": 41389.7000002861,
+      "firstMs": 539.3000001907349,
+      "warmMedianMs": 359.64999985694885,
+      "warmP95Ms": 453.2999997138977,
+      "flushMedianMs": 0,
+      "assetMedianMs": 3.3000001907348633,
+      "restartMs": 529.5627960000056,
+      "restartMountMs": 4.099999904632568,
+      "restartedRequestMs": 747.5,
+      "restartToResponseMs": 1277.0627960000056,
+      "renderMs": 407.0812189999997,
+      "maxHeapBytes": 134217728
+    }
+  ],
+  "sizes": [
+    {
+      "rawBytes": 30873664,
+      "gzip9Bytes": 12610294,
+      "brotli11Bytes": 7698896,
+      "backend": "idbfs",
+      "name": "php.data",
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "rawBytes": 4404866,
+      "gzip9Bytes": 589862,
+      "brotli11Bytes": 418457,
+      "backend": "idbfs",
+      "name": "php8.3-cgi-worker.mjs",
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "rawBytes": 40405624,
+      "gzip9Bytes": 11517480,
+      "brotli11Bytes": 7712991,
+      "backend": "idbfs",
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "rawBytes": 30873664,
+      "gzip9Bytes": 12610294,
+      "brotli11Bytes": 7698896,
+      "backend": "opfs",
+      "name": "php.data",
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "rawBytes": 4448377,
+      "gzip9Bytes": 586634,
+      "brotli11Bytes": 413846,
+      "backend": "opfs",
+      "name": "php8.3-cgi-worker.mjs",
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "rawBytes": 40819220,
+      "gzip9Bytes": 11595371,
+      "brotli11Bytes": 7769364,
+      "backend": "opfs",
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    },
+    {
+      "rawBytes": 30873664,
+      "gzip9Bytes": 12610294,
+      "brotli11Bytes": 7698896,
+      "backend": "idbfs-pruned",
+      "name": "php.data",
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "rawBytes": 4404866,
+      "gzip9Bytes": 589862,
+      "brotli11Bytes": 418457,
+      "backend": "idbfs-pruned",
+      "name": "php8.3-cgi-worker.mjs",
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "rawBytes": 40333239,
+      "gzip9Bytes": 11499750,
+      "brotli11Bytes": 7706254,
+      "backend": "idbfs-pruned",
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "sha256": "ff12101439cf62dbde9b29943d3aefa2d983254e81b283ce8f5c3d9b7975de9e"
+    }
+  ],
+  "totals": [
+    {
+      "backend": "idbfs",
+      "name": "JavaScript + Wasm",
+      "rawBytes": 44810490,
+      "gzip9Bytes": 12107342,
+      "brotli11Bytes": 8131448
+    },
+    {
+      "backend": "opfs",
+      "name": "JavaScript + Wasm",
+      "rawBytes": 45267597,
+      "gzip9Bytes": 12182005,
+      "brotli11Bytes": 8183210
+    },
+    {
+      "backend": "idbfs-pruned",
+      "name": "JavaScript + Wasm",
+      "rawBytes": 44738105,
+      "gzip9Bytes": 12089612,
+      "brotli11Bytes": 8124711
+    }
+  ],
+  "deltas": [
+    {
+      "name": "php.data",
+      "rawBytes": {
+        "bytes": 0,
+        "percent": 0
+      },
+      "gzip9Bytes": {
+        "bytes": 0,
+        "percent": 0
+      },
+      "brotli11Bytes": {
+        "bytes": 0,
+        "percent": 0
+      }
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "rawBytes": {
+        "bytes": 43511,
+        "percent": 0.9877939533234459
+      },
+      "gzip9Bytes": {
+        "bytes": -3228,
+        "percent": -0.547246644130317
+      },
+      "brotli11Bytes": {
+        "bytes": -4611,
+        "percent": -1.1019053331644546
+      }
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "rawBytes": {
+        "bytes": 413596,
+        "percent": 1.0236099806304244
+      },
+      "gzip9Bytes": {
+        "bytes": 77891,
+        "percent": 0.6762850901412376
+      },
+      "brotli11Bytes": {
+        "bytes": 56373,
+        "percent": 0.730883777771818
+      }
+    },
+    {
+      "name": "JavaScript + Wasm",
+      "rawBytes": {
+        "bytes": 457107,
+        "percent": 1.0200892692760144
+      },
+      "gzip9Bytes": {
+        "bytes": 74663,
+        "percent": 0.6166754024128585
+      },
+      "brotli11Bytes": {
+        "bytes": 51762,
+        "percent": 0.6365655907779377
+      }
+    }
+  ],
+  "combinedChange": {
+    "rawBytes": {
+      "bytes": 529492,
+      "percent": 1.1835369423894848
+    },
+    "gzip9Bytes": {
+      "bytes": 92393,
+      "percent": 0.7642346172896275
+    },
+    "brotli11Bytes": {
+      "bytes": 58499,
+      "percent": 0.7200133026270095
+    }
+  },
+  "preflights": [
+    {
+      "time": "2026-09-20T17:09:40.015Z",
+      "idlePercent": 84.76150274377375,
+      "loadAverage": [
+        3.23,
+        4.76,
+        4.46
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "cakephp-5",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:13:16.299Z",
+      "idlePercent": 86.51162790697674,
+      "loadAverage": [
+        5.49,
+        5.09,
+        4.65
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "cakephp-5",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:13:44.922Z",
+      "idlePercent": 84.24571667363142,
+      "loadAverage": [
+        4.85,
+        4.98,
+        4.63
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "cakephp-5",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:15:47.582Z",
+      "idlePercent": 85.9375,
+      "loadAverage": [
+        5.22,
+        5,
+        4.67
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "codeigniter-4",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:16:26.637Z",
+      "idlePercent": 84.89692890197728,
+      "loadAverage": [
+        4.88,
+        4.95,
+        4.67
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "codeigniter-4",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:16:34.975Z",
+      "idlePercent": 83.00127172530733,
+      "loadAverage": [
+        4.99,
+        4.97,
+        4.68
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "codeigniter-4",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T16:33:44.940Z",
+      "idlePercent": 93.25795644891122,
+      "loadAverage": [
+        4.04,
+        4.13,
+        4.41
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "drupal",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:39:17.357Z",
+      "idlePercent": 93.09623430962343,
+      "loadAverage": [
+        2.08,
+        2.79,
+        3.72
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "drupal",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:39:49.879Z",
+      "idlePercent": 93.1827687160184,
+      "loadAverage": [
+        2.14,
+        2.75,
+        3.67
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "drupal",
+      "round": 2,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T17:16:58.372Z",
+      "idlePercent": 83.6424957841484,
+      "loadAverage": [
+        4.76,
+        4.92,
+        4.67
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laminas-3",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:19:07.587Z",
+      "idlePercent": 84.43791946308725,
+      "loadAverage": [
+        5.68,
+        5.11,
+        4.76
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laminas-3",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:19:24.192Z",
+      "idlePercent": 84.56403838130997,
+      "loadAverage": [
+        5.48,
+        5.1,
+        4.77
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laminas-3",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T16:50:07.585Z",
+      "idlePercent": 90.78726968174205,
+      "loadAverage": [
+        2.54,
+        2.64,
+        3.16
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laravel-11",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:53:48.687Z",
+      "idlePercent": 92.52728799328295,
+      "loadAverage": [
+        2.45,
+        2.54,
+        3
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laravel-11",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:54:10.615Z",
+      "idlePercent": 92.52297410192148,
+      "loadAverage": [
+        3.17,
+        2.68,
+        3.04
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "laravel-11",
+      "round": 2,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:42:54.166Z",
+      "idlePercent": 92.14615707685846,
+      "loadAverage": [
+        3.56,
+        2.9,
+        3.54
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "wordpress",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:47:12.782Z",
+      "idlePercent": 92.31090681153364,
+      "loadAverage": [
+        2.39,
+        2.63,
+        3.27
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "wordpress",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:47:41.781Z",
+      "idlePercent": 90.71993341656263,
+      "loadAverage": [
+        2.28,
+        2.59,
+        3.24
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "idbfs",
+      "framework": "wordpress",
+      "round": 2,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T17:10:08.914Z",
+      "idlePercent": 82.67849598648078,
+      "loadAverage": [
+        3.6,
+        4.7,
+        4.45
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "cakephp-5",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:11:42.444Z",
+      "idlePercent": 82.35044548154434,
+      "loadAverage": [
+        5.27,
+        4.97,
+        4.57
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "cakephp-5",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:14:13.726Z",
+      "idlePercent": 85.16949152542372,
+      "loadAverage": [
+        4.55,
+        4.9,
+        4.61
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "cakephp-5",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:15:55.973Z",
+      "idlePercent": 85.34844668345927,
+      "loadAverage": [
+        5.26,
+        5.01,
+        4.68
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "codeigniter-4",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:16:11.357Z",
+      "idlePercent": 83.19148936170212,
+      "loadAverage": [
+        5.14,
+        5,
+        4.68
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "codeigniter-4",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:16:43.270Z",
+      "idlePercent": 84.14429530201342,
+      "loadAverage": [
+        4.82,
+        4.93,
+        4.67
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "codeigniter-4",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T16:34:17.897Z",
+      "idlePercent": 93.03876615256357,
+      "loadAverage": [
+        3.32,
+        3.96,
+        4.35
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "drupal",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:36:47.487Z",
+      "idlePercent": 91.87264348554672,
+      "loadAverage": [
+        2.17,
+        3.18,
+        3.99
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "drupal",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:40:22.311Z",
+      "idlePercent": 92.0767306088407,
+      "loadAverage": [
+        1.98,
+        2.64,
+        3.6
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "drupal",
+      "round": 2,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T17:17:15.165Z",
+      "idlePercent": 84.84848484848484,
+      "loadAverage": [
+        4.43,
+        4.84,
+        4.65
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laminas-3",
+      "round": 0,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:18:11.367Z",
+      "idlePercent": 82.80523869877482,
+      "loadAverage": [
+        5.03,
+        4.92,
+        4.68
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laminas-3",
+      "round": 1,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T17:19:40.823Z",
+      "idlePercent": 84.55728073856483,
+      "loadAverage": [
+        5.79,
+        5.19,
+        4.8
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laminas-3",
+      "round": 2,
+      "minimumIdlePercent": 80
+    },
+    {
+      "time": "2026-09-20T16:50:29.717Z",
+      "idlePercent": 93.45088161209068,
+      "loadAverage": [
+        2.45,
+        2.61,
+        3.14
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laravel-11",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:52:09.473Z",
+      "idlePercent": 91.58291457286433,
+      "loadAverage": [
+        2.81,
+        2.62,
+        3.09
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laravel-11",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T17:04:32.264Z",
+      "idlePercent": 90.18867924528301,
+      "loadAverage": [
+        6.95,
+        6.31,
+        4.62
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "laravel-11",
+      "round": 2,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:43:23.221Z",
+      "idlePercent": 91.79508538109121,
+      "loadAverage": [
+        3.02,
+        2.84,
+        3.5
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "wordpress",
+      "round": 0,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:45:17.329Z",
+      "idlePercent": 90.89775561097257,
+      "loadAverage": [
+        2.54,
+        2.75,
+        3.39
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "wordpress",
+      "round": 1,
+      "minimumIdlePercent": 90
+    },
+    {
+      "time": "2026-09-20T16:48:10.959Z",
+      "idlePercent": 93.0514859773964,
+      "loadAverage": [
+        2.97,
+        2.72,
+        3.26
+      ],
+      "containers": [
+        "laravel-ksqlc-orders-1",
+        "laravel-ksqlc-billing-api-1",
+        "laravel-ksqlc-inventory-api-1",
+        "laravel-ksqlc-billing-1",
+        "laravel-ksqlc-inventory-1",
+        "laravel-ksqlc-ksql-server-1",
+        "laravel-ksqlc-krest-server-1",
+        "laravel-ksqlc-schema-registry-1",
+        "laravel-ksqlc-kafka-1",
+        "laravel-ksqlc-zookeeper-1"
+      ],
+      "backend": "opfs",
+      "framework": "wordpress",
+      "round": 2,
+      "minimumIdlePercent": 90
+    }
+  ]
+}

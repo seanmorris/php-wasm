@@ -744,16 +744,33 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 With persistence enabled, browser runtimes synchronize their mounted IDBFS
 storage while holding the `php-wasm-fs-lock` Web Lock.
 
-Browser CGI gives each queued filesystem call its own transaction. Storage is
-refreshed before the operation. `analyzePath`, `readdir`, `readFile`, and `stat`
-are read-only and do not flush afterward. Mutations wait for persistence before
-their promises resolve or the service worker sends its reply. A persistence
-failure rejects the call, and subsequent operations can still run.
+Browser CGI batches queued filesystem calls into one transaction. After the
+queue becomes idle it waits up to 25 ms for more work. Storage is refreshed
+once per batch. A batch containing only `analyzePath`, `readdir`, `readFile`, or
+`stat` does not flush; any mutation makes the batch writable. All calls wait
+for the shared commit before their promises resolve or the worker replies.
+A commit failure rejects every call in that batch. Callback failures still
+commit possible partial writes and do not prevent later calls from running.
+The batching window keeps the wrapper transaction open; it does not hold an
+IndexedDB transaction open. IDBFS opens those while hydrating or flushing.
 
-Concurrent CGI calls remain separate transactions, including calls started with
-`Promise.all`. Use a typed `readdir` to obtain names and entry types in one
-transaction. `PhpWeb` and `PhpWorker` retain their batched queues; their operation
-results can become available before the shared transaction commits.
+Calls submitted together, including through `Promise.all`, can share a batch.
+Awaiting each call before submitting the next creates separate batches. A
+batch commits after 64 operations or a 250 ms processing window, checked
+between operations, so continuous traffic cannot postpone acknowledgment
+indefinitely. HTTP CGI requests use a separate path and still flush each
+successful PHP request. A typed `readdir` obtains names and entry types in one
+operation. `PhpWeb` and `PhpWorker` retain their existing queues; their results
+can become available before the shared transaction commits.
+
+Browser CGI tracks PHP and filesystem API mutations and flushes only changed
+IDBFS records. Clean mounts do not open a write transaction. Renamed directory
+trees, deletions, file contents and metadata are persisted in the existing
+IDBFS format, so existing stored files and older readers remain compatible.
+Hydration still reconciles with persistent storage; it uses a direct local-node
+walk to avoid repeatedly resolving every path. Mounts with nested filesystems
+use ordinary reconciliation. Failed commits retain their pending changes and
+retry them before a later hydration can replace local state.
 
 With `{autoTransaction: false}`, the caller owns transaction boundaries and
 serialization across runtimes. `startTransaction()` loads persisted storage;

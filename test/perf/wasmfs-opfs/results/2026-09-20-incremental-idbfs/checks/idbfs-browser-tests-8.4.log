@@ -1,0 +1,19 @@
+
+Running 10 tests using 1 worker
+
+(node:175400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:175400) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 test/browser/idbfs.spec.mjs:37:1 › incremental IDBFS commits native writes and metadata without scanning clean entries (1.2s)
+  ✓   2 test/browser/idbfs.spec.mjs:77:1 › incremental IDBFS journals renamed trees, replacement paths and unlinked open files (888ms)
+  ✓   3 test/browser/idbfs.spec.mjs:105:1 › aborted IDBFS commits reject acknowledgments and survive the next hydration (906ms)
+  ✓   4 test/browser/idbfs.spec.mjs:136:1 › mutations during an IDBFS commit remain pending for the following commit (925ms)
+  ✓   5 test/browser/idbfs.spec.mjs:167:1 › independent runtimes preserve unrelated remote writes and hydrate each other’s changes (945ms)
+  ✓   6 test/browser/idbfs.spec.mjs:183:1 › quota failures abort the whole batch and retain both writes for retry (926ms)
+  ✓   7 test/browser/idbfs.spec.mjs:206:1 › incremental records remain readable and writable by unmodified IDBFS (668ms)
+  ✓   8 test/browser/idbfs.spec.mjs:224:1 › dangling symlinks and retargeted links hydrate without touching their targets (713ms)
+  ✓   9 test/browser/idbfs.spec.mjs:243:1 › shared memory-map synchronization is persisted through native MEMFS stream operations (775ms)
+  ✓  10 test/browser/idbfs.spec.mjs:261:1 › installing after files exist retains them when the initial full commit fails (910ms)
+
+  10 passed (10.3s)

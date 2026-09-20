@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: Every docs code block is classified by the docs coverage harness
+ok 1 - Every docs code block is classified by the docs coverage harness
+  ---
+  duration_ms: 2095.908939
+  type: 'test'
+  ...
+# Subtest: Docs coverage harness executes a meaningful subset of runtime-backed examples
+ok 2 - Docs coverage harness executes a meaningful subset of runtime-backed examples
+  ---
+  duration_ms: 1259.817108
+  type: 'test'
+  ...
+# Subtest: Docs coverage report tracks known browser/platform gaps explicitly
+ok 3 - Docs coverage report tracks known browser/platform gaps explicitly
+  ---
+  duration_ms: 1734.204111
+  type: 'test'
+  ...
+# Subtest: Vendored docs fixture matches php-wasm-site page content
+ok 4 - Vendored docs fixture matches php-wasm-site page content
+  ---
+  duration_ms: 2.901514
+  type: 'test'
+  ...
+# Subtest: Generated php-wasm-site links, metadata, sitemap, and static assets are valid
+ok 5 - Generated php-wasm-site links, metadata, sitemap, and static assets are valid
+  ---
+  duration_ms: 79.137437
+  type: 'test'
+  ...
+# Subtest: package metadata only references files that ship in the npm tarballs
+ok 6 - package metadata only references files that ship in the npm tarballs
+  ---
+  duration_ms: 51944.647343
+  type: 'test'
+  ...
+# Subtest: runtime package tarballs only ship hashed wasm payloads
+ok 7 - runtime package tarballs only ship hashed wasm payloads
+  ---
+  duration_ms: 48105.55311
+  type: 'test'
+  ...
+# Subtest: package index.mjs relative imports ship in the npm tarballs
+ok 8 - package index.mjs relative imports ship in the npm tarballs
+  ---
+  duration_ms: 9118.381014
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh accepts flags before the npm tag and prints packed files
+ok 9 - publish-packages.sh accepts flags before the npm tag and prints packed files
+  ---
+  duration_ms: 138.145955
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh rejects extra positional arguments
+ok 10 - publish-packages.sh rejects extra positional arguments
+  ---
+  duration_ms: 6.749982
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh skips publishes when npm diff is empty
+ok 11 - publish-packages.sh skips publishes when npm diff is empty
+  ---
+  duration_ms: 116.315892
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh still publishes first-release packages when npm diff returns 404
+ok 12 - publish-packages.sh still publishes first-release packages when npm diff returns 404
+  ---
+  duration_ms: 123.31004
+  type: 'test'
+  ...
+# Subtest: publish-packages.sh uses a fresh otp source for real publishes
+ok 13 - publish-packages.sh uses a fresh otp source for real publishes
+  ---
+  duration_ms: 132.042521
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 109759.444985

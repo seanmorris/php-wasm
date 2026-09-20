@@ -1,0 +1,2265 @@
+{
+  "backend": "idbfs",
+  "framework": "drupal",
+  "mode": "original",
+  "round": 2,
+  "started": "2026-09-20T17:44:28.846Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    4.78,
+    3.7,
+    3.89
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 635.3000001907349,
+      "value": {
+        "wallMs": 635.3000001907349,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 562.9000000953674
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 181.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 184.69999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 369.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 690.9000000953674,
+      "value": {
+        "wallMs": 690.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 610.9000000953674
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 197.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 201,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.9000000953674316,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 1.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 399.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 10.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 632.4000000953674,
+      "value": {
+        "wallMs": 632.4000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 553.3999996185303
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 193,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 195,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 342.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 13.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 588.6999998092651,
+      "value": {
+        "wallMs": 588.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 513.9000000953674
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 178.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 180.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 321.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 1.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 10.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 603.7999997138977,
+      "value": {
+        "wallMs": 603.7999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 530.8000001907349
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 188.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 190.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 330.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 603.0999999046326,
+      "value": {
+        "wallMs": 603.0999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 532.5
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 183.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 185.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 336.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 1.200000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.899999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 533.1999998092651,
+      "operations": [
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 181.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 184.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 336.1000003814697,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 11.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 553.8999996185303,
+      "operations": [
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 203.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 205.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 339.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.399999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 524.8000001907349,
+      "operations": [
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 187.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 190.10000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 325.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 4369.400000095367,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 1498.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 142752,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 1515.5000004768372,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 2763.100000858307,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 142752,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 75.99999952316284,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 544.5999999046326,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 186,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 188.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 322.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 6.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-0",
+      "wallMs": 559.0999999046326,
+      "value": {
+        "wallMs": 559.0999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 481.80000019073486
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 169.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 300.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-1",
+      "wallMs": 644.3000001907349,
+      "value": {
+        "wallMs": 644.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 567.5
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 178.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 377.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-2",
+      "wallMs": 622.8999996185303,
+      "value": {
+        "wallMs": 622.8999996185303,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 549.1999998092651
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 177.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 359.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-3",
+      "wallMs": 587.5999999046326,
+      "value": {
+        "wallMs": 587.5999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 519.8000001907349
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 180.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 327.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-4",
+      "wallMs": 671.6999998092651,
+      "value": {
+        "wallMs": 671.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 595.9000000953674
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 195.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 387.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 9.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-5",
+      "wallMs": 658.6999998092651,
+      "value": {
+        "wallMs": 658.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 584.4000000953674
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 182.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 383.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 12.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 1.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    {
+      "errorMessage": {
+        "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "",
+        "lineNumber": 0,
+        "columnNumber": -1
+      }
+    }
+  ],
+  "archiveSha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f",
+  "startup": {
+    "instantiateMs": 460,
+    "mountHydrateMs": 29,
+    "totalMs": 490
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 102,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 6.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 2.0999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 38.5,
+          "bytes": 22457133,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 81.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 4996.599999904633,
+      "value": {
+        "wallMs": 4996.5,
+        "status": 200,
+        "body": {
+          "entries": 17761,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 3019.5999999046326
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 2,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 2,
+          "ms": 206,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17763,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 2,
+          "ms": 208.4000005722046,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 2,
+          "ms": 897.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 2,
+          "ms": 1.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 2,
+          "ms": 2811,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 17762,
+          "ms": 23261772.20003128,
+          "bytes": 64951089,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5",
+            "/persist/drupal-11.4.5/.editorconfig",
+            "/persist/drupal-11.4.5/.gitattributes",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/composer.json",
+            "/persist/drupal-11.4.5/composer.lock",
+            "/persist/drupal-11.4.5/recipes",
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/vendor",
+            "/persist/drupal-11.4.5/vendor/asm89",
+            "/persist/drupal-11.4.5/vendor/asm89/stack-cors",
+            "/persist/drupal-11.4.5/vendor/asm89/stack-cors/LICENSE"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 1885.0999999046326,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 5098.599999904633
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 4931.900000095367,
+    "value": {
+      "wallMs": 4931.900000095367,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 644
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0.09999990463256836,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 182,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 17844,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 184.40000009536743,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 406,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 17762,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.storeRemoteEntry:/persist",
+        "calls": 84,
+        "ms": 584.3999991416931,
+        "bytes": 5323686,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files",
+          "/persist/drupal-11.4.5/web/sites/default/files/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/persist/drupal-11.4.5/web/sites/default/files/php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--page-title-block.h_vY0aDa0grSOXSMXDg7YWYmw0B",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--page-title-block.h_vY0aDa0grSOXSMXDg7YWYmw0B/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--page-title-block.h_vY0aDa0grSOXSMXDg7YWYmw0B/U9_gBSvIGfRtEWrKLkw_pBLhcVWkQcc7xLUznsluFXA.php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--secondary-menu.htm_ddHg3EcU_BUcPZOTaKTwkXqAU",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--secondary-menu.htm_ddHg3EcU_BUcPZOTaKTwkXqAU/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--secondary-menu.htm_ddHg3EcU_BUcPZOTaKTwkXqAU/rjHnhAd2Hg-bj1xKBI6sbwnF2CtygiDSXkOMXgHptzY.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 51.80000019073486,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "dirtyInfo": {
+    "startup": {
+      "instantiateMs": 460,
+      "mountHydrateMs": 29,
+      "totalMs": 490
+    },
+    "dirty": [],
+    "flushedMounts": [
+      "/persist",
+      "/config"
+    ]
+  },
+  "restart": {
+    "instantiateMs": 441.80000019073486,
+    "mountHydrateMs": 2390.9000000953674,
+    "totalMs": 2834
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 2029.6999998092651,
+    "value": {
+      "wallMs": 2029.5999999046326,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 612.4000000953674
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 2,
+        "ms": 0.19999980926513672,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 2,
+        "ms": 639.9000000953674,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 35688,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 2,
+        "ms": 656.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 2,
+        "ms": 0.9000000953674316,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 2,
+        "ms": 644.4000000953674,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 35688,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 2,
+        "ms": 376.50000047683716,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.39999961853027344,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.storeRemoteEntry:/persist",
+        "calls": 1,
+        "ms": 0.2999997138977051,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "complete": true,
+  "finished": "2026-09-20T17:44:58.905Z"
+}

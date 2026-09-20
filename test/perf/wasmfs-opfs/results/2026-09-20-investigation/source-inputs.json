@@ -1,0 +1,51 @@
+[
+  {
+    "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+    "bytes": 7780,
+    "sha256": "4ccb8587e0c53b6bcb073e6cf392bdf30f5cf07aa09f81a4c10aec55aecd0a36",
+    "snapshot": "sources/measured/test/perf/wasmfs-opfs/diagnose.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+    "bytes": 10447,
+    "sha256": "4db988da03decaaedc60933991f52e85c6fd6defa0c2736cdcdb3adcc7b96d1d",
+    "snapshot": "sources/measured/test/perf/wasmfs-opfs/diagnostic-worker.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+    "bytes": 11960,
+    "sha256": "5132d7088242a21db2ce773f4718383516d0a0683d8e5c703d38887336137b22",
+    "snapshot": "sources/measured/test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/runtime.mjs",
+    "bytes": 5960,
+    "sha256": "b4e1c3836ac5b378c8152b7950bf3173a99b79ab3d2e42ef67d89a74bcab3e2d",
+    "snapshot": "sources/measured/test/perf/wasmfs-opfs/runtime.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/server.mjs",
+    "bytes": 3897,
+    "sha256": "bb9c6f5d69a6a5f7b15b6aa94452fa8816abc92038a69f50454dce9152ea631c",
+    "snapshot": "sources/measured/test/perf/wasmfs-opfs/server.mjs.txt"
+  },
+  {
+    "file": "source/PhpCgiWebBase.mjs",
+    "bytes": 9781,
+    "sha256": "4b6a7761809be9e2d06ea89cf70872f305045099d43b8d784b64f4e9453f3192",
+    "snapshot": "sources/measured/source/PhpCgiWebBase.mjs.txt"
+  },
+  {
+    "file": "source/webTransactions.mjs",
+    "bytes": 4450,
+    "sha256": "6566f1fd7ab40b08b4b86f373b64f2e08b4afff33d0191fcd0530aea70b5f898",
+    "snapshot": "sources/measured/source/webTransactions.mjs.txt"
+  },
+  {
+    "file": "source/PhpCgiWebBase.mjs",
+    "revision": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+    "bytes": 6815,
+    "sha256": "01d1aa17690ba04689ee4c3b601e7a6f6c6d324fa4fa427292664ceaf5b110cc",
+    "snapshot": "sources/previous-PhpCgiWebBase.mjs.txt"
+  }
+]

@@ -1,0 +1,4399 @@
+{
+  "backend": "idbfs",
+  "framework": "wordpress",
+  "mode": "original",
+  "round": 7,
+  "started": "2026-09-20T18:40:30.125Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    2.16,
+    1.2,
+    1.22
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 849.9000000953674,
+      "value": {
+        "wallMs": 849.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 98.7999997138977
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 25.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 26,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 70.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 866,
+      "value": {
+        "wallMs": 866,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 113.5
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 23.200000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 29.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 87.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 866,
+      "value": {
+        "wallMs": 866,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 102.2000002861023
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 25,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 25.600000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 74.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.8999996185302734,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 810.3000001907349,
+      "value": {
+        "wallMs": 810.3000001907349,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 100.59999990463257
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 23.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 24.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 74.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 849.4000000953674,
+      "value": {
+        "wallMs": 849.4000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 131.80000019073486
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 23.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 24.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 105.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.0999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 814.5,
+      "value": {
+        "wallMs": 814.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 101.90000009536743
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 22.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 24,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 76.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 97.40000009536743,
+      "operations": [
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 26.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 27.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 69,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 100.09999990463257,
+      "operations": [
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 25.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 26.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 72.69999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.1999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 100.60000038146973,
+      "operations": [
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 22.899999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 23.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 75.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 811.7000002861023,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 197.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 32616,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 203.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 592.0000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 32616,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 13.200000762939453,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 122.5,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 23.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 23.899999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 70.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-0",
+      "wallMs": 806.2000002861023,
+      "value": {
+        "wallMs": 806.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 95.2999997138977
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 22.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 68.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-1",
+      "wallMs": 828.6999998092651,
+      "value": {
+        "wallMs": 828.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 104.7000002861023
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 22.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 79.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.6999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-2",
+      "wallMs": 795.6999998092651,
+      "value": {
+        "wallMs": 795.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 96
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 21.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 70.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-3",
+      "wallMs": 799.8000001907349,
+      "value": {
+        "wallMs": 799.8000001907349,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 97.19999980926514
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 23.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 69.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.1999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-4",
+      "wallMs": 838.5,
+      "value": {
+        "wallMs": 838.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 105.30000019073486
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 28.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 73.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-5",
+      "wallMs": 837.6999998092651,
+      "value": {
+        "wallMs": 837.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 113
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 22.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 86.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-0",
+      "wallMs": 773.0999999046326,
+      "value": {
+        "wallMs": 773.0999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 74.69999980926514
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 68.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-1",
+      "wallMs": 776.6999998092651,
+      "value": {
+        "wallMs": 776.6999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 75
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 69.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-2",
+      "wallMs": 791.9000000953674,
+      "value": {
+        "wallMs": 791.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 75.2999997138977
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 68.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.1000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-3",
+      "wallMs": 773.5,
+      "value": {
+        "wallMs": 773.4000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 74.30000019073486
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 68.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-4",
+      "wallMs": 801.3999996185303,
+      "value": {
+        "wallMs": 801.3999996185303,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 96.5
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 90.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-5",
+      "wallMs": 790.5999999046326,
+      "value": {
+        "wallMs": 790.5999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 74.09999990463257
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 2.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 68.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-0",
+      "wallMs": 695.3999996185303,
+      "value": {
+        "wallMs": 695.3999996185303,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.1999998092651367
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-1",
+      "wallMs": 716.4000000953674,
+      "value": {
+        "wallMs": 716.4000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.0999999046325684
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-2",
+      "wallMs": 697.1999998092651,
+      "value": {
+        "wallMs": 697.1999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 1,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 1,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 2,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-3",
+      "wallMs": 697.8000001907349,
+      "value": {
+        "wallMs": 697.8000001907349,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.1999998092651367
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-4",
+      "wallMs": 696,
+      "value": {
+        "wallMs": 696,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.0999999046325684
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-5",
+      "wallMs": 720.8000001907349,
+      "value": {
+        "wallMs": 720.8000001907349,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.1000003814697266
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "0c28243ae5fdfedbef5825f8295628882e971923e072c0755ad948c18b1b17e2",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10684,
+      "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 12502,
+      "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8107,
+      "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 438.7999997138977,
+    "mountHydrateMs": 50.200000286102295,
+    "totalMs": 489.8999996185303
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 136,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 5.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 1.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 47,
+          "bytes": 29997708,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 47.09999990463257,
+          "bytes": 29997708,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 103.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 1894.2999997138977,
+      "value": {
+        "wallMs": 1894.2999997138977,
+        "status": 200,
+        "body": {
+          "entries": 3628,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 974.2999997138977
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 2,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 2,
+          "ms": 26.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4078,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 2,
+          "ms": 27.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 2,
+          "ms": 461.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 2,
+          "ms": 1.0999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 2,
+          "ms": 946.3999996185303,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 4077,
+          "ms": 1836343.4999938011,
+          "bytes": 95944968,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 4077,
+          "ms": 1836362.5999946594,
+          "bytes": 95944968,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 398.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 398.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 2030.2999997138977
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 1470.1000003814697,
+    "value": {
+      "wallMs": 1470.1000003814697,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 175.40000009536743
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 43.299999713897705,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 4077,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 52.80000019073486,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 104.2999997138977,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 4077,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/persist",
+        "calls": 2,
+        "ms": 6.199999809265137,
+        "bytes": 446464,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.storeRemoteEntry:/persist",
+        "calls": 2,
+        "ms": 6.199999809265137,
+        "bytes": 446464,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 26.800000190734863,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "dirtyInfo": {
+    "startup": {
+      "instantiateMs": 438.7999997138977,
+      "mountHydrateMs": 50.200000286102295,
+      "totalMs": 489.8999996185303
+    },
+    "dirty": [],
+    "flushedMounts": [
+      "/persist",
+      "/config"
+    ]
+  },
+  "mutationProbe": {
+    "files": [
+      "/persist/diagnostic-persistence/changed.bin",
+      "/persist/diagnostic-persistence/rpc-0.bin",
+      "/persist/diagnostic-persistence/rpc-1.bin",
+      "/persist/diagnostic-persistence/rpc-2.bin",
+      "/persist/diagnostic-persistence/rpc-3.bin"
+    ],
+    "bytes": [
+      0,
+      1,
+      127,
+      128,
+      255,
+      13,
+      10
+    ],
+    "batch": {
+      "name": "rpc-write-probe",
+      "wallMs": 191.7000002861023,
+      "operations": [
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 2,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 2,
+          "ms": 5.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8162,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 2,
+          "ms": 8.299999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 2,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 2,
+          "ms": 154.39999961853027,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8158,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 2,
+          "ms": 4.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "indexeddb.put:/persist",
+          "calls": 5,
+          "ms": 2.5,
+          "bytes": 28,
+          "failures": 0,
+          "paths": [
+            "/persist/diagnostic-persistence",
+            "/persist/diagnostic-persistence/rpc-0.bin",
+            "/persist/diagnostic-persistence/rpc-1.bin",
+            "/persist/diagnostic-persistence/rpc-2.bin",
+            "/persist/diagnostic-persistence/rpc-3.bin"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 5,
+          "ms": 2.5,
+          "bytes": 28,
+          "failures": 0,
+          "paths": [
+            "/persist/diagnostic-persistence",
+            "/persist/diagnostic-persistence/rpc-0.bin",
+            "/persist/diagnostic-persistence/rpc-1.bin",
+            "/persist/diagnostic-persistence/rpc-2.bin",
+            "/persist/diagnostic-persistence/rpc-3.bin"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "absent": [
+      "/persist/diagnostic-persistence/temporary",
+      "/persist/diagnostic-persistence/renamed",
+      "/persist/diagnostic-persistence/empty"
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 431.59999990463257,
+    "mountHydrateMs": 595.8000001907349,
+    "totalMs": 1028.8000001907349
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 1624,
+    "value": {
+      "wallMs": 1624,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 109.30000019073486
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 2,
+        "ms": 0.09999990463256836,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 2,
+        "ms": 61.40000057220459,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 8166,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 2,
+        "ms": 69.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 2,
+        "ms": 0.7000002861022949,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 2,
+        "ms": 145.09999990463257,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 8166,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 2,
+        "ms": 35.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.19999980926513672,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.40000009536743164,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/persist",
+        "calls": 1,
+        "ms": 0.2999997138977051,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.storeRemoteEntry:/persist",
+        "calls": 1,
+        "ms": 0.2999997138977051,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "verifiedMutations": [
+    {
+      "path": "/persist/diagnostic-persistence/changed.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-0.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-1.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-2.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-3.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    }
+  ],
+  "verifiedDeletions": [
+    {
+      "path": "/persist/diagnostic-persistence/temporary",
+      "exists": false
+    },
+    {
+      "path": "/persist/diagnostic-persistence/renamed",
+      "exists": false
+    },
+    {
+      "path": "/persist/diagnostic-persistence/empty",
+      "exists": false
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:40:58.359Z"
+}

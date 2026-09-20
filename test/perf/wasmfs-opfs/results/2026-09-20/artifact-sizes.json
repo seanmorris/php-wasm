@@ -1,0 +1,74 @@
+[
+  {
+    "rawBytes": 30873664,
+    "gzip9Bytes": 12610294,
+    "brotli11Bytes": 7698896,
+    "backend": "idbfs",
+    "name": "php.data",
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  {
+    "rawBytes": 4404866,
+    "gzip9Bytes": 589862,
+    "brotli11Bytes": 418457,
+    "backend": "idbfs",
+    "name": "php8.3-cgi-worker.mjs",
+    "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+  },
+  {
+    "rawBytes": 40405624,
+    "gzip9Bytes": 11517480,
+    "brotli11Bytes": 7712991,
+    "backend": "idbfs",
+    "name": "php8.3-cgi-worker.mjs.wasm",
+    "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+  },
+  {
+    "rawBytes": 30873664,
+    "gzip9Bytes": 12610294,
+    "brotli11Bytes": 7698896,
+    "backend": "opfs",
+    "name": "php.data",
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  {
+    "rawBytes": 4448377,
+    "gzip9Bytes": 586634,
+    "brotli11Bytes": 413846,
+    "backend": "opfs",
+    "name": "php8.3-cgi-worker.mjs",
+    "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+  },
+  {
+    "rawBytes": 40819220,
+    "gzip9Bytes": 11595371,
+    "brotli11Bytes": 7769364,
+    "backend": "opfs",
+    "name": "php8.3-cgi-worker.mjs.wasm",
+    "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+  },
+  {
+    "rawBytes": 30873664,
+    "gzip9Bytes": 12610294,
+    "brotli11Bytes": 7698896,
+    "backend": "idbfs-pruned",
+    "name": "php.data",
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  {
+    "rawBytes": 4404866,
+    "gzip9Bytes": 589862,
+    "brotli11Bytes": 418457,
+    "backend": "idbfs-pruned",
+    "name": "php8.3-cgi-worker.mjs",
+    "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+  },
+  {
+    "rawBytes": 40333239,
+    "gzip9Bytes": 11499750,
+    "brotli11Bytes": 7706254,
+    "backend": "idbfs-pruned",
+    "name": "php8.3-cgi-worker.mjs.wasm",
+    "sha256": "ff12101439cf62dbde9b29943d3aefa2d983254e81b283ce8f5c3d9b7975de9e"
+  }
+]

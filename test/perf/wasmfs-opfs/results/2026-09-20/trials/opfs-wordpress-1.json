@@ -1,0 +1,416 @@
+{
+  "backend": "opfs",
+  "framework": "wordpress",
+  "name": "WordPress 7.1",
+  "round": 1,
+  "runLabel": "clean-repeat",
+  "archive": {
+    "name": "wordpress-7.1.zip",
+    "bytes": 29997708,
+    "sha256": "0c28243ae5fdfedbef5825f8295628882e971923e072c0755ad948c18b1b17e2"
+  },
+  "assetSha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4448377,
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40819220,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      2.54,
+      2.75,
+      3.39
+    ]
+  },
+  "started": "2026-09-20T16:45:18.054Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1638.0999999046326,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1640.2000002861023,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1625.2999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1627.0999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1620.3999996185303,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1622.0999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1587.8000001907349,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1589.5999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1563.7000002861023,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1565.8000001907349,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1584.8000001907349,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1586.5,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1593.9000000953674,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1595.5999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1606.3000001907349,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1607.7999997138977,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1512.0999999046326,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1513.9000000953674,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1580.1999998092651,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1582.0999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1801,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1802.5999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1590.2999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1592,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1630.3999996185303,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1632.0999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1546.7999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1548.6999998092651,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1614.9000000953674,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1616.5999999046326,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1623.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1625.2999997138977,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1573.7999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1575.3000001907349,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1641.4000000953674,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1643.2000002861023,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1592.0999999046326,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1593.8999996185303,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+      "status": 200,
+      "cgiMs": 1575.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1577.2000002861023,
+      "bytes": 71433,
+      "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/wp-includes/css/dashicons.min.css",
+      "status": 200,
+      "cgiMs": 2.6999998092651367,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 4,
+      "bytes": 59004,
+      "bodySha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/wp-includes/css/dashicons.min.css",
+      "status": 200,
+      "cgiMs": 2.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.5999999046325684,
+      "bytes": 59004,
+      "bodySha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/wp-includes/css/dashicons.min.css",
+      "status": 200,
+      "cgiMs": 2.4000000953674316,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.5,
+      "bytes": 59004,
+      "bodySha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/wp-includes/css/dashicons.min.css",
+      "status": 200,
+      "cgiMs": 2.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.5,
+      "bytes": 59004,
+      "bodySha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/wp-includes/css/dashicons.min.css",
+      "status": 200,
+      "cgiMs": 2.5999999046325684,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.8999996185302734,
+      "bytes": 59004,
+      "bodySha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 449.80000019073486,
+    "mountHydrateMs": 42.19999980926514,
+    "totalMs": 493,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 633.102338,
+  "install": {
+    "downloadMs": 53.69999980926514,
+    "archiveBytes": 29997708,
+    "archiveWriteMs": 68.5,
+    "extractAndFlushMs": 70869.89999961853,
+    "installMs": 70938.59999990463,
+    "details": {
+      "files": 3628,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 70869.7999997139,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+    "status": 200,
+    "cgiMs": 2688,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 2690.3999996185303,
+    "bytes": 71433,
+    "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+    "valid": true
+  },
+  "render": {
+    "title": "WordPress 7.1 on PHP-WASM",
+    "text": "Skip to content\n\nWordPress 7.1 on PHP-WASM\n\nSample Page\nBlog\nHello world!\n\nWordPress 7.1 is running in the browser!\n\nLog in to explore the dashboard.\n\nUsername: admin\nPassword: admin\n\nClick here to edit this welcome message!\n\nWelcome to WordPress. This is your first post. Edit or delete it, then start writing!\n\nAugust 19, 2026\nWordPress 7.1 on PHP-WASM\nBlog\nAbout\nFAQs\nAuthors\nEvents\nShop\nPatterns\nThemes\n\nTwenty Twenty-Five\n\nDesigned with WordPress",
+    "images": [],
+    "wallMs": 1633.3900960000028
+  },
+  "restart": {
+    "instantiateMs": 434.59999990463257,
+    "mountHydrateMs": 3.8000001907348633,
+    "totalMs": 441.69999980926514,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 492.760214000009,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/wordpress/",
+    "status": 200,
+    "cgiMs": 2393.5,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 2395.4000000953674,
+    "bytes": 71433,
+    "bodySha256": "417dc7640716ecfb3556d3bb07236cf36ad572cfaa194b899f0a492573c253c9",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T16:47:09.530Z"
+}

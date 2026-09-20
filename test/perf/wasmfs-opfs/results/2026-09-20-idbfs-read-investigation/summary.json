@@ -1,0 +1,79 @@
+{
+  "decision": "Retain ordinary IDBFS remote timestamp cursor; the schema-compatible bulk prototype was 20\u201329% slower on the five larger framework trees. CodeIgniter changed by less than half a millisecond.",
+  "rows": [
+    {
+      "framework": "drupal",
+      "entries": 17844,
+      "timestampGroups": 1245,
+      "cursorHydrateMedianMs": 337.35000014305115,
+      "groupedHydrateMedianMs": 404.9500000476837,
+      "changePercent": 20.038535608705253,
+      "bulkKeysMedianMs": 199.85000014305115,
+      "uniqueCursorElapsedMedianMs": 373.34999990463257,
+      "metadataJoinMedianMs": 5.849999904632568,
+      "trial": "trials/idbfs-drupal-grouped-idbfs-1.json"
+    },
+    {
+      "framework": "wordpress",
+      "entries": 4077,
+      "timestampGroups": 252,
+      "cursorHydrateMedianMs": 86.20000004768372,
+      "groupedHydrateMedianMs": 106.90000009536743,
+      "changePercent": 24.013921155722716,
+      "bulkKeysMedianMs": 50.700000047683716,
+      "uniqueCursorElapsedMedianMs": 98.90000009536743,
+      "metadataJoinMedianMs": 1.25,
+      "trial": "trials/idbfs-wordpress-grouped-idbfs-1.json"
+    },
+    {
+      "framework": "laravel-11",
+      "entries": 9449,
+      "timestampGroups": 787,
+      "cursorHydrateMedianMs": 173.0,
+      "groupedHydrateMedianMs": 214.75,
+      "changePercent": 24.132947976878615,
+      "bulkKeysMedianMs": 102.14999985694885,
+      "uniqueCursorElapsedMedianMs": 199.09999990463257,
+      "metadataJoinMedianMs": 2.8999998569488525,
+      "trial": "trials/idbfs-laravel-11-grouped-idbfs-1.json"
+    },
+    {
+      "framework": "cakephp-5",
+      "entries": 8787,
+      "timestampGroups": 784,
+      "cursorHydrateMedianMs": 156.79999995231628,
+      "groupedHydrateMedianMs": 201.64999985694885,
+      "changePercent": 28.603316274407973,
+      "bulkKeysMedianMs": 98.04999995231628,
+      "uniqueCursorElapsedMedianMs": 187.15000009536743,
+      "metadataJoinMedianMs": 2.6000001430511475,
+      "trial": "trials/idbfs-cakephp-5-grouped-idbfs-1.json"
+    },
+    {
+      "framework": "codeigniter-4",
+      "entries": 835,
+      "timestampGroups": 83,
+      "cursorHydrateMedianMs": 13.350000143051147,
+      "groupedHydrateMedianMs": 12.900000095367432,
+      "changePercent": -3.370786837915851,
+      "bulkKeysMedianMs": 5.0,
+      "uniqueCursorElapsedMedianMs": 10.900000095367432,
+      "metadataJoinMedianMs": 0.2999999523162842,
+      "trial": "trials/idbfs-codeigniter-4-grouped-idbfs-1.json"
+    },
+    {
+      "framework": "laminas-3",
+      "entries": 7671,
+      "timestampGroups": 585,
+      "cursorHydrateMedianMs": 139.0499997138977,
+      "groupedHydrateMedianMs": 174.599999666214,
+      "changePercent": 25.566343060382724,
+      "bulkKeysMedianMs": 85.20000004768372,
+      "uniqueCursorElapsedMedianMs": 159.79999995231628,
+      "metadataJoinMedianMs": 2.5,
+      "trial": "trials/idbfs-laminas-3-grouped-idbfs-1.json"
+    }
+  ],
+  "firstPrototypeTrial": "trials/idbfs-drupal-grouped-idbfs-0.json",
+  "completedTrials": 7
+}

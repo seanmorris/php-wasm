@@ -1,0 +1,31 @@
+{
+  "checked": "2026-09-20T17:21:44.431Z",
+  "trials": 36,
+  "warmRequests": 720,
+  "staticRequests": 180,
+  "allComplete": true,
+  "archiveCountsMatch": true,
+  "binaryHashesMatch": true,
+  "allRenderedImagesLoaded": true,
+  "expectedFavicon404Only": true,
+  "wasm": [
+    {
+      "backend": "idbfs",
+      "bytes": 40405624,
+      "valid": true,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "backend": "opfs",
+      "bytes": 40819220,
+      "valid": true,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    },
+    {
+      "backend": "idbfs-pruned",
+      "bytes": 40333239,
+      "valid": true,
+      "sha256": "ff12101439cf62dbde9b29943d3aefa2d983254e81b283ce8f5c3d9b7975de9e"
+    }
+  ]
+}
