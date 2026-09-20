@@ -26,6 +26,7 @@ jobs:
           test/web-locks.test.mjs test/filesystem.test.mjs test/build/cloudflare-build.test.mjs
           test/phar-packaging.test.mjs
           test/build/builder-package.test.mjs
+          test/build/web-exports.test.mjs
       - name: Verify CGI regressions on pinned Deno before native builds
         run: >-
           npm exec --yes --package=deno@2.5.6 -- deno test

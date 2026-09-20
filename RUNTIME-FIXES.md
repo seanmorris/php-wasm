@@ -25,8 +25,10 @@ preparing the artifacts does not publish packages, push images, or deploy sites.
   local configuration, and credentials do not. The release script includes the
   staged tarball in its default dry run.
 - **WebPerl coexistence (#91):** the current modular Emscripten build scopes its
-  debug globals to the PHP module. Browser regressions exercise the historical
-  WebPerl 0.09-beta distribution before and after PHP. Replace affected old
+  debug globals to the PHP module. An obsolete export-name rewrite has also been
+  removed so assertions-enabled browser modules can initialize. Regressions
+  exercise the historical WebPerl 0.09-beta distribution before and after PHP.
+  Replace affected old
   generated PHP assets as a matching JavaScript/Wasm pair; a wrapper-only update
   cannot repair a global hook already embedded in an older generated module.
 
