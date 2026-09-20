@@ -17,28 +17,30 @@ const cases = [
  * Exercises identical PHP source semantics through ESM and CommonJS consumers.
  * @param {typeof import('./PhpNode.mjs').PhpNode} PhpNode Runtime constructor for the consumer under test.
  * @param {(name: string, callback: () => Promise<void>) => Promise<void>} register Test registration function.
- * @returns {Promise<void>} Completion of all source cases.
+ * @returns {Promise<void[]>} Completion of all source cases.
  */
-export async function testRunSources(PhpNode, register)
+export function testRunSources(PhpNode, register)
 {
+	const tests = [];
 	for(const [name, source, expected, status = 0] of cases)
 	{
-		await register(`run preserves PHP source semantics: ${name}`, async () => {
+		tests.push(register(`run preserves PHP source semantics: ${name}`, async () => {
 			const php = new PhpNode();
 			let output = '';
 			php.addEventListener('output', event => output += event.detail.join(''));
 			assert.equal(await php.run(source), status);
 			if(expected instanceof RegExp) assert.match(output, expected);
 			else assert.equal(output, expected);
-		});
+		}));
 	}
 
-	await register('strict declarations do not leak into subsequent runs', async () => {
+	tests.push(register('strict declarations do not leak into subsequent runs', async () => {
 		const php = new PhpNode();
 		let output = '';
 		php.addEventListener('output', event => output += event.detail.join(''));
 		assert.equal(await php.run('<?php declare(strict_types=1); $saved = 4;'), 0);
 		assert.equal(await php.run('<?php echo $saved; echo (function(int $n) { return $n; })("1");'), 0);
 		assert.equal(output, '41');
-	});
+	}));
+	return Promise.all(tests);
 }
