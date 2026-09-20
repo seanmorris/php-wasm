@@ -8,7 +8,10 @@ export const useEditorDialog = () => {
 	const ask = useCallback(options => new Promise(resolve => {
 		pending.current?.({action: 'cancel'});
 		pending.current = resolve;
-		setDialog({...options, key: crypto.randomUUID()});
+		// Capture focus before the editor becomes inert; a closed menu item cannot receive it back.
+		const active = document.activeElement;
+		const returnFocus = active?.closest('details')?.querySelector('summary') || active;
+		setDialog({...options, key: crypto.randomUUID(), returnFocus});
 	}), []);
 	const finish = useCallback(result => {
 		pending.current?.(result);
@@ -26,12 +29,12 @@ export default function EditorDialog({dialog, finish})
 	const [value, setValue] = useState(dialog.value ?? '');
 	const [error, setError] = useState('');
 	useEffect(() => {
-		const previous = document.activeElement;
+		const previous = dialog.returnFocus || document.activeElement;
 		const target = form.current.querySelector('input:not(:disabled), button:not(:disabled)');
 		target?.focus();
 		target?.select?.();
 		return () => previous?.isConnected && previous.focus();
-	}, []);
+	}, [dialog.returnFocus]);
 	const choose = action => {
 		if(dialog.choices.find(choice => choice.action === action)?.disabled) return;
 		if(action !== 'cancel' && dialog.validate)

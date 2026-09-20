@@ -294,6 +294,7 @@ it('remaps a dirty tab on rename and closes it on confirmed deletion', async () 
 	await waitFor(() => expect(screen.getByRole('button', {name: 'Save file'})).toBeEnabled());
 	fireEvent.click(screen.getByRole('button', {name: 'Save file'}));
 	await waitFor(() => expect(filesystem.write).toHaveBeenCalledWith('/persist/renamed.php', new TextEncoder().encode('keep this draft'), 'original'));
+	fireEvent.click(screen.getByLabelText('More file actions'));
 	await waitFor(() => expect(screen.getByRole('button', {name: 'Delete…'})).toBeEnabled());
 	filesystem.inspect.mockResolvedValue({path: '/persist/renamed.php', revision: 'saved'});
 	fireEvent.click(screen.getByRole('button', {name: 'Delete…'}));

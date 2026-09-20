@@ -28,6 +28,9 @@ to visible filenames. Breadcrumbs, Root and Reveal help navigate large trees.
 Tabs show full paths when names collide and support arrow keys, Home and End.
 The explorer has keyboard navigation, selection checkboxes, action buttons and a
 width control; it can be hidden on small screens. Dialogs trap and restore focus.
+Its compact header keeps New file, New folder and Refresh beside a More file
+actions menu for uploads, root/reveal navigation and copy/cut/paste/delete. The
+visible-file filter stays on its own row below the actions.
 
 Shortcuts: Ctrl/Cmd+S saves, Ctrl/Cmd+Shift+S saves all, Ctrl/Cmd+O opens a path,
 Ctrl/Cmd+P opens Quick open, Ctrl/Cmd+N creates an untitled buffer, Ctrl/Cmd+W closes

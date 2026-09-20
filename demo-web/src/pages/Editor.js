@@ -79,6 +79,7 @@ export default function Editor()
 	const uploadInput = useRef(null);
 	const folderInput = useRef(null);
 	const zipInput = useRef(null);
+	const explorerMenu = useRef(null);
 	const uploadDestination = useRef('/persist');
 	const [ready, setReady] = useState(false);
 	const [initialized, setInitialized] = useState(false);
@@ -126,6 +127,15 @@ export default function Editor()
 	const doc = w.model.active;
 	const documents = [...w.model.documents.values()];
 	const blocked = !!w.busy || debuggerActive;
+	useEffect(() => {
+		const dismiss = event => {
+			const menu = explorerMenu.current;
+			if(menu?.open && !menu.contains(event.target)) menu.open = false;
+		};
+		document.addEventListener('pointerdown', dismiss);
+		return () => document.removeEventListener('pointerdown', dismiss);
+	}, []);
+
 	useEffect(() => {
 		if(!ready || !editor.current?.container || typeof ResizeObserver === 'undefined') return;
 		const observer = new ResizeObserver(() => editor.current?.resize());
@@ -489,21 +499,53 @@ export default function Editor()
 			<div className="row editor-main">
 				<aside className="file-area frame inset" aria-label="File explorer">
 					<div className="editor-explorer-toolbar">
-						<button disabled={blocked} onClick={() => w.newEntry(false)} title="New file">+ File</button>
-						<button disabled={blocked} onClick={() => w.newEntry(true)} title="New folder">+ Folder</button>
-						<button onClick={() => void w.checkExternal()}>Refresh</button>
-						<button disabled={blocked} onClick={() => pickUpload(uploadInput)}>Upload…</button>
-						<button disabled={blocked} onClick={w.changeRoot}>Root…</button>
-						<button disabled={!doc?.path} onClick={() => {
-							if(!withinPath(doc.path, w.root)) w.setRoot('/');
-							w.select({path: doc.path, name: doc.name, kind: 'file'}, false);
-							w.reveal(doc.path);
-						}}>Reveal</button>
-						<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(false)}>Copy</button>
-						<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(true)}>Cut</button>
-						<button disabled={blocked} onClick={w.paste}>Paste</button>
-						<button disabled={blocked || !w.selected.size} onClick={w.removeSelected}>Delete…</button>
-						<input aria-label="Filter visible files" placeholder="Filter visible files" value={filter} onChange={event => setFilter(event.target.value)} />
+						<div className="editor-toolbar editor-explorer-actions" role="group" aria-label="File explorer actions">
+							<span className="editor-explorer-title">Files</span>
+							<button disabled={blocked} onClick={() => w.newEntry(false)} title="New file" aria-label="New file">
+								<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14H3V2h7l3 3v3M10 2v4h3M9 12h6m-3-3v6" /></svg>
+							</button>
+							<button disabled={blocked} onClick={() => w.newEntry(true)} title="New folder" aria-label="New folder">
+								<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 13H2V3h4l2 2h6v3M9 12h6m-3-3v6" /></svg>
+							</button>
+							<button onClick={() => void w.checkExternal()} title="Refresh files" aria-label="Refresh files">
+								<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 6a5.5 5.5 0 1 0 .1 4M13.5 2v4h-4" /></svg>
+							</button>
+							<details ref={explorerMenu} className="editor-menu editor-explorer-menu" onClick={event => {
+								if(event.target.closest('button:not(:disabled)'))
+								{
+									event.currentTarget.open = false;
+									event.currentTarget.querySelector('summary').focus();
+								}
+							}} onKeyDown={event => {
+								if(event.key === 'Escape')
+								{
+									event.preventDefault();
+									event.stopPropagation();
+									event.currentTarget.open = false;
+									event.currentTarget.querySelector('summary').focus();
+								}
+							}} onBlur={event => {
+								if(!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+							}}>
+								<summary aria-label="More file actions" title="More file actions">⋯</summary>
+								<div className="bevel">
+									<button disabled={blocked} onClick={() => pickUpload(uploadInput)}>Upload files…</button>
+									<hr />
+									<button disabled={blocked} onClick={w.changeRoot}>Change root folder…</button>
+									<button disabled={!doc?.path} onClick={() => {
+										if(!withinPath(doc.path, w.root)) w.setRoot('/');
+										w.select({path: doc.path, name: doc.name, kind: 'file'}, false);
+										w.reveal(doc.path);
+									}}>Reveal current file</button>
+									<hr />
+									<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(false)}>Copy</button>
+									<button disabled={blocked || !w.selected.size} onClick={() => w.copySelection(true)}>Cut</button>
+									<button disabled={blocked} onClick={w.paste}>Paste</button>
+									<button disabled={blocked || !w.selected.size} onClick={w.removeSelected}>Delete…</button>
+								</div>
+							</details>
+						</div>
+						<div className="editor-explorer-filter"><input aria-label="Filter visible files" title="Filter visible files" placeholder="Filter files…" value={filter} onChange={event => setFilter(event.target.value)} /></div>
 					</div>
 					<div className="editor-tree-scroll"><ul role="tree" aria-label="Filesystem" aria-multiselectable="true" onKeyDown={treeKeys}>
 						<EditorFolder entry={{path: w.root, name: w.root, kind: 'directory', protected: ['/', '/persist', '/config'].includes(w.root)}} expanded={w.expanded} onExpand={w.expand} selected={w.selected} onSelect={w.select} onOpenFile={path => void w.openFile(path)} onMenu={entryMenu} onDrop={drop} refresh={w.refresh} filter={filter} />

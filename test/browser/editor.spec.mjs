@@ -235,12 +235,14 @@ test('uploads and downloads binary bytes, exports a folder and imports its ZIP i
 	await start(page);
 	await rpc(page, 'mkdir', '/persist/transfer');
 	await rpc(page, 'mkdir', '/persist/roundtrip');
-	await page.getByRole('button', {name: 'Root…'}).click();
+	await page.getByLabel('More file actions', {exact: true}).click();
+	await page.getByRole('button', {name: 'Change root folder…'}).click();
 	await page.getByRole('dialog').getByRole('textbox').fill('/persist/transfer');
 	await page.getByRole('dialog').getByRole('button', {name: 'Continue'}).click();
 	const bytes = Buffer.from([0, 128, 255, 1, 2, 3]);
 	const uploadChooser = page.waitForEvent('filechooser');
-	await page.getByRole('button', {name: 'Upload…', exact: true}).click();
+	await page.getByLabel('More file actions', {exact: true}).click();
+	await page.getByRole('complementary', {name: 'File explorer'}).getByRole('button', {name: 'Upload files…', exact: true}).click();
 	await (await uploadChooser).setFiles({name: 'binary.dat', mimeType: 'application/octet-stream', buffer: bytes});
 	await expect(page.getByRole('button', {name: 'binary.dat', exact: true})).toBeVisible();
 	await page.getByRole('button', {name: 'binary.dat', exact: true}).click();
@@ -252,8 +254,8 @@ test('uploads and downloads binary bytes, exports a folder and imports its ZIP i
 	const zipDownload = page.waitForEvent('download', {timeout: 120000});
 	await page.getByRole('button', {name: 'Export folder as ZIP'}).click();
 	const zip = await zipDownload;
-	await expect(page.getByRole('button', {name: 'Root…'})).toBeEnabled();
-	await page.getByRole('button', {name: 'Root…'}).click();
+	await page.getByLabel('More file actions', {exact: true}).click();
+	await page.getByRole('button', {name: 'Change root folder…'}).click();
 	await page.getByRole('dialog').getByRole('textbox').fill('/persist/roundtrip');
 	await page.getByRole('dialog').getByRole('button', {name: 'Continue'}).click();
 	// Opening the picker captures the current folder before the browser supplies a file.
@@ -284,6 +286,13 @@ test('tree, tabs and dialogs are keyboard reachable on a narrow viewport', async
 	await expect(page.getByRole('dialog', {name: 'Quick open'}).getByRole('textbox')).toBeFocused();
 	await page.keyboard.press('Escape');
 	await expect(page.getByRole('button', {name: 'Quick open…'})).toBeFocused();
+	const more = page.getByLabel('More file actions', {exact: true});
+	await more.focus();
+	await more.press('Enter');
+	await page.getByRole('button', {name: 'Change root folder…'}).click();
+	await page.getByRole('dialog').getByRole('textbox').waitFor();
+	await page.keyboard.press('Escape');
+	await expect(more).toBeFocused();
 	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 	await page.getByRole('button', {name: 'Toggle explorer'}).click();
 	await expect(page.getByRole('complementary', {name: 'File explorer'})).toBeHidden();
@@ -292,7 +301,8 @@ test('tree, tabs and dialogs are keyboard reachable on a narrow viewport', async
 test('rejects a whole unsafe ZIP inventory before creating destination files', async ({page}) => {
 	await start(page);
 	await rpc(page, 'mkdir', '/persist/zip-target');
-	await page.getByRole('button', {name: 'Root…'}).click();
+	await page.getByLabel('More file actions', {exact: true}).click();
+	await page.getByRole('button', {name: 'Change root folder…'}).click();
 	await page.getByRole('dialog').getByRole('textbox').fill('/persist/zip-target');
 	await page.getByRole('dialog').getByRole('button', {name: 'Continue'}).click();
 	const cases = [
@@ -363,7 +373,8 @@ test('runs the saved buffer in the existing PHP debugger', async ({page}) => {
 test('round trips an empty folder as a standard empty ZIP', async ({page}) => {
 	await start(page);
 	await rpc(page, 'mkdir', '/persist/empty');
-	await page.getByRole('button', {name: 'Root…'}).click();
+	await page.getByLabel('More file actions', {exact: true}).click();
+	await page.getByRole('button', {name: 'Change root folder…'}).click();
 	await page.getByRole('dialog').getByRole('textbox').fill('/persist/empty');
 	await page.getByRole('dialog').getByRole('button', {name: 'Continue'}).click();
 	await page.getByText('File', {selector: 'summary', exact: true}).click();
