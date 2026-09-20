@@ -20,7 +20,6 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-preload-assets-'));
 	const absoluteDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-preload-absolute-'));
 	const homeDir = path.join(workspaceDir, 'home');
-	const binDir = path.join(workspaceDir, 'bin');
 	const publicDir = path.join(workspaceDir, 'public');
 	const relativeDir = path.join(workspaceDir, 'relative');
 	const rcFile = path.join(workspaceDir, '.php-wasm-rc');
@@ -34,11 +33,8 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 	});
 
 	fs.mkdirSync(homeDir, { recursive: true });
-	fs.mkdirSync(binDir, { recursive: true });
 	fs.mkdirSync(publicDir, { recursive: true });
 	fs.mkdirSync(relativeDir, { recursive: true });
-	fs.writeFileSync(path.join(binDir, 'npm'), '#!/usr/bin/env bash\nexit 0\n', 'utf8');
-	fs.chmodSync(path.join(binDir, 'npm'), 0o755);
 
 	fs.writeFileSync(homeAsset, 'home\n', 'utf8');
 	fs.writeFileSync(absoluteAsset, 'absolute\n', 'utf8');
@@ -63,6 +59,7 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 			, '.cache/preload-collected'
 			, `PHP_BUILDER_DIR=${workspaceDir}`
 			, `ENV_FILE=${rcFile}`
+			, 'EXTENSION_PACKAGE_DIRS='
 		],
 		{
 			cwd: repoRoot
@@ -70,7 +67,6 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 			, env: {
 				...independentMakeEnvironment(),
 				HOME: homeDir
-				, PATH: `${binDir}:${process.env.PATH ?? ''}`
 			}
 		}
 	);
@@ -95,21 +91,11 @@ test('builder-mode PRELOAD_ASSETS keeps anchored paths and resolves relative pat
 
 test('package pre.mak additions remain available to builder preload collection', t => {
 	const workspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'php-wasm-preload-package-'));
-	const binDir = path.join(workspaceDir, 'bin');
-	const npmPath = path.join(binDir, 'npm');
 	const intlPackageDir = path.join(repoRoot, 'packages/intl');
 
 	t.after(() => {
 		fs.rmSync(workspaceDir, { recursive: true, force: true });
 	});
-
-	fs.mkdirSync(binDir, { recursive: true });
-	fs.writeFileSync(
-		npmPath,
-		`#!/usr/bin/env bash\nprintf '%s\\n' '${intlPackageDir}'\n`,
-		'utf8'
-	);
-	fs.chmodSync(npmPath, 0o755);
 
 	const result = spawnSync(
 		'make',
@@ -120,16 +106,14 @@ test('package pre.mak additions remain available to builder preload collection',
 			, 'Makefile'
 			, 'WITH_INTL=static'
 			, `PHP_BUILDER_DIR=${workspaceDir}`
+			, `EXTENSION_PACKAGE_DIRS=${intlPackageDir}`
 			, '--eval=.PHONY: print-preload-assets\nprint-preload-assets:\n\t@printf "%s\\n" "$(PRELOAD_ASSET_SOURCES)"'
 			, 'print-preload-assets'
 		],
 		{
 			cwd: repoRoot
 			, encoding: 'utf8'
-			, env: {
-				...independentMakeEnvironment(),
-				PATH: `${binDir}:${process.env.PATH ?? ''}`
-			}
+			, env: independentMakeEnvironment()
 		}
 	);
 

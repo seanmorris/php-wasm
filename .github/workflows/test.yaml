@@ -32,10 +32,12 @@ jobs:
       - name: Test build helpers under inherited Make settings (Node)
         env:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+          WITH_GD: shared
         run: node --test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs
       - name: Test build helpers under inherited Make settings (Deno)
         env:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+          WITH_GD: shared
         run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
       - name: Verify packaged builder helpers
         run: node --test test/build/builder-tools-packaging.test.mjs
