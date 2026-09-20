@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
-import test, {beforeEach, afterEach} from 'node:test';
+import test from 'node:test';
 import {PhpCgiWebBase} from '../source/PhpCgiWebBase.mjs';
 
-const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
-beforeEach(() => {
+const installLocks = t => {
+	const originalNavigator = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
 	const pending = new Map();
 	Object.defineProperty(globalThis, 'navigator', {
 		configurable: true
@@ -15,11 +15,11 @@ beforeEach(() => {
 			}
 		}}
 	});
-});
-afterEach(() => {
-	if(originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);
-	else delete globalThis.navigator;
-});
+	t.after(() => {
+		if(originalNavigator) Object.defineProperty(globalThis, 'navigator', originalNavigator);
+		else delete globalThis.navigator;
+	});
+};
 
 const deferred = () => {
 	let resolve;
@@ -77,7 +77,8 @@ const createCgi = async main => {
 	return {cgi, runtimes};
 };
 
-test('CGI execution keeps uncommitted files safe from concurrent filesystem RPC hydration', {timeout: 3000}, async () => {
+test('CGI execution keeps uncommitted files safe from concurrent filesystem RPC hydration', {timeout: 3000}, async t => {
+	installLocks(t);
 	const started = deferred();
 	const resume = deferred();
 	const {cgi, runtimes} = await createCgi(async runtime => {
@@ -90,7 +91,7 @@ test('CGI execution keeps uncommitted files safe from concurrent filesystem RPC 
 	await started.promise;
 	let acknowledged = false;
 	const writing = cgi.writeFile('/www/from-rpc.txt', 'rpc').then(() => acknowledged = true);
-	await new Promise(resolve => setImmediate(resolve));
+	await new Promise(resolve => setTimeout(resolve, 0));
 	const acknowledgedDuringPhp = acknowledged;
 	resume.resolve();
 	const [result] = await Promise.all([response, writing]);
@@ -102,7 +103,8 @@ test('CGI execution keeps uncommitted files safe from concurrent filesystem RPC 
 	assert.equal(runtimes.at(-1).files.get('/www/from-rpc.txt'), 'rpc');
 });
 
-test('refresh queued during a request does not deadlock its commit or reuse a stale runtime', {timeout: 3000}, async () => {
+test('refresh queued during a request does not deadlock its commit or reuse a stale runtime', {timeout: 3000}, async t => {
+	installLocks(t);
 	const started = deferred();
 	const resume = deferred();
 	let calls = 0;
@@ -126,7 +128,8 @@ test('refresh queued during a request does not deadlock its commit or reuse a st
 	assert.equal(runtimes[1].files.get('/www/committed.txt'), 'first');
 });
 
-test('CGI and filesystem operations serialize without the Web Locks API', {timeout: 3000}, async () => {
+test('CGI and filesystem operations serialize without the Web Locks API', {timeout: 3000}, async t => {
+	installLocks(t);
 	Object.defineProperty(globalThis, 'navigator', {configurable: true, value: {}});
 	const started = deferred();
 	const resume = deferred();
@@ -139,7 +142,7 @@ test('CGI and filesystem operations serialize without the Web Locks API', {timeo
 	const response = cgi.request(new Request('http://localhost/cgi/index.php'));
 	await started.promise;
 	const writing = cgi.writeFile('/www/from-rpc.txt', 'rpc');
-	await new Promise(resolve => setImmediate(resolve));
+	await new Promise(resolve => setTimeout(resolve, 0));
 	resume.resolve();
 	const [result] = await Promise.all([response, writing]);
 	assert.equal(await result.text(), 'kept');
@@ -149,6 +152,7 @@ test('CGI and filesystem operations serialize without the Web Locks API', {timeo
 });
 
 test('a failed request commit reports one error and releases the lock for later work', {timeout: 3000}, async t => {
+	installLocks(t);
 	const originalError = console.error;
 	console.error = () => undefined;
 	t.after(() => console.error = originalError);

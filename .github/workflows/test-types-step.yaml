@@ -26,6 +26,11 @@ jobs:
           test/web-locks.test.mjs test/filesystem.test.mjs test/build/cloudflare-build.test.mjs
           test/phar-packaging.test.mjs
           test/build/builder-package.test.mjs
+      - name: Verify CGI regressions on pinned Deno before native builds
+        run: >-
+          npm exec --yes --package=deno@2.5.6 -- deno test
+          test/php-cgi-concurrency.test.mjs test/php-cgi-cookies.test.mjs
+          --allow-read --allow-env
       - name: Install locked demo dependencies
         working-directory: demo-web
         run: npm ci
