@@ -1,7 +1,7 @@
 .editor-entry {
 	user-select: none;
 	cursor: pointer;
-	margin-left: 0;
+	margin-left: 0.5rem;
 }
 
 .editor-entry .editor-entry {
