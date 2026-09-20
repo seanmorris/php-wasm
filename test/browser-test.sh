@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+bash test/browser/prepare-webperl.sh
 PORT=9000
 export CI="${CI:-}"
 BROWSER_TEST_PORT="${PORT}" node test/browser/server.mjs &
@@ -12,7 +13,7 @@ until curl -fsS "http://127.0.0.1:${PORT}/php-wasm/" >/dev/null; do
 	sleep 0.1
 done
 
-PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/browser.spec.mjs)
+PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/browser.spec.mjs test/browser/runtime-regressions.spec.mjs)
 
 if [[ -n "${UPDATE_SNAPSHOTS:-}" || -n "${CV_UPDATE_SNAPSHOTS:-}" ]]; then
 	PLAYWRIGHT_ARGS+=(--update-snapshots)

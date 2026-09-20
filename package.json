@@ -6,7 +6,8 @@
   "author": "Sean Morris<php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
   "bin": {
-    "php-wasm-builder": "./bin/php-wasm-builder.js"
+    "php-wasm-builder": "./bin/php-wasm-builder.js",
+    "php-wasm-build": "./bin/php-wasm-builder.js"
   },
   "scripts": {
     "build": "make",
@@ -32,6 +33,7 @@
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-transform-logical-assignment-operators": "^7.25.8",
     "@babel/preset-env": "^7.0.0",
     "ansi-to-html": "^0.7.2",
     "pdo-cfd1": "./packages/pdo-cfd1",
@@ -104,7 +106,6 @@
     "vrzno"
   ],
   "devDependencies": {
-    "@babel/plugin-transform-logical-assignment-operators": "^7.25.8",
     "@types/node": "^24.8.0",
     "@playwright/test": "^1.55.0",
     "eslint": "^10.2.1",

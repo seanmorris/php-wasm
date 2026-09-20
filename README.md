@@ -321,6 +321,12 @@ php.inputString('This is a string of data provided on STDIN.');
 const exitCode = await php.run('<?php echo "Hello, world!";');
 ```
 
+`run()` accepts complete PHP source, including an initial
+`<?php declare(strict_types=1);`, namespaces, and mixed PHP/HTML. A leading
+PHP opening tag does not introduce output before the declaration, and line
+numbers are preserved. Leading HTML, whitespace outside PHP, or a UTF-8 BOM
+still count as output and cannot precede `strict_types`.
+
 ### Dynamic Extensions in Static Pages
 
 Dynamic extensions can be loaded in static webpages like so:
@@ -806,11 +812,27 @@ self.addEventListener('message',  event => php.handleMessageEvent(event));
 
 To use the in-place builder, first install `php-wasm-builder` globally:
 
-***Requires docker, docker-compose, coreutils, wget, & make.***
+***Requires Docker with the `docker compose` plugin, Node.js/npm, coreutils, wget, and Make.***
 
 ```sh
 $ npm install -g php-wasm-builder
 ```
+
+`php-wasm-build` is an alias for `php-wasm-builder`; both commands use the same
+Make targets. The builder package includes build sources, package templates,
+and Docker image helpers. Runtime binaries are produced in your project.
+
+Maintainers can prepare a source-only release without publishing it:
+
+```sh
+make package-builder
+npm install -g ./.cache/release/php-wasm-builder-0.1.0.tgz
+```
+
+The tarball and its SHA-256 inventory are written to `.cache/release/` (override
+with `BUILDER_PACKAGE_OUTPUT`). Native outputs, caches, local environment files,
+and credentials are excluded. `./publish-packages.sh next --dry-run` includes
+this staged builder in the release inventory and skips unchanged packages.
 
 Create the build environment (can be run from anywhere):
 

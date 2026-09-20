@@ -14,6 +14,17 @@ const instantiateRuntimeModule = (Runtime, args) => /^class\s/.test(Function.pro
 export class PhpCgiWebBase extends PhpCgiBase
 {
 	/**
+	 * Serializes the entire request with browser filesystem RPCs and refreshes.
+	 * @protected
+	 * @param {(php: object) => Promise<Response|string|undefined>} callback Request work using the captured runtime.
+	 * @returns {Promise<Response|string|undefined>} Response after filesystem persistence completes.
+	 */
+	_withRequestLock(callback)
+	{
+		return super._withRequestLock(callback, 'php-wasm-fs-lock');
+	}
+
+	/**
 	 * Starts a persisted browser transaction for CGI requests.
 	 * @returns {Promise<void>} Resolves when the transaction lock has been acquired.
 	 */
@@ -34,20 +45,19 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	/**
 	 * Hydrates the persisted CGI filesystem before handling a request.
+	 * The request coordinator already owns the filesystem lock.
+	 * @param {object} php Runtime captured by the request coordinator.
 	 * @returns {Promise<void>} Resolves after the persisted filesystem has been loaded.
 	 */
-	async _beforeRequest()
+	async _beforeRequest(php)
 	{
 		if(!this.initialized)
 		{
-			const php = await this.binary;
 			this.loadInit(php);
-			await navigator.locks.request('php-wasm-fs-lock', () => {
-				return new Promise((accept,reject) => php.FS.syncfs(true, err => {
-					if(err) reject(err);
-					else accept();
-				}));
-			});
+			await new Promise((accept,reject) => php.FS.syncfs(true, err => {
+				if(err) reject(err);
+				else accept();
+			}));
 		}
 
 		this.initialized = true;
@@ -55,9 +65,11 @@ export class PhpCgiWebBase extends PhpCgiBase
 
 	/**
 	 * Flushes pending CGI filesystem changes after a request.
+	 * The request coordinator already owns the filesystem lock.
+	 * @param {object} php Runtime captured by the request coordinator.
 	 * @returns {Promise<void>} Resolves after pending filesystem changes have been flushed.
 	 */
-	async _afterRequest()
+	async _afterRequest(php)
 	{
 
 		if(this.phpArgs.staticFS)
@@ -65,14 +77,10 @@ export class PhpCgiWebBase extends PhpCgiBase
 			return;
 		}
 
-		const php = await this.binary;
-
-		await navigator.locks.request('php-wasm-fs-lock', () => {
-			return new Promise((accept,reject) => php.FS.syncfs(false, err => {
-				if(err) reject(err);
-				else accept();
-			}));
-		});
+		await new Promise((accept,reject) => php.FS.syncfs(false, err => {
+			if(err) reject(err);
+			else accept();
+		}));
 	}
 
 	/**
@@ -113,7 +121,7 @@ export class PhpCgiWebBase extends PhpCgiBase
 			, locateFile
 		};
 
-		this.binary = navigator.locks.request('php-wasm-fs-lock', async () => {
+		this.binary = requestWebLock('php-wasm-fs-lock', async () => {
 
 			const {default: PHP} = await this.binLoader;
 

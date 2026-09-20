@@ -169,6 +169,14 @@ esac
 	writeExecutable(path.join(binDir, 'sleep'), `#!/usr/bin/env bash
 exit 0
 `);
+	writeExecutable(path.join(binDir, 'make'), `#!/usr/bin/env bash
+set -euo pipefail
+[[ "$1" == "package-builder" ]]
+OUTPUT="\${2#BUILDER_PACKAGE_OUTPUT=}"
+mkdir -p "$OUTPUT"
+printf '%s\\n' '{"filename":"php-wasm-builder-0.1.0.tgz"}' > "$OUTPUT/builder.manifest.json"
+touch "$OUTPUT/php-wasm-builder-0.1.0.tgz"
+`);
 
 	return {
 		binDir,
@@ -270,6 +278,8 @@ test('publish-packages.sh accepts flags before the npm tag and prints packed fil
 	assert.match(result.stdout, /- package\.json/);
 	assert.match(result.stdout, /- dist\/index\.js/);
 	assert.match(result.log, /diff --tag next --diff-name-only/);
+	assert.match(result.log, /--diff php-wasm-builder@next --diff .*php-wasm-builder-0\.1\.0\.tgz/);
+	assert.match(result.log, /publish .*php-wasm-builder-0\.1\.0\.tgz --tag next --registry https:\/\/registry\.example --dry-run/);
 	assert.match(
 		result.log,
 		/publish --tag next --registry https:\/\/registry\.example --dry-run/

@@ -270,8 +270,7 @@ NOTPARALLEL=
 all:
 	$(MAKE) _all
 
-TOP_LEVEL=$(addprefix ${CURDIR}/node_modules/,php-wasm php-cloud-wasm php-cgi-wasm php-cli-wasm php-dbg-wasm)
-EXTENSION_PACKAGE_DIRS ?= $(filter-out ${TOP_LEVEL},$(shell npm ls -p))
+EXTENSION_PACKAGE_DIRS ?= $(shell node bin/list-extension-packages.mjs)
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-cli-wasm/pre.mak
@@ -1110,6 +1109,11 @@ save-image:
 
 NPM_PUBLISH_TAG?=latest
 NPM_PUBLISH_DRY?=--dry-run
+
+BUILDER_PACKAGE_OUTPUT?=${CURDIR}/.cache/release
+.PHONY: package-builder
+package-builder:
+	node bin/package-builder.mjs $(call shell_quote,${BUILDER_PACKAGE_OUTPUT})
 
 publish:
 	./publish-packages.sh ${NPM_PUBLISH_TAG} ${NPM_PUBLISH_DRY}

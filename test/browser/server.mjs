@@ -23,6 +23,10 @@ const mimeTypes = {
 
 const mounts = [
 	{
+		prefix: `${basePath}/webperl/`
+		, root: path.resolve(repoRoot, '.cache/browser-webperl/webperl_prebuilt_v0.09-beta')
+	}
+	, {
 		prefix: `${basePath}/fixtures/`
 		, root: path.resolve(repoRoot, 'test/browser/fixtures')
 	}

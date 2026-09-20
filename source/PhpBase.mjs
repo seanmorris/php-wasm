@@ -372,12 +372,18 @@ export class PhpBase extends EventTarget
 	 */
 	_run(phpCode)
 	{
+		const source = `${phpCode}`;
+		// Starting eval in PHP mode avoids an artificial inline-HTML statement
+		// before strict_types or a namespace. Keep source line and column offsets.
+		const code = /^<\?php(?=[ \t\r\n]|$)/i.test(source)
+			? `     ${source.slice(5)}`
+			: `?>${source}`;
 		return this.binary.then(php => {
 			return php.ccall(
 				'pib_run'
 				, NUM
 				, [STR]
-				, [`?>${phpCode}`]
+				, [code]
 				, {async: true}
 			);
 		})

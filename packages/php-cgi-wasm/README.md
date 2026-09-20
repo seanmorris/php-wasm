@@ -58,6 +58,25 @@ A typed listing resolves every entry's type inside that single transaction.
 Writes still resolve only after persistence finishes. With `autoTransaction: false`,
 the caller retains ownership of transaction boundaries.
 
+Browser CGI requests, filesystem RPCs, and runtime refreshes share one lock.
+PHP keeps that lock while suspended on asynchronous work and until its writes
+are persisted. Await writes before opening a URL that uses them. Persistence
+failures return a non-cacheable HTTP 500; `onRequest` receives the final response
+after the commit attempt, and later queued work can still run. Without Web Locks,
+serialization is limited to the current JavaScript realm.
+
+## Persisted cookies
+
+The internal `/config/.cookies` snapshot stores absolute expiry deadlines, so
+restarting or refreshing a worker does not renew `Max-Age` cookies. Cookie
+deletion and replacement are persisted with the next successful request.
+
+Legacy snapshots retain session cookies and unexpired `Expires` cookies.
+Legacy `Max-Age` cookies are discarded because their original expiry cannot be
+recovered; users with those cookies may need to sign in again. Fresh cookie
+headers supplied through the constructor still start their lifetime when received.
+Treat the snapshot format as internal rather than editing its JSON directly.
+
 ## Phar applications
 
 For a dynamic build, enable Phar and, for gzip support, zlib:

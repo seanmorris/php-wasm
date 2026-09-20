@@ -13,6 +13,15 @@ const createNotFoundResponse = request => new Response(
 let loader = null;
 const prefix = '/php-wasm/cgi-bin/';
 const testPath = `${prefix}test`;
+let resumeConcurrencyTest;
+
+// A test-controlled suspension makes filesystem overlap reproducible without sleeps.
+globalThis.cgiConcurrencyPause = () => new Promise(resolve => {
+	resumeConcurrencyTest = resolve;
+	self.clients.matchAll().then(clients => clients.forEach(client => {
+		client.postMessage({phase: 'cgi-concurrency-paused'});
+	}));
+});
 
 const init = () => {
 	if(loader)
@@ -22,6 +31,13 @@ const init = () => {
 
 	loader = Promise.resolve(new PhpCgiWorker({
 		docroot: '/persist/www'
+		, actions: {
+			resumeConcurrencyTest: () => {
+				resumeConcurrencyTest?.();
+				resumeConcurrencyTest = null;
+				return true;
+			}
+		}
 		, exclude: [`${prefix}~!@`, `${prefix}.`]
 		, files: [
 			{

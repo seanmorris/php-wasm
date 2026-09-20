@@ -187,7 +187,7 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 /**
  * Run some PHP code and return the exit code.
  * 0 = good, >0 = bad.
- * Code MUST start with a PHP tag.
+ * Code starts in PHP mode; the JS wrapper prepares tagged source for eval.
  * Async.
 */
 int EMSCRIPTEN_KEEPALIVE pib_run(char *code)

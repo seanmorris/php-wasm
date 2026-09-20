@@ -24,7 +24,8 @@ test('PhpBase serializes concurrent run/exec calls and awaits async run before f
 		events.push(`${name}:start`);
 		if(name === 'pib_run')
 		{
-			assert.deepEqual(values, ['?><?php first();']);
+			assert.equal(values.length, 1);
+			assert.match(values[0], /first\(\);$/);
 			started.resolve();
 			await release.promise;
 		}
