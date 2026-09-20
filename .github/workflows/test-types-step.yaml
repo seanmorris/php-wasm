@@ -32,7 +32,7 @@ jobs:
       - name: Verify CGI regressions on pinned Deno before native builds
         run: >-
           npm exec --yes --package=deno@2.5.6 -- deno test
-          test/php-cgi-concurrency.test.mjs test/php-cgi-cookies.test.mjs
+          test/php-cgi-concurrency.test.mjs test/php-cgi-cookies.test.mjs test/php-cgi-queue.test.mjs
           test/msg-bus.test.mjs test/php-tags.test.mjs
           --allow-read --allow-env
       - name: Install locked demo dependencies

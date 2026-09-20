@@ -14,6 +14,50 @@ const create = () => Object.assign(Object.create(PhpCgiWebBase.prototype), {
 	, startTransaction: async () => {}, commitTransaction: async () => {}
 });
 
+/**
+ * Controls one-shot timers and elapsed time without Node-only timer mocks.
+ * @param {(clock: {tick: (milliseconds: number) => void}) => Promise<void>} callback Test using the clock.
+ * @returns {Promise<void>} Resolves after the clock has been restored.
+ */
+const withClock = async callback => {
+	const original = {setTimeout, clearTimeout, now: Date.now};
+	const timers = new Map();
+	let now = 0;
+	let nextId = 0;
+
+	globalThis.setTimeout = (callback, delay = 0, ...args) => {
+		const id = ++nextId;
+		timers.set(id, {at: now + delay, callback: () => callback(...args)});
+		return id;
+	};
+	globalThis.clearTimeout = id => timers.delete(id);
+	Date.now = () => now;
+
+	const tick = milliseconds => {
+		const target = now + milliseconds;
+		while(timers.size)
+		{
+			const [id, timer] = [...timers].sort((a, b) => a[1].at - b[1].at)[0];
+			if(timer.at > target) break;
+			timers.delete(id);
+			now = timer.at;
+			timer.callback();
+		}
+		now = target;
+	};
+
+	try
+	{
+		await callback({tick});
+	}
+	finally
+	{
+		globalThis.setTimeout = original.setTimeout;
+		globalThis.clearTimeout = original.clearTimeout;
+		Date.now = original.now;
+	}
+};
+
 test('browser CGI batches acknowledgments after persistence and excludes work arriving during commit', async () => {
 	const cgi = create();
 	const committing = deferred();
@@ -39,14 +83,13 @@ test('browser CGI batches acknowledgments after persistence and excludes work ar
 	assert.equal(commits, 2);
 });
 
-test('browser CGI waits 25 ms after the queue becomes idle and accepts work during that wait', async t => {
-	t.mock.timers.enable({apis: ['setTimeout', 'Date']});
+test('browser CGI waits 25 ms after the queue becomes idle and accepts work during that wait', () => withClock(async timer => {
 	const cgi = create();
 	const events = [];
 	let commits = 0;
 	cgi.commitTransaction = async () => commits++;
 	const tick = async () => {
-		t.mock.timers.tick(5);
+		timer.tick(5);
 		await new Promise(resolve => setImmediate(resolve));
 	};
 	const first = cgi._enqueue(() => events.push('first'));
@@ -63,7 +106,7 @@ test('browser CGI waits 25 ms after the queue becomes idle and accepts work duri
 	await tick();
 	await Promise.all([first, second]);
 	assert.equal(commits, 1);
-});
+}));
 
 test('browser CGI recovers from initialization, callback and commit failures', async () => {
 	const cgi = create();
@@ -130,18 +173,17 @@ test('browser CGI bounds batches so a continuous queue cannot defer every acknow
 	assert.deepEqual(commits, [64, 70]);
 });
 
-test('browser CGI commits after its processing window even below the operation limit', async t => {
-	t.mock.timers.enable({apis: ['setTimeout', 'Date']});
+test('browser CGI commits after its processing window even below the operation limit', () => withClock(async timer => {
 	const cgi = create();
 	let executed = 0;
 	const commits = [];
 	cgi.commitTransaction = async () => commits.push(executed);
 	await Promise.all(Array.from({length: 3}, () => cgi._enqueue(() => {
-		t.mock.timers.tick(250);
+		timer.tick(250);
 		return ++executed;
 	})));
 	assert.deepEqual(commits, [1, 2, 3]);
-});
+}));
 
 test('browser CGI separates operations queued with different automatic transaction modes', async () => {
 	const cgi = create();
