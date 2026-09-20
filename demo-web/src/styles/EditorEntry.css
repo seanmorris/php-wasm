@@ -1,6 +1,10 @@
 .editor-entry {
 	user-select: none;
 	cursor: pointer;
+	margin-left: 0;
+}
+
+.editor-entry .editor-entry {
 	margin-left: 1rem;
 }
 
