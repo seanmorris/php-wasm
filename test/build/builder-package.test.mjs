@@ -15,6 +15,7 @@ test('the actual builder tarball installs independently and scaffolds a build', 
 	const packed = await packageBuilder({outputDir: path.join(temporary, 'release')});
 	assert.ok(packed.files.includes('packages/php-cgi-wasm/static.mak'));
 	assert.ok(packed.files.includes('packages/vrzno/pre.mak'));
+	assert.ok(packed.files.includes('packages/sdl/php8-string-return.patch'));
 	assert.ok(packed.files.includes('bin/source-importer.mjs'));
 	assert.ok(packed.files.includes('.github/bin/verify-emscripten-async-errors.sh'));
 	assert.equal(packed.files.some(name => /\.(wasm|so|data|dat|gz|br|log)$/.test(name)), false);

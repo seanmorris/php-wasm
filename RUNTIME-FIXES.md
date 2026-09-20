@@ -46,6 +46,11 @@ preparing the artifacts does not publish packages, push images, or deploy sites.
   truncated JavaScript class names. The current native build already uses the
   stable `Vrzno` debug name and passes repeated comparisons. A browser regression
   preserves that behavior; JavaScript constructor names are not restored.
+- **SDL startup output:** the SDL build patches 18 missing `__toString(): string`
+  declarations in the pinned extension. PHP 8 startup warnings no longer precede
+  application output or corrupt JSON responses. Browser coverage checks all 22
+  string-conversion declarations and a real conversion with warnings enabled.
+  This requires a rebuilt matching JavaScript/Wasm pair.
 
 GitHub issue records remain unchanged. The regression suites cover source
 queues and cookies, Node ESM/CommonJS source evaluation, real browser requests

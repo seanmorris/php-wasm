@@ -118,7 +118,7 @@ test('Cloudflare snapshot hashes only selected sources and never follows symlink
 	await fs.mkdir(fixture);
 	for(const name of buildRootFiles) await fs.writeFile(path.join(fixture, name), 'fixture source\n');
 	await fs.copyFile(path.join(repoRoot, 'package.json'), path.join(fixture, 'package.json'));
-	for(const name of ['source', 'patch', 'profiles', 'bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
+	for(const name of ['source', 'patch', 'profiles', 'bin', '.github/bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
 	await fs.writeFile(path.join(fixture, 'source/probe.c'), 'int main(void) { return 0; }\n');
 	await fs.writeFile(path.join(fixture, 'source/.env'), 'FIXTURE_SECRET=never-copy\n');
 	await fs.writeFile(path.join(fixture, 'source/private.key'), 'fixture key, not a real credential\n');
@@ -147,6 +147,9 @@ test('build workspaces reuse native state, update wrappers, and separate changed
 	const cache = path.join(root, 'cache');
 	const prepare = (version = '8.3', settings = '') => prepareBuildWorkspace(cache, 'profiles/cloudflare.mak', version, settings, buildPackages, fixture);
 	const first = await prepare();
+	const downloadHelper = '.github/bin/retry-download.sh';
+	assert.equal(await fs.readFile(path.join(first, downloadHelper), 'utf8'), await fs.readFile(path.join(repoRoot, downloadHelper), 'utf8'));
+	assert.ok((await fs.stat(path.join(first, downloadHelper))).mode & 0o111);
 	const object = path.join(first, '.cache/native.o');
 	await fs.writeFile(object, 'compiled fixture');
 	const before = (await fs.stat(object)).mtimeMs;
@@ -622,14 +625,14 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	const source = path.join(root, 'builder-source');
 	await fs.mkdir(source);
 	for(const name of ['package.json', '.npmignore', ...buildRootFiles]) await fs.copyFile(path.join(repoRoot, name), path.join(source, name));
-	for(const name of ['bin', 'source', 'patch', 'profiles']) await fs.cp(path.join(repoRoot, name), path.join(source, name), {recursive: true});
+	for(const name of ['bin', 'source', 'patch', 'profiles', '.github/bin']) await fs.cp(path.join(repoRoot, name), path.join(source, name), {recursive: true});
 	await fs.mkdir(path.join(source, 'packages/not-shipped'), {recursive: true});
 	await fs.writeFile(path.join(source, 'packages/not-shipped/sentinel'), 'must not ship');
 	const packed = spawnSync('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', root, '--cache', path.join(root, 'npm-cache')], {cwd: source, encoding: 'utf8'});
 	assert.equal(packed.status, 0, packed.stderr);
 	const metadata = JSON.parse(packed.stdout)[0];
 	assert.ok(!metadata.files.some(file => file.path.startsWith('packages/')));
-	for(const name of ['build-workspace.mak', 'bin/prepare-build-workspace.mjs', 'bin/package-cloudflare.mjs', 'bin/source-importer.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak']) assert.ok(metadata.files.some(file => file.path === name), name);
+	for(const name of ['build-workspace.mak', 'bin/prepare-build-workspace.mjs', 'bin/package-cloudflare.mjs', 'bin/source-importer.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak', '.github/bin/retry-download.sh']) assert.ok(metadata.files.some(file => file.path === name), name);
 
 	const installed = path.join(root, 'project/node_modules/php-wasm-builder');
 	await fs.mkdir(installed, {recursive: true});

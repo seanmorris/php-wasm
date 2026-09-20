@@ -5,6 +5,37 @@ const version = process.env.PHP_VERSION ?? '8.4';
 const variant = process.env.PHP_VARIANT ?? '';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
 
+if(variant === '_sdl')
+{
+	test('SDL string conversion methods declare their return types without startup warnings', async ({page}) => {
+		await page.goto('harness/index.html');
+		const result = await page.evaluate(async ({version, variant, libType}) => {
+			const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
+			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+			const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+			let stdout = '', stderr = '';
+			php.addEventListener('output', event => stdout += event.detail.join(''));
+			php.addEventListener('error', event => stderr += event.detail.join(''));
+			const status = await php.run(`<?php
+			$methods = [];
+			foreach((new ReflectionExtension('sdl'))->getClasses() as $class) {
+				if($class->hasMethod('__toString')) {
+					$methods[$class->getName()] = (string) $class->getMethod('__toString')->getReturnType();
+				}
+			}
+			echo json_encode(['methods' => $methods, 'sample' => (string) new SDL_Color(1, 2, 3, 4)]);
+			`);
+			return {status, stdout, stderr};
+		}, {version, variant, libType});
+		expect(result.status).toBe(0);
+		expect(result.stderr).toBe('');
+		const {methods, sample} = JSON.parse(result.stdout);
+		expect(Object.keys(methods)).toHaveLength(22);
+		expect(new Set(Object.values(methods))).toEqual(new Set(['string']));
+		expect(sample).toBe('SDL_Color(1,2,3,4)');
+	});
+}
+
 test('async PHP tags initialize when their module executes before the HTML body exists', async ({page}) => {
 	const errors = [];
 	page.on('pageerror', error => errors.push(error.message));

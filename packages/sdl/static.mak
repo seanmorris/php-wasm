@@ -12,9 +12,10 @@ ifeq (${PHP_VERSION},8.5)
 	${DOCKER_RUN_IN_EXT_SDL} find . -type f -exec perl -pi -e 's/zend_exception_get_default\(\)/zend_ce_exception/g;' {} +
 endif
 
-third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSION}-sdl/config.m4 | third_party/php${PHP_VERSION}-src/patched
+third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSION}-sdl/config.m4 packages/sdl/php8-string-return.patch | third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mImporting ext-sdl\e[0m"
-	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-sdl third_party/php${PHP_VERSION}-src/ext/sdl
+	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-sdl/. third_party/php${PHP_VERSION}-src/ext/sdl/
+	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/sdl/php8-string-return.patch
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/sdl/.libs third_party/php${PHP_VERSION}-src/ext/sdl/autom4te.cache third_party/php${PHP_VERSION}-src/ext/sdl/modules third_party/php${PHP_VERSION}-src/ext/sdl/build
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl/src -type f \( -name '*.dep' -o -name '*.lo' \) -delete
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/sdl/src/.libs
@@ -29,6 +30,7 @@ lib/bin/sdl2-config: packages/sdl/sdl2-config.in lib/lib/libSDL2.a lib/lib/libGL
 lib/lib/libGL.a:
 	@ echo -e "\e[33;4mBuilding LIBGL\e[0m"
 	${DOCKER_RUN} retry-embuilder build libGL-mt-webgl2-ofb-full_es3-getprocaddr --lto --pic --verbose
+	${DOCKER_RUN} mkdir -p /src/lib/lib
 	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libGL-mt-webgl2-ofb-full_es3-getprocaddr.a /src/$@
 
 lib/lib/libSDL2.a:

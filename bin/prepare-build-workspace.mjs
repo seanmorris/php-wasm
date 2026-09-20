@@ -36,7 +36,7 @@ async function sourceFiles(sourceRoot, packageFolders)
 		}
 		else if(stat.isFile()) files.set(relative, {data: await fs.readFile(source), mode: stat.mode & 0o777});
 	}
-	for(const relative of [...rootFiles, 'source', 'patch', 'profiles', 'bin']) await collect(relative);
+	for(const relative of [...rootFiles, 'source', 'patch', 'profiles', 'bin', '.github/bin']) await collect(relative);
 	const defaults = packages.size ? [...packages.keys()] : [
 		...(metadata.workspaces ?? []).map(directory => path.basename(directory))
 		, ...Object.keys(metadata.dependencies).filter(name => name.endsWith('-wasm'))

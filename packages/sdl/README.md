@@ -32,6 +32,11 @@ await php.run(`<?php var_dump(function_exists('SDL_Init'));`);
 
 Enable `WITH_SDL` in `.php-wasm-rc`.
 
+The build applies a PHP 8 compatibility patch to SDL's string-conversion
+declarations. Its `__toString()` methods declare a `string` result, preventing
+startup warnings from appearing in PHP output. Update the matching JavaScript
+and Wasm runtime assets together to receive this native fix.
+
 ## Build Options
 
 - `WITH_SDL`: defaults to `0`.

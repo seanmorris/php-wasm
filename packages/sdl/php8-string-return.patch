@@ -1,0 +1,197 @@
+--- a/src/php_sdl.h
++++ b/src/php_sdl.h
+@@ -35,6 +35,10 @@
+ 
+ #include <php.h>
+ #include <zend_exceptions.h>
++
++/* PHP 8 requires a string return declaration for magic string conversion. */
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sdl_to_string, 0, 0, IS_STRING, 0)
++ZEND_END_ARG_INFO()
+ 
+ #define PHP_SDL_VERSION "2.7.0"
+ 
+--- a/src/event.c
++++ b/src/event.c
+@@ -206,7 +206,7 @@
+ 
+ static const zend_function_entry php_sdl_event_methods[] = {
+ 	PHP_ME(SDL_Event, __construct, arginfo_none, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_Event, __toString, arginfo_none, ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_Event, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static methods */
+ //	PHP_FALIAS(Empty,            SDL_RectEmpty,            arginfo_none)
+--- a/src/glcontext.c
++++ b/src/glcontext.c
+@@ -475,7 +475,7 @@
+ /* {{{ sdl_glcontext_methods[] */
+ static const zend_function_entry php_sdl_glcontext_methods[] = {
+ 	PHP_ME(SDL_GLContext,       __construct,                arginfo_SDL_GLContext__construct,     ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_GLContext,       __toString,                 arginfo_none,                         ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_GLContext,       __toString,                 arginfo_sdl_to_string,                         ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static method */
+ 	PHP_FALIAS(Delete,          SDL_GL_DeleteContext,       arginfo_none)
+--- a/src/messagebox.c
++++ b/src/messagebox.c
+@@ -551,7 +551,7 @@
+ /* {{{ php_sdl_messageboxcolor_methods[] */
+ static const zend_function_entry php_sdl_messageboxcolor_methods[] = {
+ 	PHP_ME(SDL_MessageBoxColor, __construct, arginfo_SDL_MessageBoxColor__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_MessageBoxColor, __toString,  arginfo_messagebox_none,                ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_MessageBoxColor, __toString,  arginfo_sdl_to_string,                ZEND_ACC_PUBLIC)
+ 
+ 	PHP_FE_END
+ };
+@@ -560,7 +560,7 @@
+ /* {{{ php_sdl_messageboxbuttondata_methods[] */
+ static const zend_function_entry php_sdl_messageboxbuttondata_methods[] = {
+ 	PHP_ME(SDL_MessageBoxButtonData, __construct, arginfo_SDL_MessageBoxButtonData__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_MessageBoxButtonData, __toString,  arginfo_messagebox_none,                     ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_MessageBoxButtonData, __toString,  arginfo_sdl_to_string,                     ZEND_ACC_PUBLIC)
+ 
+ 	PHP_FE_END
+ };
+@@ -569,7 +569,7 @@
+ /* {{{ php_sdl_messageboxdata_methods[] */
+ static const zend_function_entry php_sdl_messageboxdata_methods[] = {
+ 	PHP_ME(SDL_MessageBoxData, __construct, arginfo_SDL_MessageBoxData__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_MessageBoxData, __toString,  arginfo_messagebox_none,               ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_MessageBoxData, __toString,  arginfo_sdl_to_string,               ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static methods */
+ 	PHP_FALIAS(Show,         SDL_ShowMessageBox,          arginfo_SDL_MessageBoxData_Show)
+--- a/src/mouse.c
++++ b/src/mouse.c
+@@ -547,7 +547,7 @@
+ /* {{{ sdl_cursor_methods[] */
+ static const zend_function_entry php_sdl_cursor_methods[] = {
+ 	PHP_ME(SDL_Cursor, __construct, arginfo_SDL_Cursor__construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Cursor, __toString, arginfo_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Cursor, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static methods */
+ 	PHP_FALIAS(Free, SDL_FreeCursor, arginfo_none)
+--- a/src/mutex.c
++++ b/src/mutex.c
+@@ -896,7 +896,7 @@
+ /* {{{ sdl_mutex_methods[] */
+ static const zend_function_entry php_sdl_mutex_methods[] = {
+ 	PHP_ME(SDL_mutex,       __construct,                arginfo_none,          ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_mutex,       __toString,                 arginfo_none,          ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_mutex,       __toString,                 arginfo_sdl_to_string,          ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static method */
+ 	PHP_FALIAS(Lock,        SDL_LockMutex,              arginfo_none)
+@@ -912,7 +912,7 @@
+ /* {{{ sdl_sem_methods[] */
+ static const zend_function_entry php_sdl_sem_methods[] = {
+ 	PHP_ME(SDL_sem,        __construct,                arginfo_SDL_sem__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_sem,        __toString,                 arginfo_none,               ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_sem,        __toString,                 arginfo_sdl_to_string,               ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static method */
+ 	PHP_FALIAS(Wait,        SDL_SemWait,               arginfo_none)
+@@ -930,7 +930,7 @@
+ /* {{{ sdl_cond_methods[] */
+ static const zend_function_entry php_sdl_cond_methods[] = {
+ 	PHP_ME(SDL_cond,        __construct,               arginfo_none, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_cond,        __toString,                arginfo_none,               ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_cond,        __toString,                arginfo_sdl_to_string,               ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static method */
+ 	PHP_FALIAS(Wait,        SDL_CondWait,              arginfo_SDL_Cond_Wait)
+--- a/src/pixels.c
++++ b/src/pixels.c
+@@ -1636,7 +1636,7 @@
+ /* {{{ php_sdl_color_methods[] */
+ static const zend_function_entry php_sdl_color_methods[] = {
+ 	PHP_ME(SDL_Color, __construct, arginfo_SDL_Color__construct, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Color, __toString, arginfo_palette_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Color, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 
+ 			PHP_FE_END};
+ /* }}} */
+@@ -1644,7 +1644,7 @@
+ /* {{{ php_sdl_palette_methods[] */
+ static const zend_function_entry php_sdl_palette_methods[] = {
+ 	PHP_ME(SDL_Palette, __construct, arginfo_SDL_AllocPalette, ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Palette, __toString, arginfo_palette_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Palette, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 			PHP_ME(SDL_Palette, count, arginfo_palette_none, ZEND_ACC_PUBLIC)
+ 				PHP_ME(SDL_Palette, offsetExists, arginfo_SDL_Palette_offsetExists, ZEND_ACC_PUBLIC)
+ 					PHP_ME(SDL_Palette, offsetGet, arginfo_SDL_Palette_offsetGet, ZEND_ACC_PUBLIC)
+@@ -1661,7 +1661,7 @@
+ /* {{{ php_sdl_pixelformat_methods[] */
+ static const zend_function_entry php_sdl_pixelformat_methods[] = {
+ 	PHP_ME(SDL_PixelFormat, __construct, arginfo_SDL_AllocFormat, ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_PixelFormat, __toString, arginfo_palette_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_PixelFormat, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 			PHP_ME(SDL_PixelFormat, GetRGB, arginfo_SDL_PixelFormat_GetRGB, ZEND_ACC_PUBLIC)
+ 				PHP_ME(SDL_PixelFormat, GetRGBA, arginfo_SDL_PixelFormat_GetRGBA, ZEND_ACC_PUBLIC)
+ 
+@@ -1677,7 +1677,7 @@
+ /* {{{ php_sdl_pixels_methods[] */
+ static const zend_function_entry php_sdl_pixels_methods[] = {
+ 	PHP_ME(SDL_Pixels, __construct, arginfo_SDL_Pixels__construct, ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Pixels, __toString, arginfo_format_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Pixels, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 			PHP_ME(SDL_Pixels, count, arginfo_format_none, ZEND_ACC_PUBLIC)
+ 				PHP_ME(SDL_Pixels, offsetExists, arginfo_SDL_Pixels_offsetExists, ZEND_ACC_PUBLIC)
+ 					PHP_ME(SDL_Pixels, offsetGet, arginfo_SDL_Pixels_offsetGet, ZEND_ACC_PUBLIC)
+--- a/src/rwops.c
++++ b/src/rwops.c
+@@ -812,7 +812,7 @@
+ /* {{{ sdl_rwops_methods[] */
+ static const zend_function_entry php_sdl_rwops_methods[] = {
+ 	PHP_ME(SDL_RWops,        __construct,       arginfo_rwops_none,    ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_RWops,        __toString,        arginfo_rwops_none,    ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_RWops,        __toString,        arginfo_sdl_to_string,    ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static methods */
+ 	PHP_FALIAS(Free,         SDL_FreeRW,        arginfo_rwops_none)
+--- a/src/shape.c
++++ b/src/shape.c
+@@ -179,7 +179,7 @@
+ /* {{{ php_sdl_windowshapemode_methods[] */
+ static const zend_function_entry php_sdl_windowshapemode_methods[] = {
+ 	PHP_ME(SDL_WindowShapeMode,  __construct,  arginfo_SDL_WindowShapeMode__construct,    ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_WindowShapeMode,  __toString,   arginfo_none,                              ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_WindowShapeMode,  __toString,   arginfo_sdl_to_string,                              ZEND_ACC_PUBLIC)
+ 
+ 	PHP_FE_END
+ };
+--- a/src/surface.c
++++ b/src/surface.c
+@@ -1265,7 +1265,7 @@
+ 
+ static const zend_function_entry php_sdl_surface_methods[] = {
+ 	PHP_ME(SDL_Surface, __construct, arginfo_SDL_CreateRGBSurface, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Surface, __toString, arginfo_surface_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Surface, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static methods */
+ 	PHP_FALIAS(Free, SDL_FreeSurface, arginfo_surface_none)
+--- a/src/video.c
++++ b/src/video.c
+@@ -525,7 +525,7 @@
+ /* {{{ php_sdl_displaymode_methods[] */
+ static const zend_function_entry php_sdl_displaymode_methods[] = {
+ 	PHP_ME(SDL_DisplayMode, __construct, arginfo_SDL_DisplayMode__construct, ZEND_ACC_PUBLIC)
+-	PHP_ME(SDL_DisplayMode, __toString,  arginfo_video_none,                 ZEND_ACC_PUBLIC)
++	PHP_ME(SDL_DisplayMode, __toString,  arginfo_sdl_to_string,                 ZEND_ACC_PUBLIC)
+ 
+ 	PHP_FE_END
+ };
+--- a/src/window.c
++++ b/src/window.c
+@@ -1426,7 +1426,7 @@
+ 
+ static const zend_function_entry php_sdl_window_methods[] = {
+ 	PHP_ME(SDL_Window, __construct, arginfo_SDL_CreateWindow, ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
+-		PHP_ME(SDL_Window, __toString, arginfo_window_none, ZEND_ACC_PUBLIC)
++		PHP_ME(SDL_Window, __toString, arginfo_sdl_to_string, ZEND_ACC_PUBLIC)
+ 
+ 	/* non-static functions */
+ 	PHP_FALIAS(UpdateSurface, SDL_UpdateWindowSurface, arginfo_window_none)
