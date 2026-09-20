@@ -1,0 +1,592 @@
+--- a/config.m4
++++ b/config.m4
+@@ -1,44 +1,12 @@
+-dnl config.m4 for extension sdl_mixer
+-
+-PHP_ARG_ENABLE([sdl_mixer],
+-    [whether to enable sdl_mixer support],
+-    [AS_HELP_STRING([--enable-sdl_mixer],
+-        [Enable sdl_mixer support])],
+-    [no])
+-
++dnl php-wasm: use the native prerequisites built by packages/sdl/extensions.mak.
++PHP_ARG_ENABLE([sdl_mixer], [for sdl_mixer support],
++  [AS_HELP_STRING([--enable-sdl_mixer=DIR], [Enable sdl_mixer using libraries in DIR])], [no])
+ if test "$PHP_SDL_MIXER" != "no"; then
+-    AC_DEFINE(WITH_SDL_MIXER, 1, [Whether you want SDL Mixer])
+-    AC_MSG_CHECKING([for SDL_mixer.h])
+-    for i in $PHP_SDL_MIXER /usr/local /usr; do
+-      if test -r $i/include/SDL2/SDL_mixer.h; then
+-        SDL_MIXER_DIR=$i
+-        AC_DEFINE(HAVE_SDL_MIXER_H, 1, [Whether you have SDL2/SDL_mixer.h])
+-        PHP_ADD_INCLUDE($i/include/SDL2)
+-      fi
+-    done
+-
+-    if test -z "$SDL_MIXER_DIR"; then
+-      AC_MSG_RESULT([not found])
+-      AC_MSG_ERROR([Please reinstall the SDL_mixer distribution including development files])
+-    else
+-      AC_MSG_RESULT([found])
+-    fi
+-
+-    AC_CHECK_LIB(SDL2_mixer, Mix_PlayMusic, [
+-      PHP_ADD_LIBRARY(SDL2_mixer,, SDL_MIXER_SHARED_LIBADD)
+-    ], [
+-      AC_MSG_ERROR([libSDL2_mixer not found!])
+-    ])
+-
+-    AC_CHECK_LIB(SDL2_mixer, Mix_HasMusicDecoder, [
+-      AC_DEFINE(HAVE_MIX_HASMUSICDECODER, 1, [ Have sdl_mixer support ])
+-    ])
+-
+-  AC_DEFINE(HAVE_SDL_MIXER, 1, [ Have sdl_mixer support ])
+-
+-  PHP_ADD_BUILD_DIR(PHP_EXT_BUILDDIR(sdl_mixer)[/src])
++  PHP_ADD_INCLUDE($PHP_SDL_MIXER/include)
++  PHP_ADD_INCLUDE($PHP_SDL_MIXER/include/SDL2)
++  PHP_ADD_LIBRARY_WITH_PATH(SDL2_mixer, $PHP_SDL_MIXER/lib, SDL_MIXER_SHARED_LIBADD)
++  AC_DEFINE(HAVE_MIX_HASMUSICDECODER, 1, [SDL_mixer 2.8 provides decoder queries])
+   PHP_SUBST(SDL_MIXER_SHARED_LIBADD)
+-
+   PHP_NEW_EXTENSION(sdl_mixer, src/effect_position.c src/effect_stereoreverse.c src/Mix_Music.c src/Mix_Chunk.c src/music.c src/mixer.c src/php_sdl_mixer.c, $ext_shared)
+   PHP_ADD_EXTENSION_DEP(sdl_mixer, sdl)
+ fi
+--- a/src/Mix_Chunk.c
++++ b/src/Mix_Chunk.c
+@@ -2,6 +2,7 @@
+ #include "Mix_Chunk_arginfo.h"
+ 
+ zend_class_entry *mix_chunk_ce = NULL;
++static HashTable live_chunks;
+ zend_object_handlers php_mix_chunk_object_handlers;
+ 
+ php_mix_chunk_object *php_mix_chunk_object_from_zend_object(zend_object *zobj)
+@@ -16,14 +17,21 @@
+ 
+ Mix_Chunk* php_mix_chunk_from_zval_p(zval* zp)
+ {
+-	return php_mix_chunk_object_from_zend_object(Z_OBJ_P(zp))->mix_chunk;
++	Mix_Chunk *value = php_mix_chunk_object_from_zend_object(Z_OBJ_P(zp))->mix_chunk;
++	if (!value) { zend_throw_error(NULL, "Mix_Chunk has been freed"); }
++	return value;
+ }
+ 
+-inline void mix_chunk_to_zval(Mix_Chunk *mix_chunk, zval *zp)
++void mix_chunk_to_zval(Mix_Chunk *mix_chunk, zval *zp)
+ {
++	if (!mix_chunk) { ZVAL_NULL(zp); return; }
++	zval *existing = zend_hash_index_find(&live_chunks, (zend_ulong)(uintptr_t)mix_chunk);
++	if (existing) { ZVAL_COPY(zp, existing); return; }
+ 	object_init_ex(zp, mix_chunk_ce);
+ 	php_mix_chunk_object *php_mix_chunk = php_mix_chunk_object_from_zend_object(Z_OBJ_P(zp));
+ 	php_mix_chunk->mix_chunk = mix_chunk;
++	Z_TRY_ADDREF_P(zp);
++	zend_hash_index_add_new(&live_chunks, (zend_ulong)(uintptr_t)mix_chunk, zp);
+ }
+ 
+ zend_object *php_mix_chunk_object_create(zend_class_entry *ce)
+@@ -44,7 +52,7 @@
+ 	php_mix_chunk_object *obj = php_mix_chunk_object_from_zend_object(zobj);
+ 
+ 	if (obj->mix_chunk) {
+-		// @todo implement free es. TTF_CloseFont(obj->mix_chunk);
++		Mix_FreeChunk(obj->mix_chunk);
+ 		obj->mix_chunk = NULL;
+ 	}
+ 
+@@ -68,3 +76,28 @@
+ 	php_mix_chunk_object_handlers.get_constructor = php_mix_chunk_object_get_constructor;
+ 	php_mix_chunk_object_handlers.offset = XtOffsetOf(php_mix_chunk_object, std);
+ }
++
++void php_mix_chunk_release(zval *value)
++{
++	php_mix_chunk_object *object = php_mix_chunk_object_from_zend_object(Z_OBJ_P(value));
++	Mix_Chunk *native = object->mix_chunk;
++	if (!native) { return; }
++	object->mix_chunk = NULL;
++	Mix_FreeChunk(native);
++	zend_hash_index_del(&live_chunks, (zend_ulong)(uintptr_t)native);
++}
++
++void php_mix_chunk_request_init(void)
++{
++	zend_hash_init(&live_chunks, 8, NULL, ZVAL_PTR_DTOR, 0);
++}
++
++void php_mix_chunk_request_shutdown(void)
++{
++	zval *value;
++	ZEND_HASH_FOREACH_VAL(&live_chunks, value) {
++		php_mix_chunk_object *object = php_mix_chunk_object_from_zend_object(Z_OBJ_P(value));
++		if (object->mix_chunk) { Mix_FreeChunk(object->mix_chunk); object->mix_chunk = NULL; }
++	} ZEND_HASH_FOREACH_END();
++	zend_hash_destroy(&live_chunks);
++}
+--- a/src/Mix_Chunk.h
++++ b/src/Mix_Chunk.h
+@@ -20,4 +20,8 @@
+ 
+ void php_mix_chunk_minit_helper(void);
+ 
+-#endif
+\ No newline at end of file
++void php_mix_chunk_release(zval *value);
++void php_mix_chunk_request_init(void);
++void php_mix_chunk_request_shutdown(void);
++
++#endif
+--- a/src/mixer.c
++++ b/src/mixer.c
+@@ -8,6 +8,7 @@
+ extern zend_class_entry *get_php_sdl_rwops_ce(void);
+ extern SDL_RWops *zval_to_sdl_rwops(zval *z_val);
+ #define php_sdl_rwops_from_zval_p zval_to_sdl_rwops
++#include "../php_sdl_mixer_rw.h"
+ 
+ PHP_FUNCTION(Mix_Init)
+ {
+@@ -90,11 +91,11 @@
+ PHP_FUNCTION(Mix_QuerySpec)
+ {
+ 	zval *z_frequency = NULL;
+-	int frequency;
++	int frequency = 0;
+ 	zval *z_format = NULL;
+-	Uint16 format;
++	Uint16 format = 0;
+ 	zval *z_channels = NULL;
+-	int channels;
++	int channels = 0;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(3, 3);
+ 		Z_PARAM_ZVAL(z_frequency)
+@@ -121,8 +122,10 @@
+ 		Z_PARAM_LONG(freesrc)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	src = php_sdl_rwops_from_zval_p(SRC);
+-
+-	Mix_Chunk * result = Mix_LoadWAV_RW(src, freesrc);
++	if (!src) { zend_throw_error(NULL, "SDL_RWops has been closed"); RETURN_THROWS(); }
++
++	Mix_Chunk * result = Mix_LoadWAV_RW(src, 0);
++	if (freesrc) { php_sdl_mixer_close_rw(SRC); }
+ 
+ 	if (result == NULL) {
+ 		RETURN_NULL();
+@@ -152,13 +155,11 @@
+ PHP_FUNCTION(Mix_FreeChunk)
+ {
+ 	zval *CHUNK;
+-	Mix_Chunk *chunk;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(1, 1);
+ 		Z_PARAM_OBJECT_OF_CLASS(CHUNK, mix_chunk_ce)
+ 	ZEND_PARSE_PARAMETERS_END();
+-	chunk = php_mix_chunk_from_zval_p(CHUNK);
+-	Mix_FreeChunk(chunk);
++	php_mix_chunk_release(CHUNK);
+ }
+ 
+ PHP_FUNCTION(Mix_GetNumChunkDecoders)
+@@ -180,6 +181,7 @@
+ 
+ 	const char * result = Mix_GetChunkDecoder(index);
+ 
++	if (!result) { RETURN_NULL(); }
+ 	RETURN_STRING(result);
+ }
+ 
+@@ -308,6 +310,7 @@
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
+ 	chunk = php_mix_chunk_from_zval_p(CHUNK);
++	if (!chunk) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_PlayChannel(channel, chunk, loops);
+ 
+@@ -330,6 +333,7 @@
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
+ 	chunk = php_mix_chunk_from_zval_p(CHUNK);
++	if (!chunk) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_PlayChannelTimed(channel, chunk, loops, ticks);
+ 
+@@ -354,6 +358,7 @@
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
+ 	chunk = php_mix_chunk_from_zval_p(CHUNK);
++	if (!chunk) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_FadeInChannelTimed(channel, chunk, loops, ms, ticks);
+ 
+@@ -386,6 +391,7 @@
+ 		Z_PARAM_LONG(volume)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	chunk = php_mix_chunk_from_zval_p(CHUNK);
++	if (!chunk) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_VolumeChunk(chunk, volume);
+ 
+--- a/src/Mix_Music.c
++++ b/src/Mix_Music.c
+@@ -2,6 +2,7 @@
+ #include "Mix_Music_arginfo.h"
+ 
+ zend_class_entry *mix_music_ce = NULL;
++static HashTable live_musics;
+ zend_object_handlers php_mix_music_object_handlers;
+ 
+ php_mix_music_object *php_mix_music_object_from_zend_object(zend_object *zobj)
+@@ -16,14 +17,21 @@
+ 
+ Mix_Music* php_mix_music_from_zval_p(zval* zp)
+ {
+-	return php_mix_music_object_from_zend_object(Z_OBJ_P(zp))->mix_music;
++	Mix_Music *value = php_mix_music_object_from_zend_object(Z_OBJ_P(zp))->mix_music;
++	if (!value) { zend_throw_error(NULL, "Mix_Music has been freed"); }
++	return value;
+ }
+ 
+-inline void mix_music_to_zval(Mix_Music *mix_music, zval *zp)
++void mix_music_to_zval(Mix_Music *mix_music, zval *zp)
+ {
++	if (!mix_music) { ZVAL_NULL(zp); return; }
++	zval *existing = zend_hash_index_find(&live_musics, (zend_ulong)(uintptr_t)mix_music);
++	if (existing) { ZVAL_COPY(zp, existing); return; }
+ 	object_init_ex(zp, mix_music_ce);
+ 	php_mix_music_object *php_mix_music = php_mix_music_object_from_zend_object(Z_OBJ_P(zp));
+ 	php_mix_music->mix_music = mix_music;
++	Z_TRY_ADDREF_P(zp);
++	zend_hash_index_add_new(&live_musics, (zend_ulong)(uintptr_t)mix_music, zp);
+ }
+ 
+ zend_object *php_mix_music_object_create(zend_class_entry *ce)
+@@ -32,6 +40,7 @@
+ 	zend_object *zobj = php_mix_music_object_to_zend_object(obj);
+ 
+ 	obj->mix_music = NULL;
++	obj->rw_buffer = NULL;
+ 	zend_object_std_init(zobj, ce);
+ 	object_properties_init(zobj, ce);
+ 	zobj->handlers = &php_mix_music_object_handlers;
+@@ -44,10 +53,11 @@
+ 	php_mix_music_object *obj = php_mix_music_object_from_zend_object(zobj);
+ 
+ 	if (obj->mix_music) {
+-		// @todo implement free es. TTF_CloseFont(obj->mix_music);
++		Mix_FreeMusic(obj->mix_music);
+ 		obj->mix_music = NULL;
+ 	}
+ 
++	if (obj->rw_buffer) { efree(obj->rw_buffer); obj->rw_buffer = NULL; }
+ 	zend_object_std_dtor(zobj);
+ }
+ 
+@@ -68,3 +78,30 @@
+ 	php_mix_music_object_handlers.get_constructor = php_mix_music_object_get_constructor;
+ 	php_mix_music_object_handlers.offset = XtOffsetOf(php_mix_music_object, std);
+ }
++
++void php_mix_music_release(zval *value)
++{
++	php_mix_music_object *object = php_mix_music_object_from_zend_object(Z_OBJ_P(value));
++	Mix_Music *native = object->mix_music;
++	if (!native) { return; }
++	object->mix_music = NULL;
++	Mix_FreeMusic(native);
++	if (object->rw_buffer) { efree(object->rw_buffer); object->rw_buffer = NULL; }
++	zend_hash_index_del(&live_musics, (zend_ulong)(uintptr_t)native);
++}
++
++void php_mix_music_request_init(void)
++{
++	zend_hash_init(&live_musics, 8, NULL, ZVAL_PTR_DTOR, 0);
++}
++
++void php_mix_music_request_shutdown(void)
++{
++	zval *value;
++	ZEND_HASH_FOREACH_VAL(&live_musics, value) {
++		php_mix_music_object *object = php_mix_music_object_from_zend_object(Z_OBJ_P(value));
++		if (object->mix_music) { Mix_FreeMusic(object->mix_music); object->mix_music = NULL; }
++		if (object->rw_buffer) { efree(object->rw_buffer); object->rw_buffer = NULL; }
++	} ZEND_HASH_FOREACH_END();
++	zend_hash_destroy(&live_musics);
++}
+--- a/src/Mix_Music.h
++++ b/src/Mix_Music.h
+@@ -5,6 +5,7 @@
+ 
+ typedef struct _php_mix_music_object {
+ 	Mix_Music *mix_music;
++	void *rw_buffer;
+ 	zend_object std;
+ } php_mix_music_object;
+ 
+@@ -20,4 +21,8 @@
+ 
+ void php_mix_music_minit_helper(void);
+ 
+-#endif
+\ No newline at end of file
++void php_mix_music_release(zval *value);
++void php_mix_music_request_init(void);
++void php_mix_music_request_shutdown(void);
++
++#endif
+--- a/src/music.c
++++ b/src/music.c
+@@ -8,6 +8,7 @@
+ extern zend_class_entry *get_php_sdl_rwops_ce(void);
+ extern SDL_RWops *zval_to_sdl_rwops(zval *z_val);
+ #define php_sdl_rwops_from_zval_p zval_to_sdl_rwops
++#include "../php_sdl_mixer_rw.h"
+ 
+ PHP_FUNCTION(Mix_LoadMUS)
+ {
+@@ -39,26 +40,27 @@
+ 		Z_PARAM_LONG(freesrc)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	src = php_sdl_rwops_from_zval_p(SRC);
+-
+-	Mix_Music * result = Mix_LoadMUS_RW(src, freesrc);
+-
+-	if (result == NULL) {
+-		RETURN_NULL();
+-	}
+-
++	if (!src) { zend_throw_error(NULL, "SDL_RWops has been closed"); RETURN_THROWS(); }
++
++	void *buffer = NULL;
++	SDL_RWops *copy = php_sdl_mixer_snapshot_rw(src, &buffer);
++	if (freesrc) { php_sdl_mixer_close_rw(SRC); }
++	if (!copy) { RETURN_THROWS(); }
++	Mix_Music * result = Mix_LoadMUS_RW(copy, 1);
++	if (!result) { efree(buffer); RETURN_NULL(); }
+ 	mix_music_to_zval(result, return_value);
++	php_mix_music_object_from_zend_object(Z_OBJ_P(return_value))->rw_buffer = buffer;
++
+ }
+ 
+ PHP_FUNCTION(Mix_FreeMusic)
+ {
+ 	zval *MUSIC;
+-	Mix_Music *music;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(1, 1);
+ 		Z_PARAM_OBJECT_OF_CLASS(MUSIC, mix_music_ce)
+ 	ZEND_PARSE_PARAMETERS_END();
+-	music = php_mix_music_from_zval_p(MUSIC);
+-	Mix_FreeMusic(music);
++	php_mix_music_release(MUSIC);
+ }
+ 
+ PHP_FUNCTION(Mix_GetNumMusicDecoders)
+@@ -80,6 +82,7 @@
+ 
+ 	const char * result = Mix_GetMusicDecoder(index);
+ 
++	if (!result) { RETURN_NULL(); }
+ 	RETURN_STRING(result);
+ }
+ 
+@@ -111,6 +114,7 @@
+ 		Z_PARAM_LONG(loops)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	music = php_mix_music_from_zval_p(MUSIC);
++	if (!music) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_PlayMusic(music, loops);
+ 
+@@ -132,6 +136,7 @@
+ 		Z_PARAM_LONG(ms)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	music = php_mix_music_from_zval_p(MUSIC);
++	if (!music) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_FadeInMusic(music, loops, ms);
+ 
+@@ -153,6 +158,7 @@
+ 		Z_PARAM_DOUBLE(position)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 	music = php_mix_music_from_zval_p(MUSIC);
++	if (!music) { RETURN_THROWS(); }
+ 
+ 	int result = Mix_FadeInMusicPos(music, loops, ms, position);
+ 
+@@ -302,5 +308,6 @@
+ 
+ 	const char* result = Mix_GetSoundFonts();
+ 
++	if (!result) { RETURN_NULL(); }
+ 	RETURN_STRING(result);
+ }
+--- a/src/php_sdl_mixer.c
++++ b/src/php_sdl_mixer.c
+@@ -15,7 +15,7 @@
+ /* {{{ PHP_MINIT_FUNCTION */
+ PHP_MINIT_FUNCTION(sdl_mixer)
+ {
+-	sld_mixer_flags = Mix_Init(MIX_INIT_FLAC|MIX_INIT_MOD|MIX_INIT_MP3|MIX_INIT_OGG|MIX_INIT_MID|MIX_INIT_OPUS);
++	sld_mixer_flags = Mix_Init(MIX_INIT_OGG);
+ 
+ 	php_mix_chunk_minit_helper();
+ 	php_mix_music_minit_helper();
+@@ -25,6 +25,12 @@
+     REGISTER_LONG_CONSTANT("MIX_DEFAULT_FORMAT", MIX_DEFAULT_FORMAT, CONST_CS | CONST_PERSISTENT);
+     REGISTER_LONG_CONSTANT("MIX_MAX_VOLUME", MIX_MAX_VOLUME, CONST_CS | CONST_PERSISTENT);
+     REGISTER_LONG_CONSTANT("MIX_CHANNELS", MIX_CHANNELS, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_OGG", MIX_INIT_OGG, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_MP3", MIX_INIT_MP3, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_FLAC", MIX_INIT_FLAC, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_MOD", MIX_INIT_MOD, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_MID", MIX_INIT_MID, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("MIX_INIT_OPUS", MIX_INIT_OPUS, CONST_CS | CONST_PERSISTENT);
+ 
+ 	return SUCCESS;
+ }
+@@ -79,6 +85,23 @@
+ 	php_info_print_table_end();
+ }
+ 
++PHP_RINIT_FUNCTION(sdl_mixer)
++{
++	php_mix_chunk_request_init();
++	php_mix_music_request_init();
++	return SUCCESS;
++}
++
++PHP_RSHUTDOWN_FUNCTION(sdl_mixer)
++{
++	Mix_HaltChannel(-1);
++	Mix_HaltMusic();
++	php_mix_chunk_request_shutdown();
++	php_mix_music_request_shutdown();
++	Mix_CloseAudio();
++	return SUCCESS;
++}
++
+ static const zend_module_dep ext_deps[] = {
+     ZEND_MOD_REQUIRED("sdl")
+     ZEND_MOD_END
+@@ -92,10 +115,9 @@
+ 	ext_functions,
+ 	PHP_MINIT(sdl_mixer),
+ 	PHP_MSHUTDOWN(sdl_mixer),
+-	NULL, /* PHP_RINIT - Request initialization */
+-	NULL, /* PHP_RSHUTDOWN - Request shutdown */
++	PHP_RINIT(sdl_mixer),
++	PHP_RSHUTDOWN(sdl_mixer),
+ 	PHP_MINFO(sdl_mixer),
+ 	PHP_SDL_MIXER_VERSION,
+ 	STANDARD_MODULE_PROPERTIES
+ };
+-
+--- a/src/php_sdl_mixer_arginfo.h
++++ b/src/php_sdl_mixer_arginfo.h
+@@ -34,12 +34,12 @@
+ 	ZEND_ARG_TYPE_INFO(1, channels, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV_RW, 0, 2, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV_RW, 0, 2, Mix_Chunk, 1)
+ 	ZEND_ARG_OBJ_INFO(0, src, SDL_RWops, 0)
+ 	ZEND_ARG_TYPE_INFO(0, freesrc, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV, 0, 1, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV, 0, 1, Mix_Chunk, 1)
+ 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -50,7 +50,7 @@
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetNumChunkDecoders, 0, 0, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetChunkDecoder, 0, 1, IS_STRING, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetChunkDecoder, 0, 1, IS_STRING, 1)
+ 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -145,17 +145,17 @@
+ 
+ #define arginfo_Mix_Playing arginfo_Mix_HaltChannel
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_GetChunk, 0, 1, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_GetChunk, 0, 1, Mix_Chunk, 1)
+ 	ZEND_ARG_TYPE_INFO(0, channel, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+ #define arginfo_Mix_CloseAudio arginfo_Mix_Quit
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS, 0, 1, Mix_Music, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS, 0, 1, Mix_Music, 1)
+ 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS_RW, 0, 2, Mix_Music, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS_RW, 0, 2, Mix_Music, 1)
+ 	ZEND_ARG_OBJ_INFO(0, src, SDL_RWops, 0)
+ 	ZEND_ARG_TYPE_INFO(0, freesrc, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+@@ -230,7 +230,7 @@
+ 	ZEND_ARG_TYPE_INFO(0, paths, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetSoundFonts, 0, 0, IS_STRING, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetSoundFonts, 0, 0, IS_STRING, 1)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_SetPosition, 0, 3, IS_LONG, 0)
+--- a/src/php_sdl_mixer.stub.php
++++ b/src/php_sdl_mixer.stub.php
+@@ -11,11 +11,11 @@
+ function Mix_OpenAudioDevice(int $frequency, int $format, int $channels, int $chunksize, string $device, int $allowed_changes): int {}
+ function Mix_AllocateChannels(int $numchans): int {}
+ function Mix_QuerySpec(int &$frequency, int &$format, int &$channels): int {}
+-function Mix_LoadWAV_RW(SDL_RWops $src, int $freesrc): Mix_Chunk {}
+-function Mix_LoadWAV(string $file): Mix_Chunk {}
++function Mix_LoadWAV_RW(SDL_RWops $src, int $freesrc): ?Mix_Chunk {}
++function Mix_LoadWAV(string $file): ?Mix_Chunk {}
+ function Mix_FreeChunk(Mix_Chunk $chunk): void {}
+ function Mix_GetNumChunkDecoders(): int {}
+-function Mix_GetChunkDecoder(int $index): string {}
++function Mix_GetChunkDecoder(int $index): ?string {}
+ function Mix_HasChunkDecoder(string $name): bool {}
+ function Mix_ReserveChannels(int $num): int {}
+ function Mix_GroupChannel(int $which, int $tag): int {}
+@@ -38,13 +38,13 @@
+ function Mix_Resume(int $channel): void {}
+ function Mix_Paused(int $channel): int {}
+ function Mix_Playing(int $channel): int {}
+-function Mix_GetChunk(int $channel): Mix_Chunk {}
++function Mix_GetChunk(int $channel): ?Mix_Chunk {}
+ function Mix_CloseAudio(): void {}
+-function Mix_LoadMUS(string $file): Mix_Music {}
+-function Mix_LoadMUS_RW(SDL_RWops $src, int $freesrc): Mix_Music {}
++function Mix_LoadMUS(string $file): ?Mix_Music {}
++function Mix_LoadMUS_RW(SDL_RWops $src, int $freesrc): ?Mix_Music {}
+ function Mix_FreeMusic(Mix_Music $music): void {}
+ function Mix_GetNumMusicDecoders(): int {}
+-function Mix_GetMusicDecoder(int $index): string {}
++function Mix_GetMusicDecoder(int $index): ?string {}
+ #ifdef HAVE_MIX_HASMUSICDECODER
+ function Mix_HasMusicDecoder(string $name): bool {}
+ #endif
+@@ -64,7 +64,7 @@
+ function Mix_SetSynchroValue(int $value): int {}
+ function Mix_GetSynchroValue(): int {}
+ function Mix_SetSoundFonts(string $paths): int {}
+-function Mix_GetSoundFonts(): string {}
++function Mix_GetSoundFonts(): ?string {}
+ function Mix_SetPosition(int $channel, int $angle, int $distance): int {}
+ function Mix_SetDistance(int $channel, int $distance): int {}
+ function Mix_SetReverseStereo(int $channel, int $flip): int {}
+@@ -75,4 +75,3 @@
+ function Mix_GetError(): string {}
+ /** @alias SDL_ClearError */
+ function Mix_ClearError(): string {}
+-

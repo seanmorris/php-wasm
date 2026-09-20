@@ -1,0 +1,366 @@
+--- a/config.m4
++++ b/config.m4
+@@ -1,96 +1,11 @@
+-dnl config.m4 for extension sdl_ttf
+-
+-dnl Comments in this file start with the string 'dnl'.
+-dnl Remove where necessary.
+-
+-dnl If your extension references something external, use 'with':
+-
+-dnl PHP_ARG_WITH([sdl_ttf],
+-dnl   [for sdl_ttf support],
+-dnl   [AS_HELP_STRING([--with-sdl_ttf],
+-dnl     [Include sdl_ttf support])])
+-
+-dnl Otherwise use 'enable':
+-
+-PHP_ARG_ENABLE([sdl_ttf],
+-  [whether to enable sdl_ttf support],
+-  [AS_HELP_STRING([--enable-sdl_ttf],
+-    [Enable sdl_ttf support])],
+-  [no])
+-
++dnl php-wasm: use the native prerequisites built by packages/sdl/extensions.mak.
++PHP_ARG_ENABLE([sdl_ttf], [for sdl_ttf support],
++  [AS_HELP_STRING([--enable-sdl_ttf=DIR], [Enable sdl_ttf using libraries in DIR])], [no])
+ if test "$PHP_SDL_TTF" != "no"; then
+-  dnl Write more examples of tests here...
+-
+-  dnl Remove this code block if the library does not support pkg-config.
+-  dnl PKG_CHECK_MODULES([LIBFOO], [foo])
+-  dnl PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
+-  dnl PHP_EVAL_LIBLINE($LIBFOO_LIBS, SDL_TTF_SHARED_LIBADD)
+-
+-  dnl If you need to check for a particular library version using PKG_CHECK_MODULES,
+-  dnl you can use comparison operators. For example:
+-  dnl PKG_CHECK_MODULES([LIBFOO], [foo >= 1.2.3])
+-  dnl PKG_CHECK_MODULES([LIBFOO], [foo < 3.4])
+-  dnl PKG_CHECK_MODULES([LIBFOO], [foo = 1.2.3])
+-
+-  dnl Remove this code block if the library supports pkg-config.
+-  dnl --with-sdl_ttf -> check with-path
+-  SEARCH_PATH="/usr/local /usr"     # you might want to change this
+-  SEARCH_FOR="/include/SDL2/SDL_ttf.h"  # you most likely want to change this
+-  if test -r $PHP_SDL_TTF/$SEARCH_FOR; then # path given as parameter
+-    SDL_TTF_DIR=$PHP_SDL_TTF
+-  else # search default path list
+-    AC_MSG_CHECKING([for sdl_ttf files in default path])
+-    for i in $SEARCH_PATH ; do
+-      if test -r $i/$SEARCH_FOR; then
+-        SDL_TTF_DIR=$i
+-        AC_MSG_RESULT(found in $i)
+-      fi
+-    done
+-  fi
+-  
+-  if test -z "$SDL_TTF_DIR"; then
+-    AC_MSG_RESULT([not found])
+-    AC_MSG_ERROR([Please reinstall the sdl_ttf distribution])
+-   fi
+-
+-  dnl Remove this code block if the library supports pkg-config.
+-  dnl --with-sdl_ttf -> add include path
+-  PHP_ADD_INCLUDE($SDL_TTF_DIR/include)
+-
+-  dnl Remove this code block if the library supports pkg-config.
+-  dnl --with-sdl_ttf -> check for lib and symbol presence
+-  LIBNAME=SDL2_ttf # you may want to change this
+-  LIBSYMBOL=TTF_Init # you most likely want to change this
+-
+-  dnl If you need to check for a particular library function (e.g. a conditional
+-  dnl or version-dependent feature) and you are using pkg-config:
+-  dnl PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
+-  dnl [
+-  dnl   AC_DEFINE(HAVE_SDL_TTF_FEATURE, 1, [ ])
+-  dnl ],[
+-  dnl   AC_MSG_ERROR([FEATURE not supported by your sdl_ttf library.])
+-  dnl ], [
+-  dnl   $LIBFOO_LIBS
+-  dnl ])
+-
+-  dnl If you need to check for a particular library function (e.g. a conditional
+-  dnl or version-dependent feature) and you are not using pkg-config:
+-  PHP_CHECK_LIBRARY($LIBNAME, $LIBSYMBOL,
+-  [
+-    PHP_ADD_LIBRARY_WITH_PATH($LIBNAME, $SDL_TTF_DIR/$PHP_LIBDIR, SDL_TTF_SHARED_LIBADD)
+-    AC_DEFINE(HAVE_SDL_TTF_FEATURE, 1, [ ])
+-  ],[
+-    AC_MSG_ERROR([FEATURE not supported by your sdl_ttf library.])
+-  ],[
+-    -L$SDL_TTF_DIR/$PHP_LIBDIR -lm
+-  ])
+-  
+-    PHP_SUBST(SDL_TTF_SHARED_LIBADD)
+-
+-  dnl In case of no dependencies
+-  dnl AC_DEFINE(HAVE_SDL_TTF, 1, [ Have sdl_ttf support ])
+-
++  PHP_ADD_INCLUDE($PHP_SDL_TTF/include)
++  PHP_ADD_INCLUDE($PHP_SDL_TTF/include/SDL2)
++  PHP_ADD_LIBRARY_WITH_PATH(SDL2_ttf, $PHP_SDL_TTF/lib, SDL_TTF_SHARED_LIBADD)
++  PHP_SUBST(SDL_TTF_SHARED_LIBADD)
+   PHP_NEW_EXTENSION(sdl_ttf, sdl_ttf.c sdl_ttf_font.c, $ext_shared)
+   PHP_ADD_EXTENSION_DEP(sdl_ttf, sdl)
+-  PHP_ADD_MAKEFILE_FRAGMENT
+ fi
+--- a/sdl_ttf_font.c
++++ b/sdl_ttf_font.c
+@@ -2,6 +2,7 @@
+ #include "sdl_ttf_arginfo.h"
+ 
+ zend_class_entry *ttf_font_ce = NULL;
++static HashTable live_fonts;
+ zend_object_handlers php_ttf_font_object_handlers;
+ 
+ php_ttf_font_object *php_ttf_font_object_from_zend_object(zend_object *zobj)
+@@ -16,14 +17,19 @@
+ 
+ TTF_Font *php_ttf_font_from_zval_p(zval *zp)
+ {
+-    return php_ttf_font_object_from_zend_object(Z_OBJ_P(zp))->internal;
++    TTF_Font *font = php_ttf_font_object_from_zend_object(Z_OBJ_P(zp))->internal;
++    if (!font) { zend_throw_error(NULL, "TTF_Font has been closed"); }
++    return font;
+ }
+ 
+-inline void ttf_font_to_zval(TTF_Font *ttf_font, zval *zp)
++void ttf_font_to_zval(TTF_Font *ttf_font, zval *zp)
+ {
++    if (!ttf_font) { ZVAL_NULL(zp); return; }
+     object_init_ex(zp, ttf_font_ce);
+     php_ttf_font_object *php_ttf_font = php_ttf_font_object_from_zend_object(Z_OBJ_P(zp));
+     php_ttf_font->internal = ttf_font;
++    Z_TRY_ADDREF_P(zp);
++    zend_hash_index_add_new(&live_fonts, (zend_ulong)(uintptr_t)ttf_font, zp);
+ }
+ 
+ zend_object *php_ttf_font_object_create(zend_class_entry *ce)
+@@ -45,7 +51,7 @@
+ 
+     if (obj->internal)
+     {
+-        // TTF_CloseFont(obj->internal);
++        TTF_CloseFont(obj->internal);
+         obj->internal = NULL;
+     }
+ 
+@@ -69,3 +75,35 @@
+     php_ttf_font_object_handlers.get_constructor = php_ttf_font_object_get_constructor;
+     php_ttf_font_object_handlers.offset = XtOffsetOf(php_ttf_font_object, std);
+ }
++
++void php_ttf_font_release(zval *value)
++{
++    php_ttf_font_object *object = php_ttf_font_object_from_zend_object(Z_OBJ_P(value));
++    TTF_Font *font = object->internal;
++    if (!font) { return; }
++    object->internal = NULL;
++    TTF_CloseFont(font);
++    zend_hash_index_del(&live_fonts, (zend_ulong)(uintptr_t)font);
++}
++
++void php_ttf_fonts_init(void)
++{
++    zend_hash_init(&live_fonts, 8, NULL, ZVAL_PTR_DTOR, 0);
++}
++
++void php_ttf_fonts_close(void)
++{
++    zval *value;
++    ZEND_HASH_FOREACH_VAL(&live_fonts, value) {
++        php_ttf_font_object *object = php_ttf_font_object_from_zend_object(Z_OBJ_P(value));
++        if (object->internal) { TTF_CloseFont(object->internal); object->internal = NULL; }
++    } ZEND_HASH_FOREACH_END();
++    zend_hash_clean(&live_fonts);
++}
++
++void php_ttf_fonts_shutdown(void)
++{
++    php_ttf_fonts_close();
++    zend_hash_destroy(&live_fonts);
++    while (TTF_WasInit()) { TTF_Quit(); }
++}
+--- a/sdl_ttf_font.h
++++ b/sdl_ttf_font.h
+@@ -23,4 +23,9 @@
+ 
+ void php_ttf_font_minit_helper(void);
+ 
+-#endif
+\ No newline at end of file
++void php_ttf_font_release(zval *value);
++void php_ttf_fonts_init(void);
++void php_ttf_fonts_close(void);
++void php_ttf_fonts_shutdown(void);
++
++#endif
+--- a/sdl_ttf.c
++++ b/sdl_ttf.c
+@@ -41,6 +41,7 @@
+ {
+ 	ZEND_PARSE_PARAMETERS_NONE();
+ 
++	php_ttf_fonts_close();
+ 	TTF_Quit();
+ }
+ 
+@@ -55,6 +56,7 @@
+ 	Z_PARAM_LONG(size)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
++	if (size <= 0 || size > 4096) { zend_value_error("font size must be between 1 and 4096"); RETURN_THROWS(); }
+ 	TTF_Font *font = TTF_OpenFont(name, size);
+ 
+ 	ttf_font_to_zval(font, return_value);
+@@ -65,16 +67,36 @@
+ 	zval *z_font;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(1, 1)
+-	Z_PARAM_ZVAL(z_font)
++	Z_PARAM_OBJECT_OF_CLASS(z_font, ttf_font_ce)
++	ZEND_PARSE_PARAMETERS_END();
++
++	php_ttf_font_release(z_font);
++}
++
++PHP_FUNCTION(TTF_RenderText_Solid)
++{
++	char *text;
++	size_t text_len;
++
++	zval *z_font, *z_color;
++
++	ZEND_PARSE_PARAMETERS_START(3, 3)
++	Z_PARAM_OBJECT_OF_CLASS(z_font, ttf_font_ce)
++	Z_PARAM_STRING(text, text_len)
++	Z_PARAM_ZVAL(z_color)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
+ 	TTF_Font *font;
+ 	font = php_ttf_font_from_zval_p(z_font);
+-
+-	TTF_CloseFont(font);
+-}
+-
+-PHP_FUNCTION(TTF_RenderText_Solid)
++	if (!font) { RETURN_THROWS(); }
++	SDL_Color color;
++	if (!zval_to_sdl_color(z_color, &color)) { zend_type_error("color must be SDL_Color"); RETURN_THROWS(); }
++	SDL_Surface *surface = TTF_RenderText_Solid(font, text, color);
++
++	sdl_surface_to_zval(surface, return_value);
++}
++
++PHP_FUNCTION(TTF_RenderText_Blended)
+ {
+ 	char *text;
+ 	size_t text_len;
+@@ -89,30 +111,9 @@
+ 
+ 	TTF_Font *font;
+ 	font = php_ttf_font_from_zval_p(z_font);
++	if (!font) { RETURN_THROWS(); }
+ 	SDL_Color color;
+-	zval_to_sdl_color(z_color, &color);
+-	SDL_Surface *surface = TTF_RenderText_Solid(font, text, color);
+-
+-	sdl_surface_to_zval(surface, return_value);
+-}
+-
+-PHP_FUNCTION(TTF_RenderText_Blended)
+-{
+-	char *text;
+-	size_t text_len;
+-
+-	zval *z_font, *z_color;
+-
+-	ZEND_PARSE_PARAMETERS_START(3, 3)
+-	Z_PARAM_OBJECT_OF_CLASS(z_font, ttf_font_ce)
+-	Z_PARAM_STRING(text, text_len)
+-	Z_PARAM_ZVAL(z_color)
+-	ZEND_PARSE_PARAMETERS_END();
+-
+-	TTF_Font *font;
+-	font = php_ttf_font_from_zval_p(z_font);
+-	SDL_Color color;
+-	zval_to_sdl_color(z_color, &color);
++	if (!zval_to_sdl_color(z_color, &color)) { zend_type_error("color must be SDL_Color"); RETURN_THROWS(); }
+ 	SDL_Surface *surface = TTF_RenderText_Blended(font, text, color);
+ 
+ 	sdl_surface_to_zval(surface, return_value);
+@@ -134,9 +135,10 @@
+ 
+ 	TTF_Font *font;
+ 	font = php_ttf_font_from_zval_p(z_font);
++	if (!font) { RETURN_THROWS(); }
+ 	SDL_Color color, backgroundColor;
+-	zval_to_sdl_color(z_color, &color);
+-	zval_to_sdl_color(z_backgroundColor, &backgroundColor);
++	if (!zval_to_sdl_color(z_color, &color)) { zend_type_error("color must be SDL_Color"); RETURN_THROWS(); }
++	if (!zval_to_sdl_color(z_backgroundColor, &backgroundColor)) { zend_type_error("backgroundColor must be SDL_Color"); RETURN_THROWS(); }
+ 	SDL_Surface *surface = TTF_RenderText_Shaded(font, text, color, backgroundColor);
+ 
+ 	sdl_surface_to_zval(surface, return_value);
+@@ -148,7 +150,7 @@
+ #if defined(ZTS) && defined(COMPILE_DL_SDL_TTF)
+ 	ZEND_TSRMLS_CACHE_UPDATE();
+ #endif
+-
++	php_ttf_fonts_init();
+ 	return SUCCESS;
+ }
+ /* }}} */
+@@ -167,6 +169,12 @@
+ 	php_info_print_table_end();
+ }
+ /* }}} */
++
++PHP_RSHUTDOWN_FUNCTION(sdl_ttf)
++{
++	php_ttf_fonts_shutdown();
++	return SUCCESS;
++}
+ 
+ PHP_MINIT_FUNCTION(sdl_ttf)
+ {
+@@ -189,7 +197,7 @@
+ 	PHP_MINIT(sdl_ttf),	 /* PHP_MINIT - Module initialization */
+ 	NULL,				 /* PHP_MSHUTDOWN - Module shutdown */
+ 	PHP_RINIT(sdl_ttf),	 /* PHP_RINIT - Request initialization */
+-	NULL,				 /* PHP_RSHUTDOWN - Request shutdown */
++	PHP_RSHUTDOWN(sdl_ttf), /* Request shutdown */
+ 	PHP_MINFO(sdl_ttf),	 /* PHP_MINFO - Module info */
+ 	PHP_SDL_TTF_VERSION, /* Version */
+ 	STANDARD_MODULE_PROPERTIES};
+--- a/sdl_ttf_arginfo.h
++++ b/sdl_ttf_arginfo.h
+@@ -9,16 +9,16 @@
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_TTF_Quit, 0, 0, IS_VOID, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_OpenFont, 0, 2, TTF_Font, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_OpenFont, 0, 2, TTF_Font, 1)
+ 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_TTF_CloseFont, 0, 1, IS_LONG, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_TTF_CloseFont, 0, 1, IS_VOID, 0)
+ 	ZEND_ARG_OBJ_INFO(0, font, TTF_Font, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_RenderText_Solid, 0, 3, SDL_Surface, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_RenderText_Solid, 0, 3, SDL_Surface, 1)
+ 	ZEND_ARG_OBJ_INFO(0, font, TTF_Font, 0)
+ 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ 	ZEND_ARG_OBJ_INFO(0, color, SDL_Color, 0)
+@@ -26,7 +26,7 @@
+ 
+ #define arginfo_TTF_RenderText_Blended arginfo_TTF_RenderText_Solid
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_RenderText_Shaded, 0, 4, SDL_Surface, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_TTF_RenderText_Shaded, 0, 4, SDL_Surface, 1)
+ 	ZEND_ARG_OBJ_INFO(0, font, TTF_Font, 0)
+ 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ 	ZEND_ARG_OBJ_INFO(0, color, SDL_Color, 0)

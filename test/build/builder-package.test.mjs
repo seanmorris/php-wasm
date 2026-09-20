@@ -16,6 +16,9 @@ test('the actual builder tarball installs independently and scaffolds a build', 
 	assert.ok(packed.files.includes('packages/php-cgi-wasm/static.mak'));
 	assert.ok(packed.files.includes('packages/vrzno/pre.mak'));
 	assert.ok(packed.files.includes('packages/sdl/php8-string-return.patch'));
+	assert.ok(packed.files.includes('packages/sdl/extensions.mak'));
+	assert.ok(packed.files.includes('packages/sdl/opengl/php_webgl.c'));
+	assert.ok(packed.files.includes('packages/sdl/patches/sdl_mixer.patch'));
 	assert.ok(packed.files.includes('bin/source-importer.mjs'));
 	assert.ok(packed.files.includes('.github/bin/verify-emscripten-async-errors.sh'));
 	assert.equal(packed.files.some(name => /\.(wasm|so|data|dat|gz|br|log)$/.test(name)), false);

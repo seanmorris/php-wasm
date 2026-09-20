@@ -3,6 +3,7 @@
  */
 import '../styles/Embedded.css';
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import ace from 'ace-builds';
 import AceEditor from 'react-ace';
 
@@ -12,6 +13,7 @@ import { PhpWeb } from 'php-wasm/PhpWeb';
 import Confirm from '../components/Confirm';
 import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { prepareSdlAssets } from '../lib/sdlAssets';
 
 import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
@@ -142,6 +144,7 @@ function Embedded()
 {
 	const phpRef = useRef(null);
 	const runtimeCleanup = useRef(null);
+	const runtimeGeneration = useRef(0);
 	const bootTimeout = useRef(null);
 	const autorunTimeout = useRef(null);
 	const selectDemoBox = useRef(null);
@@ -177,6 +180,7 @@ function Embedded()
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const [showCanvas, setShowCanvas] = useState(true);
+	const [canvasGeneration, setCanvasGeneration] = useState(0);
 
 	const [running, setRunning] = useState(false);
 	const [displayMode, setDisplayMode] = useState('');
@@ -199,29 +203,61 @@ function Embedded()
 		}
 	}, []);
 
-	const disposePhp = useCallback(() => {
-		canvasCheckbox.current && (canvasCheckbox.current.checked = query.get('canvas'));
-		phpRef.current && phpRef.current.refresh();
+	const disposePhp = useCallback(async () => {
+		runtimeGeneration.current++;
+		const php = phpRef.current;
+		phpRef.current = null;
+		const cleanup = runtimeCleanup.current;
+		runtimeCleanup.current = null;
 		clearPendingAutorun();
 		setStdOut('');
 		setStdErr('');
 
-
-		if(runtimeCleanup.current)
+		try
 		{
-			runtimeCleanup.current();
-			runtimeCleanup.current = null;
+			await php?.refresh();
 		}
-
-		phpRef.current = null;
+		catch(error)
+		{
+			console.error(error);
+		}
+		finally
+		{
+			cleanup?.();
+		}
 	}, [clearPendingAutorun]);
 
-	const refreshPhp = useCallback(() => {
-		disposePhp();
+	const refreshPhp = useCallback(async () => {
+		const generation = runtimeGeneration.current + 1;
+		await disposePhp();
+
+		if(generation !== runtimeGeneration.current)
+		{
+			return null;
+		}
+
+		// A canvas cannot switch between WebGL1 and WebGL2 contexts. Give each
+		// runtime its own canvas after the previous runtime has released it.
+		flushSync(() => setCanvasGeneration(value => value + 1));
 
 		const version = selectVersionBox.current?.value ?? defaultPhpVersion;
 		const variant = selectVariantBox.current?.value ?? '';
 		const runtimeSharedLibs = [...sharedLibs.current];
+
+		if(variant === '_sdl' && libType === 'dynamic')
+		{
+			// SDL image/font code is built in; its shared codecs remain in the
+			// existing GD and zlib packages. Do not enable those PHP extensions.
+			const providers = await Promise.all([toggleableModules.gd, toggleableModules.zlib]);
+			const codecNames = ['libpng.so', 'libjpeg.so', 'libfreetype.so', 'libz.so'];
+			runtimeSharedLibs.push(...providers.flatMap(module => module.getLibs({phpVersion: version}))
+				.filter(library => codecNames.includes(library.name)));
+		}
+
+		if(generation !== runtimeGeneration.current)
+		{
+			return null;
+		}
 
 		const php = new PhpWeb({
 			version
@@ -306,6 +342,8 @@ function Embedded()
 	}, []);
 
 	const runCode = useCallback(async (codeOverride = null) => {
+		const php = phpRef.current;
+		if(!php) return;
 		codeOverride = typeof codeOverride === 'string' ? codeOverride : null;
 
 		setRunning(true);
@@ -320,6 +358,7 @@ function Embedded()
 		setStdRet('');
 
 		let code = codeOverride ?? editor.current?.editor?.getValue() ?? input.current ?? editorValue;
+		const settings = parseDemoSettings(code);
 
 		const version = selectVersionBox.current?.value;
 		const variant = selectVariantBox.current?.value;
@@ -334,6 +373,7 @@ function Embedded()
 			, 'canvas': showCanvas
 			, 'version': version
 			, 'variant': variant
+			, 'assets': settings.assets
 		})}\n`);
 
 		query.set('code', encodeURIComponent(code));
@@ -350,11 +390,12 @@ function Embedded()
 
 			try
 			{
-				const ret = await phpRef.current.exec(code);
+				const ret = await php.exec(code);
+				if(php !== phpRef.current) return;
 				setStdRet(ret);
 				if(!persist.current.checked)
 				{
-					await phpRef.current.refresh();
+					await php.refresh();
 				}
 			}
 			catch(error)
@@ -363,8 +404,11 @@ function Embedded()
 			}
 			finally
 			{
-				setStatusMessage('php-wasm ready!');
-				setRunning(false);
+				if(php === phpRef.current)
+				{
+					setStatusMessage('php-wasm ready!');
+					setRunning(false);
+				}
 			}
 
 			return;
@@ -372,28 +416,44 @@ function Embedded()
 
 		try
 		{
-			const nextExitCode = await phpRef.current.run(code);
+			if(settings.assets === 'sdl')
+			{
+				setStatusMessage('Loading SDL assets...');
+				await prepareSdlAssets(php, basePath('sdl/'));
+				if(php !== phpRef.current) return;
+			}
+
+			const nextExitCode = await php.run(code);
+			if(php !== phpRef.current) return;
 			setExitCode(nextExitCode);
 			if(!persist.current.checked)
 			{
-				await phpRef.current.refresh();
+				await php.refresh();
 			}
 		}
 		catch(error)
 		{
 			console.error(error);
+			if(php === phpRef.current)
+			{
+				setStdErr(String(error.message ?? error));
+				setExitCode('1');
+			}
 		}
 		finally
 		{
-			setStatusMessage('php-wasm ready!');
-			setRunning(false);
+			if(php === phpRef.current)
+			{
+				setStatusMessage('php-wasm ready!');
+				setRunning(false);
+			}
 		}
 	}, [editorValue, query]);
 
 	const loadDemo = useCallback(async demoName => {
 		if(!demoName)
 		{
-			refreshPhp();
+			if(!await refreshPhp()) return;
 			await runCode();
 			return;
 		}
@@ -410,7 +470,7 @@ function Embedded()
 			return;
 		}
 
-		if(demoName === 'sdl-sine.php')
+		if(demoName === 'sdl-sine.php' || demoName === 'sdl-cube.php')
 		{
 			selectVariantBox.current.value = '_sdl';
 		}
@@ -443,14 +503,9 @@ function Embedded()
 
 		window.history.replaceState({}, document.title, "?" + query.toString());
 
-		if(phpRef.current)
-		{
-			await phpRef.current.refresh();
-		}
-
 		await loadExtensions();
-		refreshPhp();
 		applySettings(settings);
+		if(!await refreshPhp()) return;
 
 		if(settings.autorun)
 		{
@@ -482,7 +537,7 @@ function Embedded()
 		}
 
 		await loadExtensions();
-		refreshPhp();
+		if(!await refreshPhp()) return;
 
 		if(settings.autorun)
 		{
@@ -600,7 +655,7 @@ function Embedded()
 		setStdOut('');
 		setStdErr('');
 		await loadExtensions();
-		refreshPhp();
+		if(!await refreshPhp()) return;
 		await runCode();
 	};
 
@@ -640,7 +695,8 @@ function Embedded()
 						<option value = "json.php">JSON</option>
 						<option value = "closures.php">Closures</option>
 						<option value = "files.php">Files</option>
-						<option value = "sdl-sine.php">SDL</option>
+						<option value = "sdl-cube.php">SDL Cube</option>
+						<option value = "sdl-sine.php">SDL Sine</option>
 						<option value = "zend-benchmark.php">Zend Benchmark</option>
 						{isIframe || <option value = "drupal.php">Drupal 7</option>}
 					</select>
@@ -762,7 +818,7 @@ function Embedded()
 						</div>
 						<div className = "canvas output liquid" >
 							<div className = "column">
-								<canvas ref={canvas} />
+								<canvas key={canvasGeneration} ref={canvas} tabIndex={0} aria-label="SDL canvas" />
 							</div>
 						</div>
 					</div>

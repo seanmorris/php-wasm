@@ -41,6 +41,24 @@ const mimeTypes = {
 
 const mounts = [
 	{
+		prefix: `${basePath}/assets/icons/`
+		, root: path.resolve(repoRoot, 'demo-web/src/assets/icons')
+	}
+
+	, {
+		prefix: `${basePath}/sdl-assets/`
+		, root: path.resolve(repoRoot, 'demo-web/public/sdl')
+	}
+	, {
+		prefix: `${basePath}/demo-scripts/`
+		, root: path.resolve(repoRoot, 'demo-web/public/scripts')
+	}
+	, {
+		prefix: `${basePath}/demo-lib/`
+		, root: path.resolve(repoRoot, 'demo-web/src/lib')
+	}
+
+	, {
 		prefix: `${basePath}/webperl/`
 		, root: path.resolve(repoRoot, '.cache/browser-webperl/webperl_prebuilt_v0.09-beta')
 	}

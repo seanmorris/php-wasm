@@ -14,6 +14,15 @@
     "index.d.ts",
     "LICENSE",
     "NOTICE",
-    "README.md"
+    "README.md",
+    "benchmarks",
+    "pre.mak",
+    "static.mak",
+    "extensions.mak",
+    "sdl2-config.in",
+    "php8-string-return.patch",
+    "patches",
+    "opengl",
+    "mixer"
   ]
 }

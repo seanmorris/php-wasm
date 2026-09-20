@@ -33,7 +33,7 @@ const main = async () => {
 		, PGlite
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
 		, sharedLibs: [
-			...loadEmbeddedSharedLibs(libType)
+			...loadEmbeddedSharedLibs(libType, variant)
 			, ...loadEmbeddedExtensionLibs(libType, extensionFlags)
 		]
 	});

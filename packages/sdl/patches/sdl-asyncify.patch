@@ -1,0 +1,24 @@
+--- a/src/sdl.c
++++ b/src/sdl.c
+@@ -41,6 +41,11 @@
+ 
+ 	Uint32 flags = (Uint32)z_flags;
+ 
++#ifdef __EMSCRIPTEN__
++	/* Browser callbacks own frame scheduling. SDL_Quit clears this hint, so
++	 * restore it on every init, including reruns within one PHP request. */
++	SDL_SetHint(SDL_HINT_EMSCRIPTEN_ASYNCIFY, "0");
++#endif
+ 	RETURN_LONG(SDL_Init(flags));
+ }
+ /* }}} */
+@@ -57,6 +62,9 @@
+ 		RETURN_FALSE;
+ 	}
+ 
++#ifdef __EMSCRIPTEN__
++	SDL_SetHint(SDL_HINT_EMSCRIPTEN_ASYNCIFY, "0");
++#endif
+ 	RETURN_LONG(SDL_InitSubSystem((Uint32)flags));
+ }
+ /* }}} */

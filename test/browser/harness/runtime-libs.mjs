@@ -186,9 +186,14 @@ const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
 	return [];
 };
 
-export const loadEmbeddedSharedLibs = libType => {
+export const loadEmbeddedSharedLibs = (libType, variant = '') => {
 	if(libType === 'dynamic')
 	{
+		if(variant === '_sdl')
+		{
+			return sharedEmbeddedLibs.filter(library => ['libpng.so', 'libjpeg.so', 'libfreetype.so', 'libz.so'].includes(library.name));
+		}
+
 		return [];
 	}
 

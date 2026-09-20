@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 const {
 	editor
@@ -7,6 +7,7 @@ const {
 	, phpRefresh
 	, phpRun
 	, PhpWeb
+	, prepareSdlAssets
 } = vi.hoisted(() => {
 	const editor = {
 		getValue: vi.fn(() => '')
@@ -25,8 +26,9 @@ const {
 	};
 
 	const PhpWeb = vi.fn(function PhpWebMock() {
-		return phpInstance;
+		return {...phpInstance};
 	});
+	const prepareSdlAssets = vi.fn(async () => undefined);
 
 	return {
 		editor
@@ -34,10 +36,12 @@ const {
 		, phpRefresh
 		, phpRun
 		, PhpWeb
+		, prepareSdlAssets
 	};
 });
 
 vi.mock('php-wasm/PhpWeb', () => ({PhpWeb}));
+vi.mock('../lib/sdlAssets', () => ({prepareSdlAssets}));
 
 vi.mock('@electric-sql/pglite', () => ({
 	PGlite: class PGliteMock {}
@@ -81,6 +85,7 @@ echo "Hello, World!";
 		phpExec.mockClear();
 		phpRefresh.mockClear();
 		phpRun.mockClear();
+		prepareSdlAssets.mockReset().mockResolvedValue(undefined);
 
 		globalThis.fetch = vi.fn(async () => ({
 			ok: true
@@ -155,6 +160,45 @@ echo "Hello, World!";
 		});
 
 		expect(modules).toEqual(['gd', 'zlib']);
+	});
+
+	it('discards a pending SDL run when switching demos and replaces its canvas', async () => {
+		const cubeCode = '<?php //{"autorun":true,"persist":true,"canvas":true,"variant":"_sdl","assets":"sdl","extensionFlags":0}\n echo "cube";';
+		globalThis.fetch.mockImplementation(async url => ({
+			ok: true
+			, text: async () => url.endsWith('sdl-cube.php') ? cubeCode : phpCode
+		}));
+		let releaseAssets;
+		prepareSdlAssets.mockImplementationOnce(() => new Promise(resolve => releaseAssets = resolve));
+		const {container} = render(<Embedded />);
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+		const originalCanvas = container.querySelector('canvas');
+		const demos = container.querySelector('select option[value="sdl-cube.php"]').parentElement;
+		fireEvent.change(demos, {target: {value: 'sdl-cube.php'}});
+		fireEvent.click(container.querySelector('[data-load-demo]'));
+		await waitFor(() => expect(prepareSdlAssets).toHaveBeenCalledTimes(1));
+		expect(container.querySelector('canvas')).not.toBe(originalCanvas);
+		const [{sharedLibs}] = PhpWeb.mock.calls[1];
+		expect(sharedLibs.map(library => library.name).sort()).toEqual(['libfreetype.so', 'libjpeg.so', 'libpng.so', 'libz.so']);
+		fireEvent.change(demos, {target: {value: 'hello-world.php'}});
+		fireEvent.click(container.querySelector('[data-load-demo]'));
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(2));
+		await act(async () => releaseAssets());
+		expect(phpRun).toHaveBeenCalledTimes(2);
+		expect(phpRun.mock.calls.every(([code]) => !code.includes('echo "cube"'))).toBe(true);
+	});
+
+	it('shows asset errors without starting PHP code', async () => {
+		prepareSdlAssets.mockRejectedValueOnce(new Error('SDL asset loop.ogg: HTTP 404'));
+		globalThis.fetch.mockResolvedValue({
+			ok: true
+			, text: async () => '<?php //{"autorun":true,"persist":true,"canvas":true,"variant":"_sdl","assets":"sdl","extensionFlags":0}\n echo "cube";'
+		});
+		const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const {container} = render(<Embedded />);
+		await waitFor(() => expect(container.querySelector('.stderr')).toHaveTextContent('SDL asset loop.ogg: HTTP 404'));
+		expect(phpRun).not.toHaveBeenCalled();
+		errorLog.mockRestore();
 	});
 
 	it.each([

@@ -12,7 +12,7 @@ if(variant === '_sdl')
 		const result = await page.evaluate(async ({version, variant, libType}) => {
 			const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+			const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
 			let stdout = '', stderr = '';
 			php.addEventListener('output', event => stdout += event.detail.join(''));
 			php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -79,7 +79,7 @@ test('repeated PHP dumps of a JavaScript object retain a stable debug class name
 		const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		window.__php_action = new (class WindowPhpActionService {})();
-		const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+		const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
 		let output = '';
 		php.addEventListener('output', event => output += event.detail.join(''));
 		const status = await php.run(`<?php
@@ -241,7 +241,7 @@ test('browser PHP supports strict source and PHP objects as native fetch options
 	const result = await page.evaluate(async ({version, variant, libType}) => {
 		const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-		const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+		const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
 		let output = '';
 		php.addEventListener('output', event => output += event.detail.join(''));
 		const status = await php.run('<?php declare(strict_types=1); echo "strict";');
@@ -262,7 +262,7 @@ for(const order of ['legacy-first', 'php-first'])
 			const before = Object.getOwnPropertyDescriptor(globalThis, 'buffer');
 			const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+			const php = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
 			const status = await php.run('<?php echo "ready";');
 			const after = Object.getOwnPropertyDescriptor(globalThis, 'buffer');
 			return {status, preserved: before?.value === after?.value && before?.get === after?.get && before?.configurable === after?.configurable};
@@ -294,7 +294,7 @@ for(const order of ['perl-first', 'php-first'])
 		const startPhp = () => page.evaluate(async ({version, variant, libType}) => {
 			const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			window.compatPhp = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType)});
+			window.compatPhp = new PhpWeb({version, variant, sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
 			window.phpOutput = '';
 			window.compatPhp.addEventListener('output', event => window.phpOutput += event.detail.join(''));
 			await window.compatPhp.run('<?php echo "php-ready";');

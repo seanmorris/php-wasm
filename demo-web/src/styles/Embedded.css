@@ -479,3 +479,25 @@ div.toggleExtensions input {
 	margin: 0.25rem;
 	margin-right: 1rem;
 }
+
+.Embedded .sdl-controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem;
+}
+
+.Embedded .sdl-controls small {
+	flex-basis: 100%;
+}
+
+.Embedded canvas {
+	max-width: 100%;
+	object-fit: contain;
+	align-self: flex-start;
+}
+
+.Embedded canvas[data-pixel-art="1"] {
+	image-rendering: pixelated;
+}

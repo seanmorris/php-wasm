@@ -87,7 +87,7 @@ function Home()
 				<Header />
 				<h2>Select a demo:</h2>
 				<div className='row'>
-					<a className = "big-link inset" href = {basePath('embedded-php.html?demo=sdl-sine.php')}>
+					<a className = "big-link inset" href = {basePath('embedded-php.html?demo=sdl-cube.php')}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>

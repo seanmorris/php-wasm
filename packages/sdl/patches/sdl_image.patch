@@ -1,0 +1,87 @@
+--- a/config.m4
++++ b/config.m4
+@@ -1,37 +1,10 @@
+-dnl config.m4 for extension sdl_image
+-
+-PHP_ARG_ENABLE([sdl_image],
+-    [whether to enable sdl_image support],
+-    [AS_HELP_STRING([--enable-sdl_image],
+-        [Enable sdl_image support])],
+-    [no])
+-
++dnl php-wasm: use the native prerequisites built by packages/sdl/extensions.mak.
++PHP_ARG_ENABLE([sdl_image], [for sdl_image support],
++  [AS_HELP_STRING([--enable-sdl_image=DIR], [Enable sdl_image using libraries in DIR])], [no])
+ if test "$PHP_SDL_IMAGE" != "no"; then
+-    AC_DEFINE(WITH_SDL_IMAGE, 1, [Whether you want SDL Image])
+-    AC_MSG_CHECKING([for SDL_image.h])
+-    for i in $PHP_SDL_IMAGE /usr/local /usr; do
+-      if test -r $i/include/SDL2/SDL_image.h; then
+-        SDL_IMAGE_DIR=$i
+-        AC_DEFINE(HAVE_SDL_IMAGE_H, 1, [Whether you have SDL2/SDL_image.h])
+-        PHP_ADD_INCLUDE($i/include)
+-      fi
+-    done
+-
+-    if test -z "$SDL_IMAGE_DIR"; then
+-      AC_MSG_RESULT([not found])
+-      AC_MSG_ERROR([Please reinstall the SDL_image distribution including development files])
+-    else
+-      AC_MSG_RESULT([found])
+-    fi
+-
+-    AC_CHECK_LIB(SDL2_image, IMG_Load, [
+-      PHP_ADD_LIBRARY(SDL2_image,, SDL_IMAGE_SHARED_LIBADD)
+-    ], [
+-      AC_MSG_ERROR([libSDL2_image not found!])
+-    ])
+-
+-  AC_DEFINE(HAVE_SDL_IMAGE, 1, [ Have sdl_image support ])
+-
++  PHP_ADD_INCLUDE($PHP_SDL_IMAGE/include)
++  PHP_ADD_INCLUDE($PHP_SDL_IMAGE/include/SDL2)
++  PHP_ADD_LIBRARY_WITH_PATH(SDL2_image, $PHP_SDL_IMAGE/lib, SDL_IMAGE_SHARED_LIBADD)
+   PHP_SUBST(SDL_IMAGE_SHARED_LIBADD)
+   PHP_NEW_EXTENSION(sdl_image, php_sdl_image.c, $ext_shared)
+   PHP_ADD_EXTENSION_DEP(sdl_image, sdl)
+--- a/php_sdl_image.c
++++ b/php_sdl_image.c
+@@ -27,11 +27,12 @@
+ 	SDL_Renderer *renderer = NULL;
+ 
+ 	ZEND_PARSE_PARAMETERS_START(2, 2)
+-		Z_PARAM_ZVAL(z_renderer)
++		Z_PARAM_RESOURCE(z_renderer)
+ 		Z_PARAM_STR(file)
+ 	ZEND_PARSE_PARAMETERS_END();
+ 
+     renderer = (SDL_Renderer*)zend_fetch_resource(Z_RES_P(z_renderer), SDL_RENDERER_RES_NAME, le_sdl_renderer);
++	if (!renderer) { RETURN_THROWS(); }
+ 	texture = IMG_LoadTexture(renderer, ZSTR_VAL(file));
+ 
+ 	if (!texture) {
+--- a/php_sdl_image_arginfo.h
++++ b/php_sdl_image_arginfo.h
+@@ -1,7 +1,7 @@
+ /* This is a generated file, edit the .stub.php file instead.
+  * Stub hash: 2beef1dccbd6b0db8dfca04c0c7e441c81fe233a */
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_IMG_LoadTexture, 0, 2, SDL_Texture, 0)
++ZEND_BEGIN_ARG_INFO_EX(arginfo_IMG_LoadTexture, 0, 0, 2)
+ 	ZEND_ARG_INFO(0, renderer)
+ 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+--- a/php_sdl_image.stub.php
++++ b/php_sdl_image.stub.php
+@@ -4,7 +4,8 @@
+ 
+ /**
+  * @param resource $renderer
++ * @return resource|null
+  */
+-function IMG_LoadTexture($renderer, string $file): SDL_Texture {};
++function IMG_LoadTexture($renderer, string $file) {};
+ 
+-function IMG_Load(string $file): ?SDL_Surface {};
+\ No newline at end of file
++function IMG_Load(string $file): ?SDL_Surface {};
