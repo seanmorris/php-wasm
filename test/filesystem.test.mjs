@@ -33,6 +33,7 @@ const createFilesystem = (names = ['.', '..', 'folder', 'café.php', 'folder-lin
 		binary: Promise.resolve({FS, persist: true})
 		, autoTransaction: true
 		, queue: []
+		, _filesystemQueue: [], _filesystemQueueActive: false
 		, extraActions: {}
 	});
 	return {php, FS, events, names};
@@ -77,7 +78,7 @@ for(const count of [100, 1000])
 	});
 }
 
-test('every public CGI read refreshes storage without flushing', async () => {
+test('sequential public CGI reads refresh storage without flushing', async () => {
 	const {php, events} = createFilesystem();
 	await php.analyzePath('/persist');
 	await php.readdir('/persist');
@@ -87,7 +88,7 @@ test('every public CGI read refreshes storage without flushing', async () => {
 	assert.equal(events.filter(event => event === 'flush').length, 0);
 });
 
-test('CGI reads wait for hydration, and later reads wait for writes to persist', async () => {
+test('CGI batches reads with writes, acknowledges after commit, and defers work arriving during commit', async () => {
 	const {php, FS, events} = createFilesystem();
 	let release;
 	let started;
@@ -115,12 +116,17 @@ test('CGI reads wait for hydration, and later reads wait for writes to persist',
 	};
 	events.length = 0;
 	const write = php.writeFile('/persist/new.php', 'saved').then(() => events.push('acknowledged'));
-	const read = php.readdir('/persist');
+	const read = php.readdir('/persist').then(() => events.push('read acknowledged'));
 	await flushing;
-	assert.deepEqual(events, ['populate', 'write', 'flush']);
+	const later = php.stat('/persist/new.php');
+	await new Promise(resolve => setImmediate(resolve));
+	assert.deepEqual(events, ['populate', 'write', 'readdir:/persist', 'flush']);
+	events.push('committed');
 	release();
-	await Promise.all([write, read]);
-	assert.ok(events.indexOf('acknowledged') > events.indexOf('flush'));
+	await Promise.all([write, read, later]);
+	assert.ok(events.indexOf('acknowledged') > events.indexOf('committed'));
+	assert.ok(events.indexOf('read acknowledged') > events.indexOf('committed'));
+	assert.ok(events.indexOf('stat:/persist/new.php') > events.indexOf('committed'));
 	assert.equal(events.filter(event => event === 'populate').length, 2);
 	assert.equal(events.filter(event => event === 'flush').length, 1);
 });
