@@ -545,7 +545,7 @@ export default function Editor()
 								</div>
 							</details>
 						</div>
-						<div className="editor-explorer-filter"><input aria-label="Filter visible files" title="Filter visible files" placeholder="Filter files…" value={filter} onChange={event => setFilter(event.target.value)} /></div>
+						<div className="editor-explorer-filter"><input className="inset" aria-label="Filter visible files" title="Filter visible files" placeholder="Filter files…" value={filter} onChange={event => setFilter(event.target.value)} /></div>
 					</div>
 					<div className="editor-tree-scroll"><ul role="tree" aria-label="Filesystem" aria-multiselectable="true" onKeyDown={treeKeys}>
 						<EditorFolder entry={{path: w.root, name: w.root, kind: 'directory', protected: ['/', '/persist', '/config'].includes(w.root)}} expanded={w.expanded} onExpand={w.expand} selected={w.selected} onSelect={w.select} onOpenFile={path => void w.openFile(path)} onMenu={entryMenu} onDrop={drop} refresh={w.refresh} filter={filter} />
