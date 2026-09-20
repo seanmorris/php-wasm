@@ -20,7 +20,7 @@ export const useEditorWorkspace = ({createSession, onMove, onDelete}) => {
 	const [selectedEntry, setSelectedEntry] = useState(null);
 	const [refresh, setRefresh] = useState(0);
 	const [busy, setBusy] = useState(null);
-	const [status, setStatus] = useState('Ready. Save writes files; draft recovery does not.');
+	const [status, setStatus] = useState('Ready.');
 	const [error, setError] = useState(null);
 	const operation = useRef(null);
 	const pendingMoves = useRef([]);

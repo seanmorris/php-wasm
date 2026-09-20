@@ -32,6 +32,11 @@ Its compact header keeps New file, New folder and Refresh beside a More file
 actions menu for uploads, root/reveal navigation and copy/cut/paste/delete. The
 visible-file filter stays on its own row below the actions.
 
+A single bottom status bar uses inset regions for the current operation, file
+storage/read-only state, encoding and line endings, draft recovery, and browser
+storage usage/quota. Regions wrap on narrow screens; long operation and recovery
+messages remain readable.
+
 Shortcuts: Ctrl/Cmd+S saves, Ctrl/Cmd+Shift+S saves all, Ctrl/Cmd+O opens a path,
 Ctrl/Cmd+P opens Quick open, Ctrl/Cmd+N creates an untitled buffer, Ctrl/Cmd+W closes
 the current tab, and Ctrl/Cmd+Shift+T reopens the last closed path. Browser/OS

@@ -250,8 +250,11 @@ select.bevel option {
 .editor-error, .editor-notice { padding: 0.5rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 .editor-error { background: #ffc9bd; color: #4d1600; }
 .editor-notice { background: #ffeab0; color: #3d2a00; }
-.editor-file-info { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; padding: 0.25rem; background: #333; color: #ddd; }
-.editor-status { padding: 0.3rem; white-space: normal; overflow-wrap: anywhere; }
+.editor-statusbar { display: flex; flex-wrap: wrap; flex-shrink: 0; gap: 0.2rem; padding-top: 0.25rem; font-size: 0.8rem; color: #000; }
+.editor-status-panel { min-width: 0; max-width: 100%; min-height: 1.75rem; box-sizing: border-box; padding: 0.2rem 0.4rem; line-height: 1.25; overflow-wrap: anywhere; }
+.editor-status { flex: 1 1 auto; white-space: normal; }
+.editor-status-format { display: flex; align-items: center; gap: 0.4rem; }
+.editor-status-format select { margin: 0; padding: 0; border: 0; font: inherit; color: inherit; background: transparent; }
 .editor-debugger { position: relative; height: 35%; min-height: 8rem; display: flex; overflow: auto; }
 .editor-dialog { position: fixed; inset: 0; z-index: 100; background: #0008; }
 .editor-dialog .dialog { width: min(36rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); overflow: auto; box-sizing: border-box; }

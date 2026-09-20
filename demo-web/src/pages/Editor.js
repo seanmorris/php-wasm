@@ -587,21 +587,27 @@ export default function Editor()
 						</div>
 					</div>
 					{debuggerActive && <div className="editor-debugger inset"><Debugger file={debuggerStartFile} initCommands={debuggerCommands} onStdIn={() => void gotoFile(currentBreak.current.file, currentBreak.current.line)} openFile={gotoFile} ref={openDbg} setCurrentFile={file => currentBreak.current.file = file} setCurrentLine={line => currentBreak.current.line = line} setIsExecuting={setIsExecuting} version={phpVersion} /></div>}
-					<div className="editor-file-info">
-						<span>{recovery.status}</span>
-						{doc?.writable === false && <span>Read-only file — use Save As to create an editable copy</span>}
-						<span>{doc?.path ? isPersistentPath(doc.path) ? 'Persistent browser storage' : 'Temporary filesystem — download to keep a copy' : 'Unsaved document'}</span>
-						{doc && !doc.binary && <><span>{doc.bom ? 'UTF-8 with BOM' : 'UTF-8'}</span><select aria-label="Line endings" disabled={blocked} value={doc.eol} onChange={event => {
-							doc.eol = event.target.value;
-							doc.session.setNewLineMode(doc.eol);
-							doc.dirty = !doc.path || doc.session.getValue() !== doc.baseline;
-							w.model.emit();
-						}}><option value="unix">LF</option><option value="windows">CRLF</option></select></>}
-						{storage && <span title="Storage is shared by this site's demos">{(storage.usage / 1048576).toFixed(1)} MiB used / {(storage.quota / 1048576).toFixed(0)} MiB available quota</span>}
-					</div>
 				</div>
 			</div>
-			<div className="editor-status inset" role="status" aria-live="polite">{w.status}</div>
+			<div className="editor-statusbar" role="group" aria-label="Editor status">
+				<div className="editor-status editor-status-panel inset" role="status" aria-live="polite">{w.status}</div>
+				<div className="editor-status-panel inset" title={doc?.writable === false ? 'Read-only file — use Save As to create an editable copy' : doc?.path && !isPersistentPath(doc.path) ? 'Temporary filesystem — download to keep a copy' : undefined}>
+					{doc?.writable === false && 'Read-only · '}{doc?.path ? isPersistentPath(doc.path) ? 'Persistent storage' : 'Temporary file' : 'Unsaved document'}
+				</div>
+				{doc && !doc.binary && <div className="editor-status-panel editor-status-format inset">
+					<span>{doc.bom ? 'UTF-8 with BOM' : 'UTF-8'}</span>
+					<select aria-label="Line endings" disabled={blocked} value={doc.eol} onChange={event => {
+						doc.eol = event.target.value;
+						doc.session.setNewLineMode(doc.eol);
+						doc.dirty = !doc.path || doc.session.getValue() !== doc.baseline;
+						w.model.emit();
+					}}><option value="unix">LF</option><option value="windows">CRLF</option></select>
+				</div>}
+				<div className="editor-status-panel inset" title="Draft recovery keeps unsaved edits separate from files. Use Save to write the file.">{recovery.status}</div>
+				{storage && <div className="editor-status-panel inset" title="Browser storage used / available quota. Shared by this site's demos." aria-label={`${(storage.usage / 1048576).toFixed(1)} MiB used / ${(storage.quota / 1048576).toFixed(0)} MiB available quota`}>
+					{(storage.usage / 1048576).toFixed(1)} / {(storage.quota / 1048576).toFixed(0)} MiB
+				</div>}
+			</div>
 		</div>
 		{w.dialog && <EditorDialog key={w.dialog.key} dialog={w.dialog} finish={w.finish} />}
 		{showQuickOpen && <EditorQuickOpen root={w.root} recent={w.model.recent} onOpen={w.openFile} onClose={() => setShowQuickOpen(false)} />}
