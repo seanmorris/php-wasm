@@ -499,8 +499,8 @@ export default function Editor()
 			<div className="row editor-main">
 				<aside className="file-area frame inset" aria-label="File explorer">
 					<div className="editor-explorer-toolbar">
-						<div className="editor-toolbar editor-explorer-actions" role="group" aria-label="File explorer actions">
-							<span className="editor-explorer-title inset">Files</span>
+						<div className="editor-toolbar editor-explorer-actions inset" role="group" aria-label="File explorer actions">
+							<span className="editor-explorer-title">Files</span>
 							<button disabled={blocked} onClick={() => w.newEntry(false)} title="New file" aria-label="New file">
 								<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14H3V2h7l3 3v3M10 2v4h3M9 12h6m-3-3v6" /></svg>
 							</button>
