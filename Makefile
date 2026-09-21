@@ -569,12 +569,15 @@ STDLIB_WEB_TARGET=
 STDLIB_WORKER_TARGET=
 STDLIB_WEBVIEW_TARGET=
 
+# These modules instantiate the standard runtime and use its Node build as input.
+ifeq (${PHP_VARIANT},)
 ifneq ($(filter ${WITH_LIBXML},dynamic),)
 ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 STDLIB_NODE_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs
 STDLIB_WEB_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs
 STDLIB_WORKER_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs
 STDLIB_WEBVIEW_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs
+endif
 endif
 endif
 

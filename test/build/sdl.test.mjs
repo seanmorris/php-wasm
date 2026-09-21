@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
+import {mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {promisify} from 'node:util';
 import test from 'node:test';
 
@@ -56,6 +59,50 @@ test('SDL reuses the selected shared or static codec providers', async () => {
 	for(const name of ['libpng', 'libjpeg', 'libfreetype', 'libz'])
 	{
 		assert.ok(statically.split('\n')[4].includes(`lib/lib/${name}.a`));
+	}
+});
+
+test('a fresh SDL web build does not require the standard Node runtime', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'php-wasm-sdl-stdlib-'));
+	try
+	{
+		// Stand in for completed native work; leave the runtime output directory empty.
+		for(const name of ['configured', 'runtime', 'assets'])
+		{
+			await writeFile(join(directory, name), '');
+		}
+		await run('make', [
+			'--no-print-directory', 'ENV_FILE=.github/.env_8.4.dynamic.ci', 'WITH_SDL=1'
+			, `PHP_DIST_DIR=${directory}/dist`
+			, `PHP_CONFIGURE_DEPS=${directory}/configured`
+			, `WEB_MJS=${directory}/runtime`
+			, `WEB_MJS_ASSETS=${directory}/assets`
+			, 'web-mjs'
+		], {maxBuffer: 1024 * 1024});
+	}
+	finally
+	{
+		await rm(directory, {recursive: true, force: true});
+	}
+});
+
+test('standard dynamic builds retain all stdlib generation targets', async () => {
+	for(const version of ['8.2', '8.3', '8.4', '8.5'])
+	{
+		const {stdout} = await run('make', [
+			'--no-print-directory'
+			, `ENV_FILE=.github/.env_${version}.dynamic.ci`
+			, 'WITH_SDL=0'
+			, '--eval'
+			, '__stdlib_inventory:;@echo $(STDLIB_NODE_TARGET) $(STDLIB_WEB_TARGET) $(STDLIB_WORKER_TARGET) $(STDLIB_WEBVIEW_TARGET)'
+			, '__stdlib_inventory'
+		]);
+		assert.deepEqual(stdout.trim().split(/\s+/).map(path => path.split('/').pop()), [
+			`${version}-node.mjs`
+			, `${version}-web.mjs`
+			, `${version}-worker.mjs`
+			, `${version}-webview.mjs`
+		]);
 	}
 });
 
