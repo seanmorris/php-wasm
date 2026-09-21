@@ -84,6 +84,13 @@ jobs:
       - name: Build demo-node
         run: npm install --prefix demo-node
 
+      # Leave the snapshot configured for the ordinary Node/Deno/CGI checks.
+      # Building SDL last would make each test job reconfigure and rebuild PHP.
+      - name: Build PHP (sdl variant) for Web
+        run: |
+          sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
+          time make --debug=basic web-mjs WITH_SDL=1
+
       - name: Build PHP For Node
         run: time make --debug=basic node-mjs node-js
 
@@ -107,11 +114,6 @@ jobs:
 
       - name: Build PHP DBG for Web
         run: time make --debug=basic web-dbg-mjs web-dbg-js
-
-      - name: Build PHP (sdl variant) for Web
-        run: |
-          sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
-          time make --debug=basic web-mjs WITH_SDL=1
 
       - name: Stage every declared runtime wrapper
         run: make --debug=basic runtime-wrappers
