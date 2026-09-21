@@ -37,6 +37,8 @@ lib/lib/libGL.a:
 
 lib/lib/libSDL2.a:
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
+	# SDL writes its pkg-config file before compiling, so bootstrap a cold SDK cache first.
+	${DOCKER_RUN} retry-embuilder build sysroot
 	${DOCKER_RUN} retry-embuilder build sdl2 --lto --pic --verbose
 	${DOCKER_RUN} mkdir -p /src/lib/include /src/lib/lib
 	${DOCKER_RUN} rm -rf /src/lib/include/SDL2
