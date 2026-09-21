@@ -3,8 +3,8 @@ title: Using PHP Extensions
 weight: -1000
 ---
 <!--
-Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
-Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/extensions/using-php-extensions.md
+Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
+Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/extensions/using-php-extensions.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -242,6 +242,9 @@ The following extensions may be loaded at runtime. This allows the shared extens
 ### sdl
 
 Built into the `_sdl` runtime variant. No separate extension package is required.
+The development runtime adds SDL_image, SDL_mixer, SDL_ttf, and OpenGL shader
+bindings. See [SDL and OpenGL](/extensions/sdl.html) for availability, canvas
+setup, shared codec assets, the textured cube, and build options.
 
 ### zlib
 

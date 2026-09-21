@@ -2,8 +2,8 @@
 title: CHANGELOG
 ---
 <!--
-Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
-Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/CHANGELOG.md
+Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
+Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/CHANGELOG.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -13,6 +13,10 @@ Changes
 
 ## Unreleased
 
+* SDL_mixer now decodes MP3 through its bundled minimp3 implementation. The cube plays the supplied **Unreal Superhero 3** by **Kenët and rez** and displays the artist credit from the file's ID3 tags.
+* Embedded PHP links now store source in the URL fragment, avoiding request-header limits while preserving old query links. The SDL cube fills its preview and adapts its viewport, perspective, and text overlay to resizing without interpolating its pixel-art texture.
+* Expanded the `_sdl` browser runtime with SDL_image, SDL_mixer, SDL_ttf, and PHP 8 OpenGL shader bindings through the existing Make build. The SDL Cube demo uses the `sean-icon-32` texture with nearest filtering, text, focused keyboard controls, and audio after a user gesture. Added resource cleanup, context recovery, checked asset loading, and PHP 8.0–8.5 coverage across all three library profiles. See [SDL and OpenGL](/extensions/sdl.html) for availability, build flags, supported APIs, and measurements.
+* Made the CGI queue timing tests portable to pinned Deno 2.5.6 without changing the 25 ms idle wait or 250 ms processing bound. The fast Deno gate now includes the queue suite before native builds.
 * Added typed directory listings with `readdir(path, {withFileTypes: true})` across runtime wrappers and declarations. Browser CGI reads refresh storage without flushing, and writes still wait for persistence. The VS Code bridge forwards listing options so updated File Bus hosts can expand and search directories without per-entry RPCs.
 * Expanded the lightweight editor's file handling with explicit Save, untitled documents, file/folder operations, transfers, recovery, and conflict checks. Empty workspaces retain a saveable untitled document. Removed the redundant standalone Waitline link from the home-page extras.
 * Expanded PDO-CFD1 with named/numbered parameters, direct execution, quoting, insert IDs, binary values, buffered scroll cursors, and result metadata. Atomic `cfd1Batch()` reuses bound PDO statements; ordinary `execute([...])` remains available without explicit binding.

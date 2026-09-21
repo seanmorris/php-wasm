@@ -45,6 +45,27 @@ module paths and matching JavaScript/Wasm assets. A path like
 `/node_modules/php-wasm/php-tags.mjs` starts at the server root, when that directory
 is exposed there.
 
+## SDL browser runtime
+
+Select `variant: '_sdl'` and pass a canvas to `PhpWeb` for SDL graphics and input:
+
+```javascript
+const php = new PhpWeb({
+  version: '8.4',
+  variant: '_sdl',
+  canvas: document.querySelector('canvas'),
+});
+```
+
+Create the canvas first. The development runtime adds SDL_image, SDL_mixer,
+SDL_ttf, and OpenGL shader bindings. Its SDL Cube example uses a pixel-art
+texture with nearest filtering, keyboard input, text, and audio after a user
+gesture. The cube requires WebGL2; the original SDL Sine example remains.
+Shared codecs require matching native support libraries, and JavaScript/Wasm
+must come from the same build. See the [SDL guide](https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/packages/sdl/README.md)
+for dependencies, build flags, resource cleanup, and measurements. Older
+published runtimes may provide only core SDL.
+
 ## Directory listings
 
 `await php.readdir(path)` returns names as `string[]`. Pass

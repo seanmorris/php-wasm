@@ -2,8 +2,8 @@
 pagetitle: Custom Builds with php-wasm-builder
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/compiling/custom-builds.md
+Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
+Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/compiling/custom-builds.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/bin/php-wasm-builder.js
@@ -184,6 +184,27 @@ Build `php-dbg-wasm` modules with:
 $ php-wasm-builder build node dbg mjs
 $ php-wasm-builder build web dbg mjs
 ```
+
+## SDL browser runtime
+
+A builder containing the [SDL expansion](/extensions/sdl.html) can select the
+`_sdl` browser runtime through `.php-wasm-rc`:
+
+```make
+WITH_SDL=1
+```
+
+Then use the ordinary build command:
+
+```sh
+php-wasm-builder build web mjs
+```
+
+SDL_image, SDL_mixer, SDL_ttf, and OpenGL default to enabled with SDL. Each can
+be disabled independently with the [SDL runtime options](/compiling/php-wasm-rc.html#sdl-runtime-options).
+The source checkout uses `make web-mjs WITH_SDL=1`; no separate build script or
+`sdl` command selector is needed. Keep the generated JavaScript/Wasm pair and
+its required data and codec assets together.
 
 ## PHP_DIST_DIR
 

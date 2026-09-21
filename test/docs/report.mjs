@@ -555,6 +555,36 @@ async function validateVrzno(page)
 	);
 }
 
+/**
+ * Checks SDL setup examples while identifying their browser-only execution.
+ * @param {object} page Parsed documentation page with fenced examples.
+ * @returns {Promise<object[]>} Classified examples and their separate runtime coverage.
+ */
+async function validateSdl(page)
+{
+	const text = page.blocks.map(block => block.code).join('\n');
+	const guide = readLocal(path.join(repoRoot, 'packages/sdl/README.md'));
+
+	assert.match(text, /<canvas[^>]+id="sdl"[^>]+tabindex="0"/);
+	assert.match(text, /image-rendering: pixelated/);
+	assert.match(text, /import \{PhpWeb\} from 'php-wasm\/PhpWeb\.mjs'/);
+	assert.match(text, /variant: '_sdl'/);
+	assert.match(text, /canvas: document\.querySelector\('#sdl'\)/);
+	assert.match(text, /make web-mjs WITH_SDL=1/);
+	for(const option of ['WITH_SDL_IMAGE', 'WITH_SDL_MIXER', 'WITH_SDL_TTF', 'WITH_OPENGL'])
+	{
+		assert.ok(text.includes(`${option}=0`), `Missing core-only opt-out: ${option}`);
+		assert.ok(guide.includes(`${option}=0`), `Unsupported SDL opt-out: ${option}`);
+	}
+
+	return coverAll(
+		page
+		, 'allowed_gap'
+		, 'SDL canvas setup and Make opt-outs were checked against the package guide; browser execution and native builds use the separate SDL suites.'
+		, { gap: 'browser_sdl_runtime', tests: ['test/browser/sdl.spec.mjs', 'test/build/sdl.test.mjs'] }
+	);
+}
+
 async function validatePdoPglite(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
@@ -895,7 +925,8 @@ const cgiPageValidators = {
 };
 
 const browserOnlyPageValidators = {
-	'getting-started/cgi-service-worker.md': validateCgiServiceWorker,
+	'extensions/sdl.md': validateSdl
+	, 'getting-started/cgi-service-worker.md': validateCgiServiceWorker
 };
 
 const allPageValidators = {

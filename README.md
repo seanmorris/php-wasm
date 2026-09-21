@@ -33,6 +33,7 @@ _PHP in WebAssembly, npm not required._
 * Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, and `zlib`.
 * [Vrzno](https://github.com/seanmorris/vrzno), [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1), and [pdo_pglite](https://github.com/seanmorris/pdo-pglite) are maintained as separate packages.
 * [Cloudflare embedded PHP](CLOUDFLARE.md) has a dedicated static ES-module build and local workerd tests for PHP `8.0` through `8.5`; final assets use the existing nightly distribution.
+* The `_sdl` browser variant supports SDL graphics and input. The current development build adds image loading, TrueType text, audio, and OpenGL shaders, with a textured cube example. See the [SDL guide](packages/sdl/README.md) for canvas setup, shared codec dependencies, controls, and measurements.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -1071,6 +1072,28 @@ WITH_ONIGURUMA # [0, 1, static, shared]
 WITH_OPENSSL   # [0, 1, shared, dynamic]
 WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
+
+---
+
+##### SDL runtime options
+
+The `_sdl` browser runtime is selected with `WITH_SDL=1`. `dynamic` remains a
+legacy alias for `1`; SDL PHP extensions are built into the main runtime.
+
+| Option | Values | Default |
+| --- | --- | --- |
+| `WITH_SDL` | `0`, `1`, `dynamic` | `0` |
+| `WITH_SDL_IMAGE` | `0`, `1` | Follows SDL |
+| `WITH_SDL_MIXER` | `0`, `1` | Follows SDL |
+| `WITH_SDL_TTF` | `0`, `1` | Follows SDL |
+| `WITH_OPENGL` | `0`, `1` | Follows SDL |
+
+The add-ons require SDL. Image loading reuses `WITH_LIBPNG`/`WITH_LIBJPEG`, and
+text reuses `WITH_FREETYPE`; those codec libraries must be enabled as static or
+shared. `WITH_ZLIB=0` still provides the native zlib archive needed by codecs.
+Set all four add-on flags to `0` for core SDL only. Build with the existing
+`make web-mjs WITH_SDL=1` target, or set the flags in `.php-wasm-rc` and use
+`php-wasm-builder build web mjs`. See the [SDL build and API guide](packages/sdl/README.md).
 
 ---
 

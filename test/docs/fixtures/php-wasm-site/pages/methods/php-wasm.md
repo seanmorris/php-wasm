@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
-Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
+Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -44,12 +44,27 @@ const php = new PhpWeb({version: '8.4'});
 *string*
 
 Selects a packaged runtime variant. The empty string uses the standard runtime.
-`_sdl` selects the SDL-enabled `PhpWeb` runtime for supported PHP versions.
+`_sdl` selects the SDL-enabled `PhpWeb` runtime for PHP 8.0–8.5.
 `PhpNode` currently supports only the standard empty variant.
 
 ```javascript
-const php = new PhpWeb({version: '8.4', variant: '_sdl'});
+const php = new PhpWeb({
+    version: '8.4',
+    variant: '_sdl',
+    canvas: document.querySelector('canvas'),
+});
 ```
+
+Create the canvas first. See [SDL and OpenGL](/extensions/sdl.html) for the
+development add-ons, shared codec dependencies, and example controls.
+
+### canvas
+
+*HTMLCanvasElement*
+
+Pass the canvas used by an SDL-enabled browser runtime. The cube example needs
+WebGL2 and a focusable canvas (`tabindex="0"`) for keyboard input. Pass a fresh
+canvas when replacing the runtime or switching graphics context types.
 
 ### sharedLibs
 
