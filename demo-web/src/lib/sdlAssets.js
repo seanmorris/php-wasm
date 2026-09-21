@@ -1,5 +1,6 @@
 /** Files used by the SDL cube, relative to the demo's public asset directory. */
-export const sdlAssetNames = ['sean-icon-32.png', 'DejaVuSansMono.ttf', 'loop.ogg', 'click.wav'];
+// Keep the original Ogg available to code saved in older shared demo links.
+export const sdlAssetNames = ['sean-icon-32.png', 'DejaVuSansMono.ttf', 'WOJTEK3.mp3', 'click.wav', 'loop.ogg'];
 
 const textureUrl = new URL('../assets/icons/sean-icon-32.png', import.meta.url);
 

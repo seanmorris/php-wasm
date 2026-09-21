@@ -22,9 +22,9 @@ test('assets are fetched once per runtime and staged only after every download s
 });
 
 test('an HTTP failure reports its asset, writes nothing and allows retry', async () => {
-	vi.stubGlobal('fetch', vi.fn(async url => new Response('data', {status: String(url).endsWith('loop.ogg') ? 404 : 200})));
+	vi.stubGlobal('fetch', vi.fn(async url => new Response('data', {status: String(url).endsWith('WOJTEK3.mp3') ? 404 : 200})));
 	const {FS, php} = runtime();
-	await expect(prepareSdlAssets(php, '/sdl/')).rejects.toThrow('SDL asset loop.ogg: HTTP 404');
+	await expect(prepareSdlAssets(php, '/sdl/')).rejects.toThrow('SDL asset WOJTEK3.mp3: HTTP 404');
 	expect(FS.writeFile).not.toHaveBeenCalled();
 	vi.stubGlobal('fetch', vi.fn(async () => new Response('data')));
 	await prepareSdlAssets(php, '/sdl/');

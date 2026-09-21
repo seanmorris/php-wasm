@@ -8,13 +8,28 @@ empty `getLibs()` result. There are no separate SDL PHP side modules.
 
 Open **SDL Cube** in the embedded PHP demo. It renders a perspective cube with
 the existing sean-icon-32 texture and a TrueType text overlay. Click **Enable audio** to start
-looping Ogg music and WAV effects. Focus the canvas to use arrows/WASD to rotate,
+looping MP3 music and WAV effects. The track is **Unreal Superhero 3** by
+**Kenët and rez**, credited from the supplied `WOJTEK3.mp3` ID3 tags.
+Focus the canvas to use arrows/WASD to rotate,
 Space to pause rotation, R to reset, M to mute, and Escape to stop. Audio pauses
 when focus leaves the canvas. Run restarts a stopped demo; Refresh releases its
 native resources. The original **SDL Sine** example remains available.
 
+Use the example, asset loader and MP3-enabled runtime from the same checkout;
+the initial SDL expansion supported only WAV and Ogg.
+
 The icon uses nearest-neighbor filtering without mipmaps, and the canvas uses
 pixelated scaling to preserve its pixel art.
+
+The cube canvas fills its preview box. Resizing updates the drawing buffer,
+viewport, perspective and text overlay; both landscape and portrait layouts
+keep the cube's proportions. The resize observer is released during cleanup.
+
+Running or loading a demo stores its PHP source in the URL's `#code=` fragment.
+Copy the full URL to share it. The source is encoded once and stays out of HTTP
+requests; runtime options remain in the query string. Existing `?code=` links
+still load and are migrated to the fragment. Large snippets still produce long
+share links, but no longer consume the server's request-header limit.
 
 The cube needs WebGL2. Context loss pauses it; restoration recreates its shaders,
 buffers and textures. Asset downloads have HTTP checks and a 30-second timeout;
@@ -53,7 +68,7 @@ make web-mjs WITH_SDL=1 WITH_SDL_IMAGE=0 WITH_SDL_MIXER=0 WITH_SDL_TTF=0 WITH_OP
 | --- | --- | --- |
 | `WITH_SDL` | `0` | `1` enables `_sdl`; `dynamic` is a legacy alias for `1` |
 | `WITH_SDL_IMAGE` | follows SDL | PECL sdl_image 0.4.0 / SDL_image 2.6.0; PNG, JPEG, BMP |
-| `WITH_SDL_MIXER` | follows SDL | PECL sdl_mixer 0.4.0 / SDL_mixer 2.8.0; WAV and Ogg Vorbis |
+| `WITH_SDL_MIXER` | follows SDL | PECL sdl_mixer 0.4.0 / SDL_mixer 2.8.0; WAV, Ogg Vorbis and MP3 |
 | `WITH_SDL_TTF` | follows SDL | PECL sdl_ttf 0.3.0 / SDL_ttf 2.20.2; FreeType, without HarfBuzz |
 | `WITH_OPENGL` | follows SDL | PECL opengl 0.9.0 with the PHP 8 browser shader implementation |
 
@@ -85,8 +100,13 @@ remaining objects. Explicitly free resources in long-running animation loops.
 The RWops loaders honor `freesrc=1` by closing through the PHP SDL wrapper.
 Streamed music owns a snapshot of the remaining seekable input, so the caller
 may close or release its RWops after loading. This copy is retained until the
-music is freed. `Mix_Init()` reports the codecs actually available; this build
-does not enable MP3, FLAC, MIDI or tracker decoders.
+music is freed. `Mix_Init()` reports the codecs actually available. MP3 uses
+SDL_mixer's bundled `minimp3` decoder, without an extra shared library. This
+build does not enable FLAC, MIDI or tracker decoders.
+
+After halting playback and freeing music/chunks, close the audio device with
+`Mix_CloseAudio()` and unload initialized decoders with `Mix_Quit()`. The cube
+does both on Stop and on failed audio setup, so retries start from clean state.
 
 Register browser animation cleanup in `vrzno_env('onRefresh')` so callbacks,
 listeners and native resources are released before PHP request memory resets.
@@ -147,7 +167,7 @@ library profiles.
 
 Measured on 2026-09-20 with PHP 8.4.1, the static CI profile and Emscripten
 6.0.6. The baseline is the core SDL runtime at `eca81a6`; the expanded build
-includes the extensions and callback fixes described above. Sizes combine
+includes the extensions and callback fixes, before MP3 support was added. Sizes combine
 the JavaScript and Wasm files, in bytes:
 
 | Encoding | Core SDL | Expanded SDL | Increase |
@@ -156,8 +176,12 @@ the JavaScript and Wasm files, in bytes:
 | gzip, level 9 | 13,802,830 | 13,922,591 | 119,761 (0.87%) |
 | Brotli, quality 11 | 9,314,484 | 9,508,327 | 193,843 (2.08%) |
 
-The separate 30,873,664-byte ICU data file is unchanged. The cube's font and
-audio assets add 362,265 raw bytes; its texture reuses the existing icon.
+The separate 30,873,664-byte ICU data file is unchanged. At this measurement,
+the font and generated Ogg/WAV assets added 362,265 raw bytes. The current
+cube plays the supplied 3,063,619-byte MP3, bringing preloaded font/audio assets
+to 3,425,884 raw bytes. Its texture reuses the existing icon. These assets are
+downloaded separately from the runtime. The original 12,025-byte Ogg remains
+available for older shared cube links and tests.
 
 Three fresh Chromium 152 processes, serving uncompressed files over localhost
 on an i7-7700K with SwiftShader, produced these median timings. Native builds
@@ -174,3 +198,28 @@ The cube averaged 55–59 FPS across the three 180-frame samples, with 16.7 ms
 median and p95 frame intervals. These are local software-rendering measurements;
 the small startup sample is not a performance guarantee. Per-file sizes, hashes
 and individual timing samples are in [the measurement record](benchmarks/2026-09-20.json).
+
+The 2026-09-21 MP3 follow-up uses the same PHP/toolchain/profile. Adding the
+bundled minimp3 decoder changes the combined JavaScript/Wasm sizes as follows;
+the JavaScript has the same raw size, and ICU data is byte-for-byte identical:
+
+| Encoding | With MP3 | Added to expanded SDL |
+| --- | ---: | ---: |
+| Raw | 51,556,274 | 56,876 |
+| gzip, level 9 | 13,947,279 | 24,688 |
+| Brotli, quality 11 | 9,532,800 | 24,473 |
+
+Three interleaved before/after runs in fresh Chromium processes measured median
+runtime readiness at 946 ms before MP3 and 927 ms after. First PHP execution
+completed at 965/942 ms, and the cube's first frame after assets took 383/359 ms.
+Both builds ran the same current cube with audio off. This small local sample
+does not demonstrate a startup regression or establish a speedup.
+
+With MP3 playing, three 180-frame samples averaged 58.4–59.7 FPS at 640×400,
+with 16.7 ms median and 16.8 ms p95 frame intervals under SwiftShader. Music was
+measured after the muted phase, so warm-up prevents comparing their FPS as an
+audio overhead measurement.
+
+The original MP3 adds 3,063,619 bytes to the separate demo downloads. Track
+metadata, artifact hashes, sizes and all timing samples are in the
+[MP3 measurement record](benchmarks/2026-09-21-mp3.json).

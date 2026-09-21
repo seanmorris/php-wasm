@@ -99,7 +99,47 @@ test('SDL cube renders texture and text, moves, handles focused input and cleans
 	await testInfo.attach('timings', {body: JSON.stringify({...result, fps: await canvas.getAttribute('data-fps')}), contentType: 'application/json'});
 });
 
-test('audio produces PCM only after a user gesture and stops when muted', async ({page}) => {
+test('cube resizes its drawing buffer and projection for landscape and portrait boxes', async ({page}) => {
+	const errors = [];
+	page.on('pageerror', error => errors.push(error.message));
+	await startCube(page);
+	await page.evaluate(() => {
+		const canvas = document.querySelector('canvas');
+		const box = document.createElement('div');
+		box.id = 'cube-box';
+		document.body.append(box);
+		box.append(canvas);
+		canvas.style.cssText = 'width: 100%; height: 100%; display: block';
+	});
+	for(const [width, height] of [[900, 240], [300, 500], [640, 400]])
+	{
+		await page.evaluate(([width, height]) => {
+			const box = document.querySelector('#cube-box');
+			box.style.width = `${width}px`;
+			box.style.height = `${height}px`;
+		}, [width, height]);
+		await expect.poll(() => page.evaluate(() => {
+			const canvas = document.querySelector('canvas');
+			const gl = canvas.getContext('webgl2');
+			return [canvas.width, canvas.height, ...gl.getParameter(gl.VIEWPORT)];
+		})).toEqual([width, height, 0, 0, width, height]);
+		const aspect = await page.evaluate(() => {
+			const gl = document.querySelector('canvas').getContext('webgl2');
+			const program = gl.getParameter(gl.CURRENT_PROGRAM);
+			const matrix = gl.getUniform(program, gl.getUniformLocation(program, 'matrix'));
+			return Math.hypot(matrix[1], matrix[5], matrix[9]) / Math.hypot(matrix[0], matrix[4], matrix[8]);
+		});
+		expect(aspect).toBeCloseTo(width / height, 4);
+	}
+	await page.evaluate(() => window.sdlPhp.refresh());
+	await expect(page.locator('canvas')).toHaveAttribute('data-stopped', '1');
+	await page.evaluate(() => document.querySelector('#cube-box').style.width = '800px');
+	await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+	expect(await page.evaluate(() => window.sdlErrors)).toBe('');
+	expect(errors).toEqual([]);
+});
+
+test('credited MP3 music produces PCM only after a user gesture and stops when muted', async ({page}) => {
 	const errors = [];
 	page.on('pageerror', error => errors.push(error.message));
 	await page.addInitScript(() => {
@@ -121,9 +161,18 @@ test('audio produces PCM only after a user gesture and stops when muted', async 
 	});
 	await startCube(page);
 	await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off');
+	await expect(page.locator('[data-sdl-credit]')).toHaveText('Music: Unreal Superhero 3 — Kenët and rez');
 	expect(await page.evaluate(() => window.audioSamples)).toBe(0);
 	await page.locator('[data-sdl-audio]').click();
 	await expect.poll(() => page.evaluate(() => window.audioSamples)).toBeGreaterThan(0);
+	// Stop the WAV effect so continued PCM proves the music itself is playing.
+	await page.evaluate(async () => {
+		window.sdlOutput = '';
+		await window.sdlPhp.run('<?php Mix_HaltChannel(-1); echo Mix_PlayingMusic();');
+	});
+	expect(await page.evaluate(() => window.sdlOutput)).toBe('1');
+	const musicSamples = await page.evaluate(() => window.audioSamples);
+	await expect.poll(() => page.evaluate(() => window.audioSamples)).toBeGreaterThan(musicSamples + 2);
 	await page.locator('[data-sdl-audio]').click();
 	await expect(page.locator('[data-sdl-audio]')).toHaveText('Enable audio');
 	await page.waitForTimeout(200);
@@ -131,7 +180,59 @@ test('audio produces PCM only after a user gesture and stops when muted', async 
 	await page.waitForTimeout(200);
 	expect(await page.evaluate(() => window.audioSamples)).toBe(count);
 	await page.evaluate(() => window.sdlPhp.refresh());
-	await page.waitForTimeout(200);
+	await expect(page.locator('canvas')).toHaveAttribute('data-stopped', '1');
+	const loadedMp3 = await page.evaluate(async () => {
+		window.sdlOutput = '';
+		await window.sdlPhp.run('<?php echo Mix_Init(0) & MIX_INIT_MP3;');
+		return window.sdlOutput;
+	});
+	expect(loadedMp3).toBe('0');
+	await page.evaluate(() => window.sdlPhp.run(window.sdlCode));
+	await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off');
+	const restartSamples = await page.evaluate(() => window.audioSamples);
+	await page.locator('[data-sdl-audio]').click();
+	await page.evaluate(() => window.sdlPhp.run('<?php Mix_HaltChannel(-1);'));
+	await expect.poll(() => page.evaluate(() => window.audioSamples)).toBeGreaterThan(restartSamples + 2);
+	await page.locator('canvas').press('Escape');
+	expect(await page.evaluate(async () => {
+		window.sdlOutput = '';
+		await window.sdlPhp.run('<?php echo Mix_Init(0) & MIX_INIT_MP3;');
+		return window.sdlOutput;
+	})).toBe('0');
+	expect(errors).toEqual([]);
+	expect(await page.evaluate(() => window.sdlErrors)).toBe('');
+});
+
+test('corrupt MP3 can be retried while the cube keeps rendering', async ({page}) => {
+	const errors = [];
+	page.on('pageerror', error => errors.push(error.message));
+	await startCube(page);
+	await page.evaluate(async () => {
+		const {FS} = await window.sdlPhp.binary;
+		window.goodMusic = FS.readFile('/preload/sdl/WOJTEK3.mp3');
+		FS.writeFile('/preload/sdl/WOJTEK3.mp3', new TextEncoder().encode('invalid MP3'));
+	});
+	const canvas = page.locator('canvas');
+	await page.locator('[data-sdl-audio]').click();
+	await expect(page.locator('[data-sdl-status]')).toContainText('Audio unavailable: Decode music:');
+	await expect(page.locator('[data-sdl-audio]')).toHaveText('Retry audio');
+	const loadedMp3 = await page.evaluate(async () => {
+		window.sdlOutput = '';
+		await window.sdlPhp.run('<?php echo Mix_Init(0) & MIX_INIT_MP3;');
+		return window.sdlOutput;
+	});
+	expect(loadedMp3).toBe('0');
+	const frames = Number(await canvas.getAttribute('data-frames'));
+	await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(frames);
+	await page.evaluate(async () => {
+		(await window.sdlPhp.binary).FS.writeFile('/preload/sdl/WOJTEK3.mp3', window.goodMusic);
+		delete window.goodMusic;
+	});
+	await page.locator('[data-sdl-audio]').click();
+	await expect(page.locator('[data-sdl-audio]')).toHaveText('Mute audio');
+	await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound on');
+	await page.evaluate(() => window.sdlPhp.refresh());
+	await expect(canvas).toHaveAttribute('data-stopped', '1');
 	expect(errors).toEqual([]);
 	expect(await page.evaluate(() => window.sdlErrors)).toBe('');
 });
@@ -179,7 +280,9 @@ test('native bindings check uploads, preserve colors and invalidate freed audio/
 		$missing = [IMG_Load('/missing.png'), TTF_OpenFont('/missing.ttf', 12), Mix_LoadWAV('/missing.wav'), Mix_LoadMUS('/missing.ogg')];
 		file_put_contents('/bad.png', 'invalid image');
 		$missing[] = IMG_Load('/bad.png');
-		$decoders = [Mix_HasMusicDecoder('OGG'), Mix_HasMusicDecoder('MP3'), Mix_GetChunkDecoder(-1), Mix_GetMusicDecoder(-1)];
+		file_put_contents('/bad.mp3', 'invalid MP3');
+		$missing[] = Mix_LoadMUS('/bad.mp3');
+		$decoders = [Mix_HasMusicDecoder('OGG'), Mix_HasMusicDecoder('MP3'), Mix_HasMusicDecoder('FLAC'), Mix_GetChunkDecoder(-1), Mix_GetMusicDecoder(-1)];
 		$errors = [];
 		$reject = function($name, $callback) use (&$errors) {
 			try { $callback(); } catch(ValueError | TypeError | Error $error) { $errors[] = $name; }
@@ -250,8 +353,8 @@ test('native bindings check uploads, preserve colors and invalidate freed audio/
 	expect(result.stderr).toBe('');
 	const data = JSON.parse(result.output);
 	expect(data.images).toEqual({png: [128, 128], jpg: [128, 128], bmp: [128, 128]});
-	expect(data.missing).toEqual([null, null, null, null, null]);
-	expect(data.decoders).toEqual([true, false, null, null]);
+	expect(data.missing).toEqual([null, null, null, null, null, null]);
+	expect(data.decoders).toEqual([true, true, false, null, null]);
 	expect(data.color).toBe('f9cf47ff');
 	expect(data.surfaceColors).toEqual(['112233ff', '11223344']);
 	expect(data.complete && data.diagnostic && data.same && data.streamed && data.emptyPoll).toBe(true);

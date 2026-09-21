@@ -139,6 +139,42 @@ test('embedded php hello world runs', async ({ page }) => {
 });
 
 test.describe('SDL demo controls', () => {
+	test('cube links reload from a fragment and its canvas fills the preview after resize', async ({page, context}) => {
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+		const share = new URL(page.url());
+		expect(share.searchParams.has('code')).toBe(false);
+		expect(new URLSearchParams(share.hash.slice(1)).get('code')).toContain('SDL cube');
+		expect(share.pathname.length + share.search.length).toBeLessThan(200);
+		for(const viewport of [{width: 1280, height: 1000}, {width: 1000, height: 850}])
+		{
+			await page.setViewportSize(viewport);
+			await expect.poll(() => page.locator('canvas').evaluate(canvas => {
+				const box = canvas.parentElement.getBoundingClientRect();
+				const rect = canvas.getBoundingClientRect();
+				return Math.abs(rect.width - box.width) < 1 && Math.abs(rect.height - box.height) < 1
+					&& canvas.width === canvas.clientWidth && canvas.height === canvas.clientHeight;
+			})).toBe(true);
+		}
+		await page.locator('canvas').press('Escape');
+		const copy = await context.newPage();
+		const requests = [];
+		copy.on('request', request => { if(request.isNavigationRequest()) requests.push(request.url()); });
+		share.pathname = share.pathname.replace('embedded-php.html', 'home.html');
+		await copy.goto(share.href, {waitUntil: 'domcontentloaded'});
+		await expect(copy).toHaveURL(/\/embedded-php\.html/);
+		await expect(copy.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+		expect(requests.every(url => !new URL(url).searchParams.has('code') && !url.includes('#code='))).toBe(true);
+		await expect(copy.locator('.stderr')).toHaveText('');
+		await copy.locator('canvas').press('Escape');
+		await copy.evaluate(() => {
+			const code = '<?php //{"autorun":true,"persist":false,"canvas":false,"extensionFlags":0}\n echo "fragment navigation";';
+			window.location.hash = new URLSearchParams({code}).toString();
+		});
+		await expect(copy.locator('.stdout .scroller').last()).toHaveText('fragment navigation', {timeout: 180000});
+		await copy.close();
+	});
+
 	test('cube supports input, audio, refresh, rerun and switching to sine', async ({page}) => {
 		const failures = [];
 		page.on('pageerror', error => failures.push(error.message));
@@ -146,6 +182,7 @@ test.describe('SDL demo controls', () => {
 		const canvas = page.locator('canvas');
 		const status = page.locator('[data-sdl-status]');
 		await expect(status).toHaveText('Running · sound off', {timeout: 180000});
+		await expect(page.locator('[data-sdl-credit]')).toHaveText('Music: Unreal Superhero 3 — Kenët and rez');
 		await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(2);
 		await canvas.press('Space');
 		await expect(canvas).toHaveAttribute('data-paused', '1');

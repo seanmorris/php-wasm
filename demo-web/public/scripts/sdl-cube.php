@@ -25,6 +25,8 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 	private $stopped = false, $lost = false, $paused = false, $muted = true, $audio = false;
 	private $audioError = null;
 	private $x = .35, $y = .55, $last = 0, $frames = 0, $started = 0;
+	private $width = 640, $height = 400, $textWidth = 0, $textHeight = 0;
+	private $resizeObserver = null, $resizePending = true;
 	private const WIDTH = 640, HEIGHT = 400;
 
 	public function __construct($browser, $canvas, $refresh, $shared)
@@ -40,6 +42,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->panel->className = 'sdl-controls';
 		$this->panel->innerHTML = '<button type="button" data-sdl-audio>Enable audio</button>'
 			. '<span role="status" data-sdl-status>Starting SDL...</span>'
+			. '<small data-sdl-credit>Music: Unreal Superhero 3 — Kenët and rez</small>'
 			. '<small>Focus the canvas: arrows/WASD rotate · Space pauses · R resets · M mutes · Esc stops</small>';
 		$browser->document->querySelector('#example')->appendChild($this->panel);
 		$this->button = $this->panel->querySelector('[data-sdl-audio]');
@@ -82,6 +85,9 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->font = TTF_OpenFont('/preload/sdl/DejaVuSansMono.ttf', 18);
 		$this->check($this->font, 'Load font');
 		$this->buildGraphics();
+		$ResizeObserver = $this->browser->ResizeObserver;
+		$this->resizeObserver = new $ResizeObserver(function() { $this->resizePending = true; });
+		$this->resizeObserver->observe($this->canvas);
 
 		$this->listen($this->button, 'click', function() {
 			try
@@ -200,8 +206,8 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->uploadSurface(IMG_Load('/preload/sdl/sean-icon-32.png'), $this->textures[0], GL_NEAREST);
 		$text = TTF_RenderText_Blended($this->font, 'PHP / SDL + OpenGL', new SDL_Color(255, 255, 255, 255));
 		$this->check($text, 'Render text');
-		$right = -.94 + 2 * $text->w / self::WIDTH;
-		$bottom = .92 - 2 * $text->h / self::HEIGHT;
+		$this->textWidth = $text->w;
+		$this->textHeight = $text->h;
 		$this->uploadSurface($text, $this->textures[1]);
 
 		$vertices = $indices = [];
@@ -219,18 +225,43 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 			foreach($points as $index => $point) { array_push($vertices, ...array_merge($point, $uv[$index], [.6 + ($face % 3) * .2])); }
 			foreach([0,1,2,0,2,3] as $index) { $indices[] = $face * 4 + $index; }
 		}
-		$overlay = [-.94,$bottom,0,0,1,1, $right,$bottom,0,1,1,1, -.94,.92,0,0,0,1, $right,.92,0,1,0,1];
 		glGenBuffers(3, $this->buffers);
-		foreach([[0, GL_ARRAY_BUFFER, pack('g*', ...$vertices)], [1, GL_ELEMENT_ARRAY_BUFFER, pack('v*', ...$indices)], [2, GL_ARRAY_BUFFER, pack('g*', ...$overlay)]] as [$index, $target, $bytes])
+		foreach([[0, GL_ARRAY_BUFFER, pack('g*', ...$vertices)], [1, GL_ELEMENT_ARRAY_BUFFER, pack('v*', ...$indices)]] as [$index, $target, $bytes])
 		{
 			glBindBuffer($target, $this->buffers[$index]);
 			glBufferData($target, strlen($bytes), $bytes, GL_STATIC_DRAW);
 		}
-		glViewport(0, 0, self::WIDTH, self::HEIGHT);
+		$this->resizePending = true;
+		$this->resize();
 		glClearColor(.025, .04, .075, 1);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if($error = glGetError()) { throw new RuntimeException('OpenGL setup error: ' . $error); }
+	}
+
+	private function resize(): void
+	{
+		if(!$this->resizePending) { return; }
+		$this->resizePending = false;
+		$width = max(1, (int)$this->canvas->clientWidth);
+		$height = max(1, (int)$this->canvas->clientHeight);
+		if($this->canvas->width !== $width || $this->canvas->height !== $height)
+		{
+			SDL_SetWindowSize($this->window, $width, $height);
+			$this->canvas->width = $width;
+			$this->canvas->height = $height;
+		}
+		$this->width = $width;
+		$this->height = $height;
+		glViewport(0, 0, $width, $height);
+		$left = -1 + 24 / $width;
+		$top = 1 - 24 / $height;
+		$right = $left + 2 * $this->textWidth / $width;
+		$bottom = $top - 2 * $this->textHeight / $height;
+		$overlay = [$left,$bottom,0,0,1,1, $right,$bottom,0,1,1,1, $left,$top,0,0,0,1, $right,$top,0,1,0,1];
+		$bytes = pack('g*', ...$overlay);
+		glBindBuffer(GL_ARRAY_BUFFER, $this->buffers[2]);
+		glBufferData(GL_ARRAY_BUFFER, strlen($bytes), $bytes, GL_STATIC_DRAW);
 	}
 
 	private function attributes(int $buffer): void
@@ -248,8 +279,10 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		// Column-major perspective * translation * rotationY * rotationX.
 		$cx = cos($this->x); $sx = sin($this->x); $cy = cos($this->y); $sy = sin($this->y);
 		$model = [$cy,0,-$sy,0, $sy*$sx,$cx,$cy*$sx,0, $sy*$cx,-$sx,$cy*$cx,0, 0,0,-5,1];
-		$f = 1 / tan(M_PI / 8);
-		$projection = [$f/(self::WIDTH/self::HEIGHT),0,0,0, 0,$f,0,0, 0,0,-100.1/99.9,-1, 0,0,-20/99.9,0];
+		$aspect = $this->width / $this->height;
+		// Keep the same field of view on the shorter axis in landscape or portrait.
+		$f = min(1, $aspect) / tan(M_PI / 8);
+		$projection = [$f/$aspect,0,0,0, 0,$f,0,0, 0,0,-100.1/99.9,-1, 0,0,-20/99.9,0];
 		$result = array_fill(0, 16, 0.0);
 		for($column = 0; $column < 4; $column++)
 		{
@@ -292,6 +325,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		if($this->stopped || $this->lost) { return; }
 		// The browser can lose the context just before dispatching its event.
 		if($this->canvas->getContext('webgl2')->isContextLost()) { return; }
+		$this->resize();
 		$delta = $this->last ? min(.05, ($time - $this->last) / 1000) : 0;
 		$this->last = $time;
 		$this->input($delta);
@@ -331,11 +365,13 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		{
 			try
 			{
-				$this->check(Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024) === 0, 'Open audio');
+				$this->check(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) === 0, 'Open audio');
 				$this->audio = true;
-				$this->music = Mix_LoadMUS('/preload/sdl/loop.ogg');
+				$this->check((Mix_Init(MIX_INIT_MP3) & MIX_INIT_MP3) === MIX_INIT_MP3, 'Initialize MP3 decoder');
+				$this->music = Mix_LoadMUS('/preload/sdl/WOJTEK3.mp3');
+				$this->check($this->music, 'Decode music');
 				$this->effect = Mix_LoadWAV('/preload/sdl/click.wav');
-				$this->check($this->music && $this->effect, 'Decode audio');
+				$this->check($this->effect, 'Decode effect');
 				Mix_VolumeMusic(48);
 				$this->check(Mix_PlayMusic($this->music, -1) === 0, 'Play music');
 			}
@@ -343,7 +379,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 			{
 				if($this->music) { Mix_FreeMusic($this->music); $this->music = null; }
 				if($this->effect) { Mix_FreeChunk($this->effect); $this->effect = null; }
-				if($this->audio) { Mix_CloseAudio(); $this->audio = false; }
+				if($this->audio) { Mix_CloseAudio(); Mix_Quit(); $this->audio = false; }
 				throw $error;
 			}
 		}
@@ -376,6 +412,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		if($this->stopped) { return; }
 		$this->stopped = true;
 		$this->browser->cancelAnimationFrame($this->animation);
+		if($this->resizeObserver) { $this->resizeObserver->disconnect(); $this->resizeObserver = null; }
 		foreach($this->listeners as [$target, $name, $callback]) { $target->removeEventListener($name, $callback); }
 		$this->listeners = [];
 		$this->refresh->delete($this->cleanup);
@@ -383,7 +420,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		if($this->audio) { Mix_HaltMusic(); Mix_HaltChannel(-1); }
 		if($this->music) { Mix_FreeMusic($this->music); $this->music = null; }
 		if($this->effect) { Mix_FreeChunk($this->effect); $this->effect = null; }
-		if($this->audio) { Mix_CloseAudio(); $this->audio = false; }
+		if($this->audio) { Mix_CloseAudio(); Mix_Quit(); $this->audio = false; }
 		$this->releaseGraphics();
 		if($this->font) { TTF_CloseFont($this->font); $this->font = null; }
 		TTF_Quit();

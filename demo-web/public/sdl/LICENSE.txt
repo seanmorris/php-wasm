@@ -1,5 +1,13 @@
 click.wav and loop.ogg were generated for php-wasm and are covered by the repository Apache-2.0 license.
 
+WOJTEK3.mp3: "Unreal Superhero 3"
+Artist and composer: Kenët and rez
+Album artist: Rebels
+Album: chipmusicdisk (2001)
+Credits transcribed from the supplied MP3's ID3 tags. The original audio and
+metadata are preserved; this track is not covered by the generated samples'
+Apache-2.0 license.
+
 DejaVuSansMono.ttf is distributed unchanged under the following font license:
 
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/

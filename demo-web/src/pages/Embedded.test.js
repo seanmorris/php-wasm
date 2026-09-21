@@ -115,7 +115,22 @@ echo "Hello, World!";
 		});
 
 		expect(executedCode).not.toBe('');
-		expect(new URLSearchParams(window.location.search).get('code')).not.toBe('');
+		expect(new URLSearchParams(window.location.search).has('code')).toBe(false);
+		expect(new URLSearchParams(window.location.hash.slice(1)).get('code')).toBe(executedCode);
+	});
+
+	it.each(['fragment', 'legacy query'])('restores and autoruns shared code from a %s link while Ace is empty', async kind => {
+		const code = phpCode + '// Unicode: 🧊 café; literals: 100% %20 + # &\n';
+		const source = kind === 'fragment'
+			? `#${new URLSearchParams({code})}`
+			: `&${new URLSearchParams({code: encodeURIComponent(code)})}`;
+		window.history.replaceState({}, '', `/embedded-php.html?version=8.4&extensionFlags=0${source}`);
+		render(<Embedded />);
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+		expect(phpRun.mock.calls[0][0]).toContain('// Unicode: 🧊 café; literals: 100% %20 + # &');
+		expect(globalThis.fetch).not.toHaveBeenCalled();
+		expect(new URLSearchParams(window.location.search).has('code')).toBe(false);
+		expect(new URLSearchParams(window.location.hash.slice(1)).get('code')).toBe(phpRun.mock.calls[0][0]);
 	});
 
 	it('boots the embedded demo only once under StrictMode', async () => {
@@ -189,14 +204,14 @@ echo "Hello, World!";
 	});
 
 	it('shows asset errors without starting PHP code', async () => {
-		prepareSdlAssets.mockRejectedValueOnce(new Error('SDL asset loop.ogg: HTTP 404'));
+		prepareSdlAssets.mockRejectedValueOnce(new Error('SDL asset WOJTEK3.mp3: HTTP 404'));
 		globalThis.fetch.mockResolvedValue({
 			ok: true
 			, text: async () => '<?php //{"autorun":true,"persist":true,"canvas":true,"variant":"_sdl","assets":"sdl","extensionFlags":0}\n echo "cube";'
 		});
 		const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 		const {container} = render(<Embedded />);
-		await waitFor(() => expect(container.querySelector('.stderr')).toHaveTextContent('SDL asset loop.ogg: HTTP 404'));
+		await waitFor(() => expect(container.querySelector('.stderr')).toHaveTextContent('SDL asset WOJTEK3.mp3: HTTP 404'));
 		expect(phpRun).not.toHaveBeenCalled();
 		errorLog.mockRestore();
 	});

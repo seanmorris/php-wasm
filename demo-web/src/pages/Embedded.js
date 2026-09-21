@@ -14,6 +14,7 @@ import Confirm from '../components/Confirm';
 import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { prepareSdlAssets } from '../lib/sdlAssets';
+import { readEmbeddedCode, replaceEmbeddedUrl } from '../lib/embeddedUrl';
 
 import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
@@ -153,11 +154,8 @@ function Embedded()
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
-	const initialQueryCode = useMemo(
-		() => decodeURIComponent((new URLSearchParams(window.location.search)).get('code') || '')
-		, []
-	);
-	const input = useRef(initialQueryCode);
+	const initialCode = useMemo(() => readEmbeddedCode(window.location), []);
+	const input = useRef(initialCode ?? '');
 	const persist = useRef('');
 	const single = useRef('');
 	const canvasCheckbox = useRef('');
@@ -172,7 +170,7 @@ function Embedded()
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
-	const [editorValue, setEditorValue] = useState(initialQueryCode);
+	const [editorValue, setEditorValue] = useState(initialCode ?? '');
 	const [exitCode, setExitCode] = useState('');
 	const [stdOut, setStdOut] = useState('');
 	const [stdErr, setStdErr] = useState('');
@@ -376,12 +374,10 @@ function Embedded()
 			, 'assets': settings.assets
 		})}\n`);
 
-		query.set('code', encodeURIComponent(code));
-		query.set('canvas', encodeURIComponent(showCanvas ? 1 : 0));
-		query.set('version', encodeURIComponent(version));
-		query.set('variant', encodeURIComponent(variant));
-
-		window.history.replaceState({}, document.title, "?" + query.toString());
+		query.set('canvas', showCanvas ? '1' : '0');
+		query.set('version', version);
+		query.set('variant', variant);
+		replaceEmbeddedUrl(query, code);
 
 		if(single.current.checked)
 		{
@@ -496,12 +492,7 @@ function Embedded()
 			query.set('extensionFlags', settings.extensionFlags);
 		}
 
-		if(phpCode.length < 1024)
-		{
-			query.set('code', encodeURIComponent(phpCode));
-		}
-
-		window.history.replaceState({}, document.title, "?" + query.toString());
+		replaceEmbeddedUrl(query, phpCode);
 
 		await loadExtensions();
 		applySettings(settings);
@@ -524,10 +515,11 @@ function Embedded()
 		selectVariantBox.current.value = query.get('variant') ?? '';
 		canvasCheckbox.current.checked = (query.get('canvas') ?? '0') === '1';
 
-		const settings = parseDemoSettings(initialQueryCode);
+		if(initialCode !== null) replaceEmbeddedUrl(query, initialCode);
+		const settings = parseDemoSettings(initialCode ?? '');
 		applySettings(settings);
 
-		if(query.has('demo'))
+		if(query.has('demo') && initialCode === null)
 		{
 			const demoName = query.get('demo');
 			selectDemoBox.current.value = demoName;
@@ -544,10 +536,21 @@ function Embedded()
 			clearPendingAutorun();
 			autorunTimeout.current = setTimeout(() => {
 				autorunTimeout.current = null;
-				void runCode();
+				void runCode(initialCode);
 			}, 1);
 		}
 	});
+
+	useEffect(() => {
+		// A new fragment is same-document navigation. Reload shared source just
+		// as a query link did, including its runtime settings and cleanup.
+		const loadSharedFragment = () => {
+			const code = readEmbeddedCode(window.location);
+			if(code !== null && code !== input.current) window.location.reload();
+		};
+		window.addEventListener('hashchange', loadSharedFragment);
+		return () => window.removeEventListener('hashchange', loadSharedFragment);
+	}, []);
 
 	useEffect(() => {
 		// Delay the one-shot boot so StrictMode's dev-only effect replay can

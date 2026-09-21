@@ -52,9 +52,9 @@ function Home()
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	useEffect(() => {
-		if(query.has('code') || query.has('demo'))
+		if(query.has('code') || query.has('demo') || new URLSearchParams(window.location.hash.slice(1)).has('code'))
 		{
-			window.location = basePath(`embedded-php.html${window.location.search}`);
+			window.location = basePath(`embedded-php.html${window.location.search}${window.location.hash}`);
 		}
 	}, [query]);
 
