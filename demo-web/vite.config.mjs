@@ -4,7 +4,9 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
+import { patchPhpEditorWorker } from './src/lib/phpEditorWorker.js';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -72,6 +74,53 @@ const trimmedAppBase = appBase.endsWith('/')
 
 const rootHtmlPath = path.resolve(__dirname, 'src/index.html');
 
+/** Serve and emit the same checked Ace worker correction without editing node_modules. */
+const phpEditorWorkerPlugin = () => {
+	const moduleId = '\0php-editor-worker';
+	const filename = 'php-editor-worker.js';
+	const workerPath = createRequire(import.meta.url).resolve('ace-builds/src-noconflict/worker-php.js');
+	let command;
+	let source;
+	const getSource = () => source ??= fs.readFile(workerPath, 'utf8').then(patchPhpEditorWorker);
+
+	return {
+		name: 'php-editor-worker'
+		, configResolved(config) { command = config.command; }
+		, resolveId(id) { return id === 'php-editor-worker' ? moduleId : null; }
+		, async load(id) {
+			if(id !== moduleId)
+			{
+				return null;
+			}
+			if(command !== 'build')
+			{
+				return `export default ${JSON.stringify(appBase + filename)};`;
+			}
+			const reference = this.emitFile({type: 'asset', name: filename, source: await getSource()});
+			return `export default import.meta.ROLLUP_FILE_URL_${reference};`;
+		}
+		, configureServer(server) {
+			server.middlewares.use(async (req, res, next) => {
+				if(new URL(req.url, 'http://localhost').pathname !== appBase + filename)
+				{
+					next();
+					return;
+				}
+				try
+				{
+					res.setHeader('content-type', 'application/javascript');
+					res.setHeader('cache-control', 'no-cache');
+					res.end(await getSource());
+				}
+				catch(error)
+				{
+					next(error);
+				}
+			});
+		}
+	};
+};
+
 /**
  * Serves every legacy HTML alias through the same transformed Vite entry document.
  */
@@ -114,6 +163,7 @@ export default defineConfig(() => ({
 	plugins: [
 		react({include: /\.[jt]sx?$/})
 		, legacyHtmlAliasPlugin()
+		, phpEditorWorkerPlugin()
 	]
 	, assetsInclude: ['**/*.dat', '**/*.so', '**/*.wasm']
 	, base: appBase

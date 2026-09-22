@@ -139,6 +139,54 @@ test('embedded php hello world runs', async ({ page }) => {
 });
 
 test.describe('SDL demo controls', () => {
+	test('cube shader nowdocs preserve highlighting and syntax validation', async ({page}) => {
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		await page.waitForFunction(() => document.querySelector('#input')?.env?.editor?.getValue().includes('glCreateProgram'));
+		await page.waitForFunction(() => {
+			const session = document.querySelector('#input').env.editor.session;
+			return session.bgTokenizer.currentLine >= session.getLength();
+		});
+		const highlighting = await page.evaluate(() => {
+			const session = document.querySelector('#input').env.editor.session;
+			const lines = session.getDocument().getAllLines();
+			const endings = lines.flatMap((line, index) => /^\s+GLSL\);$/.test(line) ? [index] : []);
+			return endings.map(row => ({
+				closing: session.getTokens(row)
+				, after: session.getTokens(row + 1)
+			}));
+		});
+		expect(highlighting).toHaveLength(2);
+		for(const {closing, after} of highlighting)
+		{
+			expect(closing.some(token => token.type === 'markup.list')).toBe(true);
+			expect(after.some(token => token.type === 'variable')).toBe(true);
+		}
+		await page.waitForFunction(() => document.querySelector('#input')?.env?.editor?.session.$worker);
+		const diagnostics = await page.evaluate(async () => {
+			const session = document.querySelector('#input').env.editor.session;
+			const worker = session.$worker;
+			const validate = code => new Promise(resolve => {
+				const report = event => {
+					worker.off('annotate', report);
+					resolve(event.data);
+				};
+				worker.on('annotate', report);
+				worker.call('setValue', [code]);
+			});
+			const code = session.getValue();
+			return {
+				enabled: session.getUseWorker()
+				, cube: await validate(code)
+				, broken: await validate("<?php\n$value = <<<'END'\n  body\n  END;\n$broken = ;")
+				, restored: await validate(code)
+			};
+		});
+		expect(diagnostics.enabled).toBe(true);
+		expect(diagnostics.cube).toEqual([]);
+		expect(diagnostics.broken).toEqual([expect.objectContaining({row: 4, type: 'error', text: expect.stringContaining("unexpected ';'")})]);
+		expect(diagnostics.restored).toEqual([]);
+	});
+
 	for(const locks of ['browser locks', 'without Web Locks'])
 	{
 		test(`typing in the code editor preserves canvas controls (${locks})`, async ({page}) => {

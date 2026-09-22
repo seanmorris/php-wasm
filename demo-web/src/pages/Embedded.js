@@ -15,11 +15,11 @@ import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { prepareSdlAssets } from '../lib/sdlAssets';
 import { readEmbeddedCode, replaceEmbeddedUrl } from '../lib/embeddedUrl';
+import { createPhpEditorMode } from '../lib/phpEditorMode';
 
-import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-import phpWorkerUrl from "ace-builds/src-noconflict/worker-php?url";
+import phpWorkerUrl from 'php-editor-worker';
 ace.config.setModuleUrl("ace/mode/php_worker", phpWorkerUrl);
 
 // import yaml from 'php-wasm-yaml';
@@ -154,6 +154,7 @@ function Embedded()
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
+	const editorMode = useMemo(() => createPhpEditorMode(), []);
 	const initialCode = useMemo(() => readEmbeddedCode(window.location), []);
 	const input = useRef(initialCode ?? '');
 	const persist = useRef('');
@@ -799,7 +800,7 @@ function Embedded()
 						<div className = "liquid" id = "input-box">
 							<AceEditor
 								height = "100%"
-								mode = "php"
+								mode = {editorMode}
 								name = "input"
 								onChange = {codeChanged}
 								ref = {editor}

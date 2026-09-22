@@ -47,7 +47,7 @@ vi.mock('@electric-sql/pglite', () => ({
 	PGlite: class PGliteMock {}
 }));
 
-vi.mock('ace-builds/src-noconflict/mode-php', () => ({}));
+vi.mock('../lib/phpEditorMode', () => ({createPhpEditorMode: () => ({})}));
 vi.mock('ace-builds/src-noconflict/theme-monokai', () => ({}));
 
 vi.mock('react-ace', () => ({
