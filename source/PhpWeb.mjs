@@ -1,5 +1,5 @@
 import { PhpBase } from './PhpBase.mjs';
-import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { commitTransaction, requestWebLock, startTransaction } from './webTransactions.mjs';
 
 const defaultVersion = '8.4';
 const defaultVariant = '';
@@ -100,7 +100,7 @@ export class PhpWeb extends PhpBase
 	{
 		await super.refresh();
 		const php = await this.binary;
-		await navigator.locks.request('php-wasm-fs-lock', () => {
+		await requestWebLock('php-wasm-fs-lock', () => {
 			return new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {
 					if(error) reject(error);
@@ -130,7 +130,7 @@ export class PhpWeb extends PhpBase
 
 		this.queue.push([callback, params, _accept, _reject]);
 
-		navigator.locks.request('php-wasm-fs-lock', async () => {
+		requestWebLock('php-wasm-fs-lock', async () => {
 			if(!this.queue.length)
 			{
 				return;

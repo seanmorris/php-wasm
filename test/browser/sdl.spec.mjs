@@ -37,6 +37,28 @@ const startCube = async page => {
 	}, {version, libType});
 };
 
+test('SDL cube starts and refreshes without Web Locks', async ({page}) => {
+	const errors = [];
+	page.on('pageerror', error => errors.push(error.message));
+	await page.addInitScript(() => {
+		Object.defineProperty(navigator, 'locks', {configurable: true, value: undefined});
+	});
+	const result = await startCube(page);
+	expect(result.stderr).toBe('');
+	expect(result.status).toBe(0);
+	expect(await page.evaluate(() => navigator.locks)).toBeUndefined();
+	const canvas = page.locator('canvas');
+	await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(2);
+	await page.evaluate(() => window.sdlPhp.refresh());
+	await expect(canvas).toHaveAttribute('data-stopped', '1');
+	await page.evaluate(() => window.sdlPhp.run(window.sdlCode));
+	await expect(canvas).toHaveAttribute('data-stopped', '0');
+	await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(2);
+	await page.evaluate(() => window.sdlPhp.refresh());
+	expect(await page.evaluate(() => window.sdlErrors)).toBe('');
+	expect(errors).toEqual([]);
+});
+
 test('SDL cube renders texture and text, moves, handles focused input and cleans up on refresh', async ({page}, testInfo) => {
 	const errors = [];
 	page.on('pageerror', error => errors.push(error.message));

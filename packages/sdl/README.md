@@ -41,6 +41,12 @@ The cube needs WebGL2. Context loss pauses it; restoration recreates its shaders
 buffers and textures. Asset downloads have HTTP checks and a 30-second timeout;
 missing or undecodable assets report an error instead of blocking startup.
 
+Local testing over HTTP on a LAN IP works without Web Locks. Browser wrappers
+use a FIFO lock within the current page or worker when `navigator.locks` is
+unavailable. For filesystem coordination across tabs or workers, use HTTPS
+with a browser that provides Web Locks; the local fallback cannot coordinate
+those separate contexts.
+
 ## Use the runtime
 
 ```js
