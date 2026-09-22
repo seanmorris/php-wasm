@@ -85,6 +85,29 @@ profile fix and the Ace heredoc correction, but predates the audio-test fix.
 See [the evidence record](benchmarks/2026-09-22-ci-regressions.json). These local
 results do not replace full CI with the final source.
 
+## Manual device checks
+
+These cases require physical devices or OS facilities unavailable in the Linux
+automation above. They are **unverified**, and are not included in its pass
+counts. Use the cube for mobile startup, focus and audible playback; use an SDL
+application that logs `SDL_PollEvent()` and the listed queries for input checks.
+Keep the event loop yielding to browser frames as described in the README.
+
+| Device or facility | Actions | Results to record |
+| --- | --- | --- |
+| iPhone/iPad Safari | Load over both HTTPS and an HTTP LAN address; run the cube, tap Enable audio, rotate the device, background/restore the page and restart the runtime | Startup without a missing-Web-Locks error; resize/aspect behavior; gesture requirements and playback after explicit resume/reopen. The HTTP fallback coordinates only one page/worker. |
+| Physical keyboard and OS IME | Hold a key/modifier while moving focus to the editor; compose Japanese/Chinese text and a long Unicode commit after `SDL_StartTextInput()`; stop during composition; repeat in fullscreen | Key releases and normal editor typing; `SDL_TEXTEDITING` selection in codepoints; concatenated `SDL_TEXTINPUT` bytes equal committed UTF-8. Fullscreen IME requires EditContext; the textarea path must report that limit through `SDL_GetError()`. Font shaping is a separate limitation. |
+| USB/Bluetooth controllers | Press a button to expose each device, poll an open controller each frame, exercise axes/buttons, disconnect and reconnect at the same browser index; repeat with two devices | Browser mapping and event payloads; a new SDL instance ID on reconnection; the retained old handle stays detached. Record devices that the browser does not expose. Close controller and separately acquired joystick references. |
+| Touchscreen | Move two contacts independently on a CSS-scaled canvas, lift each contact and trigger browser cancellation; repeat after rotation | Finger identity across motion, normalized positions/deltas and cancellation events. The pinned backend reports pressure as 1; pressure sensitivity is not claimed. |
+| Hardware audio output | Play concurrent WAV effects and MP3 music, suspend/resume through browser or OS controls, change the output route where supported, then close/reopen and refresh repeatedly | Audible output, interruption/resume policy, mixer return values and diagnostics; no hung close/reopen. Record glitches and device latency separately from the software-sink measurements. |
+| Hardware GPU | Run the rendering fixtures on the actual GPU, resize/recreate targets, lose/restore the WebGL context and recreate assets; exercise only advertised compressed formats | Pixel/error results, reported capabilities, resource recreation and frame times. Software-renderer results do not establish driver support or hardware performance. |
+
+For each result, retain the commit, matching JS/Wasm hashes, PHP/profile,
+browser/OS/device versions, origin (HTTPS or HTTP), permission/gesture sequence,
+event/query output and SDL/GL/browser diagnostics. Record unsupported browser
+capabilities explicitly. A physical-device pass must come from that device;
+simulated input, Linux WebKit and a software audio sink are not substitutes.
+
 ## Initial local baseline
 
 The initial extension/cube delivery is at `84475db`. The subsequent binding

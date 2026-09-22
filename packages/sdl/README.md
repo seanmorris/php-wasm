@@ -31,6 +31,8 @@ original builds.
 See [COVERAGE.md](COVERAGE.md), [cleanup results](benchmarks/2026-09-22-cleanup.json),
 [size comparison](benchmarks/2026-09-22-cleanup-size.json) and
 [CI regression evidence](benchmarks/2026-09-22-ci-regressions.json).
+The [manual device checks](COVERAGE.md#manual-device-checks) list the remaining
+physical input, mobile, GPU and audio cases and the evidence to collect.
 
 ## Run the example
 
