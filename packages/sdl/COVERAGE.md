@@ -229,15 +229,27 @@ memory. The package README contains a normalized comparison table.
 Native allocations and live bytes plateau during the sampled rounds; graphics
 cleanup retains the known three SDL TLS allocations, and event cleanup returns
 to zero. This is fixture-specific evidence, not general leak freedom. Indexed
-draw submission is costly on this browser; the per-draw buffer queries are a
-candidate for further profiling. Some instanced submission samples are below
+draw submission is costly on this browser; the per-draw buffer queries are
+measured separately below. Some instanced submission samples are below
 the SDL clock resolution, and draw/texture timings vary between the two
 runs. These shared-host SwiftShader results do not establish hardware GPU or
 game FPS limits. All controlled native builds, compression and other tests were
 idle during timing. The measurements include the mixer correction. Texture
 and uniform cases first render opposite data, and four deliberate driver no-op
-probes fail their guards. Indexed-query profiling and wider device coverage
-remain open.
+probes fail their guards. Wider device coverage remains open.
+
+Two further idle runs use `test/perf/sdl/index-queries.mjs` on the matching
+`f191496` pair. Six rotating rounds interleave original and observed WebGL
+methods without changing their results or the PHP bounds checks. Counts match
+all 1,024 ordinary indexed draws or the single instanced draw per batch; every
+sample passes full-frame equality. About 92% of observed indexed submission
+is inside the buffer-size query: 100.488 / 92.338 ms per 1,024 draws, versus
+109.375 / 100.625 ms total observed submission. These call times include queued
+rendering synchronization and observer overhead. Original-method submission
+is 100.875 / 100.000 ms; retain both runs and avoid hardware GPU claims.
+Exact inputs and samples are in `benchmarks/2026-09-22-index-queries-first.json`
+and `-second.json`. Existing instancing amortizes validation; no checks were
+removed or speculative caches introduced by the investigation.
 
 Two further idle runs on `f191496` measure color/depth, two-output MRT and
 four-sample resolve targets, plus actual audio callbacks for 1/8/32 channels,

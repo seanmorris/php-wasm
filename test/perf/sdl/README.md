@@ -106,6 +106,16 @@ frame precedes timing, so stale output cannot satisfy the final pixel check.
 Each sample repeats 1,024 batches to keep submission above the SDL clock
 resolution; frame intervals describe that entire sample, not a game frame.
 
+For the indexed-draw query investigation, run `index-queries.mjs` twice with
+the same artifact-directory/output arguments. It reuses the checked instancing
+fixture with four batches per sample. Six rotating rounds compare original
+browser methods with wrappers that count and time the real bound-buffer and
+buffer-size queries and draw calls. Query results and PHP validation remain
+unchanged. Counts must match the number of indexed draws; every sample still
+passes full-frame pixel verification. Observed call time includes any waiting
+for previously queued rendering, and the observer adds overhead. Keep both
+uninstrumented and observed samples when interpreting the result.
+
 ## Concurrent mixing
 
 After builds, compression and other tests finish, run twice:

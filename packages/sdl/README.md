@@ -858,8 +858,40 @@ Use `test/perf/sdl/throughput.mjs` as described in `test/perf/sdl/README.md`.
 These runs include the mixer cleanup correction. Texture/uniform cases first
 render the opposite data, so stale state cannot mask a missing update; four
 driver no-op probes confirm those checks fail. SDL texture measurements use
-WebGL1, while the direct GL paths use WebGL2. Indexed-query profiling remains
-separate work; target and concurrent mixer measurements follow below.
+WebGL1, while the direct GL paths use WebGL2. The indexed-query investigation
+and target/concurrent mixer measurements follow below.
+
+## Indexed-draw query investigation
+
+Two further idle runs on the matching `f191496` pair interleave original browser
+methods with observers that count and time the real calls. Each sample draws
+four batches of 1,024 triangles and verifies the complete framebuffer; two
+warmups precede six rotating rounds. These are medians per batch in milliseconds:
+
+| Ordinary indexed submission | Run 1 / 2 |
+| --- | ---: |
+| Original browser methods | 100.875 / 100.000 |
+| Observed browser methods | 109.375 / 100.625 |
+| Inside 1,024 buffer-size queries | 100.488 / 92.338 |
+| Inside 1,024 bound-buffer queries | 1.425 / 1.438 |
+| Inside 1,024 draw calls | 1.462 / 1.363 |
+
+About 92% of observed submission time is inside `getBufferParameter`, including
+waiting for previously queued rendering. This is not an isolated CPU query
+cost or a hardware GPU result. Observers add overhead; both observed and
+original-method samples are retained. The instanced path performs one size
+query per batch, taking 0.138 / 0.125 ms inside that query. Ordinary non-indexed
+submission takes 1.500 / 1.500 ms with the original methods, although its
+readback still waits for rendering. Batching through the existing instanced
+API avoids repeating the checked index-range queries for each triangle.
+
+The binding keeps its bounds checks. A future size cache would need correct
+buffer reallocation/deletion, VAO/context and external WebGL mutation handling.
+Raw samples, exact call counts and input hashes are in
+`benchmarks/2026-09-22-index-queries-first.json` and `-second.json`;
+`test/perf/sdl/index-queries.mjs` reproduces the investigation. Native-mode
+driver counters are unobserved, not evidence of zero calls. Runtime artifacts
+are unchanged by this measurement.
 
 ## Render-target and concurrent mixing measurements
 
