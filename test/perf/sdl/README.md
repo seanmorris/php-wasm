@@ -73,6 +73,7 @@ each round. No native timing threshold is used as a correctness gate.
 | GL textures | 256 × 256 RGBA bytes through image replacement or subimage update, then a draw | Entire rendered image matches the final uploaded color |
 | SDL textures | Same upload through `SDL_UpdateTexture` and `SDL_RenderCopy` | Entire rendered image matches the final uploaded color |
 | Events | Bursts of 32 or 1,024 mouse-motion payloads, 32,768 roundtrips per sample | Every event's payload and each burst's exact count |
+| Targets | 128 × 128 color/depth targets, two-output MRT, and multisample color/depth followed by resolve | Full framebuffer equality, far-fragment rejection and both MRT outputs |
 
 Input arrays/strings, GL objects and shaders are prepared before measurement. Texture/uniform
 samples first render the opposite data; stale uploads cannot satisfy their
@@ -96,3 +97,40 @@ limit. Allocation samples include warmed native live bytes, reserved memory,
 Wasm capacity and the V8 heap after GC. Explicit cleanup and PHP refresh are
 sampled separately. Stable values only describe these fixtures, not general
 leak freedom. Concurrent audio and malformed-asset stress are separate checks.
+
+Append suite names to run a subset, for example `targets`. Render-target
+fixtures preallocate their attachments and choose a common supported sample
+count for color/depth. Each batch clears, draws a near triangle, attempts an
+occluded far triangle, and resolves when needed. A verified opposite-color
+frame precedes timing, so stale output cannot satisfy the final pixel check.
+Each sample repeats 1,024 batches to keep submission above the SDL clock
+resolution; frame intervals describe that entire sample, not a game frame.
+
+## Concurrent mixing
+
+After builds, compression and other tests finish, run twice:
+
+```sh
+PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/audio.mjs \
+  packages/php-wasm .cache/sdl-audio-first.json
+PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/audio.mjs \
+  packages/php-wasm .cache/sdl-audio-second.json
+```
+
+The fixture compares silence, 1/8/32 looping WAV channels, MP3 music, and
+32 channels with MP3. WAV generation, decoding and playback setup are outside
+measurement. The quiet 440 Hz tone lets actual PCM amplitude verify the
+number of contributing channels. Native playing counts are checked before
+and after each sample. MP3 playback uses the supplied **Unreal Superhero 3**
+by **Kenët and rez**; the report hashes the asset and all measured sources.
+
+Each case warms up, then four rotating rounds record 96 real Web Audio
+callbacks after discarding 24 settling callbacks. Timing wraps SDL's actual
+callback, including mixing, decoding and output conversion/copy. PCM checks
+run after that timer; instrumentation can still affect callback scheduling.
+The report retains callback durations, intervals, buffer durations, PCM
+levels, device settings and native/V8 memory. Allocation snapshots use the
+same warmed playback state each round; cleanup checks native allocations
+and processor disconnection. Samples exceeding the buffer duration and long
+callback intervals are reported without turning them into claims of audible
+underruns. Headless software audio does not measure hardware output latency.

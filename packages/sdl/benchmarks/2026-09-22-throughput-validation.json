@@ -1,0 +1,141 @@
+{
+  "date": "2026-09-22",
+  "sourceCommit": "f191496",
+  "artifacts": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781330,
+      "sha256": "208026a0231efa0cfe73e028c1e349870d8b4a87e588954587ace1fe88912c11"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104472,
+      "sha256": "7531c4e0b213f40153cbe6b01402fddd83dd30f725d4616e87c2fe6c72290314"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "sourceHashes": {
+    "test/perf/sdl/common.php": "025be3ca7c7cc3b648678cf60ca8f08acab2b907a2fc4072a4cef1a1c8e182d9",
+    "test/perf/sdl/targets.php": "59435b1d8101204a1c8b6aac0b233d4721169aac605c0fca4d830f40e2c684b8",
+    "test/perf/sdl/audio.php": "d796cac603bb895058612bb812f10d214375cc7b23ac42eaaefd6d1791f65994",
+    "test/perf/sdl/audio.mjs": "ab9493462e13d5a718c308cc2a11207ce9d708d3c6552a9c9e2c60096a7892e1",
+    "test/perf/sdl/throughput.mjs": "9a17414473e3ab0430e324f819a7f158e117fee49517b539b85d88bedb548fa5",
+    "test/browser/lib/sdl-audio.mjs": "bc29abf1d08b81d722dd8e6a2c59b730d03ae910ffc6b0b010c1b98971cdfc89"
+  },
+  "targetNegativeControls": [
+    {
+      "fixture": "depth",
+      "control": "draw",
+      "detected": true,
+      "status": 2,
+      "errors": "[22-Sep-2026 11:49:04 UTC] PHP Fatal error:  Uncaught RuntimeException: Depth/MRT/resolve pixels differ in php-wasm run script:8\nStack trace:\n#0 php-wasm run script(137): perfCheck(false, 'Depth/MRT/resol...')\n#1 php-wasm run script(1): {closure:php-wasm run script:135}(Array)\n#2 {main}\n  thrown in php-wasm run script on line 8\n"
+    },
+    {
+      "fixture": "depth",
+      "control": "depth",
+      "detected": true,
+      "status": 2,
+      "errors": "[22-Sep-2026 11:49:07 UTC] PHP Fatal error:  Uncaught RuntimeException: Depth/MRT/resolve pixels differ in php-wasm run script:8\nStack trace:\n#0 php-wasm run script(137): perfCheck(false, 'Depth/MRT/resol...')\n#1 php-wasm run script(1): {closure:php-wasm run script:135}(Array)\n#2 {main}\n  thrown in php-wasm run script on line 8\n"
+    },
+    {
+      "fixture": "mrt_depth",
+      "control": "mrt",
+      "detected": true,
+      "status": 2,
+      "errors": "[22-Sep-2026 11:49:12 UTC] PHP Fatal error:  Uncaught RuntimeException: Depth/MRT/resolve pixels differ in php-wasm run script:8\nStack trace:\n#0 php-wasm run script(137): perfCheck(false, 'Depth/MRT/resol...')\n#1 php-wasm run script(1): {closure:php-wasm run script:135}(Array)\n#2 {main}\n  thrown in php-wasm run script on line 8\n"
+    },
+    {
+      "fixture": "msaa_resolve",
+      "control": "blit",
+      "detected": true,
+      "status": 2,
+      "errors": "[22-Sep-2026 11:49:17 UTC] PHP Fatal error:  Uncaught RuntimeException: Depth/MRT/resolve pixels differ in php-wasm run script:8\nStack trace:\n#0 php-wasm run script(137): perfCheck(false, 'Depth/MRT/resol...')\n#1 php-wasm run script(1): {closure:php-wasm run script:135}(Array)\n#2 {main}\n  thrown in php-wasm run script on line 8\n"
+    }
+  ],
+  "audioNegativeControls": [
+    {
+      "channels": 1,
+      "rms": 0.002748354706406122
+    },
+    {
+      "channels": 8,
+      "rms": 0.021986837651248977
+    },
+    {
+      "channels": 32,
+      "rms": 0.08794735060499591
+    },
+    {
+      "control": "muted native channels still report playing",
+      "state": {
+        "channels": 32,
+        "playingMusic": false,
+        "frequency": 44100,
+        "format": 32784,
+        "outputs": 2
+      },
+      "signalGuardRejects": true
+    }
+  ],
+  "audioRefresh": [
+    {
+      "step": "cleanup",
+      "sdlAllocations": 0,
+      "liveBytes": 3410560,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "refresh-1",
+      "sdlAllocations": 2,
+      "liveBytes": 3370952,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "refresh-2",
+      "sdlAllocations": 2,
+      "liveBytes": 3371008,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "refresh-3",
+      "sdlAllocations": 2,
+      "liveBytes": 3370912,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "refresh-4",
+      "sdlAllocations": 2,
+      "liveBytes": 3370952,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "error-inspected",
+      "error": "Invalid audio device ID",
+      "sdlAllocations": 2,
+      "liveBytes": 3371000,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    },
+    {
+      "step": "final-quit",
+      "sdlAllocations": 2,
+      "liveBytes": 3371000,
+      "reservedBytes": 3846576,
+      "wasmBytes": 134217728
+    }
+  ],
+  "notes": [
+    "Native builds, compression and other browser tests were terminal before both final runs of each benchmark. Background host services remain; this is not an isolated physical device.",
+    "The render-target fixture originally used 32 batches, producing below-resolution submission samples. Both exploratory runs remain under .cache/sdl-focus/targets-first.json and targets-second.json. The published pair uses 1024 batches and has no zero submission samples.",
+    "Render controls independently suppress draws, depth rejection, the second MRT output or resolve; every control fails full-image verification after a validated opposite-color starting frame. The control loops use 32 batches; the final measurement repeats the same checked operation 1024 times.",
+    "Audio PCM amplitude scales with 1/8/32 native channels. Muting them preserves native playing counts but fails the signal guard, ruling out a counter-only success.",
+    "Mixing memory remains at 51 SDL allocations and 3745008 live bytes after warmup and every round, on both runs. Explicit shutdown reaches zero and closes the audio context/disconnects the processor.",
+    "After PHP refresh, two SDL allocations reappear and SDL_GetError reports Invalid audio device ID. Four successive refreshes preserve the count. Source points to request shutdown calling Mix_HaltMusic/Mix_LockAudio on a closed device. This is a separate cleanup/error-state audit item, not evidence of growing playback allocations."
+  ]
+}

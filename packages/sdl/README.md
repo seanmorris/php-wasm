@@ -852,8 +852,63 @@ Use `test/perf/sdl/throughput.mjs` as described in `test/perf/sdl/README.md`.
 These runs include the mixer cleanup correction. Texture/uniform cases first
 render the opposite data, so stale state cannot mask a missing update; four
 driver no-op probes confirm those checks fail. SDL texture measurements use
-WebGL1, while the direct GL paths use WebGL2. Concurrent mixer throughput and
-indexed-query profiling remain separate work.
+WebGL1, while the direct GL paths use WebGL2. Indexed-query profiling remains
+separate work; target and concurrent mixer measurements follow below.
+
+## Render-target and concurrent mixing measurements
+
+Two further runs use the matching `f191496` PHP 8.4 static Make pair, with
+all controlled builds, compression and other tests idle. Internal Chromium
+uses SwiftShader and software audio; background host services still run.
+These are medians per 128 × 128 target batch, including amortized readback:
+
+| Target | Total ms, run 1 / 2 |
+| --- | ---: |
+| Color and depth | 0.247 / 0.269 |
+| Two color outputs and depth | 0.289 / 0.287 |
+| Four-sample color/depth and resolve | 0.427 / 0.467 |
+
+Each sample repeats 1,024 clears, near/occluded-far draws and optional resolves.
+Four warmups precede twelve rotating samples. Full-image checks start from a
+verified opposite-color frame; disabling draws, depth rejection, the second
+color output or resolve independently fails verification. Submission samples
+are all above the SDL clock resolution. Reported frame intervals span the
+whole repeated sample and do not predict game FPS. Native live bytes plateau
+at 3,707,072 with 71 SDL allocations; graphics cleanup retains the three known
+SDL TLS allocations. Both complete reports, including outliers, are in
+`benchmarks/2026-09-22-targets-first.json` and `-second.json`.
+
+The mixing fixture measures real SDL Web Audio callbacks after settling,
+with 384 callbacks per case per run. Each buffer holds 1,024 stereo frames
+at 44.1 kHz (23.22 ms). Setup, WAV decoding and output PCM analysis are outside
+the callback timer; MP3 decoding and output conversion are inside it.
+
+| Playback | Median callback ms, run 1 / 2 | p95 ms, run 1 / 2 |
+| --- | ---: | ---: |
+| Silence | < clock resolution / < clock resolution | 0.1 / 0.1 |
+| One WAV channel | < clock resolution / < clock resolution | 0.1 / 0.1 |
+| Eight WAV channels | 0.1 / 0.1 | 0.1 / 0.2 |
+| 32 WAV channels | 0.1 / 0.2 | 0.2 / 0.3 |
+| MP3 music | 0.1 / 0.1 | 0.2 / 0.2 |
+| 32 WAV channels and MP3 | 0.2 / 0.2 | 0.3 / 0.4 |
+
+Actual PCM amplitude verifies that all 1/8/32 channels contribute; muting them
+fails the signal guard even while the native playing count remains 32.
+The largest callback was 6 ms in run two. No callback exceeded its buffer
+duration and no observed interval exceeded two buffers. These observations
+do not establish hardware latency or absence of audible underruns; the
+observer can affect scheduling. Native memory stays at 3,745,008 live bytes
+and 51 SDL allocations after warmup and every round in both runs. Explicit
+shutdown reaches zero SDL allocations, closes the audio context and disconnects
+the processor. PHP refresh then recreates two allocations with an invalid
+closed-device diagnostic; repeated refreshes preserve the count. That cleanup
+path is tracked separately in VO note 76, not treated as a growing playback leak.
+
+Raw callbacks, memory, source/artifact hashes and machine details are retained
+in `benchmarks/2026-09-22-mixing-first.json` and `-second.json`; negative controls
+and the refresh probe are in `benchmarks/2026-09-22-throughput-validation.json`.
+See `test/perf/sdl/README.md` for reproduction. These fixtures change no runtime
+binary; the matching size record remains `benchmarks/2026-09-22-focus-size.json`.
 
 ## RWops and font lifetime verification
 

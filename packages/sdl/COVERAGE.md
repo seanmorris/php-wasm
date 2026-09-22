@@ -20,10 +20,10 @@ The expanded source has not yet passed the complete remote matrix.
 | SDL renderer | Texture update/lock/readback/modulation; array/packed triangles and primitive batches; callback mutation/destruction, renderer state pixel tests and window/logical coordinate conversion | Wider sustained lifetime audit |
 | SDL_image | PNG/JPEG/BMP decoding, surface-to-texture paths, explicit PNG short-read rejection and valid-load recovery | Wider device/resource stress and full matrix verification |
 | SDL_ttf | UTF-8, styles/outline, metrics, reference-counted initialization, callback safety and native allocation churn | Wider request/profile stress and CI; HarfBuzz remains disabled |
-| SDL_mixer | WAV/Ogg/MP3 and real PCM; canonical chunks, bounded channel owners, music completion, pause/fades, suspended replacement, restarts and native allocation churn | Wider device/backend stress, concurrent-playback measurements and full profile/PHP matrix |
+| SDL_mixer | WAV/Ogg/MP3 and real PCM; canonical chunks, bounded channel owners, music completion, pause/fades, suspended replacement, restarts and native allocation churn | Closed-device request cleanup, wider device/backend stress and full profile/PHP matrix |
 | GL shaders/uniforms | Compilation/link diagnostics; signed/float/unsigned uniforms; reflected UBO layouts shared by two programs | Wider stress and full matrix verification |
 | GL vertex/index buffers | Checked byte uploads/index ranges; VAOs; integer attributes; instanced array/index draws; range binding and buffer copies; teardown/recreation tests | Broader context-loss/device coverage |
-| GL render targets | Color/depth/stencil, MRT and multisample resolve pixels; resize/deletion and sized queries; layered attachment and real browser context restoration | Throughput, wider device coverage and full matrix verification |
+| GL render targets | Color/depth/stencil, MRT and multisample resolve pixels; resize/deletion and sized queries; layered attachment and real browser context restoration | Wider device coverage and full matrix verification |
 | GL state/capabilities | Typed scalar/array queries, blend/stencil/mask/range/offset state, compressed-format and extension enumeration; scalar texture/sampler queries | Remaining backend/device audit and full matrix verification |
 | GL textures | Checked complete pixel layouts, immutable 2D/cube/3D/array storage, compressed image/subimage calls and context-owned samplers; twelve native cases with pixel checks | Full remote matrix verification and wider device coverage |
 | Native ownership | Renderer/texture/window/controller invalidation; GL cleanup; retained surface/pixel/format/palette owners; safe locks/blits; RWops ownership/callbacks, font/cursor/mixer cleanup; canonical windows, checked outputs and callback reentry | Remaining callback paths, wider device teardown and broader sustained allocation checks |
@@ -236,8 +236,23 @@ runs. These shared-host SwiftShader results do not establish hardware GPU or
 game FPS limits. All controlled native builds, compression and other tests were
 idle during timing. The measurements include the mixer correction. Texture
 and uniform cases first render opposite data, and four deliberate driver no-op
-probes fail their guards. Concurrent mixer measurements, indexed-query profiling
-and wider device coverage remain open.
+probes fail their guards. Indexed-query profiling and wider device coverage
+remain open.
+
+Two further idle runs on `f191496` measure color/depth, two-output MRT and
+four-sample resolve targets, plus actual audio callbacks for 1/8/32 channels,
+MP3 and 32 channels with MP3. The package README records both runs and timing
+limits. Every target sample repeats 1,024 batches to exceed clock resolution;
+full-frame negative controls detect missing draws, depth rejection, MRT output
+and resolve. Actual PCM amplitude verifies channel contributions independently
+of native playing counts. Native allocations/live bytes plateau in both
+fixtures. Mixer shutdown reaches zero SDL allocations and closes/disconnects
+audio; a subsequent PHP refresh recreates two allocations and a closed-device
+diagnostic, tracked separately in VO note 76. No claim of a growing playback
+leak or physical audio/GPU performance follows from these short software-device
+runs. Raw samples and exact hashes are in `benchmarks/2026-09-22-targets-*.json`,
+`-mixing-*.json` and `-throughput-validation.json`. No runtime code changes are
+needed for these fixtures; matching size hashes remain in `-focus-size.json`.
 
 ### Make cache and incremental build verification
 

@@ -6,15 +6,17 @@ import {resolve, join} from 'node:path';
 import {chromium} from '@playwright/test';
 import {getPlaywrightLaunchOptions} from '../../lib/playwright-browser.mjs';
 
-const [directory, output] = process.argv.slice(2);
-assert.ok(output, 'Usage: node test/perf/sdl/throughput.mjs artifact-directory output.json');
+const [directory, output, ...selected] = process.argv.slice(2);
+assert.ok(output, 'Usage: node test/perf/sdl/throughput.mjs artifact-directory output.json [suite ...]');
 await assert.rejects(access(output), {code: 'ENOENT'}, 'Use a new output path to preserve previous measurements');
 process.env.PHP_VERSION ??= '8.4';
 process.env.PHP_VARIANT = '_sdl';
 process.env.LIB_TYPE ??= 'static';
 process.env.SDL_TEST_ARTIFACT_DIR = resolve(directory);
 const {start, run, allocationStats} = await import('../../browser/lib/sdl-bindings.mjs');
-const fixtures = ['instancing', 'uniforms', 'textures-gl', 'textures-sdl', 'events'];
+const available = ['instancing', 'uniforms', 'textures-gl', 'textures-sdl', 'events', 'targets'];
+const fixtures = selected.length ? selected : available;
+assert.ok(fixtures.every(fixture => available.includes(fixture)), 'Unknown throughput suite');
 const sampleCount = 12;
 const warmupCount = 4;
 
@@ -121,7 +123,7 @@ try
 		const metadata = await run(page, sources.common + '\n' + sources[fixture] + `
 		$metadata = [];
 		foreach($cases as $name => $case) {
-			$metadata[$name] = array_intersect_key($case, array_flip(['batches','itemsPerBatch','callsPerBatch','bytesPerBatch']));
+			$metadata[$name] = array_intersect_key($case, array_flip(['batches','itemsPerBatch','callsPerBatch','bytesPerBatch','samples']));
 		}
 		echo json_encode(['cases'=>$metadata, 'phpVersion'=>PHP_VERSION, 'counterFrequency'=>SDL_GetPerformanceFrequency()]);
 		`);
