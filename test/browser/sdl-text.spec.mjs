@@ -226,6 +226,28 @@ for(const backend of ['EditContext', 'textarea fallback'])
 			expect((await events(page, 'text')).map(event => event.text)).toEqual(['再開😀']);
 		});
 
+		test('active SDL text input leaves other page editors and shortcuts alone', async ({page}) => {
+			await begin(page);
+			await page.keyboard.down('Shift'); await page.keyboard.down('a');
+			expect(await run(page, 'echo json_encode(array_keys(array_filter(SDL_GetKeyboardState())));')).toEqual([4, 225]);
+			await page.evaluate(() => {
+				const input = document.createElement('textarea');
+				input.setAttribute('aria-label', 'Other editor');
+				document.body.append(input); input.focus();
+			});
+			expect(await run(page, 'echo json_encode(array_keys(array_filter(SDL_GetKeyboardState())));')).toEqual([]);
+			await page.keyboard.up('a'); await page.keyboard.up('Shift');
+			await run(page, poll);
+			const input = page.getByRole('textbox', {name: 'Other editor'});
+			await input.pressSequentially('outside');
+			await input.press('Control+a'); await input.pressSequentially('edited');
+			await expect(input).toHaveValue('edited');
+			expect(await run(page, poll)).toEqual([]);
+			await page.locator('canvas').focus(); await page.keyboard.type('b');
+			expect((await events(page, 'text')).map(event => event.text)).toEqual(['b']);
+			await expect(input).toHaveValue('edited');
+		});
+
 		test('stop cancels input, repeated start is idempotent, and other controls retain focus', async ({page, context}) => {
 			await begin(page);
 			const client = await context.newCDPSession(page);

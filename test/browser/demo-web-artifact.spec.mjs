@@ -139,6 +139,26 @@ test('embedded php hello world runs', async ({ page }) => {
 });
 
 test.describe('SDL demo controls', () => {
+	test('typing in the code editor is independent of canvas keyboard controls', async ({page}) => {
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+		const canvas = page.locator('canvas');
+		await canvas.press('Space');
+		await expect(canvas).toHaveAttribute('data-paused', '1');
+		const input = page.locator('#input .ace_text-input');
+		await input.focus();
+		await page.keyboard.press('Control+Home');
+		await page.keyboard.type('// editor still works\n');
+		await expect.poll(() => page.locator('#input').evaluate(node => node.env.editor.getValue())).toMatch(/^\/\/ editor still works\n/);
+		await expect(canvas).toHaveAttribute('data-paused', '1');
+		await expect(canvas).toHaveAttribute('data-stopped', '0');
+		await canvas.press('Space');
+		await expect(canvas).toHaveAttribute('data-paused', '0');
+		await canvas.press('Escape');
+		await expect(canvas).toHaveAttribute('data-stopped', '1');
+		await expect(page.locator('.stderr')).toHaveText('');
+	});
+
 	test('cube links reload from a fragment and its canvas fills the preview after resize', async ({page, context}) => {
 		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
 		await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});

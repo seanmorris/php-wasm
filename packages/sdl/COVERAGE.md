@@ -189,6 +189,32 @@ See `benchmarks/2026-09-22-png-size.json`. Full remote verification remains
 pending for this source.
 
 
+
+### Canvas keyboard focus
+
+Browser key forwarding now requires focus on the supplied canvas or its
+owned IME transport. Other editors receive normal typing and shortcuts.
+Leaving that target releases native held keys and modifiers after DOM focus
+settles, without interrupting a move between the canvas and its IME field.
+The JS-only change preserves SDL's native event dispatch and cleanup.
+
+Four native regressions fail on the preceding PNG runtime and pass on the
+fresh normal PHP 8.4 static build: ordinary/shadow-root canvas focus, plus
+outside editing with each text-input backend. The actual Ace editor regression
+also fails before the fix; all three SDL editor checks now pass, including
+returning to canvas controls, refresh and rerun.
+
+The final pair passes all 87 Chromium input/text/pointer/binding cases, all
+three SDL editor checks, and six focused Firefox/WebKit cases, with no skips
+or flaky results. Eleven Make/package checks, main-module validation and JS
+style pass. `benchmarks/2026-09-22-focus.json` preserves the failures, corrected
+results and exact artifacts. The normal Make rebuild performs one link, with
+no PHP configure or C compilation. The matching pair is installed locally.
+The change adds 246 raw / 61 gzip / 301 Brotli bytes of JavaScript; Wasm and
+ICU are byte-identical. See `benchmarks/2026-09-22-focus-size.json`. These are
+local checks; full newest-source PHP/profile CI and physical-device coverage
+remain pending.
+
 ### Rendering and event throughput baseline
 
 Two idle runs against the matching `401f6d9` PHP 8.4 static Make pair now cover

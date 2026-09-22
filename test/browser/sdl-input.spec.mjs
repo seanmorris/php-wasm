@@ -19,6 +19,46 @@ echo json_encode(['events'=>$events,'held'=>array_keys(array_filter(SDL_GetKeybo
 `;
 const cleanup = 'SDL_DestroyWindow($window); SDL_Quit();';
 
+for(const placement of ['document', 'shadow root'])
+{
+	test(`keyboard capture follows canvas focus in a ${placement}`, async ({page}) => {
+		await start(page);
+		await page.evaluate(placement => {
+			const canvas = document.querySelector('canvas');
+			if(placement === 'shadow root')
+			{
+				const host = document.createElement('div'); document.body.append(host);
+				host.attachShadow({mode: 'open'}).append(canvas);
+			}
+			const field = document.createElement('textarea');
+			field.setAttribute('aria-label', 'Code editor'); document.body.append(field);
+			window.outsideKeys = [];
+			window.addEventListener('keydown', event => queueMicrotask(() => window.outsideKeys.push([event.key, event.defaultPrevented])));
+		}, placement);
+		await run(page, windowSetup);
+		await page.locator('canvas').focus();
+		await page.keyboard.down('Shift'); await page.keyboard.down('a');
+		expect((await run(page, poll)).held).toEqual([4, 225]);
+		const field = page.getByRole('textbox', {name: 'Code editor'});
+		await field.focus();
+		const lost = await run(page, poll);
+		await page.keyboard.up('a'); await page.keyboard.up('Shift');
+		await page.evaluate(() => window.outsideKeys = []);
+		await field.pressSequentially('hello wasm');
+		await field.press('ArrowLeft'); await field.press('Backspace');
+		const outside = await run(page, poll);
+		await test.info().attach('canvas-keyboard-focus', {body: JSON.stringify({lost, outside, value: await field.inputValue(), keys: await page.evaluate(() => window.outsideKeys)}, null, 2), contentType: 'application/json'});
+		await expect(field).toHaveValue('hello wam');
+		expect(lost.held).toEqual([]); expect(lost.mod).toBe(0);
+		expect(lost.events.filter(([kind]) => kind === 'key').map(([,event]) => [event.state, event.keysym.scancode])).toEqual([[0, 4], [0, 225]]);
+		expect(outside.events.filter(([kind]) => ['key', 'text', 'edit'].includes(kind))).toEqual([]);
+		expect(await page.evaluate(() => window.outsideKeys.every(([,prevented]) => !prevented))).toBe(true);
+		await page.locator('canvas').focus(); await page.keyboard.press('b');
+		expect((await run(page, poll)).events.filter(([kind]) => kind === 'key').map(([,event]) => [event.state, event.keysym.scancode])).toEqual([[1, 5], [0, 5]]);
+		await run(page, cleanup);
+	});
+}
+
 /**
  * Run PHP without Playwright's implicit browser user activation.
  * @param {import('@playwright/test').CDPSession} client Browser protocol session.

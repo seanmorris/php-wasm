@@ -1,6 +1,6 @@
 /* PHP License 3.01; see ../opengl/LICENSE. */
 addToLibrary({
-	$php_sdl_text__deps: ['$JSEvents', '$stringToNewUTF8', 'free', 'php_sdl_text_send', 'php_sdl_text_size', 'php_sdl_text_unavailable']
+	$php_sdl_text__deps: ['$JSEvents', '$stringToNewUTF8', 'free', 'SDL_ResetKeyboard', 'php_sdl_text_send', 'php_sdl_text_size', 'php_sdl_text_unavailable']
 	, $php_sdl_text: {
 		id: 0
 		, requested: false
@@ -58,7 +58,22 @@ addToLibrary({
 		 * @returns {boolean} Whether the element owns focus in its root.
 		 */
 		, focused: function(element) {
-			return element?.getRootNode().activeElement === element;
+			return !!element && element.getRootNode().activeElement === element;
+		}
+
+		/**
+		 * Release native held keys when focus leaves the canvas and its IME field.
+		 * Wait until DOM focus settles so switching to the owned field is seamless.
+		 * @returns {void}
+		 */
+		, releaseKeys: function() {
+			const id = this.id;
+			queueMicrotask(() => {
+				if(id && this.id === id && !this.focused(Module['canvas']) && !this.focused(this.field))
+				{
+					_SDL_ResetKeyboard();
+				}
+			});
 		}
 
 		/**
@@ -300,7 +315,10 @@ addToLibrary({
 					field.value = '';
 				});
 				this.listen(field, 'keydown', () => this.pending = null);
-				this.listen(field, 'blur', () => this.cancel());
+				this.listen(field, 'blur', () => {
+					this.cancel();
+					this.releaseKeys();
+				});
 			}
 			if(!this.observer)
 			{
@@ -327,6 +345,7 @@ addToLibrary({
 		 * Its keypress registration follows keydown/up and shares their userdata.
 		 * Keep SDK dispatch/cleanup and native key state, but allow the owned
 		 * editing target's default action and normalize legacy charCode input.
+		 * Ignore keyboard events while another page control has focus.
 		 * @returns {void}
 		 */
 		, keyboard: function() {
@@ -347,6 +366,10 @@ addToLibrary({
 				handler.handlerFunc = event => {
 					const target = event.composedPath?.()[0] ?? event.target;
 					const canvas = Module['canvas'];
+					if(!this.focused(canvas) && !this.focused(this.field))
+					{
+						return;
+					}
 					const editing = this.field && target === this.field
 						|| this.context && target === canvas && canvas.editContext === this.context;
 					if(editing && event.type === 'keypress')
@@ -468,6 +491,7 @@ addToLibrary({
 		text.listen(window, 'scroll', () => text.position());
 		text.listen(window, 'blur', () => text.cancel());
 		text.listen(canvas, 'blur', () => {
+			text.releaseKeys();
 			if(text.context)
 			{
 				text.cancel();
