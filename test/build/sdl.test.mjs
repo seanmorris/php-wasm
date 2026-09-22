@@ -98,6 +98,21 @@ test('SDL JavaScript invalidates every native link without invalidating PHP conf
 	}
 });
 
+test('native SDL patches invalidate extracted sources and their archives', async () => {
+	const {stdout} = await run('make', [
+		'--no-print-directory', '-pn', 'null'
+		, 'ENV_FILE=.github/.env_8.4.static.ci', 'WITH_SDL=1'
+	], {maxBuffer: 8 * 1024 * 1024});
+	const rules = stdout.split('\n');
+	for(const name of ['image', 'mixer'])
+	{
+		const configure = rules.find(line => line.startsWith(`third_party/SDL2_${name}-`) && line.includes('/configure:'));
+		assert.ok(configure?.includes(`packages/sdl/patches/SDL2_${name}.patch`));
+		const archive = rules.find(line => line.startsWith(`lib/lib/libSDL2_${name}.a:`));
+		assert.ok(archive?.includes(configure.split(':')[0]));
+	}
+});
+
 test('a fresh SDL web build does not require the standard Node runtime', async () => {
 	const directory = await mkdtemp(join(tmpdir(), 'php-wasm-sdl-stdlib-'));
 	try
@@ -199,6 +214,7 @@ test('the SDL npm payload includes reproducible build inputs and the compatibili
 		, 'mixer/src/effect_position.c'
 		, 'mixer/src/effect_stereoreverse.c'
 		, 'patches/SDL2_mixer.patch'
+		, 'patches/SDL2_image.patch'
 		, 'opengl/php_webgl.c'
 		, 'opengl/php_webgl.h'
 		, 'opengl/php_webgl_buffers.c'

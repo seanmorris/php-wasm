@@ -64,6 +64,74 @@ function failedAsset($value) {
 }
 `;
 
+test('PNG short reads abort at headers, image data and CRCs and valid loads recover', async ({page}) => {
+	await start(page);
+	const cuts = await page.evaluate(async () => {
+		const response = await fetch('/php-wasm/fixtures/sdl/cube.png');
+		if(!response.ok)
+		{ throw new Error('Missing PNG fixture'); }
+		const bytes = new Uint8Array(await response.arrayBuffer());
+		const view = new DataView(bytes.buffer);
+		const cuts = [8, 12, 24];
+		for(let offset = 8; offset < bytes.length; offset += 12 + view.getUint32(offset))
+		{
+			if(view.getUint32(offset + 4) !== 0x49444154)
+			{ continue; }
+			const length = view.getUint32(offset);
+			cuts.push(offset + 8, offset + 8 + Math.floor(length / 2), offset + 8 + length + 2);
+			break;
+		}
+		const {FS} = await window.bindingPhp.binary;
+		FS.writeFile('/png-complete', bytes);
+		for(const cut of cuts)
+		{ FS.writeFile(`/png-cut-${cut}`, bytes.subarray(0, cut)); }
+		return cuts;
+	});
+	expect(cuts).toHaveLength(6);
+	const errors = [];
+	page.on('pageerror', error => errors.push(error.message));
+	const result = await page.evaluate(async cuts => {
+		window.bindingOutput = window.bindingErrors = '';
+		const status = await window.bindingPhp.run(`<?php
+		SDL_Init(SDL_INIT_VIDEO);
+		$window = SDL_CreateWindow('PNG short reads',0,0,32,32,SDL_WINDOW_SHOWN);
+		$renderer = SDL_CreateRenderer($window,-1,SDL_RENDERER_ACCELERATED);
+		function pngPixels($renderer,$texture) {
+			if(SDL_RenderCopy($renderer,$texture,null,null)!==0) { throw new RuntimeException(SDL_GetError()); }
+			return SDL_RenderReadPixels($renderer,null,SDL_PIXELFORMAT_ABGR8888);
+		}
+		$reference = IMG_LoadTexture($renderer,'/png-complete');
+		if(!$reference) { throw new RuntimeException(SDL_GetError()); }
+		$pixels = pngPixels($renderer,$reference);
+		SDL_DestroyTexture($reference);
+		$results = [];
+		foreach([${cuts.join(',')}] as $cut) {
+			SDL_ClearError(); $bad = IMG_Load('/png-cut-'.$cut);
+			$surfaceFailed = $bad===null && SDL_GetError()==='Error reading the PNG file.';
+			if($bad) { SDL_FreeSurface($bad); }
+			SDL_ClearError(); $bad = IMG_LoadTexture($renderer,'/png-cut-'.$cut);
+			$textureFailed = $bad===null && SDL_GetError()==='Error reading the PNG file.';
+			if($bad) { SDL_DestroyTexture($bad); }
+			$surface = IMG_Load('/png-complete');
+			if(!$surface) { throw new RuntimeException(SDL_GetError()); }
+			$dimensions = [$surface->w,$surface->h]; SDL_FreeSurface($surface);
+			$texture = IMG_LoadTexture($renderer,'/png-complete');
+			if(!$texture) { throw new RuntimeException(SDL_GetError()); }
+			$recovered = pngPixels($renderer,$texture)===$pixels; SDL_DestroyTexture($texture);
+			$results[] = compact('cut','surfaceFailed','textureFailed','dimensions','recovered');
+		}
+		SDL_DestroyRenderer($renderer); SDL_DestroyWindow($window); SDL_Quit();
+		echo json_encode($results);
+		`);
+		return {status, output: window.bindingOutput, diagnostics: window.bindingErrors};
+	}, cuts);
+	await test.info().attach('png-short-reads', {body: JSON.stringify(result, null, 2), contentType: 'application/json'});
+	expect(result.status).toBe(0);
+	expect(JSON.parse(result.output)).toEqual(cuts.map(cut => ({cut, surfaceFailed: true, textureFailed: true, dimensions: [128, 128], recovered: true})));
+	expect(result.diagnostics.trim().split('\n')).toEqual(Array(cuts.length * 2).fill('libpng error: Read Error'));
+	expect(errors).toEqual([]);
+});
+
 test('truncated PNG, JPEG and BMP loads fail repeatedly and valid images still render', async ({page}) => {
 	await start(page);
 	await page.evaluate(async () => {

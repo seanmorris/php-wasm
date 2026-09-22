@@ -735,8 +735,8 @@ The broad audio case previously grew from 46 to 166 SDL allocations and 14 to
 36 allocations and four descriptors, then returns to zero SDL allocations on
 shutdown. The focused RWops case is also flat; PNG/JPEG/BMP and font cases stay
 flat on both builds. These are finite ownership checks, not decoder fuzzing or
-general leak-freedom claims. The PNG callback's unchecked short-read handling
-remains a separate audit item (VO note 75).
+general leak-freedom claims. The subsequent PNG callback correction is recorded
+below (VO note 75).
 
 All four new cases and 32 affected existing audio/stream/cube cases pass on the
 matching candidate, with no skips or flaky results. Both editor checks,
@@ -747,6 +747,34 @@ bytes and −2,407 Brotli bytes for the matching pair; JS and ICU are unchanged.
 Full PHP/profile remote
 verification of this commit remains pending; running CI on `17d386c` proves
 only that preceding source.
+
+
+### PNG short-read recovery
+
+SDL_image's PNG callback now checks the exact byte count returned by RWops
+and calls the selected libpng provider's error handler on a short read.
+The existing cleanup releases decoder/surface state and returns null with
+an SDL error. The package-local `SDL2_image.patch` follows the native Make
+patch prerequisites and is included in npm; codec providers and versions
+are unchanged.
+
+A regression fails on the preceding runtime: six cuts through headers, IDAT
+data and CRCs reach later parser errors instead of the required read error.
+On the corrected normal PHP 8.4 static build, both image loaders reject all
+six cuts with `libpng error: Read Error`; complete-image loading and full
+rendered pixels recover after every cut. All five malformed-asset cases pass,
+including repeated allocation and file-descriptor checks. The record
+`benchmarks/2026-09-22-png.json` preserves before/after evidence and artifact
+hashes. This checks the callback contract; it does not claim that the tested
+baseline accepted malformed PNGs or establish general decoder safety.
+
+The corrected PNG pair passes 32 existing audio/stream/cube cases, main-module
+validation and eleven Make/package checks. Compared with the previous pair,
+raw JS/Wasm is 166 bytes smaller, gzip grows by 334 bytes and Brotli by 2,040
+bytes; JS and ICU are unchanged. Both sides use the same compressors/settings.
+See `benchmarks/2026-09-22-png-size.json`. Full remote verification remains
+pending for this source.
+
 
 ## Rendering and event throughput baseline
 
