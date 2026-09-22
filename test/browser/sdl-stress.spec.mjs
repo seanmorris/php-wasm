@@ -1,5 +1,6 @@
 import {test, expect} from '@playwright/test';
 import {start, run, allocationStats} from './lib/sdl-bindings.mjs';
+import {startAudio, primeAudio} from './lib/sdl-audio.mjs';
 
 test.skip(process.env.PHP_VARIANT !== '_sdl', 'requires the SDL build');
 test.afterEach(async ({page}) => {
@@ -11,10 +12,12 @@ test.afterEach(async ({page}) => {
  * @param {import('@playwright/test').Page} page Idle native runtime.
  * @param {string} setup PHP defining stressAssets($cycles) and its resources.
  * @param {string} cleanup PHP releasing those resources.
- * @param {boolean} pngDiagnostics Whether truncated PNGs emit libpng errors.
+ * @param {object} [options] Native warmup and diagnostic requirements.
+ * @param {boolean} [options.pngDiagnostics] Whether truncated PNGs emit libpng errors.
+ * @param {boolean} [options.audio] Wait for the open mixer's first audio callback.
  * @returns {Promise<object[]>} Native allocation snapshots attached to the test.
  */
-const exercise = async (page, setup, cleanup, pngDiagnostics = false) => {
+const exercise = async (page, setup, cleanup, {pngDiagnostics = false, audio = false} = {}) => {
 	const errors = [];
 	page.on('pageerror', error => errors.push(error.message));
 	const snapshot = async () => ({
@@ -39,6 +42,12 @@ const exercise = async (page, setup, cleanup, pngDiagnostics = false) => {
 		{ expect(line).toMatch(/^libpng error: [^\r\n]+$/); }
 	};
 	await batchRun(setup + '\nstressAssets(5);', 5);
+	if(audio)
+	{
+		// SDL allocates its conversion buffer during the first Web Audio callback.
+		// Include that live device buffer in the baseline before measuring loaders.
+		await primeAudio(page);
+	}
 	const samples = [{step: 'warm', ...await snapshot()}];
 	for(let batch = 0; batch < 3; batch++)
 	{
@@ -177,7 +186,7 @@ test('truncated PNG, JPEG and BMP loads fail repeatedly and valid images still r
 			}
 		}
 	}
-	`, 'SDL_DestroyRenderer($renderer); SDL_DestroyWindow($window); SDL_Quit();', true);
+	`, 'SDL_DestroyRenderer($renderer); SDL_DestroyWindow($window); SDL_Quit();', {pngDiagnostics: true});
 	expect(samples.at(-1).sdlAllocations).toBe(3);
 });
 
@@ -209,7 +218,7 @@ test('truncated fonts fail repeatedly without retaining faces and valid UTF-8 st
 });
 
 test('truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery', async ({page}) => {
-	await start(page);
+	await startAudio(page);
 	const samples = await exercise(page, String.raw`${failure}
 	SDL_Init(SDL_INIT_AUDIO);
 	if(Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,1024)!==0) { throw new RuntimeException(SDL_GetError()); }
@@ -237,12 +246,12 @@ test('truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer 
 			Mix_HaltChannel(-1); Mix_HaltMusic(); Mix_FreeChunk($chunk); Mix_FreeMusic($music);
 		}
 	}
-	`, 'Mix_CloseAudio(); Mix_Quit(); SDL_Quit();');
+	`, 'Mix_CloseAudio(); Mix_Quit(); SDL_Quit();', {audio: true});
 	expect(samples.at(-1).sdlAllocations).toBe(0);
 });
 
 test('failed chunk format detection closes owned streams and preserves borrowed RWops', async ({page}) => {
-	await start(page);
+	await startAudio(page);
 	const samples = await exercise(page, String.raw`${failure}
 	SDL_Init(SDL_INIT_AUDIO);
 	if(Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,1024)!==0) { throw new RuntimeException(SDL_GetError()); }
@@ -273,6 +282,6 @@ test('failed chunk format detection closes owned streams and preserves borrowed 
 			}
 		}
 	}
-	`, 'Mix_CloseAudio(); Mix_Quit(); SDL_Quit();');
+	`, 'Mix_CloseAudio(); Mix_Quit(); SDL_Quit();', {audio: true});
 	expect(samples.at(-1).sdlAllocations).toBe(0);
 });

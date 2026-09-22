@@ -57,6 +57,34 @@ Final-source CI remains required across PHP 8.0–8.5 and all three library
 profiles. The dated sections below preserve evidence at each change; their
 older pending-work statements describe those historical builds.
 
+## Full CI findings and allocation-test correction
+
+The complete `920b838` run finished with all 20 Test jobs passing. Build
+Artifacts finished all 235 expected jobs: 227 passed, six failed and two
+branch-restricted deployments were skipped. Every failure was the malformed
+chunk/RWops stress test recording `[35, 36, 36, 36]` SDL allocations instead of
+a constant count. The unchanged test reproduced the failure in three of five
+local attempts.
+
+An isolated mixer with no asset loads showed the same increase. A forwarding
+native allocator observer traced one 8,224-byte allocation to the first real
+Web Audio callback. Shutdown freed that pointer and restored both SDL's
+allocation count and the allocator's live bytes to their initial values.
+The stress helper now waits for a completed native audio callback before taking
+the warm baseline. Repeated loader/stream checks still require constant SDL
+allocation and file-descriptor counts, stable live bytes and zero SDL allocations
+after audio shutdown. Both audio cases pass ten repetitions each, and all five
+malformed-asset cases pass on the same matching PHP 8.4 static JS/Wasm pair.
+
+The same CI run also exposed 109 runtime test jobs repeating native configure
+work and 506 runtime links. Build jobs now preserve `LIB_TYPE` when copying
+profile settings to `.env`, so their configure-cache identity matches downstream
+artifact tests. The regression checks all 18 PHP/profile combinations against
+the real Make stamp. The new CI run on `82def93` is pending; it contains this
+profile fix and the Ace heredoc correction, but predates the audio-test fix.
+See [the evidence record](benchmarks/2026-09-22-ci-regressions.json). These local
+results do not replace full CI with the final source.
+
 ## Initial local baseline
 
 The initial extension/cube delivery is at `84475db`. The subsequent binding

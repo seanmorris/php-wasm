@@ -17,12 +17,20 @@ focus build, with unchanged ICU data.
 The cleanup records preserve the three before-fix failures, allocation trace,
 all final test results and artifact/source hashes. Linux Firefox audio tests
 use a software output sink; no physical iPhone, controller, OS IME or hardware
-performance claim is made. Full newest-source PHP/profile CI remains pending.
+performance claim is made. The full `920b838` CI run finished with 20 Test jobs
+passing and 227 Build Artifacts jobs passing, six failures and two intended
+deployment skips. All six failures were the same allocation-test timing race:
+SDL initializes its audio conversion buffer during the first browser callback,
+which could occur after the test recorded its baseline. Waiting for that callback
+keeps the allocation and shutdown assertions intact; the corrected tests pass
+20 repeated audio checks and all five malformed-asset cases locally. The native
+JS/Wasm pair is unchanged. Full CI with this fixture correction remains required.
 The dated verification sections below retain the results and limits of their
 original builds.
 
-See [COVERAGE.md](COVERAGE.md), [cleanup results](benchmarks/2026-09-22-cleanup.json)
-and [size comparison](benchmarks/2026-09-22-cleanup-size.json).
+See [COVERAGE.md](COVERAGE.md), [cleanup results](benchmarks/2026-09-22-cleanup.json),
+[size comparison](benchmarks/2026-09-22-cleanup-size.json) and
+[CI regression evidence](benchmarks/2026-09-22-ci-regressions.json).
 
 ## Run the example
 
