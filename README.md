@@ -988,13 +988,20 @@ The following options may appear in `.php-wasm-rc`.
 
 ##### PHP_DIST_DIR
 
-This is the directory where JavaScript and wasm files will be built, *relative to the current directory.*
+This is the directory where JavaScript and wasm files will be built. It accepts
+an absolute path or a path relative to the current build directory. When using
+`php-wasm-builder`, relative paths in `.php-wasm-rc` resolve from the project
+directory.
 
 ---
 
 ##### PHP_ASSET_DIR
 
-This is the directory where preload `.data` / `.dat` files and other supporting assets will be built, *relative to the current directory.* Shared libraries and side modules remain in their owning packages. Defaults to `PHP_DIST_DIR`.
+This is the directory where preload `.data` / `.dat` files and other supporting
+assets will be built. Paths resolve in the same way as `PHP_DIST_DIR`, which is
+also the default. Shared libraries and side modules remain in their owning
+packages. Preload staging reports an error if the native build's `.data` output
+is missing.
 
 ---
 

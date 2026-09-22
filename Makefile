@@ -766,9 +766,8 @@ NOTPARALLEL+=\
 
 DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS} ${PRE_JS_FILES}
 
-${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
-	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
-	- cp -Lprf ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_ASSET_DIR}/
+${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
+	cp -Lpf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data $@
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ENVIRONMENT=web
