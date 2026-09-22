@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-lifetimes.json",
+  "change": "Surface, pixel and palette ownership; checked conversion/blits; renderer callback and texture-lock output safety",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652842,
+      "brotli": 466397,
+      "sha256": "b391245a7e686bf3de970d94fd8b0ee89bef120a0368db14b5cc3e4d5b693fb6"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47022445,
+      "gzip": 13339686,
+      "brotli": 9087295,
+      "sha256": "e747852b9f4ed33767979815fca31da0cdb2fd6ab476a17b316a93f935e5650c"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652847,
+      "brotli": 465243,
+      "sha256": "e8f6ce58a179d7407c21703de00ab3f56fc6e3cd3b6ea9725b484e2f1daf94fc"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47033066,
+      "gzip": 13341989,
+      "brotli": 9083718,
+      "sha256": "1e47f2e3a6663f79616e740d2ac1179c5924dff491fc9e83ec54d65a5791797f"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51784231,
+      "after": 51794852,
+      "increase": 10621,
+      "percent": 0.02051010470735773
+    },
+    "gzip": {
+      "before": 13992528,
+      "after": 13994836,
+      "increase": 2308,
+      "percent": 0.016494517645417612
+    },
+    "brotli": {
+      "before": 9553692,
+      "after": 9548961,
+      "increase": -4731,
+      "percent": -0.049520122691834735
+    }
+  }
+}

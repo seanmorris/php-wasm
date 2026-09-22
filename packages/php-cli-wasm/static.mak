@@ -130,7 +130,7 @@ ifneq (${PRE_JS_FILES},)
 CLI_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
-CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
+CLI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_LINK_DEPS}
 
 ${PHP_CLI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CLI_DIST_DIR}/

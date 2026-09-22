@@ -7,7 +7,7 @@ import {promisify} from 'node:util';
 import test from 'node:test';
 
 const run = promisify(execFile);
-const inventory = '__sdl_inventory:;@echo $(WITH_SDL_IMAGE) $(WITH_SDL_MIXER) $(WITH_SDL_TTF) $(WITH_OPENGL); echo $(PHP_VARIANT); echo $(PHP_CONFIGURE_DEPS); echo $(SHARED_LIBS); echo $(ARCHIVES)';
+const inventory = '__sdl_inventory:;@echo $(WITH_SDL_IMAGE) $(WITH_SDL_MIXER) $(WITH_SDL_TTF) $(WITH_OPENGL); echo $(PHP_VARIANT); echo $(PHP_CONFIGURE_DEPS); echo $(SHARED_LIBS); echo $(ARCHIVES); echo $(EXTRA_FLAGS)';
 
 /**
  * Evaluates the actual Make configuration without compiling native code.
@@ -20,11 +20,23 @@ const configure = settings => run('make', [
 ], {maxBuffer: 1024 * 1024});
 
 test('SDL add-ons follow the main flag and can all be opted out', async () => {
-	assert.match((await configure(['WITH_SDL=0'])).stdout, /^0 0 0 0\n/);
+	const disabled = (await configure(['WITH_SDL=0'])).stdout;
+	assert.match(disabled, /^0 0 0 0\n/);
+	assert.doesNotMatch(disabled, /--wrap=SDL_/);
+	assert.doesNotMatch(disabled, /sdl\/js\/library\.js/);
 	for(const flag of ['1', 'dynamic'])
 	{
 		const {stdout} = await configure([`WITH_SDL=${flag}`]);
 		assert.match(stdout, /^1 1 1 1\n_sdl\n/);
+		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/library.js'));
+		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/text-input.js'));
+		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/pointer-lock.js'));
+		assert.ok(stdout.includes('-Wl,--wrap=SDL_SetRelativeMouseMode'));
+		assert.ok(stdout.includes('packages/sdl/js/library.js'));
+		for(const symbol of ['SDL_GL_DeleteContext', 'SDL_VideoQuit', 'SDL_VideoInit', 'SDL_FreeSurface', 'SDL_AudioQuit', 'SDL_AudioInit', 'SDL_StartTextInput', 'SDL_StopTextInput', 'SDL_SetTextInputRect'])
+		{
+			assert.ok(stdout.includes(`-Wl,--wrap=${symbol}`));
+		}
 		for(const name of ['sdl_image', 'sdl_mixer', 'sdl_ttf', 'opengl'])
 		{
 			assert.ok(stdout.includes(`ext/${name}/config.m4`));
@@ -33,6 +45,7 @@ test('SDL add-ons follow the main flag and can all be opted out', async () => {
 	const {stdout} = await configure(['WITH_SDL=1', 'WITH_SDL_IMAGE=0', 'WITH_SDL_MIXER=0', 'WITH_SDL_TTF=0', 'WITH_OPENGL=0']);
 	assert.match(stdout, /^0 0 0 0\n_sdl\n/);
 	assert.doesNotMatch(stdout, /ext\/(sdl_image|sdl_mixer|sdl_ttf|opengl)\//);
+	assert.ok(stdout.includes('-Wl,--wrap=SDL_GL_DeleteContext'));
 });
 
 test('SDL rejects invalid options and disabled codec prerequisites', async () => {
@@ -59,6 +72,29 @@ test('SDL reuses the selected shared or static codec providers', async () => {
 	for(const name of ['libpng', 'libjpeg', 'libfreetype', 'libz'])
 	{
 		assert.ok(statically.split('\n')[4].includes(`lib/lib/${name}.a`));
+	}
+});
+
+test('SDL JavaScript invalidates every native link without invalidating PHP configure', async () => {
+	const {stdout} = await run('make', [
+		'--no-print-directory', '-pn', 'null'
+		, 'ENV_FILE=.github/.env_8.4.static.ci', 'WITH_SDL=1'
+	], {maxBuffer: 8 * 1024 * 1024});
+	const rules = stdout.split('\n');
+	const configure = rules.find(line => line.startsWith('third_party/php8.4-src/configured:'));
+	assert.ok(configure);
+	const links = rules.filter(line => /^packages\/php-(?:wasm|cgi-wasm|cli-wasm|dbg-wasm)\/php8\.4_sdl-.*\.(?:mjs|js): /.test(line));
+	// Eight environment/format combinations in each of the four runtime packages.
+	const targets = new Set(links.filter(line => line.includes('third_party/php8.4-src/configured')).map(line => line.split(':')[0]));
+	assert.equal(targets.size, 32);
+	for(const library of ['library.js', 'text-input.js', 'pointer-lock.js'])
+	{
+		const file = `packages/sdl/js/${library}`;
+		assert.equal(configure.includes(file), false, `${file} must not trigger configure`);
+		for(const target of targets)
+		{
+			assert.ok(links.some(line => line.startsWith(`${target}:`) && line.includes(file)), target);
+		}
 	}
 });
 
@@ -110,8 +146,72 @@ test('the SDL npm payload includes reproducible build inputs and the compatibili
 	const {stdout} = await run('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {cwd: new URL('../../packages/sdl', import.meta.url), maxBuffer: 1024 * 1024});
 	const [{files}] = JSON.parse(stdout);
 	const names = files.map(file => file.path);
-	for(const name of ['index.mjs', 'extensions.mak', 'patches/sdl-events.patch', 'patches/sdl-asyncify.patch', 'patches/sdl_image.patch', 'patches/sdl_mixer.patch', 'patches/sdl_ttf.patch', 'patches/opengl.patch', 'mixer/php_sdl_mixer_rw.h', 'opengl/php_webgl.c', 'opengl/php_webgl_arginfo.h', 'opengl/php_webgl.stub.php', 'opengl/LICENSE'])
-	{
+	for(const name of [
+		'index.mjs'
+		, 'extensions.mak'
+		, 'patches/sdl-events.patch'
+		, 'patches/sdl-bindings.patch'
+		, 'core/joystick.c'
+		, 'core/glcontext.c'
+		, 'core/glcontext.h'
+		, 'core/php_sdl_context_hooks.c'
+		, 'core/php_sdl_events.c'
+		, 'core/php_sdl_render.c'
+		, 'core/php_sdl_values.c'
+		, 'core/pixels.c'
+		, 'core/surface.c'
+		, 'core/render.c'
+		, 'core/rwops.c'
+		, 'core/rwops.h'
+		, 'core/mouse.c'
+		, 'core/mouse.h'
+		, 'js/library.js'
+		, 'js/text-input.js'
+		, 'js/pointer-lock.js'
+		, 'core/php_sdl_text.c'
+		, 'core/php_sdl_geometry.c'
+		, 'core/php_sdl_geometry.stub.php'
+		, 'core/php_sdl_geometry_arginfo.h'
+		, 'core/php_sdl_extra.c'
+		, 'core/php_sdl_extra.h'
+		, 'core/php_sdl_extra_arginfo.h'
+		, 'core/php_sdl_extra.stub.php'
+		, 'ttf/php_ttf_extra.c'
+		, 'ttf/sdl_ttf.c'
+		, 'ttf/sdl_ttf_font.c'
+		, 'ttf/sdl_ttf_font.h'
+		, 'ttf/php_ttf_extra_arginfo.h'
+		, 'ttf/php_ttf_extra.stub.php'
+		, 'patches/sdl-asyncify.patch'
+		, 'patches/sdl_image.patch'
+		, 'patches/sdl_mixer.patch'
+		, 'patches/sdl_ttf.patch'
+		, 'patches/opengl.patch'
+		, 'mixer/php_sdl_mixer_rw.h'
+		, 'mixer/php_sdl_mixer_lifetime.h'
+		, 'mixer/src/Mix_Chunk.c'
+		, 'mixer/src/Mix_Chunk.h'
+		, 'mixer/src/Mix_Music.c'
+		, 'mixer/src/Mix_Music.h'
+		, 'mixer/src/mixer.c'
+		, 'mixer/src/music.c'
+		, 'mixer/src/php_sdl_mixer.c'
+		, 'mixer/src/effect_position.c'
+		, 'mixer/src/effect_stereoreverse.c'
+		, 'patches/SDL2_mixer.patch'
+		, 'opengl/php_webgl.c'
+		, 'opengl/php_webgl.h'
+		, 'opengl/php_webgl_buffers.c'
+		, 'opengl/php_webgl_targets.c'
+		, 'opengl/php_webgl_state.c'
+		, 'opengl/php_webgl_objects.c'
+		, 'opengl/php_webgl_textures.c'
+		, 'opengl/php_webgl_constants.h'
+		, 'COVERAGE.md'
+		, 'opengl/php_webgl_arginfo.h'
+		, 'opengl/php_webgl.stub.php'
+		, 'opengl/LICENSE'
+	]) {
 		assert.ok(names.includes(name), name);
 	}
 	assert.equal(names.some(name => /\.(wasm|so)$/.test(name)), false);

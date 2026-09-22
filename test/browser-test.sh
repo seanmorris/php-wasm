@@ -13,7 +13,28 @@ until curl -fsS "http://127.0.0.1:${PORT}/php-wasm/" >/dev/null; do
 	sleep 0.1
 done
 
-PLAYWRIGHT_ARGS=(-c playwright.config.mjs test/browser/browser.spec.mjs test/browser/runtime-regressions.spec.mjs test/browser/idbfs.spec.mjs test/browser/sdl.spec.mjs)
+PLAYWRIGHT_ARGS=(
+	-c playwright.config.mjs
+	test/browser/browser.spec.mjs
+	test/browser/runtime-regressions.spec.mjs
+	test/browser/idbfs.spec.mjs
+	test/browser/sdl.spec.mjs
+	test/browser/sdl-bindings.spec.mjs
+	test/browser/sdl-engine.spec.mjs
+	test/browser/sdl-geometry.spec.mjs
+	test/browser/sdl-coordinates.spec.mjs
+	test/browser/sdl-textures.spec.mjs
+	test/browser/sdl-lifetimes.spec.mjs
+	test/browser/sdl-buffers.spec.mjs
+	test/browser/sdl-streams.spec.mjs
+	test/browser/sdl-cursors.spec.mjs
+	test/browser/sdl-input.spec.mjs
+	test/browser/sdl-text.spec.mjs
+	test/browser/sdl-pointer.spec.mjs
+	test/browser/sdl-audio.spec.mjs
+	test/browser/sdl-windows.spec.mjs
+	test/browser/sdl-serialization.spec.mjs
+)
 
 if [[ -n "${UPDATE_SNAPSHOTS:-}" || -n "${CV_UPDATE_SNAPSHOTS:-}" ]]; then
 	PLAYWRIGHT_ARGS+=(--update-snapshots)

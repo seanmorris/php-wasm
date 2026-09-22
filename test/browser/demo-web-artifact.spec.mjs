@@ -182,7 +182,6 @@ test.describe('SDL demo controls', () => {
 		const canvas = page.locator('canvas');
 		const status = page.locator('[data-sdl-status]');
 		await expect(status).toHaveText('Running · sound off', {timeout: 180000});
-		await expect(page.locator('[data-sdl-credit]')).toHaveText('Music: Unreal Superhero 3 — Kenët and rez');
 		await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(2);
 		await canvas.press('Space');
 		await expect(canvas).toHaveAttribute('data-paused', '1');

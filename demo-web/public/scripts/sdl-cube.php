@@ -26,8 +26,18 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 	private $audioError = null;
 	private $x = .35, $y = .55, $last = 0, $frames = 0, $started = 0;
 	private $width = 640, $height = 400, $textWidth = 0, $textHeight = 0;
+	private $messages = [], $glyphs = [], $letters = [], $glyphWidth = 0;
+	private $messageIndex = 0, $messageTime = 0, $textTime = 0, $textExit = 0, $textDuration = 0;
+	private $textScale = 1;
 	private $resizeObserver = null, $resizePending = true;
 	private const WIDTH = 640, HEIGHT = 400;
+	private const SPIN_SPEED = .6, KEYBOARD_SPEED = 3.6;
+	private const MESSAGES = [
+		'Hello, World! Welcome to PHP-WASM!',
+		'This is the PHP/SDL + OPENGL Demo!',
+		'Focus the canvas: arrows/WASD rotate · Space pauses · R resets · M mutes · Esc stops',
+		'You are listening to Unreal Superhero 3 by Kenët and rez'
+	];
 
 	public function __construct($browser, $canvas, $refresh, $shared)
 	{
@@ -41,9 +51,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->panel = $browser->document->createElement('div');
 		$this->panel->className = 'sdl-controls';
 		$this->panel->innerHTML = '<button type="button" data-sdl-audio>Enable audio</button>'
-			. '<span role="status" data-sdl-status>Starting SDL...</span>'
-			. '<small data-sdl-credit>Music: Unreal Superhero 3 — Kenët and rez</small>'
-			. '<small>Focus the canvas: arrows/WASD rotate · Space pauses · R resets · M mutes · Esc stops</small>';
+			. '<span role="status" data-sdl-status>Starting SDL...</span>';
 		$browser->document->querySelector('#example')->appendChild($this->panel);
 		$this->button = $this->panel->querySelector('[data-sdl-audio]');
 		$this->status = $this->panel->querySelector('[data-sdl-status]');
@@ -82,8 +90,10 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->check($this->context, 'Create WebGL2 context (WebGL2 must be enabled in your browser)');
 		$this->check(SDL_GL_MakeCurrent($this->window, $this->context) === 0, 'Make GL context current');
 		$this->check(TTF_Init() === 0, 'Initialize fonts');
-		$this->font = TTF_OpenFont('/preload/sdl/DejaVuSansMono.ttf', 18);
+		$this->font = TTF_OpenFont('/preload/sdl/DejaVuSansMono.ttf', 28);
 		$this->check($this->font, 'Load font');
+		TTF_SetFontStyle($this->font, TTF_STYLE_BOLD);
+		TTF_SetFontKerning($this->font, 0);
 		$this->buildGraphics();
 		$ResizeObserver = $this->browser->ResizeObserver;
 		$this->resizeObserver = new $ResizeObserver(function() { $this->resizePending = true; });
@@ -181,8 +191,51 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$vertex = $fragment = 0;
 		try
 		{
-			$vertex = $this->shader(GL_VERTEX_SHADER, "#version 300 es\nlayout(location=0) in vec3 position;\nlayout(location=1) in vec2 uv;\nlayout(location=2) in float light;\nuniform mat4 matrix;\nuniform highp int overlay;\nout vec2 texCoord;\nout float shade;\nvoid main(){ gl_Position=overlay==1?vec4(position,1.0):matrix*vec4(position,1.0); texCoord=uv; shade=light; }");
-			$fragment = $this->shader(GL_FRAGMENT_SHADER, "#version 300 es\nprecision mediump float;\nin vec2 texCoord;\nin float shade;\nuniform sampler2D image;\nuniform highp int overlay;\nout vec4 color;\nvoid main(){ vec4 sampleColor=texture(image,texCoord); if(overlay==0){ sampleColor=vec4(mix(vec3(0.12,0.18,0.24),sampleColor.rgb,sampleColor.a),1.0); } color=vec4(sampleColor.rgb*shade,sampleColor.a); }");
+			$vertex = $this->shader(GL_VERTEX_SHADER, <<<'GLSL'
+				#version 300 es
+				layout(location=0) in vec3 position;
+				layout(location=1) in vec2 uv;
+				layout(location=2) in float light;
+				uniform mat4 matrix;
+				uniform highp int overlay;
+				out vec2 texCoord;
+				out float shade;
+				void main()
+				{
+					gl_Position = overlay != 0 ? vec4(position, 1.0) : matrix * vec4(position, 1.0);
+					texCoord = uv;
+					shade = light;
+				}
+				GLSL);
+			$fragment = $this->shader(GL_FRAGMENT_SHADER, <<<'GLSL'
+				#version 300 es
+				precision highp float;
+				in vec2 texCoord;
+				in float shade;
+				uniform sampler2D image;
+				uniform highp int overlay;
+				out vec4 color;
+				void main()
+				{
+					if(overlay == 2)
+					{
+						// SDL_ttf supplies native bold glyphs and outlines; bake only the tint.
+						vec4 glyph = texture(image, texCoord);
+						vec3 tint = mix(vec3(0.25, 0.85, 1.0), vec3(0.88, 0.77, 0.59), texCoord.y);
+						tint = mix(tint, vec3(1.0), 1.0 - smoothstep(0.0, 0.24, abs(texCoord.y - 0.48)));
+						color = vec4(tint * glyph.rgb, glyph.a);
+					}
+					else if(overlay == 1)
+					{
+						color = texture(image, texCoord);
+					}
+					else
+					{
+						vec4 sampleColor = texture(image, texCoord);
+						color = vec4(mix(vec3(0.12, 0.18, 0.24), sampleColor.rgb, sampleColor.a) * shade, 1.0);
+					}
+				}
+				GLSL);
 			$this->program = glCreateProgram();
 			glAttachShader($this->program, $vertex);
 			glAttachShader($this->program, $fragment);
@@ -201,13 +254,42 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->matrixLocation = glGetUniformLocation($this->program, 'matrix');
 		$this->overlayLocation = glGetUniformLocation($this->program, 'overlay');
 		glUniform1i(glGetUniformLocation($this->program, 'image'), 0);
-		glGenTextures(2, $this->textures);
+		glGenTextures(3, $this->textures);
 		glActiveTexture(GL_TEXTURE0);
 		$this->uploadSurface(IMG_Load('/preload/sdl/sean-icon-32.png'), $this->textures[0], GL_NEAREST);
-		$text = TTF_RenderText_Blended($this->font, 'PHP / SDL + OpenGL', new SDL_Color(255, 255, 255, 255));
-		$this->check($text, 'Render text');
-		$this->textWidth = $text->w;
-		$this->textHeight = $text->h;
+		$this->messages = self::MESSAGES;
+		// Keep code points intact, including ë and ·, while caching each glyph once.
+		$characters = array_values(array_unique($this->characters(implode('', $this->messages))));
+		$this->glyphs = array_flip($characters);
+		$atlas = ' ' . implode('  ', $characters) . ' ';
+		$this->check(TTF_SizeUTF8($this->font, ' ', $advance, $height) === 0, 'Measure font');
+		$this->glyphWidth = $advance;
+		TTF_SetFontOutline($this->font, 0);
+		$fill = TTF_RenderUTF8_Blended($this->font, $atlas, new SDL_Color(255, 255, 255, 255));
+		$this->check($fill, 'Render text');
+		try
+		{
+			TTF_SetFontOutline($this->font, 2);
+			$text = TTF_RenderUTF8_Blended($this->font, $atlas, new SDL_Color(0, 0, 0, 255));
+			$this->check($text, 'Render text outline');
+			try
+			{
+				$destination = new SDL_Rect(2, 2, $fill->w, $fill->h);
+				$this->check(SDL_UpperBlit($fill, null, $text, $destination) === 0, 'Composite text');
+				$this->textWidth = $text->w;
+				$this->textHeight = $text->h;
+			}
+			catch(Throwable $error)
+			{
+				SDL_FreeSurface($text);
+				throw $error;
+			}
+		}
+		finally
+		{
+			TTF_SetFontOutline($this->font, 0);
+			SDL_FreeSurface($fill);
+		}
 		$this->uploadSurface($text, $this->textures[1]);
 
 		$vertices = $indices = [];
@@ -231,12 +313,51 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 			glBindBuffer($target, $this->buffers[$index]);
 			glBufferData($target, strlen($bytes), $bytes, GL_STATIC_DRAW);
 		}
+		$this->styleText();
 		$this->resizePending = true;
 		$this->resize();
 		glClearColor(.025, .04, .075, 1);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		if($error = glGetError()) { throw new RuntimeException('OpenGL setup error: ' . $error); }
+	}
+
+	private function styleText(): void
+	{
+		// Bake the gradient once; animation only samples the native bold/outlined atlas.
+		glBindTexture(GL_TEXTURE_2D, $this->textures[2]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, $this->textWidth, $this->textHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		$framebuffers = [];
+		glGenFramebuffers(1, $framebuffers);
+		try
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, $framebuffers[0]);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, $this->textures[2], 0);
+			if(glCheckFramebufferStatus(GL_FRAMEBUFFER) !== GL_FRAMEBUFFER_COMPLETE)
+			{
+				throw new RuntimeException('Cannot create the text atlas framebuffer.');
+			}
+			glViewport(0, 0, $this->textWidth, $this->textHeight);
+			glDisable(GL_DEPTH_TEST);
+			glDisable(GL_BLEND);
+			$bytes = pack('g*', -1,-1,0,0,0,1, 1,-1,0,1,0,1, -1,1,0,0,1,1, 1,1,0,1,1,1);
+			$this->attributes($this->buffers[2]);
+			glBufferData(GL_ARRAY_BUFFER, strlen($bytes), $bytes, GL_STATIC_DRAW);
+			glBindTexture(GL_TEXTURE_2D, $this->textures[1]);
+			glUniform1i($this->overlayLocation, 2);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		}
+		finally
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glDeleteFramebuffers(count($framebuffers), $framebuffers);
+		}
+		glDeleteTextures(1, [$this->textures[1]]);
+		$this->textures = [$this->textures[0], $this->textures[2]];
 	}
 
 	private function resize(): void
@@ -254,14 +375,107 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->width = $width;
 		$this->height = $height;
 		glViewport(0, 0, $width, $height);
-		$left = -1 + 24 / $width;
-		$top = 1 - 24 / $height;
-		$right = $left + 2 * $this->textWidth / $width;
-		$bottom = $top - 2 * $this->textHeight / $height;
-		$overlay = [$left,$bottom,0,0,1,1, $right,$bottom,0,1,1,1, $left,$top,0,0,0,1, $right,$top,0,1,0,1];
-		$bytes = pack('g*', ...$overlay);
-		glBindBuffer(GL_ARRAY_BUFFER, $this->buffers[2]);
-		glBufferData(GL_ARRAY_BUFFER, strlen($bytes), $bytes, GL_STATIC_DRAW);
+		$this->layoutText();
+	}
+
+	private function characters(string $text): array
+	{
+		return preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY);
+	}
+
+	private function wrapText(string $text, int $columns): array
+	{
+		$lines = [];
+		$line = [];
+		foreach(explode(' ', $text) as $word)
+		{
+			$letters = $this->characters($word);
+			if($line && count($line) + count($letters) + 1 > $columns)
+			{
+				$lines[] = $line;
+				$line = [];
+			}
+			if($line) { $line[] = ' '; }
+			foreach($letters as $letter)
+			{
+				if(count($line) === $columns)
+				{
+					$lines[] = $line;
+					$line = [];
+				}
+				$line[] = $letter;
+			}
+		}
+		if($line) { $lines[] = $line; }
+		return $lines;
+	}
+
+	private function layoutText(): void
+	{
+		$this->textScale = min(1, $this->width / 480, $this->height / 240);
+		$advance = ($this->glyphWidth + 3) * $this->textScale;
+		$lineHeight = ($this->textHeight + 12) * $this->textScale;
+		$columns = max(1, (int)(($this->width - 48 * $this->textScale) / $advance));
+		$message = $this->messages[$this->messageIndex];
+		$lines = $this->wrapText($message, $columns);
+		$top = $this->height * .57 - count($lines) * $lineHeight / 2;
+		$this->letters = [];
+		foreach($lines as $row => $line)
+		{
+			$left = ($this->width - count($line) * $advance) / 2;
+			foreach($line as $column => $letter)
+			{
+				$this->letters[] = [$letter, $left + $column * $advance, $top + $row * $lineHeight];
+			}
+		}
+		$streamDuration = .8 + max(0, count($this->letters) - 1) * .035;
+		$this->textExit = $streamDuration + max(2.8, count($this->characters($message)) * .055);
+		$this->textDuration = $this->textExit + $streamDuration;
+		$this->canvas->setAttribute('aria-label', 'Rotating textured cube. ' . self::MESSAGES[$this->messageIndex]);
+	}
+
+	private function renderText(): void
+	{
+		if($this->messageTime >= $this->textDuration)
+		{
+			$this->messageTime -= $this->textDuration;
+			$this->messageIndex = ($this->messageIndex + 1) % count($this->messages);
+			$this->layoutText();
+		}
+		$vertices = [];
+		$padding = $this->glyphWidth * $this->textScale;
+		$width = $padding * 3;
+		$height = $this->textHeight * $this->textScale;
+		$amplitude = min(16, $this->height * .04) * $this->textScale;
+		foreach($this->letters as $index => [$letter, $x, $y])
+		{
+			if($letter === ' ') { continue; }
+			$enter = max(0, min(1, ($this->messageTime - $index * .035) / .8));
+			$leave = max(0, min(1, ($this->messageTime - $this->textExit - $index * .035) / .8));
+			if($enter === 0 || $leave === 1) { continue; }
+			// Letters stream in from the left, linger in reading order, then leave right.
+			$x += ($this->width + $width) * ($leave ** 3 - (1 - $enter) ** 3) - $padding;
+			if($x + $width < 0 || $x > $this->width) { continue; }
+			$y += sin($this->textTime * 3.8 - $index * .43) * $amplitude;
+			$left = -1 + 2 * $x / $this->width;
+			$right = $left + 2 * $width / $this->width;
+			$top = 1 - 2 * $y / $this->height;
+			$bottom = $top - 2 * $height / $this->height;
+			$u = $this->glyphs[$letter] * 3 * $this->glyphWidth / $this->textWidth;
+			$v = $u + 3 * $this->glyphWidth / $this->textWidth;
+			array_push($vertices,
+				$left,$bottom,0,$u,1,1, $right,$bottom,0,$v,1,1, $left,$top,0,$u,0,1,
+				$left,$top,0,$u,0,1, $right,$bottom,0,$v,1,1, $right,$top,0,$v,0,1
+			);
+		}
+		if(!$vertices) { return; }
+		// Draw the bold, outlined text with one batched vertex upload and one draw.
+		$bytes = pack('g*', ...$vertices);
+		$this->attributes($this->buffers[2]);
+		glBufferData(GL_ARRAY_BUFFER, strlen($bytes), $bytes, GL_STREAM_DRAW);
+		glBindTexture(GL_TEXTURE_2D, $this->textures[1]);
+		glUniform1i($this->overlayLocation, 1);
+		glDrawArrays(GL_TRIANGLES, 0, count($vertices) / 6);
 	}
 
 	private function attributes(int $buffer): void
@@ -306,7 +520,12 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 			if(!$focused || isset($this->keys[$key])) { continue; }
 			$this->keys[$key] = true;
 			if($key === SDLK_SPACE) { $this->paused = !$this->paused; }
-			if($key === SDLK_r) { $this->x = .35; $this->y = .55; }
+			if($key === SDLK_r)
+			{
+				$this->x = .35; $this->y = .55;
+				$this->messageIndex = $this->messageTime = $this->textTime = 0;
+				$this->layoutText();
+			}
 			if($key === SDLK_m && $this->audio) { $this->toggleAudio(); }
 			if($key === SDLK_ESCAPE) { $this->stop(); return; }
 			if($this->audio && !$this->muted && in_array($key, [SDLK_SPACE, SDLK_r, SDLK_m], true))
@@ -316,8 +535,8 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		}
 		if(!$focused) { return; }
 		$keys = SDL_GetKeyboardState();
-		$this->x += $delta * 1.8 * (($keys[SDL_SCANCODE_DOWN] || $keys[SDL_SCANCODE_S]) - ($keys[SDL_SCANCODE_UP] || $keys[SDL_SCANCODE_W]));
-		$this->y += $delta * 1.8 * (($keys[SDL_SCANCODE_RIGHT] || $keys[SDL_SCANCODE_D]) - ($keys[SDL_SCANCODE_LEFT] || $keys[SDL_SCANCODE_A]));
+		$this->x += $delta * self::KEYBOARD_SPEED * (($keys[SDL_SCANCODE_DOWN] || $keys[SDL_SCANCODE_S]) - ($keys[SDL_SCANCODE_UP] || $keys[SDL_SCANCODE_W]));
+		$this->y += $delta * self::KEYBOARD_SPEED * (($keys[SDL_SCANCODE_RIGHT] || $keys[SDL_SCANCODE_D]) - ($keys[SDL_SCANCODE_LEFT] || $keys[SDL_SCANCODE_A]));
 	}
 
 	private function render(float $time): void
@@ -330,7 +549,12 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		$this->last = $time;
 		$this->input($delta);
 		if($this->stopped) { return; }
-		if(!$this->paused) { $this->y += $delta * .45; }
+		if(!$this->paused)
+		{
+			$this->y += $delta * self::SPIN_SPEED;
+			$this->messageTime += $delta;
+			$this->textTime += $delta;
+		}
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glUseProgram($this->program);
 		glEnable(GL_DEPTH_TEST);
@@ -341,10 +565,7 @@ $demo = new class($browser, vrzno_env('canvas'), vrzno_env('onRefresh'), $shared
 		glBindTexture(GL_TEXTURE_2D, $this->textures[0]);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, 0);
 		glDisable(GL_DEPTH_TEST);
-		glUniform1i($this->overlayLocation, 1);
-		$this->attributes($this->buffers[2]);
-		glBindTexture(GL_TEXTURE_2D, $this->textures[1]);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		$this->renderText();
 		SDL_GL_SwapWindow($this->window);
 		$this->frames++;
 		$this->canvas->dataset->frames = (string)$this->frames;

@@ -15,6 +15,7 @@
     "LICENSE",
     "NOTICE",
     "README.md",
+    "COVERAGE.md",
     "benchmarks",
     "pre.mak",
     "static.mak",
@@ -23,6 +24,9 @@
     "php8-string-return.patch",
     "patches",
     "opengl",
-    "mixer"
+    "mixer",
+    "core",
+    "js",
+    "ttf"
   ]
 }

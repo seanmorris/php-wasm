@@ -28,6 +28,15 @@ ifneq ($(filter ${WITH_SDL},1 dynamic),)
 WITH_SDL=1
 CONFIGURE_FLAGS+= --with-sdl=/src/lib/bin/sdl2-config
 EXTRA_FLAGS+= -sFULL_ES2 -sFULL_ES3 -lEGL -lGL
+EXTRA_FLAGS+= -Wl,--wrap=SDL_GL_DeleteContext -Wl,--wrap=SDL_VideoQuit -Wl,--wrap=SDL_VideoInit
+EXTRA_FLAGS+= -Wl,--wrap=SDL_FreeSurface
+EXTRA_FLAGS+= -Wl,--wrap=SDL_AudioQuit -Wl,--wrap=SDL_AudioInit
+EXTRA_FLAGS+= -Wl,--wrap=SDL_StartTextInput -Wl,--wrap=SDL_StopTextInput -Wl,--wrap=SDL_SetTextInputRect
+EXTRA_FLAGS+= -Wl,--wrap=SDL_SetRelativeMouseMode
+EXTRA_FLAGS+= --js-library /src/packages/sdl/js/library.js
+EXTRA_FLAGS+= --js-library /src/packages/sdl/js/text-input.js
+EXTRA_FLAGS+= --js-library /src/packages/sdl/js/pointer-lock.js
+PHP_LINK_DEPS+= packages/sdl/js/library.js packages/sdl/js/text-input.js packages/sdl/js/pointer-lock.js
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 lib/bin/sdl2-config
 ZEND_EXTRA_LIBS+= -lhtml5
 TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)

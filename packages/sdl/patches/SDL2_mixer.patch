@@ -1,0 +1,133 @@
+--- a/src/mixer.c
++++ b/src/mixer.c
+@@ -508,6 +508,13 @@
+     num_channels = MIX_CHANNELS;
+     mix_channel = (struct _Mix_Channel *) SDL_malloc(num_channels * sizeof(struct _Mix_Channel));
+ 
++    if (!mix_channel) {
++        SDL_CloseAudioDevice(audio_device);
++        audio_device = 0;
++        num_channels = 0;
++        return Mix_OutOfMemory();
++    }
++
+     /* Clear out the audio channels */
+     for (i = 0; i < num_channels; ++i) {
+         mix_channel[i].chunk = NULL;
+@@ -564,6 +571,13 @@
+     if (numchans<0 || numchans==num_channels)
+         return num_channels;
+ 
++    if (!audio_opened) {
++        return Mix_SetError("Audio device hasn't been opened");
++    }
++    if ((size_t)numchans > SDL_MAX_SINT32 / sizeof(*mix_channel)) {
++        return Mix_SetError("Too many mixer channels");
++    }
++
+     if (numchans < num_channels) {
+         /* Stop the affected channels */
+         int i;
+@@ -573,7 +587,12 @@
+         }
+     }
+     Mix_LockAudio();
+-    mix_channel = (struct _Mix_Channel *) SDL_realloc(mix_channel, numchans * sizeof(struct _Mix_Channel));
++    struct _Mix_Channel *resized = (struct _Mix_Channel *) SDL_realloc(mix_channel, numchans * sizeof(*mix_channel));
++    if (numchans && !resized) {
++        Mix_UnlockAudio();
++        return Mix_OutOfMemory();
++    }
++    mix_channel = resized;
+     if (numchans > num_channels) {
+         /* Initialize the new channels */
+         int i;
+@@ -985,6 +1004,8 @@
+             for (i = 0; i < num_channels; ++i) {
+                 if (chunk == mix_channel[i].chunk) {
+                     Mix_HaltChannel_locked(i);
++                    mix_channel[i].chunk = NULL;
++                    mix_channel[i].samples = NULL;
+                 }
+             }
+         }
+@@ -1096,7 +1117,7 @@
+                 if (!Mix_Playing(i))
+                     break;
+             }
+-            if (i == num_channels) {
++            if (i >= num_channels) {
+                 Mix_SetError("No free channels available");
+                 which = -1;
+             } else {
+@@ -1172,7 +1193,7 @@
+                 if (!Mix_Playing(i))
+                     break;
+             }
+-            if (i == num_channels) {
++            if (i >= num_channels) {
+                 which = -1;
+             } else {
+                 which = i;
+@@ -1217,13 +1238,13 @@
+ int Mix_Volume(int which, int volume)
+ {
+     int i;
+-    int prev_volume = 0;
++    Sint64 prev_volume = 0;
+ 
+     if (which == -1) {
+         for (i = 0; i < num_channels; ++i) {
+             prev_volume += Mix_Volume(i, volume);
+         }
+-        prev_volume /= num_channels;
++        if (num_channels) { prev_volume /= num_channels; }
+     } else if (which < num_channels) {
+         prev_volume = mix_channel[which].volume;
+         if (volume >= 0) {
+@@ -1400,6 +1421,7 @@
+             audio_device = 0;
+             SDL_free(mix_channel);
+             mix_channel = NULL;
++            num_channels = 0;
+ 
+             /* rcg06042009 report available decoders at runtime. */
+             SDL_free((void *)chunk_decoders);
+@@ -1478,7 +1500,7 @@
+ /* Change the group of a channel */
+ int Mix_GroupChannel(int which, int tag)
+ {
+-    if (which < 0 || which > num_channels) {
++    if (which < 0 || which >= num_channels) {
+         return 0;
+     }
+ 
+--- a/src/music.c
++++ b/src/music.c
+@@ -961,7 +961,7 @@
+         music->fading = MIX_NO_FADING;
+     }
+     music->fade_step = 0;
+-    music->fade_steps = (ms + ms_per_step - 1) / ms_per_step;
++    music->fade_steps = ((Sint64)ms + ms_per_step - 1) / ms_per_step;
+ 
+     /* Play the puppy */
+     Mix_LockAudio();
+@@ -1263,7 +1263,7 @@
+ 
+     Mix_LockAudio();
+     if (music_playing) {
+-        int fade_steps = (ms + ms_per_step - 1) / ms_per_step;
++        int fade_steps = ((Sint64)ms + ms_per_step - 1) / ms_per_step;
+         if (music_playing->fading == MIX_NO_FADING) {
+             music_playing->fade_step = 0;
+         } else {
+@@ -1274,7 +1274,7 @@
+             } else {
+                 step = old_fade_steps - music_playing->fade_step + 1;
+             }
+-            music_playing->fade_step = (step * fade_steps) / old_fade_steps;
++            music_playing->fade_step = ((Sint64)step * fade_steps) / old_fade_steps;
+         }
+         music_playing->fading = MIX_FADING_OUT;
+         music_playing->fade_steps = fade_steps;

@@ -1,0 +1,68 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "change": "Add 91 PHP bindings for SDL events, textures, fonts, controllers, GL uniforms and timers; fix related ownership and surface blits.",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652791,
+      "brotli": 465521,
+      "sha256": "f843f8a7da54c78411a6993ca509b151cc16566d4ef2b5a4a9f1de7394b15075"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 46794488,
+      "gzip": 13294488,
+      "brotli": 9067279,
+      "sha256": "83a2e74b4a0e813a0454fbf0ce720e1fd8af40a44be158a64ea5f8ecfa92ba61"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652840,
+      "brotli": 465169,
+      "sha256": "80b8cf1ebf8da01065e6d7b8553855d27800f46d611165b976622be7676fdce6"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 46885059,
+      "gzip": 13309991,
+      "brotli": 9089154,
+      "sha256": "c498d8a6cc1f7375e5a3df69a0f1095ce421ddf8ace309802e1a553e374605b2"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51556274,
+      "after": 51646845,
+      "increase": 90571,
+      "percent": 0.17567406054207874
+    },
+    "gzip": {
+      "before": 13947279,
+      "after": 13962831,
+      "increase": 15552,
+      "percent": 0.11150562055867672
+    },
+    "brotli": {
+      "before": 9532800,
+      "after": 9554323,
+      "increase": 21523,
+      "percent": 0.22577836522322928
+    }
+  }
+}

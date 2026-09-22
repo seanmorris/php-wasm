@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-serialization-8.0-baseline.json",
+  "change": "PHP 8.0 native resource serialization guards and window garbage collection",
+  "phpVersion": "8.0.30",
+  "emscriptenVersion": "6.0.6",
+  "profile": "static",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.0.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-serialization/baseline-runtime PHP_ASSET_DIR=.cache/sdl-serialization/baseline-runtime CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.0_sdl-web.mjs": {
+      "raw": 4696475,
+      "gzip": 642002,
+      "brotli": 457349,
+      "sha256": "5151e85a7d32bbffc8fdbfa86edb69f2bb81cb1af8e5dbc188dfab1337674f1c"
+    },
+    "php8.0_sdl-web.mjs.wasm": {
+      "raw": 41171898,
+      "gzip": 11666995,
+      "brotli": 7853562,
+      "sha256": "e1b9c91412f9e02505b7884efe405ee8ffbd5a8c0f100710d85d716aa9503864"
+    }
+  },
+  "sizes": {
+    "php8.0_sdl-web.mjs": {
+      "raw": 4696475,
+      "gzip": 642006,
+      "brotli": 457570,
+      "sha256": "e1cfc2089a33f0415cde1faff1abfabf09be82f746ab3c0860addba4ec60df50"
+    },
+    "php8.0_sdl-web.mjs.wasm": {
+      "raw": 41175584,
+      "gzip": 11667728,
+      "brotli": 7855200,
+      "sha256": "219e8d3878916df49897a5800b6e7e38bb362cbb3a42e53dd202df55ff317ec9"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 45868373,
+      "after": 45872059,
+      "increase": 3686,
+      "percent": 0.008036038252326936
+    },
+    "gzip": {
+      "before": 12308997,
+      "after": 12309734,
+      "increase": 737,
+      "percent": 0.005987490288607593
+    },
+    "brotli": {
+      "before": 8310911,
+      "after": 8312770,
+      "increase": 1859,
+      "percent": 0.022368185629710147
+    }
+  }
+}

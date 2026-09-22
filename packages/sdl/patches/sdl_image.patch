@@ -46,7 +46,15 @@
    PHP_ADD_EXTENSION_DEP(sdl_image, sdl)
 --- a/php_sdl_image.c
 +++ b/php_sdl_image.c
-@@ -27,11 +27,12 @@
+@@ -9,6 +9,7 @@
+ #define SDL_RENDERER_RES_NAME "SDL Renderer"
+ extern int le_sdl_renderer;
+ extern int le_sdl_texture;
++extern zend_resource *php_sdl_register_texture(SDL_Texture *texture, SDL_Renderer *renderer);
+ extern zend_bool sdl_surface_to_zval(SDL_Surface *surface, zval *z_val);
+ 
+ /* {{{ proto SDL_Texture IMG_LoadTexture(string file)
+@@ -27,18 +28,19 @@
  	SDL_Renderer *renderer = NULL;
  
  	ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -60,6 +68,14 @@
  	texture = IMG_LoadTexture(renderer, ZSTR_VAL(file));
  
  	if (!texture) {
+ 		RETURN_NULL();
+ 	}
+ 
+-	RETURN_RES(zend_register_resource(texture, le_sdl_texture));
++	RETURN_RES(php_sdl_register_texture(texture, renderer));
+ }
+ /* }}} */
+ 
 --- a/php_sdl_image_arginfo.h
 +++ b/php_sdl_image_arginfo.h
 @@ -1,7 +1,7 @@
@@ -82,6 +98,4 @@
 -function IMG_LoadTexture($renderer, string $file): SDL_Texture {};
 +function IMG_LoadTexture($renderer, string $file) {};
  
--function IMG_Load(string $file): ?SDL_Surface {};
-\ No newline at end of file
-+function IMG_Load(string $file): ?SDL_Surface {};
+ function IMG_Load(string $file): ?SDL_Surface {};

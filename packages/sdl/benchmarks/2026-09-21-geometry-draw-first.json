@@ -1,0 +1,353 @@
+{
+  "date": "2026-09-21T17:50:08.393Z",
+  "browser": "152.0.7977.75",
+  "libType": "static",
+  "hashes": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4761786,
+      "sha256": "d73ededc31b7428bffcec999d74117358442980e323e0ccf2c173f1d28c9c6cb"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47020635,
+      "sha256": "75a7b866abd084d78ddcb8455994faef90f1590d0bd7e042adba1b2be67b4ee2"
+    }
+  },
+  "machine": {
+    "os": "linux",
+    "release": "6.1.0-31-amd64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "logicalCpus": 8
+  },
+  "loadBefore": [
+    5,
+    8.91,
+    9.25
+  ],
+  "loadAfter": [
+    5.24,
+    8.89,
+    9.24
+  ],
+  "graphics": {
+    "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "launch": {
+    "headless": true,
+    "args": [
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader"
+    ]
+  },
+  "phpVersion": "8.4.1",
+  "renderer": {
+    "name": "opengles2",
+    "flags": 10,
+    "num_texture_formats": 9,
+    "texture_formats": [
+      376840196,
+      372645892,
+      370546692,
+      374740996,
+      842094169,
+      1448433993,
+      842094158,
+      825382478,
+      542328143
+    ],
+    "max_texture_width": 8192,
+    "max_texture_height": 8192
+  },
+  "rectanglesPerBatch": 1024,
+  "rectanglesPerSample": 65536,
+  "batchesPerSample": 64,
+  "warmupsPerCase": 4,
+  "samples": {
+    "single_rectangles": [
+      {
+        "submitMs": 101,
+        "flushMs": 36,
+        "totalMs": 137
+      },
+      {
+        "submitMs": 94,
+        "flushMs": 38,
+        "totalMs": 132
+      },
+      {
+        "submitMs": 96,
+        "flushMs": 45,
+        "totalMs": 141
+      },
+      {
+        "submitMs": 112,
+        "flushMs": 53.999755859375,
+        "totalMs": 165.999755859375
+      },
+      {
+        "submitMs": 86.000244140625,
+        "flushMs": 32.999755859375,
+        "totalMs": 119
+      },
+      {
+        "submitMs": 91.99951171875,
+        "flushMs": 38.000244140625,
+        "totalMs": 129.999755859375
+      },
+      {
+        "submitMs": 141.999755859375,
+        "flushMs": 45.999755859375,
+        "totalMs": 187.99951171875
+      },
+      {
+        "submitMs": 89,
+        "flushMs": 31,
+        "totalMs": 120
+      },
+      {
+        "submitMs": 90.000244140625,
+        "flushMs": 32,
+        "totalMs": 122.000244140625
+      },
+      {
+        "submitMs": 96.999755859375,
+        "flushMs": 33.000244140625,
+        "totalMs": 130
+      },
+      {
+        "submitMs": 103.000244140625,
+        "flushMs": 37.000244140625,
+        "totalMs": 140.00048828125
+      },
+      {
+        "submitMs": 90.000244140625,
+        "flushMs": 33,
+        "totalMs": 123.000244140625
+      }
+    ],
+    "rectangle_batch": [
+      {
+        "submitMs": 51.000244140625,
+        "flushMs": 35,
+        "totalMs": 86.000244140625
+      },
+      {
+        "submitMs": 56,
+        "flushMs": 30,
+        "totalMs": 86
+      },
+      {
+        "submitMs": 56,
+        "flushMs": 36,
+        "totalMs": 92
+      },
+      {
+        "submitMs": 58.000244140625,
+        "flushMs": 36.999755859375,
+        "totalMs": 95
+      },
+      {
+        "submitMs": 54.000244140625,
+        "flushMs": 35.99951171875,
+        "totalMs": 89.999755859375
+      },
+      {
+        "submitMs": 51,
+        "flushMs": 29,
+        "totalMs": 80
+      },
+      {
+        "submitMs": 88,
+        "flushMs": 46.000244140625,
+        "totalMs": 134.000244140625
+      },
+      {
+        "submitMs": 53,
+        "flushMs": 38,
+        "totalMs": 91
+      },
+      {
+        "submitMs": 76,
+        "flushMs": 38,
+        "totalMs": 114
+      },
+      {
+        "submitMs": 52.999755859375,
+        "flushMs": 34,
+        "totalMs": 86.999755859375
+      },
+      {
+        "submitMs": 60.999755859375,
+        "flushMs": 44,
+        "totalMs": 104.999755859375
+      },
+      {
+        "submitMs": 64.999755859375,
+        "flushMs": 31.000244140625,
+        "totalMs": 96
+      }
+    ],
+    "geometry_arrays": [
+      {
+        "submitMs": 72,
+        "flushMs": 83,
+        "totalMs": 155
+      },
+      {
+        "submitMs": 63.000244140625,
+        "flushMs": 38.999755859375,
+        "totalMs": 102
+      },
+      {
+        "submitMs": 71,
+        "flushMs": 27,
+        "totalMs": 98
+      },
+      {
+        "submitMs": 65,
+        "flushMs": 36,
+        "totalMs": 101
+      },
+      {
+        "submitMs": 102.000244140625,
+        "flushMs": 38.000244140625,
+        "totalMs": 140.00048828125
+      },
+      {
+        "submitMs": 73.999755859375,
+        "flushMs": 30.000244140625,
+        "totalMs": 104
+      },
+      {
+        "submitMs": 101,
+        "flushMs": 32,
+        "totalMs": 133
+      },
+      {
+        "submitMs": 61,
+        "flushMs": 32,
+        "totalMs": 93
+      },
+      {
+        "submitMs": 71.000244140625,
+        "flushMs": 42.999755859375,
+        "totalMs": 114
+      },
+      {
+        "submitMs": 68.999755859375,
+        "flushMs": 32,
+        "totalMs": 100.999755859375
+      },
+      {
+        "submitMs": 93,
+        "flushMs": 33,
+        "totalMs": 126
+      },
+      {
+        "submitMs": 64,
+        "flushMs": 32.999755859375,
+        "totalMs": 96.999755859375
+      }
+    ],
+    "geometry_packed": [
+      {
+        "submitMs": 8,
+        "flushMs": 61,
+        "totalMs": 69
+      },
+      {
+        "submitMs": 6.999755859375,
+        "flushMs": 44,
+        "totalMs": 50.999755859375
+      },
+      {
+        "submitMs": 8,
+        "flushMs": 31,
+        "totalMs": 39
+      },
+      {
+        "submitMs": 5.000244140625,
+        "flushMs": 31.000244140625,
+        "totalMs": 36.00048828125
+      },
+      {
+        "submitMs": 5.999755859375,
+        "flushMs": 35,
+        "totalMs": 40.999755859375
+      },
+      {
+        "submitMs": 7,
+        "flushMs": 31.000244140625,
+        "totalMs": 38.000244140625
+      },
+      {
+        "submitMs": 8.999755859375,
+        "flushMs": 30,
+        "totalMs": 38.999755859375
+      },
+      {
+        "submitMs": 7,
+        "flushMs": 31.000244140625,
+        "totalMs": 38.000244140625
+      },
+      {
+        "submitMs": 7,
+        "flushMs": 37,
+        "totalMs": 44
+      },
+      {
+        "submitMs": 8,
+        "flushMs": 38.000244140625,
+        "totalMs": 46.000244140625
+      },
+      {
+        "submitMs": 5.000244140625,
+        "flushMs": 42.999755859375,
+        "totalMs": 48
+      },
+      {
+        "submitMs": 6.000244140625,
+        "flushMs": 43.99951171875,
+        "totalMs": 49.999755859375
+      }
+    ]
+  },
+  "phpMemoryBeforeSamples": 0,
+  "phpMemoryAfterSamples": 0,
+  "phpMemoryPeakAllocated": 0,
+  "phpMemoryAccountingAvailable": false,
+  "medians": {
+    "single_rectangles": {
+      "submitMs": 1.484375,
+      "flushMs": 0.5703144073486328,
+      "totalMs": 2.046875
+    },
+    "rectangle_batch": {
+      "submitMs": 0.875,
+      "flushMs": 0.5624961853027344,
+      "totalMs": 1.4296875
+    },
+    "geometry_arrays": {
+      "submitMs": 1.1093769073486328,
+      "flushMs": 0.5156230926513672,
+      "totalMs": 1.609375
+    },
+    "geometry_packed": {
+      "submitMs": 0.109375,
+      "flushMs": 0.5625,
+      "totalMs": 0.6640605926513672
+    }
+  },
+  "heapBytesBefore": 134217728,
+  "heapBytesAfter": 134217728,
+  "notes": [
+    "Prepared inputs: object/array construction and packing occur before measurement.",
+    "Each raw sample repeats 64 batches to exceed the SDL clock granularity; medians are normalized per 1024 rectangles.",
+    "Submission includes PHP/native calls and SDL queueing. Readback forces completion separately.",
+    "Completion is amortized across the repeated draws; it is not an individual frame measurement.",
+    "Headless browser results describe this machine and renderer, not hardware GPU performance.",
+    "Memory samples include retained result arrays and allocator caches; they are not a leak test.",
+    "Zero PHP memory readings mean allocator accounting is unavailable in this build."
+  ]
+}

@@ -88,8 +88,11 @@ jobs:
       # Building SDL last would make each test job reconfigure and rebuild PHP.
       - name: Build PHP (sdl variant) for Web
         run: |
-          sudo rm -f .cache/config-cache third_party/php${{ inputs.phpVersion }}-src/configured
           time make --debug=basic web-mjs WITH_SDL=1
+
+      - name: Verify unchanged and JavaScript-only SDL builds
+        if: ${{ inputs.phpVersion == '8.4' && inputs.libType == 'static' }}
+        run: node .github/bin/verify-sdl-incremental.mjs '${{ inputs.phpVersion }}'
 
       - name: Build PHP For Node
         run: time make --debug=basic node-mjs node-js

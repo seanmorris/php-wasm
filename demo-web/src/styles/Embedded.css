@@ -488,10 +488,6 @@ div.toggleExtensions input {
 	padding: 0.5rem;
 }
 
-.Embedded .sdl-controls small {
-	flex-basis: 100%;
-}
-
 .Embedded canvas {
 	max-width: 100%;
 	object-fit: contain;

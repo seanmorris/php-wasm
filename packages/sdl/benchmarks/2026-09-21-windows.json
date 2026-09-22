@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-audio.json",
+  "change": "Window ownership, checked references and callback-safe rectangle updates",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761957,
+      "gzip": 652919,
+      "brotli": 466352,
+      "sha256": "9a28ba31484c8445bca1cbbd01569d5a80aec1a5971ff624c319722ae56dad5a"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47066495,
+      "gzip": 13347637,
+      "brotli": 9091586,
+      "sha256": "e22342c5833a86bfeb3cd526e5f9a1675cdecf1ed09555c31bcf52ff120b9cbe"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761957,
+      "gzip": 652918,
+      "brotli": 466269,
+      "sha256": "211c28ee8db4ba74bab81533b99abe77e2f44a925382a4ad2b657fac573e8930"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47067155,
+      "gzip": 13348626,
+      "brotli": 9093969,
+      "sha256": "360d68acfad8b1b6eebaa79439fbe391bd2158bb4bb255db5f4a4d14f919749b"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51828452,
+      "after": 51829112,
+      "increase": 660,
+      "percent": 0.0012734318208076135
+    },
+    "gzip": {
+      "before": 14000556,
+      "after": 14001544,
+      "increase": 988,
+      "percent": 0.0070568625988853585
+    },
+    "brotli": {
+      "before": 9557938,
+      "after": 9560238,
+      "increase": 2300,
+      "percent": 0.024063767728980875
+    }
+  }
+}

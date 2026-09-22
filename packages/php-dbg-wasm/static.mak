@@ -130,7 +130,7 @@ ifneq (${PRE_JS_FILES},)
 DBG_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
-DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
+DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_LINK_DEPS}
 
 ${PHP_DBG_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DBG_DIST_DIR}/

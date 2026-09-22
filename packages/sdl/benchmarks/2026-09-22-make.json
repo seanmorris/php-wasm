@@ -1,0 +1,142 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-pointer.json",
+  "change": "Isolate PHP configure caches and make SDL JavaScript edits relink without recompiling C.",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-make/runtime PHP_ASSET_DIR=.cache/sdl-make/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781084,
+      "gzip": 657815,
+      "brotli": 469683,
+      "sha256": "77c08ec5e2683c1997c15445a9fd4c23df0ffddc9a405ab9eedda9b9ee8b31ce"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104549,
+      "gzip": 13359039,
+      "brotli": 9114678,
+      "sha256": "7a23c1f0582e7f9e9a29bd20740d386521a79dc1663cafb1bcd85eb166d0aa5d"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781084,
+      "gzip": 657829,
+      "brotli": 469341,
+      "sha256": "6a6cdfc669290a10bf3821fb9d1bdce262e18f76491259e6532287c4358b8eef"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104581,
+      "gzip": 13358960,
+      "brotli": 9114439,
+      "sha256": "60aaf44fb73968b6f29516d99cdbc3eae36471b1cb6be1a6ac95bde50e919d81"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51885633,
+      "after": 51885665,
+      "increase": 32,
+      "percent": 6.167410543107376e-05
+    },
+    "gzip": {
+      "before": 14016854,
+      "after": 14016789,
+      "increase": -65,
+      "percent": -0.00046372745267946714
+    },
+    "brotli": {
+      "before": 9584361,
+      "after": 9583780,
+      "increase": -581,
+      "percent": -0.006061958642834927
+    }
+  },
+  "incrementalVerification": "ENV_FILE=.github/.env_8.4.static.ci node .github/bin/verify-sdl-incremental.mjs 8.4 .cache/sdl-make/runtime .cache/sdl-make/incremental-final.json",
+  "buildSourceHashes": {
+    "packages/sdl/core/glcontext.c": "d86dfb8e9b1dafbd6f0cdfec02602c1cceeb5c1302ca9f92d37c89327317cd23",
+    "packages/sdl/core/glcontext.h": "0eb727fd1b0c3f91101fa7c1d6a914ee3f096e6fc2007607ec893c5b2946f512",
+    "packages/sdl/core/joystick.c": "b87434e7a962fabf02d0270b90a2228db7538095337189447a7e44bd033b2edd",
+    "packages/sdl/core/mouse.c": "d7efa77317a4ad11d0a081fa43210f146cf2f9a415b0270ede72842959adf79a",
+    "packages/sdl/core/mouse.h": "d90c724d3aa578c34d402224215cbd2fcb47888e6ab3986c6b151b5bee99bf0b",
+    "packages/sdl/core/php_sdl_context_hooks.c": "a6b91f7667266c1ba3c7031097076f43f04b567bc1a846c48ac7058312e038c8",
+    "packages/sdl/core/php_sdl_events.c": "cf98abf7ed2b7c916f6d59eed9c8d2fd5af979015a46a6b984cff4cf97d4bc40",
+    "packages/sdl/core/php_sdl_extra.c": "08f226bfc884dbd7750bd05322b0596cff5cd260aecb616d29df2b966d6eecb3",
+    "packages/sdl/core/php_sdl_extra.h": "921115f928c203771e3c9c8dfcf2af8c1fe7567ae9fc76298dbf516d4dc29a83",
+    "packages/sdl/core/php_sdl_extra.stub.php": "fe1fe1e8417d6280b4c0fddd4fb289d02db6446ea19f940f8b400633dab917bb",
+    "packages/sdl/core/php_sdl_extra_arginfo.h": "d62b172e7fbca2c7d3c52606f3ce704d7c19b8e529388b1658e1937323fffb11",
+    "packages/sdl/core/php_sdl_geometry.c": "ccf944184f49748dbdf61e67b71d51fe6ef9d4c0814c4fcfd8707abd5df90375",
+    "packages/sdl/core/php_sdl_geometry.stub.php": "540118243f43b6f38cd7dfd65bb70be7cbc5770cd62858033c1fc91b896126b9",
+    "packages/sdl/core/php_sdl_geometry_arginfo.h": "d7ad7d921766c269aa3e2ac362ec710b4a5a87902a8b87c2a11df21320c36924",
+    "packages/sdl/core/php_sdl_render.c": "97e8a3c326fb3247821cfeacb3f9c52722729fafa75ab1970caba65c721bd37d",
+    "packages/sdl/core/php_sdl_text.c": "ddbdb166cbcf3b15529b914ca8bf5d622f366f7d23d9084b762b3cbad38e1a28",
+    "packages/sdl/core/php_sdl_values.c": "de3740bffc6e188c6ff58c6e0d00f7ca66c5c86bc1b086863d454767e3f88fb8",
+    "packages/sdl/core/pixels.c": "c132bf5b348fcec929c70b0922b73cb6226f86c41bb31bc447f178eb71a294e6",
+    "packages/sdl/core/render.c": "93a9ef912d2f9ba316599a6be35015d1a849e216570011d8de93541716b01ead",
+    "packages/sdl/core/rwops.c": "ed6294cc5c08753dac2b97ceae2bbf24b04f871caa1123ddb646cde223d5bfdb",
+    "packages/sdl/core/rwops.h": "aa6682dabcea7d67978acd2d97be2b206754052ec4eba42c7d519ebd551d4e01",
+    "packages/sdl/core/surface.c": "072df12a108fbb2203a0842e82598d1049918773a03637f8832bcf5dda9a805c",
+    "packages/sdl/core/window.c": "32aa2289ff3f49466bbabfbe152ebfe60b49b8e0ad2a7b3324eda64b698c36c6",
+    "packages/sdl/core/window.h": "301cc9635574c3f17a6412cd75cab8d9b1bef78d6c80beae01c2e2e45deb8eaf",
+    "packages/sdl/extensions.mak": "16a3b5abe0615609736998584c5a5de1ec9918ad15662e3b3d3a199080ff1399",
+    "packages/sdl/js/library.js": "fd8eb124679220d31031387c6640d3174d19ff3c4a8eca3ac5db1b245f0b2de3",
+    "packages/sdl/js/pointer-lock.js": "7f7f36500cfe7056215bb702f8b3d6ff31b901841768c88e6539739d8fa966b2",
+    "packages/sdl/js/text-input.js": "44f19d4e01be0f2e793097e56329a6564edb20f9432e012d598e58dde83fe7b8",
+    "packages/sdl/mixer/php_sdl_mixer_lifetime.h": "28b978b781f6d90a68b5937e3d6b703e8daee5cb2d76609ea4c895a05035ec0a",
+    "packages/sdl/mixer/php_sdl_mixer_rw.h": "aa848938e3562e4c3c3da91d52120d0618fef30fe536ecc1282be42b6adb4a7a",
+    "packages/sdl/mixer/src/Mix_Chunk.c": "7c67aa2a009f5235bfdd312814006c96140464d6c3a69f524555c96cbadc6186",
+    "packages/sdl/mixer/src/Mix_Chunk.h": "4f9ded2d5d330b66bb662cb65764620a1238dcfc6c7d3a43db829d260f5c4310",
+    "packages/sdl/mixer/src/Mix_Music.c": "b39594f5642d3a2afb410f40e07e4ae373b0e31ec4b711e9d6d29c24fd9fdaca",
+    "packages/sdl/mixer/src/Mix_Music.h": "812ed5152a0632f8dc5cd082af7923458109e58df9ba79f1549de1146f1caef9",
+    "packages/sdl/mixer/src/effect_position.c": "731813cba3522072b70540c7b4ed8094bd68c427fe100b3056fbc520faf88d5c",
+    "packages/sdl/mixer/src/effect_stereoreverse.c": "8bf9d1671914f72f2b432d9bba97498a786eb4d949f653d6b3863981a81976a5",
+    "packages/sdl/mixer/src/mixer.c": "d8f5c5cda38efec42b1a1f2ef0aef07e41dd59bfd65e3eba0bb984ee5db0feed",
+    "packages/sdl/mixer/src/music.c": "c5eab8353b96b0304be7a63599a48c2bfd6e3fd4f031f05c887d0bc1956f1ad6",
+    "packages/sdl/mixer/src/php_sdl_mixer.c": "456e02219760a3a8ee493260071916200402a2640118b06b406f10aabee7e1e0",
+    "packages/sdl/opengl/php_webgl.c": "d1e8881e6c60c8af4bc7de91f67f5dd63879ca73e025ac474ab8fbb33c7c7ad0",
+    "packages/sdl/opengl/php_webgl.h": "3459e50824ac5df5b5e0430005ac34e1e186d5cfbefd20f89ace623f434d7318",
+    "packages/sdl/opengl/php_webgl.stub.php": "246d21050b23b0ce190895573012b60bf166ae758703654a172107a029f732a3",
+    "packages/sdl/opengl/php_webgl_arginfo.h": "765089441f00407203e57ab9fe99cf48ba99db270341b11ff14900f2b37849ee",
+    "packages/sdl/opengl/php_webgl_buffers.c": "511aa0d5fefa3816ef6df7892f943559d08869a1d9b3154c81599993dacdbf67",
+    "packages/sdl/opengl/php_webgl_constants.h": "750c0cfc35068b5ac724ddf5ead9a1d2887ad39dc33e2da34a05b22a7eab56cb",
+    "packages/sdl/opengl/php_webgl_objects.c": "bde192257a22b2a9703a164d1b7f3d50ad20ec3709b9ef3b94dc1f0e8cbe5da7",
+    "packages/sdl/opengl/php_webgl_state.c": "9428edb5da1d3b220d46a31ba4e2a1f27fd4fd9a28f55599b87de69c0bbe049c",
+    "packages/sdl/opengl/php_webgl_targets.c": "cb941c126c81d6d2ba9b0a1fd580fd238997a3f68e684c87a5708ed6abbcb84d",
+    "packages/sdl/opengl/php_webgl_textures.c": "920a79b839df010bc6ae2432de70000552a1b01bdaf5f78b5f250578e5e6ef33",
+    "packages/sdl/patches/SDL2_mixer.patch": "cfa42e435c6915976093689efeb1cca7a6061307f5834a7ecf5c76e100197192",
+    "packages/sdl/patches/opengl.patch": "2397c3a69d0b708589154714aa2038ed8bec8a13044e3c99994fcc9b0aeb3f65",
+    "packages/sdl/patches/sdl-asyncify.patch": "581591726ab6ae2685ae2d606d98d3b9035bd8638b163bad154b74b3d9ad6c73",
+    "packages/sdl/patches/sdl-bindings.patch": "5cdb1a319cdf7fef6408ec42dca632e067fae6e02b3419aa570ba35ee38e8e12",
+    "packages/sdl/patches/sdl-events.patch": "9edbcc860f0dc199b4c71f3ddf109ee125c16a382061532cdf5c9ed0d03c4d36",
+    "packages/sdl/patches/sdl_image.patch": "416aa10398a1570e5baa4f118ab8b78beab27ed5ee3c6c6d698e9531c9b2f3a7",
+    "packages/sdl/patches/sdl_mixer.patch": "1ca6daad9fa24d295502891433d9d8b7f8c20b235cd50494e2deb3ea49d6bd4f",
+    "packages/sdl/patches/sdl_ttf.patch": "6c60a6dda9d2db5dea438e701f562d323e40d9659c9ac63eed6d3fa934f5a8ca",
+    "packages/sdl/php8-string-return.patch": "973a37b4a9618bb386219a3e78d91618f396c44a69bf8481033f533b1ae46ed7",
+    "packages/sdl/pre.mak": "edcf895d85f271c2305aa21822c6bee615273340b4042c4adbb367bc516897aa",
+    "packages/sdl/static.mak": "ca2af1d44246ff7dfe7a49efbe5a431b0fad4b9b64fd8423067c358a5ab9ece3",
+    "packages/sdl/ttf/php_ttf_extra.c": "1d1eda8960032aec4f1716161ca5338098f9f4511afaae8fd879a2d2dc90efe3",
+    "packages/sdl/ttf/php_ttf_extra.stub.php": "bb9e21e23c861ac5d05dc5a75a6cc830b1e795f97e2852119ae70a9e39fa7f2d",
+    "packages/sdl/ttf/php_ttf_extra_arginfo.h": "9b85fc9162b58e551e589ae508846f102ee1c615de1025905e81638046bd484a",
+    "packages/sdl/ttf/sdl_ttf.c": "58433dd6cf3295417de52c1e28db1c021f87de42f8206784a6cba87cbca173f7",
+    "packages/sdl/ttf/sdl_ttf_font.c": "3dfa5829524570d00cdb8476f847c1c04f5fd0a34bb7cb43b14ab54ca15df437",
+    "packages/sdl/ttf/sdl_ttf_font.h": "c1befc3174a1f66a04b0be0c467bacaf993965e7a8fe3a3df7eadb7a61ff9b75",
+    "Makefile": "20b275e3a0f4303a810ec7130dfb39f62174ee8a59418be815a8c152cc0ccdfa",
+    "packages/php-cgi-wasm/static.mak": "5a08061d4e8d6d410081bfa7634c94c68433edc617f5f11c3d4ca2c665419cdc",
+    "packages/php-cli-wasm/static.mak": "43a34cc2931e41de261a4768bfbd1b4c1cb3bd65c46962475828bd8ae26be531",
+    "packages/php-dbg-wasm/static.mak": "e873a26c2627bcd7e85908c06edb232400227d289c141b32666bceeb65a92c9b"
+  }
+}

@@ -4,6 +4,34 @@ Changes
 
 ## Unreleased
 
+* Isolated PHP configure caches by version and configure settings, fixing iconv detection when switching between PHP releases. SDL JavaScript changes now relink runtime outputs without reconfiguring PHP or recompiling unchanged C sources. The existing fast CI gate checks cache selection and all 32 runtime link targets.
+* Hardened SDL pointer-lock requests and teardown. Unsupported/no-window requests return SDL errors, browser Promise rejection is handled, and deferred/late work is tied to window ownership. Window/video/request cleanup releases the SDL canvas without unlocking another element.
+
+* Connected SDL text-input start/stop and candidate rectangles to browser Unicode/composition input, preserving physical keys and native UTF-8 event splitting. Window/video/request teardown retires editing callbacks. Fullscreen IME uses EditContext; browsers without it report the limitation and retain ordinary keypress input.
+
+* Fixed SDL fullscreen on canvases with empty/custom IDs and in shadow roots. Unavailable or policy-blocked fullscreen changes return an SDL error. Window/video teardown and PHP refresh cancel delayed style/resize work before native window data is freed, preserving newly created windows.
+
+* Added immutable, volume and array OpenGL texture storage/uploads, checked compressed transfers, and context-owned samplers with scalar parameter queries. Pixel transfers support checked row/image offsets and padding; surface uploads preserve unpack state and readback never exposes uninitialized gaps.
+* Fixed SDL WebGL context restoration by retiring invalidated GPU names, resetting cached bindings and restoring automatically enabled extensions. Applications can recreate ordinary/compressed textures and render targets after restoration; GPU assets still need to be reloaded by the application.
+
+* Added SDL window/logical coordinate conversions with fractional viewport and scaling support, checked numeric bounds, and safe output references.
+
+* Stopped SDL window garbage collection from refreshing native properties or invoking their PHP destructors. This fixes PHP 8.0 collection crashes and preserves live property values on newer PHP versions.
+
+* Closed PHP 8.0 subclass serialization bypasses for SDL native resource handles while preserving valid subclasses and ordinary value-object serialization. Shared guards also make crafted object payloads fail with catchable exceptions; PHP 8.1+ retains its existing class-flag behavior.
+
+* Hardened SDL window aliases, subclass conversion, constructor reentry, property callbacks and typed outputs. Rectangle updates validate counts and reject targets changed by getters. Window and input handles reject ownership copying; repeated window destruction is harmless and native creation errors remain visible.
+* Hardened SDL_mixer ownership, stale channel aliases, channel bounds, callback outputs and audio restarts. Unused audio objects release on last PHP reference; channels and active music retain playback. Freeing or replacing fading music returns while browser audio is suspended. Final audio shutdown invalidates loaded objects and PHP refresh closes every mixer open reference. Mixer RWops loaders snapshot input before native decoding; pre-video cursor selection now fails safely.
+
+* Corrected SDL cursor construction, aliases, video teardown and native cleanup. Bitmap dimensions, hotspots and system IDs are checked; cloning, serialization and reinitialization are rejected. Cursor visibility queries no longer change visibility and return the pinned SDL integer state. Mouse outputs respect typed references and callback exceptions. SDL input callbacks follow the supplied canvas, including custom IDs and shadow roots.
+* Hardened SDL RWops allocation, memory ownership and PHP stream callbacks; BMP loaders close aliases consistently and snapshot source pixels across callbacks. Invalid ranges now raise exceptions, zero-length transfers are no-ops, and unsigned reads outside PHP's integer range return exact decimal strings. SDL_ttf fonts now follow initialization counts and ordinary PHP ownership, with callback and typed-output lifetime checks.
+
+* Fixed SDL pixel conversion writing into the source, uninitialized blit destination rectangles, stale surface/format/palette views, and renderer callbacks using destroyed resources. Views retain their owners and reject explicit/native teardown; checked conversions support overlapping buffers. Texture-lock output failures preserve newer locks created by callbacks.
+
+* Fixed SDL GL context construction, ownership and borrowed-alias invalidation. Window/video teardown releases remaining PHP-created GPU resources, while subsystem reference counts preserve live contexts. Context-changing output destructors and deleted shader/program handles now fail with catchable PHP errors; rectangular matrix setters reject WebGL1 safely.
+* Added checked SDL triangle geometry and packed-buffer drawing, integer/float primitive batches, and renderer capability, color/blend, viewport, clipping and scaling controls. Batches reject invalid buffers and keep renderer lifetime checks valid across PHP property callbacks.
+* Added checked WebGL2 instancing, integer vertex attributes, uniform buffers and reflection, exact unsigned uniforms, depth/stencil/multisample renderbuffers, framebuffer resolve, and multiple render targets. Typed state queries return correctly sized scalar or array results. New WebGL2 operations report a catchable error when given a WebGL1 context.
+* Filled out SDL event payloads, safe streaming textures, UTF-8 font rendering/metrics/styles, standard controller polling, OpenGL uniform variants, and precise timers. The cube uses native bold/outline fonts for its cyan/white/sand text scroller. Texture/window/controller teardown invalidates handles safely; SDL surface blits now honor destination rectangles.
 * SDL_mixer now decodes MP3 through its bundled minimp3 implementation. The cube plays the supplied **Unreal Superhero 3** by **Kenët and rez** and displays the artist credit from the file's ID3 tags.
 * Embedded PHP links now store source in the URL fragment, avoiding request-header limits while preserving old query links. The SDL cube fills its preview and adapts its viewport, perspective, and text overlay to resizing without interpolating its pixel-art texture.
 * Expanded the `_sdl` browser runtime with SDL_image, SDL_mixer, SDL_ttf, and PHP 8 OpenGL shader bindings through the existing Make build. The SDL Cube demo uses the `sean-icon-32` texture with nearest filtering, text, focused keyboard controls, and audio after a user gesture. Added resource cleanup, context recovery, checked asset loading, and PHP 8.0–8.5 coverage across all three library profiles. See the [SDL guide](packages/sdl/README.md) for build flags, supported APIs, and measurements.

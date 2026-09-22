@@ -99,7 +99,7 @@
    PHP_SUBST(OPENGL_SHARED_LIBADD)
 -  PHP_ADD_EXTENSION_DEP(opengl, ppp)
 -  PHP_NEW_EXTENSION(opengl, php_convert.c php_opengl.c, $ext_shared)
-+  PHP_NEW_EXTENSION(opengl, php_webgl.c, $ext_shared)
++  PHP_NEW_EXTENSION(opengl, php_webgl.c php_webgl_buffers.c php_webgl_targets.c php_webgl_state.c php_webgl_objects.c php_webgl_textures.c, $ext_shared)
 +  PHP_ADD_EXTENSION_DEP(opengl, sdl)
  fi
 -

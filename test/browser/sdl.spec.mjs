@@ -1,4 +1,5 @@
 import {test, expect} from '@playwright/test';
+import {routeRuntime} from './lib/sdl-bindings.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
@@ -10,6 +11,7 @@ test.skip(process.env.PHP_VARIANT !== '_sdl', 'Requires the SDL runtime artifact
  * @returns {Promise<object>} Runtime startup result and elapsed time.
  */
 const startCube = async page => {
+	await routeRuntime(page);
 	await page.goto('harness/index.html');
 	return page.evaluate(async ({version, libType}) => {
 		document.body.innerHTML = '<div id="example"></div><canvas tabindex="0"></canvas>';
@@ -139,7 +141,7 @@ test('cube resizes its drawing buffer and projection for landscape and portrait 
 	expect(errors).toEqual([]);
 });
 
-test('credited MP3 music produces PCM only after a user gesture and stops when muted', async ({page}) => {
+test('MP3 music produces PCM only after a user gesture and stops when muted', async ({page}) => {
 	const errors = [];
 	page.on('pageerror', error => errors.push(error.message));
 	await page.addInitScript(() => {
@@ -161,7 +163,6 @@ test('credited MP3 music produces PCM only after a user gesture and stops when m
 	});
 	await startCube(page);
 	await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off');
-	await expect(page.locator('[data-sdl-credit]')).toHaveText('Music: Unreal Superhero 3 — Kenët and rez');
 	expect(await page.evaluate(() => window.audioSamples)).toBe(0);
 	await page.locator('[data-sdl-audio]').click();
 	await expect.poll(() => page.evaluate(() => window.audioSamples)).toBeGreaterThan(0);

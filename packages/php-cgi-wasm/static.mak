@@ -140,7 +140,7 @@ ifneq (${PRE_JS_FILES},)
 CGI_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
-CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
+CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_LINK_DEPS}
 
 ${PHP_CGI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/

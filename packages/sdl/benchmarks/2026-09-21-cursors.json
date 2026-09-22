@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-streams.json",
+  "change": "Correct cursor ownership, video teardown, visibility and native input targeting for supplied canvases",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652866,
+      "brotli": 465186,
+      "sha256": "70dae96f123196b29c28736a078b03b44a1735fef8bad379487ed507627d9c4b"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47042327,
+      "gzip": 13342384,
+      "brotli": 9075405,
+      "sha256": "9f52ddead3db1d98a5d72900f682f2cadd2644dec3cb191891e50c4caa6bd29e"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761956,
+      "gzip": 652904,
+      "brotli": 465253,
+      "sha256": "c3afc0a20a4f57f01c6e3d790162448a0137a4c00b99fbc4e14d980bd4c9031e"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47045219,
+      "gzip": 13343415,
+      "brotli": 9080661,
+      "sha256": "d14ec17f03811d0a68c42d2138987a3651ba9265ecd3b3fb0c240f3a56cd1fd0"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51804113,
+      "after": 51807175,
+      "increase": 3062,
+      "percent": 0.005910727590297705
+    },
+    "gzip": {
+      "before": 13995250,
+      "after": 13996319,
+      "increase": 1069,
+      "percent": 0.007638305853771815
+    },
+    "brotli": {
+      "before": 9540591,
+      "after": 9545914,
+      "increase": 5323,
+      "percent": 0.055793189331772006
+    }
+  }
+}
