@@ -34,6 +34,7 @@ PLAYWRIGHT_ARGS=(
 	test/browser/sdl-audio.spec.mjs
 	test/browser/sdl-windows.spec.mjs
 	test/browser/sdl-serialization.spec.mjs
+	test/browser/sdl-stress.spec.mjs
 )
 
 if [[ -n "${UPDATE_SNAPSHOTS:-}" || -n "${CV_UPDATE_SNAPSHOTS:-}" ]]; then

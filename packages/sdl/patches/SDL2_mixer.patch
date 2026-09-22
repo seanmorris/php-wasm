@@ -42,7 +42,17 @@
      if (numchans > num_channels) {
          /* Initialize the new channels */
          int i;
-@@ -985,6 +1004,8 @@
+@@ -634,6 +653,9 @@
+ 
+     music_type = detect_music_type(src);
+     if (!load_music_type(music_type) || !open_music_type(music_type)) {
++        if (freesrc) {
++            SDL_RWclose(src);
++        }
+         return NULL;
+     }
+ 
+@@ -985,6 +1007,8 @@
              for (i = 0; i < num_channels; ++i) {
                  if (chunk == mix_channel[i].chunk) {
                      Mix_HaltChannel_locked(i);

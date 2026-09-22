@@ -4,6 +4,8 @@ Changes
 
 ## Unreleased
 
+* Fixed an SDL_mixer leak when chunk format detection fails: owned input streams now close on that failure path. Repeated malformed image/font/audio tests cover native allocations, file descriptors, decoder recovery and borrowed/owned RWops behavior.
+
 * Isolated PHP configure caches by version and configure settings, fixing iconv detection when switching between PHP releases. SDL JavaScript changes now relink runtime outputs without reconfiguring PHP or recompiling unchanged C sources. The existing fast CI gate checks cache selection and all 32 runtime link targets.
 * Hardened SDL pointer-lock requests and teardown. Unsupported/no-window requests return SDL errors, browser Promise rejection is handled, and deferred/late work is tied to window ownership. Window/video/request cleanup releases the SDL canvas without unlocking another element.
 
