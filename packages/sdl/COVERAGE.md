@@ -17,15 +17,15 @@ The expanded source has not yet passed the complete remote matrix.
 | Area | Current evidence | Remaining work |
 | --- | --- | --- |
 | SDL input | Payload roundtrips; real browser keyboard/mouse, Unicode/composition, focus and touch; supplied-canvas fullscreen, policy/deferred requests and teardown; simulated controller reconnect | Physical IME and wider browser/device coverage |
-| SDL renderer | Texture update/lock/readback/modulation; array/packed triangles and primitive batches; callback mutation/destruction, renderer state pixel tests and window/logical coordinate conversion | Throughput and wider lifetime audit |
-| SDL_image | PNG/JPEG/BMP decoding and surface-to-texture paths | Include malformed input and resource churn in final stress checks |
-| SDL_ttf | UTF-8, styles/outline, metrics, reference-counted initialization, callback safety and native allocation churn | Malformed assets, wider request/profile stress and CI; HarfBuzz remains disabled |
+| SDL renderer | Texture update/lock/readback/modulation; array/packed triangles and primitive batches; callback mutation/destruction, renderer state pixel tests and window/logical coordinate conversion | Wider sustained lifetime audit |
+| SDL_image | PNG/JPEG/BMP decoding and surface-to-texture paths | Reject PNG short reads explicitly; wider device/resource stress |
+| SDL_ttf | UTF-8, styles/outline, metrics, reference-counted initialization, callback safety and native allocation churn | Wider request/profile stress and CI; HarfBuzz remains disabled |
 | SDL_mixer | WAV/Ogg/MP3 and real PCM; canonical chunks, bounded channel owners, music completion, pause/fades, suspended replacement, restarts and native allocation churn | Wider device/backend stress, concurrent-playback measurements and full profile/PHP matrix |
-| GL shaders/uniforms | Compilation/link diagnostics; signed/float/unsigned uniforms; reflected UBO layouts shared by two programs | Stress/performance and full matrix verification |
-| GL vertex/index buffers | Checked byte uploads/index ranges; VAOs; integer attributes; instanced array/index draws; range binding and buffer copies; teardown/recreation tests | Throughput and broader context-loss/device coverage |
+| GL shaders/uniforms | Compilation/link diagnostics; signed/float/unsigned uniforms; reflected UBO layouts shared by two programs | Wider stress and full matrix verification |
+| GL vertex/index buffers | Checked byte uploads/index ranges; VAOs; integer attributes; instanced array/index draws; range binding and buffer copies; teardown/recreation tests | Broader context-loss/device coverage |
 | GL render targets | Color/depth/stencil, MRT and multisample resolve pixels; resize/deletion and sized queries; layered attachment and real browser context restoration | Throughput, wider device coverage and full matrix verification |
 | GL state/capabilities | Typed scalar/array queries, blend/stencil/mask/range/offset state, compressed-format and extension enumeration; scalar texture/sampler queries | Remaining backend/device audit and full matrix verification |
-| GL textures | Checked complete pixel layouts, immutable 2D/cube/3D/array storage, compressed image/subimage calls and context-owned samplers; twelve native cases with pixel checks | Full remote matrix verification, throughput and wider device coverage |
+| GL textures | Checked complete pixel layouts, immutable 2D/cube/3D/array storage, compressed image/subimage calls and context-owned samplers; twelve native cases with pixel checks | Full remote matrix verification and wider device coverage |
 | Native ownership | Renderer/texture/window/controller invalidation; GL cleanup; retained surface/pixel/format/palette owners; safe locks/blits; RWops ownership/callbacks, font/cursor/mixer cleanup; canonical windows, checked outputs and callback reentry | Remaining callback paths, wider device teardown and broader sustained allocation checks |
 | Make and packaging | Version/configuration cache isolation, SDL opt-out registration, unchanged and JS-only incremental builds, reproducible arginfo and source package checks | Complete native cold/profile builds and full remote CI matrix |
 
@@ -129,6 +129,61 @@ measurements, npm source payload checks, and the unchanged PHP 8.0–8.5 × thre
 library-profile CI matrix. Report browser/device coverage limits explicitly.
 Update this file as evidence arrives; historical green CI does not verify new
 source. Engine scenes, physics, asset caches and gameplay code are out of scope.
+
+### Malformed assets and mixer input cleanup
+
+The four native cases in `test/browser/sdl-stress.spec.mjs` repeat malformed
+PNG/JPEG/BMP, TTF, WAV/Ogg/MP3 and filename/RWops input paths, then require valid
+loading/rendering or playback to recover. They measure SDL allocations, live
+native bytes and open file descriptors across a warmup and three batches.
+Expected libpng truncated-header diagnostics are validated explicitly; other
+stderr and browser errors fail the checks.
+
+Two cases reproduce a pinned SDL_mixer failure-path leak before `401f6d9`.
+`Mix_LoadMusic_RW()` returned without closing owned input when format detection,
+loading or opening failed. The existing package-local SDL2_mixer patch now closes
+that stream. Borrowed RWops and PHP stream autoclose semantics are preserved.
+The broad audio case previously grew from 46 to 166 SDL allocations and 14 to
+134 file descriptors. On the normal PHP 8.4 static Make build, it stays at
+36 allocations and four descriptors, then returns to zero SDL allocations on
+shutdown. The focused RWops case is also flat; PNG/JPEG/BMP and font cases stay
+flat on both builds. These are finite ownership checks, not decoder fuzzing or
+general leak-freedom claims. The PNG callback's unchecked short-read handling
+remains a separate audit item (VO note 75).
+
+All four new cases and 32 affected existing audio/stream/cube cases pass on the
+matching candidate, with no skips or flaky results. Both editor checks,
+main-module validation, ten Make/package checks and JS style also pass.
+`benchmarks/2026-09-22-malformed-assets.json` preserves before/after evidence.
+`benchmarks/2026-09-22-malformed-size.json` records +57 raw bytes, −35 gzip
+bytes and −2,407 Brotli bytes for the matching pair; JS and ICU are unchanged.
+Full PHP/profile remote
+verification of this commit remains pending; running CI on `17d386c` proves
+only that preceding source.
+
+### Rendering and event throughput baseline
+
+Two idle runs against the matching `401f6d9` PHP 8.4 static Make pair now cover
+ordinary/instanced indexed and array draws, scalar/array/UBO uniform updates,
+GL/SDL texture streaming and 32/1,024-event bursts. Four warmups precede twelve
+rotating samples per path. Full framebuffer equality and per-event payload/count
+checks pass. `benchmarks/2026-09-22-throughput-first.json` and `-second.json`
+retain artifact/fixture hashes, raw samples, software renderer/machine details,
+submission/completion times, frame callback execution intervals and native/V8
+memory. The package README contains a normalized comparison table.
+
+Native allocations and live bytes plateau during the sampled rounds; graphics
+cleanup retains the known three SDL TLS allocations, and event cleanup returns
+to zero. This is fixture-specific evidence, not general leak freedom. Indexed
+draw submission is costly on this browser; the per-draw buffer queries are a
+candidate for further profiling. Some instanced submission samples are below
+the SDL clock resolution, and draw/texture timings vary between the two
+runs. These shared-host SwiftShader results do not establish hardware GPU or
+game FPS limits. All controlled native builds, compression and other tests were
+idle during timing. The measurements include the mixer correction. Texture
+and uniform cases first render opposite data, and four deliberate driver no-op
+probes fail their guards. Concurrent mixer measurements, indexed-query profiling
+and wider device coverage remain open.
 
 ### Make cache and incremental build verification
 

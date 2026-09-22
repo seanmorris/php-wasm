@@ -717,6 +717,85 @@ neither observation establishes leak freedom. See the complete
 renderer/machine details, load, and artifact hashes. Run the checkout's
 `test/perf/sdl/run.mjs` to repeat the comparison.
 
+## Malformed assets and mixer input cleanup
+
+The four native cases in `test/browser/sdl-stress.spec.mjs` repeat malformed
+PNG/JPEG/BMP, TTF, WAV/Ogg/MP3 and filename/RWops input paths, then require valid
+loading/rendering or playback to recover. They measure SDL allocations, live
+native bytes and open file descriptors across a warmup and three batches.
+Expected libpng truncated-header diagnostics are validated explicitly; other
+stderr and browser errors fail the checks.
+
+Two cases reproduce a pinned SDL_mixer failure-path leak before `401f6d9`.
+`Mix_LoadMusic_RW()` returned without closing owned input when format detection,
+loading or opening failed. The existing package-local SDL2_mixer patch now closes
+that stream. Borrowed RWops and PHP stream autoclose semantics are preserved.
+The broad audio case previously grew from 46 to 166 SDL allocations and 14 to
+134 file descriptors. On the normal PHP 8.4 static Make build, it stays at
+36 allocations and four descriptors, then returns to zero SDL allocations on
+shutdown. The focused RWops case is also flat; PNG/JPEG/BMP and font cases stay
+flat on both builds. These are finite ownership checks, not decoder fuzzing or
+general leak-freedom claims. The PNG callback's unchecked short-read handling
+remains a separate audit item (VO note 75).
+
+All four new cases and 32 affected existing audio/stream/cube cases pass on the
+matching candidate, with no skips or flaky results. Both editor checks,
+main-module validation, ten Make/package checks and JS style also pass.
+`packages/sdl/benchmarks/2026-09-22-malformed-assets.json` preserves before/after evidence.
+`benchmarks/2026-09-22-malformed-size.json` records +57 raw bytes, −35 gzip
+bytes and −2,407 Brotli bytes for the matching pair; JS and ICU are unchanged.
+Full PHP/profile remote
+verification of this commit remains pending; running CI on `17d386c` proves
+only that preceding source.
+
+## Rendering and event throughput baseline
+
+Two idle runs on the matching `401f6d9` PHP 8.4.1 static Make build use internal
+Chromium/SwiftShader, prepared inputs, four warmups and twelve rotating samples
+per case. Complete framebuffer comparisons verify the rendering paths, and
+event tests check every payload and count. These are total milliseconds per
+batch, including amortized readback after repeated submissions:
+
+| Path | Batch | Total ms, run 1 / 2 |
+| --- | --- | ---: |
+| Ordinary array draws | 1,024 triangles | 37.422 / 13.453 |
+| Instanced array draw | 1,024 triangles | 29.703 / 11.703 |
+| Ordinary indexed draws | 1,024 triangles | 221.688 / 99.891 |
+| Instanced indexed draw | 1,024 triangles | 36.000 / 11.219 |
+| Scalar uniform setters + draw | 64 vec4 values | 0.172 / 0.164 |
+| Uniform array + draw | 64 vec4 values | 0.102 / 0.109 |
+| UBO update + draw | 1 KiB | 0.098 / 0.094 |
+| Texture image replacement + draw | 256 × 256 RGBA | 0.250 / 0.367 |
+| Texture subimage update + draw | 256 × 256 RGBA | 0.242 / 0.375 |
+| SDL texture update + copy | 256 × 256 RGBA | 0.219 / 0.219 |
+| Event push/poll + payload checks | 32 events | 0.316 / 0.294 |
+| Event push/poll + payload checks | 1,024 events | 9.938 / 9.719 |
+
+Individual indexed draws have a large submission cost here. The checked
+binding queries the bound index buffer and its size on each call; instancing
+amortizes that validation. The source identifies a candidate for investigation,
+but these measurements do not isolate the cost of each browser operation.
+Ordinary draws update a per-triangle offset uniform; instanced draws preload
+offset attributes. Non-indexed instanced submission falls below the SDL clock's
+resolution, so the report leaves its call rate unavailable. Draw and texture
+results vary substantially between runs; retain both and avoid treating them
+as hardware GPU results or game FPS limits.
+
+Native allocation counts and live bytes plateau during the sampled rounds.
+Graphics cleanup leaves the three known SDL TLS allocations, and event cleanup
+returns to zero. Prepared PHP inputs remain live until request refresh; reserved
+heap capacity is distinct from live allocations. This does not prove general
+leak freedom. Reports include raw samples, frame callback execution intervals,
+native/V8 memory, machine/load, and exact artifact/fixture hashes:
+[first run](benchmarks/2026-09-22-throughput-first.json),
+[second run](benchmarks/2026-09-22-throughput-second.json).
+Use `test/perf/sdl/throughput.mjs` as described in `test/perf/sdl/README.md`.
+These runs include the mixer cleanup correction. Texture/uniform cases first
+render the opposite data, so stale state cannot mask a missing update; four
+driver no-op probes confirm those checks fail. SDL texture measurements use
+WebGL1, while the direct GL paths use WebGL2. Concurrent mixer throughput and
+indexed-query profiling remain separate work.
+
 ## RWops and font lifetime verification
 
 The stream/font PHP 8.4 static Make build passed 49 native SDL browser tests, two

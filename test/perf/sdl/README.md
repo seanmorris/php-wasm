@@ -47,3 +47,52 @@ bytes come from the pinned SDK's `mallinfo`, because this build reports zero
 from PHP's `memory_get_usage()`. Reserved space may remain reusable after free;
 do not interpret it as a count of live allocations. This fixture establishes
 font lifetime behavior and does not measure drawing throughput or other resources.
+
+## Rendering and event throughput
+
+The broader runner takes an explicit matching native artifact directory. Start
+the same browser harness, leave builds/compression/other tests idle, and run it
+twice with separate output paths (existing reports are never overwritten):
+
+```sh
+PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/throughput.mjs \
+  packages/php-wasm .cache/sdl-throughput-first.json
+PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/throughput.mjs \
+  packages/php-wasm .cache/sdl-throughput-second.json
+```
+
+Each suite uses a fresh runtime page. JS, Wasm and ICU are routed from the
+specified directory and hashed, along with the PHP fixtures and runner. Four
+warmup samples precede twelve measured samples per path; case order rotates
+each round. No native timing threshold is used as a correctness gate.
+
+| Suite | Work per batch | Correctness check |
+| --- | --- | --- |
+| Instancing | 1,024 triangles, ordinary or instanced, indexed or non-indexed | Identical full framebuffer for all four paths, with drawn and clear pixels |
+| Uniforms | 64 vec4 values through scalar setters, one array setter or a 1 KiB UBO update, then a draw | Every palette entry is rendered; red/green data alternates |
+| GL textures | 256 × 256 RGBA bytes through image replacement or subimage update, then a draw | Entire rendered image matches the final uploaded color |
+| SDL textures | Same upload through `SDL_UpdateTexture` and `SDL_RenderCopy` | Entire rendered image matches the final uploaded color |
+| Events | Bursts of 32 or 1,024 mouse-motion payloads, 32,768 roundtrips per sample | Every event's payload and each burst's exact count |
+
+Input arrays/strings, GL objects and shaders are prepared before measurement. Texture/uniform
+samples first render the opposite data; stale uploads cannot satisfy their
+final-image checks.
+Ordinary draws update an offset uniform for each triangle; instanced draws use
+preloaded offsets. Uniform and texture cases consume each update with a draw.
+Submission includes PHP loops and native/driver work; full framebuffer readback
+measures completion separately. Byte comparisons occur outside those timers.
+Event validation is deliberately included in its queue timing. Results report
+normalized milliseconds per batch, item/call rates, uploaded MiB/s, raw samples,
+browser/renderer details, machine/load and memory snapshots.
+
+The recorded frame interval uses `performance.now()` inside animation callbacks
+before and after a whole repeated sample, including request dispatch and event-loop
+scheduling. Animation-frame timestamps themselves can be stale after synchronous
+work. This interval is not an individual game frame. Zero submission samples
+are below the SDL timer resolution; their call rate is reported as unavailable.
+These SwiftShader numbers are software-renderer
+measurements; they neither predict hardware GPU performance nor set a game FPS
+limit. Allocation samples include warmed native live bytes, reserved memory,
+Wasm capacity and the V8 heap after GC. Explicit cleanup and PHP refresh are
+sampled separately. Stable values only describe these fixtures, not general
+leak freedom. Concurrent audio and malformed-asset stress are separate checks.
