@@ -4,6 +4,8 @@ Changes
 
 ## Unreleased
 
+* Fixed closed SDL_mixer cleanup replacing the existing error and retaining a stale audio format. Decoder initialization after shutdown no longer recreates decoder lists; repeated PHP refresh stays at zero SDL allocations, and reopening supports a different audio format.
+
 * Browser, worker, webview and debugger runtimes now use the existing local lock fallback when Web Locks are unavailable, including HTTP LAN testing on iOS. Worker/webview refresh also waits for filesystem synchronization before releasing its lock. The fallback coordinates one page or worker; cross-context locking still requires Web Locks.
 * Fixed SDL keyboard capture swallowing other page editors: native keys now follow canvas/IME focus, and leaving that target releases held keys and modifiers.
 * SDL_image now aborts short PNG reads through libpng cleanup, with valid-image recovery checked after truncated headers, image data and CRCs.

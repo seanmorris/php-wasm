@@ -141,3 +141,14 @@
          }
          music_playing->fading = MIX_FADING_OUT;
          music_playing->fade_steps = fade_steps;
+@@ -1452,7 +1452,10 @@
+     }
+     num_decoders = 0;
+ 
++    /* Decoder initialization must not reopen a closed device's format. */
++    SDL_zero(music_spec);
++
+     ms_per_step = 0;
+ }
+ 
+ /* Unload the music interface libraries */

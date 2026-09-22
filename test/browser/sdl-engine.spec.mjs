@@ -360,6 +360,54 @@ test('typed state queries return scalar and array shapes without overwriting sto
 	expect(result.error).toBe(0);
 });
 
+test('culling and depth writes control pixels after partial vertex-buffer updates', async ({page}) => {
+	await start(page);
+	const result = await run(page, String.raw`${context}
+	$vertex = '#version 300 es
+	layout(location=0) in vec3 position;void main(){gl_Position=vec4(position,1);}';
+	$fragment = '#version 300 es
+	precision highp float;uniform vec4 tint;out vec4 color;void main(){color=tint;}';
+	$program = $programFrom($vertex,$fragment); glUseProgram($program);
+	$tint = glGetUniformLocation($program,'tint');
+	glGenBuffers(1,$buffers); glBindBuffer(GL_ARRAY_BUFFER,$buffers[0]);
+	$vertices = pack('f*',-1,-1,0,3,-1,0,-1,3,0);
+	glBufferData(GL_ARRAY_BUFFER,strlen($vertices),$vertices,GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0,3,GL_FLOAT,false,0,0); glEnableVertexAttribArray(0);
+	$draw = function($depth,$color) use($tint) {
+		foreach([8,20,32] as $offset) { glBufferSubData(GL_ARRAY_BUFFER,$offset,4,pack('f',$depth)); }
+		glUniform4f($tint,...$color); glDrawArrays(GL_TRIANGLES,0,3);
+	};
+	glClearColor(0,0,0,1); glClearDepth(1); glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LESS);
+	$depthPixels = []; $writeMasks = [];
+	foreach([false,true] as $write) {
+		glDepthMask(true); glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		glDepthMask($write); $writeMasks[] = glGetBooleanv(GL_DEPTH_WRITEMASK);
+		$draw(-.5,[1,0,0,1]); glDepthMask(true); $draw(.5,[0,0,1,1]);
+		glFlush(); glFinish(); $depthPixels[] = $pixel();
+	}
+	glDisable(GL_DEPTH_TEST); glEnable(GL_CULL_FACE);
+	$cullPixels = [];
+	foreach([[GL_BACK,GL_CCW],[GL_BACK,GL_CW],[GL_FRONT,GL_CW]] as [$face,$winding]) {
+		glCullFace($face); glFrontFace($winding); glClear(GL_COLOR_BUFFER_BIT);
+		$draw(0,[1,0,0,1]); $cullPixels[] = $pixel();
+	}
+	$state = [glIsEnabled(GL_CULL_FACE),glGetIntegerv(GL_CULL_FACE_MODE) === GL_FRONT,glGetIntegerv(GL_FRONT_FACE) === GL_CW];
+	glDisable(GL_CULL_FACE); $disabled = glIsEnabled(GL_CULL_FACE);
+	glDisableVertexAttribArray(0); glClear(GL_COLOR_BUFFER_BIT); $draw(0,[0,1,0,1]); $noVertices = $pixel();
+	glEnableVertexAttribArray(0); $draw(0,[0,1,0,1]); $restored = $pixel();
+	glFrontFace(GL_TEXTURE_2D); $invalidWinding = glGetError();
+	$preserved = glGetIntegerv(GL_FRONT_FACE) === GL_CW;
+	$error = glGetError(); ${cleanup}
+	echo json_encode(compact('depthPixels','writeMasks','cullPixels','state','disabled','noVertices','restored','invalidWinding','preserved','error'));
+	`);
+	expect(result).toEqual({
+		depthPixels: ['0000ffff', 'ff0000ff'], writeMasks: [false, true]
+		, cullPixels: ['ff0000ff', '000000ff', 'ff0000ff'], state: [true, true, true]
+		, disabled: false, noVertices: '000000ff', restored: '00ff00ff'
+		, invalidWinding: 1280, preserved: true, error: 0
+	});
+});
+
 test('WebGL2 bindings reject a WebGL1 context with a catchable error', async ({page}) => {
 	await start(page);
 	const result = await run(page, String.raw`

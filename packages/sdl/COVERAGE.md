@@ -5,29 +5,65 @@ browser backend. It describes package primitives, not an engine architecture.
 An exported function is not considered verified until a test exercises its
 native behavior. Implementation and verification status are separate.
 
-## Accepted local baseline
+## Current API audit
+
+The selected API groups below are implemented. Their PHP signatures live in
+[core extras](core/php_sdl_extra.stub.php),
+[renderer geometry/state](core/php_sdl_geometry.stub.php),
+[font extras](ttf/php_ttf_extra.stub.php) and
+[WebGL](opengl/php_webgl.stub.php). These declare 39, 30, 32 and 169 functions
+respectively; each has a matching generated registration. Counts include
+previously available operations and do not measure behavioral coverage.
+The [package README](README.md) specifies ownership, byte layouts, nullable
+native failures, typed outputs and exception behavior. This is the selected
+browser contract, not an assertion of parity with every native SDL API.
+
+| Selected group | Native behavioral checks in `test/browser/` | Classification |
+| --- | --- | --- |
+| Events, timers and controller mappings | `sdl-bindings`, `sdl-input`: payloads, precise counters, browser input, device attachment/reconnection, event settings, mapping selection and live button remapping | Implemented; simulated gamepads, physical hardware unverified |
+| Unicode, focus, fullscreen and pointer lock | `sdl-text`, `sdl-input`, `sdl-pointer`: composition transport, focus release, actual browser requests, policy errors and retired callback cleanup | Implemented; browser permissions and IME limits below |
+| Streaming textures and SDL batches | `sdl-bindings`, `sdl-geometry`, `sdl-coordinates`: pixel uploads/readback, all eight integer/float batches, indexed/packed geometry, state, scaling and coordinate conversion | Implemented; planar YUV upload outside this PHP byte-transfer contract |
+| Fonts | `sdl-bindings`, `sdl-streams`, `sdl-stress`: all supported text render variants, glyph metrics/styles, face metadata, size changes, callback failures and repeated allocation cleanup | Implemented; no HarfBuzz shaping |
+| Image decoders | `sdl`, `sdl-stress`: PNG/JPEG/BMP surfaces/textures, truncated streams and valid-image recovery | Implemented; no additional codec claim |
+| Audio | `sdl-audio`, `sdl-streams`, `sdl-stress`, `sdl`: WAV/Ogg/MP3, real PCM, channels/music, fades, suspended/reopened devices, failed loads and closed-device request cleanup | Implemented; browser gesture/output-device policy remains native |
+| Shader and uniform variants | `sdl-bindings`, `sdl-engine`, `sdl-lifetimes`: shader/link errors, float/signed/unsigned scalar and vector setters, square/rectangular matrices, reflection and shared UBO layouts | Implemented; WebGL2 operations reject a WebGL1 context |
+| Vertex/index buffers and draws | `sdl-engine`, `sdl-lifetimes`: offsets/ranges, partial updates, VAOs, integer attributes, instanced array/index draws, copies and output callback teardown | Implemented; bounds checks retained |
+| Render targets | `sdl-engine`, `sdl-textures`: depth/stencil, MRT, multisample resolve, layer attachments, queries, deletion/recreation and restored contexts | Implemented; attachment/sample limits are driver-dependent |
+| GL state and capabilities | `sdl-engine`: typed scalar/array queries, blending, masks, winding/culling/depth pixels, extension and compressed-format enumeration | Implemented; ordinary driver errors remain in `glGetError()` |
+| GL textures and samplers | `sdl-textures`: complete byte layouts, immutable/volume/array/cube storage, generated mipmaps, compressed transfers, independent samplers and context restoration | Implemented; only advertised compressed formats may be used |
+| Native ownership and PHP callbacks | `sdl-buffers`, `sdl-streams`, `sdl-cursors`, `sdl-windows`, `sdl-lifetimes`, `sdl-audio`, `sdl-serialization`: explicit/last-reference cleanup, borrowed views, cloning/serialization rejection, typed outputs, callback reentry, reference counts and restarts | Corrected and covered by finite native allocation/resource checks |
+| Make/npm/source inputs | Make/package tests and the unchanged/JS-only incremental verifier; source overlays, stubs, generated headers and native patches ship in npm | Implemented; final-source full CI still required |
+
+Test filenames in the table have the `.spec.mjs` suffix. Generated cases verify
+whole families (uniform variants, primitive batches and text render variants);
+a textual search for one function name is not sufficient coverage evidence.
+The final audit added size/metadata, controller-settings/remapping,
+culling/depth/partial-buffer and generated-mipmap checks where native behavior
+had not previously been asserted. No selected binding gap is deferred without
+a documented backend boundary. Full candidate-suite results and artifact hashes
+are recorded with the closed-device cleanup verification below.
+
+Backend boundaries are explicit: one live SDL GL context per runtime; engine
+code reloads GPU assets after loss; no PHP native pointer inputs; no pixel-buffer
+object transfers through PHP byte-string upload/readback; no complex shaping
+without HarfBuzz; no browser mouse warping, desktop windows, threads or
+unavailable haptics/sensors. Compressed formats require actual context support
+(PVRTC is not available on the test device). Textarea-based IME cannot edit a
+fullscreen canvas; EditContext supports that path where available. Physical
+OS IME, controllers, iPhones and hardware GPU/audio performance are unverified.
+These limits are not hidden test skips or claims of native feature parity.
+
+Final-source CI remains required across PHP 8.0–8.5 and all three library
+profiles. The dated sections below preserve evidence at each change; their
+older pending-work statements describe those historical builds.
+
+## Initial local baseline
 
 The initial extension/cube delivery is at `84475db`. The subsequent binding
 expansion adds events, streaming textures, UTF-8 font rendering/metrics/styles,
 controllers, uniform variants and timers. On PHP 8.4 static, 12 native browser
-tests and two editor tests pass; nine Make/package checks pass. See
+tests and two editor tests passed; nine Make/package checks passed. See
 `benchmarks/2026-09-21-bindings.json` for matching artifact hashes and sizes.
-The expanded source has not yet passed the complete remote matrix.
-
-| Area | Current evidence | Remaining work |
-| --- | --- | --- |
-| SDL input | Payload roundtrips; real browser keyboard/mouse, Unicode/composition, focus and touch; supplied-canvas fullscreen, policy/deferred requests and teardown; simulated controller reconnect | Physical IME and wider browser/device coverage |
-| SDL renderer | Texture update/lock/readback/modulation; array/packed triangles and primitive batches; callback mutation/destruction, renderer state pixel tests and window/logical coordinate conversion | Wider sustained lifetime audit |
-| SDL_image | PNG/JPEG/BMP decoding, surface-to-texture paths, explicit PNG short-read rejection and valid-load recovery | Wider device/resource stress and full matrix verification |
-| SDL_ttf | UTF-8, styles/outline, metrics, reference-counted initialization, callback safety and native allocation churn | Wider request/profile stress and CI; HarfBuzz remains disabled |
-| SDL_mixer | WAV/Ogg/MP3 and real PCM; canonical chunks, bounded channel owners, music completion, pause/fades, suspended replacement, restarts and native allocation churn | Closed-device request cleanup, wider device/backend stress and full profile/PHP matrix |
-| GL shaders/uniforms | Compilation/link diagnostics; signed/float/unsigned uniforms; reflected UBO layouts shared by two programs | Wider stress and full matrix verification |
-| GL vertex/index buffers | Checked byte uploads/index ranges; VAOs; integer attributes; instanced array/index draws; range binding and buffer copies; teardown/recreation tests | Broader context-loss/device coverage |
-| GL render targets | Color/depth/stencil, MRT and multisample resolve pixels; resize/deletion and sized queries; layered attachment and real browser context restoration | Wider device coverage and full matrix verification |
-| GL state/capabilities | Typed scalar/array queries, blend/stencil/mask/range/offset state, compressed-format and extension enumeration; scalar texture/sampler queries | Remaining backend/device audit and full matrix verification |
-| GL textures | Checked complete pixel layouts, immutable 2D/cube/3D/array storage, compressed image/subimage calls and context-owned samplers; twelve native cases with pixel checks | Full remote matrix verification and wider device coverage |
-| Native ownership | Renderer/texture/window/controller invalidation; GL cleanup; retained surface/pixel/format/palette owners; safe locks/blits; RWops ownership/callbacks, font/cursor/mixer cleanup; canonical windows, checked outputs and callback reentry | Remaining callback paths, wider device teardown and broader sustained allocation checks |
-| Make and packaging | Version/configuration cache isolation, SDL opt-out registration, unchanged and JS-only incremental builds, reproducible arginfo and source package checks | Complete native cold/profile builds and full remote CI matrix |
 
 ## Selected rendering API additions
 
@@ -129,6 +165,50 @@ measurements, npm source payload checks, and the unchanged PHP 8.0–8.5 × thre
 library-profile CI matrix. Report browser/device coverage limits explicitly.
 Update this file as evidence arrives; historical green CI does not verify new
 source. Engine scenes, physics, asset caches and gameplay code are out of scope.
+
+### Closed-device mixer cleanup and final API audit
+
+Three native regressions fail on the preserved `f191496` runtime. Closing an
+unused mixer replaces the existing SDL error with `Invalid audio device ID`;
+refresh after explicit shutdown recreates two SDL allocations; and codec
+initialization advertises decoder lists while `Mix_QuerySpec()` reports no
+open device. A forwarding native allocation observer traces the two allocations
+to `Mix_Init()`. The error guard alone does not fix those allocations.
+
+The PHP owner cleanup now calls native music halt only when a mixer device is
+open. The existing SDL_mixer patch clears `music_spec` in `close_music()` so
+later codec initialization cannot reuse a closed device's format. Ownership
+release still runs. Repeated close/quit/halt preserves the existing diagnostic;
+three refreshes and three codec-init/quit cycles remain at zero SDL allocations.
+Reopening at an exact 22050 Hz mono format produces real PCM and shuts down cleanly.
+
+The normal PHP 8.4 static Make pair passes 211 distinct Chromium cases: the
+209-case full suite plus two final GL checks added after its collection. All
+211 are now included in the ordinary suite. The reusable portable configuration
+passes 19 cases in each of Firefox and WebKit (38 total), and all four real
+editor cases pass. Eight Make/npm checks, main-module validation, source/patch
+hash checks and JS style also pass. The full newest-source PHP/profile CI
+matrix remains pending.
+
+The final coverage audit adds font metadata/size/glyph checks, controller
+names/event settings and live mapping changes, culling/depth/partial-buffer
+pixels, and generated mipmaps. SDL's nonzero fixed-width font flag is not
+necessarily `1`. A controller using the browser default mapping must be
+reopened once after creating a device-specific mapping; later edits update
+that selected mapping on its live handle.
+
+Firefox initially produced no PCM callbacks because the container had no audio
+output service. A plain Web Audio page without SDL reproduced it. An isolated
+PulseAudio null sink resolves both that probe and the native test; assertions
+and native callbacks are unchanged. This is software audio coverage, not a
+physical-output or iPhone test.
+
+`benchmarks/2026-09-22-cleanup.json` preserves before/after results, the allocation
+trace, the environment diagnosis and source/artifact hashes.
+`benchmarks/2026-09-22-cleanup-size.json` records +61 raw bytes, +52 gzip bytes
+and +931 Brotli bytes relative to the focus build; ICU is byte-identical. The
+matching native pair is installed locally. Historical performance records keep
+their original runtime hashes and are not relabeled as results for this pair.
 
 ### Malformed assets and mixer input cleanup
 

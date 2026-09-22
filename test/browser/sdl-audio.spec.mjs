@@ -27,12 +27,77 @@ const promptRun = async (page, source) => {
 			run(page, source)
 			, new Promise(resolve => timer = setTimeout(() => resolve('native timeout'), 5000))
 		]);
-		if(result === 'native timeout') { await page.close(); }
+		if(result === 'native timeout')
+		{ await page.close(); }
 		expect(result).not.toBe('native timeout');
 		return result;
 	}
-	finally { clearTimeout(timer); }
+	finally
+	{ clearTimeout(timer); }
 };
+
+test('closing an unused mixer preserves the existing SDL diagnostic', async ({page}) => {
+	await start(page);
+	expect(await run(page, `
+	SDL_SetError('previous failure');
+	$errors = [];
+	for($i=0;$i<3;$i++) {
+		Mix_CloseAudio(); $errors[] = SDL_GetError();
+		Mix_Quit(); $errors[] = SDL_GetError();
+		$halted = Mix_HaltMusic(); $errors[] = SDL_GetError();
+		if($halted !== 0) { throw new RuntimeException('Empty music halt failed'); }
+	}
+	echo json_encode($errors);
+	`)).toEqual(Array(9).fill('previous failure'));
+});
+
+test('request refresh after audio shutdown does not recreate SDL allocations', async ({page}) => {
+	await startAudio(page);
+	await run(page, `${setup}
+	$music = Mix_LoadMUS('/preload/sdl/loop.ogg');
+	if(!$music || Mix_PlayMusic($music,-1) !== 0) { throw new RuntimeException(SDL_GetError()); }
+	Mix_CloseAudio(); Mix_Quit(); SDL_Quit(); unset($music);
+	`);
+	expect((await allocationStats(page)).sdlAllocations).toBe(0);
+	for(let index = 0; index < 3; index++)
+	{
+		await page.evaluate(() => window.bindingPhp.refresh());
+		expect((await allocationStats(page)).sdlAllocations).toBe(0);
+	}
+	expect(await run(page, 'echo json_encode(SDL_GetError());')).toBe('');
+	expect(await page.evaluate(() => ({
+		contexts: window.audioContexts.map(context => context.state)
+		, processors: window.audioProcessors.filter(processor => processor.connected).length
+	}))).toEqual({contexts: ['closed'], processors: 0});
+});
+
+test('decoder initialization after audio shutdown stays closed and supports reopening', async ({page}) => {
+	await startAudio(page);
+	await run(page, `${setup} Mix_CloseAudio(); Mix_Quit(); SDL_Quit();`);
+	expect((await allocationStats(page)).sdlAllocations).toBe(0);
+	for(let index = 0; index < 3; index++)
+	{
+		expect(await run(page, `
+		$flags = MIX_INIT_OGG | MIX_INIT_MP3;
+		$initialized = (Mix_Init($flags) & $flags) === $flags;
+		echo json_encode([$initialized, Mix_QuerySpec($f,$s,$c), Mix_GetNumMusicDecoders(), Mix_GetNumChunkDecoders()]);
+		Mix_Quit();
+		`)).toEqual([true, 0, 0, 0]);
+		expect((await allocationStats(page)).sdlAllocations).toBe(0);
+	}
+	expect(await run(page, `
+	SDL_Init(SDL_INIT_AUDIO);
+	if(Mix_OpenAudioDevice(22050,MIX_DEFAULT_FORMAT,1,512,null,0) !== 0) { throw new RuntimeException(SDL_GetError()); }
+	if(Mix_QuerySpec($f,$s,$c) !== 1) { throw new RuntimeException('Reopened device unavailable'); }
+	$music = Mix_LoadMUS('/preload/sdl/loop.ogg');
+	if(!$music || Mix_PlayMusic($music,-1) !== 0) { throw new RuntimeException(SDL_GetError()); }
+	echo json_encode([$f,$s === MIX_DEFAULT_FORMAT,$c]);
+	`)).toEqual([22050, true, 1]);
+	await primeAudio(page);
+	await expect.poll(() => page.evaluate(() => window.audioSamples)).toBeGreaterThan(0);
+	await run(page, 'Mix_CloseAudio(); Mix_Quit(); SDL_Quit(); unset($music);');
+	expect((await allocationStats(page)).sdlAllocations).toBe(0);
+});
 
 test('unused audio objects release on last reference and reject copied native ownership', async ({page}) => {
 	await start(page);
@@ -116,11 +181,15 @@ test('mixer channels validate bounds and fail safely after closing the device', 
 	$reject('bad-size',fn() => Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,65536));
 	$reopened = Mix_OpenAudioDevice(44100,MIX_DEFAULT_FORMAT,2,1024,null,0) === 0;
 	echo json_encode(compact('overflow','group','closed','reopened','rejected'));
-	`)).toEqual({overflow: true, group: true, closed: [0, 0, 0, null], reopened: true, rejected: [
-		'group-boundary', 'range-end', 'backwards', 'play-negative', 'halt-negative', 'pause-negative'
-		, 'resume-negative', 'playing-negative', 'effect-channel', 'effect-distance', 'effect-angle'
-		, 'closed-group', 'closed-play', 'closed-pause', 'closed-effect', 'bad-size'
-	]});
+	`)).toEqual({
+		overflow: true, group: true, closed: [0, 0, 0, null], reopened: true
+		, rejected: [
+			'group-boundary', 'range-end', 'backwards', 'play-negative'
+			, 'halt-negative', 'pause-negative', 'resume-negative', 'playing-negative'
+			, 'effect-channel', 'effect-distance', 'effect-angle'
+			, 'closed-group', 'closed-play', 'closed-pause', 'closed-effect', 'bad-size'
+		]
+	});
 });
 
 test('audio opens preserve native default settings and negative volume queries', async ({page}) => {

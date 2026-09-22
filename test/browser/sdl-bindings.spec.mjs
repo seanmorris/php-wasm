@@ -5,7 +5,8 @@ test.skip(process.env.PHP_VARIANT !== '_sdl', 'Requires the SDL runtime artifact
 
 test.afterEach(async ({page}) => {
 	await page.evaluate(async () => {
-		if(window.bindingPhp) { await window.bindingPhp.refresh(); }
+		if(window.bindingPhp)
+		{ await window.bindingPhp.refresh(); }
 	});
 });
 
@@ -229,6 +230,44 @@ test('SDL_ttf measures UTF-8 and provides native bold, outline, wrapping and gly
 	expect(data.rejected).toEqual(['negative-wrap', 'surrogate', 'nul', 'style', 'closed-font']);
 });
 
+test('font face metadata and size changes match rendered glyphs', async ({page}) => {
+	await start(page);
+	const result = await run(page, `${rejectHelper}
+	TTF_Init(); $font = TTF_OpenFont('/preload/sdl/DejaVuSansMono.ttf',12);
+	$face = [TTF_FontFaceFamilyName($font),TTF_FontFaceStyleName($font),TTF_FontFaces($font),TTF_FontFaceIsFixedWidth($font)];
+	$sizes = [];
+	foreach([12,36,12] as $size) {
+		if(TTF_SetFontSize($font,$size) !== 0) { throw new RuntimeException(SDL_GetError()); }
+		TTF_SizeUTF8($font,'Resize',$w,$h);
+		$surface = TTF_RenderUTF8_Blended($font,'Resize',new SDL_Color(255,255,255,255));
+		$rgba = SDL_ConvertSurfaceFormat($surface,SDL_PIXELFORMAT_ABGR8888,0);
+		$pixels = $rgba->pixels; $ink = 0;
+		for($y=0;$y<$rgba->h;$y++) {
+			for($x=0;$x<$rgba->w;$x++) { $ink += $pixels->GetByte($x*4+3,$y) > 0; }
+		}
+		$sizes[] = [$w,$h,$surface->w,$surface->h,$ink];
+		SDL_FreeSurface($rgba); SDL_FreeSurface($surface); unset($pixels);
+	}
+	$reject('zero-size',fn() => TTF_SetFontSize($font,0));
+	$reject('large-size',fn() => TTF_SetFontSize($font,4097));
+	TTF_CloseFont($font);
+	$reject('closed-size',fn() => TTF_SetFontSize($font,24));
+	$reject('closed-name',fn() => TTF_FontFaceFamilyName($font));
+	TTF_Quit(); echo json_encode(compact('face','sizes','rejected'));
+	`);
+	expect(result.face.slice(0, 3)).toEqual(['DejaVu Sans Mono', 'Book', 1]);
+	expect(result.face[3]).toBeGreaterThan(0);
+	expect(result.sizes[0]).toEqual(result.sizes[2]);
+	for(const size of result.sizes)
+	{
+		expect(size.slice(0, 2)).toEqual(size.slice(2, 4));
+		expect(size[4]).toBeGreaterThan(0);
+	}
+	expect(result.sizes[1][0]).toBeGreaterThan(result.sizes[0][0] * 2);
+	expect(result.sizes[1][4]).toBeGreaterThan(result.sizes[0][4] * 3);
+	expect(result.rejected).toEqual(['zero-size', 'large-size', 'closed-size', 'closed-name']);
+});
+
 test('SDL counters retain unsigned precision and measure elapsed time', async ({page}) => {
 	await page.addInitScript(() => {
 		const now = performance.now.bind(performance);
@@ -240,8 +279,10 @@ test('SDL counters retain unsigned precision and measure elapsed time', async ({
 	const after = await run(page, String.raw`echo json_encode([SDL_GetTicks(), SDL_GetTicks64(), SDL_GetPerformanceCounter(), SDL_GetPerformanceFrequency()]); SDL_Quit();`);
 	for(const sample of [before, after])
 	{
-		for(const value of sample.slice(0, 4)) { expect(String(value)).toMatch(/^\d+$/); }
-		if(BigInt(sample[2]) > BigInt(before[4])) { expect(typeof sample[2]).toBe('string'); }
+		for(const value of sample.slice(0, 4))
+		{ expect(String(value)).toMatch(/^\d+$/); }
+		if(BigInt(sample[2]) > BigInt(before[4]))
+		{ expect(typeof sample[2]).toBe('string'); }
 	}
 	expect(Number(after[0]) - Number(before[0])).toBeGreaterThanOrEqual(25);
 	expect(BigInt(after[1])).toBeGreaterThan(BigInt(before[1]));
@@ -255,7 +296,8 @@ test('SDL counters retain unsigned precision and measure elapsed time', async ({
 test('SDL standard controllers poll browser gamepads and survive close and disconnect', async ({page}) => {
 	await page.addInitScript(() => {
 		window.testPad = {
-			id: 'Standard Gamepad', index: 0, connected: true, mapping: 'standard', timestamp: 1
+			id: 'Standard Gamepad', index: 0, connected: true
+			, mapping: 'standard', timestamp: 1
 			, axes: [0, 0, 0, 0]
 			, buttons: Array.from({length: 17}, () => ({pressed: false, touched: false, value: 0}))
 		};
@@ -271,13 +313,41 @@ test('SDL standard controllers poll browser gamepads and survive close and disco
 	echo json_encode([
 		SDL_NumJoysticks(), SDL_IsGameController(0), SDL_GameControllerGetAttached($controller),
 		SDL_JoystickGetAttached($joystick), SDL_JoystickNumAxes($joystick), SDL_JoystickNumButtons($joystick),
-		$id === SDL_JoystickGetDeviceInstanceID(0), SDL_GameControllerMapping($controller) !== null
+		$id === SDL_JoystickGetDeviceInstanceID(0), SDL_GameControllerMapping($controller) !== null,
+		[SDL_GameControllerName($controller),SDL_GameControllerNameForIndex(0)], SDL_JoystickNumHats($joystick)
 	]);
 	`);
 	expect(initial.slice(0, 4)).toEqual([1, true, true, true]);
 	expect(initial[4]).toBeGreaterThanOrEqual(4);
 	expect(initial[5]).toBeGreaterThanOrEqual(17);
-	expect(initial.slice(6)).toEqual([true, true]);
+	expect(initial.slice(6, 8)).toEqual([true, true]);
+	expect(initial[8][0]).toBeTruthy();
+	expect(initial[8][0]).toBe(initial[8][1]);
+	expect(initial[9]).toBe(0);
+	const settings = await run(page, String.raw`
+	$mapping = SDL_GameControllerMapping($controller);
+	$mapped = SDL_GameControllerAddMapping($mapping) >= 0;
+	$roundtrip = SDL_GameControllerMapping($controller) === $mapping;
+	// The browser default and a new device-specific mapping are separate SDL entries.
+	// Reopen once to select the new entry; subsequent edits update that open handle.
+	SDL_GameControllerClose($controller); $controller = SDL_GameControllerOpen(0);
+	if(!$controller) { throw new RuntimeException(SDL_GetError()); }
+	$states = [];
+	foreach(['SDL_JoystickEventState','SDL_GameControllerEventState'] as $state) {
+		$state(SDL_IGNORE); $states[] = $state(SDL_QUERY);
+		$state(SDL_ENABLE); $states[] = $state(SDL_QUERY);
+	}
+	$reject('hat-range',fn() => SDL_JoystickGetHat($joystick,0));
+	$reject('joystick-state',fn() => SDL_JoystickEventState(2));
+	$reject('controller-state',fn() => SDL_GameControllerEventState(-2));
+	$reject('mapping-nul',fn() => SDL_GameControllerAddMapping("a\0b"));
+	$settingErrors = $rejected; $rejected = [];
+	echo json_encode(compact('mapped','roundtrip','states','settingErrors'));
+	`);
+	expect(settings).toEqual({
+		mapped: true, roundtrip: true, states: [0, 1, 0, 1]
+		, settingErrors: ['hat-range', 'joystick-state', 'controller-state', 'mapping-nul']
+	});
 	await page.locator('canvas').focus();
 	await page.evaluate(() => {
 		window.testPad.axes[0] = .5;
@@ -300,6 +370,20 @@ test('SDL standard controllers poll browser gamepads and survive close and disco
 	expect(pressed[0]).toBeLessThanOrEqual(16384);
 	expect(pressed.slice(1, 3)).toEqual([1, 1]);
 	expect(pressed[3]).toEqual(expect.arrayContaining([expect.objectContaining({button: 0, state: 1})]));
+	const remapped = await run(page, `
+	$fields = explode(',',$mapping);
+	foreach($fields as &$field) {
+		if(strncmp($field,'a:',2) === 0) { $field = 'a:b1'; }
+		else if(strncmp($field,'b:',2) === 0) { $field = 'b:b0'; }
+	} unset($field);
+	if(SDL_GameControllerAddMapping(implode(',',$fields)) < 0) { throw new RuntimeException(SDL_GetError()); }
+	SDL_GameControllerUpdate();
+	$swapped = [SDL_GameControllerGetButton($controller,SDL_CONTROLLER_BUTTON_A),SDL_GameControllerGetButton($controller,SDL_CONTROLLER_BUTTON_B)];
+	SDL_GameControllerAddMapping($mapping); SDL_GameControllerUpdate();
+	$restored = SDL_GameControllerGetButton($controller,SDL_CONTROLLER_BUTTON_A);
+	echo json_encode([$swapped,$restored]);
+	`);
+	expect(remapped).toEqual([[0, 1], 1]);
 	const closed = await run(page, String.raw`
 	$reject('axis-range', function() use ($controller) { SDL_GameControllerGetAxis($controller, SDL_CONTROLLER_AXIS_MAX); });
 	SDL_GameControllerClose($controller); SDL_GameControllerClose($controller);

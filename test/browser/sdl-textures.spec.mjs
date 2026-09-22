@@ -373,6 +373,39 @@ test('immutable 2D and cube storage preserve mip levels and sampled faces', asyn
 		, error: 0});
 });
 
+test('generated mipmaps average source pixels and refresh after a base-level update', async ({page}) => {
+	await start(page);
+	const result = await run(page, String.raw`${setup}
+	$id = $texture(GL_TEXTURE_2D);
+	$red = "\xff\x00\x00\xff"; $green = "\x00\xff\x00\xff";
+	$blue = "\x00\x00\xff\xff"; $white = "\xff\xff\xff\xff";
+	$top = str_repeat($red,2).str_repeat($green,2);
+	$bottom = str_repeat($blue,2).str_repeat($white,2);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,4,4,0,GL_RGBA,GL_UNSIGNED_BYTE,str_repeat($top,2).str_repeat($bottom,2));
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST_MIPMAP_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	$quadrants = [];
+	foreach([[.25,.25,0],[.75,.25,0],[.25,.75,0],[.75,.75,0]] as $coord) {
+		$quadrants[] = $draw('sampler2D',GL_TEXTURE_2D,$id,$coord,1);
+	}
+	$average = array_values(unpack('C*',hex2bin($draw('sampler2D',GL_TEXTURE_2D,$id,[.5,.5,0],2))));
+	glTexSubImage2D(GL_TEXTURE_2D,0,0,0,4,4,GL_RGBA,GL_UNSIGNED_BYTE,str_repeat($green,16));
+	glGenerateMipmap(GL_TEXTURE_2D);
+	$updated = $draw('sampler2D',GL_TEXTURE_2D,$id,[.5,.5,0],2);
+	$error = glGetError(); ${cleanup}
+	echo json_encode(compact('quadrants','average','updated','error'));
+	`);
+	expect(result.quadrants).toEqual(['ff0000ff', '00ff00ff', '0000ffff', 'ffffffff']);
+	for(const component of result.average.slice(0, 3))
+	{
+		expect(component).toBeGreaterThanOrEqual(127);
+		expect(component).toBeLessThanOrEqual(128);
+	}
+	expect(result.average[3]).toBe(255);
+	expect(result.updated).toBe('00ff00ff');
+	expect(result.error).toBe(0);
+});
+
 test('3D and array textures sample updated layers and layered framebuffer writes', async ({page}) => {
 	await start(page);
 	const result = await run(page, String.raw`${setup}

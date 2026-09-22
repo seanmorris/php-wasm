@@ -6,12 +6,16 @@ if(process.env.PHP_VARIANT !== '_sdl')
 	throw new Error('Build WITH_SDL=1 and set PHP_VARIANT=_sdl for the SDL platform checks.');
 }
 
-// These existing native fixtures use portable input paths. Chromium's CDP
-// composition/deferred-activation cases remain in the ordinary browser suite.
+// These native fixtures use portable browser paths. Audio checks need a working
+// output device (a software sink is sufficient). Chromium's CDP composition and
+// deferred-activation cases remain in the ordinary browser suite.
 export default defineConfig({
 	testDir: fileURLToPath(new URL('.', import.meta.url))
-	, testMatch: ['sdl-pointer.spec.mjs', 'sdl-text.spec.mjs']
-	, grep: /actual pointer lock|active pointer lock cleanup|window cleanup preserves|combined fullscreen|before an application event handler|textarea fallback.*commits complete/
+	, testMatch: [
+		'sdl-pointer.spec.mjs', 'sdl-text.spec.mjs', 'sdl-audio.spec.mjs'
+		, 'sdl-bindings.spec.mjs', 'sdl-engine.spec.mjs', 'sdl-textures.spec.mjs'
+	]
+	, grep: /actual pointer lock|active pointer lock cleanup|window cleanup preserves|combined fullscreen|before an application event handler|textarea fallback.*commits complete|closing an unused mixer|request refresh after audio shutdown|decoder initialization after audio shutdown|font face metadata|standard controllers|culling and depth writes|generated mipmaps/
 	, workers: 1
 	, timeout: 180000
 	, retries: 0

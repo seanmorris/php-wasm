@@ -67,7 +67,9 @@ void php_mix_music_collect(void)
 
 void php_mix_music_halt(void)
 {
-	Mix_HaltMusic();
+	/* Request shutdown also runs after explicit audio teardown. Locking
+	 * device zero would overwrite the caller's error. */
+	if (Mix_QuerySpec(NULL, NULL, NULL)) { Mix_HaltMusic(); }
 	php_mix_music_current_set(NULL);
 }
 

@@ -1,0 +1,2161 @@
+{
+  "date": "2026-09-22",
+  "baselineNativeCommit": "f191496",
+  "sourceBaseCommit": "d2121a0f88f45de3d5bd553a581c26b5a94e9162",
+  "change": "Preserve closed-mixer diagnostics and clear the stale music format before later decoder initialization",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-cleanup-final/runtime PHP_ASSET_DIR=.cache/sdl-cleanup-final/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "before": {
+    "stats": {
+      "startTime": "2026-09-22T13:03:51.532Z",
+      "duration": 48253.63,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 3,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "id": "20d8bead9884592efb9c-87a4b0b739eff0ba205b",
+        "file": "sdl-audio.spec.mjs",
+        "title": "closing an unused mixer preserves the existing SDL diagnostic",
+        "project": "",
+        "status": "failed",
+        "error": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 9\n+ Received  + 9\n\n  Array [\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n-   \"previous failure\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n+   \"Invalid audio device ID\",\n  ]"
+      },
+      {
+        "id": "20d8bead9884592efb9c-44a4557e4ab9c54377fe",
+        "file": "sdl-audio.spec.mjs",
+        "title": "request refresh after audio shutdown does not recreate SDL allocations",
+        "project": "",
+        "status": "failed",
+        "error": "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: 0\nReceived: 2"
+      },
+      {
+        "id": "20d8bead9884592efb9c-4c20740a93cfe9eb72fd",
+        "file": "sdl-audio.spec.mjs",
+        "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+        "project": "",
+        "status": "failed",
+        "error": "Error: expect(received).toEqual(expected) // deep equality\n\n- Expected  - 2\n+ Received  + 2\n\n  Array [\n    true,\n    0,\n-   0,\n-   0,\n+   3,\n+   2,\n  ]"
+      }
+    ]
+  },
+  "after": {
+    "full": {
+      "stats": {
+        "startTime": "2026-09-22T13:28:25.619Z",
+        "duration": 1028067.9,
+        "expected": 209,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "20d8bead9884592efb9c-87a4b0b739eff0ba205b",
+          "file": "sdl-audio.spec.mjs",
+          "title": "closing an unused mixer preserves the existing SDL diagnostic",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-44a4557e4ab9c54377fe",
+          "file": "sdl-audio.spec.mjs",
+          "title": "request refresh after audio shutdown does not recreate SDL allocations",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-4c20740a93cfe9eb72fd",
+          "file": "sdl-audio.spec.mjs",
+          "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-f051ada3f4a18fa09792",
+          "file": "sdl-audio.spec.mjs",
+          "title": "unused audio objects release on last reference and reject copied native ownership",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-39e09cb4074ee19d6e3a",
+          "file": "sdl-audio.spec.mjs",
+          "title": "channels retain canonical chunk owners and never revive freed pointers",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-f6fdefefa4086d5710c3",
+          "file": "sdl-audio.spec.mjs",
+          "title": "channel replacement and shrinking retain only the current bounded associations",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-1d61727fa009993a0c14",
+          "file": "sdl-audio.spec.mjs",
+          "title": "mixer channels validate bounds and fail safely after closing the device",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-10b7c7b257085455aeb4",
+          "file": "sdl-audio.spec.mjs",
+          "title": "audio opens preserve native default settings and negative volume queries",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-7178c003ccabf95e3995",
+          "file": "sdl-audio.spec.mjs",
+          "title": "freeing or replacing fading music returns while browser audio is suspended",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-249167d52eee4f5320aa",
+          "file": "sdl-audio.spec.mjs",
+          "title": "empty or fully reserved channel sets report safe volume and playback results",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-1293a5a604bd953e144a",
+          "file": "sdl-audio.spec.mjs",
+          "title": "final SDL audio shutdown honors both reference counts and invalidates loaded objects",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-cb162d97ce57b2dd9ee0",
+          "file": "sdl-audio.spec.mjs",
+          "title": "format changes and decoder unload release the affected native resources",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-3cfdf729270811d3ef58",
+          "file": "sdl-audio.spec.mjs",
+          "title": "query outputs preserve typed references and original destructor exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-46d45922c47b7c42774b",
+          "file": "sdl-audio.spec.mjs",
+          "title": "RWops callbacks may shut down audio without leaving the decoder a stale device",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-6c19c9d47d6f2a3bbf21",
+          "file": "sdl-audio.spec.mjs",
+          "title": "resource destructors can resize channels and teardown rejects reentrant reopening",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-c84b665d9b567cd0dca9",
+          "file": "sdl-audio.spec.mjs",
+          "title": "real audio retains playback through pause and releases music after completion",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-e7792de29182e964347a",
+          "file": "sdl-audio.spec.mjs",
+          "title": "unused chunk and music cycles return native allocation counts to baseline",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-f0d79798c8cbf5128218",
+          "file": "sdl-audio.spec.mjs",
+          "title": "completed music cleanup preserves replacement playback started by a PHP destructor",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-52329f781e0937a27897",
+          "file": "sdl-audio.spec.mjs",
+          "title": "PHP refresh closes every mixer open reference and supports repeated playback restarts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-f13e981791c74d14cf03",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL events retain mouse, keyboard, UTF-8, touch and controller payloads",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-d1a38215afe63c162226",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL streaming textures upload, lock, modulate and invalidate aliases safely",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-0e3d5bbeb7d0e25b5098",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL_ttf measures UTF-8 and provides native bold, outline, wrapping and glyph metrics",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-d01e814aca38f3cb2d8e",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "font face metadata and size changes match rendered glyphs",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-c0e77c24e1f12d6a5ecb",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL counters retain unsigned precision and measure elapsed time",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-5be9310f4d8287a1bcd3",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-d9ee5f38ba6ba1a83ed5",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "OpenGL scalar, vector-array and matrix uniforms reach the real WebGL program",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-42118a5582fe13a4cad1",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "pixel conversion writes the destination, handles overlap and validates byte ranges",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-b694984d09ef55d63842",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "surface views retain owners and reject access after explicit destruction",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-3a82c81245f7ce2561ef",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "palette views follow native ownership and invalidate on replacement",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-f72cf5b8e11001b274d5",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "view owner cycles collect and window surface aliases invalidate on native teardown",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-a167c213fb5a228dde74",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "scaled and lower blits read both rectangles and preserve output object aliases",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-602c58980b12be3fbea3",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "RLE views require locks and live surface pixels can be uploaded",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-5598a42f6e61a9bf7eec",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "shape getters cannot leave stale surface, palette, texture or renderer pointers",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-a3c26e0920f61d27623f",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "texture lock output callbacks fail safely without cancelling a newer lock",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-ab51b5934c06e4f76874",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "native query outputs respect typed references and destructor exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "cb3032ecfaaf8049f4e8-aeb66a7c617503e9180e",
+          "file": "sdl-buffers.spec.mjs",
+          "title": "integer and float renderer shapes produce pixels and reject invalid values",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "b5f063be70a4d83a37d1-023add0a95d038e66156",
+          "file": "sdl-coordinates.spec.mjs",
+          "title": "SDL coordinate conversion matches letterboxed and integer-scaled pixels",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "b5f063be70a4d83a37d1-dece68011900b6c85fc6",
+          "file": "sdl-coordinates.spec.mjs",
+          "title": "SDL coordinate conversion preserves fractional viewports, target state and resizing",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "b5f063be70a4d83a37d1-8a7694f872716c31fc6e",
+          "file": "sdl-coordinates.spec.mjs",
+          "title": "SDL logical mouse events agree with conversion of the original window position",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "b5f063be70a4d83a37d1-bc33e537af1393c1ce7f",
+          "file": "sdl-coordinates.spec.mjs",
+          "title": "SDL coordinate conversion rejects nonfinite and overflowing transforms before publishing outputs",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "b5f063be70a4d83a37d1-83c9b87a4a6562123fc4",
+          "file": "sdl-coordinates.spec.mjs",
+          "title": "SDL coordinate outputs respect typed references, aliases and destructive callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-6ae8c1a1cd6613b33917",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "pre-video cursors cannot leave a freed current cursor behind",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-1c652f3f562c94df05de",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "bitmap constructors and color cursors control the canvas and preserve subclass properties",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-9fdb84567481b7d0d524",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "cursor aliases retain their owner and explicit free invalidates every alias",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-14e8ed3dfe6f19234949",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "cursor visibility queries leave the current visibility unchanged",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-a647dfde5cc9e09be3d0",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "cursor dimensions, hotspots, ownership copying and reinitialization are checked",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-b284877cc0bb045533bf",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "cursor constructor reentry preserves the successfully initialized cursor",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-83f281195f58c67afbd8",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "video reference counts, quit and reinitialization invalidate cursors at native teardown",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-6c99c0e74b97f5607fa5",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "mouse state outputs honor typed references and preserve destructor exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-f75aff8e9017f7861a29",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "cursor last references and property cycles release native allocations",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-2cecc8a80b7336461387",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "mouse position queries receive browser events and warping reports backend limitations",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-c42b002c6ac608e43b67",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "native creation results and repeated PHP refreshes leave usable cursor state",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-392ac5cbaa44935085d1",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "video initialization frees cursors created before a video driver exists",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-47bd5d765d79592d2b0a",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "SDL mouse callbacks use the supplied canvas despite another canvas named canvas",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7661fe5f232d0f8225d9-1b65f9cff7b7864833e5",
+          "file": "sdl-cursors.spec.mjs",
+          "title": "SDL mouse callbacks work for a supplied canvas inside a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-8ae2b57461de3b1e2976",
+          "file": "sdl-engine.spec.mjs",
+          "title": "instanced array and indexed draws consume integer per-instance attributes",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-8277f67ec4be83fd7b4c",
+          "file": "sdl-engine.spec.mjs",
+          "title": "uniform blocks use reflected layouts across programs and buffer ranges",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-23670ecbfe2018921215",
+          "file": "sdl-engine.spec.mjs",
+          "title": "unsigned scalar and vector uniforms preserve all uint32 bits",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-5a545eb1a29f2cb21020",
+          "file": "sdl-engine.spec.mjs",
+          "title": "renderbuffers provide depth, stencil, MRT and multisample resolve",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-e506f5c9fa4819f3f233",
+          "file": "sdl-engine.spec.mjs",
+          "title": "typed state queries return scalar and array shapes without overwriting storage",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-13b13aac2e9955a4e5b4",
+          "file": "sdl-engine.spec.mjs",
+          "title": "WebGL2 bindings reject a WebGL1 context with a catchable error",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "39f263b3a9b4ee1b4b1f-1909bce11d22b8797c58",
+          "file": "sdl-geometry.spec.mjs",
+          "title": "SDL geometry draws indexed, textured and alpha-blended triangles",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "39f263b3a9b4ee1b4b1f-849bf415b02f72a0c24e",
+          "file": "sdl-geometry.spec.mjs",
+          "title": "SDL raw geometry checks padded buffers and all index widths",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "39f263b3a9b4ee1b4b1f-8f7c26ce8fe5beaa4a71",
+          "file": "sdl-geometry.spec.mjs",
+          "title": "SDL integer and float primitive batches draw pixels and survive hostile getters",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "39f263b3a9b4ee1b4b1f-cad4066fb8514558f5af",
+          "file": "sdl-geometry.spec.mjs",
+          "title": "SDL renderer queries, clipping, viewport and scaling match the drawn output",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-349874c8d627d26d86d4",
+          "file": "sdl-input.spec.mjs",
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-1c850ffbdeb21a2db3cb",
+          "file": "sdl-input.spec.mjs",
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-b49b12fce85de857ad8d",
+          "file": "sdl-input.spec.mjs",
+          "title": "real browser blur releases held keys and produces native focus events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-0ab671a3cda8fade0f6d",
+          "file": "sdl-input.spec.mjs",
+          "title": "real touch motion and cancellation preserve native finger identity and coordinates",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-0923f5a2bbaa60c27c3f",
+          "file": "sdl-input.spec.mjs",
+          "title": "fullscreen enters and restores the supplied canvas with no ID",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-3e90dd9f3caab351f524",
+          "file": "sdl-input.spec.mjs",
+          "title": "fullscreen enters and restores the supplied canvas with custom ID with decoy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-d7ced8ecb850f505ceb7",
+          "file": "sdl-input.spec.mjs",
+          "title": "fullscreen enters and restores the supplied canvas with shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-8e7ec7cbed888f157062",
+          "file": "sdl-input.spec.mjs",
+          "title": "fullscreen requests defer until a gesture and can be cancelled before activation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-5b9b2f796e1a36601492",
+          "file": "sdl-input.spec.mjs",
+          "title": "fullscreen blocked by browser policy returns a native error without changing flags",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-05fb0ae128bc000da6e6",
+          "file": "sdl-input.spec.mjs",
+          "title": "active fullscreen cleanup survives destroy and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-1847a0b37a6487d0ab01",
+          "file": "sdl-input.spec.mjs",
+          "title": "pending fullscreen cleanup survives destroy and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-1ca9d215c549d8e757dc",
+          "file": "sdl-input.spec.mjs",
+          "title": "active fullscreen cleanup survives video quit and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-10773e92ecb4536478db",
+          "file": "sdl-input.spec.mjs",
+          "title": "pending fullscreen cleanup survives video quit and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-6b4286a8cf9683897364",
+          "file": "sdl-input.spec.mjs",
+          "title": "active fullscreen cleanup survives PHP refresh and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-629b884a45cab761c5e1",
+          "file": "sdl-input.spec.mjs",
+          "title": "pending fullscreen cleanup survives PHP refresh and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "3e0d23026440a7ea3501-684162824af1a6d9b16d",
+          "file": "sdl-input.spec.mjs",
+          "title": "controller reconnection at a reused browser index keeps old handles detached",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-e7f18424d63cc7488f2b",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "GL constructors, method aliases and owner destruction invalidate borrowed contexts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-d114298d9e15a8150b99",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "window and video teardown delete every PHP GL object and allow a new context",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-141826216fc54f775532",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "video reference counts preserve the context until the last subsystem quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-ae9eac6240a1335f1501",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "renderer-owned contexts reject explicit deletion and invalidate aliases on teardown",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-f8a87ce0ab2bf3a05c03",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "generated GL outputs survive typed-reference failure and context-changing destructors",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-0680f41502bbc96c6144",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "deleted shader and program names fail in PHP and repeated contexts release allocations",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "bca1a72025356459ab2f-f4113653804d0bd18a6f",
+          "file": "sdl-lifetimes.spec.mjs",
+          "title": "request refresh releases GL resources left in PHP globals and supports another run",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-74077e30d260aeafb6da",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with no ID",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-14c7694c8e2cf0e5bf82",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with custom ID with decoy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-49fef8bde4d3bc69903a",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-803b8a8ba83f06e9dfb5",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives destroy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-4be6845078eacae79c62",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "deferred pointer lock cleanup survives destroy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-1350d5d4d704d693abd0",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives video quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-e5f2a67ee825f0fc06b4",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "deferred pointer lock cleanup survives video quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-15e0443b82bdb1fe709f",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives SDL quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-86978269eba45747445c",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "deferred pointer lock cleanup survives SDL quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-572f2092c29b13062931",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-5316dac0fa049c01e4fe",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "deferred pointer lock cleanup survives PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-36466494d9139686dea9",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "sandbox pointer lock denial reports an SDL error without an unhandled rejection",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-6b5898132348b033333a",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "unsupported pointer lock fails before SDL falls back to unavailable mouse warping",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-7eb8e90a0728ac193d95",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "relative mode without a focused window fails with an SDL error",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-1d34880fb3900a756c69",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "window cleanup preserves pointer lock owned by another element",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-88167a8547a7c14dba4d",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "combined fullscreen and pointer lock teardown preserves the replacement canvas",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-3183d6a17d4d8e8fc441",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "a retired request rejection cannot set the replacement window error",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-dadac5d311b03c9b4907",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "synchronous pointer lock rejection returns failure and permits a later retry",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-2c324fd17fc92c56ea6a",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "a late successful request respects the replacement window's disabled mode",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-2216d60a1cdae4920699",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "a late successful request respects the replacement window's enabled mode",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-e8e48bb756d2596e6f46",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "browser unlock preserves requested mode and a real click reacquires it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-2b1c0ea4ef9b6401602c",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "a void-returning browser request reports real sandbox denial",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-51f07ac20ccbe9715d05",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "retired legacy requests release late lock and remove their listeners",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-bf734d72abe837dc743f",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "repeated rejected requests and window restarts keep native allocation counts flat",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-82b32f283a27579a095a",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "Promise rejection sets SDL error before an application event handler reads it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-c65d444873da13c2acbd",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "void rejection sets SDL error before an application event handler reads it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-6f72979194ba73c2edb6",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "non-Error browser failures produce SDL diagnostics without JavaScript exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-4bc0fc7f085083eaa70d",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "ordinary SDL value objects remain serializable",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-f9469c3933056e4ebc12",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "native subclasses keep working after serialization and crafted payloads are rejected",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-93c2bb53446ac734159c",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "a GL context subclass retains real GPU resources after denied serialization",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-6779da04eb573bd26efa",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "final font, audio and input objects reject both serialized formats",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-9a696ddf61de37c73ad4",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "serialization guards cover every extensible native class and direct legacy calls",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-866fa24ef965b11b3ca3",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "subclass magic methods cannot bypass native serialization denial",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-f7fbfa06c4727214c25c",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "crafted native payload churn releases temporary wrappers",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "8f1aedc3ea08e4a016c5-1ce04b1e31ec3f54754c",
+          "file": "sdl-serialization.spec.mjs",
+          "title": "Serializable implementations cannot replace the native denial handler",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-a908db9b98121a97c599",
+          "file": "sdl-streams.spec.mjs",
+          "title": "raw RWops fail safely and closed wrappers cannot be cloned or reinitialized",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-775b5c0e69262313a841",
+          "file": "sdl-streams.spec.mjs",
+          "title": "memory RWops preserve PHP copy-on-write and validate sizes and typed outputs",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-c4ada7ec2288e45ccb12",
+          "file": "sdl-streams.spec.mjs",
+          "title": "PHP file, memory and temporary streams retain owners and honor autoclose",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-58b2e4d4a9e2a48d6228",
+          "file": "sdl-streams.spec.mjs",
+          "title": "stream callbacks reject recursive close and survive fclose and pclose",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-7c6f3f3421538407162c",
+          "file": "sdl-streams.spec.mjs",
+          "title": "BMP loaders close aliases and snapshot pixels across destructive stream callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-53f8eccf6a6e32efa0dc",
+          "file": "sdl-streams.spec.mjs",
+          "title": "RWops output destructors and owner cycles release safely",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-8410429cf84ac52516c5",
+          "file": "sdl-streams.spec.mjs",
+          "title": "fonts follow initialization counts, ordinary ownership and final shutdown",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-c15da6ed891256383b5b",
+          "file": "sdl-streams.spec.mjs",
+          "title": "font color callbacks revalidate the font and output errors stop later assignments",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-2b5dc8895dc7dc69830f",
+          "file": "sdl-streams.spec.mjs",
+          "title": "font and RWops churn returns native allocations and live heap memory to baseline",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d32c81476c1f82841371-92a6edbd6da5666ab27f",
+          "file": "sdl-streams.spec.mjs",
+          "title": "mixer loaders retain snapshots, close PHP stream aliases and preserve callback errors",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7f8333aac7cff0aaa484-f80be44041493251821b",
+          "file": "sdl-stress.spec.mjs",
+          "title": "PNG short reads abort at headers, image data and CRCs and valid loads recover",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7f8333aac7cff0aaa484-33420a70e9d3ffe53d62",
+          "file": "sdl-stress.spec.mjs",
+          "title": "truncated PNG, JPEG and BMP loads fail repeatedly and valid images still render",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7f8333aac7cff0aaa484-e2e6ccd3e6dc67c33e31",
+          "file": "sdl-stress.spec.mjs",
+          "title": "truncated fonts fail repeatedly without retaining faces and valid UTF-8 still renders",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7f8333aac7cff0aaa484-f5afd596a04a2183a308",
+          "file": "sdl-stress.spec.mjs",
+          "title": "truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "7f8333aac7cff0aaa484-66b75e36c5c60d436a6f",
+          "file": "sdl-stress.spec.mjs",
+          "title": "failed chunk format detection closes owned streams and preserves borrowed RWops",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-3aca970919b083d27a98",
+          "file": "sdl-text.spec.mjs",
+          "title": "default keypress preserves astral Unicode and replaces unmatched surrogates",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-de17026df77992b4b0f0",
+          "file": "sdl-text.spec.mjs",
+          "title": "EditContext delivers Unicode on the actual fullscreen SDL canvas",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-668adc3adc2fa1fa619c",
+          "file": "sdl-text.spec.mjs",
+          "title": "fallback reports the fullscreen IME limitation and resumes after fullscreen",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-1bf7ab8c50e833585a4e",
+          "file": "sdl-text.spec.mjs",
+          "title": "text input restores an existing EditContext and preserves an external replacement",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-419a07fe7acac1cc684c",
+          "file": "sdl-text.spec.mjs",
+          "title": "explicit text start before window creation survives SDL_Init(SDL_INIT_VIDEO)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-f7fcad8febc0ad174b99",
+          "file": "sdl-text.spec.mjs",
+          "title": "explicit text start before window creation survives SDL_VideoInit()",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-b8a845359734783e7fae",
+          "file": "sdl-text.spec.mjs",
+          "title": "receives composition and Unicode in PHP animation callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-e85bc05077a8c12d39bf",
+          "file": "sdl-text.spec.mjs",
+          "title": "receives composition and Unicode while a PHP frame loop is suspended",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-413fb4d403af1c5732c1",
+          "file": "sdl-text.spec.mjs",
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-e1fd818a46647527a355",
+          "file": "sdl-text.spec.mjs",
+          "title": "IME selection uses codepoints and commit is delivered once",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-9255c4c4842eef4a5c99",
+          "file": "sdl-text.spec.mjs",
+          "title": "cancelled composition does not commit and a new composition still works",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-f4a820ff9bb728cc88d5",
+          "file": "sdl-text.spec.mjs",
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-12ab2a9a75a3cbfd113c",
+          "file": "sdl-text.spec.mjs",
+          "title": "stop cancels input, repeated start is idempotent, and other controls retain focus",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-18d0570f83730da3f2b2",
+          "file": "sdl-text.spec.mjs",
+          "title": "candidate rectangle follows CSS scaling and a canvas inside a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-f4268205b7205aa3c355",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_DestroyWindow($window);",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-cab63de217f26abe365a",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_VideoQuit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-1b34d1968095c80578f6",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_Quit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-070b810b452c287cdd18",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-50acda415e000f71ddc6",
+          "file": "sdl-text.spec.mjs",
+          "title": "SDL_CreateWindow preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-ecb9078aa0d127b2606b",
+          "file": "sdl-text.spec.mjs",
+          "title": "new SDL_Window preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-730a4e1faba631bfdd9b",
+          "file": "sdl-text.spec.mjs",
+          "title": "repeated start/stop releases editing listeners and has stable native allocation counts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-833faf382474a40ed1e1",
+          "file": "sdl-text.spec.mjs",
+          "title": "explicit text start before window creation survives SDL_Init(SDL_INIT_VIDEO)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-505e7159a2c2fa29b82a",
+          "file": "sdl-text.spec.mjs",
+          "title": "explicit text start before window creation survives SDL_VideoInit()",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-3b5acd7f8a9ae6cc3580",
+          "file": "sdl-text.spec.mjs",
+          "title": "receives composition and Unicode in PHP animation callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-ef7bdd18e55ce7c2cfa0",
+          "file": "sdl-text.spec.mjs",
+          "title": "receives composition and Unicode while a PHP frame loop is suspended",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-faa02248e7a10c45331d",
+          "file": "sdl-text.spec.mjs",
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-2c4e8f8332bd797dd8ec",
+          "file": "sdl-text.spec.mjs",
+          "title": "IME selection uses codepoints and commit is delivered once",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-1f6406f29bb253290e9d",
+          "file": "sdl-text.spec.mjs",
+          "title": "cancelled composition does not commit and a new composition still works",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-d13a8ecf102b8cf6a377",
+          "file": "sdl-text.spec.mjs",
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-6ec7b602a53e1bab6ad1",
+          "file": "sdl-text.spec.mjs",
+          "title": "stop cancels input, repeated start is idempotent, and other controls retain focus",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-7191c07dfdba7531b7aa",
+          "file": "sdl-text.spec.mjs",
+          "title": "candidate rectangle follows CSS scaling and a canvas inside a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-d3612cf6a9e9841e56cb",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_DestroyWindow($window);",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-07249ee55fc5150bfab7",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_VideoQuit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-ea6a8c1fcc90868d4d0e",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across SDL_Quit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-7a268154e82d42c4a16c",
+          "file": "sdl-text.spec.mjs",
+          "title": "composition callbacks are retired across PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-698060cfce5f290d693c",
+          "file": "sdl-text.spec.mjs",
+          "title": "SDL_CreateWindow preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-6430f68fee25afddd8a8",
+          "file": "sdl-text.spec.mjs",
+          "title": "new SDL_Window preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-6373f6a7fee5bb06f3e2",
+          "file": "sdl-text.spec.mjs",
+          "title": "repeated start/stop releases editing listeners and has stable native allocation counts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-831af3c21c249bcc6dfe",
+          "file": "sdl-textures.spec.mjs",
+          "title": "compressed uploads and subuploads produce decoded pixels and check exact byte spans",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-abf81e2949c7735098bd",
+          "file": "sdl-textures.spec.mjs",
+          "title": "compressed array layers upload and replace exact slices",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-1bbe657288b6de1fb628",
+          "file": "sdl-textures.spec.mjs",
+          "title": "unsupported compressed capabilities are rejected explicitly",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-0f9a3c38f28cad84c287",
+          "file": "sdl-textures.spec.mjs",
+          "title": "sampler owners survive output errors and release every browser object on teardown",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-fee07f5cd2a289ff7cf7",
+          "file": "sdl-textures.spec.mjs",
+          "title": "WebGL1 retains 2D transfers and rejects WebGL2 texture and sampler APIs",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-a56fcfcba35ad67d69d5",
+          "file": "sdl-textures.spec.mjs",
+          "title": "textures and samplers can be recreated after real browser context loss and restoration",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-f6135588edd688241d9d",
+          "file": "sdl-textures.spec.mjs",
+          "title": "immutable 2D and cube storage preserve mip levels and sampled faces",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-944f21da59e341de5966",
+          "file": "sdl-textures.spec.mjs",
+          "title": "3D and array textures sample updated layers and layered framebuffer writes",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-0ff211e34fcc12b45540",
+          "file": "sdl-textures.spec.mjs",
+          "title": "pixel transfers honor row and image strides, surface isolation and zeroed readback gaps",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-151ecfc8675747e84b55",
+          "file": "sdl-textures.spec.mjs",
+          "title": "packed, signed, integer, half and float pixels preserve their native layouts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-ff438d3301015e6d1019",
+          "file": "sdl-textures.spec.mjs",
+          "title": "unsafe layouts, PBO bindings and invalid texture parameters fail before native transfers",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-baf41a4ef9653899a46f",
+          "file": "sdl-textures.spec.mjs",
+          "title": "samplers override texture state and retain independent scalar parameters",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-6f1b4850fc0c10bbbd2f",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window aliases retain their native owner and subclass properties",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-acc8b18cc85c14728449",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window subclasses work with the SDL software renderer",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-5ed5972b4aa1083fa18f",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window construction and copying cannot duplicate or overwrite native ownership",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-64a4417cafa9d47ab69e",
+          "file": "sdl-windows.spec.mjs",
+          "title": "constructor string coercion preserves a window initialized by a callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-eec5a75f986ea325c79f",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window size outputs honor typed references and stop after destructor exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-225399fb237b86fce566",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window display and gamma outputs preserve types and native failure results",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-f6412235255467daa3e2",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window property snapshots keep the correct title key and enforce typed aliases",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-ace81855e8ff14563449",
+          "file": "sdl-windows.spec.mjs",
+          "title": "property destructors may replace a window without corrupting the old snapshot",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-2f0a48e11bf94ee99894",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window rectangle batches check counts and snapshot arrays across PHP getters",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-b3cbb86b1d42b76dc4d8",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window callbacks reject destroyed or reconstructed native targets and preserve exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-077db6aab5bdbef5a099",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window GC observes references without refreshing properties or running their destructors",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-da8f6ef3c72d89ca8cfa",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window GC retains property-array aliases and collects declared and dynamic cycles",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-10ed36c80c1849ee6a21",
+          "file": "sdl-windows.spec.mjs",
+          "title": "window property cycles release native windows across collection and video restarts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "0c86ecd1c5a90dcfccd9-147fe73ee52fb0566040",
+          "file": "sdl-windows.spec.mjs",
+          "title": "joystick and controller objects reject copied native ownership",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-c52d9a414cd317e97c88",
+          "file": "sdl.spec.mjs",
+          "title": "SDL cube starts and refreshes without Web Locks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-4f36e69f5e3d2f7f27ca",
+          "file": "sdl.spec.mjs",
+          "title": "SDL cube renders texture and text, moves, handles focused input and cleans up on refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-4c6e6bc63e02a60a24e0",
+          "file": "sdl.spec.mjs",
+          "title": "cube resizes its drawing buffer and projection for landscape and portrait boxes",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-6a742b1831131569fcca",
+          "file": "sdl.spec.mjs",
+          "title": "MP3 music produces PCM only after a user gesture and stops when muted",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-fc76d7c8eb08db5c456b",
+          "file": "sdl.spec.mjs",
+          "title": "corrupt MP3 can be retried while the cube keeps rendering",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-48bd99b94cd66b22c8e2",
+          "file": "sdl.spec.mjs",
+          "title": "graphics context loss pauses rendering and restoration rebuilds resources",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "67666485978379421777-128dfcc6478330326354",
+          "file": "sdl.spec.mjs",
+          "title": "native bindings check uploads, preserve colors and invalidate freed audio/font objects",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    },
+    "gl-audit": {
+      "stats": {
+        "startTime": "2026-09-22T13:31:58.105Z",
+        "duration": 18114.495,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "a4fb56448cde6364c6f7-3ac92b57f3d11e09e739",
+          "file": "sdl-engine.spec.mjs",
+          "title": "culling and depth writes control pixels after partial vertex-buffer updates",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-62a48cf080eaef4b24ec",
+          "file": "sdl-textures.spec.mjs",
+          "title": "generated mipmaps average source pixels and refresh after a base-level update",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    },
+    "platform-full": {
+      "stats": {
+        "startTime": "2026-09-22T13:38:14.784Z",
+        "duration": 322012.058,
+        "expected": 38,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "20d8bead9884592efb9c-61f395d3f9ec3a278ab6",
+          "file": "sdl-audio.spec.mjs",
+          "title": "closing an unused mixer preserves the existing SDL diagnostic",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-7435f02d6b8bb94d8251",
+          "file": "sdl-audio.spec.mjs",
+          "title": "request refresh after audio shutdown does not recreate SDL allocations",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-97e6b1bb46c78c4506cd",
+          "file": "sdl-audio.spec.mjs",
+          "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-44a33436cc92d38b5fd5",
+          "file": "sdl-audio.spec.mjs",
+          "title": "closing an unused mixer preserves the existing SDL diagnostic",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-cb51b48e044d1472f302",
+          "file": "sdl-audio.spec.mjs",
+          "title": "request refresh after audio shutdown does not recreate SDL allocations",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-53fdd458f6839892c1c0",
+          "file": "sdl-audio.spec.mjs",
+          "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-b35000e624cfa4421103",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "font face metadata and size changes match rendered glyphs",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-465419577d2db6f06fdf",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-b5680004c984a5b0700c",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "font face metadata and size changes match rendered glyphs",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-6813db5769174196da9d",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-015dc59e0306b90e35a0",
+          "file": "sdl-engine.spec.mjs",
+          "title": "culling and depth writes control pixels after partial vertex-buffer updates",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-0d35665285cc63b667af",
+          "file": "sdl-engine.spec.mjs",
+          "title": "culling and depth writes control pixels after partial vertex-buffer updates",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-ad26a90da39a59827886",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with no ID",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-bdc11be0e76f2681cc9b",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with custom ID with decoy",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-1ee36a6c2067ff5b4373",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with shadow root",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-d2828b10a09b7b05000f",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives destroy",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-8fa27173f066002585ea",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives video quit",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-0c91b01beb0b47d9b84f",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives SDL quit",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-4c83ee848e4c7f01f010",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives PHP refresh",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-b65dfd592a35caf626d2",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "window cleanup preserves pointer lock owned by another element",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-178cc59f9aa3dee3e99d",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "combined fullscreen and pointer lock teardown preserves the replacement canvas",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-237b4728ea5a901ead2b",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "Promise rejection sets SDL error before an application event handler reads it",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-2f96ece0565a8eadd3a0",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "void rejection sets SDL error before an application event handler reads it",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-51d788a985ba9fb95619",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with no ID",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-14780b8282a6cb801fd0",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with custom ID with decoy",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-1a78ee828ac169398225",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "actual pointer lock and motion use the supplied canvas with shadow root",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-ec52104ec905b8eac74b",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives destroy",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-17ea6a3d22b5133412ae",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives video quit",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-9530edcd7bb2a8319c8e",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives SDL quit",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-d4aee5396c5b8d9920fe",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "active pointer lock cleanup survives PHP refresh",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-c7adbcf2186ecf5a750b",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "window cleanup preserves pointer lock owned by another element",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-196f06c7c1c88d41b7bb",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "combined fullscreen and pointer lock teardown preserves the replacement canvas",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-15d8d72b4e646ad33b16",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "Promise rejection sets SDL error before an application event handler reads it",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "7fae80836780f218026f-1bf0962673bc24af2675",
+          "file": "sdl-pointer.spec.mjs",
+          "title": "void rejection sets SDL error before an application event handler reads it",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-edf86c5df5381d57e252",
+          "file": "sdl-text.spec.mjs",
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "502254bfa9a304eec58f-110c2fd174abba3a27d8",
+          "file": "sdl-text.spec.mjs",
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-02f59249de7f7ae0a523",
+          "file": "sdl-textures.spec.mjs",
+          "title": "generated mipmaps average source pixels and refresh after a base-level update",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-5e20049a48f3a836d73e",
+          "file": "sdl-textures.spec.mjs",
+          "title": "generated mipmaps average source pixels and refresh after a base-level update",
+          "project": "webkit",
+          "status": "passed"
+        }
+      ]
+    },
+    "editor": {
+      "stats": {
+        "startTime": "2026-09-22T13:39:28.335Z",
+        "duration": 96559.02200000001,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "d9b11e01d9740943793e-7de18b7052961bb45343",
+          "file": "demo-web-artifact.spec.mjs",
+          "title": "typing in the code editor preserves canvas controls (browser locks)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d9b11e01d9740943793e-b48b9c92d920d071107d",
+          "file": "demo-web-artifact.spec.mjs",
+          "title": "typing in the code editor preserves canvas controls (without Web Locks)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d9b11e01d9740943793e-0e53531f997df11efecf",
+          "file": "demo-web-artifact.spec.mjs",
+          "title": "cube links reload from a fragment and its canvas fills the preview after resize",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "id": "d9b11e01d9740943793e-fddd0defe28f6c35d094",
+          "file": "demo-web-artifact.spec.mjs",
+          "title": "cube supports input, audio, refresh, rerun and switching to sine",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "nativeCases": 211,
+  "environment": {
+    "chromium": "152.0.7977.75 (Debian 12 system executable)",
+    "firefox": "148.0.2 (Playwright revision 1511)",
+    "webkit": "26.4 (Playwright revision 2272)",
+    "rendering": "software; Chromium uses SwiftShader",
+    "audio": "isolated PulseAudio null sink for portable checks",
+    "playwright": "1.59.1"
+  },
+  "suiteNote": "209-case full native suite was collected before the two final GL coverage checks were added. Both additional GL checks passed separately on the same artifact pair; all 211 distinct cases are now included in the ordinary suite.",
+  "diagnosis": {
+    "originalFailure": "Closed-device Mix_HaltMusic replaced the existing SDL error; close_music retained music_spec so a later Mix_Init allocated decoder lists without an open device.",
+    "separateCauses": "Mix_QuerySpec guard alone corrected the diagnostic but left two allocations. Forwarding real SDL memory functions traced exactly two realloc(NULL,4) calls underneath Mix_Init during request startup.",
+    "trace": {
+      "before": {
+        "sdlAllocations": 0,
+        "liveBytes": 3403856,
+        "reservedBytes": 3617200,
+        "wasmBytes": 134217728
+      },
+      "install": {
+        "status": 0,
+        "indices": [
+          1837,
+          1838,
+          1839,
+          1840
+        ],
+        "first": 37485
+      },
+      "after": {
+        "sdlAllocations": 2,
+        "liveBytes": 3370952,
+        "reservedBytes": 3617200,
+        "wasmBytes": 134217728
+      },
+      "allocations": [
+        {
+          "name": "realloc",
+          "args": [
+            0,
+            4
+          ],
+          "value": 43483216,
+          "stack": "Error\n    at callbacks.<computed> (eval at evaluate (:302:30), <anonymous>:10:68)\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1685]:0x225032\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1683]:0x22426b\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[31929]:0x1cdfd93\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35237]:0x214de86\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35241]:0x214e72d\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[37239]:0x23d2ac1\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35239]:0x214e4ce\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1121]:0x1c1f8a\n    at Object.wrapper [as v] (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:182986)"
+        },
+        {
+          "name": "realloc",
+          "args": [
+            0,
+            4
+          ],
+          "value": 43483232,
+          "stack": "Error\n    at callbacks.<computed> (eval at evaluate (:302:30), <anonymous>:10:68)\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1685]:0x2259ae\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1683]:0x22426b\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[31929]:0x1cdfd93\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35237]:0x214de86\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35241]:0x214e72d\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[37239]:0x23d2ac1\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[35239]:0x214e4ce\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1121]:0x1c1f8a\n    at Object.wrapper [as v] (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:182986)"
+        }
+      ]
+    },
+    "finalAssertions": [
+      "Nine unused Close/Quit/Halt calls preserve the existing diagnostic.",
+      "Explicit close/quit and three request refreshes retain zero SDL allocations, one closed AudioContext and no connected processor.",
+      "Three codec-init/quit cycles keep QuerySpec, music/chunk decoder counts and SDL allocations at zero.",
+      "Reopen with disallowed format changes selects 22050 Hz mono, produces real PCM, and shuts down to zero SDL allocations."
+    ]
+  },
+  "fixtureCorrections": [
+    "Mix_OpenAudio permits frequency/channel negotiation; exact-format verification uses Mix_OpenAudioDevice with allowedChanges=0.",
+    "TTF_FontFaceIsFixedWidth returns a native nonzero flag (4 for this font), not a normalized 1.",
+    "Creating a device-specific mapping does not replace an open handle using the default mapping. Reopen once to select the new entry; subsequent edits remap the live handle."
+  ],
+  "environmentCorrection": {
+    "initialPlatformRun": {
+      "stats": {
+        "startTime": "2026-09-22T13:31:58.782Z",
+        "duration": 135143.935,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "id": "20d8bead9884592efb9c-61f395d3f9ec3a278ab6",
+          "file": "sdl-audio.spec.mjs",
+          "title": "closing an unused mixer preserves the existing SDL diagnostic",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-7435f02d6b8bb94d8251",
+          "file": "sdl-audio.spec.mjs",
+          "title": "request refresh after audio shutdown does not recreate SDL allocations",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-97e6b1bb46c78c4506cd",
+          "file": "sdl-audio.spec.mjs",
+          "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+          "project": "firefox",
+          "status": "failed",
+          "error": "Error: expect(received).toBeGreaterThan(expected)\n\nExpected: > 0\nReceived:   0\n\nCall Log:\n- Timeout 5000ms exceeded while waiting on the predicate"
+        },
+        {
+          "id": "20d8bead9884592efb9c-44a33436cc92d38b5fd5",
+          "file": "sdl-audio.spec.mjs",
+          "title": "closing an unused mixer preserves the existing SDL diagnostic",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-cb51b48e044d1472f302",
+          "file": "sdl-audio.spec.mjs",
+          "title": "request refresh after audio shutdown does not recreate SDL allocations",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "20d8bead9884592efb9c-53fdd458f6839892c1c0",
+          "file": "sdl-audio.spec.mjs",
+          "title": "decoder initialization after audio shutdown stays closed and supports reopening",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-b35000e624cfa4421103",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "font face metadata and size changes match rendered glyphs",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-465419577d2db6f06fdf",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-b5680004c984a5b0700c",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "font face metadata and size changes match rendered glyphs",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "65cc5207b874a4b17ddb-6813db5769174196da9d",
+          "file": "sdl-bindings.spec.mjs",
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-015dc59e0306b90e35a0",
+          "file": "sdl-engine.spec.mjs",
+          "title": "culling and depth writes control pixels after partial vertex-buffer updates",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "a4fb56448cde6364c6f7-0d35665285cc63b667af",
+          "file": "sdl-engine.spec.mjs",
+          "title": "culling and depth writes control pixels after partial vertex-buffer updates",
+          "project": "webkit",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-02f59249de7f7ae0a523",
+          "file": "sdl-textures.spec.mjs",
+          "title": "generated mipmaps average source pixels and refresh after a base-level update",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "id": "60fe9ec1e9ca027c336a-5e20049a48f3a836d73e",
+          "file": "sdl-textures.spec.mjs",
+          "title": "generated mipmaps average source pixels and refresh after a base-level update",
+          "project": "webkit",
+          "status": "passed"
+        }
+      ]
+    },
+    "withoutAudioSink": [
+      [
+        {
+          "sampleRate": 44100,
+          "initial": "suspended",
+          "actualRate": 44100,
+          "callbacks": 0,
+          "resumed": true,
+          "final": "suspended"
+        },
+        {
+          "sampleRate": 22050,
+          "initial": "suspended",
+          "actualRate": 22050,
+          "callbacks": 0,
+          "resumed": true,
+          "final": "suspended"
+        }
+      ]
+    ],
+    "withIsolatedPulseAudioSink": [
+      [
+        {
+          "sampleRate": 44100,
+          "initial": "suspended",
+          "actualRate": 44100,
+          "callbacks": 145,
+          "resumed": true,
+          "final": "running"
+        },
+        {
+          "sampleRate": 22050,
+          "initial": "suspended",
+          "actualRate": 22050,
+          "callbacks": 41,
+          "resumed": true,
+          "final": "running"
+        }
+      ]
+    ],
+    "note": "Firefox also produced no callbacks in a plain Web Audio page without SDL. An isolated PulseAudio null sink enables genuine native callbacks; no mixer/audio callback is replaced. The final 38-case portable suite passes using this sink. Not a physical audio test."
+  },
+  "controllerMappingProbe": {
+    "initial": {
+      "mapping": "0000ea3c5374616e6461726420476100,Standard Gamepad,a:b0,b:b1,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,platform:Emscripten",
+      "firstAdd": 1
+    },
+    "remapped": {
+      "added": 0,
+      "before": [
+        "0000ea3c5374616e6461726420476100,Standard Gamepad,a:b0,b:b1,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,platform:Emscripten",
+        1,
+        0
+      ],
+      "after": [
+        "0000ea3c5374616e6461726420476100,Standard Gamepad,a:b1,b:b0,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,platform:Emscriptencrc:3cea,",
+        0,
+        0
+      ],
+      "restoredAdd": 0,
+      "restored": [
+        0,
+        0
+      ]
+    }
+  },
+  "sourceHashes": {
+    "packages/sdl/mixer/src/Mix_Music.c": "31ae14855d10124c1e1d392b9e2f20008b0f4d0a947ec8db6c198141f8a25013",
+    "packages/sdl/patches/SDL2_mixer.patch": "5f6fd50847b784dff784a29ec737b15f51a54e5b1f9f1a27e5180e865af4032e",
+    "test/browser/sdl-audio.spec.mjs": "b840a8fba6e655b05e074b24006d0ed0f35e949072e8dd0ac3f7fd3db6cb7827",
+    "test/browser/sdl-bindings.spec.mjs": "085e386a05d4a6749bbd24ed1ceca61c90d23e0672078a0516dad7efd01f7d0f",
+    "test/browser/sdl-engine.spec.mjs": "312140a0b3a83f804712759e6c2808af04acff4b901b78fddfda10d85c5d7199",
+    "test/browser/sdl-textures.spec.mjs": "d991df4e6d2f3dc445fe7593c2ab2f7ef4936cf8abe09443321d8c6b2d128d1a",
+    "test/browser/sdl-platform.config.mjs": "93aa13897ed387ce967fa03e52445b759bca66bd856dee5863b12ea225e4b38f",
+    "test/browser/lib/sdl-audio.mjs": "bc29abf1d08b81d722dd8e6a2c59b730d03ae910ffc6b0b010c1b98971cdfc89",
+    "test/browser/lib/sdl-bindings.mjs": "77681e10390538117dc9f2b890346ef0ce8fd9c2460e99940cd80bbcc11298c0",
+    "source/PhpWeb.mjs": "8af2ba3f9a2ac9bfc309e858d6d203b79cb36402c58864640810291b6cb99b4a"
+  },
+  "compiledSourceHashes": {
+    "third_party/php8.4-src/ext/sdl_mixer/src/Mix_Music.c": "31ae14855d10124c1e1d392b9e2f20008b0f4d0a947ec8db6c198141f8a25013",
+    "third_party/SDL2_mixer-2.8.0/src/music.c": "294a2741458aeae260af0869337ca3b33c72fc3e35dfee49e3c0c7d3af6582dc"
+  },
+  "artifacts": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781330,
+      "gzip": 657885,
+      "brotli": 469577,
+      "sha256": "cc04151ba420cd2ea96a4e4672a44b16b3857c77f1661d8d27b02a07479b3ff8"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104533,
+      "gzip": 13359316,
+      "brotli": 9115068,
+      "sha256": "952ba275c7f828d10cf275a94fec4336c7a5e9326c0acf118a783455abae065e"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "sizeRecord": "2026-09-22-cleanup-size.json",
+  "checks": {
+    "normalMake": true,
+    "mainModuleValidator": true,
+    "makeAndNpmTests": 8,
+    "stubRegistrationCounts": {
+      "coreExtras": 39,
+      "renderer": 30,
+      "fonts": 32,
+      "webgl": 169
+    },
+    "nativePatchReverseDryRun": true,
+    "newUndefinedSymbols": [],
+    "fullSourceCi": "pending"
+  },
+  "limits": "Finite resource checks, software rendering/audio and simulated controller input. No physical iPhone, IME or controller verification; no hardware performance or general leak-freedom claim. Full newest-source PHP/profile matrix remains required."
+}
