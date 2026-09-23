@@ -905,8 +905,8 @@ lock and release, and SDL deltas match the browser's real movement events.
 
 To reproduce these focused checks on Linux, install the repository-pinned
 Playwright Firefox/WebKit browsers and their dependencies, plus `xvfb` and
-`xdotool`. Build/install a matching `_sdl` JS/Wasm pair through Make and start
-the normal harness (`node test/browser/server.mjs`). In another terminal:
+`xdotool`. Build/install the matching `php-sdl-wasm` package with `make sdl-mjs`
+and start the normal harness (`node test/browser/server.mjs`). In another terminal:
 
 ```sh
 PHP_VERSION=8.4 PHP_VARIANT=_sdl LIB_TYPE=static \

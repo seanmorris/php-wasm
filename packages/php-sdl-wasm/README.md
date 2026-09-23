@@ -118,6 +118,9 @@ content hashing, source staging and verified merge machinery packages both
 SDL and Cloudflare. Their adapters retain browser loading and Cloudflare's
 precompiled Wasm loading respectively. Native compilation remains in Make.
 
+For the local demos, `make demo-versions` builds PHP 8.0–8.5 SDL runtimes and
+the ordinary demo runtimes using the selected `ENV_FILE`.
+
 The packager follows the Wasm dependency list recursively, includes only
 required native libraries, and verifies every file's digest. Static builds
 carry no shared codec libraries. The internal `_sdl` filename/configuration
@@ -127,7 +130,7 @@ versions requires staging and merging a fresh complete package.
 
 | Option | Default | Behavior |
 | --- | --- | --- |
-| `WITH_SDL` | `0` | `1` enables `_sdl`; `dynamic` is a legacy alias for `1` |
+| `WITH_SDL` | `0` normally; enabled by the SDL target | Compiles SDL bindings into the runtime; `dynamic` is a legacy alias for `1` |
 | `WITH_SDL_IMAGE` | follows SDL | PECL sdl_image 0.4.0 / SDL_image 2.6.0; PNG, JPEG, BMP |
 | `WITH_SDL_MIXER` | follows SDL | PECL sdl_mixer 0.4.0 / SDL_mixer 2.8.0; WAV, Ogg Vorbis and MP3 |
 | `WITH_SDL_TTF` | follows SDL | PECL sdl_ttf 0.3.0 / SDL_ttf 2.20.2; FreeType, without HarfBuzz |
@@ -153,8 +156,8 @@ iconv results.
 
 The browser integration files in `js/` are Emscripten link inputs. Editing one
 relinks the selected runtime without rerunning PHP configure or recompiling
-unchanged C sources. Use the ordinary Make target and keep its JS/Wasm output
-pair together.
+unchanged C sources. Use `make sdl-mjs` to refresh the package and keep all its
+generated files together.
 
 After building, verify incremental behavior with:
 
@@ -1479,8 +1482,9 @@ lock and release, and SDL deltas match the browser's real movement events.
 To reproduce these focused checks on Linux, install the repository-pinned
 Playwright Firefox/WebKit browsers and their dependencies, plus `xvfb` and
 `xdotool`. Audio checks need a working output destination; a PulseAudio null
-sink is sufficient in a container. Build/install a matching `_sdl` JS/Wasm pair
-through Make and start the normal harness (`node test/browser/server.mjs`). In another terminal:
+sink is sufficient in a container. Build/install the matching `php-sdl-wasm`
+package with `make sdl-mjs` and start the normal harness
+(`node test/browser/server.mjs`). In another terminal:
 
 ```sh
 PHP_VERSION=8.4 PHP_VARIANT=_sdl LIB_TYPE=static \

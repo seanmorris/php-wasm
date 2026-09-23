@@ -86,7 +86,8 @@ async function validateCustomBuilds(page)
 	assert.match(blocksText, /php-wasm-builder build worker cgi mjs/);
 	assert.match(blocksText, /php-wasm-builder build node cli mjs/);
 	assert.match(blocksText, /php-wasm-builder build node dbg mjs/);
-	assert.match(markdown, /Environment \| `web`, `node`, `worker`, `webview` \| `web`/);
+	assert.match(blocksText, /php-wasm-builder build sdl mjs/);
+	assert.match(markdown, /Environment \| `web`, `node`, `worker`, `webview`, `cloudflare`, `sdl` \| `web`/);
 	assert.match(markdown, /Module format \| `js`, `mjs` \| `js`/);
 	assert.match(markdown, /Package \| `base`, `cgi`, `cli`, `dbg` \| `base`/);
 	assert.match(markdown, /selectors can be provided in any order/);

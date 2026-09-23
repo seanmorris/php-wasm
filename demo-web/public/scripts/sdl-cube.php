@@ -13,7 +13,7 @@ foreach(['sdl', 'sdl_image', 'sdl_mixer', 'sdl_ttf', 'opengl'] as $extension)
 {
 	if(!extension_loaded($extension))
 	{
-		throw new RuntimeException("The SDL cube requires the _sdl runtime with $extension enabled.");
+		throw new RuntimeException("The SDL cube requires php-sdl-wasm with $extension enabled.");
 	}
 }
 

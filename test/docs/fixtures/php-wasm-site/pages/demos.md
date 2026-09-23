@@ -7,8 +7,8 @@ leftBarLink: false
 TOC: false
 ---
 <!--
-Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
-Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/demos.md
+Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
+Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/demos.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -42,6 +42,13 @@ Use the editor below to write PHP scripts that run right in the page:
 <iframe class = "page-demo" src = "https://seanmorris.github.io/php-wasm/embedded-php.html?iframed=1&no-service-worker=1&demo=sdl-sine.php"></iframe>
 
 ### SDL Cube and SDL Sine
+
+The current demos load `PhpSdl` from the standalone `php-sdl-wasm` package for
+PHP 8.0–8.5. Select **PHP + SDL** in the **Runtime** control, or choose either
+SDL demo to select it automatically. Ordinary PHP uses `php-wasm`; neither
+runtime package depends on the other. Saved links using `variant=_sdl` still
+select SDL, while new links use `runtime=sdl`. For a local source build,
+`make demo-versions` prepares all six SDL runtime versions and the ordinary demo runtimes.
 
 Development builds add **SDL Cube** alongside **SDL Sine**. The cube uses the
 `sean-icon-32` pixel-art texture without interpolation, a TrueType overlay,

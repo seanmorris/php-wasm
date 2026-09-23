@@ -2,8 +2,8 @@
 title: .php-wasm-rc
 ---
 <!--
-Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
-Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/compiling/php-wasm-rc.md
+Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
+Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/compiling/php-wasm-rc.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/Makefile
@@ -170,24 +170,28 @@ WITH_INTL      # [0, 1, static, shared, dynamic]
 
 ### SDL runtime options
 
-The [development SDL runtime](/extensions/sdl.html) uses these additional flags:
+The standalone [php-sdl-wasm runtime](/extensions/sdl.html) uses these additional flags:
 
 | Option | Values | Default |
 | --- | --- | --- |
-| `WITH_SDL` | `0`, `1`, legacy `dynamic` alias for `1` | `0` |
+| `WITH_SDL` | `0`, `1`, legacy `dynamic` alias for `1` | `0` normally; enabled by the SDL target |
 | `WITH_SDL_IMAGE` | `0`, `1` | Follows SDL |
 | `WITH_SDL_MIXER` | `0`, `1` | Follows SDL |
 | `WITH_SDL_TTF` | `0`, `1` | Follows SDL |
 | `WITH_OPENGL` | `0`, `1` | Follows SDL |
 
-`WITH_SDL=1` selects the `_sdl` browser runtime. Add-ons require SDL; they do
-not produce separate PHP extension side modules. SDL_image needs enabled
+`php-wasm-builder build sdl mjs` enables SDL and packages the standalone browser
+runtime. The source checkout uses `make sdl-mjs`. Both targets set `WITH_SDL=1`;
+the `_sdl` suffix only separates internal native outputs and configure caches.
+Add-ons require SDL and are compiled into the runtime. SDL_image needs enabled
 `WITH_LIBPNG` and `WITH_LIBJPEG`; SDL_ttf needs `WITH_FREETYPE`. These reuse the
 existing static/shared codec libraries. `WITH_ZLIB=0` still supplies the native
 zlib archive when image/font decoding needs it.
 
-To retain only core SDL, set all four add-on flags to `0`. Use the ordinary
-`php-wasm-builder build web mjs` command with a builder containing the expansion.
+To retain only core SDL, set all four add-on flags to `0` in `.php-wasm-rc`, then
+run `php-wasm-builder build sdl mjs` with a builder containing this development
+package. The output in `packages/php-sdl-wasm` includes the required native
+libraries and preload data; keep those files with the runtime.
 
 ---
 
