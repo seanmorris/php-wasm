@@ -33,13 +33,13 @@ EXTRA_FLAGS+= -Wl,--wrap=SDL_FreeSurface
 EXTRA_FLAGS+= -Wl,--wrap=SDL_AudioQuit -Wl,--wrap=SDL_AudioInit
 EXTRA_FLAGS+= -Wl,--wrap=SDL_StartTextInput -Wl,--wrap=SDL_StopTextInput -Wl,--wrap=SDL_SetTextInputRect
 EXTRA_FLAGS+= -Wl,--wrap=SDL_SetRelativeMouseMode
-EXTRA_FLAGS+= --js-library /src/packages/sdl/js/library.js
-EXTRA_FLAGS+= --js-library /src/packages/sdl/js/text-input.js
-EXTRA_FLAGS+= --js-library /src/packages/sdl/js/pointer-lock.js
-PHP_LINK_DEPS+= packages/sdl/js/library.js packages/sdl/js/text-input.js packages/sdl/js/pointer-lock.js
+EXTRA_FLAGS+= --js-library /src/packages/php-sdl-wasm/js/library.js
+EXTRA_FLAGS+= --js-library /src/packages/php-sdl-wasm/js/text-input.js
+EXTRA_FLAGS+= --js-library /src/packages/php-sdl-wasm/js/pointer-lock.js
+PHP_LINK_DEPS+= packages/php-sdl-wasm/js/library.js packages/php-sdl-wasm/js/text-input.js packages/php-sdl-wasm/js/pointer-lock.js
 PHP_CONFIGURE_DEPS+= third_party/php${PHP_VERSION}-src/ext/sdl/config.m4 lib/bin/sdl2-config
 ZEND_EXTRA_LIBS+= -lhtml5
-TEST_LIST+=$(shell ls packages/sdl/test/*.mjs)
+TEST_LIST+=$(shell ls packages/php-sdl-wasm/test/*.mjs)
 PHP_VARIANT:=${PHP_VARIANT}_sdl
 endif
 

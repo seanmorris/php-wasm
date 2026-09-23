@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {artifactFiles} from './artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFile, writeFile, access} from 'node:fs/promises';
 import {cpus, loadavg, platform, release} from 'node:os';
@@ -59,7 +60,7 @@ const memory = async (page, session) => {
 };
 
 const hashes = {};
-for(const name of [`php${process.env.PHP_VERSION}_sdl-web.mjs`, `php${process.env.PHP_VERSION}_sdl-web.mjs.wasm`, 'php.data'])
+for(const name of await artifactFiles(directory, process.env.PHP_VERSION))
 {
 	hashes[name] = await fingerprint(join(directory, name));
 }

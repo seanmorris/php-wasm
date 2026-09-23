@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {artifactFiles} from './artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFile, writeFile, access} from 'node:fs/promises';
 import {cpus, loadavg, platform, release} from 'node:os';
@@ -31,7 +32,10 @@ const fingerprint = async path => {
 	return {bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex')};
 };
 
-/** @param {number[]} samples Values. @param {number} fraction Quantile. @returns {number} Interpolated quantile. */
+/**
+ * @param {number[]} samples Values. @param {number} fraction Quantile. @returns {number} Interpolated quantile.
+ * @param fraction
+ */
 const percentile = (samples, fraction) => {
 	const values = [...samples].sort((a, b) => a - b);
 	const position = (values.length - 1) * fraction;
@@ -56,11 +60,7 @@ const observe = page => page.evaluate(({callbacks, settleCallbacks}) => new Prom
 }), {callbacks, settleCallbacks});
 
 const paths = Object.fromEntries([
-	...['mjs', 'mjs.wasm'].map(suffix => {
-		const name = `php${process.env.PHP_VERSION}_sdl-web.${suffix}`;
-		return [name, join(directory, name)];
-	})
-	, ['php.data', join(directory, 'php.data')]
+	...(await artifactFiles(directory, process.env.PHP_VERSION)).map(name => [name, join(directory, name)])
 	, ['audio.mjs', new URL(import.meta.url)]
 	, ['audio.php', new URL('./audio.php', import.meta.url)]
 	, ['sdl-audio.mjs', new URL('../../browser/lib/sdl-audio.mjs', import.meta.url)]

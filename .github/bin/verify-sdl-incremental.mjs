@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {mkdir, open, readFile, readdir, stat, writeFile} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
 
-const [version, directory = 'packages/php-wasm', output = `.cache/sdl-incremental-${version}.json`] = process.argv.slice(2);
+const [version, directory = `.cache/sdl-raw/php${version}`, output = `.cache/sdl-incremental-${version}.json`] = process.argv.slice(2);
 assert.match(version ?? '', /^8\.[0-5]$/, 'Usage: verify-sdl-incremental.mjs PHP_VERSION [RUNTIME_DIR] [REPORT]');
 const source = `third_party/php${version}-src`;
 const runtime = join(directory, `php${version}_sdl-web.mjs`);
@@ -104,7 +104,7 @@ await mkdir(dirname(output), {recursive: true});
 
 for(const [name, targets] of [
 	['unchanged', ['web-mjs']]
-	, ['javascript', ['-W', 'packages/sdl/js/pointer-lock.js', runtime]]
+	, ['javascript', ['-W', 'packages/php-sdl-wasm/js/pointer-lock.js', runtime]]
 ]) {
 	const log = `${output}.${name}.log`;
 	await make(targets, log);

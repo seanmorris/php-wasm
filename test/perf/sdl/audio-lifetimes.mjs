@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
+import {artifactFiles} from './artifacts.mjs';
 import {createHash} from 'node:crypto';
-import {access, readFile, writeFile} from 'node:fs/promises';
+import {readFile, writeFile} from 'node:fs/promises';
 import {resolve, join} from 'node:path';
 import {chromium} from '@playwright/test';
 import {getPlaywrightLaunchOptions} from '../../lib/playwright-browser.mjs';
@@ -16,10 +17,7 @@ const version = process.env.PHP_VERSION;
 const pairs = [['baseline', baselineDirectory], ['candidate', candidateDirectory]];
 for(const [, directory] of pairs)
 {
-	for(const suffix of ['mjs', 'mjs.wasm'])
-	{
-		await access(join(directory, `php${version}_sdl-web.${suffix}`));
-	}
+	await artifactFiles(directory, version);
 }
 const {headless, launchOptions} = getPlaywrightLaunchOptions();
 const browser = await chromium.launch({headless, ...launchOptions});
@@ -62,7 +60,7 @@ try
 		samples.push({step: 'quit', ...await allocationStats(page)});
 		assert.deepEqual(errors, []);
 		const hashes = {};
-		for(const filename of [`php${version}_sdl-web.mjs`, `php${version}_sdl-web.mjs.wasm`])
+		for(const filename of await artifactFiles(directory, version))
 		{
 			const bytes = await readFile(join(directory, filename));
 			hashes[filename] = {bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex')};
@@ -70,14 +68,20 @@ try
 		results[name] = {directory, hashes, samples};
 		await page.close();
 	}
-	const summary = Object.fromEntries(Object.entries(results).map(([name, {samples}]) => [name, {
-		retainedSdlAllocations: samples[4].sdlAllocations - samples[1].sdlAllocations
-		, liveByteIncrease: samples[4].liveBytes - samples[1].liveBytes
-		, sdlAllocationsAfterQuit: samples[5].sdlAllocations
-	}]));
+	const summary = {};
+	for(const [name, {samples}] of Object.entries(results))
+	{
+		summary[name] = {
+			retainedSdlAllocations: samples[4].sdlAllocations - samples[1].sdlAllocations
+			, liveByteIncrease: samples[4].liveBytes - samples[1].liveBytes
+			, sdlAllocationsAfterQuit: samples[5].sdlAllocations
+		};
+	}
 	const asset = await readFile(new URL('../../../demo-web/public/sdl/click.wav', import.meta.url));
 	await writeFile(output, JSON.stringify({
-		date: new Date().toISOString(), phpVersion: version, profile: process.env.LIB_TYPE
+		date: new Date().toISOString()
+		, phpVersion: version
+		, profile: process.env.LIB_TYPE
 		, browser: browser.version(), launch: {headless, args: launchOptions.args}
 		, asset: {name: 'click.wav', bytes: asset.length, sha256: createHash('sha256').update(asset).digest('hex')}
 		, chunkMusicPairsPerBatch: 50, batches: 3, ...results, summary

@@ -28,11 +28,11 @@ test('SDL add-ons follow the main flag and can all be opted out', async () => {
 	{
 		const {stdout} = await configure([`WITH_SDL=${flag}`]);
 		assert.match(stdout, /^1 1 1 1\n_sdl\n/);
-		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/library.js'));
-		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/text-input.js'));
-		assert.ok(stdout.includes('--js-library /src/packages/sdl/js/pointer-lock.js'));
+		assert.ok(stdout.includes('--js-library /src/packages/php-sdl-wasm/js/library.js'));
+		assert.ok(stdout.includes('--js-library /src/packages/php-sdl-wasm/js/text-input.js'));
+		assert.ok(stdout.includes('--js-library /src/packages/php-sdl-wasm/js/pointer-lock.js'));
 		assert.ok(stdout.includes('-Wl,--wrap=SDL_SetRelativeMouseMode'));
-		assert.ok(stdout.includes('packages/sdl/js/library.js'));
+		assert.ok(stdout.includes('packages/php-sdl-wasm/js/library.js'));
 		for(const symbol of ['SDL_GL_DeleteContext', 'SDL_VideoQuit', 'SDL_VideoInit', 'SDL_FreeSurface', 'SDL_AudioQuit', 'SDL_AudioInit', 'SDL_StartTextInput', 'SDL_StopTextInput', 'SDL_SetTextInputRect'])
 		{
 			assert.ok(stdout.includes(`-Wl,--wrap=${symbol}`));
@@ -89,7 +89,7 @@ test('SDL JavaScript invalidates every native link without invalidating PHP conf
 	assert.equal(targets.size, 32);
 	for(const library of ['library.js', 'text-input.js', 'pointer-lock.js'])
 	{
-		const file = `packages/sdl/js/${library}`;
+		const file = `packages/php-sdl-wasm/js/${library}`;
 		assert.equal(configure.includes(file), false, `${file} must not trigger configure`);
 		for(const target of targets)
 		{
@@ -107,14 +107,14 @@ test('native SDL patches invalidate extracted sources and their archives', async
 	for(const name of ['image', 'mixer'])
 	{
 		const configure = rules.find(line => line.startsWith(`third_party/SDL2_${name}-`) && line.includes('/configure:'));
-		assert.ok(configure?.includes(`packages/sdl/patches/SDL2_${name}.patch`));
+		assert.ok(configure?.includes(`packages/php-sdl-wasm/patches/SDL2_${name}.patch`));
 		const archive = rules.find(line => line.startsWith(`lib/lib/libSDL2_${name}.a:`));
 		assert.ok(archive?.includes(configure.split(':')[0]));
 	}
 });
 
 test('a fresh SDL web build does not require the standard Node runtime', async () => {
-	const directory = await mkdtemp(join(tmpdir(), 'php-wasm-sdl-stdlib-'));
+	const directory = await mkdtemp(join(tmpdir(), 'php-sdl-wasm-stdlib-'));
 	try
 	{
 		// Stand in for completed native work; leave the runtime output directory empty.
@@ -157,8 +157,8 @@ test('standard dynamic builds retain all stdlib generation targets', async () =>
 	}
 });
 
-test('the SDL npm payload includes reproducible build inputs and the compatibility shim', async () => {
-	const {stdout} = await run('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {cwd: new URL('../../packages/sdl', import.meta.url), maxBuffer: 1024 * 1024});
+test('the SDL runtime npm payload excludes native build inputs and the former shim', async () => {
+	const {stdout} = await run('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {cwd: new URL('../../packages/php-sdl-wasm', import.meta.url), maxBuffer: 1024 * 1024});
 	const [{files}] = JSON.parse(stdout);
 	const names = files.map(file => file.path);
 	for(const name of [
@@ -228,7 +228,7 @@ test('the SDL npm payload includes reproducible build inputs and the compatibili
 		, 'opengl/php_webgl.stub.php'
 		, 'opengl/LICENSE'
 	]) {
-		assert.ok(names.includes(name), name);
+		assert.ok(!names.includes(name), name);
 	}
-	assert.equal(names.some(name => /\.(wasm|so)$/.test(name)), false);
+	for(const name of ['public.d.ts', 'PhpSdl.d.mts', 'PhpWebBase.d.mts', 'LICENSE', 'NOTICE', 'README.md']) assert.ok(names.includes(name), name);
 });

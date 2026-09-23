@@ -47,6 +47,7 @@ const localPhpPackages = [
 	, 'php-cgi-wasm'
 	, 'php-cli-wasm'
 	, 'php-dbg-wasm'
+	, 'php-sdl-wasm'
 	, 'php-wasm'
 	, 'php-wasm-dom'
 	, 'php-wasm-gd'

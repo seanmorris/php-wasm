@@ -2,7 +2,6 @@ import {test, expect} from '@playwright/test';
 import {routeRuntime} from './lib/sdl-bindings.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
-const libType = process.env.LIB_TYPE ?? 'dynamic';
 test.skip(process.env.PHP_VARIANT !== '_sdl', 'Requires the SDL runtime artifact');
 
 /**
@@ -13,17 +12,15 @@ test.skip(process.env.PHP_VARIANT !== '_sdl', 'Requires the SDL runtime artifact
 const startCube = async page => {
 	await routeRuntime(page);
 	await page.goto('harness/index.html');
-	return page.evaluate(async ({version, libType}) => {
+	return page.evaluate(async version => {
 		document.body.innerHTML = '<div id="example"></div><canvas tabindex="0"></canvas>';
-		const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
-		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+		const {PhpSdl} = await import(`/packages/php-sdl-wasm/php${version}-sdl.mjs`);
 		const {prepareSdlAssets} = await import('/php-wasm/demo-lib/sdlAssets.js');
 		window.sdlErrors = '';
 		window.sdlOutput = '';
 		const started = performance.now();
-		const php = window.sdlPhp = new PhpWeb({
-			version, variant: '_sdl', canvas: document.querySelector('canvas')
-			, sharedLibs: loadEmbeddedSharedLibs(libType, '_sdl')
+		const php = window.sdlPhp = new PhpSdl({
+			canvas: document.querySelector('canvas')
 			, ini: 'display_errors=0\nlog_errors=1\nerror_log=/dev/stderr'
 		});
 		php.addEventListener('error', event => window.sdlErrors += event.detail.join(''));
@@ -34,8 +31,26 @@ const startCube = async page => {
 		window.sdlCode = await (await fetch('/php-wasm/demo-scripts/sdl-cube.php')).text();
 		const status = await php.run(window.sdlCode);
 		return {status, bootMs, stderr: window.sdlErrors};
-	}, {version, libType});
+	}, version);
 };
+
+test('SDL starts without requesting another PHP or codec package', async ({page}) => {
+	const requests = [];
+	page.on('request', request => {
+		const pathname = new URL(request.url()).pathname;
+		if(pathname.startsWith('/packages/')) requests.push(pathname);
+	});
+	await page.route('**/packages/**', route => {
+		const pathname = new URL(route.request().url()).pathname;
+		return pathname.startsWith('/packages/php-sdl-wasm/') ? route.continue() : route.abort();
+	});
+	const result = await startCube(page);
+	expect(result.stderr).toBe('');
+	expect(result.status).toBe(0);
+	expect(requests.length).toBeGreaterThan(1);
+	expect(requests.every(name => name.startsWith('/packages/php-sdl-wasm/'))).toBe(true);
+	await page.evaluate(() => window.sdlPhp.refresh());
+});
 
 test('SDL cube starts and refreshes without Web Locks', async ({page}) => {
 	const errors = [];

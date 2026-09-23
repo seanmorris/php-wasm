@@ -15,8 +15,9 @@ export function allowedSource(relative)
 	const parts = relative.split('/');
 	if(parts.some(part => part.startsWith('.env') || ['..', '.php-wasm-rc', '.npmrc', '.aws', '.ssh', '.git', 'node_modules', 'mapped'].includes(part))) return false;
 	if(/\.(?:pem|key|p12|pfx|wasm|so|data|dat|log|map|gz|br|BAK)$/.test(relative)) return false;
-	if(/^packages\/php-(?:wasm|cloud-wasm|cgi-wasm|cli-wasm|dbg-wasm)\/.+\.(?:mjs|js|manifest\.json)$/.test(relative)) return false;
-	if(/^packages\/php-cloud-wasm\/php8\.[0-5]-cloudflare\.d\.mts$/.test(relative)) return false;
+	if(/^packages\/php-(?:wasm|cloud-wasm|sdl-wasm|cgi-wasm|cli-wasm|dbg-wasm)\/[^/]+\.(?:mjs|js|manifest\.json)$/.test(relative)) return false;
+	if(/^packages\/php-(?:cloud|sdl)-wasm\/php8\.[0-5]-(?:cloudflare|sdl)\.d\.mts$/.test(relative)) return false;
+	if(/^packages\/php-sdl-wasm\/LICENSE-(?:PHP|sdl_)/.test(relative)) return false;
 	return true;
 }
 

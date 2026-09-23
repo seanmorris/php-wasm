@@ -15,10 +15,13 @@ test('the actual builder tarball installs independently and scaffolds a build', 
 	const packed = await packageBuilder({outputDir: path.join(temporary, 'release')});
 	assert.ok(packed.files.includes('packages/php-cgi-wasm/static.mak'));
 	assert.ok(packed.files.includes('packages/vrzno/pre.mak'));
-	assert.ok(packed.files.includes('packages/sdl/php8-string-return.patch'));
-	assert.ok(packed.files.includes('packages/sdl/extensions.mak'));
-	assert.ok(packed.files.includes('packages/sdl/opengl/php_webgl.c'));
-	assert.ok(packed.files.includes('packages/sdl/patches/sdl_mixer.patch'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/php8-string-return.patch'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/extensions.mak'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/js/library.js'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/js/pointer-lock.js'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/js/text-input.js'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/opengl/php_webgl.c'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/patches/sdl_mixer.patch'));
 	assert.ok(packed.files.includes('bin/source-importer.mjs'));
 	assert.ok(packed.files.includes('.github/bin/verify-emscripten-async-errors.sh'));
 	assert.equal(packed.files.some(name => /\.(wasm|so|data|dat|gz|br|log)$/.test(name)), false);

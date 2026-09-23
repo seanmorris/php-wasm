@@ -1,4 +1,4 @@
-<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"text","canvas":true,"variant":"_sdl","extensionFlags":0,"assets":"sdl"}
+<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"text","canvas":true,"runtime":"sdl","extensionFlags":0,"assets":"sdl"}
 
 // All rendering, input polling, image decoding, font rasterization and mixing
 // happen in PHP. Vrzno supplies the browser's animation and DOM callbacks.

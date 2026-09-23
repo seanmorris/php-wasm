@@ -14,7 +14,6 @@ const defaultVersion = (
 	? process.env.PHP_VERSION
 	: '8.4';
 
-const defaultVariant = '';
 const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
 	? runtime
 	: {default: runtime};
@@ -69,12 +68,10 @@ export class PhpNode extends PhpBase
 		};
 
 		const version = args.version ?? defaultVersion;
-		const variant = args.variant ?? defaultVariant;
-		const vvId = version + variant;
 
-		const constructorArgs = {locateFile, version, variant, ...args};
+		const constructorArgs = {locateFile, version, ...args};
 
-		switch(vvId)
+		switch(version)
 		{
 			case '8.5':
 				super(loadRuntime('./php8.5-node.mjs'), constructorArgs);
@@ -101,7 +98,7 @@ export class PhpNode extends PhpBase
 				break;
 
 			default:
-				throw new Error(`Unsupported PHP runtime: ${vvId}`);
+				throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
 	}
 }

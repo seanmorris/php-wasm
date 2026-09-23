@@ -129,10 +129,6 @@ for PACKAGE_DIR in packages/*; do
 	[[ -f "${PACKAGE_DIR}/package.json" ]] || continue
 
 	PACKAGE="$(basename "${PACKAGE_DIR}")"
-	if [[ "${PACKAGE}" == "sdl" ]]; then
-		continue
-	fi
-
 	if [[ "$(jq -r '.private // false' < "${PACKAGE_DIR}/package.json")" == "true" ]]; then
 		continue
 	fi

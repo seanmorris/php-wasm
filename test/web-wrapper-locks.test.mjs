@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {PhpWeb} from '../source/PhpWeb.mjs';
+import {PhpSdl} from '../source/PhpSdl.mjs';
 import {PhpWorker} from '../source/PhpWorker.mjs';
 import {PhpWebview} from '../source/PhpWebview.mjs';
 import {PhpDbgWeb} from '../source/PhpDbgWeb.mjs';
@@ -24,7 +25,7 @@ const createWrapper = Wrapper => {
 	return {wrapper, sync};
 };
 
-for(const Wrapper of [PhpWeb, PhpWorker, PhpWebview, PhpDbgWeb])
+for(const Wrapper of [PhpWeb, PhpSdl, PhpWorker, PhpWebview, PhpDbgWeb])
 {
 	test(`${Wrapper.name} queues operations without navigator.locks`, async () => {
 		const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');

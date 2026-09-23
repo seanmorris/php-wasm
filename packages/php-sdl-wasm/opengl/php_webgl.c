@@ -3,7 +3,7 @@
  * Based on PHP-OpenGL by Santiago Lizardo and the PHP Group (1997–2016).
  * This translation unit replaces the desktop binding in php-wasm builds.
  * The PHP API is declared in php_webgl.stub.php; regenerate arginfo with
- * php third_party/php8.0-src/build/gen_stub.php packages/sdl/opengl/php_webgl.stub.php
+ * php third_party/php8.0-src/build/gen_stub.php packages/php-sdl-wasm/opengl/php_webgl.stub.php
  */
 #include "php_webgl.h"
 #include "ext/standard/info.h"

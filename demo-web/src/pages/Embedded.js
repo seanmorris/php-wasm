@@ -10,6 +10,7 @@ import AceEditor from 'react-ace';
 import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
+import { loadSdlRuntime } from '../lib/sdlRuntime';
 import Confirm from '../components/Confirm';
 import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
@@ -150,7 +151,7 @@ function Embedded()
 	const autorunTimeout = useRef(null);
 	const selectDemoBox = useRef(null);
 	const selectVersionBox = useRef(null);
-	const selectVariantBox = useRef(null);
+	const selectRuntimeBox = useRef(null);
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
@@ -240,27 +241,20 @@ function Embedded()
 		flushSync(() => setCanvasGeneration(value => value + 1));
 
 		const version = selectVersionBox.current?.value ?? defaultPhpVersion;
-		const variant = selectVariantBox.current?.value ?? '';
-		const runtimeSharedLibs = [...sharedLibs.current];
+		const runtime = selectRuntimeBox.current?.value ?? 'php';
+		const runtimeSharedLibs = runtime === 'sdl' && libType === 'shared'
+			? sharedLibs.current.filter(library => !sharedSupportLibs.includes(library))
+			: [...sharedLibs.current];
 
-		if(variant === '_sdl' && libType === 'dynamic')
-		{
-			// SDL image/font code is built in; its shared codecs remain in the
-			// existing GD and zlib packages. Do not enable those PHP extensions.
-			const providers = await Promise.all([toggleableModules.gd, toggleableModules.zlib]);
-			const codecNames = ['libpng.so', 'libjpeg.so', 'libfreetype.so', 'libz.so'];
-			runtimeSharedLibs.push(...providers.flatMap(module => module.getLibs({phpVersion: version}))
-				.filter(library => codecNames.includes(library.name)));
-		}
+		const Runtime = runtime === 'sdl' ? await loadSdlRuntime(version) : PhpWeb;
 
 		if(generation !== runtimeGeneration.current)
 		{
 			return null;
 		}
 
-		const php = new PhpWeb({
-			version
-			, variant
+		const php = new Runtime({
+			...(runtime === 'php' ? {version} : {})
 			, sharedLibs: runtimeSharedLibs
 			, dynamicLibs
 			, files
@@ -318,7 +312,9 @@ function Embedded()
 		single.current.checked = settings['single-expression'] ?? single.current.checked;
 		canvasCheckbox.current.checked = settings['canvas'] ?? false;
 		selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
-		selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
+		selectRuntimeBox.current.value = settings.runtime
+			?? (settings.variant === '_sdl' ? 'sdl' : settings.variant === '' ? 'php' : undefined)
+			?? selectRuntimeBox.current.value ?? 'php';
 
 		setOutputMode(single.current.checked ? 'single' : 'normal');
 		setShowCanvas(settings['canvas'] ?? canvasCheckbox.current.checked);
@@ -360,7 +356,7 @@ function Embedded()
 		const settings = parseDemoSettings(code);
 
 		const version = selectVersionBox.current?.value;
-		const variant = selectVariantBox.current?.value;
+		const runtime = selectRuntimeBox.current?.value;
 		const showCanvas = canvasCheckbox.current?.checked;
 
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
@@ -371,13 +367,14 @@ function Embedded()
 			// 'extensionFlags': 0
 			, 'canvas': showCanvas
 			, 'version': version
-			, 'variant': variant
+			, 'runtime': runtime
 			, 'assets': settings.assets
 		})}\n`);
 
 		query.set('canvas', showCanvas ? '1' : '0');
 		query.set('version', version);
-		query.set('variant', variant);
+		query.delete('variant');
+		query.set('runtime', runtime);
 		replaceEmbeddedUrl(query, code);
 
 		if(single.current.checked)
@@ -469,7 +466,7 @@ function Embedded()
 
 		if(demoName === 'sdl-sine.php' || demoName === 'sdl-cube.php')
 		{
-			selectVariantBox.current.value = '_sdl';
+			selectRuntimeBox.current.value = 'sdl';
 		}
 
 		setRunning(true);
@@ -513,7 +510,7 @@ function Embedded()
 		persist.current.checked = !!Number(query.get('persist') ?? '');
 		single.current.checked = !!Number(query.get('single-expression') ?? '');
 		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
-		selectVariantBox.current.value = query.get('variant') ?? '';
+		selectRuntimeBox.current.value = query.get('runtime') ?? (query.get('variant') === '_sdl' ? 'sdl' : 'php');
 		canvasCheckbox.current.checked = (query.get('canvas') ?? '0') === '1';
 
 		if(initialCode !== null) replaceEmbeddedUrl(query, initialCode);
@@ -718,10 +715,10 @@ function Embedded()
 						</select>
 					</label>
 					<label>
-						<span>Variant:</span>
-						<select data-select-demo ref = {selectVariantBox}>
-							<option value = "">base</option>
-							<option value = "_sdl">sdl</option>
+						<span>Runtime:</span>
+						<select data-select-demo ref = {selectRuntimeBox}>
+							<option value = "php">PHP</option>
+							<option value = "sdl">PHP + SDL</option>
 						</select>
 					</label>
 				</div>

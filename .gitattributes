@@ -1,5 +1,5 @@
 docs/* -diff
 demo-web/public/* -diff
 patch/*.patch whitespace=-blank-at-eol
-packages/sdl/*.patch whitespace=-blank-at-eol,-space-before-tab
-packages/sdl/patches/*.patch whitespace=-blank-at-eol,-space-before-tab
+packages/php-sdl-wasm/*.patch whitespace=-blank-at-eol,-space-before-tab
+packages/php-sdl-wasm/patches/*.patch whitespace=-blank-at-eol,-space-before-tab

@@ -4,7 +4,6 @@ const runPhpScriptTag = async (element) => {
 
 	const scope = {
 		version: '8.4'
-		, variant: ''
 		, stdin: null
 		, canvas: null
 		, stdout: null
@@ -20,9 +19,9 @@ const runPhpScriptTag = async (element) => {
 		scope.version = element.getAttribute('data-version');
 	}
 
-	if(element.hasAttribute('data-variant'))
+	if(element.hasAttribute('data-variant') && element.getAttribute('data-variant'))
 	{
-		scope.variant = element.getAttribute('data-variant');
+		throw new TypeError('SDL script tags have moved to php-sdl-wasm. Import PhpSdl and run the script explicitly.');
 	}
 
 	if(element.hasAttribute('data-ini'))
@@ -133,7 +132,6 @@ const runPhpScriptTag = async (element) => {
 	const php = new PhpWeb({
 		...flatImports,
 		version:    scope.version
-		, variant:    scope.variant
 		, sharedLibs: scope.libs
 		, ini:        scope.ini
 		, files:      scope.files

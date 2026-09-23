@@ -39,8 +39,7 @@ export class PhpBase extends EventTarget
 	transactionStarted;
 	/** @type {string|undefined} */
 	phpVersion;
-	/** @type {string|undefined} */
-	phpVariant;
+
 	/** @type {{[key: string]: PhpSharedValue}} */
 	shared;
 	/** @type {PhpRuntimeArgs} */
@@ -80,7 +79,10 @@ export class PhpBase extends EventTarget
 		this.transactionStarted = false;
 
 		this.phpVersion = args.version;
-		this.phpVariant = args.variant;
+		if(args.variant !== undefined && args.variant !== '')
+		{
+			throw new TypeError('Runtime variants have moved to separate packages. Install php-sdl-wasm and import PhpSdl for SDL.');
+		}
 
 		args.ENV = {
 			...(args.ENV ?? {}),

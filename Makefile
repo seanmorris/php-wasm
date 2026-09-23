@@ -15,6 +15,13 @@
 	dynamic dynamic-libs.json runtime-wrappers
 
 CLOUDFLARE_GOALS := cloudflare-mjs test-cloudflare
+SDL_GOALS := sdl-mjs test-sdl-package
+ifneq ($(filter ${SDL_GOALS},${MAKECMDGOALS}),)
+ifneq ($(filter-out ${SDL_GOALS},${MAKECMDGOALS}),)
+$(error SDL package targets must run separately from other build targets)
+endif
+ENV_FILE ?= profiles/sdl.mak
+endif
 ifneq ($(filter ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 ifneq ($(filter-out ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 $(error Cloudflare targets must run separately from other build targets)
@@ -47,6 +54,11 @@ MAKE_SHUFFLE ?= --shuffle=random
 MAKEFLAGS += ${MAKE_SHUFFLE}
 
 CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
+SDL_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-sdl-wasm
+SDL_RAW_DIR ?= .cache/sdl-raw/php${PHP_VERSION}
+.PHONY: test-sdl-package
+test-sdl-package: $(filter sdl-mjs,${MAKECMDGOALS})
+	node bin/package-sdl.mjs --verify $(call shell_quote,${SDL_OUTPUT_DIR}) '${PHP_VERSION}'
 .PHONY: test-cloudflare
 # Artifact tests use the caller's package and installed test dependencies. When
 # requested together, finish the native build before running them in this tree.
@@ -536,8 +548,8 @@ endif
 
 HELPER_MJS=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
-WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
-WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js php${PHP_SUFFIX}-web.js ${CJS_HELPERS_WEB})
+WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
+WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js PhpWebBase.js PhpWeb.js php${PHP_SUFFIX}-web.js ${CJS_HELPERS_WEB})
 WORKER_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs php${PHP_SUFFIX}-worker.mjs ${MJS_HELPERS_WEB})
 WORKER_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js php${PHP_SUFFIX}-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs php${PHP_SUFFIX}-webview.mjs ${MJS_HELPERS_WEB})
@@ -619,6 +631,12 @@ ${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-
 	node demo-node/get-symbols.mjs ${PHP_VERSION} Webview > $@
 
 # Single Builds
+
+.PHONY: sdl-mjs
+sdl-mjs:
+	mkdir -p $(call shell_quote,${SDL_RAW_DIR})
+	$(MAKE) web-mjs $(call make_overrides,ENV_FILE PHP_DIST_DIR PHP_ASSET_DIR WITH_SDL) ENV_FILE=$(call shell_quote,${ENV_FILE}) WITH_SDL=1 PHP_DIST_DIR=$(call shell_quote,${SDL_RAW_DIR}) PHP_ASSET_DIR=$(call shell_quote,${SDL_RAW_DIR})
+	node bin/package-sdl.mjs --build $(call shell_quote,${SDL_RAW_DIR}) '${PHP_VERSION}' $(call shell_quote,${SDL_OUTPUT_DIR})
 
 .PHONY: cloudflare-mjs test-cloudflare
 cloudflare-mjs:
@@ -923,16 +941,21 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 # This target only copies/transpiles source wrappers; it never builds PHP/Wasm.
 runtime_wrapper_mjs = $(patsubst %.d.mts,%.mjs,$(notdir $(wildcard packages/$(1)/Php*.d.mts)))
 PHP_CLOUD_WRAPPER_DIR?=${ENV_DIR}/packages/php-cloud-wasm
+PHP_SDL_WRAPPER_DIR?=${ENV_DIR}/packages/php-sdl-wasm
 RUNTIME_WRAPPERS=$(addprefix ${PHP_DIST_DIR}/,$(call runtime_wrapper_mjs,php-wasm) ${MJS_HELPERS_WEB} $(notdir ${HELPER_MJS})) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cgi-wasm) ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB}) \
 	$(addprefix ${PHP_CLI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cli-wasm) ${MJS_HELPERS_WEB}) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,$(call runtime_wrapper_mjs,php-dbg-wasm) ${MJS_HELPERS_WEB})
 RUNTIME_WRAPPERS_CJS=$(patsubst %.mjs,%.js,$(filter-out ${HELPER_MJS},${RUNTIME_WRAPPERS}))
 CLOUD_WRAPPERS=$(addprefix ${PHP_CLOUD_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-cloud-wasm) ${MJS_HELPERS})
+SDL_WRAPPERS=$(addprefix ${PHP_SDL_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-sdl-wasm) ${MJS_HELPERS_WEB})
 
 runtime-wrappers:
-	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR}
-	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS}
+	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR} ${PHP_SDL_WRAPPER_DIR}
+	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS} ${SDL_WRAPPERS}
+
+${SDL_WRAPPERS}: ${PHP_SDL_WRAPPER_DIR}/%.mjs: source/%.mjs
+	cp $< $@
 
 ${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
 	cp $< $@

@@ -21,7 +21,7 @@ jobs:
       - name: Verify queues, wrappers and Cloudflare packaging
         run: >-
           node --test test/php-base-queue.test.mjs test/php-cgi-queue.test.mjs test/php-cloudflare.test.mjs
-          test/build/sdl.test.mjs test/build/configure-cache.test.mjs packages/sdl/test/basic.mjs
+          test/build/sdl.test.mjs test/build/sdl-package.test.mjs test/build/configure-cache.test.mjs packages/php-sdl-wasm/test/basic.mjs
           test/php-cgi-concurrency.test.mjs test/php-cgi-cookies.test.mjs
           test/php-cgi-routing.test.mjs test/runtime-env.test.mjs
           test/web-locks.test.mjs test/web-wrapper-locks.test.mjs test/filesystem.test.mjs test/build/cloudflare-build.test.mjs

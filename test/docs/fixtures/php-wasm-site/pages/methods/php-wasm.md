@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
-Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit f8a0ee2561989abf4278748b1f4724e1c01e419f
+Source: https://github.com/seanmorris/php-wasm-site/blob/f8a0ee2561989abf4278748b1f4724e1c01e419f/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -39,24 +39,20 @@ Selects the PHP runtime version to load. The current defaults in `source/` are `
 const php = new PhpWeb({version: '8.4'});
 ```
 
-### variant
+### SDL runtime selection
 
-*string*
-
-Selects a packaged runtime variant. The empty string uses the standard runtime.
-`_sdl` selects the SDL-enabled `PhpWeb` runtime for PHP 8.0–8.5.
-`PhpNode` currently supports only the standard empty variant.
+Install `php-sdl-wasm` and choose a versioned entry for SDL graphics, input
+and audio. The ordinary `php-wasm` package stays independent of that build.
+The previous `variant: '_sdl'` option is no longer supported.
 
 ```javascript
-const php = new PhpWeb({
-    version: '8.4',
-    variant: '_sdl',
-    canvas: document.querySelector('canvas'),
-});
+import {PhpSdl} from 'php-sdl-wasm/php8.4-sdl.mjs';
+
+const php = new PhpSdl({canvas: document.querySelector('canvas')});
 ```
 
 Create the canvas first. See [SDL and OpenGL](/extensions/sdl.html) for the
-development add-ons, shared codec dependencies, and example controls.
+package, build options and example controls.
 
 ### canvas
 

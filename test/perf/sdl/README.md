@@ -1,7 +1,7 @@
 # SDL drawing measurements
 
-Build matching JS/Wasm through Make, with `WITH_SDL=1`, and copy the pair to
-`packages/php-wasm`. Start the ordinary browser harness from the repository
+Build the standalone runtime with `make sdl-mjs` into
+`packages/php-sdl-wasm`. Start the ordinary browser harness from the repository
 root with `node test/browser/server.mjs`. With other builds and browser tests
 idle, run twice into different output files:
 
@@ -26,7 +26,7 @@ and allocator caches affect memory figures; these short runs do not establish
 long-running leak freedom. Zero PHP memory readings indicate unavailable Zend
 allocator accounting. Do not use hardware-independent timing thresholds in CI.
 
-For compressed sizes, use `packages/sdl/benchmarks/measure-size.mjs` with a
+For compressed sizes, use `packages/php-sdl-wasm/benchmarks/measure-size.mjs` with a
 previous measurement JSON, the preserved matching baseline artifact directory,
 the candidate artifact directory (including `php.data`), the output JSON, and
 a change description. It verifies the baseline hashes and recompresses both
@@ -39,6 +39,9 @@ page for each. With builds, compression and other tests idle, run:
 PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/font-lifetimes.mjs \
   .cache/sdl-buffers/runtime .cache/sdl-streams/runtime .cache/sdl-font-lifetimes.json
 ```
+
+For comparisons, pass finished package directories produced by `make sdl-mjs`.
+Archived raw builds can be packaged with `node bin/package-sdl.mjs --build RAW_DIR 8.4 PACKAGE_DIR`; keep matching support libraries available.
 
 This records three batches of 50 fonts released by dropping PHP references,
 then final SDL_ttf shutdown. It includes artifact/font hashes, SDL allocation
@@ -56,9 +59,9 @@ twice with separate output paths (existing reports are never overwritten):
 
 ```sh
 PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/throughput.mjs \
-  packages/php-wasm .cache/sdl-throughput-first.json
+  packages/php-sdl-wasm .cache/sdl-throughput-first.json
 PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/throughput.mjs \
-  packages/php-wasm .cache/sdl-throughput-second.json
+  packages/php-sdl-wasm .cache/sdl-throughput-second.json
 ```
 
 Each suite uses a fresh runtime page. JS, Wasm and ICU are routed from the
@@ -122,9 +125,9 @@ After builds, compression and other tests finish, run twice:
 
 ```sh
 PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/audio.mjs \
-  packages/php-wasm .cache/sdl-audio-first.json
+  packages/php-sdl-wasm .cache/sdl-audio-first.json
 PHP_VERSION=8.4 LIB_TYPE=static node test/perf/sdl/audio.mjs \
-  packages/php-wasm .cache/sdl-audio-second.json
+  packages/php-sdl-wasm .cache/sdl-audio-second.json
 ```
 
 The fixture compares silence, 1/8/32 looping WAV channels, MP3 music, and

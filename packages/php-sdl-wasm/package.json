@@ -1,0 +1,71 @@
+{
+  "name": "php-sdl-wasm",
+  "description": "Browser PHP runtime with SDL2, image, mixer, TrueType and OpenGL bindings",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "version": "0.1.0",
+  "files": [
+    "*.mjs",
+    "*.d.mts",
+    "*.d.ts",
+    "[0-9a-f]*.wasm",
+    "[0-9a-f]*.so",
+    "[0-9a-f]*.dat",
+    "[0-9a-f]*.data",
+    "php*-sdl.manifest.json",
+    "LICENSE",
+    "LICENSE-*",
+    "NOTICE",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
+  "license": "Apache-2.0",
+  "exports": {
+    "./package.json": "./package.json",
+    "./public": {
+      "types": "./public.d.ts",
+      "default": "./public.d.ts"
+    },
+    "./php*-sdl.mjs": {
+      "types": "./php*-sdl.d.mts",
+      "import": "./php*-sdl.mjs",
+      "default": "./php*-sdl.mjs"
+    },
+    "./*.mjs": "./*.mjs",
+    "./*.wasm": "./*.wasm",
+    "./*.so": "./*.so",
+    "./*.dat": "./*.dat",
+    "./*.data": "./*.data",
+    "./PhpBase": {
+      "types": "./PhpBase.d.mts",
+      "import": "./PhpBase.mjs",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpBase.mjs": {
+      "types": "./PhpBase.d.mts",
+      "default": "./PhpBase.mjs"
+    },
+    "./PhpSdl": {
+      "types": "./PhpSdl.d.mts",
+      "import": "./PhpSdl.mjs",
+      "default": "./PhpSdl.mjs"
+    },
+    "./PhpSdl.mjs": {
+      "types": "./PhpSdl.d.mts",
+      "default": "./PhpSdl.mjs"
+    },
+    "./PhpWebBase": {
+      "types": "./PhpWebBase.d.mts",
+      "import": "./PhpWebBase.mjs",
+      "default": "./PhpWebBase.mjs"
+    },
+    "./PhpWebBase.mjs": {
+      "types": "./PhpWebBase.d.mts",
+      "default": "./PhpWebBase.mjs"
+    }
+  }
+}

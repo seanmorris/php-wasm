@@ -30,6 +30,7 @@ const definedTypes = [
 	'PhpModuleFactory',
 	'PhpRuntimeFactory',
 	'PhpCloudflareArgs',
+	'PhpSdlArgs',
 	'PhpCgiRuntimeArgs',
 	'PhpCgiModuleFactory',
 	'PhpRuntimeArgs',

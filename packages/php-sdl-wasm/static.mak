@@ -12,23 +12,23 @@ ifeq (${PHP_VERSION},8.5)
 	${DOCKER_RUN_IN_EXT_SDL} find . -type f -exec perl -pi -e 's/zend_exception_get_default\(\)/zend_ce_exception/g;' {} +
 endif
 
-third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSION}-sdl/config.m4 packages/sdl/php8-string-return.patch packages/sdl/patches/sdl-events.patch packages/sdl/patches/sdl-asyncify.patch packages/sdl/patches/sdl-bindings.patch packages/sdl/static.mak $(wildcard packages/sdl/core/*.[ch]) | third_party/php${PHP_VERSION}-src/patched
+third_party/php${PHP_VERSION}-src/ext/sdl/config.m4: third_party/php${PHP_VERSION}-sdl/config.m4 packages/php-sdl-wasm/php8-string-return.patch packages/php-sdl-wasm/patches/sdl-events.patch packages/php-sdl-wasm/patches/sdl-asyncify.patch packages/php-sdl-wasm/patches/sdl-bindings.patch packages/php-sdl-wasm/static.mak $(wildcard packages/php-sdl-wasm/core/*.[ch]) | third_party/php${PHP_VERSION}-src/patched
 	@ echo -e "\e[33;4mImporting ext-sdl\e[0m"
 	${DOCKER_RUN} cp -rfv third_party/php${PHP_VERSION}-sdl/. third_party/php${PHP_VERSION}-src/ext/sdl/
-	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/sdl/php8-string-return.patch
-	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/sdl/patches/sdl-events.patch
-	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/sdl/patches/sdl-asyncify.patch
-	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/sdl/patches/sdl-bindings.patch
-	${DOCKER_RUN} cp packages/sdl/core/*.[ch] third_party/php${PHP_VERSION}-src/ext/sdl/src/
+	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/php-sdl-wasm/php8-string-return.patch
+	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/php-sdl-wasm/patches/sdl-events.patch
+	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/php-sdl-wasm/patches/sdl-asyncify.patch
+	${DOCKER_RUN} patch --batch -d third_party/php${PHP_VERSION}-src/ext/sdl -p1 -i /src/packages/php-sdl-wasm/patches/sdl-bindings.patch
+	${DOCKER_RUN} cp packages/php-sdl-wasm/core/*.[ch] third_party/php${PHP_VERSION}-src/ext/sdl/src/
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/sdl/.libs third_party/php${PHP_VERSION}-src/ext/sdl/autom4te.cache third_party/php${PHP_VERSION}-src/ext/sdl/modules third_party/php${PHP_VERSION}-src/ext/sdl/build
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl/src -type f \( -name '*.dep' -o -name '*.lo' \) -delete
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/sdl/src/.libs
 	${DOCKER_RUN} find third_party/php${PHP_VERSION}-src/ext/sdl -maxdepth 1 -type f \( -name 'Makefile*' -o -name 'config.h' -o -name 'config.log' -o -name 'config.nice' -o -name 'config.status' -o -name 'configure' -o -name 'configure~' -o -name 'libtool' -o -name 'sdl.la' -o -name 'a.wasm' \) -delete
 	${DOCKER_RUN} cp -fv third_party/php${PHP_VERSION}-src/ext/sdl/src/php_sdl.h third_party/php${PHP_VERSION}-src/ext/sdl/php_sdl.h
 
-lib/bin/sdl2-config: packages/sdl/sdl2-config.in packages/sdl/static.mak lib/lib/libSDL2.a lib/lib/libGL.a
+lib/bin/sdl2-config: packages/php-sdl-wasm/sdl2-config.in packages/php-sdl-wasm/static.mak lib/lib/libSDL2.a lib/lib/libGL.a
 	${DOCKER_RUN} mkdir -p /src/lib/bin
-	${DOCKER_RUN} bash -lc 'version=$$(awk "/^#define SDL_(MAJOR_VERSION|MINOR_VERSION|PATCHLEVEL) / {print \$$3}" /src/lib/include/SDL2/SDL_version.h | paste -sd .); sed "s/@SDL_VERSION@/$$version/g" /src/packages/sdl/sdl2-config.in > /src/$@'
+	${DOCKER_RUN} bash -lc 'version=$$(awk "/^#define SDL_(MAJOR_VERSION|MINOR_VERSION|PATCHLEVEL) / {print \$$3}" /src/lib/include/SDL2/SDL_version.h | paste -sd .); sed "s/@SDL_VERSION@/$$version/g" /src/packages/php-sdl-wasm/sdl2-config.in > /src/$@'
 	${DOCKER_RUN} chmod +x /src/$@
 
 lib/lib/libGL.a:
@@ -47,4 +47,4 @@ lib/lib/libSDL2.a:
 	${DOCKER_RUN} cp -r /emsdk/upstream/emscripten/cache/sysroot/include/SDL2 /src/lib/include/SDL2
 	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libSDL2.a /src/$@
 
-include packages/sdl/extensions.mak
+include packages/php-sdl-wasm/extensions.mak

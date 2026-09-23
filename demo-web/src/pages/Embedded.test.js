@@ -7,6 +7,7 @@ const {
 	, phpRefresh
 	, phpRun
 	, PhpWeb
+	, PhpSdl
 	, prepareSdlAssets
 } = vi.hoisted(() => {
 	const editor = {
@@ -28,6 +29,9 @@ const {
 	const PhpWeb = vi.fn(function PhpWebMock() {
 		return {...phpInstance};
 	});
+	const PhpSdl = vi.fn(function PhpSdlMock() {
+		return {...phpInstance};
+	});
 	const prepareSdlAssets = vi.fn(async () => undefined);
 
 	return {
@@ -36,11 +40,13 @@ const {
 		, phpRefresh
 		, phpRun
 		, PhpWeb
+		, PhpSdl
 		, prepareSdlAssets
 	};
 });
 
 vi.mock('php-wasm/PhpWeb', () => ({PhpWeb}));
+vi.mock('../lib/sdlRuntime', () => ({loadSdlRuntime: async () => PhpSdl}));
 vi.mock('../lib/sdlAssets', () => ({prepareSdlAssets}));
 
 vi.mock('@electric-sql/pglite', () => ({
@@ -81,6 +87,7 @@ echo "Hello, World!";
 
 	beforeEach(() => {
 		PhpWeb.mockClear();
+		PhpSdl.mockClear();
 		editor.getValue.mockClear();
 		phpExec.mockClear();
 		phpRefresh.mockClear();
@@ -193,8 +200,11 @@ echo "Hello, World!";
 		fireEvent.click(container.querySelector('[data-load-demo]'));
 		await waitFor(() => expect(prepareSdlAssets).toHaveBeenCalledTimes(1));
 		expect(container.querySelector('canvas')).not.toBe(originalCanvas);
-		const [{sharedLibs}] = PhpWeb.mock.calls[1];
-		expect(sharedLibs.map(library => library.name).sort()).toEqual(['libfreetype.so', 'libjpeg.so', 'libpng.so', 'libz.so']);
+		const [options] = PhpSdl.mock.calls[0];
+		expect(options.sharedLibs).toEqual([]);
+		expect(options).not.toHaveProperty('variant');
+		expect(options).not.toHaveProperty('version');
+		expect(PhpWeb).toHaveBeenCalledTimes(1);
 		fireEvent.change(demos, {target: {value: 'hello-world.php'}});
 		fireEvent.click(container.querySelector('[data-load-demo]'));
 		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(2));

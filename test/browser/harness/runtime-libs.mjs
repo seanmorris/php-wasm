@@ -187,13 +187,9 @@ const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
 };
 
 export const loadEmbeddedSharedLibs = (libType, variant = '') => {
-	if(libType === 'dynamic')
+	// The SDL package owns all native libraries required by its build.
+	if(variant === '_sdl' || libType === 'dynamic')
 	{
-		if(variant === '_sdl')
-		{
-			return sharedEmbeddedLibs.filter(library => ['libpng.so', 'libjpeg.so', 'libfreetype.so', 'libz.so'].includes(library.name));
-		}
-
 		return [];
 	}
 

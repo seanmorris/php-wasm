@@ -17,7 +17,7 @@ const commands = new Set([
 	'php-wasm-builder.js', 'make-environment.cjs', 'source-importer.mjs'
 	, 'list-extension-packages.mjs'
 	, 'prepare-build-workspace.mjs', 'package-builder.mjs', 'package-cloudflare.mjs'
-	, 'merge-cloudflare.mjs', 'generate-runtime-types.mjs', 'transform-logical-assignments.mjs'
+	, 'merge-cloudflare.mjs', 'runtime-package.mjs', 'package-sdl.mjs', 'merge-sdl.mjs', 'generate-runtime-types.mjs', 'transform-logical-assignments.mjs'
 ]);
 const supplemental = [
 	'LICENSE', 'LICENSE-GPL', 'NOTICE', 'README.md', 'hash-wasms.sh', 'remap-sourcemap.sh'

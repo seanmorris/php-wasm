@@ -2,7 +2,6 @@ import { PhpBase } from './PhpBase.mjs';
 import { commitTransaction, requestWebLock, startTransaction } from './webTransactions.mjs';
 
 const defaultVersion = '8.4';
-const defaultVariant = '';
 
 /**
  * Worker-hosted PHP wrapper.
@@ -16,11 +15,9 @@ export class PhpWorker extends PhpBase
 	constructor(args = {})
 	{
 		const version = args.version ?? defaultVersion;
-		const variant = args.variant ?? defaultVariant;
-		const vvId = version + variant;
-		const constructorArgs = {version, variant, ...args};
+		const constructorArgs = {version, ...args};
 
-		switch(vvId)
+		switch(version)
 		{
 			case '8.5':
 				super(import(`./php8.5-worker.mjs`), constructorArgs);
@@ -47,7 +44,7 @@ export class PhpWorker extends PhpBase
 				break;
 
 			default:
-				throw new Error(`Unsupported PHP runtime: ${vvId}`);
+				throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
 	}
 

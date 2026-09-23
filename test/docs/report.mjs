@@ -563,14 +563,14 @@ async function validateVrzno(page)
 async function validateSdl(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
-	const guide = readLocal(path.join(repoRoot, 'packages/sdl/README.md'));
+	const guide = readLocal(path.join(repoRoot, 'packages/php-sdl-wasm/README.md'));
 
 	assert.match(text, /<canvas[^>]+id="sdl"[^>]+tabindex="0"/);
 	assert.match(text, /image-rendering: pixelated/);
-	assert.match(text, /import \{PhpWeb\} from 'php-wasm\/PhpWeb\.mjs'/);
-	assert.match(text, /variant: '_sdl'/);
+	assert.match(text, /import \{PhpSdl\} from 'php-sdl-wasm\/php8\.4-sdl\.mjs'/);
+	assert.match(text, /new PhpSdl\(/);
 	assert.match(text, /canvas: document\.querySelector\('#sdl'\)/);
-	assert.match(text, /make web-mjs WITH_SDL=1/);
+	assert.match(text, /make sdl-mjs/);
 	for(const option of ['WITH_SDL_IMAGE', 'WITH_SDL_MIXER', 'WITH_SDL_TTF', 'WITH_OPENGL'])
 	{
 		assert.ok(text.includes(`${option}=0`), `Missing core-only opt-out: ${option}`);
@@ -822,11 +822,9 @@ async function validateMethodsPhpWasm(page)
 
 	assert.match(markdown, /alternateName:\n\s+- PhpNode\n\s+- PhpWeb/);
 	assert.doesNotMatch(markdown, /alternateName: Php(?:Node|Web)/);
-	assert.match(markdown, /`_sdl` selects the SDL-enabled `PhpWeb` runtime/);
-	assert.match(markdown, /`PhpNode` currently supports only the standard empty variant\./);
-	assert.match(markdown, /variant: '_sdl'/);
-	assert.doesNotMatch(markdown, /variant: '-debug'/);
-	assert.match(phpWebSource, /case '8\.4_sdl':/);
+	assert.match(markdown, /php-sdl-wasm\/php8\.4-sdl\.mjs/);
+	assert.match(markdown, /new PhpSdl\(/);
+	assert.doesNotMatch(phpWebSource, /_sdl|php-sdl-wasm/);
 	assert.doesNotMatch(phpNodeSource, /_sdl/);
 
 	const runtimeVersion = getAvailablePhpNodeVersion();

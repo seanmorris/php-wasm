@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {artifactFiles} from './artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFile, writeFile, access} from 'node:fs/promises';
 import {cpus, loadavg} from 'node:os';
@@ -19,11 +20,7 @@ const rounds = 6;
 const names = ['ordinary_arrays', 'instanced_arrays', 'ordinary_indexed', 'instanced_indexed'];
 const modes = ['native', 'observed'];
 const paths = Object.fromEntries([
-	...['mjs', 'mjs.wasm'].map(suffix => {
-		const name = `php${process.env.PHP_VERSION}_sdl-web.${suffix}`;
-		return [name, join(directory, name)];
-	})
-	, ['php.data', join(directory, 'php.data')]
+	...(await artifactFiles(directory, process.env.PHP_VERSION)).map(name => [name, join(directory, name)])
 	, ...['index-queries.mjs', 'common.php', 'instancing.php'].map(name => [name, new URL(name, import.meta.url)])
 	, ['sdl-bindings.mjs', new URL('../../browser/lib/sdl-bindings.mjs', import.meta.url)]
 ]);

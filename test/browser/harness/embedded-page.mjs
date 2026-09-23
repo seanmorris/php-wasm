@@ -1,5 +1,5 @@
 import { PGlite } from '/node_modules/@electric-sql/pglite/dist/index.js';
-import { PhpWeb } from '/packages/php-wasm/PhpWeb.mjs';
+import {createEmbeddedRuntime} from './embedded-runtime.mjs';
 
 import {
 	appendStderr,
@@ -24,10 +24,8 @@ import {
 const main = async () => {
 	setStatus('loading');
 
-	const php = new PhpWeb({
-		version: runtimeVersion
-		, ...(variant ? {variant} : {})
-		, dynamicLibs: loadEmbeddedDynamicLibs(demo)
+	const php = await createEmbeddedRuntime(runtimeVersion, variant, {
+		dynamicLibs: loadEmbeddedDynamicLibs(demo)
 		, files: preloadFiles
 		, ini: createIni()
 		, PGlite

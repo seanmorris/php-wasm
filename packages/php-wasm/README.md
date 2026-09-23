@@ -47,24 +47,18 @@ is exposed there.
 
 ## SDL browser runtime
 
-Select `variant: '_sdl'` and pass a canvas to `PhpWeb` for SDL graphics and input:
+Install the standalone `php-sdl-wasm` package for SDL graphics, input and audio:
 
-```javascript
-const php = new PhpWeb({
-  version: '8.4',
-  variant: '_sdl',
-  canvas: document.querySelector('canvas'),
-});
+```js
+import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs';
+
+const php = new PhpSdl({canvas: document.querySelector('canvas')});
 ```
 
-Create the canvas first. The development runtime adds SDL_image, SDL_mixer,
-SDL_ttf, and OpenGL shader bindings. Its SDL Cube example uses a pixel-art
-texture with nearest filtering, keyboard input, text, and audio after a user
-gesture. The cube requires WebGL2; the original SDL Sine example remains.
-Shared codecs require matching native support libraries, and JavaScript/Wasm
-must come from the same build. See the [SDL guide](https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/packages/sdl/README.md)
-for dependencies, build flags, resource cleanup, and measurements. Older
-published runtimes may provide only core SDL.
+Each versioned entry carries its matching runtime and native dependencies.
+`php-wasm` does not depend on or load this package. Replace previous
+`new PhpWeb({version: '8.4', variant: '_sdl', ...options})` calls with
+`new PhpSdl(options)`. See the [SDL guide](https://github.com/seanmorris/php-wasm/tree/develop/packages/php-sdl-wasm).
 
 ## Directory listings
 

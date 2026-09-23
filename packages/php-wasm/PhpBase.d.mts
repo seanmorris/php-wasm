@@ -1,4 +1,4 @@
-import type { PhpBaseModuleFactory, PhpRuntimeFactory, PhpRuntimeArgs, PhpRuntimeVersion, PhpRuntimeVariant, PhpRuntimeValue, PhpTemplateValue, PhpBinaryRuntime, PhpPathAnalysis, PhpFileNode, PhpFileStat, PhpReadFileOptions, PhpReadDirectoryOptions, PhpDirectoryEntry } from './public.d.ts';
+import type { PhpBaseModuleFactory, PhpRuntimeFactory, PhpRuntimeArgs, PhpRuntimeVersion, PhpRuntimeValue, PhpTemplateValue, PhpBinaryRuntime, PhpPathAnalysis, PhpFileNode, PhpFileStat, PhpReadFileOptions, PhpReadDirectoryOptions, PhpDirectoryEntry } from './public.d.ts';
 
 export type * from './public.d.ts';
 
@@ -7,7 +7,6 @@ export declare class PhpBase<RunArgs extends unknown[] = [phpCode: string], Refr
 	autoTransaction: boolean;
 	transactionStarted: boolean | Promise<void>;
 	phpVersion?: PhpRuntimeVersion;
-	phpVariant?: PhpRuntimeVariant;
 	phpArgs: PhpRuntimeArgs;
 	queue: Array<[Function, Array<string | number | boolean | object | undefined>, (value?: PhpRuntimeValue) => void, (reason?: object | string | number | boolean | Error) => void, boolean?]>;
 	binary: Promise<PhpBinaryRuntime>;

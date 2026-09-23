@@ -172,11 +172,31 @@
     "./PhpWorker.js": {
       "types": "./PhpWorker.d.cts",
       "default": "./PhpWorker.js"
+    },
+    "./PhpWebBase": {
+      "import": {
+        "types": "./PhpWebBase.d.mts",
+        "default": "./PhpWebBase.mjs"
+      },
+      "require": {
+        "types": "./PhpWebBase.d.cts",
+        "default": "./PhpWebBase.js"
+      },
+      "default": "./PhpWebBase.mjs"
+    },
+    "./PhpWebBase.mjs": {
+      "types": "./PhpWebBase.d.mts",
+      "default": "./PhpWebBase.mjs"
+    },
+    "./PhpWebBase.js": {
+      "types": "./PhpWebBase.d.cts",
+      "default": "./PhpWebBase.js"
     }
   },
   "files": [
     "*.js",
     "*.mjs",
+    "!php8.*_sdl-*",
     "[0-9a-f]*.wasm",
     "*.data",
     "*.d.ts",

@@ -24,10 +24,9 @@ try
 	await page.goto(`http://127.0.0.1:${process.env.BROWSER_TEST_PORT ?? 9000}/php-wasm/harness/index.html`);
 	const result = await page.evaluate(async ({version, libType, source}) => {
 		document.body.innerHTML = '<canvas width="128" height="128"></canvas>';
-		const {PhpWeb} = await import('/packages/php-wasm/PhpWeb.mjs');
-		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+		const {PhpSdl} = await import(`/packages/php-sdl-wasm/php${version}-sdl.mjs`);
 		const canvas = document.querySelector('canvas');
-		const php = new PhpWeb({version, variant: '_sdl', canvas, sharedLibs: loadEmbeddedSharedLibs(libType, '_sdl')});
+		const php = new PhpSdl({canvas});
 		let stdout = '', stderr = '';
 		php.addEventListener('output', event => stdout += event.detail.join(''));
 		php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -49,13 +48,15 @@ try
 	assert.equal(result.status, 0);
 	const data = JSON.parse(result.stdout);
 	const hashes = {};
-	for(const name of [`php${version}_sdl-web.mjs`, `php${version}_sdl-web.mjs.wasm`])
+	const manifest = JSON.parse(await readFile(new URL(`../../../packages/php-sdl-wasm/php${version}-sdl.manifest.json`, import.meta.url)));
+	for(const name of manifest.files.map(file => file.path))
 	{
-		const bytes = await readFile(new URL(`../../../packages/php-wasm/${name}`, import.meta.url));
+		const bytes = await readFile(new URL(`../../../packages/php-sdl-wasm/${name}`, import.meta.url));
 		hashes[name] = {bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex')};
 	}
 	const medians = Object.fromEntries(Object.entries(data.samples).map(([name, samples]) => [
-		name, Object.fromEntries(['submitMs', 'flushMs', 'totalMs'].map(metric => {
+		name
+		, Object.fromEntries(['submitMs', 'flushMs', 'totalMs'].map(metric => {
 			const values = samples.map(sample => sample[metric]).sort((a, b) => a - b);
 			return [metric, (values[5] + values[6]) / (2 * data.batchesPerSample)];
 		}))
@@ -64,7 +65,9 @@ try
 		date: new Date().toISOString(), browser: browser.version(), libType, hashes
 		, machine, loadBefore, loadAfter: loadavg()
 		, graphics: result.graphics, launch: {headless, args: launchOptions.args}
-		, ...data, medians, heapBytesBefore: result.beforeHeap, heapBytesAfter: result.afterHeap
+		, ...data, medians
+		, ...data, heapBytesBefore: result.beforeHeap
+		, ...data, heapBytesAfter: result.afterHeap
 		, notes: [
 			'Prepared inputs: object/array construction and packing occur before measurement.'
 			, 'Each raw sample repeats 64 batches to exceed the SDL clock granularity; medians are normalized per 1024 rectangles.'

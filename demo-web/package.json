@@ -37,7 +37,8 @@
     "react-dom": "^19.2.0",
     "react-router-dom": "^6.23.0",
     "vscode-react": "^0.2.2",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "php-sdl-wasm": "../packages/php-sdl-wasm"
   },
   "scripts": {
     "start": "bash ./npm-start.sh",

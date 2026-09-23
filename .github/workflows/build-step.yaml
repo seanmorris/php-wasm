@@ -89,13 +89,13 @@ jobs:
 
       # Leave the snapshot configured for the ordinary Node/Deno/CGI checks.
       # Building SDL last would make each test job reconfigure and rebuild PHP.
-      - name: Build PHP (sdl variant) for Web
+      - name: Build and package PHP SDL for Web
         run: |
-          time make --debug=basic web-mjs WITH_SDL=1
+          time make --debug=basic sdl-mjs ENV_FILE=.env
 
       - name: Verify unchanged and JavaScript-only SDL builds
         if: ${{ inputs.phpVersion == '8.4' && inputs.libType == 'static' }}
-        run: node .github/bin/verify-sdl-incremental.mjs '${{ inputs.phpVersion }}'
+        run: node .github/bin/verify-sdl-incremental.mjs '${{ inputs.phpVersion }}' '.cache/sdl-raw/php${{ inputs.phpVersion }}'
 
       - name: Build PHP For Node
         run: time make --debug=basic node-mjs node-js

@@ -6,6 +6,7 @@ const versions = ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0'];
 
 const versionedFamilies = [
 	['packages/php-wasm', 'php%s-web.mjs']
+	, ['packages/php-sdl-wasm', 'php%s-sdl.mjs']
 	, ['packages/php-cli-wasm', 'php%s-cli-web.mjs']
 	, ['packages/php-dbg-wasm', 'php%s-dbg-web.mjs']
 	, ['packages/php-cgi-wasm', 'php%s-cgi-worker.mjs']

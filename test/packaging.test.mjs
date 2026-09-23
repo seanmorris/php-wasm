@@ -13,6 +13,7 @@ const packageDirs = [
 	, 'packages/php-cli-wasm'
 	, 'packages/php-dbg-wasm'
 	, 'packages/php-cloud-wasm'
+	, 'packages/php-sdl-wasm'
 ];
 const packageRoot = path.join(repoRoot, 'packages');
 

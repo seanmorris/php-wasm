@@ -6,6 +6,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { generateRuntimeTypes, runtimePackages } from '../../bin/generate-runtime-types.mjs';
+import {packageSdl, verifySdl, sdlProfile} from '../../bin/package-sdl.mjs';
+import {copyRuntimeSources} from '../../bin/runtime-package.mjs';
 import { packageCloudflare, verifyCloudflare } from '../../bin/package-cloudflare.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -131,7 +133,7 @@ test('source declarations check without skipLibCheck and generated CJS declarati
 	run(process.execPath, [tsc, '-p', 'jsconfig.json', '--skipLibCheck', 'false']);
 });
 
-test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and standalone Cloudflare consumers', async t => {
+test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and standalone Cloudflare/SDL consumers', async t => {
 	const root = await temporary(t);
 	const installed = path.join(root, 'consumer');
 	await fs.mkdir(installed);
@@ -146,7 +148,8 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 		, `PHP_CGI_DIST_DIR=${path.join(stageRoot, 'php-cgi-wasm')}`
 		, `PHP_CLI_DIST_DIR=${path.join(stageRoot, 'php-cli-wasm')}`
 		, `PHP_DBG_DIST_DIR=${path.join(stageRoot, 'php-dbg-wasm')}`
-		, `PHP_CLOUD_WRAPPER_DIR=${path.join(stageRoot, 'php-cloud-wasm')}`]);
+		, `PHP_CLOUD_WRAPPER_DIR=${path.join(stageRoot, 'php-cloud-wasm')}`
+		, `PHP_SDL_WRAPPER_DIR=${path.join(stageRoot, 'php-sdl-wasm')}`]);
 	for(const name of runtimePackages)
 		assert.ok((await fs.readdir(path.join(stageRoot, name))).every(file => !/^php8\.|\.wasm$/.test(file)), 'Wrapper staging must preserve native JS/Wasm outputs');
 	for(const name of runtimePackages)
@@ -157,7 +160,7 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 		const declarations = (await fs.readdir(template)).filter(file => /\.d\.(?:ts|mts|cts)$/.test(file) && !/^php8\./.test(file));
 		for(const file of ['package.json', 'README.md', 'LICENSE', 'NOTICE', ...declarations])
 			await fs.copyFile(path.join(template, file), path.join(stage, file));
-		const commonjs = name !== 'php-cloud-wasm';
+		const commonjs = !['php-cloud-wasm', 'php-sdl-wasm'].includes(name);
 		const visited = new Set();
 		for(const file of declarations.filter(file => file.endsWith('.d.mts')))
 			await copyWrapper(stage, file.replace('.d.mts', '.mjs'), {commonjs: commonjs && !file.startsWith('php-tags'), staged: true}, visited);
@@ -166,15 +169,19 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 			if(value?.import?.endsWith?.('.mjs') && !value.import.includes('*')) await copyWrapper(stage, value.import.slice(2), {commonjs: commonjs && !value.import.startsWith('./php-tags'), staged: true}, visited);
 		if(!commonjs)
 		{
-			assert.equal(pkg.dependencies, undefined, 'Cloudflare must remain standalone');
+			assert.equal(pkg.dependencies, undefined, `${name} must remain standalone`);
+			const profile = name === 'php-sdl-wasm' ? 'sdl' : 'cloudflare';
+			if(profile === 'sdl') await copyRuntimeSources(stage, sdlProfile);
+			const pack = profile === 'sdl' ? packageSdl : packageCloudflare;
+			const verify = profile === 'sdl' ? verifySdl : verifyCloudflare;
 			for(const version of versions)
 			{
-				const runtime = `php${version}-cloudflare-runtime.mjs`;
+				const runtime = `php${version}-${profile}-runtime.mjs`;
 				await fs.writeFile(path.join(stage, runtime), `const wasm = '${runtime}.wasm'; export default async () => ({});\n`);
 				await fs.writeFile(path.join(stage, `${runtime}.wasm`), new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]));
-				await packageCloudflare(stage, version, {fixture: true});
+				await pack(stage, version, {fixture: true});
 			}
-			for(const version of versions) await verifyCloudflare(stage, version);
+			for(const version of versions) await verify(stage, version);
 		}
 		const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', root], stage).stdout);
 		const packedFiles = new Set(packed.files.map(file => file.path));
@@ -211,7 +218,7 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 			}
 		}
 	}
-	for(const file of ['runtime.mts', 'runtime.cts', 'cloudflare.mts'])
+	for(const file of ['runtime.mts', 'runtime.cts', 'cloudflare.mts', 'sdl.mts', 'embedded.mts'])
 		await fs.copyFile(path.join(repoRoot, 'test/types', file), path.join(installed, file));
 	await fs.writeFile(path.join(installed, 'entries.mts'), esm.join('\n'));
 	await fs.writeFile(path.join(installed, 'entries.cts'), cjs.join('\n'));
@@ -222,10 +229,18 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 	let cloud = await fs.readFile(path.join(installed, 'cloudflare.mts'), 'utf8');
 	for(const [index, version] of versions.entries()) cloud += `\nimport Default${index}, { PhpCloudflare as Php${index} } from 'php-cloud-wasm/php${version}-cloudflare.mjs';\nconst php${index} = new Php${index}(options);\nnew Default${index}();\nconst run${index}: Promise<number> = php${index}.run('<?php echo 1;');\n// @ts-expect-error Fixed version entrypoints reject version overrides.\nnew Php${index}({ version: '8.0' });\n`;
 	await fs.writeFile(path.join(installed, 'cloudflare.mts'), cloud);
-	await typecheck(installed, ['runtime.mts', 'runtime.cts', 'cloudflare.mts', 'entries.mts', 'entries.cts']);
+	let sdl = await fs.readFile(path.join(installed, 'sdl.mts'), 'utf8');
+	for(const [index, version] of versions.entries()) sdl += `\nimport Default${index}, { PhpSdl as Sdl${index} } from 'php-sdl-wasm/php${version}-sdl.mjs';\nconst sdl${index} = new Sdl${index}(options);\nnew Default${index}();\nconst run${index}: Promise<number> = sdl${index}.run('<?php echo 1;');\nconst refresh${index}: Promise<void> = sdl${index}.refresh();\n// @ts-expect-error Fixed version entrypoints reject version overrides.\nnew Sdl${index}({ version: '8.0' });\n// @ts-expect-error Embedded SDL executes PHP strings rather than CLI arguments.\nsdl${index}.run(['-v']);\n`;
+	await fs.writeFile(path.join(installed, 'sdl.mts'), sdl);
+	await typecheck(installed, ['runtime.mts', 'runtime.cts', 'cloudflare.mts', 'sdl.mts', 'entries.mts', 'entries.cts']);
 
-	// Remove all other packages before repeating the complete Cloudflare fixture.
-	for(const name of runtimePackages.filter(name => name !== 'php-cloud-wasm'))
-		await fs.rm(path.join(installed, 'node_modules', name), {recursive: true});
-	await typecheck(installed, ['cloudflare.mts']);
+	// Compile each specialized runtime with no other runtime package installed.
+	for(const [name, fixture] of [['php-cloud-wasm', 'cloudflare.mts'], ['php-sdl-wasm', 'sdl.mts'], ['php-wasm', 'embedded.mts']])
+	{
+		const standalone = path.join(root, name + '-standalone');
+		await fs.mkdir(path.join(standalone, 'node_modules'), {recursive: true});
+		await fs.cp(path.join(installed, 'node_modules', name), path.join(standalone, 'node_modules', name), {recursive: true});
+		await fs.copyFile(path.join(installed, fixture), path.join(standalone, fixture));
+		await typecheck(standalone, [fixture]);
+	}
 });

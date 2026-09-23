@@ -127,7 +127,7 @@ test('PhpCloudflare keeps bindings, shared maps and identity instance-local', as
 		assert.deepEqual(captured[1].cfd1, {mainDb: binding});
 		assert.equal(captured[0].cfd1.mainDb, binding);
 		assert.equal(captured[0].version, '8.3');
-		assert.equal(captured[0].variant, '');
+		assert.equal(captured[0].variant, undefined);
 		assert.equal(captured[0].debug, true);
 		const third = new PhpCloudflare({runtime, wasmModule, version: '8.3'});
 		await third.binary;

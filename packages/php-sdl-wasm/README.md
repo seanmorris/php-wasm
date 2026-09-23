@@ -1,8 +1,9 @@
-# php-wasm-sdl
+# php-sdl-wasm
 
-The `_sdl` browser runtime includes SDL2, SDL_image, SDL_mixer, SDL_ttf and
-OpenGL shader bindings. `php-wasm-sdl` preserves the historical import and its
-empty `getLibs()` result. There are no separate SDL PHP side modules.
+A standalone browser PHP runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and
+OpenGL shader bindings. It includes its own wrappers, native runtime and any
+required codec libraries. It has no dependency on `php-wasm`, and installing
+`php-wasm` does not install SDL.
 
 ## Current verification
 
@@ -80,31 +81,49 @@ those separate contexts.
 ## Use the runtime
 
 ```js
-import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs';
 
-const php = new PhpWeb({
-  version: '8.4',
-  variant: '_sdl',
-  canvas: document.querySelector('canvas'),
-});
+const php = new PhpSdl({canvas: document.querySelector('canvas')});
 await php.run(`<?php var_dump(function_exists('SDL_Init'));`);
 ```
 
-This minimal example applies to a static build. Builds with shared codecs must
-also supply the matching `libpng.so`, `libjpeg.so`, `libfreetype.so` and `libz.so`
-through `sharedLibs`/`locateFile`, as with other shared native dependencies.
-Those artifacts come from the existing `php-wasm-gd` and `php-wasm-zlib`
-packages; enabling the PHP GD/zlib extensions is not required. The embedded
-demo supplies these codecs even when its extension toggles are all disabled.
-Always ship JavaScript and Wasm from the same build, with matching codec assets.
+Versioned entries are available for PHP 8.0–8.5. Each entry supplies its matching
+factory, Wasm, shared libraries and preload data. Normal browser options such
+as `ini`, `persist`, `files` and additional `sharedLibs` remain available.
+Supply your own textures, fonts and audio; the example assets are not bundled.
+
+Migration: replace `new PhpWeb({version, variant: '_sdl', ...options})` with
+`new PhpSdl(options)` imported from the desired version's entry. Nonempty
+`variant` options now fail with a migration error. The former `php-wasm-sdl`
+extension shim and its empty `getLibs()` result are replaced by this runtime
+package. SDL PHP bindings are compiled into the runtime, not PHP side modules.
 
 ## Build with Make
 
 ```sh
-make web-mjs WITH_SDL=1
+make sdl-mjs
+# Select an existing build configuration:
+make sdl-mjs ENV_FILE=.github/.env_8.4.dynamic.ci PHP_VERSION=8.4
 # Keep just core SDL:
-make web-mjs WITH_SDL=1 WITH_SDL_IMAGE=0 WITH_SDL_MIXER=0 WITH_SDL_TTF=0 WITH_OPENGL=0
+make sdl-mjs WITH_SDL_IMAGE=0 WITH_SDL_MIXER=0 WITH_SDL_TTF=0 WITH_OPENGL=0
+make test-sdl-package
+# Installed source-only builder:
+php-wasm-builder build sdl mjs
 ```
+
+`profiles/sdl.mak` selects the normal Make configuration. Raw native outputs
+are kept in `.cache/sdl-raw/php<version>`; the finished package is written to
+`packages/php-sdl-wasm` (override with `SDL_OUTPUT_DIR`). The same manifest,
+content hashing, source staging and verified merge machinery packages both
+SDL and Cloudflare. Their adapters retain browser loading and Cloudflare's
+precompiled Wasm loading respectively. Native compilation remains in Make.
+
+The packager follows the Wasm dependency list recursively, includes only
+required native libraries, and verifies every file's digest. Static builds
+carry no shared codec libraries. The internal `_sdl` filename/configuration
+suffix still separates native build caches; it is not a JavaScript option.
+Keep all generated package files together. Updating shared wrappers across
+versions requires staging and merging a fresh complete package.
 
 | Option | Default | Behavior |
 | --- | --- | --- |
@@ -609,10 +628,10 @@ binding; code written against those old signatures may need adjustment.
 To regenerate PHP 8.0-compatible arginfo after an API change:
 
 ```sh
-php third_party/php8.0-src/build/gen_stub.php packages/sdl/opengl/php_webgl.stub.php
-php third_party/php8.0-src/build/gen_stub.php packages/sdl/core/php_sdl_extra.stub.php
-php third_party/php8.0-src/build/gen_stub.php packages/sdl/core/php_sdl_geometry.stub.php
-php third_party/php8.0-src/build/gen_stub.php packages/sdl/ttf/php_ttf_extra.stub.php
+php third_party/php8.0-src/build/gen_stub.php packages/php-sdl-wasm/opengl/php_webgl.stub.php
+php third_party/php8.0-src/build/gen_stub.php packages/php-sdl-wasm/core/php_sdl_extra.stub.php
+php third_party/php8.0-src/build/gen_stub.php packages/php-sdl-wasm/core/php_sdl_geometry.stub.php
+php third_party/php8.0-src/build/gen_stub.php packages/php-sdl-wasm/ttf/php_ttf_extra.stub.php
 ```
 
 The Make/configuration tests run with `node --test test/build/sdl.test.mjs`.
@@ -791,7 +810,7 @@ below (VO note 75).
 All four new cases and 32 affected existing audio/stream/cube cases pass on the
 matching candidate, with no skips or flaky results. Both editor checks,
 main-module validation, ten Make/package checks and JS style also pass.
-`packages/sdl/benchmarks/2026-09-22-malformed-assets.json` preserves before/after evidence.
+`packages/php-sdl-wasm/benchmarks/2026-09-22-malformed-assets.json` preserves before/after evidence.
 `benchmarks/2026-09-22-malformed-size.json` records +57 raw bytes, −35 gzip
 bytes and −2,407 Brotli bytes for the matching pair; JS and ICU are unchanged.
 Full PHP/profile remote
@@ -1073,7 +1092,7 @@ reference counts, pre-video allocation cleanup, repeated request refresh and GC.
 The complete remote PHP/profile matrix and the remaining mixer, input/device,
 rendering remain open; PHP 8.0 serialization verification is recorded below.
 
-`packages/sdl/benchmarks/2026-09-21-cursors.json` records the matching pair:
+`packages/php-sdl-wasm/benchmarks/2026-09-21-cursors.json` records the matching pair:
 51,807,175 raw bytes, 13,996,319 gzip bytes and 9,545,914 Brotli bytes. Against
 the stream/font pair, the changes are +3,062 raw, +1,069 gzip and +5,323 Brotli
 bytes; ICU is unchanged. These are size measurements, not speed claims.

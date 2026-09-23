@@ -1,10 +1,4 @@
-import type { PhpRuntimeArgs, PhpRuntimeValue } from './public.d.ts';
-import type { PhpBase } from './PhpBase.mjs';
+import type { PhpRuntimeArgs } from './public.d.ts';
+import type { PhpWebBase } from './PhpWebBase.mjs';
 
-export class PhpWeb extends PhpBase<[phpCode: string], void> {
-	constructor(args?: PhpRuntimeArgs);
-	startTransaction(): Promise<void>;
-	commitTransaction(readOnly?: boolean): Promise<void>;
-	refresh(): Promise<void>;
-	_enqueue(callback: (...params: Array<string | number | boolean | object | undefined>) => Promise<PhpRuntimeValue>, params?: Array<string | number | boolean | object | undefined>, readOnly?: boolean): Promise<PhpRuntimeValue>;
-}
+export class PhpWeb extends PhpWebBase { constructor(args?: PhpRuntimeArgs); }

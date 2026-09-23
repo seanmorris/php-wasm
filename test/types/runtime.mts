@@ -113,3 +113,6 @@ type CgiFilesystem = Assert<Equal<Pick<PhpBase, FilesystemMethods>, Pick<PhpCgiB
 type CliConstructor = Assert<Equal<typeof PhpBase, typeof import('php-cli-wasm/PhpBase').PhpBase>>;
 type DbgConstructor = Assert<Equal<typeof PhpBase, typeof import('php-dbg-wasm/PhpBase').PhpBase>>;
 type CloudConstructor = Assert<Equal<typeof PhpBase, typeof import('php-cloud-wasm/PhpBase').PhpBase>>;
+
+// @ts-expect-error SDL is a separate package rather than a variant of php-wasm.
+new PhpWeb({ variant: '_sdl' });
