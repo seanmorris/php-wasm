@@ -1,0 +1,155 @@
+{
+  "date": "2026-09-21T20:28:38.956Z",
+  "phpVersion": "8.4",
+  "profile": "static",
+  "browser": "152.0.7977.75",
+  "launch": {
+    "headless": true,
+    "args": [
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader"
+    ]
+  },
+  "font": {
+    "name": "DejaVuSansMono.ttf",
+    "bytes": 343140,
+    "sha256": "0f5db4f1749979d961019838b160bec74abdf7f9eca69553fe1aa856bbff49a4"
+  },
+  "fontsPerBatch": 50,
+  "batches": 3,
+  "baseline": {
+    "directory": ".cache/sdl-buffers/runtime",
+    "hashes": {
+      "php8.4_sdl-web.mjs": {
+        "bytes": 4761786,
+        "sha256": "e8f6ce58a179d7407c21703de00ab3f56fc6e3cd3b6ea9725b484e2f1daf94fc"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "bytes": 47033066,
+        "sha256": "1e47f2e3a6663f79616e740d2ac1179c5924dff491fc9e83ec54d65a5791797f"
+      }
+    },
+    "samples": [
+      {
+        "step": "initial",
+        "sdlAllocations": 0,
+        "liveBytes": 3359968,
+        "reservedBytes": 3362032,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "warm",
+        "sdlAllocations": 0,
+        "liveBytes": 3395744,
+        "reservedBytes": 3448048,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-50-fonts",
+        "sdlAllocations": 200,
+        "liveBytes": 5942824,
+        "reservedBytes": 5950704,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-100-fonts",
+        "sdlAllocations": 400,
+        "liveBytes": 8490096,
+        "reservedBytes": 8498416,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-150-fonts",
+        "sdlAllocations": 600,
+        "liveBytes": 11039408,
+        "reservedBytes": 11046128,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "quit",
+        "sdlAllocations": 0,
+        "liveBytes": 3402280,
+        "reservedBytes": 11078896,
+        "wasmBytes": 134217728
+      }
+    ]
+  },
+  "candidate": {
+    "directory": ".cache/sdl-streams/runtime",
+    "hashes": {
+      "php8.4_sdl-web.mjs": {
+        "bytes": 4761786,
+        "sha256": "70dae96f123196b29c28736a078b03b44a1735fef8bad379487ed507627d9c4b"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "bytes": 47042327,
+        "sha256": "9f52ddead3db1d98a5d72900f682f2cadd2644dec3cb191891e50c4caa6bd29e"
+      }
+    },
+    "samples": [
+      {
+        "step": "initial",
+        "sdlAllocations": 0,
+        "liveBytes": 3359968,
+        "reservedBytes": 3361648,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "warm",
+        "sdlAllocations": 0,
+        "liveBytes": 3395744,
+        "reservedBytes": 3451760,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-50-fonts",
+        "sdlAllocations": 0,
+        "liveBytes": 3395784,
+        "reservedBytes": 3451760,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-100-fonts",
+        "sdlAllocations": 0,
+        "liveBytes": 3395784,
+        "reservedBytes": 3451760,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-150-fonts",
+        "sdlAllocations": 0,
+        "liveBytes": 3395784,
+        "reservedBytes": 3451760,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "quit",
+        "sdlAllocations": 0,
+        "liveBytes": 3394344,
+        "reservedBytes": 3451760,
+        "wasmBytes": 134217728
+      }
+    ]
+  },
+  "summary": {
+    "baseline": {
+      "retainedSdlAllocations": 600,
+      "liveByteIncrease": 7643664,
+      "sdlAllocationsAfterQuit": 0
+    },
+    "candidate": {
+      "retainedSdlAllocations": 0,
+      "liveByteIncrease": 40,
+      "sdlAllocationsAfterQuit": 0
+    }
+  },
+  "notes": [
+    "Run with native builds, compression and other benchmarks idle; this records counts, not throughput.",
+    "Each runtime uses a fresh browser page and matching routed JavaScript/Wasm artifacts.",
+    "Font initialization and one explicit open/close occur before the warm sample.",
+    "liveBytes is dlmalloc uordblks, including a temporary 40-byte mallinfo output allocation in every snapshot.",
+    "reservedBytes and wasmBytes include reusable allocator/linear-memory capacity; they are not live allocations.",
+    "SDL counts and heap bytes cover this font fixture; they do not prove other resources are leak-free."
+  ]
+}

@@ -11,6 +11,7 @@
 
 .editor > .bevel {
 	display: flex;
+	min-width: 0;
 	flex-direction: column;
 	align-self: stretch;
 	box-sizing: border-box;
@@ -148,4 +149,131 @@
 
 select.bevel option {
 	background-color: #FFF;
+}
+
+.editor-main { min-height: 0; overflow: hidden; }
+.editor .file-area { width: var(--editor-sidebar-width, 288px); min-width: 180px; display: flex; flex-direction: column; }
+.editor .edit-area { min-width: 0; min-height: 0; overflow: hidden; }
+.editor .editor-toolbar {
+	align-items: stretch;
+	flex-wrap: wrap;
+	flex-shrink: 0;
+	gap: 0;
+}
+
+.editor-toolbar > button,
+.editor .editor-toolbar > select,
+.editor-menu > summary {
+	box-sizing: border-box;
+	min-width: 2rem;
+	height: 2rem;
+	margin: 0;
+	padding: 0.25rem;
+	font: inherit;
+	line-height: 1.25;
+	white-space: nowrap;
+}
+
+.editor-toolbar > button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.editor .editor-toolbar > select { padding: 0 0.25rem; }
+.editor-toolbar img { display: block; width: 16px; height: 16px; }
+.editor-menu { position: relative; }
+
+.editor-menu > summary {
+	cursor: pointer;
+	user-select: none;
+	border: 2px solid;
+	border-image: url(../assets/ui/border.png) 2 2 2 2;
+	background-color: #c3c3c3;
+}
+
+.editor-menu[open] > summary,
+.editor-menu > summary:active {
+	border-image: url(../assets/ui/border-inset.png) 2 2 2 2;
+}
+
+.editor-menu > div {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	z-index: 20;
+	min-width: 14rem;
+	max-height: calc(100dvh - 10rem);
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	overflow-y: auto;
+}
+
+.editor-menu button { text-align: left; padding: 0.25rem 0.5rem; }
+.editor-explorer-toolbar { flex-shrink: 0; }
+.editor-explorer-toolbar :focus { outline: 1px dotted #000; outline-offset: -4px; }
+.editor .editor-explorer-actions { position: relative; display: flex; flex-wrap: nowrap; height: 2rem; box-sizing: border-box; border-width: 0 0 2px; background: #c3c3c3; color: #000; }
+.editor-explorer-title { flex: 1; display: flex; align-items: center; padding: 0 0.25rem; }
+.editor-explorer-actions > button,
+.editor-explorer-menu > summary { width: 2rem; height: 100%; flex-shrink: 0; }
+.editor-explorer-actions svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: square; stroke-linejoin: miter; }
+.editor-explorer-menu { position: static; }
+.editor-explorer-menu > summary { display: flex; align-items: center; justify-content: center; list-style: none; }
+.editor-explorer-menu > summary::-webkit-details-marker { display: none; }
+.editor-explorer-menu > div { min-width: 14rem; color: #000; }
+.editor-explorer-menu hr { align-self: stretch; margin: 0.2rem 0; border: 0; border-top: 1px solid #888; border-bottom: 1px solid #eee; }
+/* The header's inset bottom border also forms the filter's top edge. */
+.editor-explorer-filter input { display: block; width: 100%; min-width: 0; height: 1.75rem; box-sizing: border-box; margin: 0; border-width: 0 0 2px; font: inherit; cursor: text; }
+.editor-explorer-filter input:focus { outline-offset: -2px; }
+.editor-tree-scroll { flex: 1; overflow: auto; min-height: 0; }
+.editor-tree-scroll ul { list-style: none; margin: 0; padding-left: 0; }
+.editor-entry [role="treeitem"] { display: flex; align-items: center; padding: 0.15rem 0; white-space: nowrap; }
+.editor-entry [role="treeitem"][aria-selected="true"] { background: #20518a; }
+.editor-entry [role="treeitem"]:focus-visible { outline: 2px solid #9ce; outline-offset: -2px; }
+.editor-entry button { color: inherit; background: transparent; border: 0; box-shadow: none; text-align: left; }
+.editor-entry .editor-entry-name { flex: 1; display: flex; align-items: center; }
+.editor-entry input[type="checkbox"] { margin-right: 0.25rem; height: auto; }
+.editor-empty-folder { color: #bbb; display: block; padding: 0.25rem 1rem; font-size: 0.85rem; }
+.editor-sidebar-size { display: flex; flex-direction: column; padding: 0.4rem; font-size: 0.8rem; }
+.editor-sidebar-size input { width: 100%; }
+.editor-breadcrumbs { display: flex; overflow-x: auto; min-height: 1.75rem; background: #333; color: #ddd; }
+.editor-breadcrumbs button { background: none; color: inherit; border: 0; box-shadow: none; white-space: nowrap; }
+.editor-breadcrumbs button + button:before { content: '/ '; }
+.editor .tab-area { flex-shrink: 0; overflow-x: auto; height: auto; min-height: 2.5rem; }
+.editor .tab-area .tab { flex-shrink: 0; }
+.editor .tab-area .tab button { border: 0; box-shadow: none; background: transparent; color: inherit; white-space: nowrap; }
+.editor .tab-area .tab button:focus-visible { outline: 2px solid #28c; }
+.editor-document { flex: 1; position: relative; min-height: 10rem; overflow: hidden; }
+.editor-document #edit-root { position: absolute; inset: 0; }
+.editor-document #edit-root[hidden] { display: none; }
+.editor-empty { padding: 1rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; max-height: 100%; overflow: auto; box-sizing: border-box; }
+.editor-image-preview { max-width: 100%; max-height: 60vh; object-fit: contain; }
+.editor-error, .editor-notice { padding: 0.5rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.editor-error { background: #ffc9bd; color: #4d1600; }
+.editor-notice { background: #ffeab0; color: #3d2a00; }
+.editor-statusbar { display: flex; flex-wrap: wrap; flex-shrink: 0; gap: 0.2rem; padding-top: 0.25rem; font-size: 0.8rem; color: #000; }
+.editor-status-panel { min-width: 0; max-width: 100%; min-height: 1.75rem; box-sizing: border-box; padding: 0.2rem 0.4rem; line-height: 1.25; overflow-wrap: anywhere; }
+.editor-status { flex: 1 1 auto; white-space: normal; }
+.editor-status-format { display: flex; align-items: center; gap: 0.4rem; }
+.editor-status-format select { margin: 0; padding: 0; border: 0; font: inherit; color: inherit; background: transparent; }
+.editor-debugger { position: relative; height: 35%; min-height: 8rem; display: flex; overflow: auto; }
+.editor-dialog { position: fixed; inset: 0; z-index: 100; background: #0008; }
+.editor-dialog .dialog { width: min(36rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); overflow: auto; box-sizing: border-box; }
+.editor-dialog p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.editor-dialog label { display: flex; flex-direction: column; gap: 0.5rem; }
+.editor-dialog input { width: 100%; box-sizing: border-box; }
+.editor-dialog-choices { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.editor-quick-results { display: flex; flex-direction: column; max-height: 50vh; overflow: auto; margin-bottom: 0.5rem; }
+.editor-quick-results button { text-align: left; overflow-wrap: anywhere; padding: 0.4rem; }
+@media (max-width: 650px) {
+	.editor .file-area { width: min(var(--editor-sidebar-width, 220px), 45vw); min-width: 130px; }
+	.editor-breadcrumbs { font-size: 0.8rem; }
+	.editor-explorer-toolbar { font-size: 0.8rem; }
+	.editor-explorer-title { display: none; }
+	.editor-explorer-actions > button,
+	.editor-explorer-menu { flex: 1; }
+	.editor-explorer-menu > summary { width: 100%; }
+	.editor .editor-toolbar:not(.editor-explorer-actions) { margin-bottom: 0.25rem; }
+	.editor-sidebar-size { display: none; }
 }

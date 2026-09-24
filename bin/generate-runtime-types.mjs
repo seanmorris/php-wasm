@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const runtimePackages = ['php-wasm', 'php-cli-wasm', 'php-cgi-wasm', 'php-dbg-wasm', 'php-cloud-wasm'];
+export const runtimePackages = ['php-wasm', 'php-cli-wasm', 'php-cgi-wasm', 'php-dbg-wasm', 'php-cloud-wasm', 'php-sdl-wasm'];
 
 // Handwritten ESM declarations are authoritative. CJS declarations must name
 // their declaration dependencies explicitly: .js resolves to .d.ts, not .d.cts.
@@ -24,7 +24,7 @@ export async function generateRuntimeTypes(root = repoRoot, {check = false} = {}
 		const directory = path.join(root, 'packages', name);
 		const filename = path.join(directory, 'package.json');
 		const pkg = JSON.parse(await fs.readFile(filename, 'utf8'));
-		const commonjs = name !== 'php-cloud-wasm';
+		const commonjs = !['php-cloud-wasm', 'php-sdl-wasm'].includes(name);
 		for(const declaration of (await fs.readdir(directory)).filter(file => /^Php.*\.d\.mts$/.test(file)).sort())
 		{
 			const entry = declaration.replace('.d.mts', '');

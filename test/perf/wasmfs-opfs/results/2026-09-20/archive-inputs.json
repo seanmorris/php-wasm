@@ -1,0 +1,50 @@
+[
+  {
+    "name": "drupal-11.4.5.zip",
+    "bytes": 22457133,
+    "sha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f",
+    "entries": 17761,
+    "files": 14935,
+    "expandedBytes": 64951089
+  },
+  {
+    "name": "wordpress-7.1.zip",
+    "bytes": 29997708,
+    "sha256": "0c28243ae5fdfedbef5825f8295628882e971923e072c0755ad948c18b1b17e2",
+    "entries": 3628,
+    "files": 3628,
+    "expandedBytes": 95944968
+  },
+  {
+    "name": "laravel-11.zip",
+    "bytes": 25034430,
+    "sha256": "6985fa0a1fa7b402d8e08a71b345af0f270ebf2d4ce9564370ece84bc15a5e1b",
+    "entries": 9447,
+    "files": 8153,
+    "expandedBytes": 52296027
+  },
+  {
+    "name": "cakephp-5.zip",
+    "bytes": 10526765,
+    "sha256": "729faa3a8a586f55f6ee5bdf99d503324a5a6f27e7243d24e75a233578866392",
+    "entries": 8782,
+    "files": 7288,
+    "expandedBytes": 33633182
+  },
+  {
+    "name": "codeigniter-4.zip",
+    "bytes": 1132114,
+    "sha256": "1bfe823e888e9582564dce68ca94026bbee262a001f38641854d9f4f562cea75",
+    "entries": 834,
+    "files": 684,
+    "expandedBytes": 3529239
+  },
+  {
+    "name": "laminas-3.zip",
+    "bytes": 8600541,
+    "sha256": "e10f7ba9b524213847c63537d6d6b64d888e5776f9f66c3745a27b3d6d053186",
+    "entries": 7670,
+    "files": 6770,
+    "expandedBytes": 32150927
+  }
+]

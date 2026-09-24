@@ -1,0 +1,215 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "526bbfb1e2ba4450a920e1f2a09e034160e4dbf4",
+  "change": "Enable SDL_mixer 2.8.0 bundled minimp3 via Make; retain WAV and Ogg. Play the supplied original MP3 at 44.1 kHz stereo in the responsive cube.",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "comparison": "2026-09-20.json expanded build, before MP3",
+  "compression": {
+    "gzipLevel": 9,
+    "brotliQuality": 11
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652791,
+      "brotli": 465521,
+      "sha256": "f843f8a7da54c78411a6993ca509b151cc16566d4ef2b5a4a9f1de7394b15075"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 46794488,
+      "gzip": 13294488,
+      "brotli": 9067279,
+      "sha256": "83a2e74b4a0e813a0454fbf0ce720e1fd8af40a44be158a64ea5f8ecfa92ba61"
+    },
+    "php.data": {
+      "raw": 30873664,
+      "gzip": 12610294,
+      "brotli": 7698896,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "totals": {
+    "raw": {
+      "before": 51499398,
+      "after": 51556274,
+      "increase": 56876
+    },
+    "gzip": {
+      "before": 13922591,
+      "after": 13947279,
+      "increase": 24688
+    },
+    "brotli": {
+      "before": 9508327,
+      "after": 9532800,
+      "increase": 24473
+    }
+  },
+  "assets": {
+    "WOJTEK3.mp3": {
+      "raw": 3063619,
+      "sha256": "e62c8a6f57d245d9c34137fe7b11eaa717447656fa08b60cadfaaca44aadec3b"
+    },
+    "DejaVuSansMono.ttf": {
+      "raw": 343140,
+      "sha256": "0f5db4f1749979d961019838b160bec74abdf7f9eca69553fe1aa856bbff49a4"
+    },
+    "click.wav": {
+      "raw": 7100,
+      "sha256": "d3ad5b7b843ac66ddf0d70f8afb75ec97ecc2a07b419ffff90e69d0469ab6026"
+    },
+    "loop.ogg": {
+      "raw": 12025,
+      "sha256": "a1b73eee1c5af9e6e9eda1a8f951addff5fba30d59a39c2ad7c5a720f76c1c38"
+    }
+  },
+  "assetTotals": {
+    "before": 362265,
+    "after": 3425884,
+    "addedMp3": 3063619,
+    "notes": "Separate demo downloads, outside the native runtime. Includes the original Ogg for older shared links; the existing icon is reused."
+  },
+  "track": {
+    "title": "Unreal Superhero 3",
+    "artist": "Kenët and rez",
+    "composer": "Kenët and rez",
+    "albumArtist": "Rebels",
+    "album": "chipmusicdisk",
+    "year": "2001",
+    "durationSeconds": 127.582041
+  },
+  "timings": {
+    "browser": "Chromium 152.0.7977.75",
+    "renderer": "SwiftShader",
+    "cpu": "Intel Core i7-7700K",
+    "method": "Uncompressed localhost responses, fresh browser process per sample, native builds and compression idle. Runtime ready excludes loading the PhpWeb wrapper. First PHP includes runtime initialization. First cube frame excludes asset loading.",
+    "startupComparison": {
+      "method": "Three interleaved before/after pairs. Before uses the matched JS/Wasm pair from the expanded build in 2026-09-20.json; after uses the MP3 pair recorded above. Same current cube source and assets for both, with audio off. A local proxy selects the native pair without replacing live package files.",
+      "samples": [
+        {
+          "round": 0,
+          "variant": "before",
+          "bootMs": 1176,
+          "firstPhpMs": 1188,
+          "firstFrameMs": 383.09999990463257
+        },
+        {
+          "round": 0,
+          "variant": "after",
+          "bootMs": 1207.7000002861023,
+          "firstPhpMs": 1231.1000003814697,
+          "firstFrameMs": 359.40000009536743
+        },
+        {
+          "round": 1,
+          "variant": "before",
+          "bootMs": 945.5,
+          "firstPhpMs": 965.0999999046326,
+          "firstFrameMs": 658.5999999046326
+        },
+        {
+          "round": 1,
+          "variant": "after",
+          "bootMs": 917.5999999046326,
+          "firstPhpMs": 938.3000001907349,
+          "firstFrameMs": 320.59999990463257
+        },
+        {
+          "round": 2,
+          "variant": "before",
+          "bootMs": 927.1999998092651,
+          "firstPhpMs": 946.1999998092651,
+          "firstFrameMs": 341.09999990463257
+        },
+        {
+          "round": 2,
+          "variant": "after",
+          "bootMs": 927,
+          "firstPhpMs": 942.1999998092651,
+          "firstFrameMs": 362.19999980926514
+        }
+      ],
+      "medians": {
+        "before": {
+          "bootMs": 945.5,
+          "firstPhpMs": 965.0999999046326,
+          "firstFrameMs": 383.09999990463257
+        },
+        "after": {
+          "bootMs": 927,
+          "firstPhpMs": 942.1999998092651,
+          "firstFrameMs": 359.40000009536743
+        }
+      },
+      "interpretation": "No startup regression demonstrated in this small local sample; the differences do not establish a speedup."
+    },
+    "playback": {
+      "method": "Three fresh browser processes using the MP3 runtime at 640x400. Measure 180 displayed frame intervals muted, then 180 with music after a user gesture. Halt WAV effect channels before the music phase so its PCM comes from the MP3.",
+      "samples": [
+        {
+          "bootMs": 2819.0999999046326,
+          "firstPhpMs": 2921.300000190735,
+          "assetsMs": 106.2000002861023,
+          "firstFrameMs": 2498.2999997138977,
+          "width": 640,
+          "height": 400,
+          "muted": {
+            "frames": 180,
+            "p50Ms": 16.699999999999818,
+            "p95Ms": 33.399999999999636,
+            "fps": 46.958155066263174
+          },
+          "music": {
+            "frames": 180,
+            "p50Ms": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "fps": 58.38090295796577
+          }
+        },
+        {
+          "bootMs": 2249.2000002861023,
+          "firstPhpMs": 2288.2000002861023,
+          "assetsMs": 105.80000019073486,
+          "firstFrameMs": 1475.6999998092651,
+          "width": 640,
+          "height": 400,
+          "muted": {
+            "frames": 180,
+            "p50Ms": 16.699999999999818,
+            "p95Ms": 33.399999999999636,
+            "fps": 50.945318691271375
+          },
+          "music": {
+            "frames": 180,
+            "p50Ms": 16.69999999999891,
+            "p95Ms": 16.799999999999272,
+            "fps": 59.67180507210343
+          }
+        },
+        {
+          "bootMs": 1862.0999999046326,
+          "firstPhpMs": 1915.5999999046326,
+          "assetsMs": 115.7999997138977,
+          "firstFrameMs": 1591.5,
+          "width": 640,
+          "height": 400,
+          "muted": {
+            "frames": 180,
+            "p50Ms": 16.699999999999818,
+            "p95Ms": 33.399999999999636,
+            "fps": 49.54446615837714
+          },
+          "music": {
+            "frames": 180,
+            "p50Ms": 16.69999999999891,
+            "p95Ms": 16.80000000000109,
+            "fps": 58.698842328387414
+          }
+        }
+      ],
+      "interpretation": "Music playback averaged 58.4-59.7 FPS, with 16.7 ms median and 16.8 ms p95 frame intervals. Muted is always measured first, so warm-up prevents attributing the higher later FPS to music. Standalone startup measurements were slower than the subsequent matched comparison; do not compare their absolute startup values with historical samples to infer decoder overhead."
+    }
+  }
+}

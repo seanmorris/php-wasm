@@ -1,5 +1,5 @@
 import { PhpBase } from './PhpBase.mjs';
-import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { commitTransaction, requestWebLock, startTransaction } from './webTransactions.mjs';
 
 const NUM = 'number';
 const STR = 'string';
@@ -606,7 +606,7 @@ export class PhpDbgWeb extends PhpBase
 
 		this.queue.push([callback, params, _accept, _reject]);
 
-		navigator.locks.request('php-wasm-fs-lock', async () => {
+		requestWebLock('php-wasm-fs-lock', async () => {
 			if(!this.queue.length)
 			{
 				return;

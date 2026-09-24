@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit f8a0ee2561989abf4278748b1f4724e1c01e419f
+Source: https://github.com/seanmorris/php-wasm-site/blob/f8a0ee2561989abf4278748b1f4724e1c01e419f/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -39,17 +39,28 @@ Selects the PHP runtime version to load. The current defaults in `source/` are `
 const php = new PhpWeb({version: '8.4'});
 ```
 
-### variant
+### SDL runtime selection
 
-*string*
-
-Selects a packaged runtime variant. The empty string uses the standard runtime.
-`_sdl` selects the SDL-enabled `PhpWeb` runtime for supported PHP versions.
-`PhpNode` currently supports only the standard empty variant.
+Install `php-sdl-wasm` and choose a versioned entry for SDL graphics, input
+and audio. The ordinary `php-wasm` package stays independent of that build.
+The previous `variant: '_sdl'` option is no longer supported.
 
 ```javascript
-const php = new PhpWeb({version: '8.4', variant: '_sdl'});
+import {PhpSdl} from 'php-sdl-wasm/php8.4-sdl.mjs';
+
+const php = new PhpSdl({canvas: document.querySelector('canvas')});
 ```
+
+Create the canvas first. See [SDL and OpenGL](/extensions/sdl.html) for the
+package, build options and example controls.
+
+### canvas
+
+*HTMLCanvasElement*
+
+Pass the canvas used by an SDL-enabled browser runtime. The cube example needs
+WebGL2 and a focusable canvas (`tabindex="0"`) for keyboard input. Pass a fresh
+canvas when replacing the runtime or switching graphics context types.
 
 ### sharedLibs
 
@@ -215,7 +226,7 @@ All `PhpBase` implementations also expose the queued helper methods below:
 - `php.inputString(string)`
 - `php.input(bytes)`
 - `php.analyzePath(path)`
-- `php.readdir(path)`
+- `php.readdir(path, options?)`
 - `php.readFile(path, options)`
 - `php.stat(path)`
 - `php.mkdir(path)`
@@ -225,3 +236,9 @@ All `PhpBase` implementations also expose the queued helper methods below:
 - `php.unlink(path)`
 
 These methods run through the same queueing and transaction logic as `run`, `exec`, `r`, and `x`.
+
+`readdir` returns `string[]` by default. With `{withFileTypes: true}`, it returns
+`Array<{name: string, isFolder: boolean}>`. Both forms include `.` and `..`;
+classification follows links and metadata errors reject the call. See
+[Filesystem Operations](/filesystem/fs-operations.html#php.readdir) and
+[Transactions](/filesystem/transactions.html) for persistence behavior.

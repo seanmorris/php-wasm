@@ -3,7 +3,9 @@
 set -euo pipefail
 
 PHP_VERSION="${1:?usage: verify-sdl-main-module.sh <php-version>}"
-WRAPPER="packages/php-wasm/php${PHP_VERSION}_sdl-web.mjs"
+WRAPPER="packages/php-sdl-wasm/php${PHP_VERSION}-sdl-runtime.mjs"
+
+node bin/package-sdl.mjs --verify packages/php-sdl-wasm "${PHP_VERSION}"
 
 if [[ ! -f "${WRAPPER}" ]]; then
 	echo "missing SDL wrapper artifact: ${WRAPPER}" >&2

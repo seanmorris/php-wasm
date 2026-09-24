@@ -60,7 +60,7 @@ export function createWorker(PhpCloudflare, factory, wasm)
 				}
 				const database = input.database === 'second' ? env.SECOND_DB : env.DB;
 				const php = new PhpCloudflare({
-					cfd1: input.case === 'd1-missing' ? {} : { mainDb: database }
+					cfd1: input.case === 'd1-missing' ? {} : { mainDb: input.prepareOnly ? { prepare: sql => database.prepare(sql) } : database }
 					, shared: {
 						requestId: input.id ?? 'fixture'
 						, delay: { then(resolve) { setTimeout(() => resolve(42), 2); } }
@@ -76,6 +76,10 @@ export function createWorker(PhpCloudflare, factory, wasm)
 				let code;
 				switch(input.case)
 				{
+					case 'd1-features':
+						// PHP supplied only by the local regression harness.
+						code = input.code;
+						break;
 					case 'baseline':
 						code = `echo json_encode([PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION, PHP_SAPI,
 							extension_loaded('vrzno'), extension_loaded('zip'), extension_loaded('zlib'),
@@ -169,9 +173,10 @@ export function createWorker(PhpCloudflare, factory, wasm)
 					case 'd1-unsupported':
 						code = `$pdo = new PDO('cfd1:mainDb', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 							$results = [];
-							foreach ([fn() => $pdo->beginTransaction(), fn() => $pdo->lastInsertId(),
-								fn() => $pdo->quote('x'), fn() => $pdo->exec('SELECT 1'),
-								fn() => $pdo->prepare('SELECT :named')] as $operation) {
+							foreach ([fn() => $pdo->beginTransaction(), fn() => $pdo->lastInsertId('sequence'),
+								fn() => $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, true),
+								fn() => $pdo->setAttribute(PDO::ATTR_AUTOCOMMIT, false),
+								fn() => $pdo->prepare('SELECT @named')] as $operation) {
 								try { $operation(); $results[] = false; } catch (PDOException $error) { $results[] = true; }
 							} echo json_encode($results);`;
 						break;

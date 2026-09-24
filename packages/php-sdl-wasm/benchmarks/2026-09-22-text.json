@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-input.json",
+  "change": "Browser Unicode and composition transport with text-input lifecycle cleanup",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4768089,
+      "gzip": 654285,
+      "brotli": 467828,
+      "sha256": "20466106fa8e92479e37d8d16efce44934f991919cf85b89db31270d489ac4b0"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47100102,
+      "gzip": 13356777,
+      "brotli": 9111731,
+      "sha256": "6c2c3d360a97c00953fe78e641c9415898bfd8978ecd3a5c76fd73f2e87e38b3"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4777472,
+      "gzip": 656863,
+      "brotli": 468520,
+      "sha256": "530de7a895df278f7c381008c1fbfef51f0c5e999b76ef40f79623e10c0bb939"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47102444,
+      "gzip": 13357308,
+      "brotli": 9114933,
+      "sha256": "0623ffde94e8152904217399351a157009c61b00bbcb0685a6464c1cfcc6a047"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51868191,
+      "after": 51879916,
+      "increase": 11725,
+      "percent": 0.022605376771285508
+    },
+    "gzip": {
+      "before": 14011062,
+      "after": 14014171,
+      "increase": 3109,
+      "percent": 0.022189609895381237
+    },
+    "brotli": {
+      "before": 9579559,
+      "after": 9583453,
+      "increase": 3894,
+      "percent": 0.040649052842620416
+    }
+  }
+}

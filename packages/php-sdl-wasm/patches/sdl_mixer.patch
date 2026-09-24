@@ -1,0 +1,204 @@
+--- a/config.m4
++++ b/config.m4
+@@ -1,44 +1,12 @@
+-dnl config.m4 for extension sdl_mixer
+-
+-PHP_ARG_ENABLE([sdl_mixer],
+-    [whether to enable sdl_mixer support],
+-    [AS_HELP_STRING([--enable-sdl_mixer],
+-        [Enable sdl_mixer support])],
+-    [no])
+-
++dnl php-wasm: use the native prerequisites built by packages/sdl/extensions.mak.
++PHP_ARG_ENABLE([sdl_mixer], [for sdl_mixer support],
++  [AS_HELP_STRING([--enable-sdl_mixer=DIR], [Enable sdl_mixer using libraries in DIR])], [no])
+ if test "$PHP_SDL_MIXER" != "no"; then
+-    AC_DEFINE(WITH_SDL_MIXER, 1, [Whether you want SDL Mixer])
+-    AC_MSG_CHECKING([for SDL_mixer.h])
+-    for i in $PHP_SDL_MIXER /usr/local /usr; do
+-      if test -r $i/include/SDL2/SDL_mixer.h; then
+-        SDL_MIXER_DIR=$i
+-        AC_DEFINE(HAVE_SDL_MIXER_H, 1, [Whether you have SDL2/SDL_mixer.h])
+-        PHP_ADD_INCLUDE($i/include/SDL2)
+-      fi
+-    done
+-
+-    if test -z "$SDL_MIXER_DIR"; then
+-      AC_MSG_RESULT([not found])
+-      AC_MSG_ERROR([Please reinstall the SDL_mixer distribution including development files])
+-    else
+-      AC_MSG_RESULT([found])
+-    fi
+-
+-    AC_CHECK_LIB(SDL2_mixer, Mix_PlayMusic, [
+-      PHP_ADD_LIBRARY(SDL2_mixer,, SDL_MIXER_SHARED_LIBADD)
+-    ], [
+-      AC_MSG_ERROR([libSDL2_mixer not found!])
+-    ])
+-
+-    AC_CHECK_LIB(SDL2_mixer, Mix_HasMusicDecoder, [
+-      AC_DEFINE(HAVE_MIX_HASMUSICDECODER, 1, [ Have sdl_mixer support ])
+-    ])
+-
+-  AC_DEFINE(HAVE_SDL_MIXER, 1, [ Have sdl_mixer support ])
+-
+-  PHP_ADD_BUILD_DIR(PHP_EXT_BUILDDIR(sdl_mixer)[/src])
++  PHP_ADD_INCLUDE($PHP_SDL_MIXER/include)
++  PHP_ADD_INCLUDE($PHP_SDL_MIXER/include/SDL2)
++  PHP_ADD_LIBRARY_WITH_PATH(SDL2_mixer, $PHP_SDL_MIXER/lib, SDL_MIXER_SHARED_LIBADD)
++  AC_DEFINE(HAVE_MIX_HASMUSICDECODER, 1, [SDL_mixer 2.8 provides decoder queries])
+   PHP_SUBST(SDL_MIXER_SHARED_LIBADD)
+-
+   PHP_NEW_EXTENSION(sdl_mixer, src/effect_position.c src/effect_stereoreverse.c src/Mix_Music.c src/Mix_Chunk.c src/music.c src/mixer.c src/php_sdl_mixer.c, $ext_shared)
+   PHP_ADD_EXTENSION_DEP(sdl_mixer, sdl)
+ fi
+--- a/src/php_sdl_mixer_arginfo.h
++++ b/src/php_sdl_mixer_arginfo.h
+@@ -1,5 +1,5 @@
+ /* This is a generated file, edit the .stub.php file instead.
+- * Stub hash: 06f9569d612687e9fe0e904dcce9ebd88f9e6997 */
++ * Stub hash: 3a318186aac2649e27d8397db0a19283675f88d5 */
+ 
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_Init, 0, 1, IS_LONG, 0)
+ 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+@@ -20,7 +20,7 @@
+ 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+ 	ZEND_ARG_TYPE_INFO(0, channels, IS_LONG, 0)
+ 	ZEND_ARG_TYPE_INFO(0, chunksize, IS_LONG, 0)
+-	ZEND_ARG_TYPE_INFO(0, device, IS_STRING, 0)
++	ZEND_ARG_TYPE_INFO(0, device, IS_STRING, 1)
+ 	ZEND_ARG_TYPE_INFO(0, allowed_changes, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -34,12 +34,12 @@
+ 	ZEND_ARG_TYPE_INFO(1, channels, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV_RW, 0, 2, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV_RW, 0, 2, Mix_Chunk, 1)
+ 	ZEND_ARG_OBJ_INFO(0, src, SDL_RWops, 0)
+ 	ZEND_ARG_TYPE_INFO(0, freesrc, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV, 0, 1, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadWAV, 0, 1, Mix_Chunk, 1)
+ 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -50,7 +50,7 @@
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetNumChunkDecoders, 0, 0, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetChunkDecoder, 0, 1, IS_STRING, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetChunkDecoder, 0, 1, IS_STRING, 1)
+ 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+@@ -145,17 +145,17 @@
+ 
+ #define arginfo_Mix_Playing arginfo_Mix_HaltChannel
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_GetChunk, 0, 1, Mix_Chunk, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_GetChunk, 0, 1, Mix_Chunk, 1)
+ 	ZEND_ARG_TYPE_INFO(0, channel, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+ #define arginfo_Mix_CloseAudio arginfo_Mix_Quit
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS, 0, 1, Mix_Music, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS, 0, 1, Mix_Music, 1)
+ 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS_RW, 0, 2, Mix_Music, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_Mix_LoadMUS_RW, 0, 2, Mix_Music, 1)
+ 	ZEND_ARG_OBJ_INFO(0, src, SDL_RWops, 0)
+ 	ZEND_ARG_TYPE_INFO(0, freesrc, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+@@ -230,7 +230,7 @@
+ 	ZEND_ARG_TYPE_INFO(0, paths, IS_STRING, 0)
+ ZEND_END_ARG_INFO()
+ 
+-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetSoundFonts, 0, 0, IS_STRING, 0)
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetSoundFonts, 0, 0, IS_STRING, 1)
+ ZEND_END_ARG_INFO()
+ 
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_SetPosition, 0, 3, IS_LONG, 0)
+@@ -249,11 +249,14 @@
+ 	ZEND_ARG_TYPE_INFO(0, flip, IS_LONG, 0)
+ ZEND_END_ARG_INFO()
+ 
+-#define arginfo_Mix_SetError arginfo_Mix_GetSoundFonts
+-
+-#define arginfo_Mix_GetError arginfo_Mix_GetSoundFonts
+-
+-#define arginfo_Mix_ClearError arginfo_Mix_GetSoundFonts
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_SetError, 0, 1, IS_LONG, 0)
++	ZEND_ARG_TYPE_INFO(0, error, IS_STRING, 0)
++ZEND_END_ARG_INFO()
++
++ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_Mix_GetError, 0, 0, IS_STRING, 0)
++ZEND_END_ARG_INFO()
++
++#define arginfo_Mix_ClearError arginfo_Mix_Quit
+ 
+ 
+ ZEND_FUNCTION(Mix_Init);
+--- a/src/php_sdl_mixer.stub.php
++++ b/src/php_sdl_mixer.stub.php
+@@ -8,14 +8,14 @@
+ function Mix_Init(int $flags): int {}
+ function Mix_Quit(): void {}
+ function Mix_OpenAudio(int $frequency, int $format, int $channels, int $chunksize): int {}
+-function Mix_OpenAudioDevice(int $frequency, int $format, int $channels, int $chunksize, string $device, int $allowed_changes): int {}
++function Mix_OpenAudioDevice(int $frequency, int $format, int $channels, int $chunksize, ?string $device, int $allowed_changes): int {}
+ function Mix_AllocateChannels(int $numchans): int {}
+ function Mix_QuerySpec(int &$frequency, int &$format, int &$channels): int {}
+-function Mix_LoadWAV_RW(SDL_RWops $src, int $freesrc): Mix_Chunk {}
+-function Mix_LoadWAV(string $file): Mix_Chunk {}
++function Mix_LoadWAV_RW(SDL_RWops $src, int $freesrc): ?Mix_Chunk {}
++function Mix_LoadWAV(string $file): ?Mix_Chunk {}
+ function Mix_FreeChunk(Mix_Chunk $chunk): void {}
+ function Mix_GetNumChunkDecoders(): int {}
+-function Mix_GetChunkDecoder(int $index): string {}
++function Mix_GetChunkDecoder(int $index): ?string {}
+ function Mix_HasChunkDecoder(string $name): bool {}
+ function Mix_ReserveChannels(int $num): int {}
+ function Mix_GroupChannel(int $which, int $tag): int {}
+@@ -38,13 +38,13 @@
+ function Mix_Resume(int $channel): void {}
+ function Mix_Paused(int $channel): int {}
+ function Mix_Playing(int $channel): int {}
+-function Mix_GetChunk(int $channel): Mix_Chunk {}
++function Mix_GetChunk(int $channel): ?Mix_Chunk {}
+ function Mix_CloseAudio(): void {}
+-function Mix_LoadMUS(string $file): Mix_Music {}
+-function Mix_LoadMUS_RW(SDL_RWops $src, int $freesrc): Mix_Music {}
++function Mix_LoadMUS(string $file): ?Mix_Music {}
++function Mix_LoadMUS_RW(SDL_RWops $src, int $freesrc): ?Mix_Music {}
+ function Mix_FreeMusic(Mix_Music $music): void {}
+ function Mix_GetNumMusicDecoders(): int {}
+-function Mix_GetMusicDecoder(int $index): string {}
++function Mix_GetMusicDecoder(int $index): ?string {}
+ #ifdef HAVE_MIX_HASMUSICDECODER
+ function Mix_HasMusicDecoder(string $name): bool {}
+ #endif
+@@ -64,15 +64,14 @@
+ function Mix_SetSynchroValue(int $value): int {}
+ function Mix_GetSynchroValue(): int {}
+ function Mix_SetSoundFonts(string $paths): int {}
+-function Mix_GetSoundFonts(): string {}
++function Mix_GetSoundFonts(): ?string {}
+ function Mix_SetPosition(int $channel, int $angle, int $distance): int {}
+ function Mix_SetDistance(int $channel, int $distance): int {}
+ function Mix_SetReverseStereo(int $channel, int $flip): int {}
+ 
+ /** @alias SDL_SetError */
+-function Mix_SetError(): string {}
++function Mix_SetError(string $error): int {}
+ /** @alias SDL_GetError */
+ function Mix_GetError(): string {}
+ /** @alias SDL_ClearError */
+-function Mix_ClearError(): string {}
+-
++function Mix_ClearError(): void {}

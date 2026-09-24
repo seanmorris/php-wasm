@@ -34,13 +34,13 @@ Important distinction:
 
 - `WITH_WAITLINE`: defaults to `0` in the custom builder. Set it to `1` to compile the extension in.
 - `WAITLINE_REPOSITORY`: optional Git repository override. Defaults to the upstream Waitline repository.
-- `WAITLINE_REF`: Git commit or ref to build. The default pins `acd126e69f56f281a9dccb0e4eea24786403f46d`, the readline API and interactive-input implementation used by the integration tests.
+- `WAITLINE_REF`: Git commit or ref to build. The default pins `6dd8d818d737a301f21c938c05523de345a604ff`, the readline API and interactive-input implementation used by the integration tests.
 - `WAITLINE_BRANCH`: legacy branch override, used only when `WAITLINE_REF` is not explicitly set. It no longer defaults to `master`, which lacks the readline API.
 - `WAITLINE_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `waitline` repository during the build.
 
 Imports verify source identity and contents on every build. Changing refs or development checkouts, editing headers (including generated arginfo), or adding/removing inputs refreshes both the staged source and the PHP extension. Unchanged imports preserve timestamps and avoid recompilation. PHP configuration, base, CLI, CGI, and debugger builds all depend on the active extension manifest.
 
-Managed inputs are root-level C, header, and PHP stub files, `config.m4`, `config.w32`, `README.md`, `CREDITS`, and `LICENSE`. Development checkouts are read-only inputs and may live outside the Docker mount; only managed inputs are transferred. The builder owns all destination writes, so cached root-owned outputs require no host-side ownership changes.
+Managed inputs are root-level C, header, and PHP stub files, `js/waitline_*.js`, `waitline_js.h.in`, `Makefile.frag`, `config.m4`, `config.w32`, `README.md`, `CREDITS`, and `LICENSE`. Make embeds the JS into the native object through Emscripten’s directives-only preprocessor; generated headers and dependencies stay in the build directory. Development checkouts are read-only inputs and may live outside the Docker mount; only managed inputs are transferred. The builder owns all destination writes, so cached root-owned outputs require no host-side ownership changes.
 
 Source manifests and a pending-import record repair interrupted updates. Legacy imports without a valid manifest adopt the managed input classes above; Git metadata, compiled objects, and unrelated files are preserved. Do not use an import destination as `WAITLINE_DEV_PATH`.
 

@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-22T13:25:25.047Z",
+  "baselineNativeCommit": "f191496",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-focus-size.json",
+  "change": "Preserve errors on closed music halt and clear stale mixer format at device shutdown",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-cleanup-final/runtime PHP_ASSET_DIR=.cache/sdl-cleanup-final/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Baseline metrics reused after validating artifact hashes and identical compressor versions/settings; candidate measured here."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781330,
+      "gzip": 657890,
+      "brotli": 469642,
+      "sha256": "208026a0231efa0cfe73e028c1e349870d8b4a87e588954587ace1fe88912c11"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104472,
+      "gzip": 13359259,
+      "brotli": 9114072,
+      "sha256": "7531c4e0b213f40153cbe6b01402fddd83dd30f725d4616e87c2fe6c72290314"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781330,
+      "gzip": 657885,
+      "brotli": 469577,
+      "sha256": "cc04151ba420cd2ea96a4e4672a44b16b3857c77f1661d8d27b02a07479b3ff8"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104533,
+      "gzip": 13359316,
+      "brotli": 9115068,
+      "sha256": "952ba275c7f828d10cf275a94fec4336c7a5e9326c0acf118a783455abae065e"
+    }
+  },
+  "totals": {
+    "raw": {
+      "before": 51885802,
+      "after": 51885863,
+      "increase": 61,
+      "percent": 0.0001175658805466667
+    },
+    "gzip": {
+      "before": 14017149,
+      "after": 14017201,
+      "increase": 52,
+      "percent": 0.0003709741545873558
+    },
+    "brotli": {
+      "before": 9583714,
+      "after": 9584645,
+      "increase": 931,
+      "percent": 0.009714396735962697
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  }
+}

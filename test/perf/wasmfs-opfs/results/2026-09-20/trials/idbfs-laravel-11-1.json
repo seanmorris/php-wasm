@@ -1,0 +1,432 @@
+{
+  "backend": "idbfs",
+  "framework": "laravel-11",
+  "name": "Laravel 11",
+  "round": 1,
+  "runLabel": "clean-repeat",
+  "archive": {
+    "name": "laravel-11.zip",
+    "bytes": 25034430,
+    "sha256": "6985fa0a1fa7b402d8e08a71b345af0f270ebf2d4ce9564370ece84bc15a5e1b"
+  },
+  "assetSha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      2.45,
+      2.54,
+      3
+    ]
+  },
+  "started": "2026-09-20T16:53:49.352Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 518.0999999046326,
+      "flushMs": 256,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 519.7000002861023,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 497.90000009536743,
+      "flushMs": 248.7000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 499.2000002861023,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 495.5,
+      "flushMs": 247.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 497,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 524.3000001907349,
+      "flushMs": 278.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 525.7000002861023,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 498.1000003814697,
+      "flushMs": 249.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 499.6000003814697,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 475.7999997138977,
+      "flushMs": 240.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 477.5,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 480.40000009536743,
+      "flushMs": 239.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 481.80000019073486,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 477.5,
+      "flushMs": 239.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 479,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 514.1000003814697,
+      "flushMs": 264.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 515.9000000953674,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 474,
+      "flushMs": 228,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 475.6000003814697,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 511.40000009536743,
+      "flushMs": 265.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 512.9000000953674,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 614.5999999046326,
+      "flushMs": 250.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 616.0999999046326,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 520.3000001907349,
+      "flushMs": 256.30000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 521.5999999046326,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 473.59999990463257,
+      "flushMs": 241.30000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 475,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 505.2000002861023,
+      "flushMs": 253.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 506.69999980926514,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 499.59999990463257,
+      "flushMs": 252.2000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 500.90000009536743,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 485.2999997138977,
+      "flushMs": 251,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 486.69999980926514,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 548.7000002861023,
+      "flushMs": 261.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 550.2000002861023,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 532.7000002861023,
+      "flushMs": 295.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 533.9000000953674,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+      "status": 200,
+      "cgiMs": 548.3999996185303,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 549.6999998092651,
+      "bytes": 34207,
+      "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/robots.txt",
+      "status": 200,
+      "cgiMs": 1,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2,
+      "bytes": 24,
+      "bodySha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/robots.txt",
+      "status": 200,
+      "cgiMs": 1.0999999046325684,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.1999998092651367,
+      "bytes": 24,
+      "bodySha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/robots.txt",
+      "status": 200,
+      "cgiMs": 1.0999999046325684,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2,
+      "bytes": 24,
+      "bodySha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/robots.txt",
+      "status": 200,
+      "cgiMs": 1,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2,
+      "bytes": 24,
+      "bodySha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/robots.txt",
+      "status": 200,
+      "cgiMs": 1,
+      "flushMs": 308.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 1.9000000953674316,
+      "bytes": 24,
+      "bodySha256": "e5c4b84484ee4216e9373be99380320c25dd94805f99f0a805846f087636553f",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 416.5,
+    "mountHydrateMs": 36.80000019073486,
+    "totalMs": 454.30000019073486,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 609.523351,
+  "install": {
+    "downloadMs": 37.799999713897705,
+    "archiveBytes": 25034430,
+    "archiveWriteMs": 114.5,
+    "extractAndFlushMs": 2524.7000002861023,
+    "installMs": 2639.300000190735,
+    "details": {
+      "files": 9447,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 2524.4000000953674,
+    "flushMs": 1370.8000001907349,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+    "status": 200,
+    "cgiMs": 870.8999996185303,
+    "flushMs": 364.7999997138977,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 872.6999998092651,
+    "bytes": 34207,
+    "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+    "valid": true
+  },
+  "render": {
+    "title": "Laravel",
+    "text": "Click here to edit this template!\nDocumentation\n\nLaravel has wonderful documentation covering every aspect of the framework. Whether you are a newcomer or have prior experience with Laravel, we recommend reading our documentation from beginning to end.\n\nLaracasts\n\nLaracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.\n\nLaravel News\n\nLaravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials.\n\nVibrant Ecosystem\n\nLaravel's robust library of first-party tools and libraries, such as Forge, Vapor, Nova, Envoyer, and Herd help you take your projects to the next level. Pair them with powerful open source libraries like Cashier, Dusk, Echo, Horizon, Sanctum, Telescope, and more.\n\nLaravel v11.5.0 (PHP v8.3.11)",
+    "images": [
+      {
+        "url": "https://laravel.com/assets/img/welcome/background.svg",
+        "complete": true,
+        "width": 136
+      },
+      {
+        "url": "https://laravel.com/assets/img/welcome/docs-light.svg",
+        "complete": true,
+        "width": 132
+      },
+      {
+        "url": "https://laravel.com/assets/img/welcome/docs-dark.svg",
+        "complete": true,
+        "width": 132
+      }
+    ],
+    "wallMs": 624.083686
+  },
+  "restart": {
+    "instantiateMs": 408.40000009536743,
+    "mountHydrateMs": 1105.5999999046326,
+    "totalMs": 1515.5,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 1576.091204000002,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laravel-11/",
+    "status": 200,
+    "cgiMs": 1230.2999997138977,
+    "flushMs": 312.2000002861023,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 1232.1999998092651,
+    "bytes": 34207,
+    "bodySha256": "5eef1a9f010abe6e34779021aabcabd12ef96960104c0c08192be1efad8ccd36",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T16:54:07.474Z"
+}

@@ -1,0 +1,111 @@
+{
+  "date": "2026-09-20",
+  "baselineCommit": "eca81a6",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "browser": "Chromium 152.0.7977.75",
+  "renderer": "SwiftShader",
+  "cpu": "Intel Core i7-7700K",
+  "method": {
+    "compression": {
+      "gzipLevel": 9,
+      "brotliQuality": 11
+    },
+    "timings": "Three fresh browser processes per build; uncompressed localhost responses; native builds and compression idle. Runtime ready excludes loading the PhpWeb wrapper itself. First PHP timing includes runtime initialization. Cube first frame excludes asset loading. Frame samples contain 180 displayed frame intervals.",
+    "expandedIncludes": "SDL_image, SDL_mixer, SDL_ttf, browser OpenGL bindings and Emscripten/SDL callback fixes."
+  },
+  "baseline": {
+    "sizes": {
+      "php8.4_sdl-web.mjs": {
+        "raw": 4732513,
+        "gzip": 648078,
+        "brotli": 462161,
+        "sha256": "5a012344271425364824734f59b78f02de3fe1bb6c86a9f3d5c1c98a22cb5202"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "raw": 46210017,
+        "gzip": 13154752,
+        "brotli": 8852323,
+        "sha256": "c2541d8d28c0b3bb85e41931b3369927b0c2870e86db15e34584ab31679edeb8"
+      },
+      "php.data": {
+        "raw": 30873664,
+        "gzip": 12610294,
+        "brotli": 7698896,
+        "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+      }
+    },
+    "timings": [
+      {
+        "bootMs": 858.4000000953674,
+        "firstPhpMs": 875.6999998092651
+      },
+      {
+        "bootMs": 814.7000002861023,
+        "firstPhpMs": 836.8000001907349
+      },
+      {
+        "bootMs": 801,
+        "firstPhpMs": 824
+      }
+    ]
+  },
+  "expanded": {
+    "sizes": {
+      "php8.4_sdl-web.mjs": {
+        "raw": 4761786,
+        "gzip": 652790,
+        "brotli": 465145,
+        "sha256": "89ae621eacd18b9d547fcdb5a41bccc85ca34192f33202c3d5c529e5e80f4691"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "raw": 46737612,
+        "gzip": 13269801,
+        "brotli": 9043182,
+        "sha256": "40bb58faf2c08ec312883a2036a6e4cd823e9c7f1efde0ed501504d748da0a51"
+      },
+      "php.data": {
+        "raw": 30873664,
+        "gzip": 12610294,
+        "brotli": 7698896,
+        "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+      }
+    },
+    "timings": [
+      {
+        "bootMs": 839.7000002861023,
+        "firstPhpMs": 860.1000003814697,
+        "assetsMs": 11,
+        "firstFrameMs": 578.8000001907349,
+        "frameMs": {
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000273
+        },
+        "fps": 58.698842328387414
+      },
+      {
+        "bootMs": 887.0999999046326,
+        "firstPhpMs": 903.5999999046326,
+        "assetsMs": 16.59999990463257,
+        "firstFrameMs": 614.4000000953674,
+        "frameMs": {
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728
+        },
+        "fps": 59.345224357917644
+      },
+      {
+        "bootMs": 849.5,
+        "firstPhpMs": 866.5999999046326,
+        "assetsMs": 10.400000095367432,
+        "firstFrameMs": 323.80000019073486,
+        "frameMs": {
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728
+        },
+        "fps": 54.82289160296043
+      }
+    ]
+  }
+}

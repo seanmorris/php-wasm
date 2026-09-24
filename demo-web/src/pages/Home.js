@@ -52,9 +52,9 @@ function Home()
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
 	useEffect(() => {
-		if(query.has('code') || query.has('demo'))
+		if(query.has('code') || query.has('demo') || new URLSearchParams(window.location.hash.slice(1)).has('code'))
 		{
-			window.location = basePath(`embedded-php.html${window.location.search}`);
+			window.location = basePath(`embedded-php.html${window.location.search}${window.location.hash}`);
 		}
 	}, [query]);
 
@@ -87,7 +87,7 @@ function Home()
 				<Header />
 				<h2>Select a demo:</h2>
 				<div className='row'>
-					<a className = "big-link inset" href = {basePath('embedded-php.html?demo=sdl-sine.php')}>
+					<a className = "big-link inset" href = {basePath('embedded-php.html?demo=sdl-cube.php')}>
 						<div className = "big-icon embedded">
 							<img alt = "page showing php logo" src = {phpPageIcon} />
 						</div>
@@ -139,11 +139,6 @@ function Home()
 					<a href = {basePath('query-workbench.html')} className="icon-box">
 						<img src = {rolodexIcon} alt = "" />
 						<span>Query Workbench</span>
-					</a>
-
-					<a target = "_blank" href = {basePath('waitline-preview.html')} className="icon-box" rel="noreferrer">
-						<img src = {cmdIcon} alt = "waitline Readline Test" />
-						<span>waitline / Readline Test</span>
 					</a>
 
 					<a target = "_blank" href = {basePath('cli-preview.html')} className="icon-box" rel="noreferrer">

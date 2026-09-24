@@ -1,0 +1,52 @@
+--- a/src/event.c
++++ b/src/event.c
+@@ -172,7 +172,7 @@
+ PHP_FUNCTION(SDL_PollEvent)
+ {
+ 	zval *object;
+-	SDL_Event event;
++	SDL_Event event = {0};
+ 	int ret;
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O/", &object, get_php_sdl_event_ce()) == FAILURE) {
+@@ -181,14 +181,16 @@
+ 
+ 	ret = SDL_PollEvent(&event);
+ 
+-	sdl_event_to_zval(&event, object);
++	if (ret) {
++		sdl_event_to_zval(&event, object);
++	}
+ 	RETURN_LONG(ret);
+ }
+ 
+ PHP_FUNCTION(SDL_WaitEvent)
+ {
+ 	zval *object = NULL;
+-	SDL_Event event;
++	SDL_Event event = {0};
+ 	int ret;
+ 
+ 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O/", &object, get_php_sdl_event_ce()) == FAILURE) {
+@@ -196,7 +198,9 @@
+ 	}
+ 
+ 	ret = SDL_WaitEvent(&event);
+-	sdl_event_to_zval(&event, object);
++	if (ret) {
++		sdl_event_to_zval(&event, object);
++	}
+ 	
+ 	RETURN_LONG(ret);
+ }
+@@ -268,6 +272,10 @@
+ 	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("type"), ZEND_ACC_PUBLIC);
+ 	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("key"), ZEND_ACC_PUBLIC);
+ 	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("motion"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("button"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("window"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jbutton"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jaxis"), ZEND_ACC_PUBLIC);
+ 
+ 	return SUCCESS;
+ }

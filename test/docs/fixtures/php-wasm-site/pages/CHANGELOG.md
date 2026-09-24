@@ -2,14 +2,34 @@
 title: CHANGELOG
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/CHANGELOG.md
+Vendored from php-wasm-site commit eec9df8786a76525f3a07eaf85e597b3e8e57ff9
+Source: https://github.com/seanmorris/php-wasm-site/blob/eec9df8786a76525f3a07eaf85e597b3e8e57ff9/pages/CHANGELOG.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
 # php-wasm
 
 Changes
+
+## Unreleased
+
+* SDL_mixer now decodes MP3 through its bundled minimp3 implementation. The cube plays the supplied **Unreal Superhero 3** by **Kenët and rez** and displays the artist credit from the file's ID3 tags.
+* Embedded PHP links now store source in the URL fragment, avoiding request-header limits while preserving old query links. The SDL cube fills its preview and adapts its viewport, perspective, and text overlay to resizing without interpolating its pixel-art texture.
+* Expanded the `_sdl` browser runtime with SDL_image, SDL_mixer, SDL_ttf, and PHP 8 OpenGL shader bindings through the existing Make build. The SDL Cube demo uses the `sean-icon-32` texture with nearest filtering, text, focused keyboard controls, and audio after a user gesture. Added resource cleanup, context recovery, checked asset loading, and PHP 8.0–8.5 coverage across all three library profiles. See [SDL and OpenGL](/extensions/sdl.html) for availability, build flags, supported APIs, and measurements.
+* Made the CGI queue timing tests portable to pinned Deno 2.5.6 without changing the 25 ms idle wait or 250 ms processing bound. The fast Deno gate now includes the queue suite before native builds.
+* Added typed directory listings with `readdir(path, {withFileTypes: true})` across runtime wrappers and declarations. Browser CGI reads refresh storage without flushing, and writes still wait for persistence. The VS Code bridge forwards listing options so updated File Bus hosts can expand and search directories without per-entry RPCs.
+* Expanded the lightweight editor's file handling with explicit Save, untitled documents, file/folder operations, transfers, recovery, and conflict checks. Empty workspaces retain a saveable untitled document. Removed the redundant standalone Waitline link from the home-page extras.
+* Expanded PDO-CFD1 with named/numbered parameters, direct execution, quoting, insert IDs, binary values, buffered scroll cursors, and result metadata. Atomic `cfd1Batch()` reuses bound PDO statements; ordinary `execute([...])` remains available without explicit binding.
+* Cloudflare builds now use the ordinary Make/Docker Compose flow and a selectable configuration file. The CLI honors `.php-wasm-rc`; shared build workspaces preserve incremental native state across unchanged builds and isolate different configurations. Packaging leaves the raw JavaScript/Wasm pair intact.
+* Consolidated the PGlite, CFD1, Vrzno, and Waitline source importers and their regression fixtures. Each package command passes its policy to one shared importer in the builder workspace; refs, input policies, manifests, and build behavior are preserved. CI covers checkout, installed builder, Cloudflare snapshot, and Docker ownership layouts, including CFD1. See the [importer maintenance notes](https://github.com/seanmorris/php-wasm/blob/develop/bin/README.md).
+* Import the PHP 8.0–8.5 PDO-CFD1 driver directly from its upstream commit. The driver fixes and unit tests now live in PDO-CFD1; php-wasm no longer applies or ships a compatibility patch. Existing imported-source manifests migrate to the direct source on the next build.
+* Corrected runtime declarations and package exports for Deno, TypeScript Bundler/NodeNext resolution, and CommonJS. Existing wrapper import paths remain supported; CommonJS entrypoints now select matching `.d.cts` declarations. Constructor values come from the wrapper modules, while `public` exposes types.
+* TypeScript consumers should await `tokenize()` for its serialized string result, use the metadata returned by `mkdir()`, and expect unsigned `HEAPU8` bytes. `readFile()` now distinguishes UTF-8 text from binary bytes; `writeFile()` accepts strings and ArrayBuffer views, matching Emscripten FS.
+* CLI `run()` accepts optional string flags. Node CLI can resolve to `undefined` for runtime errors without an exit status; browser CLI rejects those errors. Embedded `run()` requires PHP source. Browser refresh methods return `Promise<void>`, embedded refresh returns a numeric result, and CGI refresh returns its binary. CGI `putEnv()` returns a number, and CGI wrappers do not inherit `EventTarget`. Debugger declarations now include `isRunning()`, synchronous `dumpSymbols()`, optional symbol tables, file arrays, and structured backtraces.
+* Added `npm run test:types` with pinned Deno 2.5.6, strict isolated npm fixtures, declaration checking, and coverage for all six generated Cloudflare versions. Both CI workflows run these checks before native builds. Regenerate CommonJS declarations and export mappings with `npm run generate:types`.
+* Artifact packaging now stages every declared wrapper with `make runtime-wrappers`, independent of the selected native profile. The isolated type fixtures use the same Make target and verify every explicit package export is present in the npm tarball.
+* Dynamic extensions and support libraries now preserve their native frames when PHP callbacks await JavaScript. This fixes crashes when libxml warning handlers perform asynchronous work, such as database logging. Rebuild side modules with the current Make flags.
+* Asyncify import rejections and failed unwinds or rewinds now reach the caller with the original error. Failed instances reject later native calls. CGI returns a non-cacheable HTTP 500 and replaces the runtime before queued requests proceed; replacement initialization failures also produce HTTP 500 responses.
 
 ## v0.1.0 - Aiming for the (GitHub) Stars
 

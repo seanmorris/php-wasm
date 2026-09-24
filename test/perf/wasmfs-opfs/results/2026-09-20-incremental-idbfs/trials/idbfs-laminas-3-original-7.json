@@ -1,0 +1,3056 @@
+{
+  "backend": "idbfs",
+  "framework": "laminas-3",
+  "mode": "original",
+  "round": 7,
+  "started": "2026-09-20T18:42:21.939Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    3.46,
+    1.87,
+    1.46
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 274.3999996185303,
+      "value": {
+        "wallMs": 274.2999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 190.69999980926514
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 67.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 68.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 119.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.6999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 281.59999990463257,
+      "value": {
+        "wallMs": 281.59999990463257,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 192.30000019073486
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 66.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 67.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 121.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 311.19999980926514,
+      "value": {
+        "wallMs": 311.19999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 220
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 71.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 72.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 144.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 274.69999980926514,
+      "value": {
+        "wallMs": 274.69999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 194.59999990463257
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 80.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 81.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 110.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 282.59999990463257,
+      "value": {
+        "wallMs": 282.59999990463257,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 196.59999990463257
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 81.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 83.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 110.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 257.09999990463257,
+      "value": {
+        "wallMs": 257.09999990463257,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 179.7999997138977
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 66.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 67.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 108.89999961853027,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.6999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 188.30000019073486,
+      "operations": [
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 66.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 68.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 118.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 184.09999990463257,
+      "operations": [
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 65.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 66.69999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 114.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 183.59999990463257,
+      "operations": [
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 67.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 69.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 112,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "noop-sync-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 1550.5,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 553.9000000953674,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 61368,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 565.300000667572,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 957.4000005722046,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 61368,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 24.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 206.30000019073486,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 66.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 68.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 109.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7671,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 2.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-0",
+      "wallMs": 75.90000009536743,
+      "value": {
+        "wallMs": 75.80000019073486,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.299999713897705
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-1",
+      "wallMs": 77.2000002861023,
+      "value": {
+        "wallMs": 77.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.1999998092651367
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-2",
+      "wallMs": 85.40000009536743,
+      "value": {
+        "wallMs": 85.40000009536743,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.9000000953674316
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-3",
+      "wallMs": 79.2000002861023,
+      "value": {
+        "wallMs": 79.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.8999996185302734
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-4",
+      "wallMs": 77.09999990463257,
+      "value": {
+        "wallMs": 77.09999990463257,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 1.0999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "dirty-warm-5",
+      "wallMs": 77.19999980926514,
+      "value": {
+        "wallMs": 77.19999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.9000000953674316
+      },
+      "operations": [
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "dirty-warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-0",
+      "wallMs": 76.40000009536743,
+      "value": {
+        "wallMs": 76.40000009536743,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.9000000953674316
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-1",
+      "wallMs": 77.7999997138977,
+      "value": {
+        "wallMs": 77.7999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 2.0999999046325684
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 1.6999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-2",
+      "wallMs": 82,
+      "value": {
+        "wallMs": 82,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.9000000953674316
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-3",
+      "wallMs": 93.09999990463257,
+      "value": {
+        "wallMs": 93.09999990463257,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.0999999046325684
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-4",
+      "wallMs": 84,
+      "value": {
+        "wallMs": 83.89999961853027,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.0999999046325684
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "direct-scan-warm-5",
+      "wallMs": 78.5,
+      "value": {
+        "wallMs": 78.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.9000000953674316
+      },
+      "operations": [
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "direct-scan-warm-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-0",
+      "wallMs": 76.7000002861023,
+      "value": {
+        "wallMs": 76.7000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6999998092651367
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-0",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-1",
+      "wallMs": 86.2000002861023,
+      "value": {
+        "wallMs": 86.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-1",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-2",
+      "wallMs": 88.30000019073486,
+      "value": {
+        "wallMs": 88.30000019073486,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-2",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-3",
+      "wallMs": 97.7999997138977,
+      "value": {
+        "wallMs": 97.7999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 8.5
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 8.200000286102295,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-3",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 8.200000286102295,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-4",
+      "wallMs": 82,
+      "value": {
+        "wallMs": 82,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6000003814697266
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-4",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "incremental-warm-5",
+      "wallMs": 81.7999997138977,
+      "value": {
+        "wallMs": 81.7999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 4.400000095367432
+      },
+      "operations": [
+        {
+          "phase": "incremental-warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 4,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "incremental-warm-5",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 4.099999904632568,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "e10f7ba9b524213847c63537d6d6b64d888e5776f9f66c3745a27b3d6d053186",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10684,
+      "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 12502,
+      "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8107,
+      "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/laminas-3/vendor/vimeo/psalm/dictionaries/CallMap_historical.php",
+      "bytes": 1158180,
+      "sha256": "9104b91622d80e8654f6967b4c90b0df5c7db3ba505b7cec09b8c557ac18a183"
+    },
+    {
+      "path": "/persist/laminas-3/public/index.php",
+      "bytes": 1040,
+      "sha256": "c25ae9eae57b0bae305ef9a639b9b2c5640b84175306e2a212969c6042c217b6"
+    },
+    {
+      "path": "/persist/laminas-3/public/css/style.css",
+      "bytes": 348,
+      "sha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 423.30000019073486,
+    "mountHydrateMs": 34.59999990463257,
+    "totalMs": 458.7000002861023
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 42,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 15.099999904632568,
+          "bytes": 8600541,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 15.300000190734863,
+          "bytes": 8600541,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 33.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 1946,
+      "value": {
+        "wallMs": 1945.8000001907349,
+        "status": 200,
+        "body": {
+          "entries": 7670,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 1061.7999997138977
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 2,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 2,
+          "ms": 69.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 7672,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 2,
+          "ms": 70.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 2,
+          "ms": 348.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 2,
+          "ms": 1.1000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 2,
+          "ms": 991.1999998092651,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 7671,
+          "ms": 3641144.8999881744,
+          "bytes": 32150927,
+          "failures": 0,
+          "paths": [
+            "/persist/laminas-3",
+            "/persist/laminas-3/.gitattributes",
+            "/persist/laminas-3/.gitignore",
+            "/persist/laminas-3/.phpstorm.meta.php",
+            "/persist/laminas-3/.psalm-stubs.phpstub",
+            "/persist/laminas-3/COPYRIGHT.md",
+            "/persist/laminas-3/Dockerfile",
+            "/persist/laminas-3/LICENSE.md",
+            "/persist/laminas-3/README.md",
+            "/persist/laminas-3/bin",
+            "/persist/laminas-3/bin/clear-config-cache.php",
+            "/persist/laminas-3/composer.json"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 7671,
+          "ms": 3641173.099990368,
+          "bytes": 32150927,
+          "failures": 0,
+          "paths": [
+            "/persist/laminas-3",
+            "/persist/laminas-3/.gitattributes",
+            "/persist/laminas-3/.gitignore",
+            "/persist/laminas-3/.phpstorm.meta.php",
+            "/persist/laminas-3/.psalm-stubs.phpstub",
+            "/persist/laminas-3/COPYRIGHT.md",
+            "/persist/laminas-3/Dockerfile",
+            "/persist/laminas-3/LICENSE.md",
+            "/persist/laminas-3/README.md",
+            "/persist/laminas-3/bin",
+            "/persist/laminas-3/bin/clear-config-cache.php",
+            "/persist/laminas-3/composer.json"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 615,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.removeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 615,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 1988
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 431.59999990463257,
+    "value": {
+      "wallMs": 431.59999990463257,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 230.30000019073486
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 84.40000009536743,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 7671,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 88.09999990463257,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0.5999999046325684,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 140.10000038146973,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 7671,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 4.100000381469727,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "dirtyInfo": {
+    "startup": {
+      "instantiateMs": 423.30000019073486,
+      "mountHydrateMs": 34.59999990463257,
+      "totalMs": 458.7000002861023
+    },
+    "dirty": [],
+    "flushedMounts": [
+      "/config"
+    ]
+  },
+  "mutationProbe": {
+    "files": [
+      "/persist/diagnostic-persistence/changed.bin",
+      "/persist/diagnostic-persistence/rpc-0.bin",
+      "/persist/diagnostic-persistence/rpc-1.bin",
+      "/persist/diagnostic-persistence/rpc-2.bin",
+      "/persist/diagnostic-persistence/rpc-3.bin"
+    ],
+    "bytes": [
+      0,
+      1,
+      127,
+      128,
+      255,
+      13,
+      10
+    ],
+    "batch": {
+      "name": "rpc-write-probe",
+      "wallMs": 283.7000002861023,
+      "operations": [
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 2,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 2,
+          "ms": 11.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 15350,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 2,
+          "ms": 13.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 2,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 2,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 2,
+          "ms": 235.99999952316284,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 15346,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 2,
+          "ms": 6.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "indexeddb.put:/persist",
+          "calls": 5,
+          "ms": 2.200000286102295,
+          "bytes": 28,
+          "failures": 0,
+          "paths": [
+            "/persist/diagnostic-persistence",
+            "/persist/diagnostic-persistence/rpc-0.bin",
+            "/persist/diagnostic-persistence/rpc-1.bin",
+            "/persist/diagnostic-persistence/rpc-2.bin",
+            "/persist/diagnostic-persistence/rpc-3.bin"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-write-probe",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 5,
+          "ms": 2.200000286102295,
+          "bytes": 28,
+          "failures": 0,
+          "paths": [
+            "/persist/diagnostic-persistence",
+            "/persist/diagnostic-persistence/rpc-0.bin",
+            "/persist/diagnostic-persistence/rpc-1.bin",
+            "/persist/diagnostic-persistence/rpc-2.bin",
+            "/persist/diagnostic-persistence/rpc-3.bin"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "absent": [
+      "/persist/diagnostic-persistence/temporary",
+      "/persist/diagnostic-persistence/renamed",
+      "/persist/diagnostic-persistence/empty"
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/laminas-3/vendor/vimeo/psalm/dictionaries/CallMap_historical.php",
+      "bytes": 1158180,
+      "sha256": "9104b91622d80e8654f6967b4c90b0df5c7db3ba505b7cec09b8c557ac18a183"
+    },
+    {
+      "path": "/persist/laminas-3/public/index.php",
+      "bytes": 1040,
+      "sha256": "c25ae9eae57b0bae305ef9a639b9b2c5640b84175306e2a212969c6042c217b6"
+    },
+    {
+      "path": "/persist/laminas-3/public/css/style.css",
+      "bytes": 348,
+      "sha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 408.80000019073486,
+    "mountHydrateMs": 920.4000000953674,
+    "totalMs": 1330.5
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 764.6999998092651,
+    "value": {
+      "wallMs": 764.5,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 216
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 2,
+        "ms": 0.10000038146972656,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 2,
+        "ms": 164.19999980926514,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 15354,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 2,
+        "ms": 166.40000009536743,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 2,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 2,
+        "ms": 0.5999999046325684,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 2,
+        "ms": 235.40000009536743,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 15354,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 2,
+        "ms": 96.89999961853027,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.20000028610229492,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.storeRemoteEntry:/config",
+        "calls": 1,
+        "ms": 0.3000001907348633,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/laminas-3/vendor/vimeo/psalm/dictionaries/CallMap_historical.php",
+      "bytes": 1158180,
+      "sha256": "9104b91622d80e8654f6967b4c90b0df5c7db3ba505b7cec09b8c557ac18a183"
+    },
+    {
+      "path": "/persist/laminas-3/public/index.php",
+      "bytes": 1040,
+      "sha256": "c25ae9eae57b0bae305ef9a639b9b2c5640b84175306e2a212969c6042c217b6"
+    },
+    {
+      "path": "/persist/laminas-3/public/css/style.css",
+      "bytes": 348,
+      "sha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac"
+    }
+  ],
+  "verifiedMutations": [
+    {
+      "path": "/persist/diagnostic-persistence/changed.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-0.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-1.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-2.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    },
+    {
+      "path": "/persist/diagnostic-persistence/rpc-3.bin",
+      "bytes": 7,
+      "sha256": "47a8404dd5bb287e70354f4aa0f7bf250e4fefe66a72cf2ac5475a802fd45968"
+    }
+  ],
+  "verifiedDeletions": [
+    {
+      "path": "/persist/diagnostic-persistence/temporary",
+      "exists": false
+    },
+    {
+      "path": "/persist/diagnostic-persistence/renamed",
+      "exists": false
+    },
+    {
+      "path": "/persist/diagnostic-persistence/empty",
+      "exists": false
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:42:33.627Z"
+}

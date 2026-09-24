@@ -8,7 +8,7 @@ import { strict as assert } from 'node:assert';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const retryScript = path.join(repoRoot, '.github/bin/retry-embuilder.sh');
-const sdlMakefile = path.join(repoRoot, 'packages/sdl/static.mak');
+const sdlMakefile = path.join(repoRoot, 'packages/php-sdl-wasm/static.mak');
 
 function writeExecutable(filePath, contents)
 {

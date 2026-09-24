@@ -1,0 +1,2057 @@
+{
+  "date": "2026-09-22T13:00:53.531Z",
+  "status": "passed",
+  "sourceCommit": "f191496",
+  "artifactDirectory": "/app/.cache/sdl-focus/runtime",
+  "hashes": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781330,
+      "sha256": "208026a0231efa0cfe73e028c1e349870d8b4a87e588954587ace1fe88912c11"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104472,
+      "sha256": "7531c4e0b213f40153cbe6b01402fddd83dd30f725d4616e87c2fe6c72290314"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    "index-queries.mjs": {
+      "bytes": 8078,
+      "sha256": "aeee1d11c4b34c8d0961ffe696bd029d381523d2f936f8208cb7e63e9d1b738c"
+    },
+    "common.php": {
+      "bytes": 2318,
+      "sha256": "025be3ca7c7cc3b648678cf60ca8f08acab2b907a2fc4072a4cef1a1c8e182d9"
+    },
+    "instancing.php": {
+      "bytes": 3195,
+      "sha256": "a50a242c56e73d6b6c5cb88efcb33103b9daf1d462ee805f3d98fab66a661e72"
+    },
+    "sdl-bindings.mjs": {
+      "bytes": 4148,
+      "sha256": "77681e10390538117dc9f2b890346ef0ce8fd9c2460e99940cd80bbcc11298c0"
+    }
+  },
+  "profile": "static",
+  "batches": 4,
+  "rounds": 6,
+  "samples": [
+    {
+      "round": 0,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 4.999755859375,
+        "finishMs": 50.000244140625,
+        "totalMs": 55
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 8.999755859375,
+        "finishMs": 55.000244140625,
+        "totalMs": 64
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 1.9999995231628418
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 64,
+        "totalMs": 64
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 52,
+        "totalMs": 52
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 412.999755859375,
+        "finishMs": 54.999755859375,
+        "totalMs": 467.99951171875
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 427,
+        "finishMs": 59.000244140625,
+        "totalMs": 486.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 6
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 392.19999742507935
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 5.999999046325684
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0.999755859375,
+        "finishMs": 56,
+        "totalMs": 56.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 0,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 1.000244140625,
+        "finishMs": 53.999755859375,
+        "totalMs": 55
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 0.40000009536743164
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 48,
+        "totalMs": 48
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 56,
+        "totalMs": 56
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 448,
+        "finishMs": 16.999755859375,
+        "totalMs": 464.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 4.700000762939453
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 411.70000410079956
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 4.7999982833862305
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 441.999755859375,
+        "finishMs": 16,
+        "totalMs": 457.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 59,
+        "totalMs": 59
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 0.5
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 1.000244140625,
+        "finishMs": 46.999755859375,
+        "totalMs": 48
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 8,
+        "finishMs": 52,
+        "totalMs": 60
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 2.09999942779541
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 1,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 5.999755859375,
+        "finishMs": 48,
+        "totalMs": 53.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 393.999755859375,
+        "finishMs": 65,
+        "totalMs": 458.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 459,
+        "finishMs": 36,
+        "totalMs": 495
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 5.700001239776611
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 420.4999985694885
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 6.1999993324279785
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 52,
+        "totalMs": 52
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 1,
+        "finishMs": 40.999755859375,
+        "totalMs": 41.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 0.5999999046325684
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 8,
+        "finishMs": 47,
+        "totalMs": 55
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 10,
+        "finishMs": 59,
+        "totalMs": 69
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 1.9000000953674316
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 69,
+        "totalMs": 69
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 2,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 48,
+        "totalMs": 48
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 48,
+        "totalMs": 48
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 0.8999996185302734
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 48.999755859375,
+        "totalMs": 48.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 11,
+        "finishMs": 52,
+        "totalMs": 63
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 2.1000003814697266
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 8,
+        "finishMs": 52,
+        "totalMs": 60
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 42.000244140625,
+        "totalMs": 42.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 1,
+        "finishMs": 54,
+        "totalMs": 55
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 554,
+        "finishMs": 72,
+        "totalMs": 626
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 6.900000095367432
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 511.2999949455261
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 7.700005531311035
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 3,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 423,
+        "finishMs": 21,
+        "totalMs": 444
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 6.000244140625,
+        "finishMs": 49.999755859375,
+        "totalMs": 56
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 12,
+        "finishMs": 48,
+        "totalMs": 60
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 2.300001621246338
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 43.99951171875,
+        "totalMs": 43.99951171875
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 44.999755859375,
+        "totalMs": 44.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 363,
+        "finishMs": 50.000244140625,
+        "totalMs": 413.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 414.999755859375,
+        "finishMs": 39.000244140625,
+        "totalMs": 454
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 5.699998378753662
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 380.2000021934509
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 4.80000114440918
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 1,
+        "finishMs": 48,
+        "totalMs": 49
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 4,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 1,
+        "finishMs": 46.000244140625,
+        "totalMs": 47.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 1.5999999046325684
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "instanced_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 46,
+        "totalMs": 46
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "instanced_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 44.999755859375,
+        "totalMs": 44.999755859375
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "ordinary_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 409,
+        "finishMs": 50,
+        "totalMs": 459
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4096,
+          "elapsedMs": 3.399998664855957
+        },
+        "getBufferParameter": {
+          "calls": 4096,
+          "elapsedMs": 375.00000190734863
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 4096,
+          "elapsedMs": 5.700000762939453
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "ordinary_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 379,
+        "finishMs": 51,
+        "totalMs": 430
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "instanced_indexed",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 47,
+        "totalMs": 47
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 4,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 4,
+          "elapsedMs": 0.5
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 4,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "instanced_indexed",
+      "mode": "native",
+      "timing": {
+        "submitMs": 0,
+        "finishMs": 42.000244140625,
+        "totalMs": 42.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "ordinary_arrays",
+      "mode": "observed",
+      "timing": {
+        "submitMs": 10.000244140625,
+        "finishMs": 47,
+        "totalMs": 57.000244140625
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 4096,
+          "elapsedMs": 1.8999991416931152
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    },
+    {
+      "round": 5,
+      "name": "ordinary_arrays",
+      "mode": "native",
+      "timing": {
+        "submitMs": 5.000244140625,
+        "finishMs": 50.999755859375,
+        "totalMs": 56
+      },
+      "driver": {
+        "getParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "getBufferParameter": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArrays": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElements": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawArraysInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        },
+        "drawElementsInstanced": {
+          "calls": 0,
+          "elapsedMs": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "ordinary_arrays": {
+      "native": {
+        "submitMsPerBatch": 1.5,
+        "totalMsPerBatch": 13.875,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      },
+      "observed": {
+        "submitMsPerBatch": 2.500030517578125,
+        "totalMsPerBatch": 15.375,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 1024,
+            "medianMsPerBatch": 0.5124998688697815
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      }
+    },
+    "instanced_arrays": {
+      "native": {
+        "submitMsPerBatch": 0,
+        "totalMsPerBatch": 13.875,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      },
+      "observed": {
+        "submitMsPerBatch": 0,
+        "totalMsPerBatch": 11.75,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 1,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      }
+    },
+    "ordinary_indexed": {
+      "native": {
+        "submitMsPerBatch": 100.87493896484375,
+        "totalMsPerBatch": 112.74996948242188,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      },
+      "observed": {
+        "submitMsPerBatch": 109.375,
+        "totalMsPerBatch": 118.875,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 1024,
+            "medianMsPerBatch": 1.4249999523162842
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 1024,
+            "medianMsPerBatch": 100.48750019073486
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 1024,
+            "medianMsPerBatch": 1.462499976158142
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      }
+    },
+    "instanced_indexed": {
+      "native": {
+        "submitMsPerBatch": 0.124969482421875,
+        "totalMsPerBatch": 12.249969482421875,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          }
+        }
+      },
+      "observed": {
+        "submitMsPerBatch": 0.125,
+        "totalMsPerBatch": 11.875030517578125,
+        "driver": {
+          "getParameter": {
+            "callsPerBatch": 1,
+            "medianMsPerBatch": 0
+          },
+          "getBufferParameter": {
+            "callsPerBatch": 1,
+            "medianMsPerBatch": 0.13749998807907104
+          },
+          "drawArrays": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElements": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawArraysInstanced": {
+            "callsPerBatch": 0,
+            "medianMsPerBatch": 0
+          },
+          "drawElementsInstanced": {
+            "callsPerBatch": 1,
+            "medianMsPerBatch": 0
+          }
+        }
+      }
+    }
+  },
+  "machine": {
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "logicalCpus": 8
+  },
+  "loadBefore": [
+    8.03,
+    8.58,
+    8.07
+  ],
+  "launch": {
+    "headless": true,
+    "executablePath": "/usr/bin/chromium",
+    "args": [
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader"
+    ]
+  },
+  "notes": [
+    "Run twice after controlled builds, compression and other tests finish.",
+    "Native mode uses original browser methods; observed mode times the real methods without replacing results or skipping validation.",
+    "Both modes use the same prepared instancing fixture and full-frame pixel checks, with four repeated batches per sample.",
+    "Six rotating rounds interleave both modes; each path is warmed before measurement.",
+    "Observed timings include synchronization with previously queued rendering, not just CPU query cost. Instrumentation adds overhead.",
+    "Per-call browser clock quantization affects tiny durations; aggregate times and native/observed sample totals are both retained.",
+    "Software renderer timings do not establish hardware GPU costs or game FPS."
+  ],
+  "browser": "152.0.7977.75",
+  "phpVersion": "8.4.1",
+  "graphics": {
+    "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "loadAfter": [
+    8.58,
+    8.69,
+    8.11
+  ]
+}

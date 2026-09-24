@@ -67,7 +67,7 @@ export default createWorker(PhpCloudflare, factory, wasm);
 		modules
 		, modulesRoot: temporaryDirectory
 		, compatibilityDate: '2024-02-01'
-		, compatibilityFlags: []
+		, compatibilityFlags: ['enable_weak_ref']
 		, d1Databases: { DB: 'cloudflare-test-main', SECOND_DB: 'cloudflare-test-second' }
 		, d1Persist: false
 		, outboundService(request) {
@@ -207,5 +207,94 @@ test('mocked archive fetch extracts and executes PHP, with static zip/zlib round
 	assert.deepEqual(JSON.parse((await request('zip')).stdout), [
 		...Array(3).fill('Cloudflare archive fixture\n')
 		, 'ARCHIVE_PHP_OK', 'Cloudflare archive fixture\n'
+	]);
+});
+
+/**
+ * Runs a named PHP regression against real local D1 and the packaged artifact.
+ * @param {string} feature PHP regression name.
+ * @param {object} options Worker fixture options.
+ * @returns {Promise<unknown>} Decoded PHP output.
+ */
+async function d1(feature, options = {})
+{
+	const source = fs.readFileSync(new URL('./d1-features.php', import.meta.url), 'utf8').replace(/^<\?php/, '');
+	return JSON.parse((await request('d1-features', {
+		...options
+		, code: '$feature = ' + JSON.stringify(feature) + ';\n' + source
+	})).stdout);
+}
+
+test('D1 named and numbered parameters work through execute arrays and explicit binding', { timeout }, async () => {
+	assert.deepEqual(await d1('parameters'), [
+		{ first: "O'Reilly", repeated: "O'Reilly", optional: null, literal: ':ignored ?99' }
+		, ['again', 'again', 'present', ':ignored ?99']
+		, ['three', 'one', 'three', 'four']
+		, [3, 1, 4], 7, 9
+	]);
+});
+
+test('D1 exec, quoting and insert IDs work without parameter binding', { timeout }, async () => {
+	assert.deepEqual(await d1('direct'), [
+		'0', 0, 1, '1', '2', "O'Reilly — café", '1', '1', 2, '4', '4294967297'
+		, false, 'HY000', '4294967297', false, 'HY000'
+	]);
+});
+
+test('D1 unsafe insert IDs report getter errors without failing committed writes or batches', { timeout }, async () => {
+	assert.deepEqual(await d1('insert-id-safety'), [
+		1, false, '22003', '9007199254740993', true, false, '22003', '9007199254740995'
+	]);
+});
+
+test('D1 BLOB strings, streams, empty values and NUL text round-trip without byte loss', { timeout }, async () => {
+	assert.deepEqual(await d1('blobs'), [[
+		['0080ff27414200', '6265666f7265006166746572', 'blob']
+		, ['0080ff27414200', '6265666f7265006166746572', 'blob']
+		, ['', '6265666f7265006166746572', 'blob']
+		, [null, '6265666f7265006166746572', 'null']
+		, ['0080ff27414200', null, 'blob']
+	], 0, true]);
+});
+
+test('D1 buffered cursors, metadata, bound columns and PDO attributes preserve normal fetch behavior', { timeout }, async () => {
+	assert.deepEqual(await d1('results'), [
+		['cfd1', true, false, true, true, true, true]
+		, ['VALUE', 'integer', true, false, false, true]
+		, [1, 3, 2, 1, 3, false, 3, false, 1], true, 3, 1, 0, false
+	]);
+});
+
+test('D1 atomic batches populate PDO statements and leave execute arrays available', { timeout }, async () => {
+	assert.deepEqual(await d1('batch'), [
+		true, { name: 'alpha', amount: 7, payload: '0080ff' }, 1, '1'
+		, true, { name: 'beta', amount: 9, payload: '0080ff' }
+		, { name: 'ordinary', amount: 11, payload: null }, 'alpha', true, 'alpha', true, false
+	]);
+});
+
+test('D1 batch rollback, preflight rejection and error modes leave no partial or stale results', { timeout }, async () => {
+	assert.deepEqual(await d1('batch-errors'), [
+		false, 'HY000', [0, false, false, '1'], false, 'HY093'
+		, [false, false, false, false], ['before'], false, [true], ['HY093', 'HY093'], true, 42
+	]);
+});
+
+test('D1 batch methods guard uninitialized objects and publish metadata and bound columns', { timeout }, async () => {
+	assert.deepEqual(await d1('batch-method'), [true, false, true, true, true, 'value', 'integer', true, 7]);
+});
+
+test('D1 batches retain statements while BLOB stream callbacks change input references', { timeout }, async () => {
+	assert.deepEqual(await d1('batch-references'), [true, true, true, 2, '0080ff', false, 1]);
+});
+
+test('D1 prepare-only bindings keep ordinary queries usable without batch support', { timeout }, async () => {
+	assert.deepEqual(await d1('prepare-only', { prepareOnly: true }), ['before', 'HYC00', 'after', true]);
+});
+
+test('D1 parameter errors, unsupported settings and forward cursor errors remain catchable', { timeout }, async () => {
+	assert.deepEqual(await d1('errors'), [
+		[[false, 'HY093'], [false, 'HY093'], [false, 'HY093'], [false, 'HY093', false]]
+		, 'recovered', false, 'HYC00', [true, true, true]
 	]);
 });

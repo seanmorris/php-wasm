@@ -1,8 +1,14 @@
 import { test, expect } from '@playwright/test';
+import {expectDebuggerContained} from '../lib/debugger-layout.mjs';
+import {getPlaywrightLaunchOptions} from '../lib/playwright-browser.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
 
 test.describe.configure({ mode: 'serial' });
+test.use({launchOptions: {
+	...getPlaywrightLaunchOptions().launchOptions
+	, args: ['--no-sandbox', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+}});
 
 test('home page uses the production base path', async ({ page }) => {
 	await page.goto('home.html?no-service-worker', {waitUntil: 'domcontentloaded'});
@@ -16,7 +22,7 @@ test('home page uses the production base path', async ({ page }) => {
 
 	await expect(embeddedLink).toHaveAttribute(
 		'href',
-		'/php-wasm/embedded-php.html?demo=sdl-sine.php'
+		'/php-wasm/embedded-php.html?demo=sdl-cube.php'
 	);
 	await expect(frameworkLink).toHaveAttribute('href', '/php-wasm/select-framework.html');
 
@@ -130,6 +136,155 @@ test('embedded php hello world runs', async ({ page }) => {
 		async () => (await outputFrame.getAttribute('srcdoc')) ?? '',
 		{ timeout: 180000 }
 	).toContain('Hello, World!');
+});
+
+test.describe('SDL demo controls', () => {
+	test('cube shader nowdocs preserve highlighting and syntax validation', async ({page}) => {
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		await page.waitForFunction(() => document.querySelector('#input')?.env?.editor?.getValue().includes('glCreateProgram'));
+		await page.waitForFunction(() => {
+			const session = document.querySelector('#input').env.editor.session;
+			return session.bgTokenizer.currentLine >= session.getLength();
+		});
+		const highlighting = await page.evaluate(() => {
+			const session = document.querySelector('#input').env.editor.session;
+			const lines = session.getDocument().getAllLines();
+			const endings = lines.flatMap((line, index) => /^\s+GLSL\);$/.test(line) ? [index] : []);
+			return endings.map(row => ({
+				closing: session.getTokens(row)
+				, after: session.getTokens(row + 1)
+			}));
+		});
+		expect(highlighting).toHaveLength(2);
+		for(const {closing, after} of highlighting)
+		{
+			expect(closing.some(token => token.type === 'markup.list')).toBe(true);
+			expect(after.some(token => token.type === 'variable')).toBe(true);
+		}
+		await page.waitForFunction(() => document.querySelector('#input')?.env?.editor?.session.$worker);
+		const diagnostics = await page.evaluate(async () => {
+			const session = document.querySelector('#input').env.editor.session;
+			const worker = session.$worker;
+			const validate = code => new Promise(resolve => {
+				const report = event => {
+					worker.off('annotate', report);
+					resolve(event.data);
+				};
+				worker.on('annotate', report);
+				worker.call('setValue', [code]);
+			});
+			const code = session.getValue();
+			return {
+				enabled: session.getUseWorker()
+				, cube: await validate(code)
+				, broken: await validate("<?php\n$value = <<<'END'\n  body\n  END;\n$broken = ;")
+				, restored: await validate(code)
+			};
+		});
+		expect(diagnostics.enabled).toBe(true);
+		expect(diagnostics.cube).toEqual([]);
+		expect(diagnostics.broken).toEqual([expect.objectContaining({row: 4, type: 'error', text: expect.stringContaining("unexpected ';'")})]);
+		expect(diagnostics.restored).toEqual([]);
+	});
+
+	for(const locks of ['browser locks', 'without Web Locks'])
+	{
+		test(`typing in the code editor preserves canvas controls (${locks})`, async ({page}) => {
+			if(locks === 'without Web Locks')
+			{
+				await page.addInitScript(() => {
+					Object.defineProperty(navigator, 'locks', {configurable: true, value: undefined});
+				});
+			}
+			await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+			await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+			const canvas = page.locator('canvas');
+			await canvas.press('Space');
+			await expect(canvas).toHaveAttribute('data-paused', '1');
+			const input = page.locator('#input .ace_text-input');
+			await input.focus();
+			await page.keyboard.press('Control+Home');
+			await page.keyboard.type('// editor still works\n');
+			await expect.poll(() => page.locator('#input').evaluate(node => node.env.editor.getValue())).toMatch(/^\/\/ editor still works\n/);
+			await expect(canvas).toHaveAttribute('data-paused', '1');
+			await expect(canvas).toHaveAttribute('data-stopped', '0');
+			await canvas.press('Space');
+			await expect(canvas).toHaveAttribute('data-paused', '0');
+			await canvas.press('Escape');
+			await expect(canvas).toHaveAttribute('data-stopped', '1');
+			await expect(page.locator('.stderr')).toHaveText('');
+		});
+	}
+
+	test('cube links reload from a fragment and its canvas fills the preview after resize', async ({page, context}) => {
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		await expect(page.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+		const share = new URL(page.url());
+		expect(share.searchParams.has('code')).toBe(false);
+		expect(new URLSearchParams(share.hash.slice(1)).get('code')).toContain('SDL cube');
+		expect(share.pathname.length + share.search.length).toBeLessThan(200);
+		for(const viewport of [{width: 1280, height: 1000}, {width: 1000, height: 850}])
+		{
+			await page.setViewportSize(viewport);
+			await expect.poll(() => page.locator('canvas').evaluate(canvas => {
+				const box = canvas.parentElement.getBoundingClientRect();
+				const rect = canvas.getBoundingClientRect();
+				return Math.abs(rect.width - box.width) < 1 && Math.abs(rect.height - box.height) < 1
+					&& canvas.width === canvas.clientWidth && canvas.height === canvas.clientHeight;
+			})).toBe(true);
+		}
+		await page.locator('canvas').press('Escape');
+		const copy = await context.newPage();
+		const requests = [];
+		copy.on('request', request => { if(request.isNavigationRequest()) requests.push(request.url()); });
+		share.pathname = share.pathname.replace('embedded-php.html', 'home.html');
+		await copy.goto(share.href, {waitUntil: 'domcontentloaded'});
+		await expect(copy).toHaveURL(/\/embedded-php\.html/);
+		await expect(copy.locator('[data-sdl-status]')).toHaveText('Running · sound off', {timeout: 180000});
+		expect(requests.every(url => !new URL(url).searchParams.has('code') && !url.includes('#code='))).toBe(true);
+		await expect(copy.locator('.stderr')).toHaveText('');
+		await copy.locator('canvas').press('Escape');
+		await copy.evaluate(() => {
+			const code = '<?php //{"autorun":true,"persist":false,"canvas":false,"extensionFlags":0}\n echo "fragment navigation";';
+			window.location.hash = new URLSearchParams({code}).toString();
+		});
+		await expect(copy.locator('.stdout .scroller').last()).toHaveText('fragment navigation', {timeout: 180000});
+		await copy.close();
+	});
+
+	test('cube supports input, audio, refresh, rerun and switching to sine', async ({page}) => {
+		const failures = [];
+		page.on('pageerror', error => failures.push(error.message));
+		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
+		const canvas = page.locator('canvas');
+		const status = page.locator('[data-sdl-status]');
+		await expect(status).toHaveText('Running · sound off', {timeout: 180000});
+		await expect.poll(async () => Number(await canvas.getAttribute('data-frames'))).toBeGreaterThan(2);
+		await canvas.press('Space');
+		await expect(canvas).toHaveAttribute('data-paused', '1');
+		await page.locator('[data-sdl-audio]').click();
+		await expect(status).toContainText('sound on');
+		await page.locator('[data-refresh]').click();
+		await expect(canvas).toHaveAttribute('data-stopped', '1');
+		await page.locator('[data-run]').click();
+		await expect(canvas).toHaveAttribute('data-stopped', '0');
+		await expect(status).toHaveText('Running · sound off');
+		await page.locator('[data-run]').click();
+		await expect(status).toHaveText('Running · sound off');
+		const original = await canvas.elementHandle();
+		await page.locator('[data-select-demo]').first().selectOption('sdl-sine.php');
+		await page.locator('[data-load-demo]').click();
+		await expect.poll(() => original.evaluate(node => node.isConnected)).toBe(false);
+		await expect(page.locator('.Embedded')).toHaveAttribute('data-running', '0');
+		await expect(page.locator('.stderr')).toHaveText('');
+		await page.locator('[data-select-demo]').first().selectOption('sdl-cube.php');
+		await page.locator('[data-load-demo]').click();
+		await expect(status).toHaveText('Running · sound off', {timeout: 180000});
+		await canvas.press('Escape');
+		await expect(canvas).toHaveAttribute('data-stopped', '1');
+		await expect(page.locator('.stderr')).toHaveText('');
+		expect(failures).toEqual([]);
+	});
 });
 
 test('Curvature demo serializes the bridged form value', async ({ page }) => {
@@ -300,6 +455,15 @@ test('debug preview boots php-dbg', async ({ page }) => {
 	await expect(page.locator('.console-output')).toContainText('/preload/test_www/hello-world.php', {
 		timeout: 180000
 	});
+	const input = page.locator('.console-input input');
+	await input.fill('help ' + 'w'.repeat(512));
+	await input.press('Enter');
+	await expect(page.locator('.console-output')).toContainText('w'.repeat(512));
+	for(const width of [1280, 375, 320])
+	{
+		await page.setViewportSize({width, height: 812});
+		await expectDebuggerContained(page.locator('.dbg-preview .frame'));
+	}
 });
 
 test('select framework service worker serves CGI', async ({ page }) => {

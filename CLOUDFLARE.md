@@ -1,9 +1,10 @@
 # Cloudflare embedded PHP
 
 The Cloudflare profile builds embedded PHP 8.0–8.5 as ES modules for Workers.
-It includes Vrzno, statically linked zip/zlib, and the supported PDO-CFD1
-prepared-query subset. It is separate from the general browser, Node and CGI
-builds: neither the normal worker artifact nor `LIB_TYPE=static` selects it.
+It includes Vrzno, statically linked zip/zlib, and PDO-CFD1 with native
+parameters, binary values, and atomic batches. It is separate from the general
+browser, Node and CGI builds: neither the normal worker artifact nor
+`LIB_TYPE=static` selects it.
 
 ## Build and test locally
 
@@ -11,17 +12,40 @@ With the project dependencies and builder Docker image available:
 
 ```sh
 npm ci
-make cloudflare-mjs PHP_VERSION=8.3
+make cloudflare-mjs ENV_FILE=profiles/cloudflare.mak PHP_VERSION=8.3
 make test-cloudflare PHP_VERSION=8.3
 ```
 
 The builder CLI also accepts `php-wasm-builder build cloudflare mjs`. Cloudflare
 is embedded PHP only: JavaScript/CommonJS, CGI, CLI and debugger combinations
-are rejected. The profile uses isolated native/configuration/library state;
-general-purpose dependency snapshots and configuration files are not imported.
-Build diagnostics are kept in `.cache/cloudflare` in the checkout or CLI caller's
-project, not a globally installed builder's directory. Direct Make invocations
-can set `CLOUDFLARE_OUTPUT_DIR` and `CLOUDFLARE_CACHE_DIR` to other writable paths.
+are rejected. `profiles/cloudflare.mak` is the default Make configuration for
+this target. Select another file with `ENV_FILE`, or include the profile from
+your `.php-wasm-rc` when using the CLI:
+
+```make
+include profiles/cloudflare.mak
+INITIAL_MEMORY = 48MB
+```
+
+Compilation uses the ordinary Make and Docker Compose recipes. The profile
+opts into the shared `BUILD_WORKSPACE` mechanism, which keeps native sources,
+libraries and configure caches under `.cache/build`. Native inputs, the selected
+configuration, Make overrides and builder image identify the workspace. Repeated
+builds reuse it; wrapper-only changes refresh their files without rebuilding PHP.
+Changing native settings selects separate state and preserves earlier builds.
+
+Use `BUILD_WORKSPACE=/path/to/cache` to place this state elsewhere. The older
+`CLOUDFLARE_CACHE_DIR` setting remains an alias in the default profile. A caller
+managing a dedicated clean checkout can pass `BUILD_WORKSPACE=` to build directly
+there. Do not reuse native state from a different configuration in that mode.
+The CLI keeps workspace state in the caller's project and honors its
+`.php-wasm-rc`. `CLOUDFLARE_OUTPUT_DIR` selects the final package destination.
+
+Make retains its raw JavaScript/Wasm outputs separately from the final package.
+The packaging helper hashes a copy, generates the static Wasm import and
+declarations, records provenance, and validates the package before replacing
+public artifacts. Configure diagnostics remain in each workspace's
+`third_party/php<version>-src/config.log`; CI also uploads the Make build log.
 
 The build produces the standalone `php-cloud-wasm` package under
 `packages/php-cloud-wasm`:
@@ -55,7 +79,7 @@ CLOUDFLARE_ARTIFACT_ROOT=/path/to/extracted/packages/php-cloud-wasm \
 ```
 
 The harness uses pinned Miniflare 4.20260730.0, compatibility date `2024-02-01`,
-and no compatibility flags or unsafe-eval permissions. It creates local D1
+and the `enable_weak_ref` compatibility flag. It creates local D1
 databases, rejects unexpected outbound requests, and serves a deterministic
 archive fixture. Build and test require no Cloudflare account or credentials.
 See the [Miniflare module](https://developers.cloudflare.com/workers/testing/miniflare/core/modules/)
@@ -63,6 +87,11 @@ and [local D1](https://developers.cloudflare.com/workers/testing/miniflare/stora
 documentation for the engine facilities used by the tests.
 
 ## Worker usage
+
+Vrzno requires `WeakRef` and `FinalizationRegistry`. Use compatibility date
+`2025-05-05` or newer, or add `compatibility_flags = ["enable_weak_ref"]` to
+your Wrangler configuration. The checked-in Pages configuration retains its
+existing date and enables the flag explicitly. No eval permission is required.
 
 Copy the final package assets from the existing nightly distribution into your
 application and preserve their relative paths. This example assumes the copied
@@ -130,16 +159,23 @@ archive and mocked fetch, plus ZIP creation/readback and zlib round-trips.
 
 ## D1 scope and limitations
 
-The profile includes a checked PHP 8.0 ABI backport of PDO-CFD1. The supported
-subset is positional `?` prepared queries, `execute`, numeric `bindValue` and
-`bindParam`, associative `fetch`/`fetchAll`, and SELECT/INSERT/UPDATE/DELETE.
-Repeated execution, scalar and NULL parameters, and write `rowCount()` are
-covered by local-D1 tests. A missing binding or failed query reports a PDO error;
-exception mode produces `PDOException`.
+The profile includes PDO-CFD1 for PHP 8.0–8.5. Ordinary queries accept
+positional or named parameter arrays through `execute([...])`; explicit binding
+is optional. The driver supports numbered placeholders, `query`, `exec`, SQLite
+quoting, connection-local insert IDs, BLOB strings/streams, and buffered scroll
+cursors. Write `rowCount()` uses D1's affected-row metadata.
 
-Named/numbered placeholders, transactions, `lastInsertId`, `quote`, and direct
-PDO `exec` are unsupported and must fail explicitly. This is not complete PDO
-or D1 API parity. Dynamic/shared extensions, browser filesystem persistence,
+`$pdo->cfd1Batch([$insert, $select])` executes distinct, already bound PDO
+statements from that connection in one atomic D1 batch. Results remain on their
+statements for normal fetching, and ordinary `execute([...])` remains available
+before and afterward. A failed batch follows PDO's error mode and does not expose
+partial results. See the [PDO-CFD1 API and examples](packages/pdo-cfd1/README.md).
+
+D1 does not support PDO transactions held open across PHP calls. Persistent
+connections, output parameters, streaming cursors, and multiple result sets
+remain unsupported. Metadata is limited to information D1 actually returns;
+empty results and duplicate column names have documented limitations.
+Dynamic/shared extensions, browser filesystem persistence,
 and the CGI HTTP request adapter are outside this profile. Zip/zlib operate on
 the instance's in-memory filesystem. Archive support is ordinary ZIP/deflate;
 encrypted AES archives are omitted from this minimal static profile.

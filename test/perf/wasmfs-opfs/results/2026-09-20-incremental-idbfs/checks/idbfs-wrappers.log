@@ -1,0 +1,120 @@
+mkdir -p ./packages/php-wasm ./packages/php-cgi-wasm ./packages/php-cli-wasm ./packages/php-dbg-wasm ./packages/php-cloud-wasm
+make ./packages/php-wasm/PhpBase.mjs ./packages/php-wasm/PhpNode.mjs ./packages/php-wasm/PhpWeb.mjs ./packages/php-wasm/PhpWebview.mjs ./packages/php-wasm/PhpWorker.mjs ./packages/php-wasm/OutputBuffer.mjs ./packages/php-wasm/fsOps.mjs ./packages/php-wasm/resolveDependencies.mjs ./packages/php-wasm/_Event.mjs ./packages/php-wasm/webTransactions.mjs ./packages/php-wasm/idbfsSync.mjs ./packages/php-wasm/php-tags.mjs ./packages/php-wasm/php-tags.jsdelivr.mjs ./packages/php-wasm/php-tags.local.mjs ./packages/php-wasm/php-tags.unpkg.mjs ./packages/php-cgi-wasm/PhpCgiBase.mjs ./packages/php-cgi-wasm/PhpCgiNode.mjs ./packages/php-cgi-wasm/PhpCgiWeb.mjs ./packages/php-cgi-wasm/PhpCgiWebBase.mjs ./packages/php-cgi-wasm/PhpCgiWebview.mjs ./packages/php-cgi-wasm/PhpCgiWorker.mjs ./packages/php-cgi-wasm/breakoutRequest.mjs ./packages/php-cgi-wasm/parseResponse.mjs ./packages/php-cgi-wasm/msg-bus.mjs ./packages/php-cgi-wasm/msg-bus.mjs ./packages/php-cgi-wasm/OutputBuffer.mjs ./packages/php-cgi-wasm/fsOps.mjs ./packages/php-cgi-wasm/resolveDependencies.mjs ./packages/php-cgi-wasm/_Event.mjs ./packages/php-cgi-wasm/webTransactions.mjs ./packages/php-cgi-wasm/idbfsSync.mjs ./packages/php-cli-wasm/PhpBase.mjs ./packages/php-cli-wasm/PhpCliNode.mjs ./packages/php-cli-wasm/PhpCliWeb.mjs ./packages/php-cli-wasm/OutputBuffer.mjs ./packages/php-cli-wasm/fsOps.mjs ./packages/php-cli-wasm/resolveDependencies.mjs ./packages/php-cli-wasm/_Event.mjs ./packages/php-cli-wasm/webTransactions.mjs ./packages/php-cli-wasm/idbfsSync.mjs ./packages/php-dbg-wasm/PhpBase.mjs ./packages/php-dbg-wasm/PhpDbgNode.mjs ./packages/php-dbg-wasm/PhpDbgWeb.mjs ./packages/php-dbg-wasm/OutputBuffer.mjs ./packages/php-dbg-wasm/fsOps.mjs ./packages/php-dbg-wasm/resolveDependencies.mjs ./packages/php-dbg-wasm/_Event.mjs ./packages/php-dbg-wasm/webTransactions.mjs ./packages/php-dbg-wasm/idbfsSync.mjs ./packages/php-wasm/PhpBase.js ./packages/php-wasm/PhpNode.js ./packages/php-wasm/PhpWeb.js ./packages/php-wasm/PhpWebview.js ./packages/php-wasm/PhpWorker.js ./packages/php-wasm/OutputBuffer.js ./packages/php-wasm/fsOps.js ./packages/php-wasm/resolveDependencies.js ./packages/php-wasm/_Event.js ./packages/php-wasm/webTransactions.js ./packages/php-wasm/idbfsSync.js ./packages/php-cgi-wasm/PhpCgiBase.js ./packages/php-cgi-wasm/PhpCgiNode.js ./packages/php-cgi-wasm/PhpCgiWeb.js ./packages/php-cgi-wasm/PhpCgiWebBase.js ./packages/php-cgi-wasm/PhpCgiWebview.js ./packages/php-cgi-wasm/PhpCgiWorker.js ./packages/php-cgi-wasm/breakoutRequest.js ./packages/php-cgi-wasm/parseResponse.js ./packages/php-cgi-wasm/msg-bus.js ./packages/php-cgi-wasm/msg-bus.js ./packages/php-cgi-wasm/OutputBuffer.js ./packages/php-cgi-wasm/fsOps.js ./packages/php-cgi-wasm/resolveDependencies.js ./packages/php-cgi-wasm/_Event.js ./packages/php-cgi-wasm/webTransactions.js ./packages/php-cgi-wasm/idbfsSync.js ./packages/php-cli-wasm/PhpBase.js ./packages/php-cli-wasm/PhpCliNode.js ./packages/php-cli-wasm/PhpCliWeb.js ./packages/php-cli-wasm/OutputBuffer.js ./packages/php-cli-wasm/fsOps.js ./packages/php-cli-wasm/resolveDependencies.js ./packages/php-cli-wasm/_Event.js ./packages/php-cli-wasm/webTransactions.js ./packages/php-cli-wasm/idbfsSync.js ./packages/php-dbg-wasm/PhpBase.js ./packages/php-dbg-wasm/PhpDbgNode.js ./packages/php-dbg-wasm/PhpDbgWeb.js ./packages/php-dbg-wasm/OutputBuffer.js ./packages/php-dbg-wasm/fsOps.js ./packages/php-dbg-wasm/resolveDependencies.js ./packages/php-dbg-wasm/_Event.js ./packages/php-dbg-wasm/webTransactions.js ./packages/php-dbg-wasm/idbfsSync.js ./packages/php-cloud-wasm/PhpBase.mjs ./packages/php-cloud-wasm/PhpCloudflare.mjs ./packages/php-cloud-wasm/OutputBuffer.mjs ./packages/php-cloud-wasm/fsOps.mjs ./packages/php-cloud-wasm/resolveDependencies.mjs ./packages/php-cloud-wasm/_Event.mjs
+make[1]: Entering directory '/app'
+make[1]: 'packages/php-wasm/PhpBase.mjs' is up to date.
+make[1]: 'packages/php-wasm/PhpNode.mjs' is up to date.
+make[1]: 'packages/php-wasm/PhpWeb.mjs' is up to date.
+make[1]: 'packages/php-wasm/PhpWebview.mjs' is up to date.
+make[1]: 'packages/php-wasm/PhpWorker.mjs' is up to date.
+make[1]: 'packages/php-wasm/OutputBuffer.mjs' is up to date.
+make[1]: 'packages/php-wasm/fsOps.mjs' is up to date.
+make[1]: 'packages/php-wasm/resolveDependencies.mjs' is up to date.
+make[1]: 'packages/php-wasm/_Event.mjs' is up to date.
+make[1]: 'packages/php-wasm/webTransactions.mjs' is up to date.
+cp source/idbfsSync.mjs packages/php-wasm/idbfsSync.mjs;
+make[1]: 'packages/php-wasm/php-tags.mjs' is up to date.
+make[1]: 'packages/php-wasm/php-tags.jsdelivr.mjs' is up to date.
+make[1]: 'packages/php-wasm/php-tags.local.mjs' is up to date.
+make[1]: 'packages/php-wasm/php-tags.unpkg.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiBase.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiNode.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWeb.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWebBase.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWebview.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWorker.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/breakoutRequest.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/parseResponse.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/msg-bus.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/msg-bus.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/OutputBuffer.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/fsOps.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/resolveDependencies.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/_Event.mjs' is up to date.
+make[1]: 'packages/php-cgi-wasm/webTransactions.mjs' is up to date.
+cp source/idbfsSync.mjs packages/php-cgi-wasm/idbfsSync.mjs;
+make[1]: 'packages/php-cli-wasm/PhpBase.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/PhpCliNode.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/PhpCliWeb.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/OutputBuffer.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/fsOps.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/resolveDependencies.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/_Event.mjs' is up to date.
+make[1]: 'packages/php-cli-wasm/webTransactions.mjs' is up to date.
+cp source/idbfsSync.mjs packages/php-cli-wasm/idbfsSync.mjs;
+make[1]: 'packages/php-dbg-wasm/PhpBase.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/PhpDbgNode.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/PhpDbgWeb.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/OutputBuffer.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/fsOps.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/resolveDependencies.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/_Event.mjs' is up to date.
+make[1]: 'packages/php-dbg-wasm/webTransactions.mjs' is up to date.
+cp source/idbfsSync.mjs packages/php-dbg-wasm/idbfsSync.mjs;
+make[1]: 'packages/php-wasm/PhpBase.js' is up to date.
+make[1]: 'packages/php-wasm/PhpNode.js' is up to date.
+make[1]: 'packages/php-wasm/PhpWeb.js' is up to date.
+make[1]: 'packages/php-wasm/PhpWebview.js' is up to date.
+make[1]: 'packages/php-wasm/PhpWorker.js' is up to date.
+make[1]: 'packages/php-wasm/OutputBuffer.js' is up to date.
+make[1]: 'packages/php-wasm/fsOps.js' is up to date.
+make[1]: 'packages/php-wasm/resolveDependencies.js' is up to date.
+make[1]: 'packages/php-wasm/_Event.js' is up to date.
+make[1]: 'packages/php-wasm/webTransactions.js' is up to date.
+npx babel source/idbfsSync.mjs --out-dir ./packages/php-wasm
+Successfully compiled 1 file with Babel (328ms).
+perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ./packages/php-wasm/idbfsSync.js
+perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ./packages/php-wasm/idbfsSync.js
+\1 better written as $1 at -e line 1.
+make[1]: 'packages/php-cgi-wasm/PhpCgiBase.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiNode.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWeb.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWebBase.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWebview.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/PhpCgiWorker.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/breakoutRequest.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/parseResponse.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/msg-bus.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/msg-bus.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/OutputBuffer.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/fsOps.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/resolveDependencies.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/_Event.js' is up to date.
+make[1]: 'packages/php-cgi-wasm/webTransactions.js' is up to date.
+npx babel source/idbfsSync.mjs --out-dir ./packages/php-cgi-wasm/
+Successfully compiled 1 file with Babel (345ms).
+perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ./packages/php-cgi-wasm/idbfsSync.js
+perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ./packages/php-cgi-wasm/idbfsSync.js
+\1 better written as $1 at -e line 1.
+make[1]: 'packages/php-cli-wasm/PhpBase.js' is up to date.
+make[1]: 'packages/php-cli-wasm/PhpCliNode.js' is up to date.
+make[1]: 'packages/php-cli-wasm/PhpCliWeb.js' is up to date.
+make[1]: 'packages/php-cli-wasm/OutputBuffer.js' is up to date.
+make[1]: 'packages/php-cli-wasm/fsOps.js' is up to date.
+make[1]: 'packages/php-cli-wasm/resolveDependencies.js' is up to date.
+make[1]: 'packages/php-cli-wasm/_Event.js' is up to date.
+make[1]: 'packages/php-cli-wasm/webTransactions.js' is up to date.
+npx babel source/idbfsSync.mjs --out-dir ./packages/php-cli-wasm/
+Successfully compiled 1 file with Babel (365ms).
+perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ./packages/php-cli-wasm/idbfsSync.js
+perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ./packages/php-cli-wasm/idbfsSync.js
+\1 better written as $1 at -e line 1.
+make[1]: 'packages/php-dbg-wasm/PhpBase.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/PhpDbgNode.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/PhpDbgWeb.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/OutputBuffer.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/fsOps.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/resolveDependencies.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/_Event.js' is up to date.
+make[1]: 'packages/php-dbg-wasm/webTransactions.js' is up to date.
+npx babel source/idbfsSync.mjs --out-dir ./packages/php-dbg-wasm/
+Successfully compiled 1 file with Babel (357ms).
+perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ./packages/php-dbg-wasm/idbfsSync.js
+perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ./packages/php-dbg-wasm/idbfsSync.js
+\1 better written as $1 at -e line 1.
+make[1]: 'packages/php-cloud-wasm/PhpBase.mjs' is up to date.
+make[1]: 'packages/php-cloud-wasm/PhpCloudflare.mjs' is up to date.
+make[1]: 'packages/php-cloud-wasm/OutputBuffer.mjs' is up to date.
+make[1]: 'packages/php-cloud-wasm/fsOps.mjs' is up to date.
+make[1]: 'packages/php-cloud-wasm/resolveDependencies.mjs' is up to date.
+make[1]: 'packages/php-cloud-wasm/_Event.mjs' is up to date.
+make[1]: Leaving directory '/app'

@@ -45,10 +45,11 @@ jobs:
         run: |
           make image ENV_FILE=/dev/null
           docker save -o /tmp/builder-image.tar seanmorris/php-emscripten-builder:latest
-      - name: Build isolated Cloudflare profile and final package
+      - name: Build Cloudflare configuration with Make and package final assets
         env:
           PHP_VERSION: ${{ inputs.phpVersion }}
-        run: make cloudflare-mjs PHP_VERSION="$PHP_VERSION"
+        shell: bash
+        run: make cloudflare-mjs ENV_FILE=profiles/cloudflare.mak PHP_VERSION="$PHP_VERSION" CPU_COUNT=8 2>&1 | tee cloudflare-build.log
       - name: Validate and archive only final manifest assets
         env:
           PHP_VERSION: ${{ inputs.phpVersion }}
@@ -68,7 +69,8 @@ jobs:
         with:
           name: failure-cloudflare-build-${{ inputs.phpVersion }}
           path: |
-            .cache/cloudflare/**/*.log
-            .cache/cloudflare/**/*.json
+            cloudflare-build.log
+            .cache/build/**/third_party/php*-src/config.log
+            .cache/build/**/.build-info.json
           include-hidden-files: true
           if-no-files-found: warn

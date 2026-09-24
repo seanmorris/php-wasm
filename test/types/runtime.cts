@@ -12,6 +12,12 @@ new cli.PhpCliNode().run(['-v']);
 const cgiArgs: cgi.PhpCgiRuntimeArgs = { docroot: '/www' };
 const cgiBase: cgi.PhpCgiBase = new cgi.PhpCgiNode(cgiArgs);
 cgiBase.request(new Request('https://example.com/'));
+for (const filesystem of [php, cgiBase, new cli.PhpCliNode(), new dbg.PhpDbgNode()]) {
+	const names: Promise<string[]> = filesystem.readdir('/persist');
+	const entries: Promise<Array<{ name: string; isFolder: boolean }>> = filesystem.readdir('/persist', { withFileTypes: true });
+	// @ts-expect-error CommonJS has the same typed listing contract.
+	const wrong: Promise<string[]> = filesystem.readdir('/persist', { withFileTypes: true });
+}
 // @ts-expect-error The root exports the base type; its constructor has its own entrypoint.
 new cgi.PhpCgiBase(Promise.resolve({ default: () => ({}) }));
 new dbg.PhpDbgNode().run();

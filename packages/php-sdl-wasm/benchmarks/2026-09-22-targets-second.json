@@ -1,0 +1,462 @@
+{
+  "date": "2026-09-22T12:05:08.686Z",
+  "status": "passed",
+  "artifactDirectory": "/app/.cache/sdl-focus/runtime",
+  "hashes": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781330,
+      "sha256": "208026a0231efa0cfe73e028c1e349870d8b4a87e588954587ace1fe88912c11"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104472,
+      "sha256": "7531c4e0b213f40153cbe6b01402fddd83dd30f725d4616e87c2fe6c72290314"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "sourceHashes": {
+    "common.php": {
+      "bytes": 2318,
+      "sha256": "025be3ca7c7cc3b648678cf60ca8f08acab2b907a2fc4072a4cef1a1c8e182d9"
+    },
+    "targets.php": {
+      "bytes": 4639,
+      "sha256": "59435b1d8101204a1c8b6aac0b233d4721169aac605c0fca4d830f40e2c684b8"
+    },
+    "throughput.mjs": {
+      "bytes": 10936,
+      "sha256": "9a17414473e3ab0430e324f819a7f158e117fee49517b539b85d88bedb548fa5"
+    }
+  },
+  "sourceCommit": "f191496",
+  "phpVersion": "8.4",
+  "profile": "static",
+  "sampleCount": 12,
+  "warmupCount": 4,
+  "machine": {
+    "os": "linux",
+    "release": "6.1.0-31-amd64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "logicalCpus": 8
+  },
+  "loadBefore": [
+    8.2,
+    6.36,
+    6.85
+  ],
+  "launch": {
+    "headless": true,
+    "executablePath": "/usr/bin/chromium",
+    "args": [
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader"
+    ]
+  },
+  "suites": {
+    "targets": {
+      "memory": [
+        {
+          "step": "initial",
+          "sdlAllocations": 0,
+          "liveBytes": 3370736,
+          "reservedBytes": 3371440,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24037440
+        },
+        {
+          "step": "warm",
+          "sdlAllocations": 71,
+          "liveBytes": 3707024,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24508964
+        },
+        {
+          "step": "round-4",
+          "sdlAllocations": 71,
+          "liveBytes": 3707072,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24519820
+        },
+        {
+          "step": "round-8",
+          "sdlAllocations": 71,
+          "liveBytes": 3707072,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24534024
+        },
+        {
+          "step": "round-12",
+          "sdlAllocations": 71,
+          "liveBytes": 3707072,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24536140
+        },
+        {
+          "step": "cleanup",
+          "sdlAllocations": 3,
+          "liveBytes": 3695584,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24509512
+        },
+        {
+          "step": "refresh",
+          "sdlAllocations": 3,
+          "liveBytes": 3373576,
+          "reservedBytes": 3899824,
+          "wasmBytes": 134217728,
+          "jsHeapUsedBytes": 24529728
+        }
+      ],
+      "samples": {
+        "depth": [
+          {
+            "submitMs": 6,
+            "finishMs": 268,
+            "totalMs": 274,
+            "frameIntervalMs": 280.2000002861023,
+            "requestMs": 279.80000019073486
+          },
+          {
+            "submitMs": 5,
+            "finishMs": 257.000244140625,
+            "totalMs": 262.000244140625,
+            "frameIntervalMs": 268.80000019073486,
+            "requestMs": 267.90000009536743
+          },
+          {
+            "submitMs": 6.000244140625,
+            "finishMs": 270.000244140625,
+            "totalMs": 276.00048828125,
+            "frameIntervalMs": 279.69999980926514,
+            "requestMs": 279.09999990463257
+          },
+          {
+            "submitMs": 4.999755859375,
+            "finishMs": 285.000244140625,
+            "totalMs": 290,
+            "frameIntervalMs": 295.40000009536743,
+            "requestMs": 295.2999997138977
+          },
+          {
+            "submitMs": 5.000244140625,
+            "finishMs": 274.999755859375,
+            "totalMs": 280,
+            "frameIntervalMs": 285.09999990463257,
+            "requestMs": 284.69999980926514
+          },
+          {
+            "submitMs": 6,
+            "finishMs": 275,
+            "totalMs": 281,
+            "frameIntervalMs": 284.8999996185303,
+            "requestMs": 284.59999990463257
+          },
+          {
+            "submitMs": 5.999755859375,
+            "finishMs": 253,
+            "totalMs": 258.999755859375,
+            "frameIntervalMs": 265,
+            "requestMs": 264.09999990463257
+          },
+          {
+            "submitMs": 6,
+            "finishMs": 249,
+            "totalMs": 255,
+            "frameIntervalMs": 258,
+            "requestMs": 257.7000002861023
+          },
+          {
+            "submitMs": 5.999755859375,
+            "finishMs": 246.000244140625,
+            "totalMs": 252,
+            "frameIntervalMs": 255.90000009536743,
+            "requestMs": 255.7000002861023
+          },
+          {
+            "submitMs": 7,
+            "finishMs": 250.000244140625,
+            "totalMs": 257.000244140625,
+            "frameIntervalMs": 263.19999980926514,
+            "requestMs": 262.90000009536743
+          },
+          {
+            "submitMs": 4,
+            "finishMs": 276,
+            "totalMs": 280,
+            "frameIntervalMs": 287,
+            "requestMs": 286.40000009536743
+          },
+          {
+            "submitMs": 8,
+            "finishMs": 299,
+            "totalMs": 307,
+            "frameIntervalMs": 421.40000009536743,
+            "requestMs": 420.7000002861023
+          }
+        ],
+        "mrt_depth": [
+          {
+            "submitMs": 5.999755859375,
+            "finishMs": 257.000244140625,
+            "totalMs": 263,
+            "frameIntervalMs": 269.09999990463257,
+            "requestMs": 268.90000009536743
+          },
+          {
+            "submitMs": 4,
+            "finishMs": 268.999755859375,
+            "totalMs": 272.999755859375,
+            "frameIntervalMs": 279.19999980926514,
+            "requestMs": 278.69999980926514
+          },
+          {
+            "submitMs": 6,
+            "finishMs": 315,
+            "totalMs": 321,
+            "frameIntervalMs": 325.80000019073486,
+            "requestMs": 325.5
+          },
+          {
+            "submitMs": 5,
+            "finishMs": 290.000244140625,
+            "totalMs": 295.000244140625,
+            "frameIntervalMs": 298.3999996185303,
+            "requestMs": 298.09999990463257
+          },
+          {
+            "submitMs": 6.000244140625,
+            "finishMs": 288,
+            "totalMs": 294.000244140625,
+            "frameIntervalMs": 301.30000019073486,
+            "requestMs": 300.90000009536743
+          },
+          {
+            "submitMs": 5.999755859375,
+            "finishMs": 339,
+            "totalMs": 344.999755859375,
+            "frameIntervalMs": 348.90000009536743,
+            "requestMs": 348.40000009536743
+          },
+          {
+            "submitMs": 6.000244140625,
+            "finishMs": 286.999755859375,
+            "totalMs": 293,
+            "frameIntervalMs": 296.90000009536743,
+            "requestMs": 296.5
+          },
+          {
+            "submitMs": 5,
+            "finishMs": 277.999755859375,
+            "totalMs": 282.999755859375,
+            "frameIntervalMs": 288,
+            "requestMs": 287.69999980926514
+          },
+          {
+            "submitMs": 8,
+            "finishMs": 295.000244140625,
+            "totalMs": 303.000244140625,
+            "frameIntervalMs": 310.2999997138977,
+            "requestMs": 310
+          },
+          {
+            "submitMs": 4.999755859375,
+            "finishMs": 262.999755859375,
+            "totalMs": 267.99951171875,
+            "frameIntervalMs": 272.7000002861023,
+            "requestMs": 272.40000009536743
+          },
+          {
+            "submitMs": 4,
+            "finishMs": 288,
+            "totalMs": 292,
+            "frameIntervalMs": 296.30000019073486,
+            "requestMs": 296.09999990463257
+          },
+          {
+            "submitMs": 5.000244140625,
+            "finishMs": 333,
+            "totalMs": 338.000244140625,
+            "frameIntervalMs": 342.59999990463257,
+            "requestMs": 342.3999996185303
+          }
+        ],
+        "msaa_resolve": [
+          {
+            "submitMs": 12,
+            "finishMs": 422,
+            "totalMs": 434,
+            "frameIntervalMs": 437.2999997138977,
+            "requestMs": 436.90000009536743
+          },
+          {
+            "submitMs": 12.00048828125,
+            "finishMs": 470.999755859375,
+            "totalMs": 483.000244140625,
+            "frameIntervalMs": 487,
+            "requestMs": 486.5
+          },
+          {
+            "submitMs": 10.999755859375,
+            "finishMs": 405.000244140625,
+            "totalMs": 416,
+            "frameIntervalMs": 424.09999990463257,
+            "requestMs": 423.5
+          },
+          {
+            "submitMs": 9.999755859375,
+            "finishMs": 444,
+            "totalMs": 453.999755859375,
+            "frameIntervalMs": 459.90000009536743,
+            "requestMs": 459.59999990463257
+          },
+          {
+            "submitMs": 9,
+            "finishMs": 484.999755859375,
+            "totalMs": 493.999755859375,
+            "frameIntervalMs": 497.59999990463257,
+            "requestMs": 497.19999980926514
+          },
+          {
+            "submitMs": 9,
+            "finishMs": 519,
+            "totalMs": 528,
+            "frameIntervalMs": 531.5999999046326,
+            "requestMs": 531.3000001907349
+          },
+          {
+            "submitMs": 12.999755859375,
+            "finishMs": 461.000244140625,
+            "totalMs": 474,
+            "frameIntervalMs": 479.30000019073486,
+            "requestMs": 479.09999990463257
+          },
+          {
+            "submitMs": 10.000244140625,
+            "finishMs": 480,
+            "totalMs": 490.000244140625,
+            "frameIntervalMs": 496,
+            "requestMs": 495.80000019073486
+          },
+          {
+            "submitMs": 9.000244140625,
+            "finishMs": 425.999755859375,
+            "totalMs": 435,
+            "frameIntervalMs": 442.90000009536743,
+            "requestMs": 442.40000009536743
+          },
+          {
+            "submitMs": 8,
+            "finishMs": 437.999755859375,
+            "totalMs": 445.999755859375,
+            "frameIntervalMs": 453.5,
+            "requestMs": 452.69999980926514
+          },
+          {
+            "submitMs": 19,
+            "finishMs": 494,
+            "totalMs": 513,
+            "frameIntervalMs": 517.3000001907349,
+            "requestMs": 516.6999998092651
+          },
+          {
+            "submitMs": 10,
+            "finishMs": 536,
+            "totalMs": 546,
+            "frameIntervalMs": 550.1999998092651,
+            "requestMs": 549.9000000953674
+          }
+        ]
+      },
+      "summary": {
+        "depth": {
+          "submitMs": 0.005859255790710449,
+          "totalMs": 0.2685549259185791,
+          "finishMs": 0.26269543170928955,
+          "itemsPerSecond": 3723.6330578541747,
+          "submissionCallsPerSecond": 1365361.111676263,
+          "uploadMiBPerSecond": null,
+          "sampleFrameIntervalMedianMs": 279.9500000476837,
+          "sampleFrameIntervalP95Ms": 352.10000009536736,
+          "zeroSubmissionSamples": 0
+        },
+        "mrt_depth": {
+          "submitMs": 0.00537109375,
+          "totalMs": 0.28662121295928955,
+          "finishMs": 0.28125,
+          "itemsPerSecond": 3488.925295079383,
+          "submissionCallsPerSecond": 1489454.5454545454,
+          "uploadMiBPerSecond": null,
+          "sampleFrameIntervalMedianMs": 297.64999985694885,
+          "sampleFrameIntervalP95Ms": 345.43499999046327,
+          "zeroSubmissionSamples": 0
+        },
+        "msaa_resolve": {
+          "submitMs": 0.00976574420928955,
+          "totalMs": 0.46728527545928955,
+          "finishMs": 0.455078125,
+          "itemsPerSecond": 2140.0203527002022,
+          "submissionCallsPerSecond": 1023987.500152586,
+          "uploadMiBPerSecond": null,
+          "sampleFrameIntervalMedianMs": 483.15000009536743,
+          "sampleFrameIntervalP95Ms": 539.9699998617172,
+          "zeroSubmissionSamples": 0
+        }
+      },
+      "phpVersion": "8.4.1",
+      "counterFrequency": 1000000,
+      "cases": {
+        "depth": {
+          "batches": 1024,
+          "itemsPerBatch": 1,
+          "callsPerBatch": 8,
+          "samples": 1
+        },
+        "mrt_depth": {
+          "batches": 1024,
+          "itemsPerBatch": 1,
+          "callsPerBatch": 8,
+          "samples": 1
+        },
+        "msaa_resolve": {
+          "batches": 1024,
+          "itemsPerBatch": 1,
+          "callsPerBatch": 10,
+          "samples": 4
+        }
+      },
+      "graphics": {
+        "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)",
+        "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+      }
+    }
+  },
+  "notes": [
+    "Run twice with native builds, compression and other browser tests idle.",
+    "Prepared PHP inputs exclude array/string packing, resource creation and shader compilation.",
+    "Timings include PHP loops, checked bindings, native execution and driver work; they are not pure call overhead.",
+    "Submission is followed by full framebuffer readback; verification occurs after the native timer stops.",
+    "Each timed sample repeats its batch, with completion amortized over all batches; this is not game FPS.",
+    "frameIntervalMs uses performance.now inside rAF callbacks before/after the whole sample, including dispatch and scheduling.",
+    "Zero submission samples are below the SDL clock resolution, not free calls; rates for a zero median are null.",
+    "Event timings include queue push/poll and per-event PHP payload checks; they do not measure physical input latency.",
+    "Instancing uses preloaded offsets; ordinary draws update an offset uniform for each triangle.",
+    "Uniform paths update the same 64 vec4 values and draw; texture paths alternate 256x256 RGBA uploads and draw.",
+    "Headless SwiftShader results describe this software renderer, not hardware GPU performance.",
+    "Native liveBytes is dlmalloc uordblks including the temporary 40-byte mallinfo allocation.",
+    "Reserved/Wasm capacity and V8 heap size are not live SDL allocations or proof of general leak freedom."
+  ],
+  "browser": "152.0.7977.75",
+  "loadAfter": [
+    9.39,
+    6.76,
+    6.97
+  ]
+}

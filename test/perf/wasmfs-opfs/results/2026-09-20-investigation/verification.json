@@ -1,0 +1,80 @@
+{
+  "unitTests": {
+    "passed": 43,
+    "skipped": 0
+  },
+  "typeTests": {
+    "passed": 7,
+    "skipped": 0,
+    "deno": "2.5.6"
+  },
+  "packagingAndDocsTests": {
+    "passed": 13,
+    "skipped": 0
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "runtimeWrappersRegenerated": true,
+  "diagnosticCodeEquivalentAfterFormatting": true,
+  "nativeArtifactsUnchanged": [
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4448377,
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40819220,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs-pruned/packages/php-cgi-wasm/php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs-pruned/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs-pruned/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40333239,
+      "sha256": "ff12101439cf62dbde9b29943d3aefa2d983254e81b283ce8f5c3d9b7975de9e"
+    }
+  ],
+  "esmWrapperSize": {
+    "file": "source/PhpCgiWebBase.mjs",
+    "previousRawBytes": 6815,
+    "currentRawBytes": 9781,
+    "rawDelta": 2966,
+    "previousGzip9Bytes": 2316,
+    "currentGzip9Bytes": 3155,
+    "compression": "gzip -n -9 -c, stdin",
+    "gzip9Delta": 839
+  },
+  "successfulDiagnosticTrials": 10,
+  "excludedHarnessSetupFailures": 3
+}

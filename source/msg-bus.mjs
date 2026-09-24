@@ -1,50 +1,52 @@
 const incomplete = new Map();
 
 /**
- * Create a sendMessage function given a service worker URL.
+ * Waits for a selected worker to activate, including an installation already in progress.
+ * @param {ServiceWorker} worker Worker selected from a registration or supplied directly.
+ * @returns {Promise<ServiceWorker>} Activated worker, or a rejection if installation fails.
+ */
+const waitForActivation = worker => new Promise((accept, reject) => {
+	const checkState = () => {
+		if(worker.state !== 'activated' && worker.state !== 'redundant') return;
+		worker.removeEventListener('statechange', checkState);
+		if(worker.state === 'activated') accept(worker);
+		else reject(new Error('Service worker became redundant before activation.'));
+	};
+	worker.addEventListener('statechange', checkState);
+	checkState();
+});
+
+/**
+ * Create a sendMessage function that waits for the target service worker to activate.
+ * Registration, installation, and message-cloning failures reject the returned promise.
  * @param {ServiceWorker|string} serviceWorker The service worker instance or registration URL to target.
  * @returns {(action: string, params?: PhpMessageParams) => Promise<PhpRuntimeValue>} Function that sends an RPC-style message to the service worker.
  */
 export const sendMessageFor = (serviceWorker) => async (action, params = []) => {
+	let worker = serviceWorker;
+	if(!(worker instanceof ServiceWorker))
+	{
+		const registration = await navigator.serviceWorker.getRegistration(worker);
+		if(!registration) throw new Error(`No service worker registration found for ${serviceWorker}.`);
+		worker = [registration.active, registration.waiting, registration.installing]
+		.find(candidate => candidate && candidate.state !== 'redundant');
+		if(!worker) throw new Error('Service worker registration has no available worker.');
+	}
+
+	await waitForActivation(worker);
 	const token = window.crypto.randomUUID();
-	let accept, reject;
-	const ret = new Promise((_accept, _reject) => [accept, reject] = [_accept, _reject]);
-	incomplete.set(token, [accept, reject, action, params]);
-
-	if(serviceWorker instanceof ServiceWorker)
-	{
-		serviceWorker.postMessage({action, params, token});
-	}
-	else
-	{
-		navigator.serviceWorker
-		.getRegistration(serviceWorker)
-		.then(registration => {
-			if(registration.active)
-			{
-				registration.active.postMessage({action, params, token});
-			}
-			else
-			{
-				console.log(registration);
-				registration.addEventListener('updatefound', () => {
-					const worker = registration.installing;
-					if(worker)
-					{
-						worker.addEventListener('statechange', () => {
-							if(worker.state === 'activated')
-							{
-								worker.postMessage({action, params, token});
-							}
-						}, {once: true});
-					}
-				}, {once: true});
-			}
-		});
-	}
-
-
-	return ret;
+	return new Promise((accept, reject) => {
+		incomplete.set(token, [accept, reject, action, params]);
+		try
+		{
+			worker.postMessage({action, params, token});
+		}
+		catch(error)
+		{
+			incomplete.delete(token);
+			reject(error);
+		}
+	});
 };
 
 /**

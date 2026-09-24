@@ -1,4 +1,5 @@
 #!/usr/bin/env make
+.DEFAULT_GOAL := all
 .PHONY: all web js cjs mjs \
 	web-mjs web-js \
 	worker-mjs worker-js node-mjs \
@@ -13,15 +14,20 @@
 	archives assets rebuild reconfigure \
 	dynamic dynamic-libs.json runtime-wrappers
 
-CLOUDFLARE_GOALS := cloudflare-mjs _cloudflare-mjs test-cloudflare
+CLOUDFLARE_GOALS := cloudflare-mjs test-cloudflare
+SDL_GOALS := sdl-mjs test-sdl-package
+ifneq ($(filter ${SDL_GOALS},${MAKECMDGOALS}),)
+ifneq ($(filter-out ${SDL_GOALS},${MAKECMDGOALS}),)
+$(error SDL package targets must run separately from other build targets)
+endif
+ENV_FILE ?= profiles/sdl.mak
+endif
 ifneq ($(filter ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 ifneq ($(filter-out ${CLOUDFLARE_GOALS},${MAKECMDGOALS}),)
 $(error Cloudflare targets must run separately from other build targets)
 endif
-# Select this before any environment file or extension makefile is evaluated.
-override ENV_FILE := profiles/cloudflare.mak
-else
-MAKEFLAGS += --shuffle=random
+# A default configuration, just like the other builds' .env files.
+ENV_FILE ?= profiles/cloudflare.mak
 endif
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variables
 
@@ -29,7 +35,13 @@ MAKEFLAGS += --no-builtin-rules --no-builtin-variables --warn-undefined-variable
 
 ENV_DIR?=.
 ENV_FILE?=.env
--include ${ENV_FILE}
+make_empty :=
+make_space := ${make_empty} ${make_empty}
+make_path = $(subst ${make_space},\${make_space},$(1))
+shell_quote = '$(subst ','"'"',$(1))'
+make_command_variables = $(foreach name,${.VARIABLES},$(if $(filter command line,$(origin ${name})),${name}))
+make_overrides = $(foreach name,$(filter-out $(1),${make_command_variables}),$(call shell_quote,${name}=$(${name})))
+-include $(call make_path,${ENV_FILE})
 LIB_TYPE ?=$(shell basename '${ENV_FILE}' | sed -n 's/^\.env_[0-9][0-9.]*\.\([^.]*\)\.ci$$/\1/p')
 
 ## PHP Version
@@ -37,7 +49,28 @@ PHP_VERSION_DEFAULT=8.4
 PHP_VERSION?=${PHP_VERSION_DEFAULT}
 PHP_VARIANT?=
 
--include ${ENV_FILE}.${PHP_VERSION}
+-include $(call make_path,${ENV_FILE}.${PHP_VERSION})
+MAKE_SHUFFLE ?= --shuffle=random
+MAKEFLAGS += ${MAKE_SHUFFLE}
+
+CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
+SDL_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-sdl-wasm
+SDL_RAW_DIR ?= .cache/sdl-raw/php${PHP_VERSION}
+.PHONY: test-sdl-package
+test-sdl-package: $(filter sdl-mjs,${MAKECMDGOALS})
+	node bin/package-sdl.mjs --verify $(call shell_quote,${SDL_OUTPUT_DIR}) '${PHP_VERSION}'
+.PHONY: test-cloudflare
+# Artifact tests use the caller's package and installed test dependencies. When
+# requested together, finish the native build before running them in this tree.
+test-cloudflare: $(filter cloudflare-mjs,${MAKECMDGOALS})
+	CLOUDFLARE_ARTIFACT_ROOT=$(call shell_quote,$(or ${CLOUDFLARE_ARTIFACT_ROOT},${CLOUDFLARE_OUTPUT_DIR})) PHP_VERSION='${PHP_VERSION}' node --test test/cloudflare/*.test.mjs
+
+# Optional source workspaces use these same recipes and ordinary Docker Compose.
+# Keep this dispatch before evaluating rules for any native build state.
+BUILD_WORKSPACE ?=
+ifneq ($(strip ${BUILD_WORKSPACE}),)
+include build-workspace.mak
+else
 
 ## Default libraries
 WITH_BCMATH  ?=1
@@ -148,7 +181,7 @@ SHELL=bash -euo pipefail
 PKG_CONFIG_PATH=/src/lib/lib/pkgconfig
 
 DOCKER_COMPOSE?=docker compose
-CPU_COUNT=`nproc || echo 1`
+CPU_COUNT?=`nproc || echo 1`
 MAX_LOAD=$(shell echo $$(( `nproc` + $$(( `nproc` / 2 )) )))
 LTO_FLAG?=-flto
 # Keep native i64 signatures at every dynamic-linking boundary. Emscripten can
@@ -166,6 +199,7 @@ MAKEFLAGS+= "-l${MAX_LOAD}"
 WITH_CGI=1
 
 PHP_CONFIGURE_DEPS=
+PHP_LINK_DEPS=
 DEPENDENCIES=
 ORDER_ONLY=
 EXTRA_FILES=
@@ -226,7 +260,7 @@ PHP_AR=libphp7
 EXTRA_FLAGS+= -s EMULATE_FUNCTION_POINTER_CASTS=1
 endif
 
-EXTRA_CFLAGS=
+EXTRA_CFLAGS?=
 ZEND_EXTRA_LIBS=
 SKIP_LIBS=
 PHP_ASSET_LIST=
@@ -249,8 +283,7 @@ NOTPARALLEL=
 all:
 	$(MAKE) _all
 
-TOP_LEVEL=$(addprefix ${CURDIR}/node_modules/,php-wasm php-cloud-wasm php-cgi-wasm php-cli-wasm php-dbg-wasm)
-EXTENSION_PACKAGE_DIRS ?= $(filter-out ${TOP_LEVEL},$(shell npm ls -p))
+EXTENSION_PACKAGE_DIRS ?= $(shell node bin/list-extension-packages.mjs)
 
 -include packages/php-cgi-wasm/pre.mak
 -include packages/php-cli-wasm/pre.mak
@@ -267,8 +300,8 @@ endif
 MJS_HELPERS=OutputBuffer.mjs fsOps.mjs resolveDependencies.mjs _Event.mjs
 CJS_HELPERS=OutputBuffer.js fsOps.js resolveDependencies.js _Event.js
 
-MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs
-CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js
+MJS_HELPERS_WEB=${MJS_HELPERS} webTransactions.mjs idbfsSync.mjs
+CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js idbfsSync.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
@@ -345,35 +378,53 @@ ifeq (${WITH_ONIGURUMA},shared)
 # CONFIGURE_FLAGS+= --with-onig=/src/lib
 endif
 
-DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES}
+DEPENDENCIES+= ${ENV_FILE} ${ARCHIVES} ${PHP_LINK_DEPS}
 
-third_party/php${PHP_VERSION}-src/configured: ${ENV_FILE} ${ARCHIVES} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c
+PHP_CONFIGURE_ARGS = \
+	PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
+	${PHP_CONFIGURE_VARS} \
+	EXTENSION_DIR='./' \
+	--prefix='/src/lib/php${PHP_VERSION}' \
+	--with-config-file-path=/php.ini \
+	--with-config-file-scan-dir='/config:/preload' \
+	--with-layout=GNU \
+	--with-valgrind=no \
+	--enable-cgi \
+	--enable-phpdbg \
+	--enable-cli \
+	--enable-embed=static \
+	--enable-pib \
+	--enable-json \
+	--enable-pdo \
+	--disable-all \
+	--disable-fiber-asm \
+	--disable-rpath \
+	--disable-opcache-jit \
+	--without-pear \
+	--without-pcre-jit \
+	${CONFIGURE_FLAGS}
+
+# Autoconf cache values are not portable across PHP versions or configurations.
+# Track the selected arguments separately so command-line flag changes also
+# invalidate configure, while a repeated identical invocation keeps its mtime.
+PHP_CONFIGURE_CACHE_DIR = .cache/php-configure/php${PHP_VERSION_FULL}
+PHP_CONFIGURE_CACHE_KEY = $(shell printf '%s\n' $(call shell_quote,${LIB_TYPE}) $(call shell_quote,${PHP_CONFIGURE_ARGS}) | sha256sum | cut -d' ' -f1)
+PHP_CONFIGURE_CACHE = ${PHP_CONFIGURE_CACHE_DIR}/${PHP_CONFIGURE_CACHE_KEY}.cache
+PHP_CONFIGURE_STAMP ?= .cache/php-configure-${PHP_VERSION}
+
+.PHONY: php-configure-force
+${PHP_CONFIGURE_STAMP}: php-configure-force
+	@mkdir -p $(dir $@)
+	@printf '%s\n' $(call shell_quote,${PHP_CONFIGURE_CACHE}) > $@.tmp
+	@cmp -s $@.tmp $@ && rm $@.tmp || mv $@.tmp $@
+
+third_party/php${PHP_VERSION}-src/configured: ${PHP_CONFIGURE_STAMP} ${ENV_FILE} ${ARCHIVES} ${PHP_CONFIGURE_DEPS} third_party/php${PHP_VERSION}-src/patched third_party/php${PHP_VERSION}-src/ext/pib/pib.c
 	@ echo -e "\e[33;4mConfiguring PHP ${PHP_SUFFIX}\e[0m"
 	${DOCKER_RUN_IN_PHP} which autoconf
 	${DOCKER_RUN_IN_PHP} emconfigure ./buildconf --force
-	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/.cache/config-cache \
-		PKG_CONFIG_PATH=${PKG_CONFIG_PATH} \
-		${PHP_CONFIGURE_VARS} \
-		EXTENSION_DIR='./'  \
-		--prefix='/src/lib/php${PHP_VERSION}' \
-		--with-config-file-path=/php.ini \
-		--with-config-file-scan-dir='/config:/preload' \
-		--with-layout=GNU  \
-		--with-valgrind=no \
-		--enable-cgi       \
-		--enable-phpdbg    \
-		--enable-cli       \
-		--enable-embed=static \
-		--enable-pib       \
-		--enable-json      \
-		--enable-pdo       \
-		--disable-all      \
-		--disable-fiber-asm \
-		--disable-rpath    \
-		--disable-opcache-jit \
-		--without-pear     \
-		--without-pcre-jit \
-		${CONFIGURE_FLAGS}
+	${DOCKER_RUN} mkdir -p ${PHP_CONFIGURE_CACHE_DIR}
+	${DOCKER_RUN_IN_PHP} emconfigure ./configure --cache-file=/src/${PHP_CONFIGURE_CACHE} ${PHP_CONFIGURE_ARGS}
+	${DOCKER_RUN_IN_PHP} scripts/dev/credits
 	${DOCKER_RUN_IN_PHP} touch /src/third_party/php${PHP_VERSION}-src/configured
 
 SYMBOL_FLAGS=
@@ -484,7 +535,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-I /src/third_party/php${PHP_VERSION}-src/sapi/ \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/ \
 		-I /src/lib/include \
-		$(addprefix /src/,${ARCHIVES}) \
+		$(addprefix /src/,$(sort ${ARCHIVES})) \
 		${FS_TYPE} \
 		${EXTRA_FILES} \
 		${EXTRA_FLAGS} \
@@ -497,8 +548,8 @@ endif
 
 HELPER_MJS=${PHP_DIST_DIR}/php-tags.mjs ${PHP_DIST_DIR}/php-tags.jsdelivr.mjs ${PHP_DIST_DIR}/php-tags.local.mjs ${PHP_DIST_DIR}/php-tags.unpkg.mjs
 
-WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
-WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWeb.js php${PHP_SUFFIX}-web.js ${CJS_HELPERS_WEB})
+WEB_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebBase.mjs PhpWeb.mjs php${PHP_SUFFIX}-web.mjs ${MJS_HELPERS_WEB})
+WEB_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js PhpWebBase.js PhpWeb.js php${PHP_SUFFIX}-web.js ${CJS_HELPERS_WEB})
 WORKER_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWorker.mjs php${PHP_SUFFIX}-worker.mjs ${MJS_HELPERS_WEB})
 WORKER_JS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.js  PhpWorker.js php${PHP_SUFFIX}-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_MJS=$(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpWebview.mjs php${PHP_SUFFIX}-webview.mjs ${MJS_HELPERS_WEB})
@@ -549,12 +600,15 @@ STDLIB_WEB_TARGET=
 STDLIB_WORKER_TARGET=
 STDLIB_WEBVIEW_TARGET=
 
+# These modules instantiate the standard runtime and use its Node build as input.
+ifeq (${PHP_VARIANT},)
 ifneq ($(filter ${WITH_LIBXML},dynamic),)
 ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 STDLIB_NODE_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-node.mjs
 STDLIB_WEB_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-web.mjs
 STDLIB_WORKER_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-worker.mjs
 STDLIB_WEBVIEW_TARGET=${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs
+endif
 endif
 endif
 
@@ -578,33 +632,30 @@ ${PHP_STDLIB_DIR}/${PHP_VERSION}-webview.mjs: ${PHP_DIST_DIR}/php${PHP_VERSION}-
 
 # Single Builds
 
-.PHONY: cloudflare-mjs _cloudflare-mjs test-cloudflare
-cloudflare_shell_quote = '$(subst ','"'"',$(1))'
-CLOUDFLARE_OUTPUT_DIR ?= ${ENV_DIR}/packages/php-cloud-wasm
-CLOUDFLARE_CACHE_DIR ?= .cache/cloudflare
+.PHONY: sdl-mjs
+sdl-mjs:
+	mkdir -p $(call shell_quote,${SDL_RAW_DIR})
+	$(MAKE) web-mjs $(call make_overrides,ENV_FILE PHP_DIST_DIR PHP_ASSET_DIR WITH_SDL) ENV_FILE=$(call shell_quote,${ENV_FILE}) WITH_SDL=1 PHP_DIST_DIR=$(call shell_quote,${SDL_RAW_DIR}) PHP_ASSET_DIR=$(call shell_quote,${SDL_RAW_DIR})
+	node bin/package-sdl.mjs --build $(call shell_quote,${SDL_RAW_DIR}) '${PHP_VERSION}' $(call shell_quote,${SDL_OUTPUT_DIR})
+
+.PHONY: cloudflare-mjs test-cloudflare
 cloudflare-mjs:
-	node bin/build-cloudflare.mjs --php-version $(call cloudflare_shell_quote,${PHP_VERSION}) --output $(call cloudflare_shell_quote,${CLOUDFLARE_OUTPUT_DIR}) --cache-root $(call cloudflare_shell_quote,${CLOUDFLARE_CACHE_DIR})
-
-# Only the isolated container invokes this target. Never reuse another profile's
-# configured PHP tree or libraries, even if its output directory is different.
-_cloudflare-mjs:
-	@test "$${PHP_WASM_CLOUDFLARE_ISOLATED:-}" = 1 || { echo 'Use make cloudflare-mjs to isolate native build state.' >&2; exit 1; }
+	@test '${MAIN_MODULE}' = 0 || { echo 'Cloudflare requires MAIN_MODULE=0; select ENV_FILE=profiles/cloudflare.mak.' >&2; exit 1; }
+	${DOCKER_RUN} emcc --version | head -1 | grep -E '(^|[[:space:]])6[.]0[.]6([[:space:]]|$$)'
 	mkdir -p '${PHP_DIST_DIR}' .cache lib
-	$(MAKE) ${PHP_CONFIGURE_DEPS} ${ARCHIVES} ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
-	$(MAKE) '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs' ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
-	$(MAKE) $(addprefix ${PHP_DIST_DIR}/,PhpBase.mjs PhpCloudflare.mjs ${MJS_HELPERS}) ENV_FILE=profiles/cloudflare.mak MAKEFLAGS= EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) ${PHP_CONFIGURE_DEPS} ${ARCHIVES} $(call make_overrides,) EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	$(MAKE) '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs' '${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm' $(call make_overrides,) EXTENSION_PACKAGE_DIRS='${EXTENSION_PACKAGE_DIRS}'
+	INITIAL_MEMORY='${INITIAL_MEMORY}' MAXIMUM_MEMORY='${MAXIMUM_MEMORY}' node bin/package-cloudflare.mjs --build $(call shell_quote,${PHP_DIST_DIR}) '${PHP_VERSION}' $(call shell_quote,${CLOUDFLARE_OUTPUT_DIR})
 
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: BUILD_TYPE=mjs
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ENVIRONMENT=worker
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: FS_TYPE=-lidbfs.js
-${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs: ${DEPENDENCIES} third_party/php${PHP_VERSION}-src/configured | ${ORDER_ONLY}
+CLOUDFLARE_RUNTIME = ${PHP_DIST_DIR}/php${PHP_VERSION}-cloudflare-runtime.mjs
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: BUILD_TYPE=mjs
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: ENVIRONMENT=worker
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm: FS_TYPE=-lidbfs.js
+${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm &: ${DEPENDENCIES} third_party/php${PHP_VERSION}-src/configured | ${ORDER_ONLY}
 	${DOCKER_RUN_IN_PHP} emmake make cli ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS='' SAPI_CLI_PATH='sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs'
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs $@
-	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.wasm $@.wasm
-	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' $@
-
-test-cloudflare:
-	PHP_VERSION='${PHP_VERSION}' node --test test/cloudflare/*.test.mjs
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.mjs ${CLOUDFLARE_RUNTIME}
+	cp third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_VERSION}-cloudflare-runtime.wasm ${CLOUDFLARE_RUNTIME}.wasm
+	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' ${CLOUDFLARE_RUNTIME}
 
 web-mjs:
 	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
@@ -733,17 +784,15 @@ NOTPARALLEL+=\
 
 DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_CONFIGURE_DEPS} ${PRE_JS_FILES}
 
-${ENV_DIR}/${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
-	- cp -Lprf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data ${PHP_ASSET_DIR}
-	- cp -Lprf ${PHP_ASSET_DIR}/${PRELOAD_NAME}.data ${ENV_DIR}/${PHP_ASSET_DIR}/
+${PHP_ASSET_DIR}/${PRELOAD_NAME}.data: .cache/preload-collected
+	cp -Lpf third_party/php${PHP_VERSION}-src/sapi/cli/${PRELOAD_NAME}.data $@
 
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: BUILD_TYPE=js
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -761,8 +810,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs: ENVIRONMENT=web
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -770,7 +818,6 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-web.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	perl -pi -w -e 's|import\(name\)|import(/* webpackIgnore: true */ name)|g' $@
 	perl -pi -w -e 's|require\("fs"\)|require(/* webpackIgnore: true */ "fs")|g' $@
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
-	perl -pi -w -e 's|_setTempRet0|setTempRet0|g' $@
 	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DIST_DIR}/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_ASSET_DIR}
 
@@ -782,8 +829,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -801,8 +847,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs: ENVIRONMENT=worker
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-worker.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -821,8 +866,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -840,8 +884,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs: ENVIRONMENT=node
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs: FS_TYPE=${NODE_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-node.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -860,8 +903,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.js: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -879,8 +921,7 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: ENVIRONMENT=webview
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: FS_TYPE=${WEB_FS_TYPE}
 ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs: ${DEPENDENCIES} | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding PHP ${PHP_VERSION} for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
-	${DOCKER_RUN_IN_PHP} scripts/dev/credits
-	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make cli install-cli install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} mv -f \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}.${BUILD_TYPE} \
 		/src/third_party/php${PHP_VERSION}-src/sapi/cli/php${PHP_SUFFIX}-${ENVIRONMENT}.${BUILD_TYPE}
@@ -900,16 +941,21 @@ ${PHP_DIST_DIR}/php${PHP_SUFFIX}-webview.mjs.wasm.map.MAPPED: ${PHP_DIST_DIR}/ph
 # This target only copies/transpiles source wrappers; it never builds PHP/Wasm.
 runtime_wrapper_mjs = $(patsubst %.d.mts,%.mjs,$(notdir $(wildcard packages/$(1)/Php*.d.mts)))
 PHP_CLOUD_WRAPPER_DIR?=${ENV_DIR}/packages/php-cloud-wasm
+PHP_SDL_WRAPPER_DIR?=${ENV_DIR}/packages/php-sdl-wasm
 RUNTIME_WRAPPERS=$(addprefix ${PHP_DIST_DIR}/,$(call runtime_wrapper_mjs,php-wasm) ${MJS_HELPERS_WEB} $(notdir ${HELPER_MJS})) \
 	$(addprefix ${PHP_CGI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cgi-wasm) ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB}) \
 	$(addprefix ${PHP_CLI_DIST_DIR}/,$(call runtime_wrapper_mjs,php-cli-wasm) ${MJS_HELPERS_WEB}) \
 	$(addprefix ${PHP_DBG_DIST_DIR}/,$(call runtime_wrapper_mjs,php-dbg-wasm) ${MJS_HELPERS_WEB})
 RUNTIME_WRAPPERS_CJS=$(patsubst %.mjs,%.js,$(filter-out ${HELPER_MJS},${RUNTIME_WRAPPERS}))
 CLOUD_WRAPPERS=$(addprefix ${PHP_CLOUD_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-cloud-wasm) ${MJS_HELPERS})
+SDL_WRAPPERS=$(addprefix ${PHP_SDL_WRAPPER_DIR}/,$(call runtime_wrapper_mjs,php-sdl-wasm) ${MJS_HELPERS_WEB})
 
 runtime-wrappers:
-	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR}
-	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS}
+	mkdir -p ${PHP_DIST_DIR} ${PHP_CGI_DIST_DIR} ${PHP_CLI_DIST_DIR} ${PHP_DBG_DIST_DIR} ${PHP_CLOUD_WRAPPER_DIR} ${PHP_SDL_WRAPPER_DIR}
+	$(MAKE) ${RUNTIME_WRAPPERS} ${RUNTIME_WRAPPERS_CJS} ${CLOUD_WRAPPERS} ${SDL_WRAPPERS}
+
+${SDL_WRAPPERS}: ${PHP_SDL_WRAPPER_DIR}/%.mjs: source/%.mjs
+	cp $< $@
 
 ${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
 	cp $< $@
@@ -962,7 +1008,7 @@ ${PHPIZE}: third_party/php${PHP_VERSION}-src/scripts/phpize-built
 
 third_party/php${PHP_VERSION}-src/scripts/phpize-built: ENVIRONMENT=web
 third_party/php${PHP_VERSION}-src/scripts/phpize-built: ${DEPENDENCIES} | ${ORDER_ONLY}
-	${DOCKER_RUN_IN_PHP} emmake make install-build  ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
+	${DOCKER_RUN_IN_PHP} emmake make install-build  ${BUILD_FLAGS} PHP_BINARIES=cli WASM_SHARED_LIBS="$(addprefix /src/,$(sort ${SHARED_LIBS}))"
 	${DOCKER_RUN_IN_PHP} chmod +x scripts/phpize
 	${DOCKER_RUN_IN_PHP} touch scripts/phpize-built
 
@@ -991,7 +1037,8 @@ patch/php8.0.patch:
 	perl -pi -w -e 's|([ab])/|\1/third_party/php8.0-src/|g' ./patch/php8.0.patch
 
 php-clean:
-	${DOCKER_RUN_IN_PHP} rm -f .cache/config-cache
+	${DOCKER_RUN} rm -rf ${PHP_CONFIGURE_CACHE_DIR}
+	${DOCKER_RUN} rm -f ${PHP_CONFIGURE_STAMP} .cache/sdl-config-${PHP_VERSION}
 	${DOCKER_RUN_IN_PHP} rm -f configured
 	${DOCKER_RUN_IN_PHP} bash -c 'rm -f \
 		sapi/cli/php-*.js \
@@ -1030,6 +1077,9 @@ php-clean:
 clean:
 	${DOCKER_RUN} rm -rf \
 		.cache/config-cache \
+		.cache/php-configure \
+		.cache/php-configure-* \
+		.cache/sdl-config-* \
 		packages/php-wasm/*.js \
 		packages/php-wasm/*.mjs \
 		packages/php-wasm/*.map \
@@ -1098,6 +1148,11 @@ save-image:
 
 NPM_PUBLISH_TAG?=latest
 NPM_PUBLISH_DRY?=--dry-run
+
+BUILDER_PACKAGE_OUTPUT?=${CURDIR}/.cache/release
+.PHONY: package-builder
+package-builder:
+	node bin/package-builder.mjs $(call shell_quote,${BUILDER_PACKAGE_OUTPUT})
 
 publish:
 	./publish-packages.sh ${NPM_PUBLISH_TAG} ${NPM_PUBLISH_DRY}
@@ -1455,12 +1510,12 @@ php-clean-all-versions:
 	${MAKE} php-clean PHP_VERSION=8.0
 
 demo-versions:
-	${MAKE} web-mjs PHP_VERSION=8.5 WITH_SDL=1
-	${MAKE} web-mjs PHP_VERSION=8.4 WITH_SDL=1
-	${MAKE} web-mjs PHP_VERSION=8.3 WITH_SDL=1
-	${MAKE} web-mjs PHP_VERSION=8.2 WITH_SDL=1
-	${MAKE} web-mjs PHP_VERSION=8.1 WITH_SDL=1
-	${MAKE} web-mjs PHP_VERSION=8.0 WITH_SDL=1
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.5
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.4
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.3
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.2
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.1
+	${MAKE} sdl-mjs ENV_FILE=$(call shell_quote,${ENV_FILE}) PHP_VERSION=8.0
 
 	${MAKE} worker-cgi-mjs web-cli-mjs web-dbg-mjs PHP_VERSION=8.3 WITH_SDL=0
 
@@ -1485,3 +1540,5 @@ serve-demo: web-mjs worker-cgi-mjs web-dbg-mjs
 	npm run start --prefix ./demo-web
 
 null:
+
+endif # BUILD_WORKSPACE

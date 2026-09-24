@@ -1,0 +1,1061 @@
+{
+  "backend": "idbfs",
+  "framework": "wordpress",
+  "mode": "incremental-idbfs",
+  "round": 0,
+  "started": "2026-09-20T18:37:09.269Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    0.22,
+    0.69,
+    1.11
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 751.9000000953674,
+      "value": {
+        "wallMs": 751.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 1.5
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 1,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 1.7999992370605469,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.8999996185302734,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 743.1999998092651,
+      "value": {
+        "wallMs": 743.0999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 5.800000190734863
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 5.300000190734863,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 10.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 5.400000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 733.1999998092651,
+      "value": {
+        "wallMs": 733.1999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.8000001907348633
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 729.5999999046326,
+      "value": {
+        "wallMs": 729.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6999998092651367
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 712.9000000953674,
+      "value": {
+        "wallMs": 712.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.7000002861022949
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.5999994277954102,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 735.0999999046326,
+      "value": {
+        "wallMs": 735.0999999046326,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.7999997138977051
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.5999999046325684,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.8000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 0.09999990463256836,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 681.4000000953674,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 28.999999523162842,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 32616,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 34.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 628.0999999046326,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 32616,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 11.90000057220459,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 106.5,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 3,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 3.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 74.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 4077,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 1.4000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "0c28243ae5fdfedbef5825f8295628882e971923e072c0755ad948c18b1b17e2",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10684,
+      "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 12502,
+      "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8107,
+      "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 444.7999997138977,
+    "mountHydrateMs": 50.40000009536743,
+    "totalMs": 496.09999990463257
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 136.10000038146973,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 53.799999713897705,
+          "bytes": 29997708,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 53.90000009536743,
+          "bytes": 29997708,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 109.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 1929.6999998092651,
+      "value": {
+        "wallMs": 1929.5999999046326,
+        "status": 200,
+        "body": {
+          "entries": 3628,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 915.3000001907349
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.20000028610229492,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 478.5,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 367.1000003814697,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 4077,
+          "ms": 1587119.4000053406,
+          "bytes": 95944968,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 2065.800000190735
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 1326.3000001907349,
+    "value": {
+      "wallMs": 1326.1999998092651,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 47.59999990463257
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 29.299999713897705,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 3,
+        "ms": 86.39999914169312,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-journal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/persist",
+        "calls": 2,
+        "ms": 57.39999961853027,
+        "bytes": 446464,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 417.5,
+    "mountHydrateMs": 595.9000000953674,
+    "totalMs": 1014.7000002861023
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 1416.2000002861023,
+    "value": {
+      "wallMs": 1416.2000002861023,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 8.300000190734863
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0.10000038146972656,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 4.599999904632568,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 4077,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 5.099999904632568,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 77.40000009536743,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 4077,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 43.299999713897705,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 7.5,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 2,
+        "ms": 14.899999618530273,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/persist",
+        "calls": 1,
+        "ms": 7.399999618530273,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:37:21.739Z"
+}

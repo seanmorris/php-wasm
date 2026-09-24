@@ -82,6 +82,24 @@ const settleWithin = (promise, timeoutMs) => {
 };
 
 /**
+ * Keeps a recovered worker's registration URL on subsequent page loads, while
+ * still checking its script graph for updates. Dropping its query would cause
+ * another unnecessary worker replacement as soon as the user opens a new tab.
+ */
+const registrationUrl = () => {
+	const workerUrl = baseUrlFor('cgi-worker.js');
+	const scriptUrl = navigator.serviceWorker.controller?.scriptURL;
+	const currentUrl = scriptUrl ? new URL(scriptUrl, window.location.origin) : null;
+
+	if(currentUrl?.origin === workerUrl.origin && currentUrl.pathname === workerUrl.pathname)
+	{
+		workerUrl.search = currentUrl.search;
+	}
+
+	return workerUrl.href;
+};
+
+/**
  * Observes service-worker state changes until startup completes or fails.
  */
 const observeRegistration = (registration, transitions, startedAt) => {
@@ -211,9 +229,10 @@ export const ensureServiceWorker = async ({
 	try
 	{
 		const registerResult = await settleWithin(
-			navigator.serviceWorker.register(basePath('cgi-worker.js'), {
+			navigator.serviceWorker.register(registrationUrl(), {
 				type: 'module'
 				, scope: basePath()
+				, updateViaCache: 'none'
 			})
 			, startupTimeoutMs
 		);
@@ -311,5 +330,76 @@ export const ensureServiceWorker = async ({
 	finally
 	{
 		stopObserving();
+	}
+};
+
+/**
+ * Replaces an unresponsive CGI worker once, without clearing persistent storage.
+ * A distinct script URL also restarts a worker whose code has not changed.
+ * Concurrent tabs reuse a replacement that has already taken control.
+ * @param {ServiceWorker|null} controller The worker whose startup failed.
+ * @param {number} timeoutMs Maximum time for the lock, registration and takeover.
+ * @returns {Promise<ServiceWorker>} The replacement controlling this page.
+ */
+export const recoverServiceWorker = async (
+	controller
+	, timeoutMs = serviceWorkerStartupTimeoutMs
+) => {
+	const workerContainer = navigator.serviceWorker;
+	const cancellation = new AbortController();
+	let onControllerChange;
+	let onAbort;
+
+	const replaceWorker = async () => {
+		cancellation.signal.throwIfAborted();
+
+		if(workerContainer.controller && workerContainer.controller !== controller)
+		{
+			return workerContainer.controller;
+		}
+
+		return new Promise((resolve, reject) => {
+			onControllerChange = () => {
+				if(workerContainer.controller && workerContainer.controller !== controller)
+				{
+					resolve(workerContainer.controller);
+				}
+			};
+			onAbort = () => reject(cancellation.signal.reason);
+
+			workerContainer.addEventListener('controllerchange', onControllerChange);
+			cancellation.signal.addEventListener('abort', onAbort, {once: true});
+			const workerUrl = baseUrlFor('cgi-worker.js');
+
+			workerUrl.searchParams.set('recovery', crypto.randomUUID());
+			workerContainer.register(workerUrl.href, {
+				type: 'module'
+				, scope: basePath()
+				, updateViaCache: 'none'
+			}).then(onControllerChange, reject);
+		});
+	};
+
+	try
+	{
+		const recovery = navigator.locks?.request
+			? navigator.locks.request('php-wasm-worker-recovery', {
+				signal: cancellation.signal
+			}, replaceWorker)
+			: replaceWorker();
+		const result = await settleWithin(recovery, timeoutMs);
+
+		if(result.timedOut)
+		{
+			throw new Error(`CGI service worker replacement timed out after ${timeoutMs}ms. Retry PHP startup when the connection is available.`);
+		}
+
+		return result.value;
+	}
+	finally
+	{
+		cancellation.abort();
+		cancellation.signal.removeEventListener('abort', onAbort);
+		workerContainer.removeEventListener('controllerchange', onControllerChange);
 	}
 };

@@ -31,10 +31,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#ifdef WITH_SDL
-#include <SDL_hints.h>
-#endif
-
 #define STRINGIFY_INTERNAL(MACRO) #MACRO
 #define STRINGIFY(MACRO)  STRINGIFY_INTERNAL(MACRO)
 
@@ -49,9 +45,6 @@ static const char pib_embed_sapi_name[] = "embed";
  */
 int EMSCRIPTEN_KEEPALIVE __attribute__((noinline)) pib_init(char *__sapi_name)
 {
-#ifdef WITH_SDL
-	SDL_SetHint(SDL_HINT_EMSCRIPTEN_ASYNCIFY, "0");
-#endif
 	if(!_sapi_name)
 	{
 		_sapi_name = malloc(strlen(__sapi_name) + 1);
@@ -187,7 +180,7 @@ char *EMSCRIPTEN_KEEPALIVE pib_exec(char *code)
 /**
  * Run some PHP code and return the exit code.
  * 0 = good, >0 = bad.
- * Code MUST start with a PHP tag.
+ * Code starts in PHP mode; the JS wrapper prepares tagged source for eval.
  * Async.
 */
 int EMSCRIPTEN_KEEPALIVE pib_run(char *code)

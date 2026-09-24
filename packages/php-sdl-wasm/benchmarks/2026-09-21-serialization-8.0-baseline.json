@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "phpVersion": "8.0.30",
+  "emscriptenVersion": "6.0.6",
+  "profile": "static",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.0.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-serialization/baseline-runtime PHP_ASSET_DIR=.cache/sdl-serialization/baseline-runtime CPU_COUNT=4 MAX_LOAD=8",
+  "note": "Fresh baseline before the PHP 8.0 serialization guards. Identity only; the paired serialization measurement recompresses both artifacts with identical settings.",
+  "sizes": {
+    "php8.0_sdl-web.mjs": {
+      "raw": 4696475,
+      "sha256": "5151e85a7d32bbffc8fdbfa86edb69f2bb81cb1af8e5dbc188dfab1337674f1c"
+    },
+    "php8.0_sdl-web.mjs.wasm": {
+      "raw": 41171898,
+      "sha256": "e1b9c91412f9e02505b7884efe405ee8ffbd5a8c0f100710d85d716aa9503864"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  }
+}

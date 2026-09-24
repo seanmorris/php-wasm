@@ -1,0 +1,116 @@
+{
+  "scope": "Local checks of the production incremental IDBFS helper and restored CGI RPC queue. No remote CI run.",
+  "unitPackagingDocs": {
+    "passed": 56,
+    "failed": 0,
+    "skipped": 0,
+    "log": "checks/production-idbfs-unit-packaging-docs.log"
+  },
+  "types": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "deno": "2.5.6",
+    "log": "checks/production-idbfs-types.log"
+  },
+  "browser": [
+    {
+      "php": "8.3",
+      "idbfsPassed": 11,
+      "existingServiceWorkerRegressionsPassed": 3,
+      "failed": 0,
+      "log": "checks/production-idbfs-browser.log"
+    },
+    {
+      "php": "8.4",
+      "idbfsPassed": 10,
+      "failed": 0,
+      "log": "checks/idbfs-browser-tests-8.4.log"
+    },
+    {
+      "php": "8.4",
+      "idbfsPassed": 1,
+      "failed": 0,
+      "log": "checks/production-idbfs-nested-8.4.log",
+      "note": "New nested-mount test; unchanged production implementation."
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 0,
+    "log": "checks/final-idbfs-lint.log"
+  },
+  "sourceTypeCheck": {
+    "passed": true,
+    "log": "checks/idbfs-tsc.log"
+  },
+  "runtimeWrappersRegenerated": true,
+  "nativeArtifactsUnchanged": true,
+  "completedPerformanceTrials": 19,
+  "finalBrowserPersistence": [
+    {
+      "php": "8.0",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.0.log"
+    },
+    {
+      "php": "8.1",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.1.log"
+    },
+    {
+      "php": "8.2",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.2.log"
+    },
+    {
+      "php": "8.3",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.3.log"
+    },
+    {
+      "php": "8.4",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.4.log"
+    },
+    {
+      "php": "8.5",
+      "passed": 11,
+      "failed": 0,
+      "libType": "static",
+      "log": "checks/final-idbfs-browser-8.5.log"
+    }
+  ],
+  "browserTestInputs": [
+    {
+      "file": "test/browser/idbfs.spec.mjs",
+      "bytes": 14012,
+      "sha256": "e425879d83207caa72f33b6c4457f5ab47aae2db07753212ee914010af91abb3"
+    },
+    {
+      "file": "test/browser/harness/idbfs-worker.mjs",
+      "bytes": 2397,
+      "sha256": "9103a6f1ddfdc6c8161fc6d444a276ed6fcb2c82332fd621b5b60a2dfe62bb8c"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    }
+  ]
+}

@@ -1,0 +1,447 @@
+{
+  "backend": "idbfs",
+  "framework": "cakephp-5",
+  "name": "CakePHP 5",
+  "round": 2,
+  "runLabel": "clean-repeat",
+  "hostPreflight": {
+    "time": "2026-09-20T17:13:44.922Z",
+    "idlePercent": 84.24571667363142,
+    "loadAverage": [
+      4.85,
+      4.98,
+      4.63
+    ],
+    "containers": [
+      "laravel-ksqlc-orders-1",
+      "laravel-ksqlc-billing-api-1",
+      "laravel-ksqlc-inventory-api-1",
+      "laravel-ksqlc-billing-1",
+      "laravel-ksqlc-inventory-1",
+      "laravel-ksqlc-ksql-server-1",
+      "laravel-ksqlc-krest-server-1",
+      "laravel-ksqlc-schema-registry-1",
+      "laravel-ksqlc-kafka-1",
+      "laravel-ksqlc-zookeeper-1"
+    ],
+    "backend": "idbfs",
+    "framework": "cakephp-5",
+    "round": 2,
+    "minimumIdlePercent": 80
+  },
+  "archive": {
+    "name": "cakephp-5.zip",
+    "bytes": 10526765,
+    "sha256": "729faa3a8a586f55f6ee5bdf99d503324a5a6f27e7243d24e75a233578866392"
+  },
+  "assetSha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      4.85,
+      4.98,
+      4.63
+    ]
+  },
+  "started": "2026-09-20T17:13:45.668Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 649.6000003814697,
+      "flushMs": 312.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 651.1000003814697,
+      "bytes": 7962,
+      "bodySha256": "0c3feaa4d9afbd91a6fea8fe025acaaf245a7cdca9b485a738f9c9bb3dcf2f0b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 539.0999999046326,
+      "flushMs": 312.30000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 540.5999999046326,
+      "bytes": 7962,
+      "bodySha256": "405f558c1d8fe4a8207de0a752fd45550aa2c478f3315878ffcce27c8c44e6fb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 532.9000000953674,
+      "flushMs": 318.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 534.8000001907349,
+      "bytes": 7962,
+      "bodySha256": "43d55e815ed1c2894e6b22befe3f13501f6fb4ad4905d47a2cf27f8e95eaf1d8",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 475.09999990463257,
+      "flushMs": 277.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 476.69999980926514,
+      "bytes": 7962,
+      "bodySha256": "4a7ecffec2bb7304bdacc3bc9cdbc25cddbe67b5221d4a5e754c955745a0a975",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 480.2000002861023,
+      "flushMs": 275.80000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 481.6000003814697,
+      "bytes": 7962,
+      "bodySha256": "8184d6f7e42ae162d6e1add9d747609b569590a451062f7c94d63c6b20783c0b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 493.69999980926514,
+      "flushMs": 290.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 495.30000019073486,
+      "bytes": 7962,
+      "bodySha256": "4a6b6b9108e9ce8cb2d8404094e398e58de057321da165a1e749a2d2f5b85e41",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 476.09999990463257,
+      "flushMs": 273.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 477.40000009536743,
+      "bytes": 7962,
+      "bodySha256": "9b421f4942a2ce0f5ae04ac7f966517fc312ad684c35e62d4d9945740bf6aae3",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 510.30000019073486,
+      "flushMs": 283.7000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 511.5,
+      "bytes": 7962,
+      "bodySha256": "308999623d98313fb14bd7f9e92bcda486daa3e06d63c7dfcf95dbb648c4e9f7",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 507.5,
+      "flushMs": 303.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 508.90000009536743,
+      "bytes": 7962,
+      "bodySha256": "b38912f1bdf1e5a3c06d98f0409e2aafadb0868ee79ba4b4df5d3db2c660f48a",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 489.6000003814697,
+      "flushMs": 281.19999980926514,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 491,
+      "bytes": 7962,
+      "bodySha256": "8e1534ad21bc572baca8c4a0b84c52d5a4b316698b71344a5464679a9764398a",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 533.3000001907349,
+      "flushMs": 309.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 534.7000002861023,
+      "bytes": 7962,
+      "bodySha256": "c26e0431829a41ecbbd9924fffe933da5f30f2f6bb92043ce250fe3c40fecae1",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 565.3000001907349,
+      "flushMs": 346.7000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 566.5,
+      "bytes": 7962,
+      "bodySha256": "8577c71d589260bab3961c58e356676aef8e745b6fba051b27ad80b798e73002",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 526.3000001907349,
+      "flushMs": 316.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 527.6000003814697,
+      "bytes": 7962,
+      "bodySha256": "1f080d6c395b612820616533cf89194fde513cae0b16297a67cc2cb883d42adc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 532.2000002861023,
+      "flushMs": 331.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 533.5,
+      "bytes": 7962,
+      "bodySha256": "67beca8ab035efa497f76fa2841c4ba4e9ba7875f9a150c0b37b3181ac16b6d0",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 497.19999980926514,
+      "flushMs": 297.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 498.59999990463257,
+      "bytes": 7962,
+      "bodySha256": "8ce5259dfa1fd8ea50b4759b7adbe5d3156fd270a15f4c9a07235da27849725f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 485.40000009536743,
+      "flushMs": 290.7999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 486.69999980926514,
+      "bytes": 7962,
+      "bodySha256": "f26e921855770d74cf685aecc919d625ebf01265dd583efb855ea0d7fbecf46e",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 523.7999997138977,
+      "flushMs": 305.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 525.5,
+      "bytes": 7962,
+      "bodySha256": "448f70677e04a76562148583a8dd353d1076875560c518317f7efa2d49a86d25",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 485.1000003814697,
+      "flushMs": 293.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 486.40000009536743,
+      "bytes": 7962,
+      "bodySha256": "2934a5a990914977835c271bdcef205e897612db1885a6afc79aeab602bc81a8",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 499.59999990463257,
+      "flushMs": 305.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 500.80000019073486,
+      "bytes": 7962,
+      "bodySha256": "e670bcd03f8b0bab14330559409a8acd022511cc54ac3f372699ff0b229fbe6f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+      "status": 200,
+      "cgiMs": 498.5,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 499.8999996185303,
+      "bytes": 7962,
+      "bodySha256": "c050f5e0e6af3563108d4b147ccebb2bb250132ac144c9f71d723a9b0f68f81e",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/favicon.ico",
+      "status": 200,
+      "cgiMs": 1.4000000953674316,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.8000001907348633,
+      "bytes": 15086,
+      "bodySha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/favicon.ico",
+      "status": 200,
+      "cgiMs": 1.299999713897705,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.299999713897705,
+      "bytes": 15086,
+      "bodySha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/favicon.ico",
+      "status": 200,
+      "cgiMs": 1.3000001907348633,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.200000286102295,
+      "bytes": 15086,
+      "bodySha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/favicon.ico",
+      "status": 200,
+      "cgiMs": 1.3000001907348633,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.3999996185302734,
+      "bytes": 15086,
+      "bodySha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/favicon.ico",
+      "status": 200,
+      "cgiMs": 1.3000001907348633,
+      "flushMs": 305.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.3999996185302734,
+      "bytes": 15086,
+      "bodySha256": "6e240ec87dde71ca932ed10b9e0e7c3bb77203d77b205fa0f494ceb2049c6e8b",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 462.7999997138977,
+    "mountHydrateMs": 32.5,
+    "totalMs": 496.19999980926514,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 634.434486,
+  "install": {
+    "downloadMs": 28.300000190734863,
+    "archiveBytes": 10526765,
+    "archiveWriteMs": 58.5,
+    "extractAndFlushMs": 2477.5999999046326,
+    "installMs": 2536.2999997138977,
+    "details": {
+      "files": 8782,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 2477.4000000953674,
+    "flushMs": 1369.0999999046326,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+    "status": 200,
+    "cgiMs": 943.8000001907349,
+    "flushMs": 345.59999990463257,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 945.9000000953674,
+    "bytes": 7962,
+    "bodySha256": "b7fe757178114d1532befca89a0f97249ecb019c43c03533d11936850015e090",
+    "valid": true
+  },
+  "render": {
+    "title": "CakePHP: the rapid development PHP framework:",
+    "text": "Welcome to CakePHP 5.0.7 Chiffon (🍰)\n\nClick here to edit this template!\n\nPlease be aware that this page will not be shown if you turn off debug mode unless you replace templates/Pages/home.php with your own version.\nEnvironment\nYour version of PHP is 8.1.0 or higher (detected 8.3.11).\nYour version of PHP has the mbstring extension loaded.\nYour version of PHP has the openssl extension loaded.\nYour version of PHP has the intl extension loaded.\nFilesystem\nYour tmp directory is writable.\nYour logs directory is writable.\nThe File is being used for core caching. To change the config edit config/app.php\nDatabase\nCakePHP is able to connect to the database.\nDebugKit\nDebugKit is loaded.\nDebugKit can connect to the database.\nGetting Started\nCakePHP Documentation The 20 min CMS Tutorial\nHelp and Bug Reports\nSlack CakePHP Issues CakePHP Forum\nDocs and Downloads\nCakePHP API The Bakery CakePHP Documentation CakePHP plugins repo CakePHP Code CakePHP Awesome List CakePHP\nTraining and Certification\nCake Software Foundation CakePHP Training",
+    "images": [
+      {
+        "url": "https://cakephp.org/v2/img/logos/CakePHP_Logo.svg",
+        "complete": true,
+        "width": 300
+      }
+    ],
+    "wallMs": 6876.488202999999
+  },
+  "restart": {
+    "instantiateMs": 447.90000009536743,
+    "mountHydrateMs": 1165.4000000953674,
+    "totalMs": 1614.6999998092651,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 1671.5385059999971,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/cakephp-5/",
+    "status": 200,
+    "cgiMs": 1656.3000001907349,
+    "flushMs": 449.6000003814697,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 1658.1999998092651,
+    "bytes": 7962,
+    "bodySha256": "112bd17f0485f460b762bcf502017de2ed0db8736f81ad363b676f8b0a86f233",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T17:14:10.588Z"
+}

@@ -186,8 +186,9 @@ const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
 	return [];
 };
 
-export const loadEmbeddedSharedLibs = libType => {
-	if(libType === 'dynamic')
+export const loadEmbeddedSharedLibs = (libType, variant = '') => {
+	// The SDL package owns all native libraries required by its build.
+	if(variant === '_sdl' || libType === 'dynamic')
 	{
 		return [];
 	}

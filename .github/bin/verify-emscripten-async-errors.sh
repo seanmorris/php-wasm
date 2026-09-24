@@ -161,4 +161,33 @@ for assertions in 0 1; do
 	node --test async-errors.test.mjs
 done
 
+# MAIN_MODULE callback wrappers must survive Binaryen's late dynCall exports.
+# SDL keyboard/mouse events use the same makeDynCall path in library_html5.
+cat > callback.c <<'EOF'
+#include <emscripten.h>
+extern int invoke_callback(int (*callback)(int, int, int), int, int, int);
+static int answer(int a, int b, int c) { return a + b + c; }
+EMSCRIPTEN_KEEPALIVE int probe_callback(void) { return invoke_callback(answer, 10, 20, 12); }
+EOF
+
+cat > callback.js <<'EOF'
+addToLibrary({
+  invoke_callback__deps: ['$dynCall'],
+  invoke_callback: (callback, a, b, c) => {{{ makeDynCall('iiii', 'callback') }}}(a, b, c)
+});
+EOF
+
+for assertions in 0 1; do
+	emcc callback.c --js-library callback.js -O2 \
+		-sMAIN_MODULE=1 -sASYNCIFY=1 -sWASM_BIGINT=1 \
+		-sASSERTIONS="${assertions}" -sMODULARIZE=1 -sENVIRONMENT=node \
+		-o callback.mjs
+	node --input-type=module -e '
+		import assert from "node:assert/strict";
+		import createRuntime from "./callback.mjs";
+		const runtime = await createRuntime();
+		assert.equal(runtime._probe_callback(), 42);
+	'
+done
+
 echo 'Emscripten async error propagation checks passed'

@@ -1,0 +1,441 @@
+{
+  "backend": "opfs",
+  "framework": "codeigniter-4",
+  "name": "CodeIgniter 4",
+  "round": 0,
+  "runLabel": "clean-repeat",
+  "hostPreflight": {
+    "time": "2026-09-20T17:15:55.973Z",
+    "idlePercent": 85.34844668345927,
+    "loadAverage": [
+      5.26,
+      5.01,
+      4.68
+    ],
+    "containers": [
+      "laravel-ksqlc-orders-1",
+      "laravel-ksqlc-billing-api-1",
+      "laravel-ksqlc-inventory-api-1",
+      "laravel-ksqlc-billing-1",
+      "laravel-ksqlc-inventory-1",
+      "laravel-ksqlc-ksql-server-1",
+      "laravel-ksqlc-krest-server-1",
+      "laravel-ksqlc-schema-registry-1",
+      "laravel-ksqlc-kafka-1",
+      "laravel-ksqlc-zookeeper-1"
+    ],
+    "backend": "opfs",
+    "framework": "codeigniter-4",
+    "round": 0,
+    "minimumIdlePercent": 80
+  },
+  "archive": {
+    "name": "codeigniter-4.zip",
+    "bytes": 1132114,
+    "sha256": "1bfe823e888e9582564dce68ca94026bbee262a001f38641854d9f4f562cea75"
+  },
+  "assetSha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4448377,
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40819220,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      5.26,
+      5.01,
+      4.68
+    ]
+  },
+  "started": "2026-09-20T17:15:56.656Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 234.7999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 236.40000009536743,
+      "bytes": 17809,
+      "bodySha256": "748e8ce664fc8b725fea1a20e658201f5c610f8eea0c203b52d7b2846e384474",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 275.2999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 276.90000009536743,
+      "bytes": 17809,
+      "bodySha256": "b770f12e1c7324817f3ef7579f843a43994b186a02b90eb693ee5ea74317aa94",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 228.80000019073486,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 230.09999990463257,
+      "bytes": 17809,
+      "bodySha256": "020dbacffde8096f4db104249b829f441713ac2a09791f0dcde4d467b5e1ca30",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 212.19999980926514,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 213.5,
+      "bytes": 17808,
+      "bodySha256": "ef754013f1205eb8cf1e32e5af9efd4a2efd5b8bb88308fe2a16cfbb6ea613cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 245,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 246.5,
+      "bytes": 17808,
+      "bodySha256": "ef754013f1205eb8cf1e32e5af9efd4a2efd5b8bb88308fe2a16cfbb6ea613cb",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 223,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 224.5,
+      "bytes": 17809,
+      "bodySha256": "020dbacffde8096f4db104249b829f441713ac2a09791f0dcde4d467b5e1ca30",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 223.90000009536743,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 225.2000002861023,
+      "bytes": 17809,
+      "bodySha256": "bc277f19fbc7df682ca4cfb6b9e6bae2552c52a3f9fd9621fba8a2fbe4753fbe",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 222.40000009536743,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 223.90000009536743,
+      "bytes": 17809,
+      "bodySha256": "902c2d37836562158485743c00138fb9e759c0a6486902abc29f834eaaf973a5",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 235.40000009536743,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 236.90000009536743,
+      "bytes": 17809,
+      "bodySha256": "8fc34dae40cb3a4fb367dcfb699ade376bd15894fd83502f017d503caabf8bfd",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 331.7000002861023,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 333,
+      "bytes": 17809,
+      "bodySha256": "c2f2ee45fbe9048c843ee8a6a7b53f9a0d9451ab1d878cd857bff7b89011bc39",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 221.59999990463257,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 223,
+      "bytes": 17809,
+      "bodySha256": "de49ee6a6793991457a378656c87602c3259f1d39a8498096a0b185b3cdb5ddc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 249.60000038146973,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 251.10000038146973,
+      "bytes": 17809,
+      "bodySha256": "748e8ce664fc8b725fea1a20e658201f5c610f8eea0c203b52d7b2846e384474",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 309.30000019073486,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 311,
+      "bytes": 17809,
+      "bodySha256": "e999862fe7a8ec144fb8bb10e85cf8bc9e2e9c8bbb5b8a33810b1685d0b92369",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 273.09999990463257,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 274.69999980926514,
+      "bytes": 17809,
+      "bodySha256": "a6e9cd754c87eab4354c25833bc44337ade1a0796e93afd934dd6454eb13b9ce",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 245,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 246.39999961853027,
+      "bytes": 17809,
+      "bodySha256": "07b5c5d2e936e74cda4e8f58e1ee61ead45b57fd700e6606b656868a91f2e1ea",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 246.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 248.19999980926514,
+      "bytes": 17809,
+      "bodySha256": "fe7082d3396053322f925bdab6084d963949d72945947506e4e899069e6e074b",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 219.7999997138977,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 221.69999980926514,
+      "bytes": 17809,
+      "bodySha256": "b2e6c2f3320a7815f7135415e8978e1b719c45fc3c227815ebf274864b4eed5f",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 217.10000038146973,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 218.40000009536743,
+      "bytes": 17809,
+      "bodySha256": "de49ee6a6793991457a378656c87602c3259f1d39a8498096a0b185b3cdb5ddc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 269.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 270.90000009536743,
+      "bytes": 17809,
+      "bodySha256": "902c2d37836562158485743c00138fb9e759c0a6486902abc29f834eaaf973a5",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+      "status": 200,
+      "cgiMs": 229.90000009536743,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 231.40000009536743,
+      "bytes": 17809,
+      "bodySha256": "f22bbc2eaaedea0a8d0e8de54642bb954251c5270b7714c4a73ef82a79dccb6e",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/favicon.ico",
+      "status": 200,
+      "cgiMs": 2.1000003814697266,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.200000286102295,
+      "bytes": 5430,
+      "bodySha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/favicon.ico",
+      "status": 200,
+      "cgiMs": 3.6999998092651367,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 4.900000095367432,
+      "bytes": 5430,
+      "bodySha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/favicon.ico",
+      "status": 200,
+      "cgiMs": 2.1999998092651367,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.4000000953674316,
+      "bytes": 5430,
+      "bodySha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/favicon.ico",
+      "status": 200,
+      "cgiMs": 2.5,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.6999998092651367,
+      "bytes": 5430,
+      "bodySha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/favicon.ico",
+      "status": 200,
+      "cgiMs": 2.1999998092651367,
+      "flushMs": 0,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 3.4000000953674316,
+      "bytes": 5430,
+      "bodySha256": "1dfc58ffbcb07c761f79eb6b46f50b3789bd21e41a0b4cb1aca82b1dd8020fcc",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 526.4000000953674,
+    "mountHydrateMs": 25.199999809265137,
+    "totalMs": 552.5999999046326,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 683.3886929999999,
+  "install": {
+    "downloadMs": 6,
+    "archiveBytes": 1132114,
+    "archiveWriteMs": 7.099999904632568,
+    "extractAndFlushMs": 3865,
+    "installMs": 3872.199999809265,
+    "details": {
+      "files": 834,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 3864.9000000953674,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+    "status": 200,
+    "cgiMs": 354,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 355.69999980926514,
+    "bytes": 17809,
+    "bodySha256": "01103f8d0452116f3440cb832e8e744b6d75b67cc72af2b30745df449111d440",
+    "valid": true
+  },
+  "render": {
+    "title": "Welcome to CodeIgniter 4!",
+    "text": "Home\n \nDocs\n \nCommunity\n \nContribute\nWelcome to CodeIgniter 4.5.1\nThe small framework with powerful features\nAbout this page\n\nThe page you are looking at is being generated dynamically by CodeIgniter.\n\nIf you would like to edit this page you will find it located at:\n\napp/Views/welcome_message.php [Click here to edit!]\n\nThe corresponding controller for this page can be found at:\n\napp/Controllers/Home.php  [Click here to edit!]\n\n...And the corresponding route configuration can be found at:\n\napp/Config/Routes.php  [Click here to edit!]\nGo further\n Learn\n\nThe User Guide contains an introduction, tutorial, a number of \"how to\" guides, and then reference documentation for the components that make up the framework. Check the User Guide !\n\n Discuss\n\nCodeIgniter is a community-developed open source project, with several venues for the community members to gather and exchange ideas. View all the threads on CodeIgniter's forum, or chat on Slack !\n\n Contribute\n\nCodeIgniter is a community driven project and accepts contributions of code and documentation from the community. Why not join us ?\n\nPage rendered in 0.125 seconds using 0.000 MB of memory.\n\nEnvironment: production\n\n© 2026 CodeIgniter Foundation. CodeIgniter is open source project released under the MIT open source licence.",
+    "images": [],
+    "wallMs": 276.52098099999967
+  },
+  "restart": {
+    "instantiateMs": 527.1999998092651,
+    "mountHydrateMs": 9.099999904632568,
+    "totalMs": 539.5999999046326,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 598.837805000001,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/codeigniter-4/",
+    "status": 200,
+    "cgiMs": 469,
+    "flushMs": 0,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 471,
+    "bytes": 17809,
+    "bodySha256": "1baf953aefe1109ceecd344d326a16ea365df7d50eb54ef481acdd0652817b39",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T17:16:08.186Z"
+}

@@ -12,7 +12,7 @@ import wordpressIcon from '../assets/frameworks/wordpress-icon.svg';
 import { useCallback, useEffect, useEffectEvent, useMemo, useState } from 'react';
 import Header from '../components/Header';
 import { basePath } from '../lib/runtimePaths';
-import { getPhpBus } from '../lib/phpBus';
+import { getReadyPhpBus } from '../lib/phpRuntime';
 import { popupTarget, resolvePopupHref, resolvePopupRequest } from '../lib/popupNavigation';
 
 import reactIcon from '../assets/frameworks/react-icon.svg';
@@ -190,6 +190,8 @@ function SelectFramework()
 	const [wordpressInstalled, setWordpressInstalled] = useState(false);
 	const [sqliteDatabases, setSqliteDatabases] = useState({});
 	const [overlay, setOverlay] = useState(null);
+	const [runtimeError, setRuntimeError] = useState('');
+	const [runtimeStatus, setRuntimeStatus] = useState('');
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const serviceWorkerDisabled = query.has('no-service-worker');
 
@@ -200,7 +202,11 @@ function SelectFramework()
 		}
 
 		void (async() => {
-			const bus = await getPhpBus();
+			setRuntimeError('');
+			setRuntimeStatus('Starting PHP runtime...');
+			const bus = await getReadyPhpBus({onProgress: setRuntimeStatus});
+
+			setRuntimeStatus('');
 			const [
 				cakePath
 				, codeigniterPath
@@ -275,7 +281,10 @@ function SelectFramework()
 			setLaminasInstalled(laminasPath.exists);
 			setWordpressInstalled(wordpressPath.exists);
 			setSqliteDatabases(Object.fromEntries(sqlitePaths));
-		})();
+		})().catch(error => {
+			setRuntimeStatus('');
+			setRuntimeError(error?.message ?? error?.error ?? String(error));
+		});
 	}, [serviceWorkerDisabled]);
 
 	useEffect(() => {
@@ -372,6 +381,11 @@ function SelectFramework()
 				{isIframe || <Header />}
 				<div className='frameworks'>
 					<h2>Select a Framework:</h2>
+					{runtimeStatus && <p role = "status">{runtimeStatus}</p>}
+					{runtimeError && <div className = "inset padded" role = "alert">
+						<p>{runtimeError}</p>
+						<button type = "button" onClick = {refreshAll}>Retry PHP startup</button>
+					</div>}
 					<div className='inset row icons'>
 						<div className='column center'>
 							<PopupLink path = "install-demo.html?framework=cakephp-5">

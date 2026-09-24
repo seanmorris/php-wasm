@@ -669,7 +669,7 @@ jobs:
       libType: ${{ matrix.libType }}
 
   test-browser-sdl-compressed:
-    name: Test Browser 8.4 _sdl w/${{ matrix.libType }} libs (compressed)
+    name: Test Browser ${{ matrix.phpVersion }} _sdl w/${{ matrix.libType }} libs (compressed)
     needs:
       - compress-dynamic-packages
       - compress-shared-packages
@@ -677,11 +677,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        phpVersion: ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
         libType: ['dynamic', 'shared', 'static']
     uses: ./.github/workflows/test-browser-step.yaml
     with:
       artifactPattern: php-compressed-${{ matrix.libType }}
-      phpVersion: '8.4'
+      phpVersion: ${{ matrix.phpVersion }}
       phpVariant: '_sdl'
       libType: ${{ matrix.libType }}
 

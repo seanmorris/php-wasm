@@ -1,0 +1,10 @@
+
+Running 1 test using 1 worker
+
+(node:180916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:180916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 test/browser/idbfs.spec.mjs:292:1 › nested IDBFS mounts retain ordinary reconciliation across mount and unmount (955ms)
+
+  1 passed (2.0s)

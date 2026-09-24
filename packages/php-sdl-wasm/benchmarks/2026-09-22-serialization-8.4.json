@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-windows.json",
+  "change": "Native resource serialization conformance and window garbage collection",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761957,
+      "gzip": 652918,
+      "brotli": 466269,
+      "sha256": "211c28ee8db4ba74bab81533b99abe77e2f44a925382a4ad2b657fac573e8930"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47067155,
+      "gzip": 13348626,
+      "brotli": 9093969,
+      "sha256": "360d68acfad8b1b6eebaa79439fbe391bd2158bb4bb255db5f4a4d14f919749b"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761957,
+      "gzip": 652918,
+      "brotli": 466269,
+      "sha256": "211c28ee8db4ba74bab81533b99abe77e2f44a925382a4ad2b657fac573e8930"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47067966,
+      "gzip": 13348830,
+      "brotli": 9083979,
+      "sha256": "d1d8ca73c43dc2219c52fcfa0398516c2aa2b5987ec03950a54912e25c49c736"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51829112,
+      "after": 51829923,
+      "increase": 811,
+      "percent": 0.001564757659749216
+    },
+    "gzip": {
+      "before": 14001544,
+      "after": 14001748,
+      "increase": 204,
+      "percent": 0.0014569821728232257
+    },
+    "brotli": {
+      "before": 9560238,
+      "after": 9550248,
+      "increase": -9990,
+      "percent": -0.10449530649759975
+    }
+  }
+}

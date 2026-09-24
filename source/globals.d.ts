@@ -15,8 +15,6 @@ declare type PhpRuntimeFactory = ((args: PhpRuntimeArgs) => object | Promise<obj
 	| (new (args: PhpRuntimeArgs) => object);
 
 declare type PhpRuntimeVersion = '8.0' | '8.1' | '8.2' | '8.3' | '8.4' | '8.5';
-declare type PhpRuntimeVariant = '' | '_sdl';
-declare type PhpRuntimeTarget = `${PhpRuntimeVersion}${PhpRuntimeVariant}`;
 
 declare type PhpQueueParam = string | number | boolean | object | undefined;
 declare type PhpMessageParam = string | number | boolean | object | null | undefined;
@@ -83,7 +81,8 @@ declare interface PhpPreloadFile {
 declare interface PhpRuntimeArgs {
 	autoTransaction?: boolean;
 	version?: PhpRuntimeVersion;
-	variant?: PhpRuntimeVariant;
+	/** Legacy input is accepted for a runtime migration error. */
+	variant?: string;
 	interactive?: boolean;
 	script?: string;
 	code?: string;
@@ -167,5 +166,6 @@ declare module 'php-wasm/PhpBase' {
 
 // Declaration dependencies belong to source checking, never copied wrappers.
 declare type PhpCloudflareArgs = import('../packages/php-cloud-wasm/public.d.ts').PhpCloudflareArgs;
+declare type PhpSdlArgs = import('../packages/php-sdl-wasm/public.d.ts').PhpSdlArgs;
 declare type PhpCgiRuntimeArgs = import('../packages/php-cgi-wasm/public.d.ts').PhpCgiRuntimeArgs;
 declare type PhpCgiModuleFactory = import('../packages/php-cgi-wasm/public.d.ts').PhpCgiModuleFactory;

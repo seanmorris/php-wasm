@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 const {
 	editor
@@ -7,6 +7,8 @@ const {
 	, phpRefresh
 	, phpRun
 	, PhpWeb
+	, PhpSdl
+	, prepareSdlAssets
 } = vi.hoisted(() => {
 	const editor = {
 		getValue: vi.fn(() => '')
@@ -25,8 +27,12 @@ const {
 	};
 
 	const PhpWeb = vi.fn(function PhpWebMock() {
-		return phpInstance;
+		return {...phpInstance};
 	});
+	const PhpSdl = vi.fn(function PhpSdlMock() {
+		return {...phpInstance};
+	});
+	const prepareSdlAssets = vi.fn(async () => undefined);
 
 	return {
 		editor
@@ -34,16 +40,20 @@ const {
 		, phpRefresh
 		, phpRun
 		, PhpWeb
+		, PhpSdl
+		, prepareSdlAssets
 	};
 });
 
 vi.mock('php-wasm/PhpWeb', () => ({PhpWeb}));
+vi.mock('../lib/sdlRuntime', () => ({loadSdlRuntime: async () => PhpSdl}));
+vi.mock('../lib/sdlAssets', () => ({prepareSdlAssets}));
 
 vi.mock('@electric-sql/pglite', () => ({
 	PGlite: class PGliteMock {}
 }));
 
-vi.mock('ace-builds/src-noconflict/mode-php', () => ({}));
+vi.mock('../lib/phpEditorMode', () => ({createPhpEditorMode: () => ({})}));
 vi.mock('ace-builds/src-noconflict/theme-monokai', () => ({}));
 
 vi.mock('react-ace', () => ({
@@ -62,8 +72,8 @@ vi.mock('../components/Confirm', () => ({
 
 vi.mock('../lib/runtimePaths', () => ({
 	basePath: (path = '') => `/php-wasm/${path}`
-	, libType: 'static'
-	, buildType: 'static'
+	, libType: 'dynamic'
+	, buildType: 'dynamic'
 	, defaultPhpVersion: '8.4'
 }));
 
@@ -77,10 +87,12 @@ echo "Hello, World!";
 
 	beforeEach(() => {
 		PhpWeb.mockClear();
+		PhpSdl.mockClear();
 		editor.getValue.mockClear();
 		phpExec.mockClear();
 		phpRefresh.mockClear();
 		phpRun.mockClear();
+		prepareSdlAssets.mockReset().mockResolvedValue(undefined);
 
 		globalThis.fetch = vi.fn(async () => ({
 			ok: true
@@ -110,7 +122,22 @@ echo "Hello, World!";
 		});
 
 		expect(executedCode).not.toBe('');
-		expect(new URLSearchParams(window.location.search).get('code')).not.toBe('');
+		expect(new URLSearchParams(window.location.search).has('code')).toBe(false);
+		expect(new URLSearchParams(window.location.hash.slice(1)).get('code')).toBe(executedCode);
+	});
+
+	it.each(['fragment', 'legacy query'])('restores and autoruns shared code from a %s link while Ace is empty', async kind => {
+		const code = phpCode + '// Unicode: 🧊 café; literals: 100% %20 + # &\n';
+		const source = kind === 'fragment'
+			? `#${new URLSearchParams({code})}`
+			: `&${new URLSearchParams({code: encodeURIComponent(code)})}`;
+		window.history.replaceState({}, '', `/embedded-php.html?version=8.4&extensionFlags=0${source}`);
+		render(<Embedded />);
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+		expect(phpRun.mock.calls[0][0]).toContain('// Unicode: 🧊 café; literals: 100% %20 + # &');
+		expect(globalThis.fetch).not.toHaveBeenCalled();
+		expect(new URLSearchParams(window.location.search).has('code')).toBe(false);
+		expect(new URLSearchParams(window.location.hash.slice(1)).get('code')).toBe(phpRun.mock.calls[0][0]);
 	});
 
 	it('boots the embedded demo only once under StrictMode', async () => {
@@ -155,5 +182,60 @@ echo "Hello, World!";
 		});
 
 		expect(modules).toEqual(['gd', 'zlib']);
+	});
+
+	it('discards a pending SDL run when switching demos and replaces its canvas', async () => {
+		const cubeCode = '<?php //{"autorun":true,"persist":true,"canvas":true,"variant":"_sdl","assets":"sdl","extensionFlags":0}\n echo "cube";';
+		globalThis.fetch.mockImplementation(async url => ({
+			ok: true
+			, text: async () => url.endsWith('sdl-cube.php') ? cubeCode : phpCode
+		}));
+		let releaseAssets;
+		prepareSdlAssets.mockImplementationOnce(() => new Promise(resolve => releaseAssets = resolve));
+		const {container} = render(<Embedded />);
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+		const originalCanvas = container.querySelector('canvas');
+		const demos = container.querySelector('select option[value="sdl-cube.php"]').parentElement;
+		fireEvent.change(demos, {target: {value: 'sdl-cube.php'}});
+		fireEvent.click(container.querySelector('[data-load-demo]'));
+		await waitFor(() => expect(prepareSdlAssets).toHaveBeenCalledTimes(1));
+		expect(container.querySelector('canvas')).not.toBe(originalCanvas);
+		const [options] = PhpSdl.mock.calls[0];
+		expect(options.sharedLibs).toEqual([]);
+		expect(options).not.toHaveProperty('variant');
+		expect(options).not.toHaveProperty('version');
+		expect(PhpWeb).toHaveBeenCalledTimes(1);
+		fireEvent.change(demos, {target: {value: 'hello-world.php'}});
+		fireEvent.click(container.querySelector('[data-load-demo]'));
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(2));
+		await act(async () => releaseAssets());
+		expect(phpRun).toHaveBeenCalledTimes(2);
+		expect(phpRun.mock.calls.every(([code]) => !code.includes('echo "cube"'))).toBe(true);
+	});
+
+	it('shows asset errors without starting PHP code', async () => {
+		prepareSdlAssets.mockRejectedValueOnce(new Error('SDL asset WOJTEK3.mp3: HTTP 404'));
+		globalThis.fetch.mockResolvedValue({
+			ok: true
+			, text: async () => '<?php //{"autorun":true,"persist":true,"canvas":true,"variant":"_sdl","assets":"sdl","extensionFlags":0}\n echo "cube";'
+		});
+		const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+		const {container} = render(<Embedded />);
+		await waitFor(() => expect(container.querySelector('.stderr')).toHaveTextContent('SDL asset WOJTEK3.mp3: HTTP 404'));
+		expect(phpRun).not.toHaveBeenCalled();
+		errorLog.mockRestore();
+	});
+
+	it.each([
+		['phar', 32768, ['php8.0-phar.so']]
+		, ['zlib', 16384, ['php8.0-zlib.so', 'libz.so']]
+	])('loads %s with its own extension flag', async (name, flag, libraries) => {
+		window.history.replaceState({}, '', `?demo=hello-world.php&version=8.0&extensionFlags=${flag}`);
+		render(<Embedded />);
+
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+
+		const [{sharedLibs}] = PhpWeb.mock.calls[0];
+		expect(sharedLibs.flatMap(module => module.getLibs({phpVersion: '8.0'}).map(lib => lib.name))).toEqual(libraries);
 	});
 });

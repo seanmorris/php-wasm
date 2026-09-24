@@ -1,4 +1,4 @@
-<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"html","canvas":true,"variant":"_sdl"}
+<?php //{"autorun":true,"persist":true,"single-expression":false,"render-as":"html","canvas":true,"runtime":"sdl"}
 
 error_reporting(E_ALL);
 

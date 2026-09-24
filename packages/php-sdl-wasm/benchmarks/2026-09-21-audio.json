@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-cursors.json",
+  "change": "Mixer ownership, audio restarts, channel validation and cursor startup guards",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761956,
+      "gzip": 652904,
+      "brotli": 465253,
+      "sha256": "c3afc0a20a4f57f01c6e3d790162448a0137a4c00b99fbc4e14d980bd4c9031e"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47045219,
+      "gzip": 13343415,
+      "brotli": 9080661,
+      "sha256": "d14ec17f03811d0a68c42d2138987a3651ba9265ecd3b3fb0c240f3a56cd1fd0"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761957,
+      "gzip": 652919,
+      "brotli": 466352,
+      "sha256": "9a28ba31484c8445bca1cbbd01569d5a80aec1a5971ff624c319722ae56dad5a"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47066495,
+      "gzip": 13347637,
+      "brotli": 9091586,
+      "sha256": "e22342c5833a86bfeb3cd526e5f9a1675cdecf1ed09555c31bcf52ff120b9cbe"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51807175,
+      "after": 51828452,
+      "increase": 21277,
+      "percent": 0.04106960088057301
+    },
+    "gzip": {
+      "before": 13996319,
+      "after": 14000556,
+      "increase": 4237,
+      "percent": 0.030272245152457584
+    },
+    "brotli": {
+      "before": 9545914,
+      "after": 9557938,
+      "increase": 12024,
+      "percent": 0.12595965142782556
+    }
+  }
+}

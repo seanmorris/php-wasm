@@ -1,16 +1,13 @@
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
-const { ensureServiceWorker, getPhpBus, terminalProps } = vi.hoisted(() => ({
-	ensureServiceWorker: vi.fn()
+const { recoverServiceWorker, getPhpBus, terminalProps } = vi.hoisted(() => ({
+	recoverServiceWorker: vi.fn()
 	, getPhpBus: vi.fn()
 	, terminalProps: {current: null}
 }));
 
-vi.mock('../lib/serviceWorker', () => ({
-	ensureServiceWorker
-	, serviceWorkerControlTimeoutMs: 1500
-}));
+vi.mock('../lib/serviceWorker', () => ({recoverServiceWorker}));
 
 vi.mock('../lib/phpBus', async importOriginal => ({
 	...(await importOriginal())
@@ -33,8 +30,10 @@ describe('InstallDemo', () => {
 	let originalLocks;
 
 	beforeEach(() => {
-		ensureServiceWorker.mockReset();
 		getPhpBus.mockReset();
+		recoverServiceWorker.mockReset().mockImplementation(async () => {
+			navigator.serviceWorker.controller = {};
+		});
 		terminalProps.current = null;
 
 		bus = {
@@ -57,14 +56,6 @@ describe('InstallDemo', () => {
 		};
 
 		getPhpBus.mockResolvedValue(bus);
-
-		ensureServiceWorker.mockResolvedValue({
-			supported: true
-			, registered: true
-			, controlled: true
-			, controller: {scriptURL: '/php-wasm/cgi-worker.js'}
-			, controlSource: 'existing'
-		});
 
 		fetchMock = vi.fn(async (url) => {
 			if(String(url).includes('scripts/init.php'))
@@ -115,6 +106,7 @@ describe('InstallDemo', () => {
 	});
 
 	afterEach(() => {
+		vi.useRealTimers();
 		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
 		sessionStorage.clear();
@@ -441,6 +433,55 @@ describe('InstallDemo', () => {
 		await screen.findByText(
 			'Installer request "analyzePath" failed: Timed out waiting for a service worker reply after 5000ms.'
 		);
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
+		expect(recoverServiceWorker).not.toHaveBeenCalled();
+	});
+
+	it('automatically retries a failed replacement before installing exactly once under StrictMode', async () => {
+		vi.useFakeTimers();
+		bus.runtimeReady.mockRejectedValueOnce(new Error('Wasm asset returned 404'));
+		recoverServiceWorker.mockRejectedValueOnce(new Error('worker module returned 404'));
+		render(<React.StrictMode><InstallDemo /></React.StrictMode>);
+
+		await act(async () => vi.advanceTimersByTimeAsync(1000));
+		expect(screen.getByText('Retrying PHP startup in 2s (2 of 2)...')).toBeInTheDocument();
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
+		expect(bus.writeFile).not.toHaveBeenCalled();
+		await act(async () => vi.advanceTimersByTimeAsync(2000));
+		expect(terminalProps.current).not.toBeNull();
+		expect(recoverServiceWorker).toHaveBeenCalledTimes(2);
+		expect(bus.runtimeReady).toHaveBeenCalledTimes(2);
+		expect(bus.analyzePath).toHaveBeenCalledTimes(1);
+		expect(bus.setSettings).toHaveBeenCalledTimes(1);
+		expect(bus.writeFile).toHaveBeenCalledTimes(2);
+	});
+
+	it('offers a working retry after startup recovery fails without writing any files', async () => {
+		vi.useFakeTimers();
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		bus.runtimeReady.mockRejectedValue(new Error('Wasm asset returned 404'));
+		render(<InstallDemo />);
+
+		await act(async () => vi.advanceTimersByTimeAsync(2999));
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
+		expect(screen.getByAltText('loading spinner')).toBeInTheDocument();
+		expect(bus.writeFile).not.toHaveBeenCalled();
+		await act(async () => vi.advanceTimersByTimeAsync(1));
+		const retry = screen.getByRole('button', {name: 'Retry PHP startup'});
+
+		expect(screen.getByText(/PHP could not start after 3 attempts/)).toBeInTheDocument();
+		expect(screen.queryByAltText('loading spinner')).not.toBeInTheDocument();
+		expect(bus.writeFile).not.toHaveBeenCalled();
+		expect(bus.setSettings).not.toHaveBeenCalled();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(recoverServiceWorker).toHaveBeenCalledTimes(2);
+		bus.runtimeReady.mockResolvedValue(true);
+		fireEvent.click(retry);
+		await act(async () => vi.advanceTimersByTimeAsync(0));
+		expect(terminalProps.current).not.toBeNull();
+		expect(bus.setSettings).toHaveBeenCalledTimes(1);
+		expect(bus.writeFile).toHaveBeenCalledTimes(2);
+		expect(screen.queryByRole('button', {name: 'Retry PHP startup'})).not.toBeInTheDocument();
 	});
 
 	it('waits for the cold PHP runtime before using short filesystem RPC timeouts', async () => {
@@ -460,42 +501,25 @@ describe('InstallDemo', () => {
 		await waitFor(() => expect(bus.analyzePath).toHaveBeenCalledTimes(1));
 	});
 
-	it('surfaces service-worker startup state instead of waiting indefinitely', async () => {
-		const diagnostics = {
-			phase: 'ready'
-			, registration: {
-				installing: {state: 'redundant'}
-				, waiting: null
-				, active: null
-			}
-		};
+	it('retries initial service-worker registration failures before presenting an error', async () => {
+		vi.useFakeTimers();
 		const error = new Error(
 			'CGI service worker ready timed out after 15000ms (installing=redundant, waiting=none, active=none, controller=none).'
 		);
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-		ensureServiceWorker.mockResolvedValue({
-			supported: true
-			, registered: true
-			, controlled: false
-			, controller: null
-			, controlSource: 'ready-timeout'
-			, error
-			, diagnostics
-		});
+		getPhpBus.mockRejectedValueOnce(error);
 
 		render(<InstallDemo />);
 
-		await screen.findByText(error.message);
-		expect(getPhpBus).not.toHaveBeenCalled();
-		expect(consoleError).toHaveBeenCalledWith(
-			'CGI service worker startup failed.'
-			, {
-				controlSource: 'ready-timeout'
-				, error
-				, diagnostics
-			}
-		);
+		await act(async () => vi.advanceTimersByTimeAsync(0));
+		expect(screen.queryByText(error.message)).not.toBeInTheDocument();
+		expect(screen.getByText('Retrying PHP startup in 1s (1 of 2)...')).toBeInTheDocument();
+		expect(fetchMock).not.toHaveBeenCalled();
+		await act(async () => vi.advanceTimersByTimeAsync(1000));
+		expect(terminalProps.current).not.toBeNull();
+		expect(bus.runtimeReady).toHaveBeenCalledTimes(1);
+		expect(consoleError).not.toHaveBeenCalled();
 	});
 
 	it('surfaces a failed archive extraction instead of leaving the installer blank', async () => {

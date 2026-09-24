@@ -5,7 +5,7 @@ set -euo pipefail
 usage() {
 	echo "Usage: $0 <npm-tag> [--dry-run|--real] [--registry <url>|--registry=<url>] [--otp <code>|--otp=<code>] [--otp-command <cmd>|--otp-command=<cmd>]"
 	echo
-	echo "Publishes package directories under ./packages serially."
+	echo "Publishes package directories and the staged source-only builder serially."
 	echo "Dry-run is the default. Use --real for an actual publish."
 	echo "For real publishes, prefer --otp-command or the interactive prompt over a fixed --otp code."
 }
@@ -117,16 +117,18 @@ else
 fi
 sleep 3
 
+BUILDER_RELEASE_DIR="${BUILDER_PACKAGE_OUTPUT:-${PWD}/.cache/release}"
+make package-builder "BUILDER_PACKAGE_OUTPUT=${BUILDER_RELEASE_DIR}"
+BUILDER_RELEASE_DIR="$(cd "${BUILDER_RELEASE_DIR}" && pwd)"
+BUILDER_TARBALL="${BUILDER_RELEASE_DIR}/$(jq -r '.filename' "${BUILDER_RELEASE_DIR}/builder.manifest.json")"
+echo "Prepared builder: ${BUILDER_TARBALL}"
+
 PACKAGES=()
 for PACKAGE_DIR in packages/*; do
 	[[ -d "${PACKAGE_DIR}" ]] || continue
 	[[ -f "${PACKAGE_DIR}/package.json" ]] || continue
 
 	PACKAGE="$(basename "${PACKAGE_DIR}")"
-	if [[ "${PACKAGE}" == "sdl" ]]; then
-		continue
-	fi
-
 	if [[ "$(jq -r '.private // false' < "${PACKAGE_DIR}/package.json")" == "true" ]]; then
 		continue
 	fi
@@ -151,12 +153,17 @@ done
 PACKAGES_TO_PUBLISH=()
 SKIPPED_PACKAGES=()
 
-for PACKAGE in "${PACKAGES[@]}"; do
-	cd "packages/${PACKAGE}"
+for PACKAGE in php-wasm-builder "${PACKAGES[@]}"; do
+	DIFF_ARGS=(diff --tag "${NPM_TAG}" --diff-name-only)
+	if [[ "${PACKAGE}" == "php-wasm-builder" ]]; then
+		DIFF_ARGS+=(--diff "php-wasm-builder@${NPM_TAG}" --diff "${BUILDER_TARBALL}")
+	else
+		cd "packages/${PACKAGE}"
+	fi
 	echo -e "\033[33mChanged files in \033[1m${PACKAGE}:\033[0m"
 
 	set +e
-	DIFF_OUTPUT="$(npm diff --tag "${NPM_TAG}" --diff-name-only 2>&1)"
+	DIFF_OUTPUT="$(npm "${DIFF_ARGS[@]}" 2>&1)"
 	DIFF_STATUS=$?
 	set -e
 
@@ -179,7 +186,9 @@ for PACKAGE in "${PACKAGES[@]}"; do
 		PACKAGES_TO_PUBLISH+=("${PACKAGE}")
 	fi
 
-	cd "../.."
+	if [[ "${PACKAGE}" != "php-wasm-builder" ]]; then
+		cd "../.."
+	fi
 done
 
 if [[ "${#SKIPPED_PACKAGES[@]}" -gt 0 ]]; then
@@ -217,9 +226,14 @@ resolve_publish_otp() {
 }
 
 for PACKAGE in "${PACKAGES_TO_PUBLISH[@]}"; do
-	cd "packages/${PACKAGE}"
+	PUBLISH_TARGET=()
+	if [[ "${PACKAGE}" == "php-wasm-builder" ]]; then
+		PUBLISH_TARGET+=("${BUILDER_TARBALL}")
+	else
+		cd "packages/${PACKAGE}"
+	fi
 
-	PUBLISH_ARGS=(publish --tag "${NPM_TAG}")
+	PUBLISH_ARGS=(publish "${PUBLISH_TARGET[@]}" --tag "${NPM_TAG}")
 
 	if [[ -n "${REGISTRY}" ]]; then
 		PUBLISH_ARGS+=(--registry "${REGISTRY}")
@@ -237,5 +251,7 @@ for PACKAGE in "${PACKAGES_TO_PUBLISH[@]}"; do
 	echo -e "\033[32mPublishing \033[1m${PACKAGE}\033[0m"
 	npm "${PUBLISH_ARGS[@]}"
 
-	cd "../.."
+	if [[ "${PACKAGE}" != "php-wasm-builder" ]]; then
+		cd "../.."
+	fi
 done

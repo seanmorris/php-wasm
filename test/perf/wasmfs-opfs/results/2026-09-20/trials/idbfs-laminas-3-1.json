@@ -1,0 +1,447 @@
+{
+  "backend": "idbfs",
+  "framework": "laminas-3",
+  "name": "Laminas 3",
+  "round": 1,
+  "runLabel": "clean-repeat",
+  "hostPreflight": {
+    "time": "2026-09-20T17:19:07.587Z",
+    "idlePercent": 84.43791946308725,
+    "loadAverage": [
+      5.68,
+      5.11,
+      4.76
+    ],
+    "containers": [
+      "laravel-ksqlc-orders-1",
+      "laravel-ksqlc-billing-api-1",
+      "laravel-ksqlc-inventory-api-1",
+      "laravel-ksqlc-billing-1",
+      "laravel-ksqlc-inventory-1",
+      "laravel-ksqlc-ksql-server-1",
+      "laravel-ksqlc-krest-server-1",
+      "laravel-ksqlc-schema-registry-1",
+      "laravel-ksqlc-kafka-1",
+      "laravel-ksqlc-zookeeper-1"
+    ],
+    "backend": "idbfs",
+    "framework": "laminas-3",
+    "round": 1,
+    "minimumIdlePercent": 80
+  },
+  "archive": {
+    "name": "laminas-3.zip",
+    "bytes": 8600541,
+    "sha256": "e10f7ba9b524213847c63537d6d6b64d888e5776f9f66c3745a27b3d6d053186"
+  },
+  "assetSha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      5.62,
+      5.1,
+      4.76
+    ]
+  },
+  "started": "2026-09-20T17:19:08.324Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 351.69999980926514,
+      "flushMs": 241.7999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 353.19999980926514,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 299.09999990463257,
+      "flushMs": 204.09999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 300.69999980926514,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 351.40000009536743,
+      "flushMs": 260.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 352.5,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 315.40000009536743,
+      "flushMs": 223.80000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 316.7999997138977,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 304.80000019073486,
+      "flushMs": 220.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 306.2000002861023,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 312.90000009536743,
+      "flushMs": 215.80000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 314.09999990463257,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 319.59999990463257,
+      "flushMs": 239.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 321.19999980926514,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 323,
+      "flushMs": 235.39999961853027,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 324.69999980926514,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 308.59999990463257,
+      "flushMs": 220.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 309.90000009536743,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 291.09999990463257,
+      "flushMs": 213.69999980926514,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 292.40000009536743,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 334.1000003814697,
+      "flushMs": 244.10000038146973,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 335.6000003814697,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 299.40000009536743,
+      "flushMs": 216.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 300.80000019073486,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 328.5,
+      "flushMs": 242.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 330,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 308.69999980926514,
+      "flushMs": 224.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 309.80000019073486,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 315.09999990463257,
+      "flushMs": 232.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 316.40000009536743,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 287.30000019073486,
+      "flushMs": 205.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 288.7000002861023,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 288.09999990463257,
+      "flushMs": 205.5,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 289.59999990463257,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 282.09999990463257,
+      "flushMs": 201,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 283.59999990463257,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 289.5,
+      "flushMs": 206.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 290.80000019073486,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+      "status": 200,
+      "cgiMs": 294.7999997138977,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 296,
+      "bytes": 5893,
+      "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/css/style.css",
+      "status": 200,
+      "cgiMs": 1.3000001907348633,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.4000000953674316,
+      "bytes": 348,
+      "bodySha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/css/style.css",
+      "status": 200,
+      "cgiMs": 1.299999713897705,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.3000001907348633,
+      "bytes": 348,
+      "bodySha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/css/style.css",
+      "status": 200,
+      "cgiMs": 1.200000286102295,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.200000286102295,
+      "bytes": 348,
+      "bodySha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/css/style.css",
+      "status": 200,
+      "cgiMs": 1.3999996185302734,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.5,
+      "bytes": 348,
+      "bodySha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/css/style.css",
+      "status": 200,
+      "cgiMs": 1.0999999046325684,
+      "flushMs": 217.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.4000000953674316,
+      "bytes": 348,
+      "bodySha256": "b34de4a8437fbbe744a15eae83f9a99348e33bbf068d9dca4f617c1d3009d1ac",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 482.7999997138977,
+    "mountHydrateMs": 28.5,
+    "totalMs": 512.5,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 693.275041,
+  "install": {
+    "downloadMs": 26.40000009536743,
+    "archiveBytes": 8600541,
+    "archiveWriteMs": 43.19999980926514,
+    "extractAndFlushMs": 2282.300000190735,
+    "installMs": 2325.699999809265,
+    "details": {
+      "files": 7670,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 2282,
+    "flushMs": 1270,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+    "status": 200,
+    "cgiMs": 496.2000002861023,
+    "flushMs": 286.2000002861023,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 498.30000019073486,
+    "bytes": 5893,
+    "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+    "valid": true
+  },
+  "render": {
+    "title": "Laminas MVC Skeleton",
+    "text": " MVC Skeleton\nHome\nWelcome to\nLaminas MVC Skeleton Application\n\nCongratulations! You have successfully installed the Laminas MVC Skeleton. This skeleton can serve as a simple starting point for you to begin building your application on Laminas MVC.\n\nClick here to edit this template »\nCheck Laminas on GitHub »\nFollow Development\n\nLaminas Project is under active development. If you are interested in following the development, you can check Laminas dev blog, and Laminas issue tracker (link requires a GitHub account). This is a great resource for staying up to date with the latest developments!\n\nLaminas Project Portal »\nDiscover Modules\n\nLaminas MVC is a modular application. You can find multiple compatible modules on packagist.\n\nExplore Laminas Modules »\nHelp & Support\n\nIf you need any help or support while developing with Laminas, you may reach us via chat or forum. We'd love to hear any questions or feedback you may have regarding any release.\n\nPing us on chat »\n\n© 2026 Laminas Project a Series of LF Projects, LLC.",
+    "images": [
+      {
+        "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/img/laminas-logo.svg",
+        "complete": true,
+        "width": 170
+      }
+    ],
+    "wallMs": 321.8101750000005
+  },
+  "restart": {
+    "instantiateMs": 439.5,
+    "mountHydrateMs": 981.9000000953674,
+    "totalMs": 1423.0999999046326,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 1477.9452070000007,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/laminas-3/",
+    "status": 200,
+    "cgiMs": 870.3000001907349,
+    "flushMs": 230.7000002861023,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 872.2000002861023,
+    "bytes": 5893,
+    "bodySha256": "da4e512a805d763c961435f9ea8c46809f459bbadfd443e672732854db7bdf11",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T17:19:21.036Z"
+}

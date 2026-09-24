@@ -1,0 +1,1599 @@
+{
+  "backend": "opfs",
+  "framework": "wordpress",
+  "mode": "buffer-files",
+  "round": 0,
+  "started": "2026-09-20T18:04:40.668Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    1.95,
+    2.57,
+    3.33
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 1593.2999997138977,
+      "value": {
+        "wallMs": 1593.2999997138977,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 293.60000371932983,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 6.799998760223389,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 297.0000042915344,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 17.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 6.900000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 7.500000476837158,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 1828.9000000953674,
+      "value": {
+        "wallMs": 1828.9000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 309.6999955177307,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 7.700000286102295,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 324.5000047683716,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 37.20000123977661,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 12.500000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 50.50000047683716,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 1596.2000002861023,
+      "value": {
+        "wallMs": 1596.2000002861023,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 314.0999927520752,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 8.399999618530273,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 297.69999504089355,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 17.499999523162842,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 7.09999942779541,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 8.100000381469727,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.5999994277954102,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 1562.5,
+      "value": {
+        "wallMs": 1562.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 310.6000003814697,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 6.600000858306885,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 299.4999942779541,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 15.799998760223389,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 6.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 6.8000006675720215,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.6999998092651367,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 1575.1999998092651,
+      "value": {
+        "wallMs": 1575.1999998092651,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 305.59999656677246,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 6.299999237060547,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 286.69999742507935,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 15.600001335144043,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 6.400000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 6.59999942779541,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 1540.4000000953674,
+      "value": {
+        "wallMs": 1540.4000000953674,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "opfs.getFile",
+          "calls": 1445,
+          "ms": 286.00000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.getFileHandle",
+          "calls": 42,
+          "ms": 8.000001430511475,
+          "bytes": 0,
+          "failures": 40,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-content",
+            "/persist/wordpress-7.1/wp-includes",
+            "/persist/wordpress-7.1/wp-content/database",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/persist/wordpress-7.1/wp-content/plugins",
+            "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+            "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+            "/persist/wordpress-7.1/wp-includes/theme-compat"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.blobRead",
+          "calls": 774,
+          "ms": 285.5000033378601,
+          "bytes": 6839992,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/wp-blog-header.php",
+            "/persist/wordpress-7.1/wp-load.php",
+            "/persist/wordpress-7.1/wp-config.php",
+            "/persist/wordpress-7.1/wp-settings.php",
+            "/persist/wordpress-7.1/wp-includes/version.php",
+            "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+            "/persist/wordpress-7.1/wp-includes/compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+            "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 16.8999981880188,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 6.100001335144043,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 7.200000762939453,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.7000002861022949,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/wp-content/database"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "archiveSha256": "0c28243ae5fdfedbef5825f8295628882e971923e072c0755ad948c18b1b17e2",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10447,
+      "sha256": "4db988da03decaaedc60933991f52e85c6fd6defa0c2736cdcdb3adcc7b96d1d"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 11960,
+      "sha256": "5132d7088242a21db2ce773f4718383516d0a0683d8e5c703d38887336137b22"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 7780,
+      "sha256": "4ccb8587e0c53b6bcb073e6cf392bdf30f5cf07aa09f81a4c10aec55aecd0a36"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9781,
+      "sha256": "4b6a7761809be9e2d06ea89cf70872f305045099d43b8d784b64f4e9453f3192"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4448377,
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40819220,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 484.5,
+    "mountHydrateMs": 51.90000009536743,
+    "totalMs": 537.4000000953674
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 16.399999618530273,
+      "operations": []
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 9849.299999713898,
+      "value": {
+        "wallMs": 9849.199999809265,
+        "status": 200,
+        "body": {
+          "entries": 3628,
+          "bufferedBytes": 95944968,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "opfs.getFileHandle",
+          "calls": 11784,
+          "ms": 2284.500000476837,
+          "bytes": 0,
+          "failures": 8155,
+          "paths": [
+            "/persist",
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.getDirectoryHandle",
+          "calls": 449,
+          "ms": 112.49999237060547,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1",
+            "/persist/wordpress-7.1/wp-admin",
+            "/persist/wordpress-7.1/wp-admin/css",
+            "/persist/wordpress-7.1/wp-admin/css/colors",
+            "/persist/wordpress-7.1/wp-admin/css/colors/blue",
+            "/persist/wordpress-7.1/wp-admin/css/colors/coffee",
+            "/persist/wordpress-7.1/wp-admin/css/colors/ectoplasm",
+            "/persist/wordpress-7.1/wp-admin/css/colors/light",
+            "/persist/wordpress-7.1/wp-admin/css/colors/midnight",
+            "/persist/wordpress-7.1/wp-admin/css/colors/modern",
+            "/persist/wordpress-7.1/wp-admin/css/colors/ocean",
+            "/persist/wordpress-7.1/wp-admin/css/colors/sunrise"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.getFile",
+          "calls": 3628,
+          "ms": 623.7000041007996,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php",
+            "/persist/wordpress-7.1/wp-admin/admin-post.php",
+            "/persist/wordpress-7.1/wp-admin/admin.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.createWritable",
+          "calls": 3622,
+          "ms": 2444.2000017166138,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php",
+            "/persist/wordpress-7.1/wp-admin/admin-post.php",
+            "/persist/wordpress-7.1/wp-admin/admin.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.write",
+          "calls": 3622,
+          "ms": 1728.4999928474426,
+          "bytes": 95944994,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php",
+            "/persist/wordpress-7.1/wp-admin/admin-post.php",
+            "/persist/wordpress-7.1/wp-admin/admin.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.close",
+          "calls": 3622,
+          "ms": 1243.2999925613403,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/wordpress-7.1/.default_theme",
+            "/persist/wordpress-7.1/index.php",
+            "/persist/wordpress-7.1/readme.html",
+            "/persist/wordpress-7.1/wordpress-remote-asset-paths",
+            "/persist/wordpress-7.1/wp-activate.php",
+            "/persist/wordpress-7.1/wp-admin/about.php",
+            "/persist/wordpress-7.1/wp-admin/admin-ajax.php",
+            "/persist/wordpress-7.1/wp-admin/admin-footer.php",
+            "/persist/wordpress-7.1/wp-admin/admin-functions.php",
+            "/persist/wordpress-7.1/wp-admin/admin-header.php",
+            "/persist/wordpress-7.1/wp-admin/admin-post.php",
+            "/persist/wordpress-7.1/wp-admin/admin.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 9865.699999332428
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 2702.199999809265,
+    "value": {
+      "wallMs": 2702.199999809265,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "opfs.getFile",
+        "calls": 1751,
+        "ms": 428.300000667572,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/index.php",
+          "/persist/wordpress-7.1/wp-blog-header.php",
+          "/persist/wordpress-7.1/wp-load.php",
+          "/persist/wordpress-7.1/wp-config.php",
+          "/persist/wordpress-7.1/wp-settings.php",
+          "/persist/wordpress-7.1/wp-includes/version.php",
+          "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+          "/persist/wordpress-7.1/wp-includes/compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.getFileHandle",
+        "calls": 48,
+        "ms": 10.399999618530273,
+        "bytes": 0,
+        "failures": 45,
+        "paths": [
+          "/persist/wordpress-7.1",
+          "/persist/wordpress-7.1/wp-content",
+          "/persist/wordpress-7.1/wp-includes",
+          "/persist/wordpress-7.1/wp-content/database",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-journal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/persist/wordpress-7.1/wp-content/plugins",
+          "/persist/wordpress-7.1/wp-content/themes/twentytwentyfive",
+          "/persist/wordpress-7.1/wp-includes/blocks/page-list-item",
+          "/persist/wordpress-7.1/wp-includes/theme-compat"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.blobRead",
+        "calls": 990,
+        "ms": 449.6000032424927,
+        "bytes": 7269037,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/index.php",
+          "/persist/wordpress-7.1/wp-blog-header.php",
+          "/persist/wordpress-7.1/wp-load.php",
+          "/persist/wordpress-7.1/wp-config.php",
+          "/persist/wordpress-7.1/wp-settings.php",
+          "/persist/wordpress-7.1/wp-includes/version.php",
+          "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+          "/persist/wordpress-7.1/wp-includes/compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.createWritable",
+        "calls": 137,
+        "ms": 167.69999933242798,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-journal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 18315437,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.write",
+        "calls": 134,
+        "ms": 74.7999997138977,
+        "bytes": 280190,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-journal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.close",
+        "calls": 137,
+        "ms": 54.29999923706055,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-journal",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-wal",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.removeEntry",
+        "calls": 3,
+        "ms": 1,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.truncate",
+        "calls": 3,
+        "ms": 1.3000006675720215,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 479.1000003814697,
+    "mountHydrateMs": 9,
+    "totalMs": 491
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 2424.5,
+    "value": {
+      "wallMs": 2424.4000000953674,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getFileHandle",
+        "calls": 1053,
+        "ms": 242.7999939918518,
+        "bytes": 0,
+        "failures": 237,
+        "paths": [
+          "/persist",
+          "/persist/wordpress-7.1/index.php",
+          "/persist/wordpress-7.1",
+          "/persist/wordpress-7.1/wp-blog-header.php",
+          "/persist/wordpress-7.1/wp-load.php",
+          "/persist/wordpress-7.1/wp-config.php",
+          "/persist/wordpress-7.1/wp-settings.php",
+          "/persist/wordpress-7.1/wp-includes/version.php",
+          "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+          "/persist/wordpress-7.1/wp-includes/compat.php",
+          "/persist/wordpress-7.1/wp-includes",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getDirectoryHandle",
+        "calls": 197,
+        "ms": 26.400004863739014,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1",
+          "/persist/wordpress-7.1/wp-includes",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/lib",
+          "/persist/wordpress-7.1/wp-content",
+          "/persist/wordpress-7.1/wp-includes/pomo",
+          "/persist/wordpress-7.1/wp-includes/l10n",
+          "/persist/wordpress-7.1/wp-content/plugins",
+          "/persist/wordpress-7.1/wp-content/plugins/sqlite-database-integration",
+          "/persist/wordpress-7.1/wp-content/plugins/sqlite-database-integration/wp-includes",
+          "/persist/wordpress-7.1/wp-content/plugins/sqlite-database-integration/wp-includes/sqlite"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getFile",
+        "calls": 1445,
+        "ms": 289.90000772476196,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/index.php",
+          "/persist/wordpress-7.1/wp-blog-header.php",
+          "/persist/wordpress-7.1/wp-load.php",
+          "/persist/wordpress-7.1/wp-config.php",
+          "/persist/wordpress-7.1/wp-settings.php",
+          "/persist/wordpress-7.1/wp-includes/version.php",
+          "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+          "/persist/wordpress-7.1/wp-includes/compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.blobRead",
+        "calls": 774,
+        "ms": 347.00000953674316,
+        "bytes": 6839992,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/index.php",
+          "/persist/wordpress-7.1/wp-blog-header.php",
+          "/persist/wordpress-7.1/wp-load.php",
+          "/persist/wordpress-7.1/wp-config.php",
+          "/persist/wordpress-7.1/wp-settings.php",
+          "/persist/wordpress-7.1/wp-includes/version.php",
+          "/persist/wordpress-7.1/wp-includes/compat-utf8.php",
+          "/persist/wordpress-7.1/wp-includes/compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/autoload-php7.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/Compat.php",
+          "/persist/wordpress-7.1/wp-includes/sodium_compat/src/SodiumException.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.createWritable",
+        "calls": 19,
+        "ms": 21.09999990463257,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 491549,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.truncate",
+        "calls": 2,
+        "ms": 0.6000003814697266,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.close",
+        "calls": 19,
+        "ms": 7.600000381469727,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.write",
+        "calls": 17,
+        "ms": 8.999999046325684,
+        "bytes": 42,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database/.ht.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.removeEntry",
+        "calls": 2,
+        "ms": 0.7999997138977051,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/wordpress-7.1/wp-content/database"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/js/dist/script-modules/vips/worker.min.js",
+      "bytes": 13417612,
+      "sha256": "a1005a046a17883207d20b5bed28463658b5b2320fa4e5373f0066afcbd0fdee"
+    },
+    {
+      "path": "/persist/wordpress-7.1/index.php",
+      "bytes": 81,
+      "sha256": "37c39fcb1b2db69a12a420aed3528cc3c3061be3ffc3134b6c05be6b3663155a"
+    },
+    {
+      "path": "/persist/wordpress-7.1/wp-includes/css/dashicons.min.css",
+      "bytes": 59004,
+      "sha256": "26a7e7b9d4bb9948771c126085b99fba6546af4399e6263e8a69a3e33f6271cb"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:05:07.395Z"
+}

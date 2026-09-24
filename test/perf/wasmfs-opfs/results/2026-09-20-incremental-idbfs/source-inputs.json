@@ -1,0 +1,44 @@
+[
+  {
+    "file": "source/idbfsSync.mjs",
+    "bytes": 11232,
+    "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50",
+    "snapshot": "sources/source/idbfsSync.mjs.txt"
+  },
+  {
+    "file": "source/PhpCgiWebBase.mjs",
+    "bytes": 9874,
+    "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e",
+    "snapshot": "sources/source/PhpCgiWebBase.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+    "bytes": 8107,
+    "sha256": "b5242525712d4924e25f44004ab352372bf6cdc5394634243d3d7dc470bdc176",
+    "snapshot": "sources/test/perf/wasmfs-opfs/diagnose.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+    "bytes": 10684,
+    "sha256": "dc85e2b9baeb4d42016affa6a14da8b23c03dd6cb3480e3acfbb9d1d8464546e",
+    "snapshot": "sources/test/perf/wasmfs-opfs/diagnostic-worker.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+    "bytes": 12502,
+    "sha256": "6f85db972ae7b7741276fe318801ea662fd702814f73199c6e2739fd3a0c35f7",
+    "snapshot": "sources/test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/runtime.mjs",
+    "bytes": 5960,
+    "sha256": "b4e1c3836ac5b378c8152b7950bf3173a99b79ab3d2e42ef67d89a74bcab3e2d",
+    "snapshot": "sources/test/perf/wasmfs-opfs/runtime.mjs.txt"
+  },
+  {
+    "file": "test/perf/wasmfs-opfs/server.mjs",
+    "bytes": 3897,
+    "sha256": "bb9c6f5d69a6a5f7b15b6aa94452fa8816abc92038a69f50454dce9152ea631c",
+    "snapshot": "sources/test/perf/wasmfs-opfs/server.mjs.txt"
+  }
+]

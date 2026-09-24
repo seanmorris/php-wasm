@@ -1,0 +1,307 @@
+{
+  "date": "2026-09-22",
+  "configureSequence": [
+    {
+      "name": "80-cold",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.0.static.ci",
+        "WITH_SDL=1",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.0.static.ci",
+        "third_party/php8.0-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 455.876,
+      "cache": ".cache/php-configure/php8.0.30/70cbac2ab68999f4fa0c280e0d54d4dba0f167ac5020533feef06145f7cc23cc.cache",
+      "cacheSha256": "d410648bb4aff271cd9c96286b61c34336bdde0b963ed99f2f0670f499f3da6a",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation=gnu_libiconv}",
+      "extensions": [
+        "sdl",
+        "sdl_image",
+        "sdl_mixer",
+        "sdl_ttf",
+        "opengl"
+      ],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    },
+    {
+      "name": "84-cold",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.4.static.ci",
+        "WITH_SDL=1",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.4.static.ci",
+        "third_party/php8.4-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 267.642,
+      "cache": ".cache/php-configure/php8.4.1/7d50dffdcc38cd000fe8ea2e9463e044b00ed9526621fe2e313e19213c410e24.cache",
+      "cacheSha256": "16a7a0098d1e11e3706511031c3d3ba939a8cad92db257e9473d17526fdf4876",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation='GNU libiconv'}",
+      "extensions": [
+        "sdl",
+        "sdl_image",
+        "sdl_mixer",
+        "sdl_ttf",
+        "opengl"
+      ],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    },
+    {
+      "name": "80-reused",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.0.static.ci",
+        "WITH_SDL=1",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.0.static.ci",
+        "third_party/php8.0-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 110.731,
+      "cache": ".cache/php-configure/php8.0.30/70cbac2ab68999f4fa0c280e0d54d4dba0f167ac5020533feef06145f7cc23cc.cache",
+      "cacheSha256": "d410648bb4aff271cd9c96286b61c34336bdde0b963ed99f2f0670f499f3da6a",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation=gnu_libiconv}",
+      "extensions": [
+        "sdl",
+        "sdl_image",
+        "sdl_mixer",
+        "sdl_ttf",
+        "opengl"
+      ],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    },
+    {
+      "name": "84-core",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.4.static.ci",
+        "WITH_SDL=1",
+        "WITH_SDL_IMAGE=0",
+        "WITH_SDL_MIXER=0",
+        "WITH_SDL_TTF=0",
+        "WITH_OPENGL=0",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.4.static.ci",
+        "third_party/php8.4-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 253.572,
+      "cache": ".cache/php-configure/php8.4.1/7fc479ec1cce0f1f68b196d12543e483157ff98c42482a219878b916a6a4725c.cache",
+      "cacheSha256": "16a7a0098d1e11e3706511031c3d3ba939a8cad92db257e9473d17526fdf4876",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation='GNU libiconv'}",
+      "extensions": [
+        "sdl"
+      ],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    },
+    {
+      "name": "84-disabled",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.4.static.ci",
+        "WITH_SDL=0",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.4.static.ci",
+        "third_party/php8.4-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 241.96,
+      "cache": ".cache/php-configure/php8.4.1/68f541f687df82da39b8d4f40c20931eb542f0ad1c422531a224bb00f6a4fbcb.cache",
+      "cacheSha256": "16a7a0098d1e11e3706511031c3d3ba939a8cad92db257e9473d17526fdf4876",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation='GNU libiconv'}",
+      "extensions": [],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    },
+    {
+      "name": "84-restored",
+      "command": [
+        "make",
+        "--no-print-directory",
+        "ENV_FILE=.github/.env_8.4.static.ci",
+        "WITH_SDL=1",
+        "CPU_COUNT=4",
+        "MAX_LOAD=8",
+        "-W",
+        ".github/.env_8.4.static.ci",
+        "third_party/php8.4-src/configured"
+      ],
+      "exitCode": 0,
+      "seconds": 60.457,
+      "cache": ".cache/php-configure/php8.4.1/7d50dffdcc38cd000fe8ea2e9463e044b00ed9526621fe2e313e19213c410e24.cache",
+      "cacheSha256": "16a7a0098d1e11e3706511031c3d3ba939a8cad92db257e9473d17526fdf4876",
+      "iconv": "php_cv_iconv_implementation=${php_cv_iconv_implementation='GNU libiconv'}",
+      "extensions": [
+        "sdl",
+        "sdl_image",
+        "sdl_mixer",
+        "sdl_ttf",
+        "opengl"
+      ],
+      "iconvHeader": "#define PHP_ICONV_IMPL \"libiconv\""
+    }
+  ],
+  "configureNote": "Each configure invocation is explicitly requested with Make -W on ENV_FILE to verify cache reads. No cache entries were manually deleted. Flag-change timestamp behavior is also exercised by test/build/configure-cache.test.mjs.",
+  "incremental": {
+    "version": "8.4",
+    "directory": ".cache/sdl-make/runtime",
+    "compiledObjects": 1562,
+    "checks": [
+      {
+        "name": "unchanged",
+        "targets": [
+          "web-mjs"
+        ],
+        "log": ".cache/sdl-make/incremental-final.json.unchanged.log",
+        "nativeChanges": [],
+        "rebuiltArtifacts": []
+      },
+      {
+        "name": "javascript",
+        "targets": [
+          "-W",
+          "packages/sdl/js/pointer-lock.js",
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs"
+        ],
+        "log": ".cache/sdl-make/incremental-final.json.javascript.log",
+        "nativeChanges": [],
+        "rebuiltArtifacts": [
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs",
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs.wasm"
+        ]
+      }
+    ]
+  },
+  "creditsRegression": {
+    "version": "8.4",
+    "directory": ".cache/sdl-make/runtime",
+    "compiledObjects": 1562,
+    "checks": [
+      {
+        "name": "unchanged",
+        "targets": [
+          "web-mjs"
+        ],
+        "log": ".cache/sdl-make/incremental-before-credits.json.unchanged.log",
+        "nativeChanges": [],
+        "rebuiltArtifacts": []
+      },
+      {
+        "name": "javascript",
+        "targets": [
+          "-W",
+          "packages/sdl/js/pointer-lock.js",
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs"
+        ],
+        "log": ".cache/sdl-make/incremental-before-credits.json.javascript.log",
+        "nativeChanges": [
+          "third_party/php8.4-src/ext/standard/credits.lo",
+          "third_party/php8.4-src/ext/standard/credits.o",
+          "third_party/php8.4-src/ext/standard/credits_ext.h",
+          "third_party/php8.4-src/ext/standard/credits_sapi.h"
+        ],
+        "rebuiltArtifacts": [
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs",
+          ".cache/sdl-make/runtime/php8.4_sdl-web.mjs.wasm"
+        ]
+      }
+    ]
+  },
+  "arginfo": {
+    "generator": "PHP 8.0.30 build/gen_stub.php",
+    "generatorSha256": "1195fd90d11bb204032f650f44cdf1bf7842c72c4a6b41fc6fff9b2cb8f97f61",
+    "files": [
+      {
+        "stub": "packages/sdl/core/php_sdl_extra.stub.php",
+        "generated": "packages/sdl/core/php_sdl_extra_arginfo.h",
+        "matches": true,
+        "sha256": "d62b172e7fbca2c7d3c52606f3ce704d7c19b8e529388b1658e1937323fffb11"
+      },
+      {
+        "stub": "packages/sdl/core/php_sdl_geometry.stub.php",
+        "generated": "packages/sdl/core/php_sdl_geometry_arginfo.h",
+        "matches": true,
+        "sha256": "d7ad7d921766c269aa3e2ac362ec710b4a5a87902a8b87c2a11df21320c36924"
+      },
+      {
+        "stub": "packages/sdl/ttf/php_ttf_extra.stub.php",
+        "generated": "packages/sdl/ttf/php_ttf_extra_arginfo.h",
+        "matches": true,
+        "sha256": "9b85fc9162b58e551e589ae508846f102ee1c615de1025905e81638046bd484a"
+      },
+      {
+        "stub": "packages/sdl/opengl/php_webgl.stub.php",
+        "generated": "packages/sdl/opengl/php_webgl_arginfo.h",
+        "matches": true,
+        "sha256": "765089441f00407203e57ab9fe99cf48ba99db270341b11ff14900f2b37849ee"
+      }
+    ]
+  },
+  "checks": {
+    "makeAndPackaging": 60,
+    "strictDeclarations": 7,
+    "demoUnit": 245,
+    "demoLint": true,
+    "javascriptStyle": true,
+    "mainModule": true,
+    "nativeBrowserCases": 195,
+    "editorCases": 2
+  },
+  "limits": "Configure/extension-registration checks do not replace complete native cold/profile builds. Full remote matrix, broader stress/throughput and physical-device coverage remain open. Recorded command durations are verification runtimes, not performance benchmarks.",
+  "finalCreditsConfigure80": {
+    "exitCode": 0,
+    "cacheReused": ".cache/php-configure/php8.0.30/70cbac2ab68999f4fa0c280e0d54d4dba0f167ac5020533feef06145f7cc23cc.cache",
+    "creditsHeadersGenerated": true,
+    "iconvImplementation": "libiconv"
+  },
+  "browserFixtureNote": "189 binding cases pass in the combined run. Updating the cube spec while that runner had cached the old helper caused a module-export failure and skipped its remaining cube cases. A fresh worker passes all six cube cases against the staged pair; all 195 distinct native cases are verified. The installed matching pair passes both editor smoke tests.",
+  "sourceFormattingAfterVerification": [
+    {
+      "file": "packages/sdl/core/glcontext.c",
+      "builtSha256": "d86dfb8e9b1dafbd6f0cdfec02602c1cceeb5c1302ca9f92d37c89327317cd23",
+      "formattedSha256": "d0fea5eccef97dc1ea026a551f2c5ea7357fda146a1f821894d069afeb68e9cc",
+      "change": "Remove trailing whitespace and extra blank lines at EOF only."
+    },
+    {
+      "file": "packages/sdl/core/glcontext.h",
+      "builtSha256": "0eb727fd1b0c3f91101fa7c1d6a914ee3f096e6fc2007607ec893c5b2946f512",
+      "formattedSha256": "b12d204cc426fa08916b66df96fc3476186fd3eda1436e8ac70847d509235291",
+      "change": "Remove trailing whitespace and extra blank lines at EOF only."
+    },
+    {
+      "file": "packages/sdl/core/mouse.h",
+      "builtSha256": "d90c724d3aa578c34d402224215cbd2fcb47888e6ab3986c6b151b5bee99bf0b",
+      "formattedSha256": "69012f17697e75a429421fa2a9869ea92139b783271bea75544644b22591e1a8",
+      "change": "Remove trailing whitespace and extra blank lines at EOF only."
+    },
+    {
+      "file": "packages/sdl/core/rwops.h",
+      "builtSha256": "aa6682dabcea7d67978acd2d97be2b206754052ec4eba42c7d519ebd551d4e01",
+      "formattedSha256": "c2e4c7bcda69ba2e671ce01b8409f5613ffce0d7d98bb9ba89f3a7861635ba60",
+      "change": "Remove trailing whitespace and extra blank lines at EOF only."
+    },
+    {
+      "file": "packages/sdl/core/window.h",
+      "builtSha256": "301cc9635574c3f17a6412cd75cab8d9b1bef78d6c80beae01c2e2e45deb8eaf",
+      "formattedSha256": "570b4605dcd43b68ffb85508e056b9cf26741eb0b3c63b60674bd3b2a063958c",
+      "change": "Remove trailing whitespace and extra blank lines at EOF only."
+    }
+  ]
+}

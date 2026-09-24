@@ -1,0 +1,26 @@
+php-sdl-wasm
+
+Copyright 2024 Sean Morris
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+The core SDL additions in core/ and js/ use PHP License 3.01 (LICENSE-PHP in the runtime package),
+like PECL sdl. The new mixer ownership helpers also use PHP License 3.01;
+other mixer overlays retain the PECL sdl_mixer zlib license. The new SDL_ttf additions in ttf/ also use PHP License 3.01.
+The OpenGL binding derives from PECL opengl, distributed under PHP License
+3.01 (LICENSE-PHP in the runtime package). PECL sdl_image and sdl_mixer use the zlib license;
+PECL sdl_ttf uses the MIT license. Their notices are included as LICENSE-sdl_image, LICENSE-sdl_mixer and
+LICENSE-sdl_ttf in the runtime package.
+Native SDL_image, SDL_mixer and SDL_ttf use the zlib license; their original
+notices remain in the downloaded source distributions. The patches and browser
+binding are modified versions, not the original upstream implementations.

@@ -39,11 +39,22 @@ export class fsOps
 	 * Lists the entries in a virtual directory.
 	 * @param {Promise<object>} binary Deferred PHP module instance.
 	 * @param {string} path Directory path to list.
-	 * @returns {Promise<string[]>} Directory entries for the path.
+	 * @param {{withFileTypes?: boolean}} [options] Include serializable entry types.
+	 * @returns {Promise<string[]|Array<{name: string, isFolder: boolean}>>} Entries in filesystem order, including dot entries.
 	 */
-	static async readdir(binary, path)
+	static async readdir(binary, path, options = {})
 	{
-		return (await binary).FS.readdir(path);
+		const {FS} = await binary;
+		const names = FS.readdir(path);
+		if(!options.withFileTypes)
+		{
+			return names;
+		}
+
+		const prefix = path.endsWith('/') ? path : path + '/';
+		// Keep metadata reads in the caller's transaction, following links as
+		// analyzePath does. stat errors must reject the listing, not hide entries.
+		return names.map(name => ({name, isFolder: FS.isDir(FS.stat(prefix + name).mode)}));
 	}
 
 	/**

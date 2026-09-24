@@ -57,7 +57,6 @@ export class PhpCloudflare extends PhpBase
 			...settings
 			, ...args
 			, version
-			, variant: ''
 			, persist: false
 			, cfd1: {...args.cfd1}
 			, shared: {...args.shared}
@@ -66,6 +65,8 @@ export class PhpCloudflare extends PhpBase
 				return receiveInstance(instance, wasmModule);
 			}
 		};
+
+		delete runtimeArgs.variant;
 
 		// The adapter has already validated and snapshotted global settings.
 		// Prevent PhpBase from merging them again behind the fixed hook.

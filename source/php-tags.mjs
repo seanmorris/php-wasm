@@ -4,7 +4,6 @@ const runPhpScriptTag = async (element) => {
 
 	const scope = {
 		version: '8.4'
-		, variant: ''
 		, stdin: null
 		, canvas: null
 		, stdout: null
@@ -20,9 +19,9 @@ const runPhpScriptTag = async (element) => {
 		scope.version = element.getAttribute('data-version');
 	}
 
-	if(element.hasAttribute('data-variant'))
+	if(element.hasAttribute('data-variant') && element.getAttribute('data-variant'))
 	{
-		scope.variant = element.getAttribute('data-variant');
+		throw new TypeError('SDL script tags have moved to php-sdl-wasm. Import PhpSdl and run the script explicitly.');
 	}
 
 	if(element.hasAttribute('data-ini'))
@@ -133,7 +132,6 @@ const runPhpScriptTag = async (element) => {
 	const php = new PhpWeb({
 		...flatImports,
 		version:    scope.version
-		, variant:    scope.variant
 		, sharedLibs: scope.libs
 		, ini:        scope.ini
 		, files:      scope.files
@@ -180,6 +178,11 @@ const runPhpScriptTag = async (element) => {
 const phpSelector = 'script[type="text/php"]';
 
 const runPhpTags = (doc) => {
+	if(doc.readyState === 'loading')
+	{
+		doc.addEventListener('DOMContentLoaded', () => runPhpTags(doc), {once: true});
+		return;
+	}
 
 	const phpNodes = doc.querySelectorAll(phpSelector);
 
@@ -203,7 +206,7 @@ const runPhpTags = (doc) => {
 		}
 	});
 
-	observer.observe(document.body.parentElement, {childList: true, subtree: true});
+	observer.observe(doc, {childList: true, subtree: true});
 };
 
 runPhpTags(document);

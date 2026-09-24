@@ -105,8 +105,9 @@ exit 0
 	return {
 		workspaceDir
 		, env: {
-			...independentMakeEnvironment(),
-			PATH: `${binDir}:${process.env.PATH ?? ''}`
+			...independentMakeEnvironment()
+			, EXTENSION_PACKAGE_DIRS: ''
+			, PATH: `${binDir}:${process.env.PATH ?? ''}`
 		}
 	};
 }
@@ -213,7 +214,6 @@ function runWaitlineMakeFixture(t, { target, enabled, omitDependency = false })
 	const dependency = /^test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno: node-cli-mjs\r?\n/m;
 	if(omitDependency) assert.match(preMake, dependency, 'The negative control must remove the actual prerequisite rule');
 	fs.writeFileSync(path.join(packageDir, 'pre.mak'), omitDependency ? preMake.replace(dependency, '') : preMake);
-	writeExecutable(path.join(workspaceDir, 'bin/npm'), '#!/usr/bin/env bash\nprintf "%s\\n" "$WAITLINE_FIXTURE_PACKAGE"\n');
 	const overrides = path.join(workspaceDir, 'recipes.mak');
 	// Override recipes, not prerequisites: the production Make graph decides
 	// whether CLI MJS is built before the test recipe can consume it.
@@ -226,7 +226,7 @@ test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test
 \t@printf '%s\\n' '\${TEST_LIST}' > '\${PHP_BUILDER_DIR}/tests'
 \t@if test '\${WITH_WAITLINE}' = 1 && test '$@' != test-bun && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
 `);
-	const cleanEnv = { ...env, WAITLINE_FIXTURE_PACKAGE: packageDir };
+	const cleanEnv = { ...env, EXTENSION_PACKAGE_DIRS: packageDir };
 	delete cleanEnv.WITH_WAITLINE;
 	// Deno 2.5.6 merges omitted child env keys with the parent environment.
 	const waitlineArgument = enabled === undefined

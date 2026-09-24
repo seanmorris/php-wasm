@@ -39,8 +39,7 @@ export class PhpBase extends EventTarget
 	transactionStarted;
 	/** @type {string|undefined} */
 	phpVersion;
-	/** @type {string|undefined} */
-	phpVariant;
+
 	/** @type {{[key: string]: PhpSharedValue}} */
 	shared;
 	/** @type {PhpRuntimeArgs} */
@@ -80,7 +79,10 @@ export class PhpBase extends EventTarget
 		this.transactionStarted = false;
 
 		this.phpVersion = args.version;
-		this.phpVariant = args.variant;
+		if(args.variant !== undefined && args.variant !== '')
+		{
+			throw new TypeError('Runtime variants have moved to separate packages. Install php-sdl-wasm and import PhpSdl for SDL.');
+		}
 
 		args.ENV = {
 			...(args.ENV ?? {}),
@@ -372,12 +374,18 @@ export class PhpBase extends EventTarget
 	 */
 	_run(phpCode)
 	{
+		const source = `${phpCode}`;
+		// Starting eval in PHP mode avoids an artificial inline-HTML statement
+		// before strict_types or a namespace. Keep source line and column offsets.
+		const code = /^<\?php(?=[ \t\r\n]|$)/i.test(source)
+			? `     ${source.slice(5)}`
+			: `?>${source}`;
 		return this.binary.then(php => {
 			return php.ccall(
 				'pib_run'
 				, NUM
 				, [STR]
-				, [`?>${phpCode}`]
+				, [code]
 				, {async: true}
 			);
 		})
@@ -579,11 +587,12 @@ export class PhpBase extends EventTarget
 	/**
 	 * Lists a directory in the virtual filesystem.
 	 * @param {string} path Directory path to list.
+	 * @param {{withFileTypes?: boolean}} [options] Include serializable entry types.
 	 * @returns {Promise<PhpRuntimeValue>} Directory entries for the path.
 	 */
-	readdir(path)
+	readdir(path, options)
 	{
-		return this._enqueue(fsOps.readdir, [this.binary, path]);
+		return this._enqueue(fsOps.readdir, [this.binary, path, options]);
 	}
 
 	/**

@@ -1,0 +1,274 @@
+--- a/config.m4
++++ b/config.m4
+@@ -63,6 +63,13 @@
+ 	src/cpuinfo.c \
+ 	src/error.c \
+ 	src/event.c \
++	src/php_sdl_extra.c \
++	src/php_sdl_events.c \
++	src/php_sdl_render.c \
++	src/php_sdl_geometry.c \
++	src/php_sdl_context_hooks.c \
++	src/php_sdl_values.c \
++	src/php_sdl_text.c \
+ 	src/filesystem.c \
+ 	src/glcontext.c \
+ 	src/joystick.c \
+--- a/src/php_sdl.c
++++ b/src/php_sdl.c
+@@ -16,6 +16,7 @@
+ */
+ 
+ #include "php_sdl.h"
++#include "php_sdl_extra.h"
+ 
+ #include "blendmode.h"
+ #include "cpuinfo.h"
+@@ -96,6 +97,7 @@
+ 		&& SUCCESS == PHP_MINIT_CALL(sdl_video)
+ 		&& SUCCESS == PHP_MINIT_CALL(sdl_window)
+ 		&& SUCCESS == PHP_MINIT_CALL(sdl_joystick)
++		&& SUCCESS == PHP_MINIT_CALL(sdl_extra)
+ 		) {
+ 		return SUCCESS;
+ 	}
+@@ -475,7 +477,7 @@
+ 	PHP_MINIT(sdl),     /* Replace with NULL if there is nothing to do at php startup   */
+ 	PHP_MSHUTDOWN(sdl), /* Replace with NULL if there is nothing to do at php shutdown  */
+ 	NULL, /* RINIT */
+-	NULL, /* RSHUTDOWN */
++	PHP_RSHUTDOWN(sdl_extra), /* RSHUTDOWN */
+ 	PHP_MINFO(sdl),
+ 	PHP_SDL_VERSION,
+ 	STANDARD_MODULE_PROPERTIES
+--- a/src/event.c
++++ b/src/event.c
+@@ -16,6 +16,7 @@
+ */
+ 
+ #include "event.h"
++#include "php_sdl_extra.h"
+ 
+ static zend_class_entry *php_sdl_event_ce;
+ static zend_object_handlers php_sdl_event_handlers;
+@@ -31,88 +32,7 @@
+ 
+ zend_bool sdl_event_to_zval(SDL_Event *event, zval *value)
+ {
+-	if(NULL == event) {
+-		ZVAL_NULL(value);
+-		return 0;
+-	}
+-	if(value != NULL) {
+-		zval_ptr_dtor(value);
+-	}
+-
+-	object_init_ex(value, php_sdl_event_ce);
+-
+-	zend_update_property_long(php_sdl_event_ce, Z_OBJ_P(value), ZEND_STRL("type"), event->type);
+-
+-	switch(event->type) {
+-		case SDL_MOUSEMOTION: {
+-			zval motion;
+-			object_init(&motion);
+-			add_property_long(&motion, "state", event->motion.state);
+-			add_property_long(&motion, "x", event->motion.x);
+-  			add_property_long(&motion, "y", event->motion.y);
+-			add_property_zval(value, "motion", &motion);
+-			zval_ptr_dtor(&motion);
+-			} break;
+-		case SDL_MOUSEBUTTONDOWN: {
+-			zval button;
+-			object_init(&button);
+-			add_property_long(&button, "button", event->button.button);
+-			add_property_long(&button, "x", event->button.x);
+-  			add_property_long(&button, "y", event->button.y);
+-			add_property_zval(value, "button", &button);
+-			zval_ptr_dtor(&button);
+-			} break;
+-		case SDL_KEYDOWN:
+-		case SDL_KEYUP: {
+-    		zval keysym;
+-    		object_init(&keysym);
+-			add_property_long(&keysym, "sym", event->key.keysym.sym);
+-
+-    		zval key;
+-    		object_init(&key);
+-			add_property_zval(&key, "keysym", &keysym);
+-
+-			add_property_zval(value, "key", &key);
+-			zval_ptr_dtor(&key);
+-			zval_ptr_dtor(&keysym);
+-			} break;
+-		case SDL_WINDOWEVENT: {
+-			zval window;
+-			object_init(&window);
+-			add_property_long(&window, "event", event->window.event);
+-			add_property_long(&window, "timestamp", event->window.timestamp);
+-			add_property_long(&window, "windowID", event->window.windowID);
+-			add_property_long(&window, "data1", event->window.data1);
+-			add_property_long(&window, "data2", event->window.data2);
+-			add_property_zval(value, "window", &window);
+-			zval_ptr_dtor(&window);
+-			} break;
+-		case SDL_JOYBUTTONDOWN:
+-		case SDL_JOYBUTTONUP: {
+-			zval joybutton;
+-			object_init(&joybutton);
+-			add_property_long(&joybutton, "type", event->jbutton.type);
+-			add_property_long(&joybutton, "timestamp", event->jbutton.timestamp);
+-			add_property_long(&joybutton, "which", event->jbutton.which);
+-			add_property_long(&joybutton, "button", event->jbutton.button);
+-			add_property_long(&joybutton, "state", event->jbutton.state);
+-			add_property_zval(value, "jbutton", &joybutton);
+-			zval_ptr_dtor(&joybutton);
+-		} break;
+-		case SDL_JOYAXISMOTION: {
+-			zval jaxis;
+-			object_init(&jaxis);
+-			add_property_long(&jaxis, "type", event->jaxis.type);
+-			add_property_long(&jaxis, "timestamp", event->jaxis.timestamp);
+-			add_property_long(&jaxis, "which", event->jaxis.which);
+-			add_property_long(&jaxis, "axis", event->jaxis.axis);
+-			add_property_long(&jaxis, "value", event->jaxis.value);
+-			add_property_zval(value, "jaxis", &jaxis);
+-			zval_ptr_dtor(&jaxis);
+-		} break;
+-	}
+-
+-	return 1;
++	return php_sdl_decode_event(event, value);
+ }
+ 
+ zend_bool zval_to_sdl_event(zval *value, SDL_Event *event)
+@@ -277,6 +197,56 @@
+ 	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jbutton"), ZEND_ACC_PUBLIC);
+ 	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jaxis"), ZEND_ACC_PUBLIC);
+ 
++	REGISTER_LONG_CONSTANT("SDL_TEXTEDITING_EXT", SDL_TEXTEDITING_EXT, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_JOYBALLMOTION", SDL_JOYBALLMOTION, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_JOYHATMOTION", SDL_JOYHATMOTION, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_JOYDEVICEADDED", SDL_JOYDEVICEADDED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_JOYDEVICEREMOVED", SDL_JOYDEVICEREMOVED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_JOYBATTERYUPDATED", SDL_JOYBATTERYUPDATED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERAXISMOTION", SDL_CONTROLLERAXISMOTION, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERBUTTONDOWN", SDL_CONTROLLERBUTTONDOWN, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERBUTTONUP", SDL_CONTROLLERBUTTONUP, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERDEVICEADDED", SDL_CONTROLLERDEVICEADDED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERDEVICEREMOVED", SDL_CONTROLLERDEVICEREMOVED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERDEVICEREMAPPED", SDL_CONTROLLERDEVICEREMAPPED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERTOUCHPADDOWN", SDL_CONTROLLERTOUCHPADDOWN, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERTOUCHPADMOTION", SDL_CONTROLLERTOUCHPADMOTION, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_CONTROLLERTOUCHPADUP", SDL_CONTROLLERTOUCHPADUP, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_FINGERDOWN", SDL_FINGERDOWN, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_FINGERUP", SDL_FINGERUP, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_FINGERMOTION", SDL_FINGERMOTION, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_MULTIGESTURE", SDL_MULTIGESTURE, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DOLLARGESTURE", SDL_DOLLARGESTURE, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DOLLARRECORD", SDL_DOLLARRECORD, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_AUDIODEVICEADDED", SDL_AUDIODEVICEADDED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_AUDIODEVICEREMOVED", SDL_AUDIODEVICEREMOVED, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DISPLAYEVENT", SDL_DISPLAYEVENT, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DROPFILE", SDL_DROPFILE, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DROPTEXT", SDL_DROPTEXT, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DROPBEGIN", SDL_DROPBEGIN, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_DROPCOMPLETE", SDL_DROPCOMPLETE, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_MOUSEWHEEL_NORMAL", SDL_MOUSEWHEEL_NORMAL, CONST_CS | CONST_PERSISTENT);
++	REGISTER_LONG_CONSTANT("SDL_MOUSEWHEEL_FLIPPED", SDL_MOUSEWHEEL_FLIPPED, CONST_CS | CONST_PERSISTENT);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("timestamp"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("wheel"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("edit"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("editExt"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("text"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jball"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jhat"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jdevice"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("jbattery"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("caxis"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("cbutton"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("cdevice"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("ctouchpad"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("tfinger"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("mgesture"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("dgesture"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("adevice"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("display"), ZEND_ACC_PUBLIC);
++	zend_declare_property_null(php_sdl_event_ce, ZEND_STRL("drop"), ZEND_ACC_PUBLIC);
++
+ 	return SUCCESS;
+ }
+ /* }}} */
+--- a/src/render.h
++++ b/src/render.h
+@@ -160,7 +160,7 @@
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_RenderCopyF, 0, 4, IS_LONG, 0)
+ 	//ZEND_ARG_OBJ_INFO(0, renderer, SDL_Renderer, 0)
+ 	ZEND_ARG_INFO(0, renderer)
+-	ZEND_ARG_OBJ_INFO(0, texture, SDL_Texture, 0)
++	ZEND_ARG_INFO(0, texture)
+ 	ZEND_ARG_OBJ_INFO(0, srcrect, SDL_Rect, 1)
+ 	ZEND_ARG_OBJ_INFO(0, dstrect, SDL_FRect, 1)
+ ZEND_END_ARG_INFO()
+@@ -168,7 +168,7 @@
+ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_RenderCopyExF, 0, 7, IS_LONG, 0)
+ 	//ZEND_ARG_OBJ_INFO(0, renderer, SDL_Renderer, 0)
+ 	ZEND_ARG_INFO(0, renderer)
+-	ZEND_ARG_OBJ_INFO(0, texture, SDL_Texture, 0)
++	ZEND_ARG_INFO(0, texture)
+ 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, srcrect, SDL_Rect, 1, "null")
+ 	ZEND_ARG_OBJ_INFO(0, dstrect, SDL_FRect, 1)
+ 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, angle, IS_DOUBLE, 0, "0.0")
+--- a/src/sdl.c
++++ b/src/sdl.c
+@@ -23,6 +23,7 @@
+ */
+ 
+ #include "sdl.h"
++#include "php_sdl_extra.h"
+ 
+ /* {{{ proto int SDL_Init([int flags=SDL_INIT_EVERYTHING])
+ 
+@@ -81,6 +82,10 @@
+ 		RETURN_FALSE;
+ 	}
+ 
++	php_sdl_render_close(NULL);
++	php_sdl_contexts_close(NULL);
++	php_sdl_joysticks_close();
++	php_sdl_windows_invalidate(NULL);
+ 	SDL_Quit();
+ }
+ /* }}} */
+@@ -98,6 +102,8 @@
+ 	}
+ 
+ 	SDL_QuitSubSystem((Uint32)flags);
++	if (!SDL_WasInit(SDL_INIT_VIDEO)) { php_sdl_render_forget(); php_sdl_windows_invalidate(NULL); }
++	php_sdl_joysticks_forget();
+ }
+ /* }}} */
+ 
+--- a/src/video.c
++++ b/src/video.c
+@@ -25,6 +25,7 @@
+ */
+ 
+ #include "video.h"
++#include "php_sdl_extra.h"
+ #include "rect.h"
+ 
+ static zend_class_entry *php_sdl_displaymode_ce;
+@@ -223,6 +224,8 @@
+ 		RETURN_FALSE;
+ 	}
+ 	SDL_VideoQuit();
++	php_sdl_render_forget();
++	php_sdl_windows_invalidate(NULL);
+ }
+ /* }}} */
+ 
+--- a/src/php_sdl.c
++++ b/src/php_sdl.c
+@@ -383 +383 @@
+-	ZEND_FE(SDL_SetCursor,                      arginfo_SDL_Cursor)
++	ZEND_FE(SDL_SetCursor,                      arginfo_SDL_SetCursor)

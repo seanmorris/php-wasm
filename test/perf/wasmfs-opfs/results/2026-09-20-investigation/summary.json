@@ -1,0 +1,512 @@
+{
+  "successfulTrials": [
+    {
+      "file": "trials/idbfs-drupal-original-2.json",
+      "sha256": "ec59543a0cbf243bd3c76fd406f5deff946715d9bfb0282ee4fb8614b95e10c9",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 2,
+      "complete": true,
+      "restoreMs": 5098.599999904633,
+      "inputHashesCaptured": false,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 618.0999999046326,
+          "medianFlushMs": 542.9499998092651,
+          "localScanCalls": 6
+        },
+        "noop-sync-": {
+          "samples": 3,
+          "medianMs": 533.1999998092651,
+          "medianFlushMs": null,
+          "localScanCalls": 3
+        },
+        "rpc-previous-": {
+          "samples": 1,
+          "medianMs": 4369.400000095367,
+          "medianFlushMs": null,
+          "localScanCalls": 8
+        },
+        "rpc-batched-": {
+          "samples": 1,
+          "medianMs": 544.5999999046326,
+          "medianFlushMs": null,
+          "localScanCalls": 1
+        },
+        "dirty-warm-": {
+          "samples": 6,
+          "medianMs": 633.5999999046326,
+          "medianFlushMs": 558.3499999046326,
+          "localScanCalls": 6
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": false,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "journalVersion": "not exercised"
+    },
+    {
+      "file": "trials/idbfs-drupal-original-4.json",
+      "sha256": "a0a719b22e60968b20e6f8d4551fff55e4cbd875f7d150fd3d33767b1eabd412",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 4,
+      "complete": true,
+      "restoreMs": 4606.39999961853,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 554.75,
+          "medianFlushMs": 483.10000014305115,
+          "localScanCalls": 6
+        },
+        "noop-sync-": {
+          "samples": 3,
+          "medianMs": 487,
+          "medianFlushMs": null,
+          "localScanCalls": 3
+        },
+        "rpc-previous-": {
+          "samples": 1,
+          "medianMs": 3794.5999999046326,
+          "medianFlushMs": null,
+          "localScanCalls": 8
+        },
+        "rpc-batched-": {
+          "samples": 1,
+          "medianMs": 492.09999990463257,
+          "medianFlushMs": null,
+          "localScanCalls": 1
+        },
+        "dirty-warm-": {
+          "samples": 6,
+          "medianMs": 573.9000000953674,
+          "medianFlushMs": 495.89999985694885,
+          "localScanCalls": 6
+        },
+        "direct-scan-warm-": {
+          "samples": 6,
+          "medianMs": 392.69999980926514,
+          "medianFlushMs": 324.89999985694885,
+          "localScanCalls": 6
+        },
+        "incremental-warm-": {
+          "samples": 6,
+          "medianMs": 393.2999999523163,
+          "medianFlushMs": 325.2500002384186,
+          "localScanCalls": 6
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": true,
+      "mutationsVerified": true,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "journalVersion": "all deletions require full reconciliation"
+    },
+    {
+      "file": "trials/idbfs-drupal-original-5.json",
+      "sha256": "4973d7a5e0e3e516dd2ff9dda7265bcbfa77bf131bc8fc3b943d58233475032b",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 5,
+      "complete": true,
+      "restoreMs": 4821.300000190735,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 572.6000003814697,
+          "medianFlushMs": 503.849999666214,
+          "localScanCalls": 6
+        },
+        "noop-sync-": {
+          "samples": 3,
+          "medianMs": 489.30000019073486,
+          "medianFlushMs": null,
+          "localScanCalls": 3
+        },
+        "rpc-previous-": {
+          "samples": 1,
+          "medianMs": 3912.4000000953674,
+          "medianFlushMs": null,
+          "localScanCalls": 8
+        },
+        "rpc-batched-": {
+          "samples": 1,
+          "medianMs": 505.59999990463257,
+          "medianFlushMs": null,
+          "localScanCalls": 1
+        },
+        "dirty-warm-": {
+          "samples": 6,
+          "medianMs": 581.5,
+          "medianFlushMs": 515.2999999523163,
+          "localScanCalls": 6
+        },
+        "direct-scan-warm-": {
+          "samples": 6,
+          "medianMs": 372.4500002861023,
+          "medianFlushMs": 302.0,
+          "localScanCalls": 6
+        },
+        "incremental-warm-": {
+          "samples": 6,
+          "medianMs": 66.29999995231628,
+          "medianFlushMs": 1.1499998569488525,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": true,
+      "mutationsVerified": true,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "journalVersion": "write/delete tracking; rename fallback"
+    },
+    {
+      "file": "trials/idbfs-drupal-original-6.json",
+      "sha256": "c0a306a11bc7fb3472828ba4882cfe09692207052115b6dcd6742fb23bec608b",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 6,
+      "complete": true,
+      "restoreMs": 4871.60000038147,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 551.7500002384186,
+          "medianFlushMs": 482.2500002384186,
+          "localScanCalls": 6
+        },
+        "noop-sync-": {
+          "samples": 3,
+          "medianMs": 504,
+          "medianFlushMs": null,
+          "localScanCalls": 3
+        },
+        "rpc-previous-": {
+          "samples": 1,
+          "medianMs": 3834,
+          "medianFlushMs": null,
+          "localScanCalls": 8
+        },
+        "rpc-batched-": {
+          "samples": 1,
+          "medianMs": 512.0999999046326,
+          "medianFlushMs": null,
+          "localScanCalls": 1
+        },
+        "dirty-warm-": {
+          "samples": 6,
+          "medianMs": 569.5999999046326,
+          "medianFlushMs": 500.0,
+          "localScanCalls": 6
+        },
+        "direct-scan-warm-": {
+          "samples": 6,
+          "medianMs": 410.5499999523163,
+          "medianFlushMs": 335.5499997138977,
+          "localScanCalls": 6
+        },
+        "incremental-warm-": {
+          "samples": 6,
+          "medianMs": 75.09999990463257,
+          "medianFlushMs": 1.0499999523162842,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": true,
+      "mutationsVerified": true,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ],
+      "journalVersion": "write/delete tracking; rename fallback"
+    },
+    {
+      "file": "trials/opfs-drupal-buffer-files-0.json",
+      "sha256": "a2fbd08e7f83b497ef357ef095cf52b2d7358e3fe61f8189a92ea13d0f069251",
+      "backend": "opfs",
+      "framework": "drupal",
+      "mode": "buffer-files",
+      "round": 0,
+      "complete": true,
+      "restoreMs": 45173.5,
+      "inputHashesCaptured": false,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 404.9999997615814,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": false,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/opfs-drupal-buffer-files-1.json",
+      "sha256": "6dad1f85704b189d752587b1f78aeabb2a734e61a890225c7d4fbda57a0dd164",
+      "backend": "opfs",
+      "framework": "drupal",
+      "mode": "buffer-files",
+      "round": 1,
+      "complete": true,
+      "restoreMs": 41260.59999990463,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 381.80000019073486,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": true,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/opfs-drupal-memory-archive-0.json",
+      "sha256": "4df355c3945ff159560f3919142e12222f314626bd0a8f6b4eaf503bd3ac9ec0",
+      "backend": "opfs",
+      "framework": "drupal",
+      "mode": "memory-archive",
+      "round": 0,
+      "complete": true,
+      "restoreMs": 60803.5,
+      "inputHashesCaptured": false,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 421.85000014305115,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": false,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/opfs-drupal-original-0.json",
+      "sha256": "5ec3fed889c7b532f16a27dee30a79751a3e9b74c102f63ffaae5e5281e5a6e9",
+      "backend": "opfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 0,
+      "complete": true,
+      "restoreMs": 96364.49999952316,
+      "inputHashesCaptured": false,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 420.39999985694885,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 17761,
+      "selectedBytesVerified": false,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        {
+          "errorMessage": {
+            "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+            "registrationId": "0",
+            "versionId": "0",
+            "sourceURL": "",
+            "lineNumber": 0,
+            "columnNumber": -1
+          }
+        }
+      ]
+    },
+    {
+      "file": "trials/opfs-wordpress-buffer-files-0.json",
+      "sha256": "879947dd28786e5e2aa5afd9d26c132ff8c0dc731e8929966d1ffc2f6020bfe4",
+      "backend": "opfs",
+      "framework": "wordpress",
+      "mode": "buffer-files",
+      "round": 0,
+      "complete": true,
+      "restoreMs": 9865.699999332428,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 1584.2499997615814,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 3628,
+      "selectedBytesVerified": true,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    },
+    {
+      "file": "trials/opfs-wordpress-original-0.json",
+      "sha256": "ba4c51d447874cc23988e1b0314c485eb657e54ab7fc15d0534b16e60eed6138",
+      "backend": "opfs",
+      "framework": "wordpress",
+      "mode": "original",
+      "round": 0,
+      "complete": true,
+      "restoreMs": 72185.30000019073,
+      "inputHashesCaptured": true,
+      "groups": {
+        "warm-": {
+          "samples": 6,
+          "medianMs": 1631.9499998092651,
+          "medianFlushMs": 0.0,
+          "localScanCalls": 0
+        }
+      },
+      "restoreEntries": 3628,
+      "selectedBytesVerified": true,
+      "mutationsVerified": false,
+      "observedBrowserErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ]
+    }
+  ],
+  "excludedHarnessFailures": [
+    {
+      "file": "excluded-harness-failures/idbfs-drupal-original-0.json",
+      "sha256": "313f7e830bb819b602ad52eef17058f55c81aa3bdf131dd352b7e4db603f0c4c",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 0,
+      "complete": false,
+      "failure": {
+        "message": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed",
+        "stack": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed\n    at /app/test/perf/wasmfs-opfs/diagnose.mjs:39:13"
+      }
+    },
+    {
+      "file": "excluded-harness-failures/idbfs-drupal-original-1.json",
+      "sha256": "48bff9c4ff169ff7bee9fc8e0235b80588c1da22f5029fabcb2ec0ac4f7e5dd6",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 1,
+      "complete": false,
+      "failure": {
+        "message": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed",
+        "stack": "page.evaluate: TypeError: Failed to register a ServiceWorker for scope ('http://127.0.0.1:9024/') with script ('http://127.0.0.1:9024/bench/diagnostic-worker.mjs?backend=idbfs'): ServiceWorker script evaluation failed\n    at /app/test/perf/wasmfs-opfs/diagnose.mjs:42:13"
+      }
+    },
+    {
+      "file": "excluded-harness-failures/idbfs-drupal-original-3.json",
+      "sha256": "01e2d004afd3aae3d6455414c330c4345e78493ba8e495d9f60efa3f9c3cff31",
+      "backend": "idbfs",
+      "framework": "drupal",
+      "mode": "original",
+      "round": 3,
+      "complete": false,
+      "failure": {
+        "message": "ENOENT: no such file or directory, open '.cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.wasm'",
+        "stack": "Error: ENOENT: no such file or directory, open '.cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.wasm'\n    at async open (node:internal/fs/promises:639:25)\n    at async Object.readFile (node:internal/fs/promises:1252:14)\n    at async file:///app/test/perf/wasmfs-opfs/diagnose.mjs:69:17"
+      }
+    }
+  ],
+  "units": "milliseconds unless specified"
+}

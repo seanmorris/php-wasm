@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { allowedSource, buildCloudflare, snapshot } from '../../bin/build-cloudflare.mjs';
+import { allowedSource, prepareBuildWorkspace, snapshot } from '../../bin/prepare-build-workspace.mjs';
 import { cloudflarePackageFiles, packageCloudflare, repackageCloudflare, verifyCloudflare } from '../../bin/package-cloudflare.mjs';
 import { mergeCloudflare } from '../../bin/merge-cloudflare.mjs';
 
@@ -16,6 +16,8 @@ const digest = data => createHash('sha256').update(data).digest('hex');
 const wasm = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]);
 const helpers = ['PhpCloudflare.mjs', 'PhpBase.mjs', 'OutputBuffer.mjs', '_Event.mjs', 'fsOps.mjs', 'resolveDependencies.mjs'];
 const declarations = ['PhpCloudflare.d.mts', 'PhpBase.d.mts', 'public.d.ts'];
+const buildPackages = ['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm'];
+const buildRootFiles = ['Makefile', 'build-workspace.mak', 'php.mk', 'info.mak', 'ico.ans', 'compress-package.sh', 'emscripten-builder.dockerfile', 'docker-compose.yml', '.babelrc'];
 
 /**
  * Creates a fixture directory cleaned up when its test finishes.
@@ -114,40 +116,109 @@ test('Cloudflare snapshot hashes only selected sources and never follows symlink
 	const root = await temporary(t);
 	const fixture = path.join(root, 'fixture');
 	await fs.mkdir(fixture);
-	for(const name of ['Makefile', 'php.mk', 'info.mak', 'ico.ans', 'compress-package.sh', 'emscripten-builder.dockerfile']) await fs.writeFile(path.join(fixture, name), 'fixture source\n');
-	for(const name of ['source', 'patch', 'profiles', 'bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
+	for(const name of buildRootFiles) await fs.writeFile(path.join(fixture, name), 'fixture source\n');
+	await fs.copyFile(path.join(repoRoot, 'package.json'), path.join(fixture, 'package.json'));
+	for(const name of ['source', 'patch', 'profiles', 'bin', '.github/bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
 	await fs.writeFile(path.join(fixture, 'source/probe.c'), 'int main(void) { return 0; }\n');
 	await fs.writeFile(path.join(fixture, 'source/.env'), 'FIXTURE_SECRET=never-copy\n');
 	await fs.writeFile(path.join(fixture, 'source/private.key'), 'fixture key, not a real credential\n');
 	await fs.writeFile(path.join(fixture, 'packages/php-cloud-wasm/old.wasm'), wasm);
 	const first = path.join(root, 'first');
-	const firstHash = await snapshot(first, fixture);
+	const firstHash = await snapshot(first, fixture, buildPackages);
 	assert.match(firstHash, /^[a-f0-9]{64}$/);
 	assert.deepEqual(await fs.readdir(path.join(first, 'source')), ['probe.c']);
 	await fs.writeFile(path.join(fixture, 'source/.env'), 'FIXTURE_SECRET=changed\n');
-	assert.equal(await snapshot(path.join(root, 'second'), fixture), firstHash);
+	assert.equal(await snapshot(path.join(root, 'second'), fixture, buildPackages), firstHash);
 	await fs.appendFile(path.join(fixture, 'source/probe.c'), '// changed source\n');
-	assert.notEqual(await snapshot(path.join(root, 'third'), fixture), firstHash);
+	assert.notEqual(await snapshot(path.join(root, 'third'), fixture, buildPackages), firstHash);
 	await fs.symlink('../source/private.key', path.join(fixture, 'bin/linked.h'));
-	await assert.rejects(snapshot(path.join(root, 'symlink'), fixture), /does not follow symlinks: bin\/linked.h/);
+	await assert.rejects(snapshot(path.join(root, 'symlink'), fixture, buildPackages), /does not follow symlinks: bin\/linked.h/);
 });
 
-test('Cloudflare builder rejects invalid versions and job counts before Docker or snapshot work', async () => {
-	await assert.rejects(buildCloudflare({phpVersion: '8.3; echo bad'}), /Unsupported PHP version/);
-	const original = process.env.CLOUDFLARE_JOBS;
+test('build workspace rejects invalid versions before filesystem work', async () => {
+	await assert.rejects(prepareBuildWorkspace('/must-not-create', 'missing', '8.3; echo bad'), /Unsupported PHP version/);
+});
+
+test('build workspaces reuse native state, update wrappers, and separate changed configurations', async t => {
+	const root = await temporary(t);
+	const fixture = path.join(root, 'source');
+	await snapshot(fixture, repoRoot, buildPackages);
+	await fs.writeFile(path.join(fixture, 'source/obsolete.mjs'), '// old helper\n');
+	const cache = path.join(root, 'cache');
+	const prepare = (version = '8.3', settings = '') => prepareBuildWorkspace(cache, 'profiles/cloudflare.mak', version, settings, buildPackages, fixture);
+	const first = await prepare();
+	const downloadHelper = '.github/bin/retry-download.sh';
+	assert.equal(await fs.readFile(path.join(first, downloadHelper), 'utf8'), await fs.readFile(path.join(repoRoot, downloadHelper), 'utf8'));
+	assert.ok((await fs.stat(path.join(first, downloadHelper))).mode & 0o111);
+	const object = path.join(first, '.cache/native.o');
+	await fs.writeFile(object, 'compiled fixture');
+	const before = (await fs.stat(object)).mtimeMs;
+	const configurationMtime = (await fs.stat(path.join(first, '.build-env.mak'))).mtimeMs;
+	assert.equal(await prepare(), first);
+	assert.equal((await fs.stat(path.join(first, '.build-env.mak'))).mtimeMs, configurationMtime);
+	await fs.appendFile(path.join(fixture, 'source/PhpCloudflare.mjs'), '\n// wrapper-only update\n');
+	await fs.rm(path.join(fixture, 'source/obsolete.mjs'));
+	assert.equal(await prepare(), first);
+	assert.match(await fs.readFile(path.join(first, 'source/PhpCloudflare.mjs'), 'utf8'), /wrapper-only update/);
+	assert.equal(await fs.stat(path.join(first, 'source/obsolete.mjs')).then(() => true, () => false), false);
+	assert.equal((await fs.stat(object)).mtimeMs, before);
+	assert.notEqual(await prepare('8.5'), first);
+	assert.notEqual(await prepare('8.3', 'INITIAL_MEMORY=48MB'), first);
+	await fs.appendFile(path.join(fixture, 'profiles/cloudflare.mak'), '\nINITIAL_MEMORY=48MB\n');
+	const changed = await prepare();
+	assert.notEqual(changed, first);
+	assert.equal(await fs.stat(path.join(changed, '.cache/native.o')).then(() => true, () => false), false);
+	assert.equal(await fs.readFile(object, 'utf8'), 'compiled fixture');
+	const originalTag = process.env.ZLIB_TAG;
 	try
 	{
-		for(const jobs of ['0', '-1', '1.5', '65', 'bad'])
-		{
-			process.env.CLOUDFLARE_JOBS = jobs;
-			await assert.rejects(buildCloudflare({phpVersion: '8.3'}), /CLOUDFLARE_JOBS/);
-		}
+		process.env.ZLIB_TAG = 'fixture-other-upstream-version';
+		assert.notEqual(await prepare(), changed, 'Environment-selected dependency refs require separate native state');
 	}
 	finally
 	{
-		if(original === undefined) delete process.env.CLOUDFLARE_JOBS;
-		else process.env.CLOUDFLARE_JOBS = original;
+		if(originalTag === undefined) delete process.env.ZLIB_TAG;
+		else process.env.ZLIB_TAG = originalTag;
 	}
+});
+
+test('real Make workspace dispatch preserves overrides, isolates files, and propagates failure', async t => {
+	const root = await temporary(t);
+	const fixture = path.join(root, 'source');
+	await snapshot(fixture, repoRoot, buildPackages);
+	const makefile = path.join(fixture, 'Makefile');
+	const probe = `PROBE_EXIT ?= 0\n.PHONY: workspace-probe\nworkspace-probe:\n\t@node -e 'require("fs").writeFileSync("probe.json", JSON.stringify({cwd:process.cwd(), initial:"\${INITIAL_MEMORY}", maximum:"\${MAXIMUM_MEMORY}"}));require("fs").appendFileSync(process.env.BUILD_TEST_TRACE,"native\\n");process.exit(\${PROBE_EXIT})'\n`;
+	const local = `workspace-local: workspace-probe\n\t@node -e 'require("fs").appendFileSync(process.env.BUILD_TEST_TRACE,"local\\n")'\n`;
+	await fs.writeFile(makefile, (await fs.readFile(makefile, 'utf8')).replace('endif # BUILD_WORKSPACE', `${probe}\nendif # BUILD_WORKSPACE`).replace('# Optional source workspaces', `${local}\n# Optional source workspaces`));
+	await fs.writeFile(path.join(fixture, 'fixture.mak'), 'include profiles/cloudflare.mak\nINITIAL_MEMORY=48MB\nBUILD_WORKSPACE_TARGETS=workspace-probe\n');
+	await fs.mkdir(path.join(fixture, 'third_party'));
+	await fs.writeFile(path.join(fixture, 'third_party/sentinel'), 'caller native state');
+	const bin = path.join(root, 'bin');
+	await fs.mkdir(bin);
+	await fs.writeFile(path.join(bin, 'docker'), `#!${process.execPath}\nif(process.argv[2] !== 'image' || process.argv[3] !== 'inspect') process.exit(9);\nconsole.log('sha256:${'a'.repeat(64)}');\n`, {mode: 0o755});
+	const cache = path.join(root, "consumer's project", 'build');
+	const args = ['--no-print-directory', 'workspace-probe', 'ENV_FILE=fixture.mak', 'PHP_VERSION=8.3', `BUILD_WORKSPACE=${cache}`, 'MAXIMUM_MEMORY=80MB', 'MAKEFLAGS='];
+	const trace = path.join(root, 'trace');
+	const options = {cwd: fixture, encoding: 'utf8', env: {...process.env, PATH: `${bin}:${process.env.PATH}`, BUILD_TEST_TRACE: trace, MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}};
+	const result = spawnSync('make', args, options);
+	assert.equal(result.status, 0, result.stdout + result.stderr);
+	const workspace = result.stdout.match(/Build workspace: (.+)/)?.[1];
+	assert.ok(workspace?.startsWith(cache), result.stdout);
+	assert.deepEqual(JSON.parse(await fs.readFile(path.join(workspace, 'probe.json'), 'utf8')), {cwd: workspace, initial: '48MB', maximum: '80MB'});
+	assert.equal(await fs.stat(path.join(fixture, 'probe.json')).then(() => true, () => false), false);
+	assert.equal(await fs.stat(path.join(workspace, 'third_party/sentinel')).then(() => true, () => false), false);
+	assert.equal(await fs.readFile(path.join(fixture, 'third_party/sentinel'), 'utf8'), 'caller native state');
+	await fs.writeFile(trace, '');
+	const together = spawnSync('make', [...args, 'workspace-local', '-j2'], options);
+	assert.equal(together.status, 0, together.stdout + together.stderr);
+	assert.equal(await fs.readFile(trace, 'utf8'), 'native\nlocal\n');
+	const failed = spawnSync('make', [...args, 'PROBE_EXIT=7'], options);
+	assert.notEqual(failed.status, 0);
+	assert.match(failed.stderr, /Error 7/);
+	const dryCache = path.join(root, 'dry-run');
+	const dry = spawnSync('make', [...args, '--dry-run', `BUILD_WORKSPACE=${dryCache}`], options);
+	assert.equal(dry.status, 0, dry.stdout + dry.stderr);
+	assert.equal(await fs.stat(dryCache).then(() => true, () => false), false);
 });
 
 test('Cloudflare packaging hashes Wasm before generating the fixed adapter and declarations', async t => {
@@ -186,6 +257,51 @@ test('Cloudflare packaging rejects invalid Wasm and mismatched factory filenames
 	await fs.writeFile(path.join(root, 'php8.3-cloudflare-runtime.mjs'), 'export default () => {};');
 	await assert.rejects(packageCloudflare(root, '8.3'), /matching Wasm output/);
 	await assert.rejects(packageCloudflare(root, '../8.3'), /Unsupported PHP version/);
+});
+
+test('Make packaging preserves raw outputs and existing packages when validation fails', async t => {
+	const root = await temporary(t);
+	const raw = await stage(path.join(root, 'raw'));
+	const output = path.join(root, 'final package');
+	for(const directory of ['php8.3-src', 'zlib', 'libzip'])
+	{
+		const git = path.join(root, 'third_party', directory, '.git');
+		await fs.mkdir(git, {recursive: true});
+		await fs.writeFile(path.join(git, 'HEAD'), `${'a'.repeat(40)}\n`);
+	}
+	for(const name of ['vrzno', 'pdo-cfd1'])
+	{
+		const directory = path.join(root, 'third_party', name);
+		await fs.mkdir(directory);
+		await fs.writeFile(path.join(directory, '.php-wasm-source.json'), JSON.stringify({identity: {commit: 'b'.repeat(40)}}));
+	}
+	const buildInfo = {sourceSha256: 'c'.repeat(64), builderImage: `sha256:${'d'.repeat(64)}`};
+	await fs.writeFile(path.join(root, '.build-info.json'), JSON.stringify(buildInfo));
+	const args = [path.join(repoRoot, 'bin/package-cloudflare.mjs'), '--build', raw, '8.3', output];
+	const options = {cwd: root, encoding: 'utf8', env: {...process.env, INITIAL_MEMORY: '48MB', MAXIMUM_MEMORY: '80MB'}};
+	const before = await tree(raw);
+	const runtimeMtime = (await fs.stat(path.join(raw, 'php8.3-cloudflare-runtime.mjs'))).mtimeMs;
+	for(let iteration = 0; iteration < 2; iteration++)
+	{
+		const packaged = spawnSync(process.execPath, args, options);
+		assert.equal(packaged.status, 0, packaged.stdout + packaged.stderr);
+		assert.deepEqual(await tree(raw), before);
+		assert.equal((await fs.stat(path.join(raw, 'php8.3-cloudflare-runtime.mjs'))).mtimeMs, runtimeMtime);
+	}
+	const {manifest} = await verifyCloudflare(output, '8.3');
+	assert.equal(manifest.provenance.initialMemory, 48 * 1024 ** 2);
+	assert.equal(manifest.provenance.maximumMemory, 80 * 1024 ** 2);
+	assert.equal(manifest.provenance.sourceSha256, buildInfo.sourceSha256);
+	assert.equal(manifest.provenance.builderImage, buildInfo.builderImage);
+	const previous = await tree(output);
+	await fs.writeFile(path.join(raw, 'php8.3-cloudflare-runtime.mjs.wasm'), 'broken wasm');
+	const failed = spawnSync(process.execPath, args, options);
+	assert.notEqual(failed.status, 0);
+	assert.match(failed.stderr, /Invalid Cloudflare WebAssembly/);
+	assert.deepEqual(await tree(output), previous);
+	const sameDirectory = spawnSync(process.execPath, [...args.slice(0, -1), raw], options);
+	assert.notEqual(sameDirectory.status, 0);
+	assert.match(sameDirectory.stderr, /separate raw and final directories/);
 });
 
 test('Cloudflare packaging supports output paths with spaces without touching the caller directory', async t => {
@@ -337,13 +453,15 @@ test('Cloudflare rebuilding cannot invalidate an existing other-version manifest
 	await verifyCloudflare(destination, '8.3');
 });
 
-test('Cloudflare profile overrides user configuration without evaluating its environment file', async t => {
+test('Cloudflare selects the requested configuration and normal Make recipes', async t => {
 	const root = await temporary(t);
 	const fixtureConfig = path.join(root, 'fixture-settings.mak');
-	await fs.writeFile(fixtureConfig, '$(error This fixture configuration must not be evaluated)\n');
-	const result = spawnSync('make', ['--no-print-directory', '--dry-run', 'cloudflare-mjs', 'PHP_VERSION=8.3', `ENV_FILE=${fixtureConfig}`, 'MAIN_MODULE=1', 'WITH_ZLIB=shared'], {cwd: repoRoot, encoding: 'utf8', env: {...process.env, MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}});
+	await fs.writeFile(fixtureConfig, 'include profiles/cloudflare.mak\nINITIAL_MEMORY=48MB\n');
+	const result = spawnSync('make', ['--no-print-directory', '--dry-run', 'cloudflare-mjs', 'PHP_VERSION=8.3', `ENV_FILE=${fixtureConfig}`, 'BUILD_WORKSPACE=', 'MAKE=true', 'MAXIMUM_MEMORY=80MB'], {cwd: repoRoot, encoding: 'utf8', env: {...process.env, MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}});
 	assert.equal(result.status, 0, result.stderr);
-	assert.match(result.stdout, /build-cloudflare.mjs --php-version '8.3'/);
+	assert.match(result.stdout, /docker compose .* emcc --version/);
+	assert.match(result.stdout, /INITIAL_MEMORY='48MB' MAXIMUM_MEMORY='80MB' node bin\/package-cloudflare.mjs --build/);
+	assert.doesNotMatch(result.stdout, /build-cloudflare|cloudflare-container-run|docker create/);
 	const mixed = spawnSync('make', ['--no-print-directory', '--dry-run', 'cloudflare-mjs', 'node-mjs'], {cwd: repoRoot, encoding: 'utf8', env: {...process.env, MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}});
 	assert.notEqual(mixed.status, 0);
 	assert.match(mixed.stderr, /Cloudflare targets must run separately/);
@@ -358,12 +476,12 @@ test('Cloudflare CLI rejects unsupported module and SAPI combinations before inv
 	}
 });
 
-test('Cloudflare CLI defaults to ESM and does not pass the caller configuration to Make', async t => {
+test('Cloudflare CLI defaults to ESM and passes the caller configuration to Make', async t => {
 	const root = await temporary(t);
 	const bin = path.join(root, 'bin');
 	const log = path.join(root, 'make-arguments.json');
 	await fs.mkdir(bin);
-	await fs.writeFile(path.join(root, '.php-wasm-rc'), '$(error Fixture configuration must not be read)\n');
+	await fs.writeFile(path.join(root, '.php-wasm-rc'), 'include profiles/cloudflare.mak\n');
 	await fs.writeFile(path.join(bin, 'make'), `#!${process.execPath}\nrequire('node:fs').writeFileSync(process.env.CLOUDFLARE_TEST_MAKE_LOG, JSON.stringify(process.argv.slice(2)));\n`, {mode: 0o755});
 	const result = spawnSync(process.execPath, [path.join(repoRoot, 'bin/php-wasm-builder.js'), 'build', 'cloudflare'], {
 		cwd: root
@@ -374,44 +492,30 @@ test('Cloudflare CLI defaults to ESM and does not pass the caller configuration 
 	const args = JSON.parse(await fs.readFile(log, 'utf8'));
 	assert.ok(args.includes('cloudflare-mjs'));
 	assert.ok(args.includes('BUILD_TYPE=mjs'));
-	assert.ok(!args.some(arg => arg.startsWith('ENV_FILE=')));
+	assert.ok(args.includes(`ENV_FILE=${path.join(root, '.php-wasm-rc')}`));
 	assert.ok(args.includes(`CLOUDFLARE_OUTPUT_DIR=${path.join(root, 'packages/php-cloud-wasm')}`));
-	assert.ok(args.includes(`CLOUDFLARE_CACHE_DIR=${path.join(root, '.cache/cloudflare')}`));
+	assert.ok(args.includes(`BUILD_WORKSPACE=${path.join(root, '.cache/build')}`));
 	assert.ok(!args.some(arg => /^(?:PHP_BUILDER_DIR|ENV_DIR)=/.test(arg)));
 });
 
-test('Cloudflare CLI passes paths with spaces and apostrophes intact through real Make', async t => {
+test('Cloudflare CLI preserves paths and selected configuration in a Make dry run', async t => {
 	const root = await temporary(t);
 	const consumer = path.join(root, "consumer's project");
 	const bin = path.join(root, 'bin');
-	const log = path.join(root, 'node-arguments.json');
 	await fs.mkdir(consumer);
 	await fs.mkdir(bin);
-	await fs.writeFile(path.join(bin, 'node'), `#!${process.execPath}\nrequire('node:fs').writeFileSync(process.env.CLOUDFLARE_TEST_NODE_LOG, JSON.stringify(process.argv.slice(2)));\n`, {mode: 0o755});
+	await fs.writeFile(path.join(consumer, '.php-wasm-rc'), 'include profiles/cloudflare.mak\n');
 	const result = spawnSync(process.execPath, [path.join(repoRoot, 'bin/php-wasm-builder.js'), 'build', 'cloudflare'], {
 		cwd: consumer
 		, encoding: 'utf8'
-		, env: {...process.env, PATH: `${bin}:${process.env.PATH}`, CLOUDFLARE_TEST_NODE_LOG: log}
+		, env: {...process.env, MAKEFLAGS: 'n', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}
 	});
 	assert.equal(result.status, 0, result.stdout + result.stderr);
-	const args = JSON.parse(await fs.readFile(log, 'utf8'));
-	assert.equal(args[0], 'bin/build-cloudflare.mjs');
-	assert.equal(args[args.indexOf('--output') + 1], path.join(consumer, 'packages/php-cloud-wasm'));
-	assert.equal(args[args.indexOf('--cache-root') + 1], path.join(consumer, '.cache/cloudflare'));
+	assert.match(result.stdout, /prepare-build-workspace.mjs/);
+	assert.match(result.stdout, /consumer.*s project\/\.cache\/build/);
+	assert.match(result.stdout, /consumer.*s project\/\.php-wasm-rc/);
+	assert.equal(await fs.stat(path.join(consumer, '.cache')).then(() => true, () => false), false);
 	assert.doesNotMatch(result.stderr, /overriding recipe|mixed implicit and normal rules/);
-});
-
-test('Cloudflare container shim preserves working directory, environment values and exit status', async t => {
-	const root = await temporary(t);
-	const shim = path.join(repoRoot, 'bin/cloudflare-container-run.mjs');
-	const result = spawnSync(process.execPath, [shim, '-p', 'fixture', 'run', '-T', '--rm', '-w', root, '-e', 'CLOUDFLARE_TEST_VALUE=a=b', 'emscripten-builder', process.execPath, '-e', 'console.log(JSON.stringify({cwd:process.cwd(),value:process.env.CLOUDFLARE_TEST_VALUE}));process.exit(7)'], {encoding: 'utf8'});
-	assert.equal(result.status, 7, result.stderr);
-	assert.deepEqual(JSON.parse(result.stdout), {cwd: root, value: 'a=b'});
-	for(const args of [[], ['--bad'], ['-w'], ['-e'], ['emscripten-builder']])
-	{
-		const invalid = spawnSync(process.execPath, [shim, ...args], {encoding: 'utf8'});
-		assert.notEqual(invalid.status, 0);
-	}
 });
 
 test('Cloudflare npm package retains every verified manifest asset', async t => {
@@ -470,6 +574,13 @@ test('normal-only ESM builds do not select standalone Cloudflare package assets'
 		assert.doesNotMatch(selection, /php8\.3-cloudflare/);
 	}
 	assert.equal(await fs.stat(output).then(() => true, () => false), false, 'The selection check must not create build assets');
+	const defaultBuild = spawnSync('make', ['--no-print-directory', '--dry-run', 'MAKE=true', 'ENV_FILE=/dev/null', 'EXTENSION_PACKAGE_DIRS='], {
+		cwd: repoRoot, encoding: 'utf8'
+		, env: {...process.env, MAKEFLAGS: '', MFLAGS: '', MAKEOVERRIDES: '', GNUMAKEFLAGS: ''}
+	});
+	assert.equal(defaultBuild.status, 0, defaultBuild.stdout + defaultBuild.stderr);
+	assert.match(defaultBuild.stdout, /true _all/);
+	assert.doesNotMatch(defaultBuild.stdout, /test\/cloudflare/);
 });
 
 test('Cloudflare repackaging validates old artifacts and preserves the compiled factory and Wasm bytes', async t => {
@@ -513,29 +624,42 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	const root = await temporary(t);
 	const source = path.join(root, 'builder-source');
 	await fs.mkdir(source);
-	for(const name of ['package.json', '.npmignore', 'Makefile', 'php.mk', 'info.mak', 'ico.ans', 'compress-package.sh', 'emscripten-builder.dockerfile']) await fs.copyFile(path.join(repoRoot, name), path.join(source, name));
-	for(const name of ['bin', 'source', 'patch', 'profiles']) await fs.cp(path.join(repoRoot, name), path.join(source, name), {recursive: true});
+	for(const name of ['package.json', '.npmignore', ...buildRootFiles]) await fs.copyFile(path.join(repoRoot, name), path.join(source, name));
+	for(const name of ['bin', 'source', 'patch', 'profiles', '.github/bin']) await fs.cp(path.join(repoRoot, name), path.join(source, name), {recursive: true});
 	await fs.mkdir(path.join(source, 'packages/not-shipped'), {recursive: true});
 	await fs.writeFile(path.join(source, 'packages/not-shipped/sentinel'), 'must not ship');
 	const packed = spawnSync('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', root, '--cache', path.join(root, 'npm-cache')], {cwd: source, encoding: 'utf8'});
 	assert.equal(packed.status, 0, packed.stderr);
 	const metadata = JSON.parse(packed.stdout)[0];
 	assert.ok(!metadata.files.some(file => file.path.startsWith('packages/')));
-	for(const name of ['bin/build-cloudflare.mjs', 'bin/package-cloudflare.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak']) assert.ok(metadata.files.some(file => file.path === name), name);
+	for(const name of ['build-workspace.mak', 'bin/prepare-build-workspace.mjs', 'bin/package-cloudflare.mjs', 'bin/source-importer.mjs', 'source/PhpCloudflare.mjs', 'profiles/cloudflare.mak', '.github/bin/retry-download.sh']) assert.ok(metadata.files.some(file => file.path === name), name);
 
 	const installed = path.join(root, 'project/node_modules/php-wasm-builder');
 	await fs.mkdir(installed, {recursive: true});
 	const extraction = spawnSync('tar', ['-xzf', path.join(root, metadata.filename), '-C', installed, '--strip-components=1'], {encoding: 'utf8'});
 	assert.equal(extraction.status, 0, extraction.stderr);
+	// Published dependencies may use versions instead of checkout-relative paths.
+	const installedMetadata = JSON.parse(await fs.readFile(path.join(installed, 'package.json'), 'utf8'));
+	for(const [name, value] of Object.entries(installedMetadata.dependencies))
+		if(value.startsWith('./packages/')) installedMetadata.dependencies[name] = '0.0.0';
+	await fs.writeFile(path.join(installed, 'package.json'), JSON.stringify(installedMetadata));
 	const packages = {'vrzno': 'vrzno', 'pdo-cfd1': 'pdo-cfd1', 'zlib': 'php-wasm-zlib', 'libzip': 'php-wasm-libzip', 'php-cloud-wasm': 'php-cloud-wasm', 'php-cgi-wasm': 'php-cgi-wasm', 'php-cli-wasm': 'php-cli-wasm', 'php-dbg-wasm': 'php-dbg-wasm'};
 	for(const [folder, packageName] of Object.entries(packages))
 	{
 		const dependency = path.join(root, 'project/node_modules', packageName);
 		await fs.mkdir(dependency);
-		await fs.writeFile(path.join(dependency, 'package.json'), JSON.stringify({name: packageName, version: '0.0.0', exports: {'./package.json': './package.json'}}));
+		if(['vrzno', 'pdo-cfd1'].includes(folder))
+		{
+			const packedDependency = spawnSync('npm', ['pack', '--json', '--ignore-scripts', path.join(repoRoot, 'packages', folder), '--pack-destination', root, '--cache', path.join(root, 'npm-cache')], {cwd: root, encoding: 'utf8'});
+			assert.equal(packedDependency.status, 0, packedDependency.stderr);
+			const filename = JSON.parse(packedDependency.stdout)[0].filename;
+			const extractedDependency = spawnSync('tar', ['-xzf', path.join(root, filename), '-C', dependency, '--strip-components=1'], {encoding: 'utf8'});
+			assert.equal(extractedDependency.status, 0, extractedDependency.stderr);
+		}
+		else await fs.writeFile(path.join(dependency, 'package.json'), JSON.stringify({name: packageName, version: '0.0.0', exports: {'./package.json': './package.json'}}));
 		// The published extension packages carry build source; runtime packages
 		// carry declarations, but their pre/static makefiles are not published.
-		if(['vrzno', 'pdo-cfd1', 'zlib', 'libzip'].includes(folder))
+		if(['zlib', 'libzip'].includes(folder))
 		{
 			await fs.writeFile(path.join(dependency, 'static.mak'), `# ${packageName} fixture\n`);
 		}
@@ -547,14 +671,47 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 		await fs.writeFile(path.join(dependency, 'unneeded.wasm'), wasm);
 	}
 	const destination = path.join(root, 'snapshot');
-	await snapshot(destination, installed);
+	await snapshot(destination, installed, buildPackages);
 	for(const folder of ['vrzno', 'pdo-cfd1', 'zlib', 'libzip'])
 	{
-		assert.match(await fs.readFile(path.join(destination, 'packages', folder, 'static.mak'), 'utf8'), /fixture/);
+		const makefile = await fs.readFile(path.join(destination, 'packages', folder, 'static.mak'), 'utf8');
+		if(['vrzno', 'pdo-cfd1'].includes(folder)) assert.equal(makefile, await fs.readFile(path.join(repoRoot, 'packages', folder, 'static.mak'), 'utf8'));
+		else assert.match(makefile, /fixture/);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, '.env')).then(() => true, () => false), false);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, 'unneeded.wasm')).then(() => true, () => false), false);
 	}
 	assert.ok(await fs.stat(path.join(destination, 'packages/php-cloud-wasm/public.d.ts')));
+	assert.equal(await fs.readFile(path.join(destination, 'bin/source-importer.mjs'), 'utf8'), await fs.readFile(path.join(installed, 'bin/source-importer.mjs'), 'utf8'));
+	// Execute the package callers from the installed builder and its isolated
+	// snapshot. Both layouts use the builder's single shared implementation.
+	for(const [folder, extension] of [['vrzno', 'vrzno'], ['pdo-cfd1', 'pdo_cfd1']])
+	{
+		const repository = path.join(root, `${folder}-upstream`);
+		await fs.mkdir(repository);
+		await fs.writeFile(path.join(repository, `${extension}.c`), '/* snapshot fixture */\n');
+		await fs.writeFile(path.join(repository, 'config.m4'), 'dnl snapshot fixture\n');
+		for(const args of [['init', '--quiet'], ['add', '.'], ['-c', 'user.name=Snapshot test', '-c', 'user.email=snapshot@example.invalid', 'commit', '--quiet', '-m', 'fixture']])
+		{
+			const result = spawnSync('git', args, {cwd: repository, encoding: 'utf8'});
+			assert.equal(result.status, 0, result.stderr);
+		}
+		const revision = spawnSync('git', ['rev-parse', 'HEAD'], {cwd: repository, encoding: 'utf8'});
+		assert.equal(revision.status, 0, revision.stderr);
+		for(const [cwd, helper] of [
+			[installed, path.join(root, 'project/node_modules', folder, 'import-source.mjs')]
+			, [destination, path.join(destination, 'packages', folder, 'import-source.mjs')]
+		]) {
+			for(const args of [['stage', repository, revision.stdout.trim()], ['sync', '8.3']])
+			{
+				const result = spawnSync(process.execPath, [helper, ...args], {cwd, encoding: 'utf8'});
+				assert.equal(result.status, 0, result.stderr);
+			}
+			const imported = path.join(cwd, 'third_party/php8.3-src/ext', extension);
+			assert.equal(await fs.readFile(path.join(imported, `${extension}.c`), 'utf8'), '/* snapshot fixture */\n');
+			const state = JSON.parse(await fs.readFile(path.join(imported, '.php-wasm-source.json'), 'utf8'));
+			assert.equal(state.identity.commit, revision.stdout.trim());
+		}
+	}
 
 	const bin = path.join(root, 'fake-bin');
 	await fs.mkdir(bin);

@@ -31,15 +31,6 @@ describe('Home', () => {
 		expect(frameworkLink).toHaveAttribute('href', '/select-framework.html');
 	});
 
-	it('links to the waitline browser test', () => {
-		render(<Home />);
-
-		fireEvent.click(screen.getByText('More...'));
-
-		expect(screen.getByRole('link', {name: /waitline \/ Readline Test/}))
-			.toHaveAttribute('href', '/waitline-preview.html');
-	});
-
 	it('puts one Query Workbench link in Extras, not the main demo buttons', () => {
 		render(<Home />);
 		expect(screen.queryByRole('link', {name: 'Query Workbench'})).not.toBeInTheDocument();

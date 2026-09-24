@@ -1,0 +1,416 @@
+{
+  "backend": "idbfs",
+  "framework": "drupal",
+  "name": "Drupal 11.4.5",
+  "round": 0,
+  "runLabel": "clean-repeat",
+  "archive": {
+    "name": "drupal-11.4.5.zip",
+    "bytes": 22457133,
+    "sha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f"
+  },
+  "assetSha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+  "phpVersion": "8.3",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "binaries": [
+    {
+      "name": "php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "name": "php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    },
+    {
+      "name": "php.data",
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  ],
+  "browser": "147.0.7727.15",
+  "profileMode": "persistent",
+  "platform": {
+    "os": "6.1.0-31-amd64",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) i7-7700K CPU @ 4.20GHz",
+    "parallelism": 8,
+    "loadAverage": [
+      4.04,
+      4.13,
+      4.41
+    ]
+  },
+  "started": "2026-09-20T16:33:45.680Z",
+  "samples": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 613.1999998092651,
+      "flushMs": 531.0999999046326,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 614.5999999046326,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 563.2999997138977,
+      "flushMs": 490,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 564.5999999046326,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 586.3000001907349,
+      "flushMs": 501.90000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 587.6999998092651,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 533,
+      "flushMs": 464.19999980926514,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 534.5,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 559.5,
+      "flushMs": 494.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 561,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 587.9000000953674,
+      "flushMs": 520.2000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 589.4000000953674,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 544.8999996185303,
+      "flushMs": 475.19999980926514,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 546.2999997138977,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 542.3000001907349,
+      "flushMs": 479,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 543.5999999046326,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 517.5999999046326,
+      "flushMs": 454.80000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 518.9000000953674,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 575.9000000953674,
+      "flushMs": 513.3000001907349,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 577.1999998092651,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 561.5999999046326,
+      "flushMs": 488.2999997138977,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 562.8999996185303,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 543.8999996185303,
+      "flushMs": 476.8999996185303,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 545.3999996185303,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 592.4000000953674,
+      "flushMs": 521.7000002861023,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 593.7999997138977,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 529.9000000953674,
+      "flushMs": 460,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 531,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 569.3000001907349,
+      "flushMs": 505.30000019073486,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 570.6999998092651,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 552.5999999046326,
+      "flushMs": 488.40000009536743,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 554.0999999046326,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 521.3999996185303,
+      "flushMs": 458.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 522.6999998092651,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 549.2999997138977,
+      "flushMs": 482,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 551,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 600.1999998092651,
+      "flushMs": 499.59999990463257,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 601.7999997138977,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+      "status": 200,
+      "cgiMs": 524.3000001907349,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 525.5,
+      "bytes": 13123,
+      "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+      "valid": true
+    }
+  ],
+  "assets": [
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/core/themes/olivero/olivero.info.yml",
+      "status": 200,
+      "cgiMs": 1.0999999046325684,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.299999713897705,
+      "bytes": 2929,
+      "bodySha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/core/themes/olivero/olivero.info.yml",
+      "status": 200,
+      "cgiMs": 1.4000000953674316,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.3000001907348633,
+      "bytes": 2929,
+      "bodySha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/core/themes/olivero/olivero.info.yml",
+      "status": 200,
+      "cgiMs": 1.0999999046325684,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.1999998092651367,
+      "bytes": 2929,
+      "bodySha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/core/themes/olivero/olivero.info.yml",
+      "status": 200,
+      "cgiMs": 1.200000286102295,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.1999998092651367,
+      "bytes": 2929,
+      "bodySha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+      "valid": true
+    },
+    {
+      "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/core/themes/olivero/olivero.info.yml",
+      "status": 200,
+      "cgiMs": 1.299999713897705,
+      "flushMs": 453.6000003814697,
+      "stderr": "",
+      "heapBytes": 134217728,
+      "wallMs": 2.200000286102295,
+      "bytes": 2929,
+      "bodySha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42",
+      "valid": true
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "startup": {
+    "instantiateMs": 418.59999990463257,
+    "mountHydrateMs": 33.200000286102295,
+    "totalMs": 452.59999990463257,
+    "heapBytes": 134217728
+  },
+  "workerStartMs": 590.799663,
+  "install": {
+    "downloadMs": 33.59999990463257,
+    "archiveBytes": 22457133,
+    "archiveWriteMs": 94.90000009536743,
+    "extractAndFlushMs": 4587.300000190735,
+    "installMs": 4682.400000095367,
+    "details": {
+      "files": 17761,
+      "php": "8.3.11"
+    },
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/install.php",
+    "status": 200,
+    "cgiMs": 4587,
+    "flushMs": 2723.2000002861023,
+    "stderr": "",
+    "heapBytes": 134217728
+  },
+  "first": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+    "status": 200,
+    "cgiMs": 4559.89999961853,
+    "flushMs": 572.6999998092651,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 4562.099999904633,
+    "bytes": 13123,
+    "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+    "valid": true
+  },
+  "render": {
+    "title": "Welcome! | Drupal 11 on PHP-WASM",
+    "text": "Skip to main content \nDrupal 11 on PHP-WASM\nMain navigation\nHome\nUser account menu\nLog in\nWelcome!\n\nYou haven’t created any frontpage content yet.\n\nDrupal 11 is running in the browser!\nLog in with:\nUsername: admin\nPassword: admin\nClick here to edit this template!\n\nCongratulations and welcome to the Drupal community.\n\nDrupal is an open source platform for building amazing digital experiences. It’s made, used, taught, documented, and marketed by the Drupal community. Our community is made up of people from around the world with a shared set of values, collaborating together in a respectful manner. As we like to say:\n\nCome for the code, stay for the community.\nGet Started\n\nThere are a few ways to get started with Drupal:\n\nUser Guide: Includes installing, administering, site building, and maintaining the content of a Drupal website.\nCreate Content: Want to get right to work? Start adding content. Note: the information on this page will go away once you add content to your site. Read on and bookmark resources of interest.\nExtend Drupal: Drupal’s core software can be extended and customized in remarkable ways. Install additional functionality and change the look of your site using addons contributed by our community.\nNext Steps\n\nBookmark these links to our active Drupal community groups and support resources.\n\nUpcoming Events: Learn and connect with others at conferences and events held around the world.\nCommunity Page: List of key Drupal community groups with their own content.\nGet support and chat with the Drupal community on Slack or DrupalChat. When you’re looking for a solution to a problem, go to Drupal Support or Drupal Answers on Stack Exchange.\nPowered by Drupal ",
+    "images": [],
+    "wallMs": 2975.0159310000017
+  },
+  "restart": {
+    "instantiateMs": 396.59999990463257,
+    "mountHydrateMs": 2157.800000190735,
+    "totalMs": 2555.800000190735,
+    "heapBytes": 134217728
+  },
+  "restartWorkerMs": 2612.3433779999978,
+  "afterRestart": {
+    "url": "http://127.0.0.1:9024/php-wasm/cgi-bin/drupal/",
+    "status": 200,
+    "cgiMs": 2022.6999998092651,
+    "flushMs": 726.2999997138977,
+    "stderr": "",
+    "heapBytes": 134217728,
+    "wallMs": 2027.5,
+    "bytes": 13123,
+    "bodySha256": "f9fde963d814469515ce7849e9d641bde64ba5fa772ff0d4d276426847a4745c",
+    "valid": true
+  },
+  "complete": true,
+  "finished": "2026-09-20T16:34:14.750Z"
+}

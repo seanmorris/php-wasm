@@ -1,0 +1,2791 @@
+{
+  "backend": "idbfs",
+  "framework": "drupal",
+  "mode": "grouped-idbfs",
+  "round": 1,
+  "started": "2026-09-20T18:58:50.959Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    0.99,
+    0.96,
+    1.21
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 73.5,
+      "value": {
+        "wallMs": 73.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6999998092651367
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 81.30000019073486,
+      "value": {
+        "wallMs": 81.30000019073486,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.8999996185302734
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.5000004768371582,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 80.5,
+      "value": {
+        "wallMs": 80.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6999998092651367
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 67,
+      "value": {
+        "wallMs": 67,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.7000002861022949
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 70.5,
+      "value": {
+        "wallMs": 70.40000009536743,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.6000003814697266
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.5999994277954102,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.2999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 68.69999980926514,
+      "value": {
+        "wallMs": 68.69999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0.5999999046325684
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 0.40000009536743164,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 2,
+          "ms": 0.5000004768371582,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "noop-sync-0",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-1",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "noop-sync-2",
+      "wallMs": 0,
+      "operations": []
+    },
+    {
+      "name": "rpc-previous-8",
+      "wallMs": 2807.300000190735,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 8,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 8,
+          "ms": 120.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 142752,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 8,
+          "ms": 150.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 8,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 8,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 8,
+          "ms": 2579.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 142752,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-previous-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 8,
+          "ms": 75.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8",
+      "wallMs": 343.3999996185303,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 15.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 291.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-0",
+      "wallMs": 333.90000009536743,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.600000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 15.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 309.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.400000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-1",
+      "wallMs": 332.6000003814697,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 15.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 307.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-2",
+      "wallMs": 325.5,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 15.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 300.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-3",
+      "wallMs": 378,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 15.599999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 352.2999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 9,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-4",
+      "wallMs": 345.7000002861023,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 14,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 16.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 316.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 11.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "cursor-hydrate-5",
+      "wallMs": 340.80000019073486,
+      "operations": [
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 19.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 22,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 308.1000003814697,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "cursor-hydrate-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 9.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-0",
+      "wallMs": 377.90000009536743,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 14,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 195.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 15.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 195.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0.10000038146972656,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 352.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 179.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 346.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 5.800000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-0",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-1",
+      "wallMs": 390.19999980926514,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 16.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 203.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 17.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 203.19999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 363.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 185.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 357,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 6.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-1",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-2",
+      "wallMs": 422.90000009536743,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.400000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 240.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 15.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 240.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 397.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 225,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 391.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 5.899999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-2",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-3",
+      "wallMs": 418.80000019073486,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 14.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 228.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 16.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 228.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 393,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 212.09999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 386.3999996185303,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 6.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-3",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8.100000381469727,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-4",
+      "wallMs": 430.90000009536743,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.300000190734863,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 226,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 15,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 225.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 406.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 210.80000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 400.7000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 5.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-4",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 8,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "grouped-hydrate-5",
+      "wallMs": 391.09999990463257,
+      "operations": [
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 14.699999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 205.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 16.40000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 205.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 366.1000003814697,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 188.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 360.30000019073486,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 5.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "grouped-hydrate-5",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 7.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "rpc-batched-8-grouped",
+      "wallMs": 409.59999990463257,
+      "value": {
+        "count": 8
+      },
+      "operations": [
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 13.199999809265137,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 200.7999997138977,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.timestampGroups:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.bulkKeys:/config",
+          "calls": 1,
+          "ms": 14.799999713897705,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.uniqueCursor:/config",
+          "calls": 1,
+          "ms": 200.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.joinMetadata:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 360.69999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 17844,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.timestampGroups:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1245,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.bulkKeys:/persist",
+          "calls": 1,
+          "ms": 185.59999990463257,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.uniqueCursor:/persist",
+          "calls": 1,
+          "ms": 355,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.joinMetadata:/persist",
+          "calls": 1,
+          "ms": 5.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "rpc-batched-8-grouped",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 6.700000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    {
+      "errorMessage": {
+        "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "",
+        "lineNumber": 0,
+        "columnNumber": -1
+      }
+    }
+  ],
+  "archiveSha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 11037,
+      "sha256": "f1195b0f4e0bd31a42f3445269776ab7fef5e708d10358add379312afd5699d2"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 15916,
+      "sha256": "3b9555be95974209c4ab028a655979fbfc3110a99da196f42cff3d72200f8ff4"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 8615,
+      "sha256": "9686bf06bc2d9230c983c1c7e76ced1f250b74011de986a5d17210da36778e4b"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9874,
+      "sha256": "1a39e22b5cad70d8f233844024de53460ad9d48a1e1cbdccb00ff9a348c1c81e"
+    },
+    {
+      "file": "source/idbfsSync.mjs",
+      "bytes": 11232,
+      "sha256": "9adb4a834ec26cafcdafc6c91b7d483c826ad79f270ab25015ba8a6d5dcbbd50"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4404866,
+      "sha256": "43847e5dda95b959c824ec8b2b1a833863e654c98a7a8f21cb341f3379a18819"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/idbfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40405624,
+      "sha256": "7bc8e074321683d8430f33b77cacb731fc591f0d64b1c402a2de41a3e5a84d4f"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 454.69999980926514,
+    "mountHydrateMs": 47.80000019073486,
+    "totalMs": 503.30000019073486
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 108.30000019073486,
+      "operations": [
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 5.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 1.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "indexeddb.put:/persist",
+          "calls": 1,
+          "ms": 39.5,
+          "bytes": 22457133,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.storeRemoteEntry:/persist",
+          "calls": 1,
+          "ms": 39.59999990463257,
+          "bytes": 22457133,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "archive-write",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 80.60000038146973,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 4371.700000286102,
+      "value": {
+        "wallMs": 4371.60000038147,
+        "status": 200,
+        "body": {
+          "entries": 17761,
+          "bufferedBytes": 0,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 2480.0999999046326
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/config",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getLocalSet:/persist",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/config",
+          "calls": 1,
+          "ms": 0.19999980926513672,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/config",
+          "calls": 1,
+          "ms": 0.09999990463256836,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.getRemoteSet:/persist",
+          "calls": 1,
+          "ms": 0.3000001907348633,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 1,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "idbfs.reconcile:/persist",
+          "calls": 1,
+          "ms": 0,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/config",
+          "calls": 1,
+          "ms": 693.7000002861023,
+          "bytes": 26,
+          "failures": 0,
+          "paths": [
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.delete:/persist",
+          "calls": 1,
+          "ms": 368.90000009536743,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/restore.zip"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "indexeddb.put:/persist",
+          "calls": 17762,
+          "ms": 18085948.399988174,
+          "bytes": 64951089,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5",
+            "/persist/drupal-11.4.5/recipes",
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes",
+            "/persist/drupal-11.4.5/web/themes/README.txt",
+            "/persist/drupal-11.4.5/web/.csslintrc"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 4480.000000476837
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 4193.5,
+    "value": {
+      "wallMs": 4193.5,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 58.80000019073486
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 16.699999809265137,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 29,
+        "ms": 376.6000003814697,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-journal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.nIu_T1YSCcea5nVhot-9Jk9NEvE",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.uDJ45MDmlo6VL6TnvzrRne0_KJg",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.qMKzij8a9FY6NGa02epnnMJF-nI",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.zQskmGS5wC_wqWKg6u4yGCw307M",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.zmcLB3EVTHy2Xt2ivmbR04JUwEo",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.S9PYEAhFrAUDhTD0ijr6ABRBJJ0",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.dziZs117notvVe6sOXCJI8IW6so",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.uTYnINVSvRakzPy1mkWJz57RT5I",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.7CcSeo93VFl0ZjfcZUqXMC3N0r4"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "indexeddb.put:/persist",
+        "calls": 84,
+        "ms": 326.90000009536743,
+        "bytes": 5323686,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/persist/drupal-11.4.5/web/sites/default/files/php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_JPO9-9q0I6moz-rP-gPqyThr6",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_JPO9-9q0I6moz-rP-gPqyThr6/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_JPO9-9q0I6moz-rP-gPqyThr6/sv0YExCdzYmJYdjSFMBh8mXhSdMDQ1kUXgB2Rs6tNyI.php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_FshgTbCHypcwWCvf6GvKj0DKC",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_FshgTbCHypcwWCvf6GvKj0DKC/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_FshgTbCHypcwWCvf6GvKj0DKC/SKsfZOC1slsqlPUh0Free9ZeLJx7jVClwajb-r8PAMI.php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_pager.html.twig_vj-copdYNJu4b-Km4bLLfHUIv"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "remoteEquivalence": [
+    {
+      "mount": "/config",
+      "entries": 1,
+      "groups": 1
+    },
+    {
+      "mount": "/persist",
+      "entries": 17844,
+      "groups": 1245
+    }
+  ],
+  "verifiedFiles": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 455.59999990463257,
+    "mountHydrateMs": 2121.5999999046326,
+    "totalMs": 2578.4000000953674
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 1008.2000002861023,
+    "value": {
+      "wallMs": 1008.1000003814697,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 1.5
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/config",
+        "calls": 1,
+        "ms": 0.09999990463256836,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getLocalSet:/persist",
+        "calls": 1,
+        "ms": 15,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 17844,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/config",
+        "calls": 1,
+        "ms": 19.300000190734863,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 1,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/config",
+        "calls": 1,
+        "ms": 0,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.getRemoteSet:/persist",
+        "calls": 1,
+        "ms": 288.7000002861023,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 17844,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "idbfs.reconcile:/persist",
+        "calls": 1,
+        "ms": 361.09999990463257,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/config",
+        "calls": 1,
+        "ms": 0.40000009536743164,
+        "bytes": 26,
+        "failures": 0,
+        "paths": [
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.delete:/persist",
+        "calls": 2,
+        "ms": 0.5999994277954102,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "indexeddb.put:/persist",
+        "calls": 1,
+        "ms": 0.2999997138977051,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:59:13.813Z"
+}

@@ -6,7 +6,8 @@
   "author": "Sean Morris<php-wasm@seanmorr.is>",
   "license": "Apache-2.0",
   "bin": {
-    "php-wasm-builder": "./bin/php-wasm-builder.js"
+    "php-wasm-builder": "./bin/php-wasm-builder.js",
+    "php-wasm-build": "./bin/php-wasm-builder.js"
   },
   "scripts": {
     "build": "make",
@@ -25,12 +26,15 @@
     "docs:coverage": "node ./bin/docs-snippet-report.js",
     "docs:sync-fixtures": "node ./test/docs/sync-site-fixtures.mjs",
     "generate:types": "node bin/generate-runtime-types.mjs",
-    "test:types": "npm exec --yes --package=deno@2.5.6 -- node --test test/types/*.test.mjs"
+    "test:importers": "node --test test/build/*-importer.test.mjs",
+    "test:types": "npm exec --yes --package=deno@2.5.6 -- node --test test/types/*.test.mjs",
+    "test:sdl-package": "node --test test/build/sdl-package.test.mjs"
   },
   "dependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.7",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
+    "@babel/plugin-transform-logical-assignment-operators": "^7.25.8",
     "@babel/preset-env": "^7.0.0",
     "ansi-to-html": "^0.7.2",
     "pdo-cfd1": "./packages/pdo-cfd1",
@@ -49,7 +53,7 @@
     "php-wasm-mbstring": "./packages/mbstring",
     "php-wasm-openssl": "./packages/openssl",
     "php-wasm-phar": "./packages/phar",
-    "php-wasm-sdl": "./packages/sdl",
+    "php-sdl-wasm": "./packages/php-sdl-wasm",
     "php-wasm-simplexml": "./packages/simplexml",
     "php-wasm-sqlite": "./packages/sqlite",
     "php-wasm-tidy": "./packages/tidy",
@@ -83,7 +87,7 @@
     "packages/xmlreader",
     "packages/xmlwriter",
     "packages/zlib",
-    "packages/sdl"
+    "packages/php-sdl-wasm"
   ],
   "contributors": [
     {
@@ -103,7 +107,6 @@
     "vrzno"
   ],
   "devDependencies": {
-    "@babel/plugin-transform-logical-assignment-operators": "^7.25.8",
     "@types/node": "^24.8.0",
     "@playwright/test": "^1.55.0",
     "eslint": "^10.2.1",

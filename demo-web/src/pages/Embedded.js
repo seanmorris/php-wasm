@@ -3,20 +3,24 @@
  */
 import '../styles/Embedded.css';
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import ace from 'ace-builds';
 import AceEditor from 'react-ace';
 
 import { PGlite } from '@electric-sql/pglite';
 
 import { PhpWeb } from 'php-wasm/PhpWeb';
+import { loadSdlRuntime } from '../lib/sdlRuntime';
 import Confirm from '../components/Confirm';
 import { basePath, defaultPhpVersion, libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { prepareSdlAssets } from '../lib/sdlAssets';
+import { readEmbeddedCode, replaceEmbeddedUrl } from '../lib/embeddedUrl';
+import { createPhpEditorMode } from '../lib/phpEditorMode';
 
-import 'ace-builds/src-noconflict/mode-php';
 import 'ace-builds/src-noconflict/theme-monokai';
 
-import phpWorkerUrl from "ace-builds/src-noconflict/worker-php?url";
+import phpWorkerUrl from 'php-editor-worker';
 ace.config.setModuleUrl("ace/mode/php_worker", phpWorkerUrl);
 
 // import yaml from 'php-wasm-yaml';
@@ -57,6 +61,8 @@ if(libType === 'dynamic')
 	toggleableModules['sqlite']    = import('php-wasm-sqlite');
 	toggleableModules['xml']       = import('php-wasm-xml');
 	toggleableModules['zlib']      = import('php-wasm-zlib');
+	// Append new toggles to preserve the existing extensionFlags bit positions.
+	toggleableModules['phar']      = import('php-wasm-phar');
 }
 else if(libType === 'shared')
 {
@@ -140,19 +146,18 @@ function Embedded()
 {
 	const phpRef = useRef(null);
 	const runtimeCleanup = useRef(null);
+	const runtimeGeneration = useRef(0);
 	const bootTimeout = useRef(null);
 	const autorunTimeout = useRef(null);
 	const selectDemoBox = useRef(null);
 	const selectVersionBox = useRef(null);
-	const selectVariantBox = useRef(null);
+	const selectRuntimeBox = useRef(null);
 	const htmlRadio = useRef(null);
 	const textRadio = useRef(null);
 	const editor = useRef(null);
-	const initialQueryCode = useMemo(
-		() => decodeURIComponent((new URLSearchParams(window.location.search)).get('code') || '')
-		, []
-	);
-	const input = useRef(initialQueryCode);
+	const editorMode = useMemo(() => createPhpEditorMode(), []);
+	const initialCode = useMemo(() => readEmbeddedCode(window.location), []);
+	const input = useRef(initialCode ?? '');
 	const persist = useRef('');
 	const single = useRef('');
 	const canvasCheckbox = useRef('');
@@ -167,7 +172,7 @@ function Embedded()
 
 	const query = useMemo(() => new URLSearchParams(window.location.search), []);
 
-	const [editorValue, setEditorValue] = useState(initialQueryCode);
+	const [editorValue, setEditorValue] = useState(initialCode ?? '');
 	const [exitCode, setExitCode] = useState('');
 	const [stdOut, setStdOut] = useState('');
 	const [stdErr, setStdErr] = useState('');
@@ -175,6 +180,7 @@ function Embedded()
 	const [overlay, setOverlay] = useState(null);
 	const [isIframe] = useState(!!Number(query.get('iframed')));
 	const [showCanvas, setShowCanvas] = useState(true);
+	const [canvasGeneration, setCanvasGeneration] = useState(0);
 
 	const [running, setRunning] = useState(false);
 	const [displayMode, setDisplayMode] = useState('');
@@ -197,33 +203,58 @@ function Embedded()
 		}
 	}, []);
 
-	const disposePhp = useCallback(() => {
-		canvasCheckbox.current && (canvasCheckbox.current.checked = query.get('canvas'));
-		phpRef.current && phpRef.current.refresh();
+	const disposePhp = useCallback(async () => {
+		runtimeGeneration.current++;
+		const php = phpRef.current;
+		phpRef.current = null;
+		const cleanup = runtimeCleanup.current;
+		runtimeCleanup.current = null;
 		clearPendingAutorun();
 		setStdOut('');
 		setStdErr('');
 
-
-		if(runtimeCleanup.current)
+		try
 		{
-			runtimeCleanup.current();
-			runtimeCleanup.current = null;
+			await php?.refresh();
 		}
-
-		phpRef.current = null;
+		catch(error)
+		{
+			console.error(error);
+		}
+		finally
+		{
+			cleanup?.();
+		}
 	}, [clearPendingAutorun]);
 
-	const refreshPhp = useCallback(() => {
-		disposePhp();
+	const refreshPhp = useCallback(async () => {
+		const generation = runtimeGeneration.current + 1;
+		await disposePhp();
+
+		if(generation !== runtimeGeneration.current)
+		{
+			return null;
+		}
+
+		// A canvas cannot switch between WebGL1 and WebGL2 contexts. Give each
+		// runtime its own canvas after the previous runtime has released it.
+		flushSync(() => setCanvasGeneration(value => value + 1));
 
 		const version = selectVersionBox.current?.value ?? defaultPhpVersion;
-		const variant = selectVariantBox.current?.value ?? '';
-		const runtimeSharedLibs = [...sharedLibs.current];
+		const runtime = selectRuntimeBox.current?.value ?? 'php';
+		const runtimeSharedLibs = runtime === 'sdl' && libType === 'shared'
+			? sharedLibs.current.filter(library => !sharedSupportLibs.includes(library))
+			: [...sharedLibs.current];
 
-		const php = new PhpWeb({
-			version
-			, variant
+		const Runtime = runtime === 'sdl' ? await loadSdlRuntime(version) : PhpWeb;
+
+		if(generation !== runtimeGeneration.current)
+		{
+			return null;
+		}
+
+		const php = new Runtime({
+			...(runtime === 'php' ? {version} : {})
 			, sharedLibs: runtimeSharedLibs
 			, dynamicLibs
 			, files
@@ -281,7 +312,9 @@ function Embedded()
 		single.current.checked = settings['single-expression'] ?? single.current.checked;
 		canvasCheckbox.current.checked = settings['canvas'] ?? false;
 		selectVersionBox.current.value = settings['version'] ?? selectVersionBox.current.value ?? defaultPhpVersion;
-		selectVariantBox.current.value = settings['variant'] ?? selectVariantBox.current.value ?? '';
+		selectRuntimeBox.current.value = settings.runtime
+			?? (settings.variant === '_sdl' ? 'sdl' : settings.variant === '' ? 'php' : undefined)
+			?? selectRuntimeBox.current.value ?? 'php';
 
 		setOutputMode(single.current.checked ? 'single' : 'normal');
 		setShowCanvas(settings['canvas'] ?? canvasCheckbox.current.checked);
@@ -304,6 +337,8 @@ function Embedded()
 	}, []);
 
 	const runCode = useCallback(async (codeOverride = null) => {
+		const php = phpRef.current;
+		if(!php) return;
 		codeOverride = typeof codeOverride === 'string' ? codeOverride : null;
 
 		setRunning(true);
@@ -318,9 +353,10 @@ function Embedded()
 		setStdRet('');
 
 		let code = codeOverride ?? editor.current?.editor?.getValue() ?? input.current ?? editorValue;
+		const settings = parseDemoSettings(code);
 
 		const version = selectVersionBox.current?.value;
-		const variant = selectVariantBox.current?.value;
+		const runtime = selectRuntimeBox.current?.value;
 		const showCanvas = canvasCheckbox.current?.checked;
 
 		code = code.replace(/^<\?php \/\/.+\n/, `<?php //${JSON.stringify({
@@ -331,15 +367,15 @@ function Embedded()
 			// 'extensionFlags': 0
 			, 'canvas': showCanvas
 			, 'version': version
-			, 'variant': variant
+			, 'runtime': runtime
+			, 'assets': settings.assets
 		})}\n`);
 
-		query.set('code', encodeURIComponent(code));
-		query.set('canvas', encodeURIComponent(showCanvas ? 1 : 0));
-		query.set('version', encodeURIComponent(version));
-		query.set('variant', encodeURIComponent(variant));
-
-		window.history.replaceState({}, document.title, "?" + query.toString());
+		query.set('canvas', showCanvas ? '1' : '0');
+		query.set('version', version);
+		query.delete('variant');
+		query.set('runtime', runtime);
+		replaceEmbeddedUrl(query, code);
 
 		if(single.current.checked)
 		{
@@ -348,11 +384,12 @@ function Embedded()
 
 			try
 			{
-				const ret = await phpRef.current.exec(code);
+				const ret = await php.exec(code);
+				if(php !== phpRef.current) return;
 				setStdRet(ret);
 				if(!persist.current.checked)
 				{
-					await phpRef.current.refresh();
+					await php.refresh();
 				}
 			}
 			catch(error)
@@ -361,8 +398,11 @@ function Embedded()
 			}
 			finally
 			{
-				setStatusMessage('php-wasm ready!');
-				setRunning(false);
+				if(php === phpRef.current)
+				{
+					setStatusMessage('php-wasm ready!');
+					setRunning(false);
+				}
 			}
 
 			return;
@@ -370,28 +410,44 @@ function Embedded()
 
 		try
 		{
-			const nextExitCode = await phpRef.current.run(code);
+			if(settings.assets === 'sdl')
+			{
+				setStatusMessage('Loading SDL assets...');
+				await prepareSdlAssets(php, basePath('sdl/'));
+				if(php !== phpRef.current) return;
+			}
+
+			const nextExitCode = await php.run(code);
+			if(php !== phpRef.current) return;
 			setExitCode(nextExitCode);
 			if(!persist.current.checked)
 			{
-				await phpRef.current.refresh();
+				await php.refresh();
 			}
 		}
 		catch(error)
 		{
 			console.error(error);
+			if(php === phpRef.current)
+			{
+				setStdErr(String(error.message ?? error));
+				setExitCode('1');
+			}
 		}
 		finally
 		{
-			setStatusMessage('php-wasm ready!');
-			setRunning(false);
+			if(php === phpRef.current)
+			{
+				setStatusMessage('php-wasm ready!');
+				setRunning(false);
+			}
 		}
 	}, [editorValue, query]);
 
 	const loadDemo = useCallback(async demoName => {
 		if(!demoName)
 		{
-			refreshPhp();
+			if(!await refreshPhp()) return;
 			await runCode();
 			return;
 		}
@@ -408,9 +464,9 @@ function Embedded()
 			return;
 		}
 
-		if(demoName === 'sdl-sine.php')
+		if(demoName === 'sdl-sine.php' || demoName === 'sdl-cube.php')
 		{
-			selectVariantBox.current.value = '_sdl';
+			selectRuntimeBox.current.value = 'sdl';
 		}
 
 		setRunning(true);
@@ -434,21 +490,11 @@ function Embedded()
 			query.set('extensionFlags', settings.extensionFlags);
 		}
 
-		if(phpCode.length < 1024)
-		{
-			query.set('code', encodeURIComponent(phpCode));
-		}
-
-		window.history.replaceState({}, document.title, "?" + query.toString());
-
-		if(phpRef.current)
-		{
-			await phpRef.current.refresh();
-		}
+		replaceEmbeddedUrl(query, phpCode);
 
 		await loadExtensions();
-		refreshPhp();
 		applySettings(settings);
+		if(!await refreshPhp()) return;
 
 		if(settings.autorun)
 		{
@@ -464,13 +510,14 @@ function Embedded()
 		persist.current.checked = !!Number(query.get('persist') ?? '');
 		single.current.checked = !!Number(query.get('single-expression') ?? '');
 		selectVersionBox.current.value = query.get('version') ?? defaultPhpVersion;
-		selectVariantBox.current.value = query.get('variant') ?? '';
+		selectRuntimeBox.current.value = query.get('runtime') ?? (query.get('variant') === '_sdl' ? 'sdl' : 'php');
 		canvasCheckbox.current.checked = (query.get('canvas') ?? '0') === '1';
 
-		const settings = parseDemoSettings(initialQueryCode);
+		if(initialCode !== null) replaceEmbeddedUrl(query, initialCode);
+		const settings = parseDemoSettings(initialCode ?? '');
 		applySettings(settings);
 
-		if(query.has('demo'))
+		if(query.has('demo') && initialCode === null)
 		{
 			const demoName = query.get('demo');
 			selectDemoBox.current.value = demoName;
@@ -480,17 +527,28 @@ function Embedded()
 		}
 
 		await loadExtensions();
-		refreshPhp();
+		if(!await refreshPhp()) return;
 
 		if(settings.autorun)
 		{
 			clearPendingAutorun();
 			autorunTimeout.current = setTimeout(() => {
 				autorunTimeout.current = null;
-				void runCode();
+				void runCode(initialCode);
 			}, 1);
 		}
 	});
+
+	useEffect(() => {
+		// A new fragment is same-document navigation. Reload shared source just
+		// as a query link did, including its runtime settings and cleanup.
+		const loadSharedFragment = () => {
+			const code = readEmbeddedCode(window.location);
+			if(code !== null && code !== input.current) window.location.reload();
+		};
+		window.addEventListener('hashchange', loadSharedFragment);
+		return () => window.removeEventListener('hashchange', loadSharedFragment);
+	}, []);
 
 	useEffect(() => {
 		// Delay the one-shot boot so StrictMode's dev-only effect replay can
@@ -598,7 +656,7 @@ function Embedded()
 		setStdOut('');
 		setStdErr('');
 		await loadExtensions();
-		refreshPhp();
+		if(!await refreshPhp()) return;
 		await runCode();
 	};
 
@@ -638,7 +696,8 @@ function Embedded()
 						<option value = "json.php">JSON</option>
 						<option value = "closures.php">Closures</option>
 						<option value = "files.php">Files</option>
-						<option value = "sdl-sine.php">SDL</option>
+						<option value = "sdl-cube.php">SDL Cube</option>
+						<option value = "sdl-sine.php">SDL Sine</option>
 						<option value = "zend-benchmark.php">Zend Benchmark</option>
 						{isIframe || <option value = "drupal.php">Drupal 7</option>}
 					</select>
@@ -656,10 +715,10 @@ function Embedded()
 						</select>
 					</label>
 					<label>
-						<span>Variant:</span>
-						<select data-select-demo ref = {selectVariantBox}>
-							<option value = "">base</option>
-							<option value = "_sdl">sdl</option>
+						<span>Runtime:</span>
+						<select data-select-demo ref = {selectRuntimeBox}>
+							<option value = "php">PHP</option>
+							<option value = "sdl">PHP + SDL</option>
 						</select>
 					</label>
 				</div>
@@ -738,7 +797,7 @@ function Embedded()
 						<div className = "liquid" id = "input-box">
 							<AceEditor
 								height = "100%"
-								mode = "php"
+								mode = {editorMode}
 								name = "input"
 								onChange = {codeChanged}
 								ref = {editor}
@@ -760,7 +819,7 @@ function Embedded()
 						</div>
 						<div className = "canvas output liquid" >
 							<div className = "column">
-								<canvas ref={canvas} />
+								<canvas key={canvasGeneration} ref={canvas} tabIndex={0} aria-label="SDL canvas" />
 							</div>
 						</div>
 					</div>

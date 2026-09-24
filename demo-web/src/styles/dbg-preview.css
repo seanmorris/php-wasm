@@ -2,14 +2,29 @@
 	display: flex;
 }
 
+.dbg-preview > .bevel {
+	min-width: 0;
+}
+
+.dbg-preview .header .cols {
+	flex-wrap: wrap;
+}
+
+.dbg-preview .header h1 {
+	white-space: normal;
+}
+
 .dbg-preview .warning {
 	filter: opacity(0.75) saturate(0.75);
 	color: #CCC;
 }
 
 .dbg-preview .status > div {
+	min-width: 0;
 	padding-left: 1rem;
 	padding-right: 1rem;
+	white-space: normal;
+	overflow-wrap: anywhere;
 }
 
 .dbg-preview .status > div > span.file:empty,
@@ -41,7 +56,7 @@
 	display: flex;
 	flex-direction: row;
 	position: absolute;
-	width: 100%;;
+	width: 100%;
 	height: 100%;
 	flex: 1;
 	box-sizing: border-box;
@@ -129,6 +144,7 @@
 
 .phpdbg-console .console-input input {
 	flex: 1;
+	min-width: 0;
 	min-height: 100%;
 	box-sizing: border-box;
 	padding-top: 1rem;
@@ -162,6 +178,7 @@
 .phpdbg .phpdbg-left-panel {
 	flex-grow: 1;
 	flex-basis: 50%;
+	min-width: 0;
 	position: relative;
 }
 
@@ -170,6 +187,7 @@
 	flex-direction: column;
 	flex-grow: 1;
 	flex-basis: 30%;
+	min-width: 0;
 
 	background-color: #FFF;
 }
@@ -213,6 +231,9 @@
 	margin: 0;
 	background-color: #ccc;
 	border-top: none;
+}
+
+.phpdbg .phpdbg-right-panel .toolbar {
 	overflow-x: auto;
 	width: 100%;
 	box-sizing: border-box;

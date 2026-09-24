@@ -1,0 +1,167 @@
+{
+  "work": "/app/.cache/wasmfs-opfs/build",
+  "assumeOld": [
+    "--assume-old=lib/lib/libcharset.a",
+    "--assume-old=lib/lib/libcrypto.a",
+    "--assume-old=lib/lib/libfreetype.a",
+    "--assume-old=lib/lib/libiconv.a",
+    "--assume-old=lib/lib/libicudata.a",
+    "--assume-old=lib/lib/libicui18n.a",
+    "--assume-old=lib/lib/libicuio.a",
+    "--assume-old=lib/lib/libicutest.a",
+    "--assume-old=lib/lib/libicutu.a",
+    "--assume-old=lib/lib/libicuuc.a",
+    "--assume-old=lib/lib/libjpeg.a",
+    "--assume-old=lib/lib/libonig.a",
+    "--assume-old=lib/lib/libpng.a",
+    "--assume-old=lib/lib/libpng16.a",
+    "--assume-old=lib/lib/libsharpyuv.a",
+    "--assume-old=lib/lib/libsqlite3.a",
+    "--assume-old=lib/lib/libssl.a",
+    "--assume-old=lib/lib/libtidy.a",
+    "--assume-old=lib/lib/libtidys.a",
+    "--assume-old=lib/lib/libwebp.a",
+    "--assume-old=lib/lib/libwebpdemux.a",
+    "--assume-old=lib/lib/libwebpmux.a",
+    "--assume-old=lib/lib/libxml2.a",
+    "--assume-old=lib/lib/libyaml.a",
+    "--assume-old=lib/lib/libz.a",
+    "--assume-old=lib/lib/libzip.a"
+  ],
+  "archives": [
+    {
+      "name": "libcharset.a",
+      "bytes": 8984,
+      "sha256": "ad55c67862941ebd69887c0e40d31e23d13f9d96b5cf2e86b22297772668141f"
+    },
+    {
+      "name": "libcrypto.a",
+      "bytes": 6554704,
+      "sha256": "5c70073dd65c48318bfef9477434bc68874d09a9d5339820a8786ab6ba3f346e"
+    },
+    {
+      "name": "libfreetype.a",
+      "bytes": 1730590,
+      "sha256": "04e058956b8b3b87b91898c2cc8a317b52eec21e850f4bbdb77563ddce69e22e"
+    },
+    {
+      "name": "libiconv.a",
+      "bytes": 1968990,
+      "sha256": "5c8d9314a90b5c148cfe8d082963f2d27d3540303271e5509ceeb09ff9fb3a58"
+    },
+    {
+      "name": "libicudata.a",
+      "bytes": 3152,
+      "sha256": "1b6648b3be4cc4a73b5b6a56c526c647753b64747af077b66234df32fa09a370"
+    },
+    {
+      "name": "libicui18n.a",
+      "bytes": 9530338,
+      "sha256": "3bb038101af5291395193d54dc5e2a353762731e861576cb9d3caa8a0877f5f3"
+    },
+    {
+      "name": "libicuio.a",
+      "bytes": 145632,
+      "sha256": "b3a66a5f421e8ed0c9324738f16e5e164eafe379321733d8c7b1434134f87e0d"
+    },
+    {
+      "name": "libicutest.a",
+      "bytes": 153598,
+      "sha256": "69e231355b89e0bb9df10f50a85fd8ed4351b6a3c056860474425be70fc5c6fd"
+    },
+    {
+      "name": "libicutu.a",
+      "bytes": 589250,
+      "sha256": "f8ccc753132ff473f6eaa1c0ab10787ad6c7f532b4c6793d64331a5de5cd21b2"
+    },
+    {
+      "name": "libicuuc.a",
+      "bytes": 5443464,
+      "sha256": "18f85dc81399f42d704a6f5633ba741a3883edee49ed7b63fa910829bcbb6a33"
+    },
+    {
+      "name": "libjpeg.a",
+      "bytes": 2254680,
+      "sha256": "ac1b9ba7a9b5715e97f495b2fd80a07674427d3c639436244811cd41b33f1412"
+    },
+    {
+      "name": "libonig.a",
+      "bytes": 2224910,
+      "sha256": "4a1d8444eafc839f1d17e416ee0e5d4ff4256728538bf9e53f35b338d5fe7865"
+    },
+    {
+      "name": "libpng.a",
+      "bytes": 608198,
+      "sha256": "7cbce7598ac6d743416a6076caa2cc25fa254995aa74010325332ac37a34d37d"
+    },
+    {
+      "name": "libpng16.a",
+      "bytes": 608198,
+      "sha256": "7cbce7598ac6d743416a6076caa2cc25fa254995aa74010325332ac37a34d37d"
+    },
+    {
+      "name": "libsharpyuv.a",
+      "bytes": 45340,
+      "sha256": "85b8ddc7ee987d8b546315bb3aeeabd5f5f0911f2397bc962172383f15b1a1e5"
+    },
+    {
+      "name": "libsqlite3.a",
+      "bytes": 3451476,
+      "sha256": "4359b1af0330889f7a9e1ffaf19fb3d45f0c6afd9566b0aaac8321ad1ed9d946"
+    },
+    {
+      "name": "libssl.a",
+      "bytes": 1356754,
+      "sha256": "7e3d5c2e52eb0d0c5ad1193f075c4290191932179523bf23af610a076ee29f3f"
+    },
+    {
+      "name": "libtidy.a",
+      "bytes": 1137606,
+      "sha256": "420b763f266a81fcf7974d145b0de1fa3b66d4f71bf7091664d6205f5eb4d1e2"
+    },
+    {
+      "name": "libtidys.a",
+      "bytes": 1137606,
+      "sha256": "420b763f266a81fcf7974d145b0de1fa3b66d4f71bf7091664d6205f5eb4d1e2"
+    },
+    {
+      "name": "libwebp.a",
+      "bytes": 1213040,
+      "sha256": "8ac5e6ae0935841b227dd2c1c1245993004791a2d642db778d50dbd8bfcc8e19"
+    },
+    {
+      "name": "libwebpdemux.a",
+      "bytes": 32902,
+      "sha256": "353de08a5511398e1aa2d526a739b6a0ee4b39cb1ff04a034c02e6e0a9b04beb"
+    },
+    {
+      "name": "libwebpmux.a",
+      "bytes": 94096,
+      "sha256": "34690a0b95d1ed57b5803f1cf13a6174101c2f41cde165c3a53e02cbe07ae775"
+    },
+    {
+      "name": "libxml2.a",
+      "bytes": 8122718,
+      "sha256": "89a471798b3ddce8d78dc8934c8a6368c09280f4eac0ef19d2b7172b20f1a48e"
+    },
+    {
+      "name": "libyaml.a",
+      "bytes": 608760,
+      "sha256": "51366660c2f0ae91378adbced2e586fb3d0a71dde3ed4afcd86dae01ac015a3d"
+    },
+    {
+      "name": "libz.a",
+      "bytes": 261992,
+      "sha256": "a20c2a7c18adf873d094892ca71e7b3bfbed758284daa3ad6cd48954dbe1cb55"
+    },
+    {
+      "name": "libzip.a",
+      "bytes": 726430,
+      "sha256": "6343a6a1704ade7f93379e249543f5d315859fe84184f881532e40ccf1d09aef"
+    }
+  ],
+  "phpVersion": "8.3",
+  "profile": "#!/usr/bin/env make\nPHP_VERSION=8.3\n\nWITH_SOURCEMAPS=0\nASSERTIONS=0\nOPTIMIZE=3\nSYMBOLS=0\n\nWITH_BCMATH=1\nWITH_CALENDAR=1\nWITH_CTYPE=1\nWITH_EXIF=1\nWITH_FILTER=1\nWITH_TOKENIZER=1\n\nWITH_PHAR=static\n\nWITH_LIBXML=static\nWITH_DOM=static\nWITH_XML=static\nWITH_SIMPLEXML=static\nWITH_XMLREADER=static\nWITH_XMLWRITER=static\nWITH_TIDY=static\n\nWITH_LIBZIP=static\nWITH_ICONV=static\nWITH_SQLITE=static\n\nWITH_GD=static\nWITH_ZLIB=static\nWITH_LIBPNG=static\nWITH_FREETYPE=static\nWITH_LIBJPEG=static\nWITH_LIBWEBP=static\n\nWITH_YAML=static\nWITH_MBSTRING=static\nWITH_ONIGURUMA=static\nWITH_OPENSSL=static\nWITH_INTL=static\n\nWITH_WAITLINE=1\n\n# Fixed settings for both filesystem variants.\nWITH_SDL=0\nWITH_WAITLINE=0\nWITH_PDO_PGLITE=1\nWITH_VRZNO=1\nCPU_COUNT=8\nMAX_LOAD=12\nMAKE_SHUFFLE=\nASYNCIFY_REMOVE=\nEXTRA_FLAGS+=-sASYNCIFY_STACK_SIZE=131072\nEXTRA_MODULES=\nBENCH_WASMFS?=0\nEXTRA_CFLAGS+=-DBENCH_WASMFS=${BENCH_WASMFS}\nifeq (${BENCH_WASMFS},1)\nWORKER_FS_TYPE=-sWASMFS=1\nendif\n",
+  "sourceCommit": "44e06ef3791a7c1f442e4273b4d69b5ae4bb52c9",
+  "builderImage": "sha256:cb86006c9e7db2b13596b2e5eac759199a55933ca4a65367d2988cc1f5e65c35"
+}

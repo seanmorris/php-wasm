@@ -1,0 +1,100 @@
+{
+  "recorded": "2026-09-20T17:22:47.641Z",
+  "node": "v22.23.2",
+  "compression": {
+    "zlib": "1.3.1-e00f703",
+    "brotli": "1.1.0"
+  },
+  "sources": [
+    {
+      "path": "test/perf/wasmfs-opfs/benchmark-fs.h",
+      "bytes": 2112,
+      "sha256": "a63f67fb3f07817721ddd527da3a71829099a2dc722888ffdc56c6538815c88b"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/build.mjs",
+      "bytes": 2148,
+      "sha256": "630e74be0bec9695288a7143e9e3e7eef58925677ebcb6b92f9c74c1133ee164"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/frameworks.mjs",
+      "bytes": 1092,
+      "sha256": "8358309c958bc4774958f11f49809a0eded11268fd8ce45e5ab64c7d518c3ed6"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/prepare.mjs",
+      "bytes": 3214,
+      "sha256": "0eae0b26b4ed5dba9eef88ef1d76703a42d21fe7637f560badfd6718f9155f2b"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/repeat.mjs",
+      "bytes": 5185,
+      "sha256": "6d625bc9c159f94cc01cc1b9d404964c5f87cd03e1983b7b9a3cbcad08a5bc5b"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/report.mjs",
+      "bytes": 13606,
+      "sha256": "ebe63e630e1a2ed9a4a8cb219c7714d71b14361241589c275ceb570cb3acba25"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/run.mjs",
+      "bytes": 10708,
+      "sha256": "145e11a52ed8d738ded1ccad9f65409f89fe43bd48f1aa6d8f73b93aa03319b7"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/runtime.mjs",
+      "bytes": 5960,
+      "sha256": "b4e1c3836ac5b378c8152b7950bf3173a99b79ab3d2e42ef67d89a74bcab3e2d"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/server.mjs",
+      "bytes": 3457,
+      "sha256": "846b50f37b4da8e3e16e2429035c99d755088a4b4dd4a3829bf8c9c9757934e1"
+    },
+    {
+      "path": "test/perf/wasmfs-opfs/worker.mjs",
+      "bytes": 5772,
+      "sha256": "808c0739906096c213461bfdfe8ae137aaf856b7087b5f4af6e22813b02e4330"
+    },
+    {
+      "path": "source/PhpCgiBase.mjs",
+      "bytes": 35736,
+      "sha256": "edb540f958ebd7378725a28d8b780179efa703dbf3d8e7ce74f1736561a60f9e"
+    },
+    {
+      "path": "source/PhpCgiWebBase.mjs",
+      "bytes": 6815,
+      "sha256": "01d1aa17690ba04689ee4c3b601e7a6f6c6d324fa4fa427292664ceaf5b110cc"
+    },
+    {
+      "path": "source/pib/pib.c",
+      "bytes": 6531,
+      "sha256": "74ce5627eff85bc0a1e6fcc8017048c168770f10ef8e98eec2ae5b588fbe712f"
+    },
+    {
+      "path": "source/parseResponse.mjs",
+      "bytes": 739,
+      "sha256": "a4af1a3f65d04f00ce0b2cc2cc4ac839136d56c7fffd1b2e963c801c7651e0c6"
+    },
+    {
+      "path": "source/breakoutRequest.mjs",
+      "bytes": 1311,
+      "sha256": "7261ccd57df432cdb67b6cf0f34426a9a73b2f15f36971ea91ee5c5faf5039d9"
+    },
+    {
+      "path": "source/fsOps.mjs",
+      "bytes": 5450,
+      "sha256": "bcc046e37c3d6cf1d39756b47c7d0dc31eec1f9dd7c901e160735bcb9b21b501"
+    },
+    {
+      "path": "source/resolveDependencies.mjs",
+      "bytes": 3089,
+      "sha256": "f70c7f469d6d47ee268421e976e0f3e536f418f6b1bc8988b0c77d1c912ed08b"
+    },
+    {
+      "path": "source/webTransactions.mjs",
+      "bytes": 4450,
+      "sha256": "6566f1fd7ab40b08b4b86f373b64f2e08b4afff33d0191fcd0530aea70b5f898"
+    }
+  ]
+}

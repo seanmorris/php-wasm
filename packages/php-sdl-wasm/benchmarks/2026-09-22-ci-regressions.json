@@ -1,0 +1,542 @@
+{
+  "date": "2026-09-22",
+  "sourceBaseCommit": "82def935d925afd3462557612025f477f7662c83",
+  "nativeCommit": "920b838d92b3205818f819898551c9037fe457f8",
+  "change": "Wait for the real first Web Audio callback before recording malformed-asset allocation baselines; no runtime changes.",
+  "nativeArtifacts": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781330,
+      "sha256": "cc04151ba420cd2ea96a4e4672a44b16b3857c77f1661d8d27b02a07479b3ff8"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104533,
+      "sha256": "952ba275c7f828d10cf275a94fec4336c7a5e9326c0acf118a783455abae065e"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "completedCI": {
+    "observed_at": "2026-09-22T21:47:45.309424+00:00",
+    "head": "920b838d92b3205818f819898551c9037fe457f8",
+    "runs": {
+      "test": {
+        "id": 35735946492,
+        "status": "completed",
+        "conclusion": "success",
+        "expected_jobs": 20,
+        "observed_jobs": 20,
+        "counts": {
+          "success": 20
+        },
+        "missing": [],
+        "unexpected": [],
+        "failures": [],
+        "matrix_audit_passed": true
+      },
+      "build": {
+        "id": 35735946619,
+        "status": "completed",
+        "conclusion": "failure",
+        "expected_jobs": 235,
+        "observed_jobs": 235,
+        "counts": {
+          "success": 227,
+          "failure": 6,
+          "skipped": 2
+        },
+        "missing": [],
+        "unexpected": [],
+        "failures": [
+          {
+            "name": "Test Browser 8.0 _sdl w/static libs (compressed) / Test Browser 8.0 w/static libs",
+            "conclusion": "failure",
+            "id": 106889095763
+          },
+          {
+            "name": "Test Browser 8.2 _sdl w/static libs (compressed) / Test Browser 8.2 w/static libs",
+            "conclusion": "failure",
+            "id": 106889095898
+          },
+          {
+            "name": "Test Browser 8.4 _sdl w/static libs (compressed) / Test Browser 8.4 w/static libs",
+            "conclusion": "failure",
+            "id": 106889095924
+          },
+          {
+            "name": "Test Browser 8.4 _sdl w/shared libs (compressed) / Test Browser 8.4 w/shared libs",
+            "conclusion": "failure",
+            "id": 106889095927
+          },
+          {
+            "name": "Test Browser 8.3 _sdl w/static libs (compressed) / Test Browser 8.3 w/static libs",
+            "conclusion": "failure",
+            "id": 106889095975
+          },
+          {
+            "name": "Test Browser 8.0 _sdl w/shared libs (compressed) / Test Browser 8.0 w/shared libs",
+            "conclusion": "failure",
+            "id": 106889096035
+          }
+        ],
+        "matrix_audit_passed": false
+      }
+    }
+  },
+  "before": {
+    "localAttempts": 5,
+    "failedAttempts": 3,
+    "expectedAllocationSeries": [
+      35,
+      35,
+      35,
+      35
+    ],
+    "observedFailureSeries": [
+      35,
+      36,
+      36,
+      36
+    ]
+  },
+  "isolatedMixerProbe": {
+    "assetLoads": 0,
+    "before": {
+      "sdlAllocations": 0,
+      "liveBytes": 3370736,
+      "reservedBytes": 3371440,
+      "wasmBytes": 134217728
+    },
+    "openedBeforeCallback": {
+      "sdlAllocations": 35,
+      "liveBytes": 3388960,
+      "reservedBytes": 3408304,
+      "wasmBytes": 134217728
+    },
+    "afterCallback": {
+      "sdlAllocations": 36,
+      "liveBytes": 3397192,
+      "reservedBytes": 3408304,
+      "wasmBytes": 134217728
+    },
+    "callbackAllocation": {
+      "name": "realloc",
+      "args": [
+        0,
+        8224
+      ],
+      "value": 46194720,
+      "stack": "Error\n    at callbacks.<computed> (eval at evaluate (:302:30), <anonymous>:10:68)\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[24684]:0x14c0eea\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[1570]:0x202d4f\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[24979]:0x150efe2\n    at http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs.wasm:wasm-function[38126]:0x24c225d\n    at wrapper (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:182986)\n    at dynCallLegacy (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:9661)\n    at dynCall (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:9733)\n    at SDL2.audio.scriptProcessorNode.onaudioprocess (http://127.0.0.1:9000/packages/php-wasm/php8.4_sdl-web.mjs:1:422345)"
+    },
+    "samePointerFreedAtShutdown": true,
+    "afterShutdown": {
+      "sdlAllocations": 0,
+      "liveBytes": 3370736,
+      "reservedBytes": 3441072,
+      "wasmBytes": 134217728
+    }
+  },
+  "after": {
+    "fixed": {
+      "command": "PHP_VARIANT=_sdl PHP_VERSION=8.4 LIB_TYPE=static SDL_TEST_ARTIFACT_DIR=.cache/sdl-cleanup-final/runtime npx playwright test test/browser/sdl-stress.spec.mjs --grep 'failed chunk format|truncated WAV' --repeat-each=10",
+      "stats": {
+        "startTime": "2026-09-22T21:51:24.662Z",
+        "duration": 76594.597,
+        "expected": 20,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": {
+        "truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery": {
+          "durationsMs": [
+            3404,
+            3524,
+            4106,
+            3430,
+            3469,
+            3452,
+            3605,
+            3593,
+            3563,
+            3551
+          ],
+          "statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6721968,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 0,
+                "liveBytes": 6474488,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        },
+        "failed chunk format detection closes owned streams and preserves borrowed RWops": {
+          "durationsMs": [
+            3097,
+            3143,
+            3256,
+            3167,
+            3136,
+            3142,
+            3277,
+            3382,
+            3185,
+            3165
+          ],
+          "statuses": [
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed",
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3461552,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 0,
+                "liveBytes": 3410920,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "stress": {
+      "command": "PHP_VARIANT=_sdl PHP_VERSION=8.4 LIB_TYPE=static SDL_TEST_ARTIFACT_DIR=.cache/sdl-cleanup-final/runtime npx playwright test test/browser/sdl-stress.spec.mjs",
+      "stats": {
+        "startTime": "2026-09-22T21:53:17.289Z",
+        "duration": 17270.581,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": {
+        "PNG short reads abort at headers, image data and CRCs and valid loads recover": {
+          "durationsMs": [
+            3298
+          ],
+          "statuses": [
+            "passed"
+          ],
+          "uniqueAllocationSamples": []
+        },
+        "truncated PNG, JPEG and BMP loads fail repeatedly and valid images still render": {
+          "durationsMs": [
+            3591
+          ],
+          "statuses": [
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 90,
+                "liveBytes": 3490400,
+                "reservedBytes": 3654064,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 90,
+                "liveBytes": 3490400,
+                "reservedBytes": 3654064,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 90,
+                "liveBytes": 3490400,
+                "reservedBytes": 3654064,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 90,
+                "liveBytes": 3490400,
+                "reservedBytes": 3654064,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 3,
+                "liveBytes": 3481928,
+                "reservedBytes": 3654064,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        },
+        "truncated fonts fail repeatedly without retaining faces and valid UTF-8 still renders": {
+          "durationsMs": [
+            3088
+          ],
+          "statuses": [
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 0,
+                "liveBytes": 3753992,
+                "reservedBytes": 3830192,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 0,
+                "liveBytes": 3753992,
+                "reservedBytes": 3834288,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 0,
+                "liveBytes": 3753992,
+                "reservedBytes": 3834288,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 0,
+                "liveBytes": 3753992,
+                "reservedBytes": 3834288,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 0,
+                "liveBytes": 3752512,
+                "reservedBytes": 3834288,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        },
+        "truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery": {
+          "durationsMs": [
+            3260
+          ],
+          "statuses": [
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6721968,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 36,
+                "liveBytes": 6500976,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 0,
+                "liveBytes": 6474488,
+                "reservedBytes": 6730160,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        },
+        "failed chunk format detection closes owned streams and preserves borrowed RWops": {
+          "durationsMs": [
+            3089
+          ],
+          "statuses": [
+            "passed"
+          ],
+          "uniqueAllocationSamples": [
+            [
+              {
+                "step": "warm",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3461552,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-1",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-2",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "batch-3",
+                "sdlAllocations": 36,
+                "liveBytes": 3437432,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              },
+              {
+                "step": "cleanup",
+                "sdlAllocations": 0,
+                "liveBytes": 3410920,
+                "reservedBytes": 3490224,
+                "wasmBytes": 134217728,
+                "fileDescriptors": 4
+              }
+            ]
+          ]
+        }
+      }
+    }
+  },
+  "ciProfileFix": {
+    "commit": "82def935d925afd3462557612025f477f7662c83",
+    "cause": "Builds copied the profile to .env without preserving LIB_TYPE; artifact tests restored LIB_TYPE and changed the configure cache key.",
+    "jobsReconfigured": 109,
+    "runtimeLinks": 506,
+    "regressionCommand": "node --test test/build/configure-cache.test.mjs test/build/sdl.test.mjs",
+    "passed": 30,
+    "profileCombinations": 18,
+    "newRun": "https://github.com/seanmorris/php-wasm/actions/runs/35788883619",
+    "newRunStatusAtRecording": "in_progress",
+    "newRunIncludesAudioTestFix": false
+  },
+  "limits": [
+    "Full newest-source matrix with the allocation-test correction remains required.",
+    "These are browser tests on the preserved PHP 8.4 static pair; no new native build or physical-device verification is claimed."
+  ],
+  "fixtureSha256": "f33e81d299b449681cb5d4ff7d4fab8de75f286da2121b71920ea5a04aa8ced8"
+}

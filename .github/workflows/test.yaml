@@ -32,10 +32,12 @@ jobs:
       - name: Test build helpers under inherited Make settings (Node)
         env:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+          WITH_GD: shared
         run: node --test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs
       - name: Test build helpers under inherited Make settings (Deno)
         env:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+          WITH_GD: shared
         run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
       - name: Verify packaged builder helpers
         run: node --test test/build/builder-tools-packaging.test.mjs
@@ -45,20 +47,18 @@ jobs:
           test/php-base-queue.test.mjs
           test/builder-help.test.mjs
           test/build/cloudflare-build.test.mjs
-          test/build/pdo-cfd1-importer.test.mjs
           test/cloudflare/artifacts.test.mjs
       - name: Verify Pages routing and safe nightly promotion
         run: npm run test:cloudflare-pages
-      - name: Test the real Make importer without PHP builds
-        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
       - name: Build the lightweight root-owned importer fixture
         run: docker build -f test/build/vrzno-importer.Dockerfile -t php-wasm-vrzno-importer test/build
       - name: Require nonroot host and root builder ownership tests
         env:
           VRZNO_IMPORTER_DOCKER: '1'
           PDO_PGLITE_IMPORTER_DOCKER: '1'
+          PDO_CFD1_IMPORTER_DOCKER: '1'
           WAITLINE_IMPORTER_DOCKER: '1'
-        run: node --test test/build/vrzno-importer.test.mjs test/build/pdo-pglite-importer.test.mjs test/build/waitline-importer.test.mjs
+        run: npm run test:importers
 
   test-8-5-static:
     needs: vrzno-importer

@@ -33,6 +33,7 @@ _PHP in WebAssembly, npm not required._
 * Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, and `zlib`.
 * [Vrzno](https://github.com/seanmorris/vrzno), [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1), and [pdo_pglite](https://github.com/seanmorris/pdo-pglite) are maintained as separate packages.
 * [Cloudflare embedded PHP](CLOUDFLARE.md) has a dedicated static ES-module build and local workerd tests for PHP `8.0` through `8.5`; final assets use the existing nightly distribution.
+* The standalone `php-sdl-wasm` browser runtime supports SDL graphics and input. The current development build adds image loading, TrueType text, audio, and OpenGL shaders, with a textured cube example. See the [SDL guide](packages/php-sdl-wasm/README.md) for canvas setup, shared codec dependencies, controls, and measurements.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -68,7 +69,7 @@ $ npm i php-wasm-builder
             <a href = "https://seanmorris.github.io/php-wasm/install-demo.html?framework=laminas-3">Laminas Demo</a>
         </td>
         <td width = "500px">
-            <a href = "https://seanmorris.github.io/php-wasm/code-editor.html?path=/persist">Code Editor</a>
+            <a href = "https://seanmorris.github.io/php-wasm/code-editor.html">Code Editor</a>
         </td>
     </tr>
 </table>
@@ -226,6 +227,14 @@ Include the `php-tags` module from a CDN:
 <script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
+To serve the installed package locally, expose its directory through your HTTP
+server and use its public URL, for example `/node_modules/php-wasm/php-tags.mjs`.
+Keep the package's relative module paths and matching JavaScript/Wasm assets
+together. A relative URL such as `node_modules/...` resolves against the page's
+directory, so nested pages may need a leading `/` or a different public path.
+The loader waits for the initial document to finish parsing, including when
+an `async` module in `<head>` loads before `<body>` exists.
+
 And run some PHP right in the page!
 
 ```html
@@ -320,6 +329,12 @@ php.inputString('This is a string of data provided on STDIN.');
 ```javascript
 const exitCode = await php.run('<?php echo "Hello, world!";');
 ```
+
+`run()` accepts complete PHP source, including an initial
+`<?php declare(strict_types=1);`, namespaces, and mixed PHP/HTML. A leading
+PHP opening tag does not introduce output before the declaration, and line
+numbers are preserved. Leading HTML, whitespace outside PHP, or a UTF-8 BOM
+still count as output and cannot precede `strict_types`.
 
 ### Dynamic Extensions in Static Pages
 
@@ -617,12 +632,10 @@ const php = new PhpNode({
 
 The following EmscriptenFS methods are exposed via the php object:
 
-***Note:*** If you're using php-web in conjunction with php-cgi-worker to work on the filesystem, you'll need to `refresh` the filesystem in the worker. You can do that with the following call using `msg-bus` (see below).
-
-```javascript
-// Tell the worker that the FS has been updated
-await sendMessage('refresh');
-```
+Browser CGI filesystem calls refresh persisted storage automatically when
+`autoTransaction` is enabled. Await the writer's persistence before reading from
+another runtime. `refresh()` recreates the PHP runtime and discards temporary
+files and in-memory PHP state; it is not required before each CGI filesystem read.
 
 #### php.analyzePath
 
@@ -634,10 +647,31 @@ await php.analyzePath(path);
 
 #### php.readdir
 
-Get a list of files and folders in a directory.
+Get entry names as `string[]`:
 
 ```javascript
 await php.readdir(path);
+```
+
+Pass `{withFileTypes: true}` to get serializable `{name: string, isFolder: boolean}`
+entries in one queued operation:
+
+```javascript
+const entries = await php.readdir(path, {withFileTypes: true});
+```
+
+Both forms preserve filesystem order and include `.` and `..`. Types follow
+symbolic links, as `analyzePath` does. Listing and metadata errors, including
+dangling links, reject the operation. Omitted options or `withFileTypes: false`
+keep the name-only result. The option is available in embedded, CLI, CGI,
+debugger, and Cloudflare runtimes; the declaration overloads reflect each result.
+
+In browser CGI, a typed listing uses one storage refresh for the directory and
+all its entry types. This avoids a separate `analyzePath` request per entry.
+It is also available over the service worker message bridge:
+
+```javascript
+const entries = await sendMessage('readdir', [path, {withFileTypes: true}]);
 ```
 
 #### php.readFile
@@ -708,11 +742,43 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 
 **Web and Worker only!**
 
-The web and worker builds use `navigator.locks.request` to request a lock named `php-wasm-fs-lock` before performing filesystem operations. This ensures multiple tabs and the service worker can interact with the filesystem without overwriting each other's work. Before any filesystem operation takes place, the entire FS is loaded from IDBFS, and before the lock is released, the entire FS is loaded back into IDBFS.
+With persistence enabled, browser runtimes synchronize their mounted IDBFS
+storage while holding the `php-wasm-fs-lock` Web Lock.
 
-The operations are enqueued asynchronously, **so if multiple requests are generated before one transaction closes, they will be batched automatically.** This also applies to multiple requests generated before the lock is acquired. There is generally no need to take explicit control of FS mirroring.
+Browser CGI batches queued filesystem calls into one transaction. After the
+queue becomes idle it waits up to 25 ms for more work. Storage is refreshed
+once per batch. A batch containing only `analyzePath`, `readdir`, `readFile`, or
+`stat` does not flush; any mutation makes the batch writable. All calls wait
+for the shared commit before their promises resolve or the worker replies.
+A commit failure rejects every call in that batch. Callback failures still
+commit possible partial writes and do not prevent later calls from running.
+The batching window keeps the wrapper transaction open; it does not hold an
+IndexedDB transaction open. IDBFS opens those while hydrating or flushing.
 
-To suppress this behavior and take explicit control of FS mirroring, you can pass the `{autoTransaction: false}` option to the constructor. Doing this requires you to call `php.startTransaction()` before any FS operations take place, and then `php.commitTransaction()` when you're done. **Using this incorrectly may leave your filesystem in a corrupted state.**
+Calls submitted together, including through `Promise.all`, can share a batch.
+Awaiting each call before submitting the next creates separate batches. A
+batch commits after 64 operations or a 250 ms processing window, checked
+between operations, so continuous traffic cannot postpone acknowledgment
+indefinitely. HTTP CGI requests use a separate path and still flush each
+successful PHP request. A typed `readdir` obtains names and entry types in one
+operation. `PhpWeb` and `PhpWorker` retain their existing queues; their results
+can become available before the shared transaction commits.
+
+Browser CGI tracks PHP and filesystem API mutations and flushes only changed
+IDBFS records. Clean mounts do not open a write transaction. Renamed directory
+trees, deletions, file contents and metadata are persisted in the existing
+IDBFS format, so existing stored files and older readers remain compatible.
+Hydration still reconciles with persistent storage; it uses a direct local-node
+walk to avoid repeatedly resolving every path. Mounts with nested filesystems
+use ordinary reconciliation. Failed commits retain their pending changes and
+retry them before a later hydration can replace local state.
+
+With `{autoTransaction: false}`, the caller owns transaction boundaries and
+serialization across runtimes. `startTransaction()` loads persisted storage;
+`commitTransaction()` flushes changes. These methods do not hold a Web Lock
+across a sequence of public calls. Do not acquire `php-wasm-fs-lock` and then
+await a public queued method that needs the same lock. Prefer automatic
+transactions unless you provide coordination for the complete operation.
 
 #### php.startTransaction
 
@@ -725,6 +791,10 @@ await php.startTransaction();
 ```javascript
 await php.commitTransaction();
 ```
+
+For a manually managed transaction that performed only reads, use
+`await php.commitTransaction(true)` to close it without flushing. Never pass
+`true` after a mutation that must be persisted.
 
 ### msg-bus
 
@@ -746,7 +816,8 @@ import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus';
 
 const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
-navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL);
+await navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL, {type: 'module'});
+await navigator.serviceWorker.ready;
 
 navigator.serviceWorker.addEventListener('message', onMessage);
 
@@ -754,6 +825,12 @@ const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
 
 const result = await sendMessage(methodName, [param, param, param]);
 ```
+
+After registration, the generated function waits for the selected worker to
+activate before sending a message. Missing registrations, failed installations,
+and message-cloning failures reject the call. Runtime errors, including denied
+persistent storage, also reject through `onMessage`; handle these rejections in
+the page. Private-mode storage availability depends on the browser.
 
 #### php.handleMessageEvent
 
@@ -767,11 +844,27 @@ self.addEventListener('message',  event => php.handleMessageEvent(event));
 
 To use the in-place builder, first install `php-wasm-builder` globally:
 
-***Requires docker, docker-compose, coreutils, wget, & make.***
+***Requires Docker with the `docker compose` plugin, Node.js/npm, coreutils, wget, and Make.***
 
 ```sh
 $ npm install -g php-wasm-builder
 ```
+
+`php-wasm-build` is an alias for `php-wasm-builder`; both commands use the same
+Make targets. The builder package includes build sources, package templates,
+and Docker image helpers. Runtime binaries are produced in your project.
+
+Maintainers can prepare a source-only release without publishing it:
+
+```sh
+make package-builder
+npm install -g ./.cache/release/php-wasm-builder-0.1.0.tgz
+```
+
+The tarball and its SHA-256 inventory are written to `.cache/release/` (override
+with `BUILDER_PACKAGE_OUTPUT`). Native outputs, caches, local environment files,
+and credentials are excluded. `./publish-packages.sh next --dry-run` includes
+this staged builder in the release inventory and skips unchanged packages.
 
 Create the build environment (can be run from anywhere):
 
@@ -895,13 +988,20 @@ The following options may appear in `.php-wasm-rc`.
 
 ##### PHP_DIST_DIR
 
-This is the directory where JavaScript and wasm files will be built, *relative to the current directory.*
+This is the directory where JavaScript and wasm files will be built. It accepts
+an absolute path or a path relative to the current build directory. When using
+`php-wasm-builder`, relative paths in `.php-wasm-rc` resolve from the project
+directory.
 
 ---
 
 ##### PHP_ASSET_DIR
 
-This is the directory where preload `.data` / `.dat` files and other supporting assets will be built, *relative to the current directory.* Shared libraries and side modules remain in their owning packages. Defaults to `PHP_DIST_DIR`.
+This is the directory where preload `.data` / `.dat` files and other supporting
+assets will be built. Paths resolve in the same way as `PHP_DIST_DIR`, which is
+also the default. Shared libraries and side modules remain in their owning
+packages. Preload staging reports an error if the native build's `.data` output
+is missing.
 
 ---
 
@@ -979,6 +1079,29 @@ WITH_ONIGURUMA # [0, 1, static, shared]
 WITH_OPENSSL   # [0, 1, shared, dynamic]
 WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
+
+---
+
+##### SDL runtime options
+
+Build the standalone `php-sdl-wasm` browser package with `make sdl-mjs`.
+Its Make profile selects `WITH_SDL=1`. `dynamic` remains a
+legacy alias for `1`; SDL PHP extensions are built into the main runtime.
+
+| Option | Values | Default |
+| --- | --- | --- |
+| `WITH_SDL` | `0`, `1`, `dynamic` | `0` |
+| `WITH_SDL_IMAGE` | `0`, `1` | Follows SDL |
+| `WITH_SDL_MIXER` | `0`, `1` | Follows SDL |
+| `WITH_SDL_TTF` | `0`, `1` | Follows SDL |
+| `WITH_OPENGL` | `0`, `1` | Follows SDL |
+
+The add-ons require SDL. Image loading reuses `WITH_LIBPNG`/`WITH_LIBJPEG`, and
+text reuses `WITH_FREETYPE`; those codec libraries must be enabled as static or
+shared. `WITH_ZLIB=0` still provides the native zlib archive needed by codecs.
+Set all four add-on flags to `0` for core SDL only. Build with the existing
+`make sdl-mjs` target, or set the flags in `.php-wasm-rc` and use
+`php-wasm-builder build sdl mjs`. See the [SDL build and API guide](packages/php-sdl-wasm/README.md).
 
 ---
 

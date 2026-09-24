@@ -1,0 +1,1650 @@
+{
+  "backend": "opfs",
+  "framework": "drupal",
+  "mode": "buffer-files",
+  "round": 1,
+  "started": "2026-09-20T17:59:43.740Z",
+  "browser": "147.0.7727.15",
+  "loadAverage": [
+    1.89,
+    3.22,
+    3.75
+  ],
+  "measurements": [
+    {
+      "name": "warm-0",
+      "wallMs": 360,
+      "value": {
+        "wallMs": 360,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-0",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 91.90000534057617,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 3.1000003814697266,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 112.30000448226929,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 18.499999523162842,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.39999961853027344,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 6.899999618530273,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 7.700000286102295,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-0",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.4999995231628418,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-1",
+      "wallMs": 390.1000003814697,
+      "value": {
+        "wallMs": 390.1000003814697,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-1",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 97.69999980926514,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 2.999999523162842,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 124.00000190734863,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 19.000001430511475,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.5,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 8.699999332427979,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 8.199999332427979,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-1",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.9000000953674316,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-2",
+      "wallMs": 406.69999980926514,
+      "value": {
+        "wallMs": 406.69999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-2",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 115.60000467300415,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 2.700000286102295,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 115.90000438690186,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 28.19999885559082,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 7.400000095367432,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 6.90000057220459,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-2",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.7999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-3",
+      "wallMs": 373.5,
+      "value": {
+        "wallMs": 373.5,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-3",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 90.99999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 3.1000003814697266,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 114.00000476837158,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 26.099998950958252,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.5000004768371582,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 10.600000858306885,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 7.8000006675720215,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-3",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.5999999046325684,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-4",
+      "wallMs": 454,
+      "value": {
+        "wallMs": 453.8999996185303,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-4",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 129.1999955177307,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 3.1000008583068848,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 164.7999997138977,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 18.200000286102295,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.6000003814697266,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 7.000000476837158,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 7.799999713897705,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-4",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.5999994277954102,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    {
+      "name": "warm-5",
+      "wallMs": 367.19999980926514,
+      "value": {
+        "wallMs": 367.19999980926514,
+        "status": 200,
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "warm-5",
+          "operation": "opfs.getFile",
+          "calls": 460,
+          "ms": 91.80000448226929,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.getFileHandle",
+          "calls": 16,
+          "ms": 3.1999993324279785,
+          "bytes": 0,
+          "failures": 14,
+          "paths": [
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+            "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+            "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+            "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+            "/persist/drupal-11.4.5/web/sites",
+            "/persist/drupal-11.4.5/web/sites/default/files",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.blobRead",
+          "calls": 291,
+          "ms": 113.20000267028809,
+          "bytes": 2203323,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/index.php",
+            "/persist/drupal-11.4.5/web/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+            "/persist/drupal-11.4.5/vendor/autoload.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+            "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+            "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+            "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+            "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+            "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+            "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.createWritable",
+          "calls": 19,
+          "ms": 17.90000057220459,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 491549,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.truncate",
+          "calls": 2,
+          "ms": 0.7999997138977051,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.close",
+          "calls": 19,
+          "ms": 7.099999904632568,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.write",
+          "calls": 17,
+          "ms": 9.799999713897705,
+          "bytes": 42,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+            "/config/.cookies"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "warm-5",
+          "operation": "opfs.removeEntry",
+          "calls": 2,
+          "ms": 0.40000009536743164,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/web/sites/default/files"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    }
+  ],
+  "errors": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    {
+      "errorMessage": {
+        "errorMessage": "Access to fetch at 'https://www.drupal.org/announcements.json' from origin 'http://127.0.0.1:9024' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+        "registrationId": "0",
+        "versionId": "0",
+        "sourceURL": "",
+        "lineNumber": 0,
+        "columnNumber": -1
+      }
+    }
+  ],
+  "archiveSha256": "21f3ec25510974c7ca664692f4c14b820e66cb606f48554669fe5a24132aef3f",
+  "inputs": [
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-worker.mjs",
+      "bytes": 10447,
+      "sha256": "4db988da03decaaedc60933991f52e85c6fd6defa0c2736cdcdb3adcc7b96d1d"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnostic-instrumentation.mjs",
+      "bytes": 11396,
+      "sha256": "f27a7a22341b1e009304569b772be02484f774f239f0ddf55efa889675ce66d9"
+    },
+    {
+      "file": "test/perf/wasmfs-opfs/diagnose.mjs",
+      "bytes": 7780,
+      "sha256": "4ccb8587e0c53b6bcb073e6cf392bdf30f5cf07aa09f81a4c10aec55aecd0a36"
+    },
+    {
+      "file": "source/PhpCgiWebBase.mjs",
+      "bytes": 9781,
+      "sha256": "4b6a7761809be9e2d06ea89cf70872f305045099d43b8d784b64f4e9453f3192"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs",
+      "bytes": 4448377,
+      "sha256": "0257e4aca73c78693b208bb4b91d1924195b89918e084b39cf9acece3aa7d78d"
+    },
+    {
+      "file": ".cache/wasmfs-opfs/artifacts/opfs/packages/php-cgi-wasm/php8.3-cgi-worker.mjs.wasm",
+      "bytes": 40819220,
+      "sha256": "e26d202a09335b816a6932c5aea14480164228551fb7b5b3f544a3cb772aaf2c"
+    }
+  ],
+  "expectedFiles": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "startup": {
+    "instantiateMs": 459.3999996185303,
+    "mountHydrateMs": 46.10000038146973,
+    "totalMs": 506.3999996185303
+  },
+  "restore": {
+    "written": {
+      "name": "archive-write",
+      "wallMs": 12.099999904632568,
+      "operations": []
+    },
+    "extracted": {
+      "name": "extract",
+      "wallMs": 41248.5,
+      "value": {
+        "wallMs": 41248.40000009537,
+        "status": 200,
+        "body": {
+          "entries": 17761,
+          "bufferedBytes": 64951089,
+          "php": "8.3.11"
+        },
+        "stderr": "",
+        "flushMs": 0
+      },
+      "operations": [
+        {
+          "phase": "extract",
+          "operation": "opfs.getFileHandle",
+          "calls": 50461,
+          "ms": 10625.199981212616,
+          "bytes": 0,
+          "failures": 35525,
+          "paths": [
+            "/persist",
+            "/persist/drupal-11.4.5",
+            "/persist/drupal-11.4.5/recipes",
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes",
+            "/persist/drupal-11.4.5/web/themes/README.txt"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.getDirectoryHandle",
+          "calls": 2827,
+          "ms": 766.2000002861023,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5",
+            "/persist/drupal-11.4.5/recipes",
+            "/persist/drupal-11.4.5/web",
+            "/persist/drupal-11.4.5/web/themes",
+            "/persist/drupal-11.4.5/web/modules",
+            "/persist/drupal-11.4.5/web/core",
+            "/persist/drupal-11.4.5/web/core/recipes",
+            "/persist/drupal-11.4.5/web/core/recipes/example",
+            "/persist/drupal-11.4.5/web/core/recipes/core_recommended_front_end_theme",
+            "/persist/drupal-11.4.5/web/core/recipes/basic_html_format_editor",
+            "/persist/drupal-11.4.5/web/core/recipes/basic_html_format_editor/config",
+            "/persist/drupal-11.4.5/web/core/recipes/standard"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.getFile",
+          "calls": 14935,
+          "ms": 2837.200028896332,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes/README.txt",
+            "/persist/drupal-11.4.5/web/.csslintrc",
+            "/persist/drupal-11.4.5/web/modules/README.txt",
+            "/persist/drupal-11.4.5/web/.htaccess",
+            "/persist/drupal-11.4.5/web/INSTALL.txt",
+            "/persist/drupal-11.4.5/web/robots.txt"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.createWritable",
+          "calls": 14936,
+          "ms": 11326.599979877472,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes/README.txt",
+            "/persist/drupal-11.4.5/web/.csslintrc",
+            "/persist/drupal-11.4.5/web/modules/README.txt",
+            "/persist/drupal-11.4.5/web/.htaccess",
+            "/persist/drupal-11.4.5/web/INSTALL.txt",
+            "/persist/drupal-11.4.5/web/robots.txt"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.write",
+          "calls": 14936,
+          "ms": 6691.800005912781,
+          "bytes": 64951115,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes/README.txt",
+            "/persist/drupal-11.4.5/web/.csslintrc",
+            "/persist/drupal-11.4.5/web/modules/README.txt",
+            "/persist/drupal-11.4.5/web/.htaccess",
+            "/persist/drupal-11.4.5/web/INSTALL.txt",
+            "/persist/drupal-11.4.5/web/robots.txt"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        },
+        {
+          "phase": "extract",
+          "operation": "opfs.close",
+          "calls": 14936,
+          "ms": 5464.199974060059,
+          "bytes": 0,
+          "failures": 0,
+          "paths": [
+            "/persist/drupal-11.4.5/recipes/README.txt",
+            "/persist/drupal-11.4.5/LICENSE.txt",
+            "/persist/drupal-11.4.5/web/.eslintignore",
+            "/persist/drupal-11.4.5/web/update.php",
+            "/persist/drupal-11.4.5/web/README.md",
+            "/persist/drupal-11.4.5/web/autoload.php",
+            "/persist/drupal-11.4.5/web/themes/README.txt",
+            "/persist/drupal-11.4.5/web/.csslintrc",
+            "/persist/drupal-11.4.5/web/modules/README.txt",
+            "/persist/drupal-11.4.5/web/.htaccess",
+            "/persist/drupal-11.4.5/web/INSTALL.txt",
+            "/persist/drupal-11.4.5/web/robots.txt"
+          ],
+          "entries": 0,
+          "preservedBytes": 0,
+          "writes8192": 0
+        }
+      ]
+    },
+    "restoreMs": 41260.59999990463
+  },
+  "first": {
+    "name": "first",
+    "wallMs": 46144.2999997139,
+    "value": {
+      "wallMs": 46144.2999997139,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0
+    },
+    "operations": [
+      {
+        "phase": "first",
+        "operation": "opfs.getFile",
+        "calls": 12896,
+        "ms": 2988.2999925613403,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/index.php",
+          "/persist/drupal-11.4.5/web/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+          "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+          "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+          "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+          "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.getFileHandle",
+        "calls": 2318,
+        "ms": 395.4999933242798,
+        "bytes": 0,
+        "failures": 2259,
+        "paths": [
+          "/persist/drupal-11.4.5/web",
+          "/persist/drupal-11.4.5/vendor/pear/pear_exception",
+          "/persist/drupal-11.4.5/vendor/pear/console_getopt",
+          "/persist/drupal-11.4.5/vendor/pear/pear-core-minimal/src",
+          "/persist/drupal-11.4.5/vendor/pear/archive_tar",
+          "/persist/drupal-11.4.5/web/sites",
+          "/persist/drupal-11.4.5/web/sites/default/files",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-journal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/core/themes/starterkit_theme",
+          "/persist/drupal-11.4.5/web/core/themes/stark"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.blobRead",
+        "calls": 4667,
+        "ms": 1912.2000093460083,
+        "bytes": 19206805,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/index.php",
+          "/persist/drupal-11.4.5/web/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+          "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+          "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+          "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+          "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.createWritable",
+        "calls": 4182,
+        "ms": 29445.399993419647,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-journal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cBkx1KW3sP5EnHeXLBO_flKXxTY",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_UR9T6c09MdV9uLVvWdL3B77CS/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cLfy4dvi0tcHeE8eRHT-jzeLR7k",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_-7SNd4cecjhO2DQWJga8ygWA7/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.3cMBlGo3GxhfJRZIoKXaJFFEelk",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_pager.html.twig_3TCrpbaI2s2VKTUdFDGhNq9Ve/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.WI9Ysn946fj1UbRPDc8tEjeMBHM"
+        ],
+        "entries": 0,
+        "preservedBytes": 13495366381,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.write",
+        "calls": 4178,
+        "ms": 2221.7999925613403,
+        "bytes": 10123875,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-journal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cBkx1KW3sP5EnHeXLBO_flKXxTY",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_UR9T6c09MdV9uLVvWdL3B77CS/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cLfy4dvi0tcHeE8eRHT-jzeLR7k",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_-7SNd4cecjhO2DQWJga8ygWA7/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.3cMBlGo3GxhfJRZIoKXaJFFEelk",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_pager.html.twig_3TCrpbaI2s2VKTUdFDGhNq9Ve/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.WI9Ysn946fj1UbRPDc8tEjeMBHM"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.close",
+        "calls": 4182,
+        "ms": 3402.10000371933,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-journal",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-wal",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cBkx1KW3sP5EnHeXLBO_flKXxTY",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_UR9T6c09MdV9uLVvWdL3B77CS/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.cLfy4dvi0tcHeE8eRHT-jzeLR7k",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_-7SNd4cecjhO2DQWJga8ygWA7/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.3cMBlGo3GxhfJRZIoKXaJFFEelk",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_pager.html.twig_3TCrpbaI2s2VKTUdFDGhNq9Ve/.htaccess",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/.WI9Ysn946fj1UbRPDc8tEjeMBHM"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.removeEntry",
+        "calls": 3,
+        "ms": 1.5999994277954102,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.truncate",
+        "calls": 4,
+        "ms": 0.9999990463256836,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "first",
+        "operation": "opfs.getDirectoryHandle",
+        "calls": 29,
+        "ms": 9.499999523162842,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/php",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_views-view--frontpage.htm_UR9T6c09MdV9uLVvWdL3B77CS",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_get-started.html.twig_-7SNd4cecjhO2DQWJga8ygWA7",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_pager.html.twig_3TCrpbaI2s2VKTUdFDGhNq9Ve",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_container.html.twig_pd2rH7BKIsZk7m7q72OMKB7lT",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_html.html.twig_OThRmfKVdhquyczvIHkqF_e9I",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_page.html.twig_8zv358Fu83FAAvdxIFGuPYs93",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block--system-branding-bl_W9fa1JuHpw6J12Tpgslg12E78",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_block.html.twig_hhPEV6md57FY44pg9gwKGIvpo",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_region--header.html.twig_gcKpBBXZgC1M4gRdqEVFsQ6-f",
+          "/persist/drupal-11.4.5/web/sites/default/files/php/twig/6a908dbe416d4_region--primary-menu.html_UltEo7RB6DYeyFLx47A72Gu2p"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedFiles": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "restart": {
+    "instantiateMs": 469.30000019073486,
+    "mountHydrateMs": 6.900000095367432,
+    "totalMs": 486.40000009536743
+  },
+  "afterRestart": {
+    "name": "after-restart",
+    "wallMs": 800.5999999046326,
+    "value": {
+      "wallMs": 800.5,
+      "status": 200,
+      "stderr": "",
+      "flushMs": 0
+    },
+    "operations": [
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getFileHandle",
+        "calls": 258,
+        "ms": 66.39999961853027,
+        "bytes": 0,
+        "failures": 109,
+        "paths": [
+          "/persist",
+          "/persist/drupal-11.4.5",
+          "/persist/drupal-11.4.5/web/index.php",
+          "/persist/drupal-11.4.5/web",
+          "/persist/drupal-11.4.5/web/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload.php",
+          "/persist/drupal-11.4.5/vendor",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+          "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+          "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+          "/persist/drupal-11.4.5/vendor/composer/include_paths.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getDirectoryHandle",
+        "calls": 95,
+        "ms": 17.800002574920654,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5",
+          "/persist/drupal-11.4.5/web",
+          "/persist/drupal-11.4.5/vendor",
+          "/persist/drupal-11.4.5/vendor/composer",
+          "/persist/drupal-11.4.5/vendor/symfony",
+          "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-ctype",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-intl-normalizer",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-intl-idn",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-php85",
+          "/persist/drupal-11.4.5/vendor/symfony/var-dumper"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.getFile",
+        "calls": 460,
+        "ms": 114.1000075340271,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/index.php",
+          "/persist/drupal-11.4.5/web/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+          "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+          "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+          "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+          "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.blobRead",
+        "calls": 291,
+        "ms": 154.29999828338623,
+        "bytes": 2203323,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/index.php",
+          "/persist/drupal-11.4.5/web/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload_runtime.php",
+          "/persist/drupal-11.4.5/vendor/autoload.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_real.php",
+          "/persist/drupal-11.4.5/vendor/composer/platform_check.php",
+          "/persist/drupal-11.4.5/vendor/composer/ClassLoader.php",
+          "/persist/drupal-11.4.5/vendor/composer/include_paths.php",
+          "/persist/drupal-11.4.5/vendor/composer/autoload_static.php",
+          "/persist/drupal-11.4.5/vendor/symfony/deprecation-contracts/function.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap.php",
+          "/persist/drupal-11.4.5/vendor/symfony/polyfill-mbstring/bootstrap80.php"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.createWritable",
+        "calls": 19,
+        "ms": 22.500000476837158,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 491549,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.truncate",
+        "calls": 2,
+        "ms": 0.5,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.close",
+        "calls": 19,
+        "ms": 8.199999809265137,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.write",
+        "calls": 17,
+        "ms": 8.500000476837158,
+        "bytes": 42,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files/.sqlite-shm",
+          "/config/.cookies"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      },
+      {
+        "phase": "after-restart",
+        "operation": "opfs.removeEntry",
+        "calls": 2,
+        "ms": 0.9000000953674316,
+        "bytes": 0,
+        "failures": 0,
+        "paths": [
+          "/persist/drupal-11.4.5/web/sites/default/files"
+        ],
+        "entries": 0,
+        "preservedBytes": 0,
+        "writes8192": 0
+      }
+    ]
+  },
+  "verifiedAfterRestart": [
+    {
+      "path": "/persist/drupal-11.4.5/web/core/.phpstan-baseline.php",
+      "bytes": 2191318,
+      "sha256": "06f71080a93372b629b410033d9dacd87ed8b94b926902718abe1a21bc1e2bdd"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/index.php",
+      "bytes": 396,
+      "sha256": "e34b23487b77a0a58cbd2b0228c92ccbdb7cbeb84d62bd50005cbad1fb0b39e0"
+    },
+    {
+      "path": "/persist/drupal-11.4.5/web/core/themes/olivero/olivero.info.yml",
+      "bytes": 2929,
+      "sha256": "5732b47dd32607e68e78864b40872b38b845e1dc757d849b0713538e1a5dca42"
+    }
+  ],
+  "complete": true,
+  "finished": "2026-09-20T18:01:16.205Z"
+}

@@ -4,7 +4,7 @@ import { PhpCgiBase } from '../source/PhpCgiBase.mjs';
 
 const responseBytes = new TextEncoder().encode('Content-Type: text/plain\r\n\r\nOK');
 
-const createCgi = async ({failures = 0, rejectMain = false, failure = new Error('Aborted(invalid state: 1)')} = {}) => {
+const createCgi = async ({failures = 0, rejectMain = false, failure = new Error('Aborted(invalid state: 1)'), options = {}} = {}) => {
 	const runtimes = [];
 	const paths = new Map([
 		['/preload', {isFolder: true, mode: 'directory'}]
@@ -12,6 +12,10 @@ const createCgi = async ({failures = 0, rejectMain = false, failure = new Error(
 		, ['/www/index.php', {isFolder: false, mode: 'file'}]
 		, ['/www/wp-admin', {isFolder: true, mode: 'directory'}]
 		, ['/www/wp-admin/index.php', {isFolder: false, mode: 'file'}]
+		, ['/www/app.phar', {isFolder: false, mode: 'file'}]
+		, ['/www/assets.css', {isFolder: false, mode: 'file'}]
+		, ['/www/folder.phar', {isFolder: true, mode: 'directory'}]
+		, ['/www/folder.phar/index.php', {isFolder: false, mode: 'file'}]
 	]);
 
 	const loader = Promise.resolve({
@@ -75,6 +79,7 @@ const createCgi = async ({failures = 0, rejectMain = false, failure = new Error(
 			, directory: '/www'
 			, entrypoint: 'index.php'
 		}]
+		, ...options
 	});
 
 	await cgi.binary;
@@ -121,6 +126,103 @@ test('CGI directory requests resolve index.php and retain directory request sema
 	assert.equal(runtimes.at(-1).env.get('REQUEST_URI'), '/cgi-bin/site/wp-admin/');
 	assert.equal(runtimes.at(-1).env.get('SCRIPT_NAME'), '/cgi-bin/site/wp-admin/index.php');
 	assert.equal(runtimes.at(-1).env.get('SCRIPT_FILENAME'), '/www/wp-admin/index.php');
+});
+
+test('CGI routes Phar members through the archive with URL-based script names', async () => {
+	for(const vHosts of [[], [{pathPrefix: '/cgi-bin/site', directory: '/www'}]])
+	{
+		const {cgi, runtimes} = await createCgi({options: {docroot: '/www', vHosts}});
+		const prefix = vHosts.length ? '/cgi-bin/site' : '/cgi-bin';
+
+		for(const pathInfo of ['', '/', '/index.php', '/nested/hello.txt', '/nested/'])
+		{
+			const pathname = `${prefix}/app.phar${pathInfo}`;
+			const response = await cgi.request(new Request(`http://localhost${pathname}?value=1`));
+			const {env} = runtimes.at(-1);
+
+			assert.equal(response.status, 200);
+			assert.equal(env.get('SCRIPT_NAME'), `${prefix}/app.phar`);
+			assert.equal(env.get('SCRIPT_FILENAME'), '/www/app.phar');
+			assert.equal(env.get('PATH_INFO'), pathInfo);
+			assert.equal(env.get('REQUEST_URI'), `${pathname}?value=1`);
+			assert.equal(env.get('QUERY_STRING'), 'value=1');
+		}
+
+		await cgi.request(new Request(`http://localhost${prefix}/index.php`));
+		assert.equal(runtimes.at(-1).env.get('PATH_INFO'), '');
+		assert.equal(runtimes.at(-1).env.get('SCRIPT_NAME'), `${prefix}/index.php`);
+	}
+});
+
+test('CGI honors root and virtual-host Phar entrypoints without replacing static files', async () => {
+	for(const vHosts of [[], [{pathPrefix: '/cgi-bin/site', directory: '/www', entrypoint: 'app.phar'}]])
+	{
+		const {cgi, runtimes} = await createCgi({options: {
+			docroot: '/www'
+			, entrypoint: 'app.phar'
+			, vHosts
+		}});
+		const prefix = vHosts.length ? '/cgi-bin/site' : '/cgi-bin';
+
+		for(const pathInfo of ['/hello.txt', '/nested/asset.css', '/nested/index.php'])
+		{
+			const response = await cgi.request(new Request(`http://localhost${prefix}${pathInfo}`));
+			const {env} = runtimes.at(-1);
+
+			assert.equal(response.status, 200);
+			assert.equal(env.get('SCRIPT_NAME'), `${prefix}/app.phar`);
+			assert.equal(env.get('SCRIPT_FILENAME'), '/www/app.phar');
+			assert.equal(env.get('PATH_INFO'), pathInfo);
+		}
+
+		const beforeStatic = runtimes.at(-1).requests;
+		const response = await cgi.request(new Request(`http://localhost${prefix}/assets.css`));
+		assert.equal(response.status, 200);
+		assert.equal(runtimes.at(-1).requests, beforeStatic);
+	}
+});
+
+test('CGI uses the configured PHP entrypoint for fallback routes', async () => {
+	const {cgi, runtimes} = await createCgi({options: {
+		docroot: '/www'
+		, entrypoint: 'wp-admin/index.php'
+		, vHosts: []
+	}});
+	await cgi.request(new Request('http://localhost/cgi-bin/missing-page'));
+	assert.equal(runtimes.at(-1).env.get('SCRIPT_FILENAME'), '/www/wp-admin/index.php');
+	assert.equal(runtimes.at(-1).env.get('SCRIPT_NAME'), '/cgi-bin/wp-admin/index.php');
+});
+
+test('CGI preserves string and explicit-script rewrites for Phar requests', async () => {
+	for(const rewrite of [
+		() => '/cgi-bin/app.phar/hello.txt'
+		, () => ({path: '/app.phar/hello.txt', scriptName: '/cgi-bin/public.phar'})
+	]){
+		const {cgi, runtimes} = await createCgi({options: {docroot: '/www', vHosts: [], rewrite}});
+		await cgi.request(new Request('http://localhost/cgi-bin/alias?value=1'));
+		const {env} = runtimes.at(-1);
+		const rewritten = rewrite();
+
+		assert.equal(env.get('SCRIPT_FILENAME'), '/www/app.phar');
+		assert.equal(env.get('SCRIPT_NAME'), typeof rewritten === 'string' ? '/cgi-bin/app.phar' : rewritten.scriptName);
+		assert.equal(env.get('PATH_INFO'), '/hello.txt');
+		assert.equal(env.get('REQUEST_URI'), '/cgi-bin/alias?value=1');
+	}
+});
+
+test('CGI only treats existing Phar files as archives', async () => {
+	const {cgi, runtimes} = await createCgi({options: {
+		docroot: '/www'
+		, vHosts: []
+		, notFound: () => new Response('Not found', {status: 404})
+	}});
+	const missing = await cgi.request(new Request('http://localhost/cgi-bin/missing.phar/index.php'));
+	assert.equal(missing.status, 404);
+	assert.equal(runtimes.at(-1).requests, 0);
+
+	await cgi.request(new Request('http://localhost/cgi-bin/folder.phar/index.php'));
+	assert.equal(runtimes.at(-1).env.get('SCRIPT_FILENAME'), '/www/folder.phar/index.php');
+	assert.equal(runtimes.at(-1).env.get('PATH_INFO'), '');
 });
 
 test('CGI runtime failures return a non-cacheable 500 and refresh exactly once', async () => {

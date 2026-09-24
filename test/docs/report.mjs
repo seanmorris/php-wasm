@@ -84,7 +84,8 @@ async function validateCustomBuilds(page)
 	assert.match(blocksText, /php-wasm-builder build worker cgi mjs/);
 	assert.match(blocksText, /php-wasm-builder build node cli mjs/);
 	assert.match(blocksText, /php-wasm-builder build node dbg mjs/);
-	assert.match(markdown, /Environment \| `web`, `node`, `worker`, `webview` \| `web`/);
+	assert.match(blocksText, /php-wasm-builder build sdl mjs/);
+	assert.match(markdown, /Environment \| `web`, `node`, `worker`, `webview`, `cloudflare`, `sdl` \| `web`/);
 	assert.match(markdown, /Module format \| `js`, `mjs` \| `js`/);
 	assert.match(markdown, /Package \| `base`, `cgi`, `cli`, `dbg` \| `base`/);
 	assert.match(markdown, /selectors can be provided in any order/);
@@ -322,6 +323,11 @@ async function validateFsOperations(page)
 	await php.writeFile('/docs/example.txt', 'hello', { encoding: 'utf8' });
 	assert.equal(await php.readFile('/docs/example.txt', { encoding: 'utf8' }), 'hello');
 	assert.deepEqual(await php.readdir('/docs'), ['.', '..', 'example.txt']);
+	assert.deepEqual(await php.readdir('/docs', {withFileTypes: true}), [
+		{name: '.', isFolder: true}
+		, {name: '..', isFolder: true}
+		, {name: 'example.txt', isFolder: false}
+	]);
 	assert.equal((await php.analyzePath('/docs/example.txt')).exists, true);
 	assert.equal((await php.stat('/docs/example.txt')).size, 5);
 	await php.rename('/docs/example.txt', '/docs/renamed.txt');
@@ -334,6 +340,8 @@ async function validateFsOperations(page)
 	assert.match(text, /bus\.writeFile\('/);
 	assert.match(text, /bus\.analyzePath\('/);
 	assert.match(text, /bus\.refresh\(\)/);
+	assert.match(text, /php\.readdir\(path, \{withFileTypes: true\}\)/);
+	assert.match(text, /bus\.readdir\([^\n]+withFileTypes: true/);
 	assert.match(markdown, /`quickbus` client/);
 	assert.doesNotMatch(markdown, /msg-bus/);
 
@@ -548,6 +556,36 @@ async function validateVrzno(page)
 	);
 }
 
+/**
+ * Checks SDL setup examples while identifying their browser-only execution.
+ * @param {object} page Parsed documentation page with fenced examples.
+ * @returns {Promise<object[]>} Classified examples and their separate runtime coverage.
+ */
+async function validateSdl(page)
+{
+	const text = page.blocks.map(block => block.code).join('\n');
+	const guide = readLocal(path.join(repoRoot, 'packages/php-sdl-wasm/README.md'));
+
+	assert.match(text, /<canvas[^>]+id="sdl"[^>]+tabindex="0"/);
+	assert.match(text, /image-rendering: pixelated/);
+	assert.match(text, /import \{PhpSdl\} from 'php-sdl-wasm\/php8\.4-sdl\.mjs'/);
+	assert.match(text, /new PhpSdl\(/);
+	assert.match(text, /canvas: document\.querySelector\('#sdl'\)/);
+	assert.match(text, /make sdl-mjs/);
+	for(const option of ['WITH_SDL_IMAGE', 'WITH_SDL_MIXER', 'WITH_SDL_TTF', 'WITH_OPENGL'])
+	{
+		assert.ok(text.includes(`${option}=0`), `Missing core-only opt-out: ${option}`);
+		assert.ok(guide.includes(`${option}=0`), `Unsupported SDL opt-out: ${option}`);
+	}
+
+	return coverAll(
+		page
+		, 'allowed_gap'
+		, 'SDL canvas setup and Make opt-outs were checked against the package guide; browser execution and native builds use the separate SDL suites.'
+		, { gap: 'browser_sdl_runtime', tests: ['test/browser/sdl.spec.mjs', 'test/build/sdl.test.mjs'] }
+	);
+}
+
 async function validatePdoPglite(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
@@ -577,21 +615,57 @@ async function validatePdoCfd1(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
 	const markdown = readLocal(path.join(docsRoot, page.file));
+	const integration = readLocal(path.join(repoRoot, 'packages/pdo-cfd1/README.md'));
 
-	assert.match(text, /import \{ PhpWorker \} from 'php-wasm\/PhpWorker\.mjs'/);
-	assert.match(text, /mainDb: env\.mainDb/);
-	assert.match(text, /new PDO\('cfd1:mainDb'\)/);
-	assert.match(text, /WITH_PDO_CFD1=1/);
-	assert.match(markdown, /PDO_CFD1_DEV_PATH/);
-	assert.match(markdown, /Only positional replacement tokens are supported\./);
-	assert.match(markdown, /Database error propagation remains limited\./);
-	assert.doesNotMatch(markdown, /@todo:/);
+	assert.match(text, /import \{ PhpCloudflare \} from '\.\/php-cloud-wasm\/php8\.5-cloudflare\.mjs'/);
+	assert.match(text, /mainDb: env\.DB/);
+	assert.match(text, /new PDO\('cfd1:mainDb'/);
+	assert.match(text, /execute\(\[42\]\)/);
+	assert.match(text, /cfd1Batch\(\[\$insert, \$select\]\)/);
+	for(const contract of ['PDO_CFD1_DEV_PATH', 'PDO::PARAM_LOB', 'PDO::CURSOR_SCROLL', 'lastInsertId()', 'getColumnMeta()', 'cfd1Batch()'])
+	{
+		assert.ok(markdown.includes(contract), `Missing PDO-CFD1 documentation: ${contract}`);
+		assert.ok(integration.includes(contract), `Unsupported PDO-CFD1 contract: ${contract}`);
+	}
+	assert.doesNotMatch(markdown, /prepared-query subset|Only positional replacement tokens are supported|Database error propagation remains limited/);
 
 	return coverAll(
 		page,
 		'allowed_gap',
-		'Cloudflare D1 examples were source-validated, but executing them requires a Cloudflare Worker-compatible runtime.',
+		'PDO-CFD1 examples were checked against the maintained integration contract; real D1 execution is covered by the separate Cloudflare artifact suite.',
 		{ gap: 'cloudflare_d1_runtime' }
+	);
+}
+
+/**
+ * Checks the Cloudflare guide against the local build and packaging contract.
+ * @param {object} page Parsed documentation page with fenced examples.
+ * @returns {Promise<object[]>} Classified examples with explicit runtime coverage gaps.
+ */
+async function validateCloudflare(page)
+{
+	const text = page.blocks.map(block => block.code).join('\n');
+	const guide = readLocal(path.join(repoRoot, 'CLOUDFLARE.md'));
+	const makefile = readLocal(path.join(repoRoot, 'Makefile'));
+	const packager = readLocal(path.join(repoRoot, 'bin/package-cloudflare.mjs'));
+
+	assert.match(text, /make cloudflare-mjs ENV_FILE=profiles\/cloudflare\.mak PHP_VERSION=8\.5/);
+	assert.match(makefile, /^cloudflare-mjs:/m);
+	assert.match(text, /verifyCloudflare\(source, '8\.5'\)/);
+	assert.match(packager, /export async function verifyCloudflare/);
+	assert.match(text, /new PhpCloudflare\(\{ cfd1: \{ mainDb: env\.DB \} \}\)/);
+	assert.match(text, /execute\(\[42\]\)/);
+	assert.match(text, /env\.ASSETS\.fetch\(request\)/);
+	assert.match(text, /compatibility_flags = \["enable_weak_ref"\]/);
+	assert.match(guide, /enable_weak_ref/);
+	assert.match(text, /CLOUDFLARE_ARTIFACT_ROOT=/);
+	assert.match(text, /pages deploy[^\n]+--branch preview --no-bundle/);
+
+	return coverAll(
+		page,
+		'allowed_gap',
+		'Cloudflare build, manifest, binding and Worker configuration examples were checked against the local build and packaging contract; uploads and D1 execution require the separate deployment or artifact harness.',
+		{ gap: 'cloudflare_worker_runtime' }
 	);
 }
 
@@ -749,11 +823,9 @@ async function validateMethodsPhpWasm(page)
 
 	assert.match(markdown, /alternateName:\n\s+- PhpNode\n\s+- PhpWeb/);
 	assert.doesNotMatch(markdown, /alternateName: Php(?:Node|Web)/);
-	assert.match(markdown, /`_sdl` selects the SDL-enabled `PhpWeb` runtime/);
-	assert.match(markdown, /`PhpNode` currently supports only the standard empty variant\./);
-	assert.match(markdown, /variant: '_sdl'/);
-	assert.doesNotMatch(markdown, /variant: '-debug'/);
-	assert.match(phpWebSource, /case '8\.4_sdl':/);
+	assert.match(markdown, /php-sdl-wasm\/php8\.4-sdl\.mjs/);
+	assert.match(markdown, /new PhpSdl\(/);
+	assert.doesNotMatch(phpWebSource, /_sdl|php-sdl-wasm/);
 	assert.doesNotMatch(phpNodeSource, /_sdl/);
 
 	const runtimeVersion = getAvailablePhpNodeVersion();
@@ -827,22 +899,23 @@ async function validateMethodsPhpWasm(page)
 }
 
 const pageValidators = {
-	'compiling/custom-builds.md': validateCustomBuilds,
-	'compiling/php-wasm-rc.md': validatePhpWasmRc,
-	'extensions/pdo-cfd1.md': validatePdoCfd1,
-	'extensions/pdo-pglite.md': validatePdoPglite,
-	'extensions/using-php-extensions.md': validateUsingExtensions,
-	'extensions/vrzno.md': validateVrzno,
-	'filesystem/fs-operations.md': validateFsOperations,
-	'filesystem/loading-files.md': validateLoadingFiles,
-	'filesystem/transactions.md': validateTransactions,
-	'getting-started/cgi-in-nodeJs.md': validateCgiInNodeJs,
-	'getting-started/cgi-service-worker.md': validateCgiServiceWorker,
-	'getting-started/install-and-include.md': validateInstallAndInclude,
-	'getting-started/php-in-js.md': validatePhpInJs,
-	'getting-started/php-in-static-html.md': validatePhpInStaticHtml,
-	'getting-started/php.ini.md': validatePhpIni,
-	'methods/php-wasm.md': validateMethodsPhpWasm,
+	'compiling/custom-builds.md': validateCustomBuilds
+	, 'compiling/php-wasm-rc.md': validatePhpWasmRc
+	, 'extensions/pdo-cfd1.md': validatePdoCfd1
+	, 'extensions/pdo-pglite.md': validatePdoPglite
+	, 'extensions/using-php-extensions.md': validateUsingExtensions
+	, 'extensions/vrzno.md': validateVrzno
+	, 'filesystem/fs-operations.md': validateFsOperations
+	, 'filesystem/loading-files.md': validateLoadingFiles
+	, 'filesystem/transactions.md': validateTransactions
+	, 'getting-started/cgi-in-nodeJs.md': validateCgiInNodeJs
+	, 'getting-started/cgi-service-worker.md': validateCgiServiceWorker
+	, 'getting-started/install-and-include.md': validateInstallAndInclude
+	, 'getting-started/php-in-cloudflare.md': validateCloudflare
+	, 'getting-started/php-in-js.md': validatePhpInJs
+	, 'getting-started/php-in-static-html.md': validatePhpInStaticHtml
+	, 'getting-started/php.ini.md': validatePhpIni
+	, 'methods/php-wasm.md': validateMethodsPhpWasm
 };
 
 const cgiPageValidators = {
@@ -851,7 +924,8 @@ const cgiPageValidators = {
 };
 
 const browserOnlyPageValidators = {
-	'getting-started/cgi-service-worker.md': validateCgiServiceWorker,
+	'extensions/sdl.md': validateSdl
+	, 'getting-started/cgi-service-worker.md': validateCgiServiceWorker
 };
 
 const allPageValidators = {

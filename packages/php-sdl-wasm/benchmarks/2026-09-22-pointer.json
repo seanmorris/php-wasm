@@ -1,0 +1,90 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-pointer-first.json",
+  "change": "Retire late legacy pointer observers and report rejection before application error handlers",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781080,
+      "gzip": 657808,
+      "brotli": 469225,
+      "sha256": "994a54c289c92d2ed79e586d2b748bd6bf4e4a828174963f78b4081a74d70b66"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104547,
+      "gzip": 13359002,
+      "brotli": 9111711,
+      "sha256": "8850690212d6001b8a789433248decab74530869297fea8483410109f340ae34"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781084,
+      "gzip": 657815,
+      "brotli": 469683,
+      "sha256": "77c08ec5e2683c1997c15445a9fd4c23df0ffddc9a405ab9eedda9b9ee8b31ce"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104549,
+      "gzip": 13359039,
+      "brotli": 9114678,
+      "sha256": "7a23c1f0582e7f9e9a29bd20740d386521a79dc1663cafb1bcd85eb166d0aa5d"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51885627,
+      "after": 51885633,
+      "increase": 6,
+      "percent": 1.1563896105563108e-05
+    },
+    "gzip": {
+      "before": 14016810,
+      "after": 14016854,
+      "increase": 44,
+      "percent": 0.0003139087995057363
+    },
+    "brotli": {
+      "before": 9580936,
+      "after": 9584361,
+      "increase": 3425,
+      "percent": 0.03574807304839527
+    }
+  },
+  "overallBaselineRecord": "packages/sdl/benchmarks/2026-09-22-text-lifetimes.json",
+  "overallTotals": {
+    "raw": {
+      "before": 51880102,
+      "after": 51885633,
+      "increase": 5531,
+      "percent": 0.010661120134266506
+    },
+    "gzip": {
+      "before": 14014328,
+      "after": 14016854,
+      "increase": 2526,
+      "percent": 0.018024410446223323
+    },
+    "brotli": {
+      "before": 9586001,
+      "after": 9584361,
+      "increase": -1640,
+      "percent": -0.01710828112786552
+    }
+  }
+}

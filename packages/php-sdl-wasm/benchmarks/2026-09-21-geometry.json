@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-21",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-21-webgl2.json",
+  "change": "SDL renderer geometry, packed buffers, primitive batches and state/capability queries.",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652865,
+      "brotli": 466204,
+      "sha256": "ff9cc2c643a218e70b62aa59e684f1a4ab06d596a208b1610c20489ab3ef6ee5"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 46988235,
+      "gzip": 13328952,
+      "brotli": 9086106,
+      "sha256": "63d9c2a879300f5731e479323c820548f95539a042d904bf1a2958f9de3044be"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4761786,
+      "gzip": 652829,
+      "brotli": 466487,
+      "sha256": "d73ededc31b7428bffcec999d74117358442980e323e0ccf2c173f1d28c9c6cb"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47020635,
+      "gzip": 13336962,
+      "brotli": 9079781,
+      "sha256": "75a7b866abd084d78ddcb8455994faef90f1590d0bd7e042adba1b2be67b4ee2"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51750021,
+      "after": 51782421,
+      "increase": 32400,
+      "percent": 0.062608670245757
+    },
+    "gzip": {
+      "before": 13981817,
+      "after": 13989791,
+      "increase": 7974,
+      "percent": 0.05703121418339262
+    },
+    "brotli": {
+      "before": 9552310,
+      "after": 9546268,
+      "increase": -6042,
+      "percent": -0.06325171607705361
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "date": "2026-09-21T22:46:52.038Z",
+  "phpVersion": "8.4",
+  "profile": "static",
+  "browser": "152.0.7977.75",
+  "launch": {
+    "headless": true,
+    "args": [
+      "--no-sandbox",
+      "--use-angle=swiftshader",
+      "--enable-unsafe-swiftshader"
+    ]
+  },
+  "asset": {
+    "name": "click.wav",
+    "bytes": 7100,
+    "sha256": "d3ad5b7b843ac66ddf0d70f8afb75ec97ecc2a07b419ffff90e69d0469ab6026"
+  },
+  "chunkMusicPairsPerBatch": 50,
+  "batches": 3,
+  "baseline": {
+    "directory": ".cache/sdl-cursors/runtime",
+    "hashes": {
+      "php8.4_sdl-web.mjs": {
+        "bytes": 4761956,
+        "sha256": "c3afc0a20a4f57f01c6e3d790162448a0137a4c00b99fbc4e14d980bd4c9031e"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "bytes": 47045219,
+        "sha256": "d14ec17f03811d0a68c42d2138987a3651ba9265ecd3b3fb0c240f3a56cd1fd0"
+      }
+    },
+    "samples": [
+      {
+        "step": "initial",
+        "sdlAllocations": 0,
+        "liveBytes": 3360048,
+        "reservedBytes": 3361200,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "warm",
+        "sdlAllocations": 36,
+        "liveBytes": 3421312,
+        "reservedBytes": 3549616,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-50-audio-pairs",
+        "sdlAllocations": 736,
+        "liveBytes": 6056624,
+        "reservedBytes": 6142384,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-100-audio-pairs",
+        "sdlAllocations": 1436,
+        "liveBytes": 8692360,
+        "reservedBytes": 8792496,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-150-audio-pairs",
+        "sdlAllocations": 2136,
+        "liveBytes": 11332216,
+        "reservedBytes": 11446704,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "quit",
+        "sdlAllocations": 2100,
+        "liveBytes": 11305792,
+        "reservedBytes": 11446704,
+        "wasmBytes": 134217728
+      }
+    ]
+  },
+  "candidate": {
+    "directory": ".cache/sdl-audio/runtime",
+    "hashes": {
+      "php8.4_sdl-web.mjs": {
+        "bytes": 4761957,
+        "sha256": "9a28ba31484c8445bca1cbbd01569d5a80aec1a5971ff624c319722ae56dad5a"
+      },
+      "php8.4_sdl-web.mjs.wasm": {
+        "bytes": 47066495,
+        "sha256": "e22342c5833a86bfeb3cd526e5f9a1675cdecf1ed09555c31bcf52ff120b9cbe"
+      }
+    },
+    "samples": [
+      {
+        "step": "initial",
+        "sdlAllocations": 0,
+        "liveBytes": 3360144,
+        "reservedBytes": 3360688,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "warm",
+        "sdlAllocations": 36,
+        "liveBytes": 3421448,
+        "reservedBytes": 3549104,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-50-audio-pairs",
+        "sdlAllocations": 36,
+        "liveBytes": 3421488,
+        "reservedBytes": 3549104,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-100-audio-pairs",
+        "sdlAllocations": 36,
+        "liveBytes": 3421488,
+        "reservedBytes": 3549104,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "after-150-audio-pairs",
+        "sdlAllocations": 36,
+        "liveBytes": 3421488,
+        "reservedBytes": 3549104,
+        "wasmBytes": 134217728
+      },
+      {
+        "step": "quit",
+        "sdlAllocations": 0,
+        "liveBytes": 3395024,
+        "reservedBytes": 3549104,
+        "wasmBytes": 134217728
+      }
+    ]
+  },
+  "summary": {
+    "baseline": {
+      "retainedSdlAllocations": 2100,
+      "liveByteIncrease": 7910904,
+      "sdlAllocationsAfterQuit": 2100
+    },
+    "candidate": {
+      "retainedSdlAllocations": 0,
+      "liveByteIncrease": 40,
+      "sdlAllocationsAfterQuit": 0
+    }
+  },
+  "notes": [
+    "Run with native builds, compression and other benchmarks idle; this records counts, not throughput.",
+    "Each runtime uses a fresh browser page and matching routed JavaScript/Wasm artifacts.",
+    "Audio initialization, a real Web Audio callback and one explicitly freed chunk/music pair precede the warm sample.",
+    "liveBytes is dlmalloc uordblks, including a temporary 40-byte mallinfo output allocation in every snapshot.",
+    "reservedBytes and wasmBytes include reusable allocator/linear-memory capacity; they are not live allocations.",
+    "SDL counts and heap bytes cover this chunk/music fixture; they do not prove other resources are leak-free."
+  ]
+}

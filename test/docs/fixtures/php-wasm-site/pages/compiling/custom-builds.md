@@ -2,15 +2,16 @@
 pagetitle: Custom Builds with php-wasm-builder
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/compiling/custom-builds.md
+Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
+Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/compiling/custom-builds.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/bin/php-wasm-builder.js
 -->
 # Custom Builds with php-wasm-builder
 
-The `php-wasm-builder` *package* is the set of source files needed to build php-wasm, php-cgi-wasm, php-cli-wasm, & php-dbg-wasm.
+The `php-wasm-builder` *package* contains the source files needed to build
+php-wasm, php-cgi-wasm, php-cli-wasm, php-dbg-wasm, php-cloud-wasm, and php-sdl-wasm.
 
 The `php-wasm-builder` *command* is a wrapper script for the build process that allows the user to easily configure the underlying build process & drop the build assets wherever is necessary.
 
@@ -50,7 +51,8 @@ $ php-wasm-builder clean
 
 ### build
 
-Use this to build a custom version of `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, or `php-dbg-wasm`. It's recommended to build this into an empty directory using a `.php-wasm-rc` file.
+Use this to build a custom runtime package. Build into an empty directory using
+a `.php-wasm-rc` file to select its configuration.
 
 ```bash
 npx php-wasm-builder build
@@ -60,13 +62,17 @@ The optional selectors can be provided in any order:
 
 | Selector | Values | Default |
 | --- | --- | --- |
-| Environment | `web`, `node`, `worker`, `webview` | `web` |
+| Environment | `web`, `node`, `worker`, `webview`, `cloudflare`, `sdl` | `web` |
 | Module format | `js`, `mjs` | `js` |
 | Package | `base`, `cgi`, `cli`, `dbg` | `base` |
 
 `base`, `cgi`, `cli`, and `dbg` build `php-wasm`, `php-cgi-wasm`,
 `php-cli-wasm`, and `php-dbg-wasm`, respectively. Unknown or conflicting
 selectors fail before Make starts.
+
+The `cloudflare` and `sdl` environments build standalone `php-cloud-wasm` and
+`php-sdl-wasm` packages. They support only embedded PHP (`base`) and ESM (`mjs`),
+which are selected by default for these two environments.
 
 ### image
 
@@ -155,7 +161,8 @@ $ php-wasm-builder build web mjs
 $ php-wasm-builder build node mjs
 ```
 
-The current builder script defaults to `js` output unless you pass `mjs`.
+The ordinary runtime targets default to `js` output unless you pass `mjs`.
+The `sdl` and `cloudflare` targets produce ESM only and default to `mjs`.
 
 ## CGI Modules
 
@@ -185,6 +192,29 @@ $ php-wasm-builder build node dbg mjs
 $ php-wasm-builder build web dbg mjs
 ```
 
+## SDL browser runtime
+
+Build the standalone [php-sdl-wasm runtime](/extensions/sdl.html) with a builder
+containing this development package:
+
+```sh
+php-wasm-builder build sdl mjs
+```
+
+This uses the normal Make build and writes the finished package to
+`packages/php-sdl-wasm` in your project. Select the PHP version and add-on flags
+in `.php-wasm-rc`. SDL_image, SDL_mixer, SDL_ttf, and OpenGL default to enabled;
+each can be disabled independently with the
+[SDL runtime options](/compiling/php-wasm-rc.html#sdl-runtime-options).
+
+In a source checkout, use `make sdl-mjs`. It packages the matching JavaScript,
+Wasm, preload data, and required native libraries together. Use `PhpSdl` from a
+versioned entry such as `php-sdl-wasm/php8.4-sdl.mjs`; neither runtime package
+depends on the other. Keep all generated package files together.
+
 ## PHP_DIST_DIR
 
-This will build the package inside of the current directory (or in `PHP_DIST_DIR`, *see [.php-wasm-rc](/compiling/php-wasm-rc.html) for more info.*)
+Ordinary runtime targets build inside the current directory, or in
+`PHP_DIST_DIR`; see [.php-wasm-rc](/compiling/php-wasm-rc.html) for details.
+The `sdl` target writes its complete package to `packages/php-sdl-wasm` as
+described above.

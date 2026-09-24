@@ -26,8 +26,8 @@ WORKER_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs
 WORKER_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWorker.js php${PHP_SUFFIX}-cgi-worker.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
 WEBVIEW_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiWebBase.mjs PhpCgiWebview.mjs php${PHP_SUFFIX}-cgi-webview.mjs ${CGI_MJS_HELPERS_WEB} ${MJS_HELPERS_WEB})
 WEBVIEW_CGI_JS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiWebBase.js  PhpCgiWebview.js php${PHP_SUFFIX}-cgi-webview.js ${CGI_CJS_HELPERS_WEB} ${CJS_HELPERS_WEB})
-NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs php${PHP_SUFFIX}-cgi-node.mjs ${CGI_MJS_HELPERS} ${MJS_HELPERS})
-NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js php${PHP_SUFFIX}-cgi-node.js ${CGI_CJS_HELPERS} ${CJS_HELPERS})
+NODE_CGI_MJS=$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.mjs PhpCgiNode.mjs php${PHP_SUFFIX}-cgi-node.mjs ${CGI_MJS_HELPERS} ${MJS_HELPERS} webTransactions.mjs)
+NODE_CGI_JS =$(addprefix ${PHP_CGI_DIST_DIR}/,PhpCgiBase.js  PhpCgiNode.js php${PHP_SUFFIX}-cgi-node.js ${CGI_CJS_HELPERS} ${CJS_HELPERS} webTransactions.js)
 
 WEB_CGI_MJS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES} ${HELPER_MJS}
 WEB_CGI_JS_ASSETS= $(addprefix ${PHP_CGI_ASSET_DIR}/,${PHP_ASSET_LIST}) ${EXTRA_MODULES}
@@ -140,7 +140,7 @@ ifneq (${PRE_JS_FILES},)
 CGI_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
 
-CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured
+CGI_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_LINK_DEPS}
 
 ${PHP_CGI_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_CGI_DIST_DIR}/

@@ -473,3 +473,37 @@ index 0ae34eb..61479ab 100644
  
    # Wrap libraries in --whole-archive, as needed.  We need to do this last
    # since otherwise the abort sorting won't make sense.
+
+diff --git a/src/parseTools.mjs b/src/parseTools.mjs
+--- a/src/parseTools.mjs
++++ b/src/parseTools.mjs
+@@ -733,7 +733,7 @@
+ Please update to new syntax.`);
+ 
+     if (DYNCALLS) {
+-      if (!hasExportedSymbol(`dynCall_${sig}`)) {
++      if (!MAIN_MODULE && !hasExportedSymbol(`dynCall_${sig}`)) {
+         if (ASSERTIONS) {
+           return `((${args}) => abort('Internal Error! Attempted to invoke wasm function pointer with signature "${sig}", but no such functions have gotten exported!'))`;
+         } else {
+@@ -747,12 +747,19 @@
+   }
+ 
+   if (DYNCALLS) {
+-    if (!hasExportedSymbol(`dynCall_${sig}`)) {
++    if (!MAIN_MODULE && !hasExportedSymbol(`dynCall_${sig}`)) {
+       if (ASSERTIONS) {
+         return `((${args}) => abort('Internal Error! Attempted to invoke wasm function pointer with signature "${sig}", but no such functions have gotten exported!'))`;
+       } else {
+         return `((${args}) => {} /* a dynamic function call to signature ${sig}, but there are no exported function pointers with that signature, so this path should never be taken. Build with ASSERTIONS enabled to validate. */)`;
+       }
++    }
++
++    // MAIN_MODULE dynCalls are registered by the dynamic linker at runtime.
++    // Binaryen adds them after base metadata was collected, so compile-time
++    // export detection must not replace live callbacks with empty functions.
++    if (MAIN_MODULE) {
++      return `((${args}) => dynCall("${sig}", ${funcPtr}, [${callArgs}]))`;
+     }
+ 
+     const dyncall = `dynCall_${sig}`;

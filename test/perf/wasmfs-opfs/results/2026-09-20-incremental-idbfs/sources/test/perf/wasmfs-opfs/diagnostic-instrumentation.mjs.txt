@@ -1,0 +1,315 @@
+/** Collects timings only while a named diagnostic phase is active. */
+export class FilesystemProfile
+{
+	phase = null;
+	entries = {};
+
+	/**
+	 * Records one completed API operation.
+	 * @param {string} operation API or backend method name.
+	 * @param {number} elapsed Wall time in milliseconds.
+	 * @param {object} [details] Counts, bytes and path information.
+	 */
+	record(operation, elapsed, details = {})
+	{
+		if(!this.phase) return;
+		const key = `${this.phase}:${operation}`;
+		const entry = this.entries[key] ??= {phase: this.phase, operation, calls: 0, ms: 0, bytes: 0, failures: 0, paths: []};
+		entry.calls++;
+		entry.ms += elapsed;
+		entry.bytes += details.bytes ?? 0;
+		entry.failures += Number(Boolean(details.failed));
+		for(const name of ['entries', 'preservedBytes', 'writes8192']) entry[name] = (entry[name] ?? 0) + (details[name] ?? 0);
+		if(details.path && entry.paths.length < 12 && !entry.paths.includes(details.path)) entry.paths.push(details.path);
+	}
+
+	/**
+	 * Runs and times one named phase, including its asynchronous completion.
+	 * @param {string} name Phase identifier.
+	 * @param {() => Promise<unknown>} callback Measured work.
+	 * @returns {Promise<object>} Result and operation counters.
+	 */
+	async measure(name, callback)
+	{
+		this.phase = name;
+		const started = performance.now();
+		try
+		{
+			const value = await callback();
+			return {name, wallMs: performance.now() - started, value, operations: Object.values(this.entries).filter(entry => entry.phase === name)};
+		}
+		finally
+		{ this.phase = null; }
+	}
+}
+
+/**
+ * Instruments browser OPFS APIs without changing their behavior.
+ * @param {FilesystemProfile} profile Diagnostic collector.
+ */
+export function instrumentOpfs(profile)
+{
+	const paths = new WeakMap();
+	const lengths = new Map();
+	const writers = new WeakMap();
+
+	/**
+	 * Wraps an asynchronous browser method, preserving its receiver and rejection.
+	 * @param {object} prototype API prototype.
+	 * @param {string} name Method name.
+	 * @param {string} operation Display name.
+	 * @param {(receiver: object, args: unknown[], result: unknown) => object|void} [after] Successful-result bookkeeping.
+	 */
+	function wrap(prototype, name, operation, after = () => ({}))
+	{
+		const original = prototype[name];
+		prototype[name] = async function(...args) {
+			const started = performance.now();
+			try
+			{
+				const result = await original.apply(this, args);
+				const elapsed = performance.now() - started;
+				const details = after(this, args, result);
+				profile.record(operation, elapsed, {path: paths.get(this), ...details});
+				return result;
+			}
+			catch(error)
+			{
+				profile.record(operation, performance.now() - started, {failed: true, path: paths.get(this)});
+				throw error;
+			}
+		};
+	}
+
+	wrap(Object.getPrototypeOf(navigator.storage), 'getDirectory', 'opfs.root', (parent, args, result) => { paths.set(result, ''); });
+	for(const name of ['getDirectoryHandle', 'getFileHandle'])
+	{
+		wrap(FileSystemDirectoryHandle.prototype, name, `opfs.${name}`, (parent, args, result) => {
+			const path = `${paths.get(parent) ?? ''}/${args[0]}`;
+			paths.set(result, path);
+			return {path};
+		});
+	}
+	wrap(FileSystemDirectoryHandle.prototype, 'removeEntry', 'opfs.removeEntry');
+	wrap(FileSystemFileHandle.prototype, 'getFile', 'opfs.getFile', (file, args, result) => {
+		paths.set(result, paths.get(file));
+		lengths.set(paths.get(file), result.size);
+	});
+	wrap(FileSystemFileHandle.prototype, 'createWritable', 'opfs.createWritable', (file, args, result) => {
+		const path = paths.get(file);
+		paths.set(result, path);
+		writers.set(result, {path});
+		return {preservedBytes: args[0]?.keepExistingData ? lengths.get(path) ?? 0 : 0};
+	});
+	wrap(FileSystemWritableFileStream.prototype, 'write', 'opfs.write', (writer, args) => {
+		const data = args[0]?.data ?? args[0];
+		const bytes = data?.byteLength ?? data?.size ?? 0;
+		const path = writers.get(writer)?.path;
+		lengths.set(path, Math.max(lengths.get(path) ?? 0, (args[0]?.position ?? 0) + bytes));
+		return {bytes, writes8192: Number(bytes === 8192)};
+	});
+	wrap(FileSystemWritableFileStream.prototype, 'truncate', 'opfs.truncate', (writer, args) => {
+		lengths.set(writers.get(writer)?.path, args[0]);
+	});
+	wrap(FileSystemWritableFileStream.prototype, 'close', 'opfs.close');
+	const slice = Blob.prototype.slice;
+	Blob.prototype.slice = function(...args) {
+		const result = slice.apply(this, args);
+		paths.set(result, paths.get(this));
+		return result;
+	};
+	wrap(Blob.prototype, 'arrayBuffer', 'opfs.blobRead', (blob, args, result) => ({bytes: result.byteLength}));
+}
+
+/**
+ * Measures IDBFS traversal, timestamp enumeration and changed-record writes.
+ * @param {object} php Native runtime with the original FS interface.
+ * @param {FilesystemProfile} profile Diagnostic collector.
+ * @returns {object} IDBFS backend and its mounted filesystems.
+ */
+export function instrumentIdbfs(php, profile)
+{
+	for(const name of ['put', 'delete'])
+	{
+		const original = IDBObjectStore.prototype[name];
+		IDBObjectStore.prototype[name] = function(...args) {
+			const started = performance.now();
+			const request = original.apply(this, args);
+			request.addEventListener('success', () => profile.record(`indexeddb.${name}:${this.transaction.db.name}`, performance.now() - started, {
+				bytes: name === 'put' ? args[0]?.contents?.byteLength ?? 0 : 0
+				, path: String(name === 'put' ? args[1] : args[0])
+			}));
+			return request;
+		};
+	}
+	const mounts = php.FS.getMounts(php.FS.root.mount).filter(mount => typeof mount.type.getRemoteSet === 'function');
+	const backend = mounts[0].type;
+	for(const name of ['getLocalSet', 'getRemoteSet', 'reconcile', 'storeRemoteEntry', 'removeRemoteEntry'])
+	{
+		const original = backend[name];
+		backend[name] = function(...args) {
+			const started = performance.now();
+			const callback = args.pop();
+			const mount = args[0]?.mountpoint ?? args[0]?.db?.name ?? args[1]?.db?.name ?? args[0]?.transaction?.db?.name ?? '';
+			args.push((...result) => {
+				profile.record(`idbfs.${name}:${mount}`, performance.now() - started, {
+					failed: result[0]
+					, entries: result[1]?.entries ? Object.keys(result[1].entries).length : 0
+					, bytes: name === 'storeRemoteEntry' ? args[2]?.contents?.byteLength ?? 0 : 0
+					, path: ['storeRemoteEntry', 'removeRemoteEntry'].includes(name) ? args[1] : undefined
+				});
+				return callback(...result);
+			});
+			return original.apply(this, args);
+		};
+	}
+	return {backend, mounts};
+}
+
+/**
+ * Tests a direct MEMFS-node traversal, checking equivalence before enabling it.
+ * Falls back to Emscripten's traversal if a nested mount is encountered.
+ * @param {object} php Runtime with a synchronized IDBFS filesystem.
+ * @param {object} backend Instrumented IDBFS backend.
+ * @param {object[]} mounts IDBFS mounts.
+ * @param {FilesystemProfile} profile Diagnostic collector.
+ * @returns {Promise<void>} Resolves after matching every path and timestamp.
+ */
+export async function useDirectLocalScan(php, backend, mounts, profile)
+{
+	const original = backend.getLocalSet;
+	const scan = mount => {
+		const entries = {};
+		const visit = (node, path) => {
+			if(node.mounted) throw new Error('Nested mount requires the original traversal');
+			entries[path] = {timestamp: node.node_ops.getattr(node).mtime};
+			if(php.FS.isDir(node.mode)) for(const child of Object.values(node.contents)) visit(child, `${path}/${child.name}`);
+		};
+		for(const child of Object.values(mount.root.contents)) visit(child, `${mount.mountpoint}/${child.name}`);
+		return {type: 'local', entries};
+	};
+	for(const mount of mounts)
+	{
+		const expected = await new Promise((resolve, reject) => original(mount, (error, result) => error ? reject(error) : resolve(result)));
+		const actual = scan(mount);
+		if(Object.keys(actual.entries).length !== Object.keys(expected.entries).length) throw new Error('Direct traversal entry count mismatch');
+		for(const [path, entry] of Object.entries(expected.entries))
+		{
+			if(actual.entries[path]?.timestamp.getTime() !== entry.timestamp.getTime()) throw new Error(`Direct traversal timestamp mismatch: ${path}`);
+		}
+	}
+	backend.getLocalSet = (mount, callback) => {
+		const started = performance.now();
+		let result;
+		try
+		{ result = scan(mount); }
+		catch
+		{ return original(mount, callback); }
+		profile.record(`idbfs.getLocalSet:${mount.mountpoint}`, performance.now() - started, {entries: Object.keys(result.entries).length});
+		callback(null, result);
+	};
+}
+
+/**
+ * Experimental mount dirtiness tracking; confined to this diagnostic runtime.
+ * Marks successful MEMFS mutations, including native writes and metadata changes.
+ * @param {object} php Runtime whose restored filesystem is already synchronized.
+ * @param {object[]} mounts IDBFS mount points.
+ * @returns {object} Dirty mount set and a flush that preserves failed generations.
+ */
+export function trackDirtyMounts(php, mounts)
+{
+	const dirty = new Map();
+	const paths = new Map();
+	const deleted = new Map();
+	const fallback = new Set();
+	const wrapped = new WeakMap();
+	const tracked = new Set(mounts);
+	const mark = node => {
+		if(!tracked.has(node?.mount)) return;
+		dirty.set(node.mount, (dirty.get(node.mount) ?? 0) + 1);
+		if(!paths.has(node.mount)) paths.set(node.mount, new Set());
+		if(!deleted.has(node.mount)) deleted.set(node.mount, new Set());
+		const path = php.FS.getPath(node);
+		if(path !== node.mount.mountpoint) paths.get(node.mount).add(path);
+		deleted.get(node.mount).delete(path);
+	};
+	const attach = node => {
+		for(const [ops, names] of [
+			[node.node_ops, ['mknod', 'setattr', 'rename', 'unlink', 'rmdir', 'symlink']]
+			, [node.stream_ops, ['write', 'allocate', 'msync']]
+		]){
+			if(!ops) continue;
+			if(!wrapped.has(ops)) wrapped.set(ops, new Set());
+			for(const name of names)
+			{
+				if(typeof ops[name] !== 'function' || wrapped.get(ops).has(name)) continue;
+				wrapped.get(ops).add(name);
+				const original = ops[name];
+				ops[name] = function(...args) {
+					const result = original.apply(this, args);
+					mark(args[0]?.node ?? args[0]);
+					if(name === 'rename') mark(args[1]);
+					if(name === 'mknod')
+					{ attach(result); mark(result); }
+					if(['unlink', 'rmdir'].includes(name) && tracked.has(args[0].mount))
+					{
+						const path = `${php.FS.getPath(args[0])}/${args[1]}`;
+						paths.get(args[0].mount).delete(path);
+						deleted.get(args[0].mount).add(path);
+					}
+					// Subtree renames need a complete journal. Keep the ordinary
+					// reconciliation fallback for renames and unsupported symlinks.
+					if(['rename', 'symlink'].includes(name)) fallback.add(args[0]?.mount);
+					return result;
+				};
+			}
+		}
+	};
+	const visit = node => {
+		attach(node);
+		if(php.FS.isDir(node.mode)) for(const child of Object.values(node.contents)) visit(child);
+	};
+	for(const mount of mounts) visit(mount.root);
+	return {
+		dirty
+		, async flush(incremental = false) {
+			const flushed = [];
+			for(const [mount, generation] of dirty)
+			{
+				if(!incremental || fallback.has(mount))
+				{
+					await new Promise((resolve, reject) => mount.type.syncfs(mount, false, error => error ? reject(error) : resolve()));
+				}
+				else
+				{
+					const entries = await Promise.all([...paths.get(mount)].map(async path => [path, await new Promise((resolve, reject) => mount.type.loadLocalEntry(path, (error, entry) => error ? reject(error) : resolve(entry)))]));
+					const db = await new Promise((resolve, reject) => mount.type.getDB(mount.mountpoint, (error, db) => error ? reject(error) : resolve(db)));
+					if(entries.length || deleted.get(mount).size) await new Promise((resolve, reject) => {
+						const transaction = db.transaction([mount.type.DB_STORE_NAME], 'readwrite');
+						transaction.oncomplete = () => resolve();
+						transaction.onerror = transaction.onabort = event => reject(event.target.error ?? new Error('Incremental commit aborted'));
+						const store = transaction.objectStore(mount.type.DB_STORE_NAME);
+						for(const [path, entry] of entries) mount.type.storeRemoteEntry(store, path, entry, error => {
+							if(error)
+{ transaction.abort(); reject(error); }
+						});
+						for(const path of deleted.get(mount)) mount.type.removeRemoteEntry(store, path, error => {
+							if(error)
+{ transaction.abort(); reject(error); }
+						});
+					});
+				}
+				if(dirty.get(mount) === generation)
+				{
+					dirty.delete(mount);
+					paths.delete(mount);
+					deleted.delete(mount);
+					fallback.delete(mount);
+				}
+				flushed.push(mount.mountpoint);
+			}
+			return flushed;
+		}
+	};
+}

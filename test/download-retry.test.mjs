@@ -142,7 +142,7 @@ test('retry-download preserves an existing output after exhausted retries', t =>
 });
 
 test('PECL extension downloads use retry-download', () => {
-	for(const makefile of ['packages/sdl/static.mak', 'packages/libyaml/static.mak'])
+	for(const makefile of ['packages/php-sdl-wasm/static.mak', 'packages/libyaml/static.mak'])
 	{
 		const contents = fs.readFileSync(path.join(repoRoot, makefile), 'utf8');
 

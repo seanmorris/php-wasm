@@ -1,0 +1,69 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "84475db59f264292b35d7c166630f359563248fe",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-text-lifetimes.json",
+  "change": "First pointer-lock candidate: immediate and asynchronous errors, owned cleanup and stale requests; legacy listener cleanup and event ordering require the follow-up build.",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4777472,
+      "gzip": 656863,
+      "brotli": 469713,
+      "sha256": "1d2c9aa34ec282e116d6ed6043a5f69c0f0378b8a161fb39b53412afe0cb4218"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47102630,
+      "gzip": 13357465,
+      "brotli": 9116288,
+      "sha256": "288ddeec0fcfc02e7808bb9c7f364847140a729e6a16370d1293ce5a1e050dc2"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781080,
+      "gzip": 657808,
+      "brotli": 469225,
+      "sha256": "994a54c289c92d2ed79e586d2b748bd6bf4e4a828174963f78b4081a74d70b66"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104547,
+      "gzip": 13359002,
+      "brotli": 9111711,
+      "sha256": "8850690212d6001b8a789433248decab74530869297fea8483410109f340ae34"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51880102,
+      "after": 51885627,
+      "increase": 5525,
+      "percent": 0.010649555006657466
+    },
+    "gzip": {
+      "before": 14014328,
+      "after": 14016810,
+      "increase": 2482,
+      "percent": 0.017710446052068996
+    },
+    "brotli": {
+      "before": 9586001,
+      "after": 9580936,
+      "increase": -5065,
+      "percent": -0.052837465800389546
+    }
+  }
+}

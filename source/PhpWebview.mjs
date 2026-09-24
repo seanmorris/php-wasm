@@ -1,8 +1,7 @@
 import { PhpBase } from './PhpBase.mjs';
-import { commitTransaction, startTransaction } from './webTransactions.mjs';
+import { commitTransaction, requestWebLock, startTransaction } from './webTransactions.mjs';
 
 const defaultVersion = '8.4';
-const defaultVariant = '';
 
 /**
  * WebView-hosted PHP wrapper.
@@ -16,11 +15,9 @@ export class PhpWebview extends PhpBase
 	constructor(args = {})
 	{
 		const version = args.version ?? defaultVersion;
-		const variant = args.variant ?? defaultVariant;
-		const vvId = version + variant;
-		const constructorArgs = {version, variant, ...args};
+		const constructorArgs = {version, ...args};
 
-		switch(vvId)
+		switch(version)
 		{
 			case '8.5':
 				super(import(`./php8.5-webview.mjs`), constructorArgs);
@@ -47,7 +44,7 @@ export class PhpWebview extends PhpBase
 				break;
 
 			default:
-				throw new Error(`Unsupported PHP runtime: ${vvId}`);
+				throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
 	}
 
@@ -78,8 +75,8 @@ export class PhpWebview extends PhpBase
 	{
 		await super.refresh();
 		const php = await this.binary;
-		await navigator.locks.request('php-wasm-fs-lock', () => {
-			new Promise((accept, reject) => {
+		await requestWebLock('php-wasm-fs-lock', () => {
+			return new Promise((accept, reject) => {
 				php.FS.syncfs(true, error => {
 					if(error) reject(error);
 					else accept();
@@ -108,7 +105,7 @@ export class PhpWebview extends PhpBase
 
 		this.queue.push([callback, params, _accept, _reject]);
 
-		navigator.locks.request('php-wasm-fs-lock', async () => {
+		requestWebLock('php-wasm-fs-lock', async () => {
 			if(!this.queue.length)
 			{
 				return;

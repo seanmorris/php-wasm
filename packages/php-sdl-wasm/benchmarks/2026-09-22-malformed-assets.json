@@ -1,0 +1,650 @@
+{
+  "baselineCommit": "17d386c8a1b7dfe83aff0d45c1f51a422d39a4f5",
+  "before": {
+    "stats": {
+      "startTime": "2026-09-22T10:33:06.445Z",
+      "duration": 40409.347,
+      "expected": 2,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "title": "truncated PNG, JPEG and BMP loads fail repeatedly and valid images still render",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 3,
+              "liveBytes": 3481928,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      },
+      {
+        "title": "truncated fonts fail repeatedly without retaining faces and valid UTF-8 still renders",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3830192,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3830192,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 0,
+              "liveBytes": 3752512,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      },
+      {
+        "title": "truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery",
+        "status": "failed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 46,
+              "liveBytes": 6513216,
+              "reservedBytes": 6734256,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 14
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 86,
+              "liveBytes": 6562176,
+              "reservedBytes": 6787504,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 54
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 126,
+              "liveBytes": 6611176,
+              "reservedBytes": 6844848,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 94
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 166,
+              "liveBytes": 6660200,
+              "reservedBytes": 6959536,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 134
+            }
+          ]
+        }
+      },
+      {
+        "title": "failed chunk format detection closes owned streams and preserves borrowed RWops",
+        "status": "failed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 111,
+              "liveBytes": 3458248,
+              "reservedBytes": 3469744,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 19
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 411,
+              "liveBytes": 3541576,
+              "reservedBytes": 3559856,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 79
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 711,
+              "liveBytes": 3624784,
+              "reservedBytes": 3641776,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 139
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 1011,
+              "liveBytes": 3708024,
+              "reservedBytes": 3727792,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 199
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "after": {
+    "stats": {
+      "startTime": "2026-09-22T10:47:10.415Z",
+      "duration": 19743.144,
+      "expected": 4,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "cases": [
+      {
+        "title": "truncated PNG, JPEG and BMP loads fail repeatedly and valid images still render",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 90,
+              "liveBytes": 3490400,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 3,
+              "liveBytes": 3481928,
+              "reservedBytes": 3654064,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      },
+      {
+        "title": "truncated fonts fail repeatedly without retaining faces and valid UTF-8 still renders",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3830192,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3830192,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 0,
+              "liveBytes": 3753992,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 0,
+              "liveBytes": 3752512,
+              "reservedBytes": 3834288,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      },
+      {
+        "title": "truncated WAV, Ogg and MP3 loads release decoder state and preserve mixer recovery",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6721968,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6721968,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 36,
+              "liveBytes": 6500976,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 0,
+              "liveBytes": 6474488,
+              "reservedBytes": 6730160,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      },
+      {
+        "title": "failed chunk format detection closes owned streams and preserves borrowed RWops",
+        "status": "passed",
+        "allocations": {
+          "native-allocations-before-cleanup": [
+            {
+              "step": "warm",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3461552,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ],
+          "native-allocations": [
+            {
+              "step": "warm",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3461552,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-1",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-2",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "batch-3",
+              "sdlAllocations": 36,
+              "liveBytes": 3437432,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            },
+            {
+              "step": "cleanup",
+              "sdlAllocations": 0,
+              "liveBytes": 3410920,
+              "reservedBytes": 3490224,
+              "wasmBytes": 134217728,
+              "fileDescriptors": 4
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "artifacts": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781084,
+      "sha256": "6a6cdfc669290a10bf3821fb9d1bdce262e18f76491259e6532287c4358b8eef"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104638,
+      "sha256": "b21433b0a7f47bddc1a372cefd9947908d26def14e1989861edb69e9c1e52ed7"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "patchSource": {
+    "baseline": "17d386c8a1b7dfe83aff0d45c1f51a422d39a4f5",
+    "patchSha256": "924796d98203e89e6171535224c37aedf13f20e3e8c03ce774730f9ca0e8a37f",
+    "baselineDirectory": "/app/.cache/sdl-make/runtime"
+  },
+  "rootCause": "Mix_LoadMusic_RW did not close an owned source when format detection/loading/opening failed.",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-throughput/runtime PHP_ASSET_DIR=.cache/sdl-throughput/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "buildExitCode": 0,
+  "notes": [
+    "The initial Make invocation failed before compilation because its output directory was missing; normal Make succeeded after creating it.",
+    "Truncated PNGs emit expected libpng diagnostics; the fixture validates them and rejects other stderr.",
+    "These finite malformed-asset and ownership cases are not a claim of general decoder leak freedom or fuzz coverage.",
+    "SDL_image unchecked short reads remain a separate follow-up (VO note 75)."
+  ],
+  "fixtureSha256": "21b73c5e96b29f001fa82819353965b372c1fe7af98447de1ef27a3d94b013d1",
+  "regression": {
+    "startTime": "2026-09-22T10:48:52.785Z",
+    "duration": 186496.948,
+    "expected": 32,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "editor": {
+    "startTime": "2026-09-22T10:51:03.629Z",
+    "duration": 54914.383,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "mainModuleExitCode": 0,
+  "makeTests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "nativeSourceSha256": "59c4937e8533f5b0ec23982048006612459922302970cdb4e5bbba6ad2d5f55e"
+}

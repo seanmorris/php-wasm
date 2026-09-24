@@ -13,6 +13,7 @@ import Libxml from 'php-wasm-libxml';
 import Libzip from 'php-wasm-libzip';
 import Mbstring from 'php-wasm-mbstring';
 import Openssl from 'php-wasm-openssl';
+import Phar from 'php-wasm-phar';
 import Simplexml from 'php-wasm-simplexml';
 import Sqlite from 'php-wasm-sqlite';
 import Tidy from 'php-wasm-tidy';
@@ -25,6 +26,7 @@ import { basePath } from '../lib/runtimePaths.worker.js';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { coordinateDemoDatabase, withDemoDatabaseLock } from '../lib/demoDatabaseRuntime.worker.js';
 import { createWorkbenchActions } from '../lib/queryWorkbench.worker.js';
+import { createEditorFilesystemActions } from '../lib/editorFilesystem.worker.js';
 
 const sharedLibs = [];
 const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
@@ -39,6 +41,7 @@ const dynamicSupportLibs = [
 	, Iconv
 	, Intl
 	, Openssl
+	, Phar
 	, Mbstring
 	, Sqlite
 	, Xml
@@ -144,6 +147,7 @@ const actions = {
 		].join('\n'))));
 	}
 	, ...createWorkbenchActions({withLock: withDemoDatabaseLock, withPGlite})
+	, ...createEditorFilesystemActions({withLock: withDemoDatabaseLock})
 };
 
 let phpLoader = null;

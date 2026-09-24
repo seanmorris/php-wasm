@@ -12,11 +12,11 @@ endif
 
 ifeq (${WITH_PHAR},static)
 CONFIGURE_FLAGS+= --enable-phar
-TEST_LIST+=packages/phar/test/basic.mjs
+TEST_LIST+=$(wildcard packages/phar/test/*.mjs)
 endif
 
 ifeq (${WITH_PHAR},dynamic)
-TEST_LIST+=packages/phar/test/basic.mjs
+TEST_LIST+=$(wildcard packages/phar/test/*.mjs)
 EXTRA_MODULES+= packages/phar/php${PHP_VERSION}-phar.so
 endif
 

@@ -1,0 +1,2536 @@
+{
+  "date": "2026-09-22",
+  "baselineCommit": "ed7afb8",
+  "change": "Only forward browser keyboard events while the supplied SDL canvas or owned IME target has focus; release held keys on blur",
+  "before": {
+    "native": {
+      "stats": {
+        "startTime": "2026-09-22T11:41:02.303Z",
+        "duration": 69986.05799999999,
+        "expected": 0,
+        "skipped": 0,
+        "unexpected": 4,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "",
+          "status": "failed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [],
+                "held": [
+                  4,
+                  225
+                ],
+                "mod": 1,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 309,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 318,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 339,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 11,
+                        "sym": 104,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 339,
+                      "windowID": 1,
+                      "text": "h"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 340,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 11,
+                        "sym": 104,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 341,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 8,
+                        "sym": 101,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 341,
+                      "windowID": 1,
+                      "text": "e"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 341,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 8,
+                        "sym": 101,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 342,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 342,
+                      "windowID": 1,
+                      "text": "l"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 343,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 343,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 343,
+                      "windowID": 1,
+                      "text": "l"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 344,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 18,
+                        "sym": 111,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "text": "o"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 18,
+                        "sym": 111,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 346,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 44,
+                        "sym": 32,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 346,
+                      "windowID": 1,
+                      "text": " "
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 347,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 44,
+                        "sym": 32,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 347,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 26,
+                        "sym": 119,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 347,
+                      "windowID": 1,
+                      "text": "w"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 348,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 26,
+                        "sym": 119,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 352,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 352,
+                      "windowID": 1,
+                      "text": "a"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 352,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 353,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 22,
+                        "sym": 115,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 353,
+                      "windowID": 1,
+                      "text": "s"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 356,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 22,
+                        "sym": 115,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 360,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 16,
+                        "sym": 109,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 360,
+                      "windowID": 1,
+                      "text": "m"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 360,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 16,
+                        "sym": 109,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 379,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 80,
+                        "sym": 1073741904,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 380,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 80,
+                        "sym": 1073741904,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 409,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 42,
+                        "sym": 8,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 410,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 42,
+                        "sym": 8,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          },
+          "firstError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('textbox', { name: 'Code editor' })\nExpected: \u001b[32m\"hello wam\"\u001b[39m\nReceived: \u001b[31m\"\"\u001b[39m\nTimeout:  5000ms"
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "",
+          "status": "failed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [],
+                "held": [
+                  4,
+                  225
+                ],
+                "mod": 1,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 265,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 280,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 315,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 11,
+                        "sym": 104,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 316,
+                      "windowID": 1,
+                      "text": "h"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 317,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 11,
+                        "sym": 104,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 321,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 8,
+                        "sym": 101,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 321,
+                      "windowID": 1,
+                      "text": "e"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 322,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 8,
+                        "sym": 101,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 325,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 325,
+                      "windowID": 1,
+                      "text": "l"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 327,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 329,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 329,
+                      "windowID": 1,
+                      "text": "l"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 331,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 15,
+                        "sym": 108,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 338,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 18,
+                        "sym": 111,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 338,
+                      "windowID": 1,
+                      "text": "o"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 339,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 18,
+                        "sym": 111,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 341,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 44,
+                        "sym": 32,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 342,
+                      "windowID": 1,
+                      "text": " "
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 342,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 44,
+                        "sym": 32,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 343,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 26,
+                        "sym": 119,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 343,
+                      "windowID": 1,
+                      "text": "w"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 344,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 26,
+                        "sym": 119,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "text": "a"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 345,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 346,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 22,
+                        "sym": 115,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 346,
+                      "windowID": 1,
+                      "text": "s"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 347,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 22,
+                        "sym": 115,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 348,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 16,
+                        "sym": 109,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "text",
+                    {
+                      "type": 771,
+                      "timestamp": 348,
+                      "windowID": 1,
+                      "text": "m"
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 348,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 16,
+                        "sym": 109,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 365,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 80,
+                        "sym": 1073741904,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 368,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 80,
+                        "sym": 1073741904,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 768,
+                      "timestamp": 383,
+                      "windowID": 1,
+                      "state": 1,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 42,
+                        "sym": 8,
+                        "mod": 0
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 385,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 42,
+                        "sym": 8,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          },
+          "firstError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveValue\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('textbox', { name: 'Code editor' })\nExpected: \u001b[32m\"hello wam\"\u001b[39m\nReceived: \u001b[31m\"\"\u001b[39m\nTimeout:  5000ms"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "failed",
+          "firstError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   4,\u001b[39m\n\u001b[31m+   225,\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  236 | \t\t\t\tdocument.body.append(input); input.focus();\n  237 | \t\t\t});\n> 238 | \t\t\texpect(await run(page, 'echo json_encode(array_keys(array_filter(SDL_GetKeyboardState())));')).toEqual([]);\n      | \t\t\t                                                                                               ^\n  239 | \t\t\tawait page.keyboard.up('a'); await page.keyboard.up('Shift');\n  240 | \t\t\tawait run(page, poll);\n  241 | \t\t\tconst input = page.getB"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "failed",
+          "firstError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   4,\u001b[39m\n\u001b[31m+   225,\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  236 | \t\t\t\tdocument.body.append(input); input.focus();\n  237 | \t\t\t});\n> 238 | \t\t\texpect(await run(page, 'echo json_encode(array_keys(array_filter(SDL_GetKeyboardState())));')).toEqual([]);\n      | \t\t\t                                                                                               ^\n  239 | \t\t\tawait page.keyboard.up('a'); await page.keyboard.up('Shift');\n  240 | \t\t\tawait run(page, poll);\n  241 | \t\t\tconst input = page.getB"
+        }
+      ]
+    },
+    "editor": {
+      "stats": {
+        "startTime": "2026-09-22T11:37:26.867Z",
+        "duration": 15696.165,
+        "expected": 0,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "typing in the code editor is independent of canvas keyboard controls",
+          "project": "",
+          "status": "failed",
+          "firstError": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoMatch\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected pattern: \u001b[32m/^\\/\\/ editor still works\\n/\u001b[39m\nReceived string:  \u001b[31m\"<?php //{\\\"autorun\\\":true,\\\"persist\\\":true,\\\"single-expression\\\":false,\\\"render-as\\\":\\\"text\\\",\\\"canvas\\\":true,\\\"variant\\\":\\\"_sdl\\\",\\\"extensionFlags\\\":0,\\\"assets\\\":\\\"sdl\\\"}\u00b7\u001b[39m\n\u001b[31m// All rendering, input polling, image decoding, font rasterization and mixing\u001b[39m\n\u001b[31m// happen in PHP. Vrzno supplies the browser's animation and DOM callbacks.\u001b[39m\n\u001b[31m$browser = new Vrzno;\u001b[39m\n\u001b[31m$shared = vrzno_env('shared');\u001b[39m\n\u001b[31mif($shared->sdlCleanup)\u001b[39m\n\u001b[31m{\u001b[39m\n\u001b[31m\t($shared->sdlCleanup)();\u001b[39m\n\u001b[31m}\u00b7\u001b[39m"
+        }
+      ]
+    }
+  },
+  "after": {
+    "focused": {
+      "stats": {
+        "startTime": "2026-09-22T11:46:12.309Z",
+        "duration": 20126.4,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 315,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 315,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 208,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 208,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    },
+    "native": {
+      "stats": {
+        "startTime": "2026-09-22T11:47:24.655Z",
+        "duration": 407416.234,
+        "expected": 87,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "SDL events retain mouse, keyboard, UTF-8, touch and controller payloads",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL streaming textures upload, lock, modulate and invalidate aliases safely",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL_ttf measures UTF-8 and provides native bold, outline, wrapping and glyph metrics",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL counters retain unsigned precision and measure elapsed time",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL standard controllers poll browser gamepads and survive close and disconnect",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "OpenGL scalar, vector-array and matrix uniforms reach the real WebGL program",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 242,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 242,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 296,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 296,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "real browser blur releases held keys and produces native focus events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "real touch motion and cancellation preserve native finger identity and coordinates",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fullscreen enters and restores the supplied canvas with no ID",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fullscreen enters and restores the supplied canvas with custom ID with decoy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fullscreen enters and restores the supplied canvas with shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fullscreen requests defer until a gesture and can be cancelled before activation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fullscreen blocked by browser policy returns a native error without changing flags",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active fullscreen cleanup survives destroy and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "pending fullscreen cleanup survives destroy and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active fullscreen cleanup survives video quit and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "pending fullscreen cleanup survives video quit and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active fullscreen cleanup survives PHP refresh and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "pending fullscreen cleanup survives PHP refresh and immediate window recreation",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "controller reconnection at a reused browser index keeps old handles detached",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "actual pointer lock and motion use the supplied canvas with no ID",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "actual pointer lock and motion use the supplied canvas with custom ID with decoy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "actual pointer lock and motion use the supplied canvas with shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active pointer lock cleanup survives destroy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pointer lock cleanup survives destroy",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active pointer lock cleanup survives video quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pointer lock cleanup survives video quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active pointer lock cleanup survives SDL quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pointer lock cleanup survives SDL quit",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active pointer lock cleanup survives PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "deferred pointer lock cleanup survives PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "sandbox pointer lock denial reports an SDL error without an unhandled rejection",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "unsupported pointer lock fails before SDL falls back to unavailable mouse warping",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "relative mode without a focused window fails with an SDL error",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "window cleanup preserves pointer lock owned by another element",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "combined fullscreen and pointer lock teardown preserves the replacement canvas",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "a retired request rejection cannot set the replacement window error",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "synchronous pointer lock rejection returns failure and permits a later retry",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "a late successful request respects the replacement window's disabled mode",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "a late successful request respects the replacement window's enabled mode",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "browser unlock preserves requested mode and a real click reacquires it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "a void-returning browser request reports real sandbox denial",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "retired legacy requests release late lock and remove their listeners",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "repeated rejected requests and window restarts keep native allocation counts flat",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "Promise rejection sets SDL error before an application event handler reads it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "void rejection sets SDL error before an application event handler reads it",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "non-Error browser failures produce SDL diagnostics without JavaScript exceptions",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "default keypress preserves astral Unicode and replaces unmatched surrogates",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "EditContext delivers Unicode on the actual fullscreen SDL canvas",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "fallback reports the fullscreen IME limitation and resumes after fullscreen",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "text input restores an existing EditContext and preserves an external replacement",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "explicit text start before window creation survives SDL_Init(SDL_INIT_VIDEO)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "explicit text start before window creation survives SDL_VideoInit()",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "receives composition and Unicode in PHP animation callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "receives composition and Unicode while a PHP frame loop is suspended",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "IME selection uses codepoints and commit is delivered once",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "cancelled composition does not commit and a new composition still works",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "stop cancels input, repeated start is idempotent, and other controls retain focus",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "candidate rectangle follows CSS scaling and a canvas inside a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_DestroyWindow($window);",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_VideoQuit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_Quit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL_CreateWindow preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "new SDL_Window preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "repeated start/stop releases editing listeners and has stable native allocation counts",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "explicit text start before window creation survives SDL_Init(SDL_INIT_VIDEO)",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "explicit text start before window creation survives SDL_VideoInit()",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "receives composition and Unicode in PHP animation callbacks",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "receives composition and Unicode while a PHP frame loop is suspended",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "commits complete Unicode in native UTF-8 chunks and keeps physical key events",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "IME selection uses codepoints and commit is delivered once",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "cancelled composition does not commit and a new composition still works",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "stop cancels input, repeated start is idempotent, and other controls retain focus",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "candidate rectangle follows CSS scaling and a canvas inside a shadow root",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_DestroyWindow($window);",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_VideoQuit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across SDL_Quit();",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "composition callbacks are retired across PHP refresh",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "SDL_CreateWindow preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "new SDL_Window preserves a replacement created by a reentrant browser focus callback",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "repeated start/stop releases editing listeners and has stable native allocation counts",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    },
+    "editor": {
+      "stats": {
+        "startTime": "2026-09-22T11:46:43.340Z",
+        "duration": 41574.002,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "typing in the code editor is independent of canvas keyboard controls",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "cube links reload from a fragment and its canvas fills the preview after resize",
+          "project": "",
+          "status": "passed"
+        },
+        {
+          "title": "cube supports input, audio, refresh, rerun and switching to sine",
+          "project": "",
+          "status": "passed"
+        }
+      ]
+    },
+    "platform": {
+      "stats": {
+        "startTime": "2026-09-22T11:47:25.065Z",
+        "duration": 55673.329,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "cases": [
+        {
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "firefox",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 145,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 145,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "firefox",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 150,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 150,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a document",
+          "project": "webkit",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 281,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 281,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "keyboard capture follows canvas focus in a shadow root",
+          "project": "webkit",
+          "status": "passed",
+          "evidence": {
+            "canvas-keyboard-focus": {
+              "lost": {
+                "events": [
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 235,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 4,
+                        "sym": 97,
+                        "mod": 1
+                      }
+                    }
+                  ],
+                  [
+                    "key",
+                    {
+                      "type": 769,
+                      "timestamp": 235,
+                      "windowID": 1,
+                      "state": 0,
+                      "repeat": 0,
+                      "keysym": {
+                        "scancode": 225,
+                        "sym": 1073742049,
+                        "mod": 0
+                      }
+                    }
+                  ]
+                ],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "outside": {
+                "events": [],
+                "held": [],
+                "mod": 0,
+                "flags": 1540
+              },
+              "value": "hello wam",
+              "keys": [
+                [
+                  "h",
+                  false
+                ],
+                [
+                  "e",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "l",
+                  false
+                ],
+                [
+                  "o",
+                  false
+                ],
+                [
+                  " ",
+                  false
+                ],
+                [
+                  "w",
+                  false
+                ],
+                [
+                  "a",
+                  false
+                ],
+                [
+                  "s",
+                  false
+                ],
+                [
+                  "m",
+                  false
+                ],
+                [
+                  "ArrowLeft",
+                  false
+                ],
+                [
+                  "Backspace",
+                  false
+                ]
+              ]
+            }
+          }
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "firefox",
+          "status": "passed"
+        },
+        {
+          "title": "active SDL text input leaves other page editors and shortcuts alone",
+          "project": "webkit",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "php8.4_sdl-web.mjs": {
+      "bytes": 4781330,
+      "sha256": "208026a0231efa0cfe73e028c1e349870d8b4a87e588954587ace1fe88912c11"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "bytes": 47104472,
+      "sha256": "7531c4e0b213f40153cbe6b01402fddd83dd30f725d4616e87c2fe6c72290314"
+    },
+    "php.data": {
+      "bytes": 30873664,
+      "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+    }
+  },
+  "sourceHashes": {
+    "packages/sdl/js/text-input.js": "f1462db66152d06591ac3886edc7212da4223ace8277e8feae0d35f0430b067f",
+    "test/browser/sdl-input.spec.mjs": "a384841af275338663332fa3f86f9924b86ff2b56a50fbc31802c4a7c98582fa",
+    "test/browser/sdl-text.spec.mjs": "345536caba848ffd4fd8ac24623058181cde050beaf2a973aa8c10bd7c4a1bc9",
+    "test/browser/demo-web-artifact.spec.mjs": "750c373bacdcb13fcb024122425fd84f48ecb01d20181a53a40a0630de9452de"
+  },
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-focus/runtime PHP_ASSET_DIR=.cache/sdl-focus/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "buildEvidence": {
+    "phpConfigureRuns": 0,
+    "nativeCompileCommands": 0,
+    "nativeLinks": 1
+  },
+  "checks": {
+    "makePackage": 11,
+    "mainModule": "passed",
+    "smNoSaccadeStyle": "passed"
+  },
+  "notes": [
+    "The 4 focused cases are included in the 87-case Chromium input/text/pointer/binding suite, not additional distinct cases.",
+    "Three actual SDL editor tests use the matching pair installed in packages/php-wasm and a restarted Vite dev server.",
+    "Firefox and WebKit each verify ordinary/shadow-root keyboard focus and the textarea text-input transport. Chromium also verifies EditContext.",
+    "The preceding runtime prevents all tested textarea typing and retains A/Shift after blur; the corrected runtime permits typing/editing/shortcuts and clears native held state.",
+    "Returning to the canvas resumes native keys and Unicode text; unrelated editors do not generate SDL input events.",
+    "Physical OS IME/controller coverage and the complete newest-source PHP/profile CI matrix remain pending."
+  ]
+}

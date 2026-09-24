@@ -12,11 +12,12 @@
   "files": [
     "*.mjs",
     "index.d.ts",
-    "test/basic.mjs",
+    "test/",
     "LICENSE",
     "NOTICE",
     "README.md",
     "static.mak",
+    "phar.mak",
     "*.so"
   ]
 }

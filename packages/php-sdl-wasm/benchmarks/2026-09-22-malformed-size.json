@@ -1,0 +1,70 @@
+{
+  "date": "2026-09-22",
+  "baseCommit": "17d386c8a1b7dfe83aff0d45c1f51a422d39a4f5",
+  "baselineRecord": "packages/sdl/benchmarks/2026-09-22-make.json",
+  "change": "Close owned streams when SDL_mixer chunk format detection fails",
+  "phpVersion": "8.4.1",
+  "emscriptenVersion": "6.0.6",
+  "profile": ".github/.env_8.4.static.ci",
+  "build": "make web-mjs ENV_FILE=.github/.env_8.4.static.ci WITH_SDL=1 PHP_DIST_DIR=.cache/sdl-make/runtime PHP_ASSET_DIR=.cache/sdl-make/runtime CPU_COUNT=4 MAX_LOAD=8",
+  "compression": {
+    "node": "v22.23.2",
+    "zlib": "1.3.1-e00f703",
+    "gzipLevel": 9,
+    "brotliQuality": 11,
+    "note": "Both artifacts recompressed with the same tool/version."
+  },
+  "baseline": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781084,
+      "gzip": 657829,
+      "brotli": 469341,
+      "sha256": "6a6cdfc669290a10bf3821fb9d1bdce262e18f76491259e6532287c4358b8eef"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104581,
+      "gzip": 13358960,
+      "brotli": 9114439,
+      "sha256": "60aaf44fb73968b6f29516d99cdbc3eae36471b1cb6be1a6ac95bde50e919d81"
+    }
+  },
+  "sizes": {
+    "php8.4_sdl-web.mjs": {
+      "raw": 4781084,
+      "gzip": 657829,
+      "brotli": 469341,
+      "sha256": "6a6cdfc669290a10bf3821fb9d1bdce262e18f76491259e6532287c4358b8eef"
+    },
+    "php8.4_sdl-web.mjs.wasm": {
+      "raw": 47104638,
+      "gzip": 13358925,
+      "brotli": 9112032,
+      "sha256": "b21433b0a7f47bddc1a372cefd9947908d26def14e1989861edb69e9c1e52ed7"
+    }
+  },
+  "unchangedIcu": {
+    "raw": 30873664,
+    "sha256": "9fb1ef96e88f1b30c0b70fd0757e0ac4c65b69a397330eeb958c2fd338ce3964"
+  },
+  "totals": {
+    "raw": {
+      "before": 51885665,
+      "after": 51885722,
+      "increase": 57,
+      "percent": 0.00010985693254581974
+    },
+    "gzip": {
+      "before": 14016789,
+      "after": 14016754,
+      "increase": -35,
+      "percent": -0.0002497005555266616
+    },
+    "brotli": {
+      "before": 9583780,
+      "after": 9581373,
+      "increase": -2407,
+      "percent": -0.0251153511453727
+    }
+  },
+  "sourceCommit": "401f6d9"
+}

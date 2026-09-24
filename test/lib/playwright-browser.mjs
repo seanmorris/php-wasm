@@ -1,22 +1,22 @@
 import fs from 'node:fs';
 
 const linuxCandidates = [
-	'/usr/bin/chromium',
-	'/usr/bin/chromium-browser',
-	'/usr/bin/google-chrome',
-	'/usr/bin/google-chrome-stable',
+	'/usr/bin/chromium'
+	, '/usr/bin/chromium-browser'
+	, '/usr/bin/google-chrome'
+	, '/usr/bin/google-chrome-stable'
 ];
 
 const macCandidates = [
-	'/Applications/Chromium.app/Contents/MacOS/Chromium',
-	'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+	'/Applications/Chromium.app/Contents/MacOS/Chromium'
+	, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 ];
 
 export const resolvePlaywrightExecutablePath = () => {
 	const envCandidates = [
-		process.env.PLAYWRIGHT_CHROMIUM_PATH,
-		process.env.CHROMIUM_BIN,
-		process.env.CHROME_BIN,
+		process.env.PLAYWRIGHT_CHROMIUM_PATH
+		, process.env.CHROMIUM_BIN
+		, process.env.CHROME_BIN
 	];
 
 	const platformCandidates = process.platform === 'darwin'
@@ -32,12 +32,14 @@ export const getPlaywrightLaunchOptions = () => {
 	const headless = !Boolean(Number(process.env.TEST_VISIBLE ?? 0));
 
 	return {
-		headless,
-		launchOptions: {
+		headless
+		, launchOptions: {
 			...(executablePath ? { executablePath } : {})
 			, args: [
-				'--no-sandbox',
-				...(headless ? ['--disable-gpu'] : [])
+				'--no-sandbox'
+				, ...(process.env.PHP_VARIANT === '_sdl'
+					? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader']
+					: headless ? ['--disable-gpu'] : [])
 			]
 		}
 	};

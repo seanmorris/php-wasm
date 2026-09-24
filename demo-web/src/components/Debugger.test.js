@@ -51,8 +51,8 @@ const { dumpGlobals, PhpDbgWeb } = vi.hoisted(() => {
 });
 
 vi.mock('../lib/runtimePaths', () => ({
-	libType: 'static',
-	buildType: 'static'
+	libType: 'static'
+	, buildType: 'static'
 }));
 
 vi.mock('php-dbg-wasm/PhpDbgWeb', () => ({
@@ -88,7 +88,7 @@ describe('Debugger', () => {
 			expect(dumpGlobals).toHaveBeenCalledTimes(1);
 		});
 
-		expect(screen.getByText('[Circular]')).toBeInTheDocument();
+		expect(await screen.findByText('[Circular]')).toBeInTheDocument();
 		expect(screen.getByText('foo:')).toBeInTheDocument();
 	});
 });

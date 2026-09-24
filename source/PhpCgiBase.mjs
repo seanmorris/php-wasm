@@ -2,6 +2,7 @@ import { parseResponse } from './parseResponse.mjs';
 import { breakoutRequest } from './breakoutRequest.mjs';
 import { fsOps } from './fsOps.mjs';
 import { resolveDependencies } from './resolveDependencies.mjs';
+import { requestWebLock } from './webTransactions.mjs';
 
 /**
  * An object representing a dynamically loaded data file.
@@ -91,9 +92,10 @@ class CookieJar
 	 */
 	constructor(rawCookies = '')
 	{
-		if(rawCookies)
+		if(!rawCookies) return;
+		for(const line of rawCookies.split('\n'))
 		{
-			this.load(rawCookies);
+			this.store(line.trim());
 		}
 	}
 
@@ -104,15 +106,17 @@ class CookieJar
 	/**
 	 * Stores a raw cookie string in the in-memory jar.
 	 * @param {string} rawCookie Raw `Set-Cookie` header value to persist.
+	 * @param {{created: number, expiresAt: ?number}|null} [saved] Saved lifetime, or null for a legacy jar entry.
 	 */
-	store(rawCookie)
+	store(rawCookie, saved)
 	{
-		if(!rawCookie || !rawCookie.trim())
+		if(typeof rawCookie !== 'string' || !rawCookie.trim())
 		{
 			return;
 		}
 
-		const cookie = {created: Date.now(), raw: rawCookie};
+		const created = saved?.created ?? Date.now();
+		const cookie = {created, raw: rawCookie};
 
 		const parts = rawCookie.split(';').map(p => p.trim()).filter(Boolean);
 
@@ -124,7 +128,7 @@ class CookieJar
 		const [nameValue, ...attributes] = parts;
 		const firstEqual = nameValue.indexOf('=');
 
-		if(firstEqual === -1)
+		if(firstEqual <= 0)
 		{
 			return;
 		}
@@ -173,8 +177,8 @@ class CookieJar
 					hasMaxAge = true;
 					cookie[lowerKey] = 1000 * parsedMaxAge;
 					expiresAt = parsedMaxAge <= 0
-						? cookie.created
-						: cookie.created + cookie[lowerKey];
+						? created
+						: created + cookie[lowerKey];
 				}
 			}
 			else
@@ -183,12 +187,27 @@ class CookieJar
 			}
 		}
 
+		if(saved === null && hasMaxAge)
+		{
+			// Old jars recorded no receipt time. Restarting must not renew them.
+			this.cookies.delete(cookie.name);
+			return;
+		}
+
+		if(saved)
+		{
+			if(saved.expiresAt === null && expiresAt !== null) return;
+			expiresAt = saved.expiresAt;
+		}
+
+		cookie.created = created;
+		cookie.raw = rawCookie;
 		if(expiresAt !== null)
 		{
 			cookie.expiresAt = expiresAt;
 		}
 
-		if(cookie.expiresAt !== undefined && cookie.expiresAt <= cookie.created)
+		if(cookie.expiresAt !== undefined && cookie.expiresAt <= Date.now())
 		{
 			this.cookies.delete(cookie.name);
 			return;
@@ -232,18 +251,48 @@ class CookieJar
 	 */
 	dump(path = null)
 	{
-		return this.retrieve(path).map(c => c.raw).join('\n');
+		return JSON.stringify({
+			version: 1
+			, cookies: this.retrieve(path).map(cookie => ({
+				raw: cookie.raw, created: cookie.created
+				, expiresAt: cookie.expiresAt ?? null
+			}))
+		});
 	}
 
 	/**
-	 * Hydrates the jar from serialized cookie lines.
-	 * @param {string} rawCookies Newline-delimited raw cookie strings to restore.
+	 * Restores a cookie snapshot or migrates a legacy newline-delimited jar.
+	 * @param {string} rawCookies Persisted cookie snapshot to restore.
 	 */
 	load(rawCookies)
 	{
-		for(const line of rawCookies.trim().split('\n').map(line => line.trim()).filter(Boolean))
+		if(typeof rawCookies !== 'string') return;
+		const serialized = rawCookies.trim();
+		if(serialized.startsWith('{') || serialized.startsWith('['))
 		{
-			this.store(line);
+			let snapshot;
+			try
+			{
+				snapshot = JSON.parse(serialized);
+			}
+			catch
+			{
+				return;
+			}
+			if(snapshot?.version !== 1 || !Array.isArray(snapshot.cookies)) return;
+			this.cookies.clear();
+			for(const entry of snapshot.cookies)
+			{
+				if(!entry || typeof entry.raw !== 'string' || !Number.isFinite(entry.created)
+					|| (entry.expiresAt !== null && !Number.isFinite(entry.expiresAt))) continue;
+				this.store(entry.raw, entry);
+			}
+			return;
+		}
+		this.cookies.clear();
+		for(const line of serialized.split('\n'))
+		{
+			this.store(line.trim(), null);
 		}
 	}
 
@@ -747,16 +796,18 @@ export class PhpCgiBase
 
 	/**
 	 * Runs before each PHP request.
+	 * @param {object} php Runtime captured by the request coordinator.
 	 * @returns {Promise<void>} Resolves when any request pre-work has completed.
 	 */
-	async _beforeRequest()
+	async _beforeRequest(php)
 	{}
 
 	/**
 	 * Runs after each successful PHP request.
+	 * @param {object} php Runtime captured by the request coordinator.
 	 * @returns {Promise<void>} Resolves when any request cleanup has completed.
 	 */
-	async _afterRequest()
+	async _afterRequest(php)
 	{}
 
 	/**
@@ -766,14 +817,39 @@ export class PhpCgiBase
 	 */
 	async request(request)
 	{
+		let response;
 		try
 		{
-			return await this._request(request);
+			response = await this._withRequestLock(php => this._request(request, php));
 		}
 		catch(error)
 		{
 			// Initialization of a replacement runtime can fail before PHP runs.
-			return this._errorResponse(request, error);
+			response = this._errorResponse(request, error);
+		}
+		if(response instanceof Response) this.onRequest(request, response);
+		return response;
+	}
+
+	/**
+	 * Acquires a ready runtime without waiting for its initialization while locked.
+	 * @protected
+	 * @param {(php: object) => Promise<Response|string|undefined>} callback Request work using the captured runtime.
+	 * @param {string} [lockName] Lock shared with operations that access this runtime.
+	 * @returns {Promise<Response|string|undefined>} Response after the request has completed.
+	 */
+	async _withRequestLock(callback, lockName = 'php-wasm-request-lock')
+	{
+		const changed = Symbol('runtime changed');
+		while(true)
+		{
+			const binary = this.binary;
+			const php = await binary;
+			const result = await requestWebLock(lockName, async () => {
+				if(this.binary !== binary) return changed;
+				return callback(php);
+			});
+			if(result !== changed) return result;
 		}
 	}
 
@@ -781,9 +857,10 @@ export class PhpCgiBase
 	 * Routes one request and serializes its PHP execution.
 	 * @private
 	 * @param {RuntimeRequest} request Request to serve.
+	 * @param {object} php Runtime captured by the request lock owner.
 	 * @returns {Promise<Response|string|undefined>} Generated response.
 	 */
-	async _request(request)
+	async _request(request, php)
 	{
 		const {
 			url
@@ -804,15 +881,12 @@ export class PhpCgiBase
 
 				if(this.staticCacheTime > 0 && this.staticCacheTime > Date.now() - cacheTime)
 				{
-					this.onRequest(request, cached);
 					return cached;
 				}
 			}
 		}
 
-		const php = await this.binary;
-
-		await this._beforeRequest();
+		await this._beforeRequest(php);
 
 		let docroot = this.docroot;
 		let vHostEntrypoint, vHostPrefix = this.prefix;
@@ -829,22 +903,32 @@ export class PhpCgiBase
 		}
 
 		const rewrite = this.rewrite(url.pathname);
-		let rewritePath = typeof rewrite === 'string'
+		const rewritePath = typeof rewrite === 'string'
 			? rewrite
 			: rewrite?.path ?? url.pathname;
+		const explicitScript = rewrite && typeof rewrite === 'object';
+		const routePrefix = vHostPrefix || this.prefix;
+		const relativePath = explicitScript ? rewritePath : rewritePath.substr(routePrefix.length);
+		let path = joinPaths(docroot, relativePath);
+		let scriptName = explicitScript ? rewrite.scriptName : joinPaths(routePrefix, relativePath);
+		let pathInfo = '';
 
-		let scriptName, path;
-
-		if(rewrite && typeof rewrite === 'object')
+		// Archive members belong to PHP's phar:// wrapper, not Emscripten FS.
+		// Only split at an existing file; directories may also end in .phar.
+		for(const match of relativePath.matchAll(/\.phar\//g))
 		{
-			scriptName = rewrite.scriptName;
-			path = docroot + rewrite.path;
-		}
-		else
-		{
+			const archiveEnd = match.index + '.phar'.length;
+			const archiveRelativePath = relativePath.slice(0, archiveEnd);
+			const archivePath = joinPaths(docroot, archiveRelativePath);
+			const aboutArchive = php.FS.analyzePath(archivePath);
 
-			path = joinPaths(docroot, rewritePath.substr((vHostPrefix || this.prefix).length));
-			scriptName = path;
+			if(aboutArchive.exists && php.FS.isFile(aboutArchive.object.mode))
+			{
+				path = archivePath;
+				pathInfo = relativePath.slice(archiveEnd);
+				scriptName = explicitScript ? scriptName : joinPaths(routePrefix, archiveRelativePath);
+				break;
+			}
 		}
 
 		let aboutPath = php.FS.analyzePath(path);
@@ -863,29 +947,16 @@ export class PhpCgiBase
 			if(aboutIndex.exists && php.FS.isFile(aboutIndex.object.mode))
 			{
 				path = indexPath;
-				rewritePath = joinPaths(rewritePath, 'index.php');
-				scriptName = rewrite && typeof rewrite === 'object'
-					? rewrite.scriptName
-					: path;
+				scriptName = explicitScript ? scriptName : joinPaths(scriptName, 'index.php');
 				aboutPath = aboutIndex;
 			}
 		}
 
-		if(vHostEntrypoint)
-		{
-			if(!aboutPath.exists || aboutPath.object.isFolder) // Rewrite SCRIPT_NAME to the entrypoint if we don't have a php file...
-			{
-				scriptName = joinPaths(vHostPrefix, vHostEntrypoint);
-			}
-			else
-			{
-				scriptName = joinPaths(vHostPrefix, rewritePath.substr(vHostPrefix.length));
-			}
-		}
-
 		const extension = path.split('.').pop();
+		const entrypoint = vHostEntrypoint ?? this.entrypoint ?? 'index.php';
+		const archiveFallback = !aboutPath.exists && entrypoint.endsWith('.phar');
 
-		if(extension !== 'php' && extension !== 'phar')
+		if((extension !== 'php' && extension !== 'phar') || archiveFallback)
 		{
 			if(aboutPath.exists && php.FS.isFile(aboutPath.object.mode))
 			{
@@ -901,7 +972,6 @@ export class PhpCgiBase
 					const cache = await caches.open('static-v1');
 					cache.put(url, response.clone());
 				}
-				this.onRequest(request, response);
 				return response;
 			}
 			else if(aboutPath.exists && php.FS.isDir(aboutPath.object.mode) && '/' !== originalPath[ -1 + originalPath.length ])
@@ -910,7 +980,13 @@ export class PhpCgiBase
 			}
 
 			// Rewrite to entrypoint or index.php
-			path = joinPaths(docroot, vHostEntrypoint ?? 'index.php');
+			path = joinPaths(docroot, entrypoint);
+			scriptName = explicitScript ? scriptName : joinPaths(routePrefix, entrypoint);
+
+			if(path.endsWith('.phar'))
+			{
+				pathInfo = '/' + noLeadingSlash(relativePath);
+			}
 		}
 
 		// Ensure query parameters are preserved.
@@ -919,7 +995,6 @@ export class PhpCgiBase
 		if(this.maxRequestAge > 0 && Date.now() - requestTimes.get(request) > this.maxRequestAge)
 		{
 			const response = new Response('408: Request Timed Out.', { status: 408 });
-			this.onRequest(request, response);
 			return response;
 		}
 
@@ -938,128 +1013,118 @@ export class PhpCgiBase
 			}
 		}
 
-		const requestLock = globalThis.navigator?.locks?.request
-			? callback => globalThis.navigator.locks.request('php-wasm-request-lock', callback)
-			: callback => callback();
+		let exitCode = -1;
 
-		return requestLock(async () => {
-			// A preceding failed request may have replaced the instance while this
-			// request was queued. Static responses above do not need this lock.
-			const php = await this.binary;
-			let exitCode = -1;
+		try
+		{
+			this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '').split('') : [];
+			this.output = [];
+			this.error = [];
 
-			try
+			const selfUrl = new URL(String(globalThis.location || request.url));
+
+			putEnv(php, 'PHP_VERSION', this.phpVersion);
+			putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
+			putEnv(php, 'PHPRC', '/php.ini');
+
+			for(const [name, value] of Object.entries(this.env))
 			{
-				this.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '').split('') : [];
-				this.output = [];
-				this.error = [];
-
-				const selfUrl = new URL(String(globalThis.location || request.url));
-
-				putEnv(php, 'PHP_VERSION', this.phpVersion);
-				putEnv(php, 'PHP_INI_SCAN_DIR', `/config:/preload:${docroot}`);
-				putEnv(php, 'PHPRC', '/php.ini');
-
-				for(const [name, value] of Object.entries(this.env))
-				{
-					putEnv(php, name, value);
-				}
-
-				const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
-
-				putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
-				putEnv(php, 'REQUEST_METHOD', method);
-				putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
-				putEnv(php, 'HTTP_HOST', selfUrl.host);
-				putEnv(php, 'REQUEST_SCHEME', protocol);
-				putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
-
-				putEnv(php, 'DOCUMENT_ROOT', docroot);
-				putEnv(php, 'REQUEST_URI', originalPath);
-				putEnv(php, 'SCRIPT_NAME', scriptName);
-				putEnv(php, 'SCRIPT_FILENAME', path);
-				putEnv(php, 'PATH_TRANSLATED', path);
-
-				putEnv(php, 'QUERY_STRING', get);
-				putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
-				putEnv(php, 'REDIRECT_STATUS', '200');
-				putEnv(php, 'CONTENT_TYPE', contentType);
-				putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
-
-				this.output = [];
-
-				exitCode = Number(await php.ccall(
-					'wasm_sapi_cgi_main'
-					, 'number'
-					, ['number', 'number']
-					, [0, 0]
-					, {async: true}
-				));
-
-				++this.count;
-
-				const parsedResponse = parseResponse(this.output);
-
-				let status = 200;
-
-				if(parsedResponse.headers.has('Status'))
-				{
-					status = Number(parsedResponse.headers.get('Status').substr(0, 3));
-				}
-
-				for(const rawCookie of parsedResponse.headers.getSetCookie())
-				{
-					this.cookieJar.store(rawCookie);
-				}
-
-				php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
-
-				const headers = new Headers(parsedResponse.headers);
-
-				if(!headers.has('Content-type'))
-				{
-					if(extension in this.types)
-					{
-						headers.set('Content-type', this.types[extension]);
-					}
-					else
-					{
-						headers.set('Content-type', 'text/html; charset=utf-8');
-					}
-				}
-
-				if(parsedResponse.headers.has('Location'))
-				{
-					headers.set('Location', parsedResponse.headers.get('Location'));
-				}
-
-				const response = new Response(parsedResponse.body || '', {status, headers});
-
-				this.onRequest(request, response);
-
-				return response;
+				putEnv(php, name, value);
 			}
-			catch(error)
+
+			const protocol = selfUrl.protocol.substr(0, selfUrl.protocol.length - 1);
+
+			putEnv(php, 'SERVER_SOFTWARE', globalThis.navigator ? globalThis.navigator.userAgent : (globalThis.process ? 'Node ' + globalThis.process.version : 'Javascript - Unknown'));
+			putEnv(php, 'REQUEST_METHOD', method);
+			putEnv(php, 'REMOTE_ADDR', '127.0.0.1');
+			putEnv(php, 'HTTP_HOST', selfUrl.host);
+			putEnv(php, 'REQUEST_SCHEME', protocol);
+			putEnv(php, 'HTTPS', protocol === 'https' ? 'on' : 'off');
+
+			putEnv(php, 'DOCUMENT_ROOT', docroot);
+			putEnv(php, 'REQUEST_URI', originalPath);
+			putEnv(php, 'SCRIPT_NAME', scriptName);
+			putEnv(php, 'SCRIPT_FILENAME', path);
+			putEnv(php, 'PATH_INFO', pathInfo || this.env.PATH_INFO || '');
+			putEnv(php, 'PATH_TRANSLATED', path);
+
+			putEnv(php, 'QUERY_STRING', get);
+			putEnv(php, 'HTTP_COOKIE', this.cookieJar.toEnv());
+			putEnv(php, 'REDIRECT_STATUS', '200');
+			putEnv(php, 'CONTENT_TYPE', contentType);
+			putEnv(php, 'CONTENT_LENGTH', String(this.input.length));
+
+			this.output = [];
+
+			exitCode = Number(await php.ccall(
+				'wasm_sapi_cgi_main'
+				, 'number'
+				, ['number', 'number']
+				, [0, 0]
+				, {async: true}
+			));
+
+			++this.count;
+
+			const parsedResponse = parseResponse(this.output);
+
+			let status = 200;
+
+			if(parsedResponse.headers.has('Status'))
 			{
-				return this._errorResponse(request, error);
+				status = Number(parsedResponse.headers.get('Status').substr(0, 3));
 			}
-			finally
+
+			for(const rawCookie of parsedResponse.headers.getSetCookie())
 			{
-				if(exitCode === 0)
+				this.cookieJar.store(rawCookie);
+			}
+
+			php.FS.writeFile('/config/.cookies', this.cookieJar.dump());
+
+			const headers = new Headers(parsedResponse.headers);
+
+			if(!headers.has('Content-type'))
+			{
+				if(extension in this.types)
 				{
-					await this._afterRequest();
+					headers.set('Content-type', this.types[extension]);
 				}
 				else
 				{
-					console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
-					console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
-
-					// Keep the failed replacement promise on binary for the next caller,
-					// while handling this background refresh's rejection immediately.
-					this.refresh().catch(error => console.error(error));
+					headers.set('Content-type', 'text/html; charset=utf-8');
 				}
 			}
-		});
+
+			if(parsedResponse.headers.has('Location'))
+			{
+				headers.set('Location', parsedResponse.headers.get('Location'));
+			}
+
+			const response = new Response(parsedResponse.body || '', {status, headers});
+
+			return response;
+		}
+		catch(error)
+		{
+			return this._errorResponse(request, error);
+		}
+		finally
+		{
+			if(exitCode === 0)
+			{
+				await this._afterRequest(php);
+			}
+			else
+			{
+				console.warn(new TextDecoder().decode(new Uint8Array(this.output).buffer));
+				console.error(new TextDecoder().decode(new Uint8Array(this.error).buffer));
+
+				// Keep the failed replacement promise on binary for the next caller,
+				// while handling this background refresh's rejection immediately.
+				this.refresh().catch(error => console.error(error));
+			}
+		}
 	}
 
 	/**
@@ -1092,8 +1157,6 @@ export class PhpCgiBase
 			}
 		);
 
-		this.onRequest(request, response);
-
 		return response;
 	}
 
@@ -1104,17 +1167,18 @@ export class PhpCgiBase
 	 */
 	analyzePath(path)
 	{
-		return this._enqueue(fsOps.analyzePath, [this.binary, path]);
+		return this._enqueue(fsOps.analyzePath, [this.binary, path], true);
 	}
 
 	/**
 	 * Lists a directory in the CGI virtual filesystem.
 	 * @param {string} path Directory path to list.
+	 * @param {{withFileTypes?: boolean}} [options] Include serializable entry types.
 	 * @returns {Promise<PhpRuntimeValue>} Directory entries for the path.
 	 */
-	readdir(path)
+	readdir(path, options)
 	{
-		return this._enqueue(fsOps.readdir, [this.binary, path]);
+		return this._enqueue(fsOps.readdir, [this.binary, path, options], true);
 	}
 
 	/**
@@ -1125,7 +1189,7 @@ export class PhpCgiBase
 	 */
 	readFile(path, options)
 	{
-		return this._enqueue(fsOps.readFile, [this.binary, path, options]);
+		return this._enqueue(fsOps.readFile, [this.binary, path, options], true);
 	}
 
 	/**
@@ -1135,7 +1199,7 @@ export class PhpCgiBase
 	 */
 	stat(path)
 	{
-		return this._enqueue(fsOps.stat, [this.binary, path]);
+		return this._enqueue(fsOps.stat, [this.binary, path], true);
 	}
 
 	/**

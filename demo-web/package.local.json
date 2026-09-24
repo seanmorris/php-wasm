@@ -19,6 +19,7 @@
     "php-wasm-tidy": "../packages/tidy",
     "php-wasm-xml": "../packages/xml",
     "php-wasm-yaml": "../packages/libyaml",
-    "php-wasm-zlib": "../packages/zlib"
+    "php-wasm-zlib": "../packages/zlib",
+    "php-sdl-wasm": "../packages/php-sdl-wasm"
   }
 }

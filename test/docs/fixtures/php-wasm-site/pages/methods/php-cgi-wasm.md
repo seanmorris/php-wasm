@@ -8,8 +8,9 @@ microdata:
         - PhpCgiWorker
 ---
 <!--
-Vendored from php-wasm-site commit 3ba91aac4946c53c89d0fdfa6ea10eadd8d27684
-Source: https://github.com/seanmorris/php-wasm-site/blob/3ba91aac4946c53c89d0fdfa6ea10eadd8d27684/pages/methods/php-cgi-wasm.md
+Vendored from the php-wasm-site working tree based on commit bdf1555ad207242ac09292ff05b125f006a9d049
+Local update: restored bounded browser CGI filesystem batching with durable acknowledgments.
+Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/methods/php-cgi-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpCgiBase.mjs
@@ -223,7 +224,13 @@ const php = new PhpCgiWorker({
 
 *boolean*
 
-Defaults to `true`. Controls whether request handling and filesystem operations automatically wrap themselves in filesystem transactions.
+Defaults to `true`. Controls whether queued browser CGI filesystem operations
+share automatically managed transactions. The queue waits up to 25 ms after
+becoming idle for more work. Entirely read-only batches hydrate without
+flushing; any mutation makes the batch writable. All calls wait for the batch
+commit. With `false`, the caller owns
+transaction boundaries and coordination. HTTP request synchronization is handled
+separately. See [Transactions](/filesystem/transactions.html).
 
 ### maxRequestAge
 
@@ -331,7 +338,7 @@ This will discard the current PHP instance and spin up a brand new one.
 `PhpCgiBase` also exposes:
 
 - `analyzePath(path)`
-- `readdir(path)`
+- `readdir(path, options?)`
 - `readFile(path, options)`
 - `stat(path)`
 - `mkdir(path)`
@@ -345,3 +352,16 @@ This will discard the current PHP instance and spin up a brand new one.
 - `getEnvs()`
 - `setEnvs(env)`
 - `storeInit()`
+
+`readdir` returns `string[]` by default. With `{withFileTypes: true}`, it returns
+`Array<{name: string, isFolder: boolean}>`. Both forms include `.` and `..`;
+classification follows links and metadata errors reject the call.
+
+With automatic browser transactions enabled, concurrent filesystem calls can
+share one refresh and commit. An entirely read-only batch does not flush;
+all calls wait for the shared commit and reject if it fails. The idle batching
+window is 25 ms. Batches commit after 64 operations or a 250 ms processing
+window, checked between callbacks. Sequentially awaited calls use separate
+batches. A typed directory
+listing obtains all entry types in one call. HTTP request synchronization is
+separate. See [Transactions](/filesystem/transactions.html).

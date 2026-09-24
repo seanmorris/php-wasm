@@ -1,5 +1,6 @@
 export type PhpRuntimeVersion = '8.0' | '8.1' | '8.2' | '8.3' | '8.4' | '8.5';
-export type PhpRuntimeVariant = '' | '_sdl';
+/** @deprecated Select a runtime package instead. */
+export type PhpRuntimeVariant = never;
 export type PhpRuntimeValue = object | string | number | boolean | Uint8Array | null | undefined | void;
 export type PhpTemplateValue = PhpRuntimeValue | Array<PhpRuntimeValue>;
 
@@ -27,7 +28,8 @@ export interface PhpVhost {
 export interface PhpRuntimeArgs {
 	autoTransaction?: boolean;
 	version?: PhpRuntimeVersion;
-	variant?: PhpRuntimeVariant;
+	/** @deprecated Install php-sdl-wasm and use PhpSdl for SDL. */
+	variant?: never;
 	interactive?: boolean;
 	script?: string;
 	code?: string;
@@ -74,6 +76,17 @@ export interface PhpBinaryRuntime {
 	FS?: {
 		syncfs?: (populate: boolean, callback: (error?: Error) => void) => void;
 	} & object;
+}
+
+/** Options for listing names or serializable directory entry types. */
+export interface PhpReadDirectoryOptions {
+	withFileTypes?: boolean;
+}
+
+/** Entry type resolved using the same link-following behavior as analyzePath. */
+export interface PhpDirectoryEntry {
+	name: string;
+	isFolder: boolean;
 }
 
 /** Serializable filesystem node metadata returned by mkdir and analyzePath. */

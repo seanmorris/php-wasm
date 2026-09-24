@@ -17,6 +17,7 @@
     "php-wasm-tidy": "0.0.9-alpha-27",
     "php-wasm-xml": "0.0.9-alpha-27",
     "php-wasm-yaml": "0.0.9-alpha-27",
-    "php-wasm-zlib": "0.0.9-alpha-27"
+    "php-wasm-zlib": "0.0.9-alpha-27",
+    "php-sdl-wasm": "^0.1.0"
   }
 }

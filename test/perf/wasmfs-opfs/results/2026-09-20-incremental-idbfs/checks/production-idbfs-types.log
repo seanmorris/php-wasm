@@ -1,0 +1,89 @@
+
+> php-wasm-builder@0.1.0 test:types
+> npm exec --yes --package=deno@2.5.6 -- node --test test/types/*.test.mjs
+
+TAP version 13
+# Subtest: PhpCliNode resolves numeric native returns and exit statuses
+ok 1 - PhpCliNode resolves numeric native returns and exit statuses
+  ---
+  duration_ms: 1.773216
+  type: 'test'
+  ...
+# Subtest: PhpCliWeb resolves numeric native returns and exit statuses
+ok 2 - PhpCliWeb resolves numeric native returns and exit statuses
+  ---
+  duration_ms: 1.017763
+  type: 'test'
+  ...
+# Subtest: Node CLI preserves its undefined result for errors without an exit status
+ok 3 - Node CLI preserves its undefined result for errors without an exit status
+  ---
+  duration_ms: 0.337511
+  type: 'test'
+  ...
+# Subtest: browser CLI rejects errors without an exit status
+ok 4 - browser CLI rejects errors without an exit status
+  ---
+  duration_ms: 0.760313
+  type: 'test'
+  ...
+# Subtest: Deno 2.5.6 checks fresh source and copied wrappers, and catches the original three errors
+ok 5 - Deno 2.5.6 checks fresh source and copied wrappers, and catches the original three errors
+  ---
+  duration_ms: 1117.321472
+  type: 'test'
+  ...
+# Subtest: source declarations check without skipLibCheck and generated CJS declarations are current
+ok 6 - source declarations check without skipLibCheck and generated CJS declarations are current
+  ---
+  duration_ms: 4295.655914
+  type: 'test'
+  ...
+# php8.0-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# MOVING php8.0-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.1-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# EXISTS php8.1-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.1-cloudflare-runtime.mjs.wasm: OK
+# c6006650182737e2b09bada7fc0774812b802917.wasm: OK
+# MOVING php8.1-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.2-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# EXISTS php8.2-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.2-cloudflare-runtime.mjs.wasm: OK
+# c6006650182737e2b09bada7fc0774812b802917.wasm: OK
+# MOVING php8.2-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.3-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# EXISTS php8.3-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.3-cloudflare-runtime.mjs.wasm: OK
+# c6006650182737e2b09bada7fc0774812b802917.wasm: OK
+# MOVING php8.3-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.4-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# EXISTS php8.4-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.4-cloudflare-runtime.mjs.wasm: OK
+# c6006650182737e2b09bada7fc0774812b802917.wasm: OK
+# MOVING php8.4-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.5-cloudflare-runtime.mjs.wasm
+# c6006650182737e2b09bada7fc0774812b802917
+# EXISTS php8.5-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# php8.5-cloudflare-runtime.mjs.wasm: OK
+# c6006650182737e2b09bada7fc0774812b802917.wasm: OK
+# MOVING php8.5-cloudflare-runtime.mjs.wasm c6006650182737e2b09bada7fc0774812b802917.wasm
+# Subtest: isolated npm packages expose every typed entry to ESM, CommonJS, Deno and standalone Cloudflare consumers
+ok 7 - isolated npm packages expose every typed entry to ESM, CommonJS, Deno and standalone Cloudflare consumers
+  ---
+  duration_ms: 38125.804023
+  type: 'test'
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 43621.974369
