@@ -7,6 +7,7 @@ import { EventEmitter } from 'node:events';
 import { deployCloudflareNightly, verifyReleaseStage, runWrangler, rawFetch, PROJECT, PRODUCTION_URL } from '../../bin/deploy-cloudflare-nightly.mjs';
 import { stageCloudflarePages } from '../../bin/stage-cloudflare-pages.mjs';
 import { artifactFixture, digest } from '../cloudflare-pages/fixtures.mjs';
+import {verifyCloudflareRelease, validateSmokeManifest} from '../../bin/verify-cloudflare-release.mjs';
 
 const token = 'fixture-release-token-NOT-A-REAL-SECRET';
 const account = 'a'.repeat(32);
@@ -31,7 +32,7 @@ async function fixture(t, hooks = {})
 	const stage = await stageCloudflarePages(artifact.options);
 	const options = {...artifact.options, projectDir: artifact.options.outputDir};
 	const previous = {id: ids.previous, project_name: PROJECT, environment: 'production', latest_stage: {name: 'deploy', status: 'success'}, deployment_trigger: {metadata: {branch: 'main', commit_message: 'prior release'}}};
-	const state = {canonical: previous, deployments: new Map([[previous.id, previous]]), calls: [], runs: [], reports: [], rollbacks: [], time: 0};
+	const state = {canonical: previous, deployments: new Map([[previous.id, previous]]), calls: [], runs: [], reports: [], rollbacks: [], cached: new Set, time: 0};
 	const apiPrefix = `/client/v4/accounts/${account}/pages/projects/${PROJECT}`;
 	const dependencies = {
 		env: {CLOUDFLARE_API_TOKEN: token, CLOUDFLARE_ACCOUNT_ID: account, CLOUDFLARE_API_BASE_URL: 'https://must-not-be-used.invalid', UNRELATED_SECRET: 'must-not-be-forwarded'}
@@ -85,13 +86,19 @@ async function fixture(t, hooks = {})
 			if(url.pathname === '/php/') return new Response('<html><title>PHP on Cloudflare</title>PHP 8.5.0 <a href="/fixture-build/php-cloud-wasm/">Downloads</a></html>', {headers: {'Content-Type': 'text/html; charset=utf-8'}});
 			if(url.pathname === '/php/phpinfo') return new Response('<html>PHP Version 8.5.0 <table><tr><td>PDO drivers</td><td>cfd1</td></tr></table></html>', {headers: {'Content-Type': 'text/html'}});
 			assert.ok(url.pathname.startsWith('/fixture-build/php-cloud-wasm/'));
-			const encoding = init.headers['Accept-Encoding'];
-			assert.ok(['identity', 'br', 'gzip'].includes(encoding));
+			const accept = init.headers['Accept-Encoding'];
+			assert.ok(['identity', 'br', 'gzip', 'br, identity;q=0', 'gzip, identity;q=0'].includes(accept));
+			assert.equal(init.headers['Cache-Control'], undefined, 'Static checks exercise ordinary cache requests');
+			assert.equal(url.search, '', 'Encoding variants must use the same canonical URL');
+			const encoding = accept.split(',')[0];
 			const filename = path.basename(url.pathname);
 			const bytes = await fs.readFile(path.join(artifact.artifactRoot, filename + ({identity: '', br: '.br', gzip: '.gz'}[encoding])));
-			const headers = {'Content-Type': filename.endsWith('.wasm') ? 'application/wasm' : 'application/javascript', Vary: 'Accept-Encoding'};
+			const key = url.href + accept;
+			const headers = {'Content-Type': filename.endsWith('.wasm') ? 'application/wasm' : 'application/javascript', Vary: 'Accept-Encoding', 'Content-Length': String(bytes.length)
+				, 'CF-Cache-Status': state.cached.has(key) ? 'HIT' : 'MISS', 'CF-Ray': 'fixture-ray', 'Cache-Control': 'public, max-age=300, no-transform', Age: state.cached.has(key) ? '1' : '0'};
+			state.cached.add(key);
 			if(encoding !== 'identity') headers['Content-Encoding'] = encoding;
-			return new Response(bytes, {headers});
+			return new Response(init.method === 'HEAD' ? null : bytes, {headers});
 		}
 	};
 	return {artifact, options, stage, dependencies, state};
@@ -141,7 +148,12 @@ test('nightly release verifies preview, promotes identical bytes to main, and ch
 	{
 		for(const route of ['/php/', '/php/phpinfo', '/php/health', '/php/d1']) assert.ok(current.state.calls.some(call => call.url === base + route));
 		for(const asset of current.stage.assets)
-			for(const encoding of ['identity', 'br', 'gzip']) assert.ok(current.state.calls.some(call => call.url === base + asset.path && call.headers['Accept-Encoding'] === encoding));
+		{
+			const calls = current.state.calls.filter(call => call.url === base + asset.path);
+			assert.deepEqual(calls.slice(0, 6).map(call => call.headers['Accept-Encoding']), ['identity', 'br', 'gzip', 'identity', 'br', 'gzip']);
+			for(const encoding of ['identity', 'br', 'gzip']) assert.ok(calls.some(call => call.method === 'HEAD' && call.headers['Accept-Encoding'] === encoding));
+			for(const encoding of ['br', 'gzip']) assert.ok(calls.some(call => call.method === 'GET' && call.headers['Accept-Encoding'] === `${encoding}, identity;q=0`));
+		}
 	}
 	for(const filename of ['release-preview.json', 'release-production.json', 'release-result.json'])
 	{
@@ -150,8 +162,112 @@ test('nightly release verifies preview, promotes identical bytes to main, and ch
 		const record = JSON.parse(text);
 		assert.equal(record.fingerprint, before.fingerprint);
 		assert.equal(record.status ?? record.verified, filename === 'release-result.json' ? 'success' : true);
+		assert.ok(record.verification.every(phase => phase.status === 'success'));
+		if(filename === 'release-result.json') assert.deepEqual(record.verification.map(phase => phase.phase), ['preview', 'production-deployment', 'production-public']);
 	}
 	assert.ok(current.state.reports.every(message => !message.includes(token)));
+});
+
+test('a warm CDN encoding collision rolls production back with the first response diagnostics intact', async t => {
+	let failed = false;
+	const current = await fixture(t, {public: async ({url, init, options}) => {
+		if(url.origin !== PRODUCTION_URL) return;
+		const checkpoint = JSON.parse(await fs.readFile(path.join(options.projectDir, 'release-production.json')));
+		assert.equal(checkpoint.verified, false);
+		assert.equal(checkpoint.verification[0].phase, 'production-deployment');
+		assert.equal(checkpoint.verification[0].status, 'success', 'Deployment URL success is saved before public-host verification');
+		if(failed) return new Promise((resolve, reject) => init.signal.addEventListener('abort', () => reject(new Error(token)), {once: true}));
+		if(url.pathname.endsWith('.mjs') && init.headers['Accept-Encoding'] === 'br')
+		{
+			failed = true;
+			return new Response('cached identity bytes', {headers: {'CF-Cache-Status': 'HIT', Age: '42', 'CF-Ray': 'bad-cache-ray', 'Cache-Control': 'public, max-age=10800'}});
+		}
+	}});
+	await assert.rejects(deployCloudflareNightly(current.options, current.dependencies), /first failure: Incorrect content encoding; expected br, received identity/);
+	const result = JSON.parse(await fs.readFile(path.join(current.options.projectDir, 'release-result.json')));
+	assert.equal(result.rollback, 'restored');
+	const failure = result.verification.find(phase => phase.phase === 'production-public');
+	assert.equal(failure.status, 'failed');
+	assert.equal(failure.firstFailure.requestedEncoding, 'br');
+	assert.equal(failure.firstFailure.receivedEncoding, 'identity');
+	assert.equal(failure.firstFailure.cacheStatus, 'HIT');
+	assert.equal(failure.firstFailure.age, '42');
+	assert.equal(failure.firstFailure.rayId, 'bad-cache-ray');
+	assert.ok(failure.firstFailure.endpoint.endsWith('.mjs'));
+	assert.equal(failure.lastFailure.kind, 'timeout');
+});
+
+test('public verification requires warm cache hits rather than accepting cache bypass', async t => {
+	const current = await fixture(t);
+	const original = current.dependencies.fetch;
+	current.dependencies.fetch = async (url, init) => {
+		const response = await original(url, init);
+		if(new URL(url).origin === PRODUCTION_URL) response.headers.set('CF-Cache-Status', 'DYNAMIC');
+		return response;
+	};
+	await assert.rejects(deployCloudflareNightly(current.options, current.dependencies), /Repeated static request did not hit the CDN cache/);
+	assert.deepEqual(current.state.rollbacks, [ids.previous]);
+});
+
+test('read-only verification retries a transient error without deploying or using API credentials', async t => {
+	let healthCalls = 0;
+	const current = await fixture(t, {public: ({url}) => url.pathname === '/php/health' && ++healthCalls === 1 ? new Response('transient', {status: 503}) : undefined});
+	const result = await verifyCloudflareRelease({stage: current.stage, baseUrl: PRODUCTION_URL}, current.dependencies);
+	assert.equal(result.status, 'success');
+	assert.equal(result.attempts, 2);
+	assert.equal(result.requireCacheHits, true);
+	assert.deepEqual(current.state.runs, []);
+	assert.deepEqual(current.state.rollbacks, []);
+	assert.ok(current.state.calls.every(call => new URL(call.url).origin === PRODUCTION_URL && ['GET', 'HEAD'].includes(call.method) && !call.headers.Authorization));
+});
+
+test('HEAD length and strict encoding exclusions are verified', async t => {
+	for(const scenario of ['head', 'excluded-identity'])
+	{
+		const current = await fixture(t);
+		const original = current.dependencies.fetch;
+		current.dependencies.fetch = async (url, init) => {
+			const response = await original(url, init);
+			if(scenario === 'head' && init.method === 'HEAD') response.headers.set('Content-Length', '1000000');
+			if(scenario === 'excluded-identity' && init.headers['Accept-Encoding'].includes('identity;q=0')) response.headers.delete('Content-Encoding');
+			return response;
+		};
+		await assert.rejects(verifyCloudflareRelease({stage: current.stage, baseUrl: PRODUCTION_URL}, current.dependencies), /HEAD content length|Incorrect content encoding/);
+	}
+});
+
+test('read-only verification rejects unsafe targets and malformed inventories before any request', async t => {
+	const current = await fixture(t);
+	for(const baseUrl of ['http://fixture.invalid', 'https://fixture.invalid/path', 'https://fixture.invalid/?token=secret', 'https://user:secret@fixture.invalid', 'https://fixture.invalid/#fragment'])
+		await assert.rejects(verifyCloudflareRelease({stage: current.stage, baseUrl}, current.dependencies), /HTTPS origin/);
+	for(const mutate of [
+		stage => stage.assets[0].path += '?encoding=br'
+		, stage => stage.assets[0].path = '/other-build/php-cloud-wasm/file.mjs'
+		, stage => stage.assets[0].path = '/fixture-build/php-cloud-wasm/../file.mjs'
+		, stage => stage.assets.push(stage.assets[0])
+		, stage => stage.assets[0].sha256 = 'bad'
+		, stage => stage.assets[0].bytes = -1
+		, stage => stage.assets[0].encodings.identity = stage.assets[0].encodings.br
+		, stage => delete stage.assets.find(asset => asset.path.endsWith('-runtime.mjs')).encodings.br
+	])
+	{
+		const stage = structuredClone(current.stage);
+		mutate(stage);
+		assert.throws(() => validateSmokeManifest(stage));
+		await assert.rejects(verifyCloudflareRelease({stage, baseUrl: PRODUCTION_URL}, current.dependencies));
+	}
+	assert.deepEqual(current.state.calls, []);
+});
+
+test('read-only verification CLI accepts explicit manifest and target options only', () => {
+	const cli = args => spawnSync(process.execPath, ['bin/verify-cloudflare-release.mjs', ...args], {encoding: 'utf8', env: {PATH: process.env.PATH}});
+	assert.equal(cli(['--help']).status, 0);
+	for(const args of [[], ['--base-url'], ['--unknown', 'file'], ['--base-url', 'one', '--base-url', 'two']])
+	{
+		const result = cli(args);
+		assert.equal(result.status, 1);
+		assert.equal(JSON.parse(result.stdout).status, 'failed');
+	}
 });
 
 test('malformed PHP/D1, home and phpinfo responses block promotion', async t => {
@@ -218,6 +334,43 @@ test('failed production health restores the captured production ID through the P
 	assert.equal(result.rollback, 'restored');
 	assert.equal(result.previousDeploymentId, ids.previous);
 	assert.equal(result.productionDeploymentId, ids.production);
+});
+
+test('production transfer errors identify the asset and encoding without disclosing transport messages', async t => {
+	const current = await fixture(t, {public: ({url, init}) => {
+		if(url.hostname === 'production.php-wasm-nightly.pages.dev' && url.pathname.endsWith('.wasm') && init.headers['Accept-Encoding'] === 'identity')
+			throw Object.assign(new Error(`request contained ${token}`), {code: 'ECONNRESET'});
+	}});
+	await assert.rejects(deployCloudflareNightly(current.options, current.dependencies), error => {
+		assert.match(error.message, /Release HTTP request failed \(ECONNRESET\): GET https:\/\/production\.php-wasm-nightly\.pages\.dev\/fixture-build\/php-cloud-wasm\/[^ ]+\.wasm \[identity\]/);
+		assert.ok(!error.message.includes(token));
+		return true;
+	});
+	const diagnostic = await fs.readFile(path.join(current.options.projectDir, 'release-result.json'), 'utf8');
+	assert.match(diagnostic, /ECONNRESET/);
+	assert.ok(!diagnostic.includes(token));
+	assert.equal(JSON.parse(diagnostic).rollback, 'restored');
+	assert.deepEqual(current.state.rollbacks, [ids.previous]);
+});
+
+test('bounded production timeouts retain the original HTTP failure and the failing endpoint', async t => {
+	let calls = 0;
+	const current = await fixture(t, {public: ({url, init}) => {
+		if(url.hostname !== new URL(PRODUCTION_URL).hostname) return;
+		if(++calls === 1) return new Response('unavailable', {status: 503});
+		return new Promise((resolve, reject) => init.signal.addEventListener('abort', () => reject(new Error(token)), {once: true}));
+	}});
+	await assert.rejects(deployCloudflareNightly(current.options, current.dependencies), error => {
+		assert.match(error.message, /Release HTTP request timed out after \d+ms: GET https:\/\/nightly\.php-wasm\.seanmorr\.is\/php\/health \[identity\]/);
+		assert.match(error.message, /first failure: PHP\/D1 smoke failed at \/php\/health \(HTTP 503\)/);
+		assert.ok(!error.message.includes(token));
+		return true;
+	});
+	assert.equal(calls, 4);
+	assert.deepEqual(current.state.rollbacks, [ids.previous]);
+	const result = JSON.parse(await fs.readFile(path.join(current.options.projectDir, 'release-result.json')));
+	assert.equal(result.rollback, 'restored');
+	assert.match(result.error, /HTTP 503/);
 });
 
 test('a Wrangler error after promotion still restores a release owned by its unique commit message', async t => {
@@ -501,4 +654,24 @@ test('raw HTTPS transport preserves encoded bytes and supports HEAD and null-bod
 		assert.equal(result.headers.get('content-encoding'), 'gzip');
 		assert.deepEqual(Buffer.from(await result.arrayBuffer()), method === 'GET' && status === 200 ? bytes : Buffer.alloc(0));
 	}
+});
+
+test('raw HTTPS transport sends the exact JSON body for cache API writes', async () => {
+	const body = '{"files":["https://fixture.invalid/file.wasm"]}';
+	const response = await rawFetch('https://fixture.invalid/api', {method: 'POST', body, headers: {'Content-Type': 'application/json'}}, {
+		request: (url, options, receive) => {
+			assert.equal(options.method, 'POST');
+			assert.equal(options.headers['Content-Type'], 'application/json');
+			const request = new EventEmitter;
+			request.end = submitted => queueMicrotask(() => {
+				assert.equal(submitted, body);
+				const reply = Object.assign(new EventEmitter, {statusCode: 200, headers: {'content-type': 'application/json'}});
+				receive(reply);
+				reply.emit('data', Buffer.from('{"success":true}'));
+				reply.emit('end');
+			});
+			return request;
+		}
+	});
+	assert.deepEqual(await response.json(), {success: true});
 });

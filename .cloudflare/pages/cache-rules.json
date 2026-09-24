@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "hostname": "nightly.php-wasm.seanmorr.is",
+  "phase": "http_request_cache_settings",
+  "rules": [
+    {
+      "ref": "php_wasm_nightly_downloads",
+      "description": "PHP-WASM nightly downloads: preserve negotiated bytes",
+      "expression": "(http.host eq \"nightly.php-wasm.seanmorr.is\" and not (http.request.uri.path eq \"/php\" or starts_with(http.request.uri.path, \"/php/\")) and (ends_with(http.request.uri.path, \".js\") or ends_with(http.request.uri.path, \".mjs\") or ends_with(http.request.uri.path, \".wasm\") or ends_with(http.request.uri.path, \".so\") or ends_with(http.request.uri.path, \".dat\")))",
+      "action": "set_cache_settings",
+      "action_parameters": {
+        "cache": true,
+        "edge_ttl": { "mode": "respect_origin" },
+        "browser_ttl": { "mode": "respect_origin" },
+        "respect_strong_etags": true,
+        "vary": {
+          "default": { "action": "bypass" },
+          "headers": { "accept-encoding": { "action": "passthrough" } }
+        }
+      },
+      "enabled": true
+    },
+    {
+      "ref": "php_wasm_nightly_php",
+      "description": "PHP-WASM nightly PHP and D1: bypass cache",
+      "expression": "(http.host eq \"nightly.php-wasm.seanmorr.is\" and (http.request.uri.path eq \"/php\" or starts_with(http.request.uri.path, \"/php/\")))",
+      "action": "set_cache_settings",
+      "action_parameters": { "cache": false },
+      "enabled": true
+    }
+  ]
+}

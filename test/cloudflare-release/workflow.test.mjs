@@ -11,6 +11,7 @@ test('nightly publication verifies immutable assets before promotion and notifie
 	const ordered = [
 		'run: npm ci'
 		, 'Require the dedicated nightly D1 binding'
+		, 'Require nightly cache management credentials'
 		, 'run: npm run test:cloudflare-pages'
 		, 'Download Artifact'
 		, 'node bin/merge-cloudflare.mjs packages/php-cloud-wasm'
@@ -18,6 +19,7 @@ test('nightly publication verifies immutable assets before promotion and notifie
 		, 'node bin/stage-cloudflare-pages.mjs'
 		, 'test/cloudflare-pages/runtime.integration.mjs'
 		, 'uses: ryand56/r2-upload-action@'
+		, 'node bin/sync-cloudflare-cache-rules.mjs'
 		, 'node bin/deploy-cloudflare-nightly.mjs'
 		, 'name: Notify Discord on success'
 	];
@@ -47,6 +49,20 @@ test('nightly staging requires an explicit D1 binding and preserves immutable bu
 	assert.equal((publisher.match(/--build-id "\$STAMP-\$SHORT_SHA"/g) ?? []).length, 2);
 	assert.match(publisher, /destination-dir: \$\{\{ env.STAMP \}\}-\$\{\{ env.SHORT_SHA \}\}\//);
 	assert.match(publisher, /name: Preserve deployment diagnostics\n\s+if: always\(\)/);
+	assert.match(publisher, /\.cache\/nightly-cache-rules\.json/);
+});
+
+test('cache configuration uses scoped credentials only before the guarded deployment', () => {
+	const steps = publisher.split(/\n      - /);
+	const cacheSteps = steps.filter(step => step.includes('CLOUDFLARE_CACHE_API_TOKEN'));
+	assert.equal(cacheSteps.length, 2);
+	assert.ok(cacheSteps[0].startsWith('name: Require nightly cache management credentials'));
+	assert.ok(cacheSteps[1].startsWith('name: Synchronize nightly cache rules'));
+	assert.match(cacheSteps[1], /CLOUDFLARE_CACHE_API_TOKEN: \$\{\{ secrets.CLOUDFLARE_CACHE_API_TOKEN \}\}/);
+	assert.match(cacheSteps[1], /CLOUDFLARE_ZONE_ID: \$\{\{ vars.CLOUDFLARE_ZONE_ID \}\}/);
+	assert.match(cacheSteps[1], /--stage-manifest \.cache\/nightly-pages\/stage\.manifest\.json/);
+	assert.doesNotMatch(cacheSteps[1], /continue-on-error|if:|\|\| true/);
+	assert.doesNotMatch(steps.find(step => step.includes('node bin/deploy-cloudflare-nightly.mjs')), /CACHE_API_TOKEN|ZONE_ID/);
 });
 
 test('Cloudflare build and test jobs exchange the standalone manifest-owned package', () => {

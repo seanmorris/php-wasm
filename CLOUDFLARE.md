@@ -256,6 +256,47 @@ existing `CLOUDFLARE_PAGES_API_TOKEN` and `R2_ACCOUNT_ID` GitHub secrets. Missin
 authentication, an absent database ID or insufficient account permissions are
 deployment blockers, not reasons to disable D1 verification.
 
+The same publication job manages the nightly hostname's cache policy from
+[`.cloudflare/pages/cache-rules.json`](.cloudflare/pages/cache-rules.json).
+Configure the `CLOUDFLARE_ZONE_ID` Actions variable for the zone containing
+`nightly.php-wasm.seanmorr.is` and a `CLOUDFLARE_CACHE_API_TOKEN` Actions secret
+scoped to that zone with **Zone Read**, **Cache Settings Write** and **Cache
+Purge** permissions. The cache token is separate from the Pages deployment
+token and is only passed to the cache configuration steps. Set it through the
+GitHub secret prompt or your existing secret manager; never commit it:
+
+```sh
+gh variable set CLOUDFLARE_ZONE_ID --repo seanmorris/php-wasm --body '<zone ID>'
+gh secret set CLOUDFLARE_CACHE_API_TOKEN --repo seanmorris/php-wasm
+```
+
+Before preview deployment, `bin/sync-cloudflare-cache-rules.mjs` reconciles two
+rules identified by stable refs. It creates or updates individual rules at the
+end of the cache ruleset, preserving unrelated rules and their order, and
+verifies the result before proceeding. Downloads ending in `.js`, `.mjs`,
+`.wasm`, `.so` or `.dat` respect origin TTLs and strong ETags. Their
+`Vary: Accept-Encoding` uses passthrough so the cache separates the original
+header values, including quality weights and exclusions. `/php` and `/php/*`
+bypass caching. The R2 handler still controls encoding negotiation and returns
+`no-transform`; PHP responses still return `no-store`.
+
+The rule deliberately has no HTTP-method filter: Cloudflare's single-file purge
+uses an internal method that must match the rule. The handler itself permits
+only GET, HEAD and OPTIONS. See Cloudflare's
+[cache rule settings](https://developers.cloudflare.com/cache/how-to/cache-rules/settings/)
+and [Vary behavior](https://developers.cloudflare.com/cache/concepts/vary/).
+After readback, CI purges only the new release manifest's canonical URLs, in
+batches of at most 30. A URL purge clears all its encoding variants. It never
+purges the whole zone or another release; older cached downloads expire under
+their existing TTLs.
+
+Missing permissions, unsupported rule settings, concurrent configuration
+changes, failed readback or a failed purge stop the job before promotion. An
+API write with an unknown outcome is not retried blindly; rerunning the job
+reconciles by ref without creating duplicate rules. Completed rule changes
+remain in place if a later deployment fails; the Pages rollback does not undo
+this hostname's cache policy or alter unrelated zone settings.
+
 The serialized publication job stages a Pages `_worker.js` **directory** with
 only the selected version's exact modules. Pinned Wrangler 4.131.1 uploads it
 with `--no-bundle`, preserving the module inventory despite Vrzno's unused
@@ -277,15 +318,43 @@ exact, unchanged manifest-owned modules in strict workerd with local D1/R2;
 the additional Wrangler smoke checks the development facade, not byte identity
 of its in-memory rebundling.
 
-After immutable assets are uploaded, release automation deploys a unique
-preview, checks real PHP/D1 execution and artifact decoding, and then deploys
-the unchanged stage to production branch `main`. Production is checked before
-success is announced. If production verification fails, the previous Pages
+After immutable assets are uploaded and the cache policy is verified, release
+automation deploys a unique preview, checks real PHP/D1 execution and artifact
+decoding, and then deploys the unchanged stage to production branch `main`.
+The production deployment URL and public hostname are checked separately.
+Static checks request identity, Brotli and gzip twice at the same canonical URL,
+then check HEAD and compressed requests with `identity;q=0`. Public-host checks
+require cache HITs on the second pass as well as matching encoded and decoded
+digests; bypassing the cache cannot satisfy verification. If production
+verification fails, the previous Pages
 deployment is restored when ownership and rollback can be confirmed. Pending or
 unknown uploads are reported as unconfirmed recovery requiring intervention,
 never as a successful rollback. No runtime is fetched from a mutable latest URL.
 The obsolete source-only Pages deployment workflow is removed; all nightly
 publication now goes through this serialized verification path.
+
+The `nightly-pages-deployment` CI artifact retains the stage manifest,
+`nightly-cache-rules.json` (owned-rule snapshots, fingerprints, changes and
+completed purges), and `release*.json` (phase results and rollback outcome).
+Deployment URL success is saved before checking the public hostname. Bounded
+retries preserve the first and last failures, including method, asset URL,
+requested/received encoding, HTTP or network error, cache status, age and Ray
+ID. Diagnostic records exclude credentials, arbitrary response bodies and
+unrelated zone rule definitions.
+
+To recheck an uploaded release without credentials, deployment or rollback,
+download its stage manifest and run:
+
+```sh
+node bin/verify-cloudflare-release.mjs \
+  --stage-manifest /path/to/stage.manifest.json \
+  --base-url https://nightly.php-wasm.seanmorr.is
+```
+
+The command emits a JSON result and exits nonzero on failure. Use the release's
+deployment URL instead to isolate origin behavior from the public hostname's
+CDN configuration. Use a manifest matching the live build; a rolled-back PHP
+deployment correctly fails the newer manifest's build identity check.
 
 Local routing, staging and release regression tests require no credentials:
 

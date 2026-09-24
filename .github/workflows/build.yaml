@@ -762,6 +762,13 @@ jobs:
         run: |
           node -e 'if (!/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(process.env.NIGHTLY_PHP_D1_DATABASE_ID || "")) throw new Error("Configure NIGHTLY_PHP_D1_DATABASE_ID for the dedicated php-wasm-nightly-demo D1 database before publishing.")'
 
+      - name: Require nightly cache management credentials
+        env:
+          CLOUDFLARE_CACHE_API_TOKEN: ${{ secrets.CLOUDFLARE_CACHE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
+        run: |
+          node -e 'if (!process.env.CLOUDFLARE_CACHE_API_TOKEN?.trim() || !/^[a-f0-9]{32}$/.test(process.env.CLOUDFLARE_ZONE_ID || "")) throw new Error("Configure CLOUDFLARE_CACHE_API_TOKEN and CLOUDFLARE_ZONE_ID for nightly cache management; see CLOUDFLARE.md.")'
+
       - name: Verify nightly release and Pages regressions
         run: npm run test:cloudflare-pages
 
@@ -856,6 +863,15 @@ jobs:
           r2-bucket: php-wasm
           source-dir: packages
 
+      - name: Synchronize nightly cache rules and purge release URLs
+        env:
+          CLOUDFLARE_CACHE_API_TOKEN: ${{ secrets.CLOUDFLARE_CACHE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
+        run: |
+          node bin/sync-cloudflare-cache-rules.mjs \
+            --stage-manifest .cache/nightly-pages/stage.manifest.json \
+            --report .cache/nightly-cache-rules.json
+
       - name: Verify preview, deploy production and verify live PHP with D1
         run: |
           node bin/deploy-cloudflare-nightly.mjs \
@@ -875,6 +891,7 @@ jobs:
           path: |
             .cache/nightly-pages/stage.manifest.json
             .cache/nightly-pages/release*.json
+            .cache/nightly-cache-rules.json
           include-hidden-files: true
           if-no-files-found: warn
 

@@ -3,55 +3,24 @@ import fs from 'node:fs/promises';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import https from 'node:https';
 import { createHash, randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { brotliDecompressSync, gunzipSync } from 'node:zlib';
 import { verifyCloudflare } from './package-cloudflare.mjs';
+import {createReleaseClient, MAX_RESPONSE_BYTES as maxResponseBytes, PROJECT, PRODUCTION_URL} from './cloudflare-release-http.mjs';
+import {verifyCloudflareRelease} from './verify-cloudflare-release.mjs';
 
-export const PROJECT = 'php-wasm-nightly';
-export const PRODUCTION_URL = 'https://nightly.php-wasm.seanmorr.is';
+export {PROJECT, PRODUCTION_URL, rawFetch} from './cloudflare-release-http.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const WRANGLER_VERSION = '4.131.1';
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const filePattern = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
-const maxResponseBytes = 64 * 1024 * 1024;
 const diagnosticNames = ['release-preview.json', 'release-production.json', 'release-result.json'];
 const requireCondition = (condition, message) => { if(!condition) throw new Error(message); };
 const safePath = name => typeof name === 'string' && filePattern.test(name)
 	&& name.split('/').every(part => !['.', '..'].includes(part) && !part.startsWith('.env') && !part.startsWith('.dev.vars') && !['.npmrc', '.git', '.ssh'].includes(part));
-
-/**
- * Raw HTTPS responses deliberately retain compressed bytes for digest checks.
- * @param {string|URL} url HTTPS endpoint.
- * @param {object} options Request method, headers and abort signal.
- * @param {object} dependencies Optional HTTPS adapter for isolated tests.
- * @returns {Promise<Response>} Response with original encoded body bytes.
- */
-export function rawFetch(url, {method = 'GET', headers = {}, signal} = {}, dependencies = {})
-{
-	return new Promise((resolve, reject) => {
-		const request = (dependencies.request ?? https.request)(url, {method, headers, signal}, response => {
-			const chunks = [];
-			let bytes = 0;
-			response.on('data', chunk => {
-				bytes += chunk.length;
-				if(bytes > maxResponseBytes) request.destroy(new Error('HTTP response exceeded the release size limit'));
-				else chunks.push(chunk);
-			});
-			response.on('error', reject);
-			response.on('end', () => {
-				const body = method === 'HEAD' || [204, 205, 304].includes(response.statusCode) ? null : Buffer.concat(chunks);
-				try { resolve(new Response(body, {status: response.statusCode, headers: response.headers})); }
-				catch(error) { reject(error); }
-			});
-		});
-		request.on('error', reject);
-		request.end();
-	});
-}
 
 async function inventory(root, relative = '')
 {
@@ -190,15 +159,11 @@ export async function deployCloudflareNightly(options, dependencies = {})
 	requireCondition(typeof token === 'string' && token.trim(), 'CLOUDFLARE_API_TOKEN is required');
 	requireCondition(typeof account === 'string' && /^[a-f0-9]{32}$/.test(account), 'CLOUDFLARE_ACCOUNT_ID must be a 32-character account ID');
 	requireCondition(options.project === undefined || options.project === PROJECT, `Only the ${PROJECT} Pages project is supported`);
-	const now = dependencies.now ?? Date.now;
-	const sleep = dependencies.sleep ?? (milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)));
-	const fetch = dependencies.fetch ?? rawFetch;
+	const client = createReleaseClient(dependencies);
+	const {request, retry} = client;
 	const runner = dependencies.runWrangler ?? runWrangler;
 	const reporter = dependencies.report ?? (message => console.log(message));
 	const report = message => reporter(String(message).replaceAll(token, '[redacted]'));
-	const timeoutMs = dependencies.timeoutMs ?? 120_000;
-	const intervalMs = dependencies.intervalMs ?? 2_000;
-	requireCondition(Number.isSafeInteger(timeoutMs) && timeoutMs > 0 && timeoutMs <= 600_000 && Number.isSafeInteger(intervalMs) && intervalMs > 0 && intervalMs <= timeoutMs, 'Invalid bounded polling settings');
 	const verified = await verifyReleaseStage(options);
 	const {stage, projectDir, fingerprint} = verified;
 	const diagnose = async (name, details) => {
@@ -208,20 +173,6 @@ export async function deployCloudflareNightly(options, dependencies = {})
 	};
 	const releaseTag = `php-cloud-wasm ${stage.buildId} ${fingerprint} ${randomUUID()}`;
 	const apiRoot = `https://api.cloudflare.com/client/v4/accounts/${account}/pages/projects/${PROJECT}`;
-	const request = async (url, init, deadline = now() + timeoutMs) => {
-		const controller = new AbortController();
-		const limit = Math.max(1, Math.min(15_000, deadline - now()));
-		let timer;
-		try
-		{
-			return await Promise.race([
-				fetch(url, {...init, signal: controller.signal, redirect: 'error'})
-				, new Promise((resolve, reject) => timer = setTimeout(() => { controller.abort(); reject(new Error('Release HTTP request timed out')); }, limit))
-			]);
-		}
-		catch { throw new Error('Release HTTP request failed'); }
-		finally { clearTimeout(timer); }
-	};
 	const api = async (suffix = '', method = 'GET', deadline) => {
 		const response = await request(apiRoot + suffix, {method, headers: {Authorization: `Bearer ${token}`, Accept: 'application/json'}}, deadline);
 		requireCondition(response.status === 200, `Pages API request failed (HTTP ${response.status})`);
@@ -230,60 +181,22 @@ export async function deployCloudflareNightly(options, dependencies = {})
 		requireCondition(body.success === true && body.result, 'Pages API reported failure');
 		return body.result;
 	};
-	const retry = async (operation, label) => {
-		const deadline = now() + timeoutMs;
-		let failure;
-		for(let attempt = 0; attempt <= Math.ceil(timeoutMs / intervalMs) && now() < deadline; attempt++)
-		{
-			try { return await operation(deadline); }
-			catch(error) { failure = error; }
-			await sleep(Math.min(intervalMs, Math.max(0, deadline - now())));
-		}
-		throw new Error(`${label} failed within the bounded verification window: ${failure?.message ?? 'timeout'}`);
-	};
 	const checkDeployment = async (deployment, branch) => retry(async deadline => {
 		const current = await api(`/deployments/${deployment.deploymentId}`, 'GET', deadline);
 		requireCondition(current.id === deployment.deploymentId && current.project_name === PROJECT && current.environment === (branch === 'main' ? 'production' : 'preview') && current.deployment_trigger?.metadata?.branch === branch, 'Pages deployment identity mismatch');
 		requireCondition(current.latest_stage?.name === 'deploy' && current.latest_stage.status === 'success', 'Pages deployment is not successful yet');
 		return current;
 	}, 'Deployment readiness');
-	const smoke = async base => retry(async deadline => {
-		for(const route of ['/php/health', '/php/d1'])
+	const verification = [];
+	const smoke = async (baseUrl, phase) => {
+		report(`Verifying ${phase} at ${new URL(baseUrl).origin}`);
+		try { verification.push(await verifyCloudflareRelease({stage, baseUrl, phase}, {client})); }
+		catch(error)
 		{
-			const response = await request(new URL(route, base), {headers: {'Accept-Encoding': 'identity', 'Cache-Control': 'no-cache'}}, deadline);
-			requireCondition(response.status === 200 && response.headers.get('content-type')?.includes('application/json'), `PHP/D1 smoke failed at ${route}`);
-			let health;
-			try { health = await response.json(); } catch { throw new Error('Malformed PHP/D1 health response'); }
-			requireCondition(health.ok === true && health.buildId === stage.buildId && health.phpVersion === '8.5' && /^8\.5\.\d+[A-Za-z0-9.-]*$/.test(health.phpFullVersion)
-				&& health.sapi === 'embed' && health.driver === 'cfd1' && health.d1?.answer === 42, 'PHP/D1 health identity or result mismatch');
+			if(error.verification) verification.push(error.verification);
+			throw error;
 		}
-		for(const route of ['/php/', '/php/phpinfo'])
-		{
-			const response = await request(new URL(route, base), {headers: {'Accept-Encoding': 'identity', 'Cache-Control': 'no-cache'}}, deadline);
-			requireCondition(response.status === 200 && response.headers.get('content-type')?.includes('text/html'), `PHP HTML smoke failed at ${route}`);
-			const html = await response.text();
-			requireCondition(/8\.5\.\d+/.test(html), `PHP version is missing at ${route}`);
-			if(route === '/php/') requireCondition(html.includes('PHP on Cloudflare') && html.includes(`/${stage.buildId}/php-cloud-wasm/`), 'PHP home page identity mismatch');
-			else requireCondition(/PHP Version/i.test(html) && /cfd1/i.test(html), 'PHP information page is missing PHP or the D1 driver');
-		}
-		for(const asset of stage.assets)
-		{
-			for(const [encoding, expected] of [['identity', asset], ...Object.entries(asset.encodings ?? {})])
-			{
-				requireCondition(now() < deadline, 'Static smoke verification deadline exceeded');
-				const response = await request(new URL(asset.path, base), {headers: {'Accept-Encoding': encoding, 'Cache-Control': 'no-cache'}}, deadline);
-				requireCondition(response.status === 200, `Static asset HTTP failure: ${asset.path}`);
-				requireCondition((response.headers.get('content-encoding') ?? 'identity').toLowerCase() === encoding, `Incorrect content encoding: ${asset.path}`);
-				if(Object.keys(asset.encodings ?? {}).length) requireCondition(response.headers.get('vary')?.toLowerCase().split(/\s*,\s*/).includes('accept-encoding'), 'Static response lacks Vary: Accept-Encoding');
-				const contentType = response.headers.get('content-type')?.split(';')[0].trim();
-				requireCondition(asset.path.endsWith('.wasm') ? contentType === 'application/wasm' : ['application/javascript', 'text/javascript'].includes(contentType), 'Incorrect static content type');
-				const bytes = Buffer.from(await response.arrayBuffer());
-				requireCondition(bytes.length === expected.bytes && sha256(bytes) === expected.sha256, `Served ${encoding} digest mismatch: ${asset.path}`);
-				const decoded = encoding === 'br' ? brotliDecompressSync(bytes, {maxOutputLength: maxResponseBytes}) : encoding === 'gzip' ? gunzipSync(bytes, {maxOutputLength: maxResponseBytes}) : bytes;
-				requireCondition(decoded.length === asset.bytes && sha256(decoded) === asset.sha256, 'Served encoding does not match original artifact');
-			}
-		}
-	}, 'PHP/D1 and static smoke');
+	};
 	const unchanged = async () => requireCondition((await verifyReleaseStage(options)).fingerprint === fingerprint, 'Staged release changed after preview');
 	let previous, preview, production;
 	let productionAttempted = false;
@@ -319,21 +232,22 @@ export async function deployCloudflareNightly(options, dependencies = {})
 		requireCondition(previous && idPattern.test(previous.id) && previous.environment === 'production' && previous.latest_stage?.status === 'success', 'A successful prior production deployment is required for rollback');
 		report(`Verifying preview for build ${stage.buildId}`);
 		preview = await execute(`verify-${sha256(Buffer.from(releaseTag)).slice(0, 20)}`);
-		await smoke(preview.url);
-		await diagnose('release-preview.json', {...preview, verified: true});
+		await smoke(preview.url, 'preview');
+		await diagnose('release-preview.json', {...preview, verified: true, verification: [...verification]});
 		await unchanged();
 		requireCondition((await api()).canonical_deployment?.id === previous.id, 'Production changed during preview; refusing promotion');
 		report(`Preview verified; promoting unchanged build ${stage.buildId} to main`);
 		try
 		{
 			production = await execute('main');
-			await smoke(production.url);
-			await smoke(PRODUCTION_URL);
+			await smoke(production.url, 'production-deployment');
+			await diagnose('release-production.json', {...production, branch: 'main', verified: false, verification: verification.filter(result => result.phase !== 'preview')});
+			await smoke(PRODUCTION_URL, 'production-public');
 			await unchanged();
 			requireCondition((await api()).canonical_deployment?.id === production.deploymentId, 'Production deployment changed during verification');
-			await diagnose('release-production.json', {...production, branch: 'main', verified: true});
+			await diagnose('release-production.json', {...production, branch: 'main', verified: true, verification: verification.filter(result => result.phase !== 'preview')});
 			const result = {buildId: stage.buildId, fingerprint, previewDeploymentId: preview.deploymentId, productionDeploymentId: production.deploymentId, previousDeploymentId: previous.id, productionUrl: PRODUCTION_URL};
-			await diagnose('release-result.json', {status: 'success', ...result});
+			await diagnose('release-result.json', {status: 'success', ...result, verification});
 			report(`Production verified for build ${stage.buildId}`);
 			return result;
 		}
@@ -367,7 +281,7 @@ export async function deployCloudflareNightly(options, dependencies = {})
 	catch(error)
 	{
 		// Diagnostics must never prevent a required rollback or hide its outcome.
-		await diagnose('release-result.json', {status: 'failed', rollback, previousDeploymentId: previous?.id, previewDeploymentId: preview?.deploymentId, productionDeploymentId: production?.deploymentId, error: String(error.message)}).catch(() => {});
+		await diagnose('release-result.json', {status: 'failed', rollback, previousDeploymentId: previous?.id, previewDeploymentId: preview?.deploymentId, productionDeploymentId: production?.deploymentId, error: String(error.message), verification}).catch(() => {});
 		throw error;
 	}
 }
