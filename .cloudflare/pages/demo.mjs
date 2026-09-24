@@ -82,7 +82,7 @@ export function createPagesWorker(PhpCloudflare, build, {wallTimeoutMs = WALL_TI
 						return respond({ok: true, buildId: build.buildId, phpVersion: build.phpVersion, ...result});
 					}
 					headers.set('Content-Type', 'text/html; charset=utf-8');
-					headers.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'");
+					headers.set('Content-Security-Policy', "default-src 'none'; img-src data:; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'");
 					return new Response(request.method === 'HEAD' ? null : text, {headers});
 				}
 				catch { return respond({ok: false, error: 'php_execution_failed'}, 502); }

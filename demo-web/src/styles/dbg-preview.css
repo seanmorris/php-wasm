@@ -297,6 +297,7 @@
 	bottom: 0;
 	right: 0;
 	overflow: auto;
+	color: #000;
 }
 
 .phpdbg-panel.phpdbg-files > div,

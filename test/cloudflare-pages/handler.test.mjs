@@ -158,7 +158,7 @@ test('PHP routing rejects unknown paths and methods without constructing an inst
 	assert.equal(instances, 0);
 });
 
-test('phpinfo omits environment and variables flags; HTML gets a restrictive CSP', async () => {
+test('phpinfo omits environment and variables flags; CSP permits embedded images only', async () => {
 	let source;
 	const worker = createPagesWorker(fakePhp(async (args, code) => { source = code; emit(args, '<html>PHP</html>'); return 0; }), build);
 	const response = await worker.fetch(request('/php/phpinfo'), {});
@@ -166,6 +166,7 @@ test('phpinfo omits environment and variables flags; HTML gets a restrictive CSP
 	assert.match(source, /INFO_GENERAL \| INFO_CONFIGURATION \| INFO_MODULES \| INFO_LICENSE/);
 	assert.doesNotMatch(source, /INFO_ALL|INFO_ENVIRONMENT|INFO_VARIABLES/);
 	assert.match(response.headers.get('Content-Security-Policy'), /default-src 'none'/);
+	assert.match(response.headers.get('Content-Security-Policy'), /(?:^|;)\s*img-src data:\s*(?:;|$)/);
 	assert.equal(response.headers.get('Cache-Control'), 'no-store');
 });
 
