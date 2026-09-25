@@ -312,6 +312,7 @@ select.bevel option {
 	.editor-explorer-title { display: none; }
 	.editor-explorer-actions > button,
 	.editor-explorer-menu { flex: 1; }
+	.editor-explorer-menu { position: static; }
 	.editor-explorer-menu > summary { width: 100%; }
 	.editor .editor-toolbar:not(.editor-explorer-actions) { margin-bottom: 0.25rem; }
 	.editor-sidebar-size { display: none; }

@@ -349,7 +349,7 @@ test('runs the saved buffer in the existing PHP debugger', async ({page}) => {
 	await expect(page.locator('.editor-debugger .phpdbg-console')).toContainText('editor debugger handoff', {timeout: 60000});
 	expect(await disk(page, '/persist/debug-editor.php')).toContain('editor debugger handoff');
 	const panel = page.locator('.editor-debugger');
-	for(const width of [1280, 375])
+	for(const width of [1280, 375, 320])
 	{
 		await page.setViewportSize({width, height: 812});
 		await expectDebuggerContained(panel);
@@ -361,7 +361,7 @@ test('runs the saved buffer in the existing PHP debugger', async ({page}) => {
 	await input.fill('run');
 	await input.press('Enter');
 	await expect(panel.locator('.phpdbg-right-panel')).toHaveAttribute('data-current-panel', 'variables');
-	for(const width of [1280, 375])
+	for(const width of [1280, 375, 320])
 	{
 		await page.setViewportSize({width, height: 812});
 		await expectDebuggerContained(panel);

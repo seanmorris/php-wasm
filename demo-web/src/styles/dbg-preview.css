@@ -180,6 +180,19 @@
 	flex-basis: 50%;
 	min-width: 0;
 	position: relative;
+	container-type: inline-size;
+}
+
+@container (max-width: 12rem) {
+	.phpdbg-console .console-input {
+		flex-wrap: wrap;
+	}
+
+	.phpdbg-console .console-input > span {
+		flex-basis: 100%;
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
 }
 
 .phpdbg .phpdbg-right-panel {
