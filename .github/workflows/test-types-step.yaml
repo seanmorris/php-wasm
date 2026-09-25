@@ -26,6 +26,7 @@ jobs:
           test/php-cgi-routing.test.mjs test/runtime-env.test.mjs
           test/web-locks.test.mjs test/web-wrapper-locks.test.mjs test/filesystem.test.mjs test/build/cloudflare-build.test.mjs
           test/phar-packaging.test.mjs
+          test/cgi-builder-workflow.test.mjs
           test/build/builder-package.test.mjs
           test/build/web-exports.test.mjs
           test/msg-bus.test.mjs test/php-tags.test.mjs
@@ -35,6 +36,15 @@ jobs:
           test/php-cgi-concurrency.test.mjs test/php-cgi-cookies.test.mjs test/php-cgi-queue.test.mjs
           test/msg-bus.test.mjs test/php-tags.test.mjs
           --allow-read --allow-env
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - name: Verify CGI regressions on pinned Bun before native builds
+        run: >-
+          bun test --timeout 180000
+          ./test/php-cgi-concurrency.test.mjs ./test/php-cgi-cookies.test.mjs ./test/php-cgi-queue.test.mjs
+          ./test/msg-bus.test.mjs ./test/php-tags.test.mjs
       - name: Install locked demo dependencies
         working-directory: demo-web
         run: npm ci

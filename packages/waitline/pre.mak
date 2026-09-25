@@ -16,5 +16,5 @@ CGI_DEPENDENCIES+= ${WAITLINE_EXTENSION_STAMP}
 DBG_DEPENDENCIES+= ${WAITLINE_EXTENSION_STAMP}
 TEST_LIST+=$(wildcard packages/waitline/test/*.mjs)
 # All TEST_LIST consumers run the ESM waitline tests, including CJS lanes.
-test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno: node-cli-mjs
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard: node-cli-mjs
 endif

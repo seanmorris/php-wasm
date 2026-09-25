@@ -7,7 +7,9 @@
 	clean php-clean deep-clean show-ports show-versions show-files \
 	hooks image push-image pull-image \
 	dist demo serve-demo scripts run \
-	test test-node test-deno test-bun test-browser \
+	test test-node test-node-standard test-node-cjs test-node-cjs-standard \
+	test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-browser \
+	test-cgi-node test-cgi-node-cjs test-cgi-bun test-cgi-bun-cjs \
 	all-versions all-versions all-stdlibs \
 	test-all-versions x-all-versions php-clean-all-versions \
 	demo-versions null \
@@ -1162,8 +1164,15 @@ test:
 ifneq ($(filter ${PHP_VERSION},8.5 8.4 8.3 8.2),)
 	${MAKE} test-deno
 endif
+	${MAKE} test-bun
 
 NODE_TEST_FLAGS=
+BUN_TEST_FLAGS?=--timeout 300000
+JS_TEST_RUNNER=node ${NODE_TEST_FLAGS} --test
+test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-cgi-bun test-cgi-bun-cjs: JS_TEST_RUNNER=bun test ${BUN_TEST_FLAGS}
+CGI_TEST_RUNTIME=node
+test-cgi-bun test-cgi-bun-cjs: CGI_TEST_RUNTIME=bun
+
 DOC_TESTS=
 DOC_TESTS_CJS=
 PACKAGING_TESTS=test/packaging.test.mjs
@@ -1180,34 +1189,11 @@ DOC_TESTS+=test/docs-cgi.test.mjs
 DOC_TESTS_CJS+=test/docs.test.cjs
 endif
 
-test-node: node-mjs node-cgi-mjs
-	PHP_VERSION=${PHP_VERSION} \
-	PHP_VARIANT=${PHP_VARIANT} \
-	LIB_TYPE=${LIB_TYPE} \
-	WITH_LIBXML=${WITH_LIBXML} \
-	WITH_LIBZIP=${WITH_LIBZIP} \
-	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_SQLITE} \
-	WITH_GD=${WITH_GD} \
-	WITH_PHAR=${WITH_PHAR} \
-	WITH_ZLIB=${WITH_ZLIB} \
-	WITH_LIBPNG=${WITH_LIBPNG} \
-	WITH_FREETYPE=${WITH_FREETYPE} \
-	WITH_LIBJPEG=${WITH_LIBJPEG} \
-	WITH_DOM=${WITH_DOM} \
-	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
-	WITH_XML=${WITH_XML} \
-	WITH_XMLREADER=${WITH_XMLREADER} \
-	WITH_XMLWRITER=${WITH_XMLWRITER} \
-	WITH_YAML=${WITH_YAML} \
-	WITH_TIDY=${WITH_TIDY} \
-	WITH_MBSTRING=${WITH_MBSTRING} \
-	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
-	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort`
+# Explicit paths also let Bun discover the canonical files without *.test.* names.
+ESM_TEST_FILES=${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} $(filter-out test/docs.test.mjs test/docs-cgi.test.mjs test/packaging.test.mjs,$(wildcard test/*.mjs))
+CJS_TEST_FILES=${TEST_LIST} ${DOC_TESTS_CJS} $(filter-out test/docs.test.cjs test/docs-cgi.test.cjs,$(wildcard test/*.cjs))
 
-test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
+test-node test-bun: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	LIB_TYPE=${LIB_TYPE} \
@@ -1232,12 +1218,9 @@ test-node-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} \
-		`find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` \
-		test/cli-node/cli-node.test.mjs \
-		test/dbg-node/dbg-node.test.mjs
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} $(addprefix ./,${ESM_TEST_FILES})
 
-test-node-cjs: node-js
+test-node-standard test-bun-standard: node-mjs node-cgi-mjs node-cli-mjs node-dbg-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	LIB_TYPE=${LIB_TYPE} \
@@ -1262,9 +1245,11 @@ test-node-cjs: node-js
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} `find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort`
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} $(addprefix ./,${ESM_TEST_FILES}) \
+		./test/cli-node/cli-node.test.mjs \
+		./test/dbg-node/dbg-node.test.mjs
 
-test-node-cjs-standard: node-js node-cli-js node-dbg-js
+test-node-cjs test-bun-cjs: node-js
 	PHP_VERSION=${PHP_VERSION} \
 	PHP_VARIANT=${PHP_VARIANT} \
 	LIB_TYPE=${LIB_TYPE} \
@@ -1289,10 +1274,36 @@ test-node-cjs-standard: node-js node-cli-js node-dbg-js
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node ${NODE_TEST_FLAGS} --test ${TEST_LIST} ${DOC_TESTS_CJS} \
-		`find test -maxdepth 1 -name '*.cjs' ! -name 'docs.test.cjs' ! -name 'docs-cgi.test.cjs' | sort` \
-		test/cli-node/cli-node.test.cjs \
-		test/dbg-node/dbg-node.test.cjs
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} $(addprefix ./,${CJS_TEST_FILES})
+
+test-node-cjs-standard test-bun-cjs-standard: node-js node-cli-js node-dbg-js
+	PHP_VERSION=${PHP_VERSION} \
+	PHP_VARIANT=${PHP_VARIANT} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} $(addprefix ./,${CJS_TEST_FILES}) \
+		./test/cli-node/cli-node.test.cjs \
+		./test/dbg-node/dbg-node.test.cjs
 
 test-deno: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
@@ -1319,38 +1330,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} deno test ${TEST_LIST} ${DOC_TESTS} ${PACKAGING_TESTS} `find test -maxdepth 1 -name '*.mjs' ! -name 'bun-runtime.test.mjs' ! -name 'docs.test.mjs' ! -name 'docs-cgi.test.mjs' ! -name 'packaging.test.mjs' | sort` --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
-
-# Bun uses JavaScriptCore, like Safari, but the focused lane deliberately avoids
-# heavyweight application bootstraps.  Drupal remains covered by the browser
-# demo test; this catches runtime, CGI, compiler, and Zend Fiber regressions in
-# seconds rather than treating Bun/Linux throughput as a Safari benchmark.
-test-bun: node-mjs node-cgi-mjs
-	PHP_VERSION=${PHP_VERSION} \
-	PHP_VARIANT=${PHP_VARIANT} \
-	LIB_TYPE=${LIB_TYPE} \
-	WITH_LIBXML=${WITH_LIBXML} \
-	WITH_LIBZIP=${WITH_LIBZIP} \
-	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_SQLITE} \
-	WITH_GD=${WITH_GD} \
-	WITH_PHAR=${WITH_PHAR} \
-	WITH_ZLIB=${WITH_ZLIB} \
-	WITH_LIBPNG=${WITH_LIBPNG} \
-	WITH_FREETYPE=${WITH_FREETYPE} \
-	WITH_LIBJPEG=${WITH_LIBJPEG} \
-	WITH_DOM=${WITH_DOM} \
-	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
-	WITH_XML=${WITH_XML} \
-	WITH_XMLREADER=${WITH_XMLREADER} \
-	WITH_XMLWRITER=${WITH_XMLWRITER} \
-	WITH_YAML=${WITH_YAML} \
-	WITH_TIDY=${WITH_TIDY} \
-	WITH_MBSTRING=${WITH_MBSTRING} \
-	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
-	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} bun test test/bun-runtime.test.mjs
+	WITH_INTL=${WITH_INTL} deno test $(addprefix ./,${ESM_TEST_FILES}) --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
 
 test-browser:
 	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
@@ -1360,59 +1340,7 @@ DEMO_WEB_PHP_VERSION ?= 8.4
 test-demo-web:
 	PHP_VERSION=${DEMO_WEB_PHP_VERSION} LIB_TYPE=${LIB_TYPE} DEMO_WEB_ARTIFACT_ROOT=${DEMO_WEB_ARTIFACT_ROOT} test/demo-web-test.sh
 
-test-cgi-node: node-mjs node-cgi-mjs
-	PHP_VERSION=${PHP_VERSION} \
-	LIB_TYPE=${LIB_TYPE} \
-	WITH_LIBXML=${WITH_LIBXML} \
-	WITH_LIBZIP=${WITH_LIBZIP} \
-	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_SQLITE} \
-	WITH_GD=${WITH_GD} \
-	WITH_PHAR=${WITH_PHAR} \
-	WITH_ZLIB=${WITH_ZLIB} \
-	WITH_LIBPNG=${WITH_LIBPNG} \
-	WITH_FREETYPE=${WITH_FREETYPE} \
-	WITH_LIBJPEG=${WITH_LIBJPEG} \
-	WITH_DOM=${WITH_DOM} \
-	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
-	WITH_XML=${WITH_XML} \
-	WITH_XMLREADER=${WITH_XMLREADER} \
-	WITH_XMLWRITER=${WITH_XMLWRITER} \
-	WITH_YAML=${WITH_YAML} \
-	WITH_TIDY=${WITH_TIDY} \
-	WITH_MBSTRING=${WITH_MBSTRING} \
-	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
-	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} test/node-cgi-test.sh
-ifeq (${LIB_TYPE},dynamic)
-	PHP_VERSION=${PHP_VERSION} \
-	LIB_TYPE=${LIB_TYPE} \
-	WITH_LIBXML=${WITH_LIBXML} \
-	WITH_LIBZIP=${WITH_LIBZIP} \
-	WITH_ICONV=${WITH_ICONV} \
-	WITH_SQLITE=${WITH_SQLITE} \
-	WITH_GD=${WITH_GD} \
-	WITH_PHAR=${WITH_PHAR} \
-	WITH_ZLIB=${WITH_ZLIB} \
-	WITH_LIBPNG=${WITH_LIBPNG} \
-	WITH_FREETYPE=${WITH_FREETYPE} \
-	WITH_LIBJPEG=${WITH_LIBJPEG} \
-	WITH_DOM=${WITH_DOM} \
-	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
-	WITH_XML=${WITH_XML} \
-	WITH_XMLREADER=${WITH_XMLREADER} \
-	WITH_XMLWRITER=${WITH_XMLWRITER} \
-	WITH_YAML=${WITH_YAML} \
-	WITH_TIDY=${WITH_TIDY} \
-	WITH_MBSTRING=${WITH_MBSTRING} \
-	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
-	WITH_OPENSSL=${WITH_OPENSSL} \
-	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.mjs
-endif
-
-test-cgi-node-cjs: node-js node-cgi-js
+test-cgi-node test-cgi-bun: node-mjs node-cgi-mjs
 	PHP_VERSION=${PHP_VERSION} \
 	LIB_TYPE=${LIB_TYPE} \
 	WITH_LIBXML=${WITH_LIBXML} \
@@ -1437,6 +1365,60 @@ test-cgi-node-cjs: node-js node-cgi-js
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} \
+	CGI_TEST_RUNTIME=${CGI_TEST_RUNTIME} BUN_TEST_FLAGS='${BUN_TEST_FLAGS}' test/node-cgi-test.sh
+ifeq (${LIB_TYPE},dynamic)
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} ./test/docs-cgi.test.mjs
+endif
+
+test-cgi-node-cjs test-cgi-bun-cjs: node-js node-cgi-js
+	PHP_VERSION=${PHP_VERSION} \
+	LIB_TYPE=${LIB_TYPE} \
+	WITH_LIBXML=${WITH_LIBXML} \
+	WITH_LIBZIP=${WITH_LIBZIP} \
+	WITH_ICONV=${WITH_ICONV} \
+	WITH_SQLITE=${WITH_SQLITE} \
+	WITH_GD=${WITH_GD} \
+	WITH_PHAR=${WITH_PHAR} \
+	WITH_ZLIB=${WITH_ZLIB} \
+	WITH_LIBPNG=${WITH_LIBPNG} \
+	WITH_FREETYPE=${WITH_FREETYPE} \
+	WITH_LIBJPEG=${WITH_LIBJPEG} \
+	WITH_DOM=${WITH_DOM} \
+	WITH_SIMPLEXML=${WITH_SIMPLEXML} \
+	WITH_XML=${WITH_XML} \
+	WITH_XMLREADER=${WITH_XMLREADER} \
+	WITH_XMLWRITER=${WITH_XMLWRITER} \
+	WITH_YAML=${WITH_YAML} \
+	WITH_TIDY=${WITH_TIDY} \
+	WITH_MBSTRING=${WITH_MBSTRING} \
+	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
+	WITH_OPENSSL=${WITH_OPENSSL} \
+	WITH_SDL=${WITH_SDL} \
+	WITH_INTL=${WITH_INTL} \
+	CGI_TEST_RUNTIME=${CGI_TEST_RUNTIME} BUN_TEST_FLAGS='${BUN_TEST_FLAGS}' \
 	TEST_FORMAT=cjs test/node-cgi-test.sh
 ifeq (${LIB_TYPE},dynamic)
 	PHP_VERSION=${PHP_VERSION} \
@@ -1462,7 +1444,7 @@ ifeq (${LIB_TYPE},dynamic)
 	WITH_ONIGURUMA=${WITH_ONIGURUMA} \
 	WITH_OPENSSL=${WITH_OPENSSL} \
 	WITH_SDL=${WITH_SDL} \
-	WITH_INTL=${WITH_INTL} node --test test/docs-cgi.test.cjs
+	WITH_INTL=${WITH_INTL} ${JS_TEST_RUNNER} ./test/docs-cgi.test.cjs
 endif
 
 update-snapshots:

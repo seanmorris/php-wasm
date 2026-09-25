@@ -92,9 +92,13 @@ jobs:
         run: |
           TARGET=test-${{ inputs.testType }}
 
-          if [ "${{ inputs.testType }}" = "node" ]; then
-            make --debug=basic test-node-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
-            make --debug=basic test-node-cjs-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+          if [ "${{ inputs.testType }}" = "node" ] || [ "${{ inputs.testType }}" = "bun" ]; then
+            make --debug=basic ${TARGET}-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+            make --debug=basic ${TARGET}-cjs-standard PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+            if [ "${{ inputs.testType }}" = "bun" ]; then
+              make --debug=basic test-cgi-bun PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+              make --debug=basic test-cgi-bun-cjs PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
+            fi
             exit 0
           fi
 

@@ -1325,6 +1325,24 @@ Print the help text for a given command
 npx php-wasm-builder help COMMAND
 ```
 
+## Testing
+
+The Node, Deno, and Bun Make targets share the same ESM runtime, extension, documentation, and packaging suites. Documentation examples run with the dynamic profile. `make test` runs Node and Bun for every supported PHP version, plus Deno for PHP 8.2–8.5. CI pins Bun to 1.4.0 and Deno to 2.5.6.
+
+To run Bun against a selected build configuration:
+
+```bash
+make test-bun ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_TYPE=dynamic
+make test-bun-standard ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_TYPE=dynamic
+make test-bun-cjs-standard ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_TYPE=dynamic
+make test-cgi-bun ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_TYPE=dynamic
+make test-cgi-bun-cjs ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_TYPE=dynamic
+```
+
+The `-standard` targets also exercise CLI PHPT cases and the debugger. `test-bun-cjs` and `test-bun-cjs-standard` mirror the corresponding Node CommonJS targets. The `test-cgi-bun` targets use the shared CGI HTTP/cookie harness with a pinned Bun Docker image, plus dynamic-profile CGI documentation examples. Bun Make targets use a five-minute per-test timeout to accommodate full tarball checks, configurable through `BUN_TEST_FLAGS`.
+
+The Build Artifacts workflow tests Node, Deno, and Bun across PHP 8.0–8.5, dynamic/shared/static builds, and uncompressed/compressed packages. Bun and Node run both ESM and CommonJS standard and CGI suites. These tests reuse the existing native build artifacts. Fast Bun wrapper and build-helper checks also run before native builds.
+
 ## 🤝 php-wasm started as a fork of oraoto/PIB...
 
 The repository [pib-legacy](https://github.com/seanmorris/pib-legacy) was created to preserve the original state of the project.

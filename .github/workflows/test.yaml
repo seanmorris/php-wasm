@@ -29,6 +29,10 @@ jobs:
         run: npm ci
       - name: Install Deno
         run: npm install -g deno@2.5.6
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - name: Test build helpers under inherited Make settings (Node)
         env:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
@@ -39,6 +43,11 @@ jobs:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
           WITH_GD: shared
         run: deno test test/builder-worktree.test.mjs test/preload-assets.test.mjs test/download-retry.test.mjs test/cgi-builder-workflow.test.mjs --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
+      - name: Test build helpers under inherited Make settings (Bun)
+        env:
+          MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
+          WITH_GD: shared
+        run: bun test --timeout 180000 ./test/builder-worktree.test.mjs ./test/preload-assets.test.mjs ./test/download-retry.test.mjs ./test/cgi-builder-workflow.test.mjs
       - name: Verify packaged builder helpers
         run: node --test test/build/builder-tools-packaging.test.mjs
       - name: Verify Cloudflare wrapper, profile, artifact and D1 regressions
@@ -69,6 +78,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -86,6 +98,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -103,6 +118,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -120,6 +138,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -137,6 +158,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -154,6 +178,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -171,6 +198,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -188,6 +218,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -205,6 +238,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -222,6 +258,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -239,6 +278,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -256,6 +298,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -273,6 +318,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -290,6 +338,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -307,6 +358,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -324,6 +378,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: docker compose version
       - run: cp .circleci/.env_8.2-shared.ci .env
       - run: make image
@@ -338,6 +395,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db
@@ -355,6 +415,9 @@ jobs:
         uses: actions/checkout@v6
       - run: npm install
       - run: npm install -g deno@2.5.6
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
       - run: |
           echo "set man-db/auto-update false" | sudo debconf-communicate
           sudo dpkg-reconfigure man-db

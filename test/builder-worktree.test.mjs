@@ -211,7 +211,7 @@ function runWaitlineMakeFixture(t, { target, enabled, omitDependency = false })
 	const packageDir = path.join(workspaceDir, 'waitline');
 	fs.mkdirSync(packageDir);
 	const preMake = fs.readFileSync(path.join(repoRoot, 'packages/waitline/pre.mak'), 'utf8');
-	const dependency = /^test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno: node-cli-mjs\r?\n/m;
+	const dependency = /^test-node [^\n]+: node-cli-mjs\r?\n/m;
 	if(omitDependency) assert.match(preMake, dependency, 'The negative control must remove the actual prerequisite rule');
 	fs.writeFileSync(path.join(packageDir, 'pre.mak'), omitDependency ? preMake.replace(dependency, '') : preMake);
 	const overrides = path.join(workspaceDir, 'recipes.mak');
@@ -222,9 +222,9 @@ node-mjs node-cgi-mjs node-js node-cli-js node-dbg-js node-dbg-mjs:
 \t@:
 node-cli-mjs:
 \t@printf 'built\\n' > '\${PHP_BUILDER_DIR}/cli-mjs'
-test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-browser:
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-browser:
 \t@printf '%s\\n' '\${TEST_LIST}' > '\${PHP_BUILDER_DIR}/tests'
-\t@if test '\${WITH_WAITLINE}' = 1 && test '$@' != test-bun && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
+\t@if test '\${WITH_WAITLINE}' = 1 && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
 `);
 	const cleanEnv = { ...env, EXTENSION_PACKAGE_DIRS: packageDir };
 	delete cleanEnv.WITH_WAITLINE;
@@ -244,7 +244,8 @@ test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test
 	};
 }
 
-const waitlineTestTargets = ['test-node', 'test-node-standard', 'test-node-cjs', 'test-node-cjs-standard', 'test-deno'];
+const waitlineTestTargets = ['test-node', 'test-node-standard', 'test-node-cjs', 'test-node-cjs-standard', 'test-deno', 'test-bun', 'test-bun-standard', 'test-bun-cjs', 'test-bun-cjs-standard'];
+const esmStandardTargets = ['test-node-standard', 'test-bun-standard'];
 
 test('every waitline TEST_LIST consumer builds CLI MJS before clean parallel tests', t => {
 	for(const target of waitlineTestTargets)
@@ -269,7 +270,7 @@ test('disabled and default waitline preserve existing runtime prerequisites', t 
 				const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled });
 				const label = `${target} (WITH_WAITLINE=${enabled ?? 'unset'})`;
 				assert.equal(result.status, 0, `${label}: ${result.stdout}${result.stderr}`);
-				assert.equal(cliBuilt, target === 'test-node-standard', label);
+				assert.equal(cliBuilt, esmStandardTargets.includes(target), label);
 				assert.doesNotMatch(tests, /packages\/waitline\/test\//, label);
 			}
 		}
@@ -281,17 +282,14 @@ test('disabled and default waitline preserve existing runtime prerequisites', t 
 	}
 });
 
-test('waitline does not add CLI prerequisites to focused Bun or browser tests', t => {
-	for(const target of ['test-bun', 'test-browser'])
-	{
-		const { result, cliBuilt } = runWaitlineMakeFixture(t, { target, enabled: 1 });
-		assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
-		assert.equal(cliBuilt, false, target);
-	}
+test('waitline does not add CLI prerequisites to browser tests', t => {
+	const { result, cliBuilt } = runWaitlineMakeFixture(t, { target: 'test-browser', enabled: 1 });
+	assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+	assert.equal(cliBuilt, false);
 });
 
 test('waitline dependency regression rejects the original missing-prerequisite graph', t => {
-	for(const target of waitlineTestTargets.filter(target => target !== 'test-node-standard'))
+	for(const target of waitlineTestTargets.filter(target => !esmStandardTargets.includes(target)))
 	{
 		const { result, cliBuilt } = runWaitlineMakeFixture(t, { target, enabled: 1, omitDependency: true });
 		assert.notEqual(result.status, 0, target);

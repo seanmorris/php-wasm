@@ -10,6 +10,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 const workflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test-cgi-node-step.yaml'), 'utf8');
 const nodeWorkflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test-node-step.yaml'), 'utf8');
 const testWorkflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/test.yaml'), 'utf8');
+const artifactWorkflow = fs.readFileSync(path.join(repoRoot, '.github/workflows/build.yaml'), 'utf8');
 const guardPath = path.join(repoRoot, '.github/bin/verify-builder-git.sh');
 const guard = fs.readFileSync(guardPath, 'utf8');
 const builderImage = process.env.BUILDER_GIT_TEST_IMAGE;
@@ -109,12 +110,14 @@ function assertFastGateDependencies(contents)
 	const install = step(gate, 'Install locked dependencies');
 	const node = step(gate, 'Test build helpers under inherited Make settings (Node)');
 	const deno = step(gate, 'Test build helpers under inherited Make settings (Deno)');
+	const bun = step(gate, 'Test build helpers under inherited Make settings (Bun)');
+	const installBun = step(gate, 'Install Bun');
 	const setup = gate.indexOf('      - uses: actions/setup-node@v6\n');
 	assert.notEqual(setup, -1, 'The gate must prepare Node before installing dependencies');
 	assert.ok(setup < gate.indexOf(install), 'Dependencies must use the prepared Node version');
 	assert.match(install, /^        run: npm ci$/m, 'Install the lockfile, including the Node types used by Deno');
 	assert.doesNotMatch(install, /^        (?:if|working-directory):/m, 'Every gate run needs the root development dependencies');
-	for(const consumer of [node, deno])
+	for(const consumer of [node, deno, bun])
 	{
 		assert.ok(gate.indexOf(install) < gate.indexOf(consumer), 'Install dependencies before each runtime test suite');
 		assert.match(consumer, /test\/cgi-builder-workflow\.test\.mjs/, 'The gate must run its own preparation regression');
@@ -122,9 +125,13 @@ function assertFastGateDependencies(contents)
 	assert.match(node, /^        run: node --test /m);
 	assert.match(deno, /^        run: deno test /m);
 	assert.doesNotMatch(deno, /--no-check\b/, 'Do not suppress typechecking to hide missing development dependencies');
+	assert.match(installBun, /uses: oven-sh\/setup-bun@v2/);
+	assert.match(installBun, /bun-version: 1\.4\.0/);
+	assert.ok(gate.indexOf(installBun) < gate.indexOf(bun), 'Prepare pinned Bun before its tests');
+	assert.match(bun, /^        run: bun test /m);
 }
 
-test('fast build gate installs locked dependencies before Node and typechecked Deno tests', () => {
+test('fast build gate prepares Node, typechecked Deno and pinned Bun tests', () => {
 	assertFastGateDependencies(testWorkflow);
 });
 
@@ -136,15 +143,128 @@ test('fast gate dependency contract rejects missing installs, late installs and 
 		, testWorkflow.replace('run: npm ci', 'run: npm ci --omit=dev')
 		, testWorkflow.replace('run: npm ci', "if: false\n        run: npm ci")
 		, testWorkflow.replace('run: deno test ', 'run: deno test --no-check ')
+		, testWorkflow.replace(step(testWorkflow, 'Install Bun'), '')
 	];
 	for(const name of [
 		'Test build helpers under inherited Make settings (Node)'
 		, 'Test build helpers under inherited Make settings (Deno)'
+		, 'Test build helpers under inherited Make settings (Bun)'
 	]){
 		const consumer = step(testWorkflow, name);
 		mutations.push(testWorkflow.replace(install, '__INSTALL_STEP__').replace(consumer, install).replace('__INSTALL_STEP__', consumer));
 	}
 	for(const contents of mutations) assert.throws(() => assertFastGateDependencies(contents));
+});
+
+/**
+ * Check every artifact test matrix against the supported runtimes and builds.
+ * @param {string} contents Artifact workflow source.
+ * @returns {void} Nothing.
+ */
+function assertRuntimeMatrices(contents)
+{
+	for(const libType of ['dynamic', 'shared', 'static'])
+	{
+		for(const compressed of [false, true])
+		{
+			const name = `test-node-${libType}${compressed ? '-compressed' : ''}`;
+			const block = contents.split(new RegExp(`^  ${name}:\\n`, 'm'))[1]?.split(/^  [\w-]+:\n/m)[0];
+			assert.ok(block, `Missing matrix: ${name}`);
+			const axis = key => {
+				const value = block.match(new RegExp(`^        ${key}: (\\[[^\\n]+\\])$`, 'm'))?.[1];
+				assert.ok(value, `Missing ${name}.${key}`);
+				return JSON.parse(value.replaceAll("'", '"'));
+			};
+			assert.deepEqual(axis('phpVersion'), ['8.5', '8.4', '8.3', '8.2', '8.1', '8.0'], name);
+			assert.deepEqual(axis('testType'), ['node', 'deno', 'bun'], name);
+			assert.deepEqual(axis('libType'), [libType], name);
+			assert.match(block, /fail-fast: false/);
+			assert.doesNotMatch(block, /continue-on-error|\bexclude:|\binclude:/, 'Every runtime must cover the same matrix');
+			const artifact = compressed
+				? 'php-compressed-${{ matrix.libType }}'
+				: 'php-uncompressed-${{ matrix.phpVersion }}-${{ matrix.libType }}';
+			assert.ok(block.includes(`artifactPattern: ${artifact}`), name);
+		}
+	}
+}
+
+test('Bun covers every Node/Deno artifact matrix and both standard module formats', () => {
+	assertRuntimeMatrices(artifactWorkflow);
+	assert.throws(() => assertRuntimeMatrices(artifactWorkflow.replace("testType: ['node', 'deno', 'bun']", "testType: ['node', 'deno']")));
+	const run = step(nodeWorkflow, 'Run tests');
+	assert.match(run, /inputs\.testType }}" = "node".*inputs\.testType }}" = "bun"/);
+	assert.match(run, /make --debug=basic \$\{TARGET}-standard /);
+	assert.match(run, /make --debug=basic \$\{TARGET}-cjs-standard /);
+	assert.match(run, /make --debug=basic test-cgi-bun /);
+	assert.match(run, /make --debug=basic test-cgi-bun-cjs /);
+	assert.match(step(nodeWorkflow, 'Install Bun'), /bun-version: 1\.4\.0/);
+	assert.equal((testWorkflow.match(/bun-version: 1\.4\.0/g) ?? []).length, 19, 'The build gate and all 18 make test jobs need Bun');
+});
+
+/**
+ * Read the production test command without rebuilding native artifacts.
+ * @param {string} target Make test target.
+ * @param {string} libType Build type.
+ * @returns {{command: string, files: string[]}} Planned command and test files.
+ */
+function runtimeTestPlan(target, libType)
+{
+	const result = spawnSync('make', [
+		'--no-print-directory', '--dry-run'
+		, ...[
+			'node-mjs', 'node-cgi-mjs', 'node-cli-mjs', 'node-dbg-mjs'
+			, 'node-js', 'node-cgi-js', 'node-cli-js', 'node-dbg-js'
+		].flatMap(name => ['-o', name])
+		, target, 'ENV_FILE=/dev/null', 'PHP_VERSION=8.3', `LIB_TYPE=${libType}`
+		, 'EXTENSION_PACKAGE_DIRS=packages/waitline', 'WITH_WAITLINE=1'
+		, 'SKIP_PACKAGING_TEST=0'
+	], {
+		cwd: repoRoot, encoding: 'utf8'
+		, env: {...process.env, MAKEFLAGS: '', MFLAGS: '', GNUMAKEFLAGS: '', MAKEFILES: '', MAKELEVEL: '0'}
+	});
+	assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
+	return {command: result.stdout, files: result.stdout.match(/\.\/(?:packages|test)\/[^\s]+\.(?:mjs|cjs)\b/g) ?? []};
+}
+
+test('Bun and Node Make targets select identical ESM, CommonJS, extension, docs and packaging suites', () => {
+	for(const libType of ['dynamic', 'shared', 'static'])
+	{
+		for(const suffix of ['', '-standard', '-cjs', '-cjs-standard'])
+		{
+			const node = runtimeTestPlan(`test-node${suffix}`, libType);
+			const bun = runtimeTestPlan(`test-bun${suffix}`, libType);
+			const label = `${libType}${suffix}`;
+			assert.match(node.command, /node\s+--test\s/);
+			assert.match(bun.command, /bun test --timeout 300000\s/);
+			assert.deepEqual(bun.files, node.files, label);
+			const extension = suffix.includes('-cjs') ? 'cjs' : 'mjs';
+			assert.ok(bun.files.includes(`./test/basic.${extension}`), label);
+			assert.ok(bun.files.includes('./packages/waitline/test/basic.mjs'), label);
+			assert.equal(bun.files.includes(`./test/docs.test.${extension}`), libType === 'dynamic', label);
+			assert.equal(bun.files.includes('./test/packaging.test.mjs'), extension === 'mjs', label);
+			assert.equal(bun.files.includes(`./test/cli-node/cli-node.test.${extension}`), suffix.endsWith('-standard'), label);
+			assert.equal(bun.files.includes(`./test/dbg-node/dbg-node.test.${extension}`), suffix.endsWith('-standard'), label);
+			if(!suffix) assert.deepEqual(runtimeTestPlan('test-deno', libType).files, bun.files, libType);
+		}
+	}
+});
+
+test('Bun and Node CGI targets share the HTTP harness and matching documentation suites', () => {
+	for(const libType of ['dynamic', 'shared', 'static'])
+	{
+		for(const suffix of ['', '-cjs'])
+		{
+			const node = runtimeTestPlan(`test-cgi-node${suffix}`, libType);
+			const bun = runtimeTestPlan(`test-cgi-bun${suffix}`, libType);
+			assert.match(node.command, /CGI_TEST_RUNTIME=node /);
+			assert.match(bun.command, /CGI_TEST_RUNTIME=bun /);
+			assert.match(bun.command, /test\/node-cgi-test\.sh/);
+			assert.equal(bun.command.includes('TEST_FORMAT=cjs'), suffix === '-cjs');
+			assert.deepEqual(bun.files, node.files);
+			const extension = suffix ? 'cjs' : 'mjs';
+			assert.deepEqual(bun.files, libType === 'dynamic' ? [`./test/docs-cgi.test.${extension}`] : []);
+		}
+	}
 });
 
 /**

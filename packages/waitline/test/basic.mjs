@@ -26,7 +26,7 @@ const captureOutput = php => {
 };
 
 test('waitline exposes the readline API and persistent history', async () => {
-	const code = String.raw`
+	const code = `
 		$functions = [
 			'readline',
 			'readline_info',

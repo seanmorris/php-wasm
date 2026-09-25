@@ -4,6 +4,8 @@ Changes
 
 ## Unreleased
 
+* Expanded Bun testing to the shared Node/Deno suites, including extensions, documentation, packaging, CLI PHPT cases, CGI HTTP/cookies, and CommonJS/debugger coverage. CI now checks Bun 1.4.0 across PHP 8.0–8.5, all three library profiles, and raw/compressed artifacts, with fast wrapper and build-helper checks before native builds.
+
 * Fixed embedded-editor highlighting and false EOF diagnostics for indented PHP heredoc/nowdoc endings followed by expressions. Ace syntax validation remains enabled, including errors after the string.
 
 * Fixed closed SDL_mixer cleanup replacing the existing error and retaining a stale audio format. Decoder initialization after shutdown no longer recreates decoder lists; repeated PHP refresh stays at zero SDL allocations, and reopening supports a different audio format.

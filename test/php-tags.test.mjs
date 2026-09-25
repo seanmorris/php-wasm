@@ -56,7 +56,7 @@ const fixture = async (t, readyState, hasBody) => {
 	replace('__phpTagsFixtureRuntime', PhpWeb);
 	const code = source.replace("import { PhpWeb } from './PhpWeb.mjs';", 'const PhpWeb = globalThis.__phpTagsFixtureRuntime;');
 	assert.notEqual(code, source);
-	const load = () => import(`data:text/javascript;base64,${Buffer.from(code + '\n//# sourceURL=php-tags-fixture.mjs').toString('base64')}#${randomUUID()}`);
+	const load = () => import(`data:text/javascript;base64,${Buffer.from(code + `\n//# sourceURL=php-tags-fixture-${randomUUID()}.mjs`).toString('base64')}`);
 	return {doc, script, runs, observers, Element, load};
 };
 
