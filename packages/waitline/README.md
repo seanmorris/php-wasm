@@ -34,8 +34,8 @@ Important distinction:
 
 - `WITH_WAITLINE`: defaults to `0` in the custom builder. Set it to `1` to compile the extension in.
 - `WAITLINE_REPOSITORY`: optional Git repository override. Defaults to the upstream Waitline repository.
-- `WAITLINE_REF`: Git commit or ref to build. The default pins `6dd8d818d737a301f21c938c05523de345a604ff`, the readline API and interactive-input implementation used by the integration tests.
-- `WAITLINE_BRANCH`: legacy branch override, used only when `WAITLINE_REF` is not explicitly set. It no longer defaults to `master`, which lacks the readline API.
+- `WAITLINE_REF`: Git commit or ref to build. The default pins `02921e409c4b61507be916a2eb2354b1cb29b9d3`, which includes the readline API and interactive-input implementation used by the integration tests.
+- `WAITLINE_BRANCH`: legacy branch override, used only when `WAITLINE_REF` is not explicitly set. Leave it unset to use the pinned commit.
 - `WAITLINE_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `waitline` repository during the build.
 
 Imports verify source identity and contents on every build. Changing refs or development checkouts, editing headers (including generated arginfo), or adding/removing inputs refreshes both the staged source and the PHP extension. Unchanged imports preserve timestamps and avoid recompilation. PHP configuration, base, CLI, CGI, and debugger builds all depend on the active extension manifest.

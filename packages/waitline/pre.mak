@@ -4,7 +4,7 @@ WITH_WAITLINE?=0
 ifeq (${WITH_WAITLINE},1)
 WAITLINE_REPOSITORY?=https://github.com/seanmorris/waitline.git
 WAITLINE_BRANCH?=
-WAITLINE_REF?=$(or ${WAITLINE_BRANCH},6dd8d818d737a301f21c938c05523de345a604ff)
+WAITLINE_REF?=$(or ${WAITLINE_BRANCH},02921e409c4b61507be916a2eb2354b1cb29b9d3)
 EXTRA_FLAGS+= -D WITH_WAITLINE=1
 WAITLINE_SOURCE_STAMP=third_party/waitline/.php-wasm-source.json
 WAITLINE_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/waitline/.php-wasm-source.json

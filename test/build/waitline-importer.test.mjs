@@ -13,7 +13,7 @@ test('the immutable default and legacy branch override feed every configure/runt
 	const f = fixture(t);
 	const settings = f.run({ ref: null, goal: 'settings' });
 	assert.deepEqual(settings.stdout.trim().split('\n'), [
-		'ref=6dd8d818d737a301f21c938c05523de345a604ff'
+		'ref=02921e409c4b61507be916a2eb2354b1cb29b9d3'
 		, ...['configure', 'base', 'cli', 'cgi', 'dbg'].map(name => `${name}=${extension}/${stateName}`)
 	]);
 	const disabled = f.run({ ref: null, goal: 'settings', enabled: '0' });
