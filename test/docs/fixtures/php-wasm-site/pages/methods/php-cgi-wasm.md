@@ -8,8 +8,8 @@ microdata:
         - PhpCgiWorker
 ---
 <!--
-Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
-Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/methods/php-cgi-wasm.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/methods/php-cgi-wasm.md
 -->
 # Php-Cgi-Wasm Methods
 
@@ -30,7 +30,7 @@ The concrete classes are:
 
 *string*
 
-Selects the PHP-CGI runtime version to load.
+Selects the PHP-CGI runtime version to load. Defaults to `8.4`.
 
 ```javascript
 const php = new PhpCgiWorker({version: '8.4'});

@@ -4,8 +4,8 @@ pagetitle: PHP in Cloudflare Workers and Pages
 weight: -650
 ---
 <!--
-Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
-Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/getting-started/php-in-cloudflare.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/getting-started/php-in-cloudflare.md
 -->
 # PHP in Cloudflare Workers and Pages
 
@@ -98,7 +98,7 @@ Create a separate `php-cloud-demo` project beside the `php-wasm` checkout:
 mkdir ../php-cloud-demo
 cd ../php-cloud-demo
 npm init -y
-npm install --save-dev --save-exact wrangler@4.131.1
+npm install --save-dev --save-exact wrangler@4.143.1
 ```
 
 Save this as `copy-runtime.mjs`. It verifies the final manifest and copies only

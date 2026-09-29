@@ -3,8 +3,8 @@ title: Install & Import
 weight: -900
 ---
 <!--
-Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
-Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/getting-started/install-and-include.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/getting-started/install-and-include.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/packages/php-wasm/PhpWeb.mjs
@@ -45,34 +45,32 @@ $ npm i php-wasm
 $ npm i php-cgi-wasm
 $ npm i php-cli-wasm
 $ npm i php-dbg-wasm
+$ npm i php-sdl-wasm
+$ npm i php-cloud-wasm
 $ npm i php-wasm-builder
 ```
 
 ### Latest nightly build
 
-If you want the newest unpublished artifacts instead of the npm packages, use the latest successful `Build Artifacts` workflow run from GitHub Actions.
+If you want the newest unpublished artifacts instead of the npm packages, use a
+[successful `develop` run of the Build Artifacts workflow](https://github.com/seanmorris/php-wasm/actions/workflows/build.yaml?query=branch%3Adevelop+conclusion%3Asuccess).
+Nightly builds are announced in the `#nightly-builds` channel on Discord.
 
-If you specifically need the long-lived `develop` artifacts, the latest successful `develop`-branch build is still the February 24, 2026 run:
+### Pre-Packaged Static Assets
 
-- `Build Artifacts` run `#92`
-- GitHub Actions run ID `22360005357`
-- Branch: `develop`
-- Versions built: PHP `8.0` through `8.5`
-- Library modes built: `static`, `shared`, and `dynamic`
-- Discord: nightly builds are announced in `#nightly-builds`
+Each runtime module loads its WebAssembly binary with
+`new URL('<hash>.wasm', import.meta.url)`. Bundlers that understand this
+pattern, such as Vite and webpack 5, emit the binary automatically.
 
-Link:
-
-<https://github.com/seanmorris/php-wasm/actions/runs/22360005357>
-
-#### Pre-Packaged Static Assets:
-
-If you're using a bundler, use the vendor's documentation to learn how to move the files matching the following pattern to your public directory:
+Otherwise, copy the binary referenced by each runtime you import next to the
+bundled module. It is named by its SHA-1 hash, which changes with every build:
 
 ```bash
-node_modules/php-wasm/php8.4-web.mjs.wasm
-node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm
+grep -o '[0-9a-f]\{40\}\.wasm' node_modules/php-wasm/php8.4-web.mjs | sort -u
+grep -o '[0-9a-f]\{40\}\.wasm' node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs | sort -u
 ```
+
+Repeat this after upgrading, and for each PHP version and runtime you import.
 
 ## Importing the module
 

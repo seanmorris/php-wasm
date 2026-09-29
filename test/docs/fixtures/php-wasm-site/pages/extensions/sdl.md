@@ -2,8 +2,8 @@
 title: SDL and OpenGL
 ---
 <!--
-Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
-Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/extensions/sdl.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/extensions/sdl.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/test/browser/sdl.spec.mjs
 - https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/test/build/sdl.test.mjs
@@ -68,7 +68,7 @@ make sdl-mjs \
 ```
 
 The same flags can be set in [`.php-wasm-rc`](/compiling/php-wasm-rc.html#sdl-runtime-options)
-for `php-wasm-builder build sdl mjs` from a builder containing this package.
+for `php-wasm-builder build sdl mjs` (`php-wasm-builder` 0.2.0 or later).
 Both commands produce `packages/php-sdl-wasm` with its matching native runtime,
 required libraries, and preload data. In a source checkout, `SDL_OUTPUT_DIR`
 can override the destination; raw native outputs stay in `.cache/sdl-raw/php<version>`.

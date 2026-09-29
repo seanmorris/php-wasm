@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
-Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -23,9 +23,11 @@ Validation refs:
 The concrete `php-wasm` classes all extend the same base runtime API:
 
 - `PhpWeb`
+- `PhpWorker`
+- `PhpWebview`
 - `PhpNode`
 
-Both accept the same core options bucket, with different defaults for binary loading and filesystem persistence depending on environment.
+They accept the same core options bucket, with different defaults for binary loading and filesystem persistence depending on environment.
 
 ### Common constructor options
 
@@ -33,7 +35,9 @@ Both accept the same core options bucket, with different defaults for binary loa
 
 *string*
 
-Selects the PHP runtime version to load. The current defaults in `source/` are `8.4` for `PhpWeb` and `PhpNode`.
+Selects the PHP runtime version to load. Defaults to `8.4`. `PhpNode` instead
+uses the `PHP_VERSION` environment variable when it names a supported version
+(`8.0`–`8.5`).
 
 ```javascript
 const php = new PhpWeb({version: '8.4'});

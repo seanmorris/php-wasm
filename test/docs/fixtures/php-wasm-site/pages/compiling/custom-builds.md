@@ -2,8 +2,8 @@
 pagetitle: Custom Builds with php-wasm-builder
 ---
 <!--
-Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
-Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/compiling/custom-builds.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/compiling/custom-builds.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/bin/php-wasm-builder.js
@@ -95,8 +95,6 @@ npx php-wasm-builder copy-assets
 ### build-assets
 
 While `copy-assets` moves existing shared libraries, the `build-assets` command compiles them first, then moves them to PHP_ASSET_DIR.
-
-You can use this with `.php-wasm-rc` to copy assets even if you're not using a custom build.
 
 ```bash
 npx php-wasm-builder build-assets
@@ -194,8 +192,8 @@ $ php-wasm-builder build web dbg mjs
 
 ## SDL browser runtime
 
-Build the standalone [php-sdl-wasm runtime](/extensions/sdl.html) with a builder
-containing this development package:
+Build the standalone [php-sdl-wasm runtime](/extensions/sdl.html) with
+`php-wasm-builder` 0.2.0 or later:
 
 ```sh
 php-wasm-builder build sdl mjs

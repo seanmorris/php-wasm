@@ -3,8 +3,8 @@ title: PHP in Static HTML
 weight: -700
 ---
 <!--
-Vendored from php-wasm-site commit 73d20fb6d1c1dce8519354e821761f60df4c220c
-Source: https://github.com/seanmorris/php-wasm-site/blob/73d20fb6d1c1dce8519354e821761f60df4c220c/pages/getting-started/php-in-static-html.md
+Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
+Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/getting-started/php-in-static-html.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/php-tags.mjs
@@ -13,18 +13,18 @@ Validation refs:
 -->
 # Php-Wasm in Static HTML
 
-PHP can be included in static HTML pages that are served with no dynamic processing on the backend whatsoever. Just use one of the `php-tags` module entrypoints from a CDN in your page:
+PHP can be included in static HTML pages that are served with no dynamic processing on the backend whatsoever. Just load the `php-tags.mjs` module from a CDN in your page:
 
 **JSDelivr**
 
 ```html
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 ```
 
 **Unpkg**
 
 ```html
-<script async type = "text/javascript" src = "https://unpkg.com/php-wasm/php-tags.unpkg.mjs"></script>
+<script async type = "module" src = "https://unpkg.com/php-wasm/php-tags.mjs"></script>
 ```
 
 Once you've included that, you can start writing php within `<script type = "text/php">` tags:
@@ -40,7 +40,7 @@ Once you've included that, you can start writing php within `<script type = "tex
 Inline php can use standard input, output and error with `data-` attributes. Just set the value of the attribute to a selector that will match that tag.
 
 ``` { .html highlight="5" }
-<script async type = "text/javascript" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.jsdelivr.mjs"></script>
+<script async type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"></script>
 
 <script id = "input" type = "text/plain">Hello, world!</script>
 
@@ -125,7 +125,7 @@ Here is a less-than-trivial example that loads zlib, gd, libwebp & others:
   imageFilledRectangle($image, 50, 50, 550, 350, $colorTwo);
   imagettftext($image, 50, 0, 95, 212, $colorOne, '/preload/Montserrat-Regular.ttf', $text);
 
-  // Render it as a JPEG:
+  // Render it as a WebP:
   ob_start();
   imageWebp($image, null, $quality);
   $webp = ob_get_contents();
