@@ -23,13 +23,13 @@ microdata:
     isBasedOn: php
     isFamilyFriendly: true
     keywords: php, javascript, webassembly
-    license: https://www.apache.org/licenses/LICENSE-2.0.txt
+    license: https://php-wasm.seanmorr.is/LICENSE.html
     maintainer: Sean Morris
     additionalType: https://schema.org/ComputerLanguage
 ---
 <!--
-Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
-Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/index.md
+Vendored from php-wasm-site commit 2ec67be087fe50a57fb296d730f597e0979b6732
+Source: https://github.com/seanmorris/php-wasm-site/blob/2ec67be087fe50a57fb296d730f597e0979b6732/pages/index.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -84,7 +84,7 @@ Write code that runs on the backend, the frontend, the edge and the service work
 
 <p class = "strong">And, of course, it's Open Source.</p>
 
-Php Wasm is published 100% for free under the Apache License, Version 2.0. This means Php Wasm is and always will be 100% free. Php Wasm is committed to maintaining the free and open nature of the web, and all the tools the project is based on.
+Php Wasm is published 100% for free, dual licensed under the Apache License, Version 2.0 and the GNU General Public License, Version 2. This means Php Wasm is and always will be 100% free. Php Wasm is committed to maintaining the free and open nature of the web, and all the tools the project is based on.
 
 <p class = "strong">Want to Reach Out?</p>
 

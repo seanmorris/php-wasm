@@ -4,8 +4,8 @@ pagetitle: Documentation Home
 weight: -1000
 ---
 <!--
-Vendored from php-wasm-site commit bdf1555ad207242ac09292ff05b125f006a9d049
-Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/getting-started/home.md
+Vendored from php-wasm-site commit 2ec67be087fe50a57fb296d730f597e0979b6732
+Source: https://github.com/seanmorris/php-wasm-site/blob/2ec67be087fe50a57fb296d730f597e0979b6732/pages/getting-started/home.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -47,10 +47,8 @@ Discord's `#nightly-builds` channel.
 
 For historical release notes, see the [CHANGELOG](/CHANGELOG.html).
 
-## 🍻 Licensed under the Apache License, Version 2.0
+## 🍻 Dual licensed under the Apache License, Version 2.0 and the GNU GPL, Version 2
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+php-wasm is dual licensed under the [Apache License, Version 2.0](/LICENSE.html) and the [GNU General Public License, Version 2](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html); you may use it under the terms of either license.
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
-
-http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software distributed under the Licenses is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the Licenses for the specific language governing permissions and limitations under the Licenses.
