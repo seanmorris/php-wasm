@@ -3,8 +3,8 @@ title: Using PHP Extensions
 weight: -1000
 ---
 <!--
-Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
-Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/extensions/using-php-extensions.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/extensions/using-php-extensions.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -60,13 +60,13 @@ Static builds are the exception for `intl`: they can bundle `icudt72l.dat` direc
 You can also load extensions modules dynamically:
 
 ```javascript
-// This will load both sqlite.so & php8.x-sqlite.so:
+// This will load both libsqlite3.so & php8.x-sqlite.so:
 const php = new PhpWeb({sharedLibs: [
 	await import('https://unpkg.com/php-wasm-sqlite')
 ]});
 ```
 
-Unfortunately, this notation is not available for Service Workers, as they do not yet support dynamic `imports()`. Hopefully this will change soon.
+This notation is not available in Service Workers, which do not support dynamic `import()`. Import the extension module statically or pass its asset URLs instead.
 
 ## Loading extensions manually
 
@@ -145,8 +145,8 @@ const php = new PhpWeb({sharedLibs: [
 		ini:  true,
 	},
 	{	
-		name: 'sqlite.so',
-		url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',
+		name: 'libsqlite3.so',
+		url: 'https://unpkg.com/php-wasm-sqlite/libsqlite3.so',
 		ini: false 
 	}
 ]});
@@ -167,7 +167,7 @@ Some extensions require supporting libraries. You can provide URLs for those as 
 ```javascript
 const php = new PhpWeb({sharedLibs: [
 	{ url: 'https://unpkg.com/php-wasm-sqlite/php8.4-sqlite.so', ini: true  },
-	{ url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
+	{ url: 'https://unpkg.com/php-wasm-sqlite/libsqlite3.so',    ini: false },
 ]});
 ```
 
@@ -244,8 +244,8 @@ The following extensions may be loaded at runtime. This allows the shared extens
 SDL bindings are built into the standalone `php-sdl-wasm` browser runtime.
 Use `PhpSdl` from a versioned entry such as `php-sdl-wasm/php8.4-sdl.mjs`.
 The package includes its required native libraries and does not depend on
-`php-wasm`. The development build adds SDL_image, SDL_mixer, SDL_ttf, and OpenGL
-shader bindings. See [SDL and OpenGL](/extensions/sdl.html) for availability,
+`php-wasm`. It includes SDL_image, SDL_mixer, SDL_ttf, and OpenGL shader
+bindings. See [SDL and OpenGL](/extensions/sdl.html) for availability,
 canvas setup, migration from the former runtime option, the textured cube,
 and build options.
 

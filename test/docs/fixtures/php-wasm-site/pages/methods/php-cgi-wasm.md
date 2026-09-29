@@ -8,8 +8,8 @@ microdata:
         - PhpCgiWorker
 ---
 <!--
-Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
-Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/methods/php-cgi-wasm.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/methods/php-cgi-wasm.md
 -->
 # Php-Cgi-Wasm Methods
 
@@ -44,7 +44,7 @@ const php = new PhpCgiWorker({version: '8.4'});
 const php = new PhpCgiWorker({
     sharedLibs: [
         { url: 'https://unpkg.com/php-wasm-sqlite/php8.4-sqlite.so', ini: true  },
-        { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so',        ini: false },
+        { url: 'https://unpkg.com/php-wasm-sqlite/libsqlite3.so',    ini: false },
     ]
 });
 ```

@@ -9,8 +9,8 @@ microdata:
         - PhpWeb
 ---
 <!--
-Vendored from php-wasm-site commit f8a0ee2561989abf4278748b1f4724e1c01e419f
-Source: https://github.com/seanmorris/php-wasm-site/blob/f8a0ee2561989abf4278748b1f4724e1c01e419f/pages/methods/php-wasm.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/methods/php-wasm.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
@@ -72,7 +72,7 @@ Loads shared extensions before boot and writes `extension=...` lines for any ite
 const php = new PhpWeb({
   sharedLibs: [
     { url: 'https://unpkg.com/php-wasm-sqlite/php8.4-sqlite.so', ini: true },
-    { url: 'https://unpkg.com/php-wasm-sqlite/sqlite.so', ini: false },
+    { url: 'https://unpkg.com/php-wasm-sqlite/libsqlite3.so', ini: false },
   ]
 });
 ```

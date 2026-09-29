@@ -2,8 +2,8 @@
 title: Transactions
 ---
 <!--
-Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
-Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/filesystem/transactions.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/filesystem/transactions.md
 -->
 # Transactions
 
@@ -11,6 +11,12 @@ Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde2
 
 With persistence enabled, browser runtimes synchronize their mounted IDBFS
 storage while holding the `php-wasm-fs-lock` Web Lock.
+
+When Web Locks are unavailable, such as on a plain HTTP origin reached by a
+LAN IP address, browser runtimes fall back to a FIFO lock within the current
+page or worker. That fallback coordinates runtimes in the same JavaScript realm
+only. Use HTTPS, where Web Locks are available, when tabs or workers share
+persistent storage.
 
 ## Browser CGI
 

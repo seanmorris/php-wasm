@@ -7,8 +7,8 @@ leftBarLink: false
 TOC: false
 ---
 <!--
-Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
-Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/demos.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/demos.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -50,7 +50,7 @@ runtime package depends on the other. Saved links using `variant=_sdl` still
 select SDL, while new links use `runtime=sdl`. For a local source build,
 `make demo-versions` prepares all six SDL runtime versions and the ordinary demo runtimes.
 
-Development builds add **SDL Cube** alongside **SDL Sine**. The cube uses the
+**SDL Cube** runs alongside **SDL Sine**. The cube uses the
 `sean-icon-32` pixel-art texture without interpolation, a TrueType overlay,
 keyboard controls, MP3 music, and WAV effects. The track is **Unreal Superhero 3**
 by **Kenët and rez**, as credited in its ID3 tags. It requires WebGL2. Click
@@ -60,6 +60,6 @@ The cube fills the preview and adjusts its perspective when it is resized.
 Edited source is shared in the URL's `#code=` fragment, keeping it out of HTTP
 requests; existing `?code=` links still work.
 
-The embedded example above remains the sine demo while the cube expansion is
-unreleased. See [SDL and OpenGL](/extensions/sdl.html) for the current cube
-source, runtime and asset setup, build flags, and error recovery.
+The embedded example above runs the sine demo. See
+[SDL and OpenGL](/extensions/sdl.html) for the cube's source, runtime and
+asset setup, build flags, and error recovery.

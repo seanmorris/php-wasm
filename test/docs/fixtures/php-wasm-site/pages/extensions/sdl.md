@@ -2,8 +2,8 @@
 title: SDL and OpenGL
 ---
 <!--
-Vendored from php-wasm-site commit 726c62268967ef5a409a9a6f229fd42468dac489
-Source: https://github.com/seanmorris/php-wasm-site/blob/726c62268967ef5a409a9a6f229fd42468dac489/pages/extensions/sdl.md
+Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
+Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/extensions/sdl.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/test/browser/sdl.spec.mjs
 - https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/test/build/sdl.test.mjs
@@ -16,11 +16,9 @@ and dynamic library profiles. Each versioned entry includes its matching
 runtime and required native libraries. SDL PHP bindings are built into that
 runtime. Neither `php-sdl-wasm` nor `php-wasm` depends on the other package.
 
-The add-ons and cube described here are **unreleased development features**.
-The [initial SDL expansion](https://github.com/seanmorris/php-wasm/commit/f4ae26b5676148f222be5dd65fc65259ba479d06)
-adds the image, font, mixer, and shader APIs. The current cube also needs the
-subsequent [MP3-enabled build](https://github.com/seanmorris/php-wasm/commit/d075a2c74dcacfd1344c46a8b5279ee917cf37b9). Use its source, assets, and native runtime from
-the same checkout. Older published runtimes may provide only core SDL.
+To see it running, open the **SDL Cube** demo in the
+[embedded PHP editor](/demos.html#sdl-cube-and-sdl-sine), or follow
+[Run the textured cube](#run-the-textured-cube) to use it on your own page.
 
 ## Select the runtime and canvas
 
@@ -55,74 +53,6 @@ Replace `new PhpWeb({version, variant: '_sdl', ...options})` with
 `new PhpSdl(options)` using the corresponding versioned import. Nonempty
 `variant` options now report a migration error. The former `php-wasm-sdl`
 shim's empty `getLibs()` API is replaced by the dedicated runtime package.
-
-## Run the textured cube
-
-In a demo build containing the expansion, select **SDL Cube** in the embedded
-PHP editor. It renders a rotating perspective cube using `sean-icon-32.png`, a
-TrueType text scroller, looping MP3 music, and a WAV sound effect. Four messages
-stream in from left to right with a sine wave through the individual letters,
-pause in reading order, then leave to the right. Their bold cyan/white/sand
-lettering and black outline sit over the spinning cube. Edit the example's
-`MESSAGES` array to change the text; long messages wrap to fit the canvas.
-Glyphs, gradient and outline are baked into one cached texture atlas.
-`SPIN_SPEED` and `KEYBOARD_SPEED` control automatic and manual rotation. The track is
-**Unreal Superhero 3** by **Kenët and rez**, credited from the supplied
-`WOJTEK3.mp3` ID3 tags. The texture
-uses `GL_NEAREST` without mipmaps, and the canvas uses pixelated scaling.
-**SDL Sine** remains available as the smaller original example.
-
-The cube canvas fills the editor's preview box. It updates its drawing buffer,
-viewport, perspective, and text overlay when the box changes size, preserving
-the cube's proportions in landscape and portrait layouts. Cleanup disconnects
-its resize observer.
-
-The editor stores PHP source in the URL's `#code=` fragment. Copy the complete
-URL to share or reload edited code. Runtime settings stay in the query string;
-the source is encoded once and is not sent in HTTP requests. Existing `?code=`
-links remain supported and migrate to the fragment. The full link can still be
-long, but it no longer consumes the server's request-header limit.
-
-The cube requires WebGL2. Click **Enable audio** to satisfy the browser's user
-gesture requirement, then focus the canvas for keyboard input:
-
-| Control | Action |
-| --- | --- |
-| Arrows / WASD | Rotate the cube |
-| Space | Pause or resume rotation and text |
-| R | Reset rotation and restart the first message |
-| M | Mute or resume enabled audio |
-| Escape | Stop the demo |
-
-Audio pauses when focus leaves the canvas. **Run** restarts a stopped demo;
-**Refresh** releases its native resources. Graphics context loss pauses
-rendering, and restoration rebuilds the GL resources.
-
-You can test the cube over HTTP on a LAN IP. Web Locks are unavailable on that
-origin, so the browser wrapper uses a FIFO lock within the current page or
-worker. Use HTTPS with Web Locks for filesystem coordination across tabs or
-workers; the fallback only coordinates runtimes in the same JavaScript realm.
-
-For your own page, use `demo-web/public/scripts/sdl-cube.php` and its asset
-loader, `demo-web/src/lib/sdlAssets.js`, from the checkout used to build your
-runtime. The current scroller needs the binding additions described below.
-Before running the cube, stage these files under `/preload/sdl` in PHP's virtual
-filesystem:
-
-| File | Source in the php-wasm checkout |
-| --- | --- |
-| `sean-icon-32.png` | `demo-web/src/assets/icons/sean-icon-32.png` |
-| `DejaVuSansMono.ttf` | `demo-web/public/sdl/DejaVuSansMono.ttf` |
-| `WOJTEK3.mp3` | `demo-web/public/sdl/WOJTEK3.mp3` |
-| `click.wav` | `demo-web/public/sdl/click.wav` |
-
-The asset loader also retains `loop.ogg` for code saved in older shared cube links.
-
-The demo fetches all assets with HTTP and empty-body checks and a 30-second
-timeout, then writes them into the idle runtime's filesystem. A failed fetch
-reports its filename and can be retried with **Run**. A native audio decode
-failure presents **Retry audio** while rendering continues. Preserve the
-font/audio notices in `demo-web/public/sdl/LICENSE.txt` when copying assets.
 
 ## Build options
 
@@ -184,20 +114,15 @@ ENV_FILE=.github/.env_8.4.static.ci node .github/bin/verify-sdl-incremental.mjs 
 Use the same `ENV_FILE` as the build. The verifier requires an unchanged build
 to preserve both native objects and output timestamps, then uses Make's `-W`
 option to simulate an updated JS library and require a relink with no C changes.
-CI runs this check in the PHP 8.4 static job. The package's
-`benchmarks/2026-09-22-make-conformance.json` records the configuration and
-incremental checks; `benchmarks/2026-09-22-make.json` records artifact sizes
-and hashes.
-
-## Input, textures, fonts and timing
-
-The current development build adds the bindings below. Ship the cube and its
-matching runtime together: the cube now uses native SDL_ttf UTF-8, bold and
-outline APIs, without converting its strings to Latin-1.
+CI runs this check in the PHP 8.4 static job.
 
 After a local native rebuild, restart Vite with `--force` and reload the demo.
 Vite can retain the previous generated JavaScript while serving the new Wasm;
 both files must come from the same build.
+
+## Input, textures, fonts and timing
+
+`php-sdl-wasm` includes the bindings below.
 
 | Area | Added support |
 | --- | --- |
@@ -330,6 +255,12 @@ pixel buffers remain valid after unlock or destruction. Keep the window and
 renderer handles alive while drawing; dropping their last PHP reference also
 releases their native resources.
 
+### Canvas keyboard focus
+
+Browser key forwarding requires focus on the supplied canvas or its
+owned IME transport. Other editors receive normal typing and shortcuts.
+Leaving that target releases native held keys and modifiers after DOM focus
+settles, without interrupting a move between the canvas and its IME field.
 
 ### Surface and pixel lifetimes
 
@@ -501,9 +432,7 @@ Sampler generation, binding, integer/float setters and deletion let a texture
 unit override its texture's sampling state. Samplers follow the same context
 ownership and checked output-reference behavior as the other GL objects.
 
-New WebGL2 operations reject a WebGL1 context with a catchable PHP error. The
-source checkout's `packages/php-sdl-wasm/COVERAGE.md` tracks native verification and the
-remaining performance, lifetime and browser behavior work separately.
+New WebGL2 operations reject a WebGL1 context with a catchable PHP error.
 
 Image, font, and audio loaders return `null` on native load failures. Check
 `SDL_GetError()`. Free surfaces with `SDL_FreeSurface()`, close fonts with
@@ -548,356 +477,13 @@ release native resources before PHP request memory resets. The cube also cleans
 up on rerun, errors, and page exit. Use a fresh canvas when replacing a runtime
 or switching graphics context types.
 
-## Current verification
+## Resource ownership and lifetimes
 
-The closed-device mixer cleanup passes 211 distinct native Chromium cases,
-38 focused Firefox/WebKit cases and all four editor smoke tests on the normal
-PHP 8.4 static Make build. The API audit now covers font metadata/size changes,
-controller mapping updates, culling/depth/partial-buffer pixels and generated
-mipmaps. Repeated audio shutdown/refresh remains at zero SDL allocations.
-The matching pair adds 61 raw bytes, 52 gzip bytes and 931 Brotli bytes over the
-focus build, with unchanged ICU data.
+PHP objects own their native SDL resources. The rules below describe when
+those resources are released, which aliases stay valid, and which errors are
+catchable.
 
-The cleanup records preserve the three before-fix failures, allocation trace,
-all final test results and artifact/source hashes. Linux Firefox audio tests
-use a software output sink; no physical iPhone, controller, OS IME or hardware
-performance claim is made. The full `920b838` CI run finished with 20 Test jobs
-passing and 227 Build Artifacts jobs passing, six failures and two intended
-deployment skips. All six failures were the same allocation-test timing race:
-SDL initializes its audio conversion buffer during the first browser callback,
-which could occur after the test recorded its baseline. Waiting for that callback
-keeps the allocation and shutdown assertions intact; the corrected tests pass
-20 repeated audio checks and all five malformed-asset cases locally. The native
-JS/Wasm pair is unchanged. Full CI with this fixture correction remains required.
-The dated verification sections below retain the results and limits of their
-original builds.
-
-See the source checkout’s `packages/php-sdl-wasm/COVERAGE.md` and
-`packages/php-sdl-wasm/benchmarks/2026-09-22-cleanup{,-size}.json` for the native records;
-`packages/php-sdl-wasm/benchmarks/2026-09-22-ci-regressions.json` records the CI findings
-and allocation-test correction.
-The coverage document also lists the unverified manual device checks for
-physical input, mobile browsers, hardware GPU/audio and the evidence to collect.
-
-## Size and test coverage
-
-The initial PHP 8.4.1 static measurement, before MP3 support, adds 119,761 gzip
-bytes (0.87%) to the combined JavaScript/Wasm payload compared with core SDL.
-Its ICU data is unchanged. The current demo preloads 3,425,884 raw bytes of
-font/audio assets, including the original Ogg for older shared links; the icon
-is reused. See the
-[measurement record](https://github.com/seanmorris/php-wasm/blob/f4ae26b5676148f222be5dd65fc65259ba479d06/packages/sdl/benchmarks/2026-09-20.json)
-for the build configuration, individual sizes, and local startup/frame timings.
-
-The MP3 follow-up adds another 56,876 raw bytes, 24,688 gzip bytes, or 24,473
-Brotli bytes to that runtime. MP3 decoding uses the bundled minimp3 implementation;
-the original 3,063,619-byte track is a separate demo asset. The older Ogg remains
-available to shared links saved before the music change.
-
-Three interleaved local startup comparisons measured median runtime readiness
-at 946 ms before MP3 and 927 ms after, with no demonstrated startup regression
-in this small sample. Three 180-frame samples with MP3 playing averaged
-58.4–59.7 FPS at 640×400 under Chromium 152 and SwiftShader. The full follow-up
-record is [available in the source checkout](https://github.com/seanmorris/php-wasm/blob/d075a2c74dcacfd1344c46a8b5279ee917cf37b9/packages/sdl/benchmarks/2026-09-21-mp3.json).
-
-The subsequent 91-function binding expansion adds 90,571 raw bytes (0.18%),
-15,552 gzip bytes (0.11%), or 21,523 Brotli bytes (0.23%) on the same PHP 8.4.1
-static profile. ICU data is unchanged. The JavaScript's raw length is unchanged,
-but its generated glue differs and must stay paired with the matching Wasm.
-Both builds were recompressed with the same Node/zlib versions. See
-`packages/php-sdl-wasm/benchmarks/2026-09-21-bindings.json` in the matching source checkout
-for hashes and per-file sizes. These are size measurements; the earlier
-startup/FPS results do not measure these binding additions.
-
-The first WebGL2 completion group adds a further 103,176 raw bytes (0.20%)
-or 18,986 gzip bytes (0.14%). Brotli is 2,013 bytes smaller (0.02%). Combined
-JS/Wasm totals are 51,750,021 raw, 13,981,817 gzip and 9,552,310 Brotli bytes;
-ICU is unchanged. See `packages/php-sdl-wasm/benchmarks/2026-09-21-webgl2.json` in the
-matching checkout for artifact hashes and compression settings. These size
-results do not establish throughput or startup performance.
-
-The 28 SDL geometry/batch/state bindings add 32,400 raw bytes (0.06%) or 7,974
-gzip bytes (0.06%) over that WebGL2 group. Brotli is 6,042 bytes smaller (0.06%).
-Combined totals are 51,782,421 raw, 13,989,791 gzip and 9,546,268 Brotli bytes;
-ICU is unchanged. See `packages/php-sdl-wasm/benchmarks/2026-09-21-geometry.json` in the
-matching checkout for artifact hashes and compressor settings. The adjacent
-`measure-size.mjs` reproduces the comparison from preserved artifact pairs.
-
-The GL lifetime follow-up adds 1,810 raw bytes (0.0035%), 2,737 gzip bytes
-(0.020%) and 7,424 Brotli bytes (0.078%) over the geometry build. Combined
-JS/Wasm totals are 51,784,231 raw, 13,992,528 gzip and 9,553,692 Brotli bytes;
-ICU is identical. See `packages/php-sdl-wasm/benchmarks/2026-09-21-lifetimes.json` for
-artifact hashes and compression settings. On PHP 8.4 static, 29 native SDL
-browser tests, two editor smoke tests and nine Make/npm checks pass. C syntax
-checks pass for PHP 8.0–8.5. The seven lifetime tests include browser GPU
-allocation/deletion counts, 40 context cycles and three request refreshes;
-they do not establish leak freedom for other SDL resources. The full remote
-matrix and remaining ownership work are still pending.
-
-The surface/buffer follow-up adds 10,621 raw bytes (0.021%) and 2,308 gzip
-bytes (0.016%) over the GL lifetime build; Brotli is 4,731 bytes smaller
-(0.050%). Combined totals are 51,794,852 raw, 13,994,836 gzip and 9,548,961
-Brotli bytes. ICU is unchanged. See
-`packages/php-sdl-wasm/benchmarks/2026-09-21-buffers.json` in the matching checkout.
-On PHP 8.4 static, 39 distinct native SDL tests, two editor smoke tests, nine
-Make/npm checks and the main-module validator pass. Fresh imports and C
-syntax checks pass for PHP 8.0–8.5. Ten new tests cover conversions, retained
-views, native window-surface invalidation, palette replacement, 100 collected
-owner/view cycles, blits, RLE uploads, renderer pixels and destructive
-callbacks. Later RWops, cursor, font and mixer verification is recorded below;
-the full remote matrix and remaining coverage contract are still open.
-
-The SDL geometry follow-up was measured twice on PHP 8.4.1 static with internal
-Chromium/SwiftShader and no native build running. Each of 12 samples repeats
-64 batches of 1,024 prepared, untextured rectangles; the medians below are
-normalized to 1,024 rectangles. Four warmup samples precede each case. A pixel
-readback verifies drawing and forces completion after submission:
-
-| API | Submission ms, run 1 / 2 | Total ms, run 1 / 2 |
-| --- | ---: | ---: |
-| 1,024 `SDL_RenderFillRect` calls | 1.484 / 1.563 | 2.047 / 2.078 |
-| One `SDL_RenderFillRects` batch | 0.875 / 0.891 | 1.430 / 1.508 |
-| Indexed `SDL_RenderGeometry` arrays | 1.109 / 1.086 | 1.609 / 1.719 |
-| Indexed `SDL_RenderGeometryRaw` bytes | 0.109 / 0.102 | 0.664 / 0.727 |
-
-Prepared inputs exclude object/array construction and packing. Submission
-includes PHP/native calls and SDL queueing. Completion is amortized over the
-repeated draws; this does not predict game FPS or hardware GPU performance.
-The Wasm heap remained at 128 MiB during these short runs. PHP allocator
-accounting returns zero in this build, so those readings are unavailable;
-neither observation establishes leak freedom. The complete records are
-`packages/php-sdl-wasm/benchmarks/2026-09-21-geometry-draw-first.json` and
-`packages/php-sdl-wasm/benchmarks/2026-09-21-geometry-draw-second.json` in the matching
-checkout. They include raw samples, renderer/machine details, load and artifact
-hashes. Run `test/perf/sdl/run.mjs` in the checkout to repeat the comparison.
-
-CI covers PHP 8.0–8.5 with all three library profiles. Browser tests exercise
-textured rendering, text, keyboard input, nonzero audio output after a gesture,
-rerun/refresh cleanup, context restoration, checked native bindings, texture
-locking/readback and lifetime checks, UTF-8 metrics/wrapping, browser gamepad
-polling, event payloads, uniform values and unsigned timer precision.
-
-## Malformed assets and mixer input cleanup
-
-The four native cases in `test/browser/sdl-stress.spec.mjs` repeat malformed
-PNG/JPEG/BMP, TTF, WAV/Ogg/MP3 and filename/RWops input paths, then require valid
-loading/rendering or playback to recover. They measure SDL allocations, live
-native bytes and open file descriptors across a warmup and three batches.
-Expected libpng truncated-header diagnostics are validated explicitly; other
-stderr and browser errors fail the checks.
-
-Two cases reproduce a pinned SDL_mixer failure-path leak before `401f6d9`.
-`Mix_LoadMusic_RW()` returned without closing owned input when format detection,
-loading or opening failed. The existing package-local SDL2_mixer patch now closes
-that stream. Borrowed RWops and PHP stream autoclose semantics are preserved.
-The broad audio case previously grew from 46 to 166 SDL allocations and 14 to
-134 file descriptors. On the normal PHP 8.4 static Make build, it stays at
-36 allocations and four descriptors, then returns to zero SDL allocations on
-shutdown. The focused RWops case is also flat; PNG/JPEG/BMP and font cases stay
-flat on both builds. These are finite ownership checks, not decoder fuzzing or
-general leak-freedom claims. The subsequent PNG callback correction is recorded
-below (VO note 75).
-
-All four new cases and 32 affected existing audio/stream/cube cases pass on the
-matching candidate, with no skips or flaky results. Both editor checks,
-main-module validation, ten Make/package checks and JS style also pass.
-`packages/php-sdl-wasm/benchmarks/2026-09-22-malformed-assets.json` preserves before/after evidence.
-`benchmarks/2026-09-22-malformed-size.json` records +57 raw bytes, −35 gzip
-bytes and −2,407 Brotli bytes for the matching pair; JS and ICU are unchanged.
-Full PHP/profile remote
-verification of this commit remains pending; running CI on `17d386c` proves
-only that preceding source.
-
-
-### PNG short-read recovery
-
-SDL_image's PNG callback now checks the exact byte count returned by RWops
-and calls the selected libpng provider's error handler on a short read.
-The existing cleanup releases decoder/surface state and returns null with
-an SDL error. The package-local `SDL2_image.patch` follows the native Make
-patch prerequisites and is included in npm; codec providers and versions
-are unchanged.
-
-A regression fails on the preceding runtime: six cuts through headers, IDAT
-data and CRCs reach later parser errors instead of the required read error.
-On the corrected normal PHP 8.4 static build, both image loaders reject all
-six cuts with `libpng error: Read Error`; complete-image loading and full
-rendered pixels recover after every cut. All five malformed-asset cases pass,
-including repeated allocation and file-descriptor checks. The record
-`benchmarks/2026-09-22-png.json` preserves before/after evidence and artifact
-hashes. This checks the callback contract; it does not claim that the tested
-baseline accepted malformed PNGs or establish general decoder safety.
-
-The corrected PNG pair passes 32 existing audio/stream/cube cases, main-module
-validation and eleven Make/package checks. Compared with the previous pair,
-raw JS/Wasm is 166 bytes smaller, gzip grows by 334 bytes and Brotli by 2,040
-bytes; JS and ICU are unchanged. Both sides use the same compressors/settings.
-See `benchmarks/2026-09-22-png-size.json`. Full remote verification remains
-pending for this source.
-
-
-
-### Canvas keyboard focus
-
-Browser key forwarding now requires focus on the supplied canvas or its
-owned IME transport. Other editors receive normal typing and shortcuts.
-Leaving that target releases native held keys and modifiers after DOM focus
-settles, without interrupting a move between the canvas and its IME field.
-The JS-only change preserves SDL's native event dispatch and cleanup.
-
-Four native regressions fail on the preceding PNG runtime and pass on the
-fresh normal PHP 8.4 static build: ordinary/shadow-root canvas focus, plus
-outside editing with each text-input backend. The actual Ace editor regression
-also fails before the fix; all three SDL editor checks now pass, including
-returning to canvas controls, refresh and rerun.
-
-The final pair passes all 87 Chromium input/text/pointer/binding cases, all
-three SDL editor checks, and six focused Firefox/WebKit cases, with no skips
-or flaky results. Eleven Make/package checks, main-module validation and JS
-style pass. `benchmarks/2026-09-22-focus.json` preserves the failures, corrected
-results and exact artifacts. The normal Make rebuild performs one link, with
-no PHP configure or C compilation. The matching pair is installed locally.
-The change adds 246 raw / 61 gzip / 301 Brotli bytes of JavaScript; Wasm and
-ICU are byte-identical. See `benchmarks/2026-09-22-focus-size.json`. These are
-local checks; full newest-source PHP/profile CI and physical-device coverage
-remain pending.
-
-## Rendering and event throughput baseline
-
-Two idle runs on the matching `401f6d9` PHP 8.4.1 static Make build use internal
-Chromium/SwiftShader, prepared inputs, four warmups and twelve rotating samples
-per case. Complete framebuffer comparisons verify the rendering paths, and
-event tests check every payload and count. These are total milliseconds per
-batch, including amortized readback after repeated submissions:
-
-| Path | Batch | Total ms, run 1 / 2 |
-| --- | --- | ---: |
-| Ordinary array draws | 1,024 triangles | 37.422 / 13.453 |
-| Instanced array draw | 1,024 triangles | 29.703 / 11.703 |
-| Ordinary indexed draws | 1,024 triangles | 221.688 / 99.891 |
-| Instanced indexed draw | 1,024 triangles | 36.000 / 11.219 |
-| Scalar uniform setters + draw | 64 vec4 values | 0.172 / 0.164 |
-| Uniform array + draw | 64 vec4 values | 0.102 / 0.109 |
-| UBO update + draw | 1 KiB | 0.098 / 0.094 |
-| Texture image replacement + draw | 256 × 256 RGBA | 0.250 / 0.367 |
-| Texture subimage update + draw | 256 × 256 RGBA | 0.242 / 0.375 |
-| SDL texture update + copy | 256 × 256 RGBA | 0.219 / 0.219 |
-| Event push/poll + payload checks | 32 events | 0.316 / 0.294 |
-| Event push/poll + payload checks | 1,024 events | 9.938 / 9.719 |
-
-Individual indexed draws have a large submission cost here. The checked
-binding queries the bound index buffer and its size on each call; instancing
-amortizes that validation. The source identifies a candidate for investigation,
-but these measurements do not isolate the cost of each browser operation.
-Ordinary draws update a per-triangle offset uniform; instanced draws preload
-offset attributes. Non-indexed instanced submission falls below the SDL clock's
-resolution, so the report leaves its call rate unavailable. Draw and texture
-results vary substantially between runs; retain both and avoid treating them
-as hardware GPU results or game FPS limits.
-
-Native allocation counts and live bytes plateau during the sampled rounds.
-Graphics cleanup leaves the three known SDL TLS allocations, and event cleanup
-returns to zero. Prepared PHP inputs remain live until request refresh; reserved
-heap capacity is distinct from live allocations. This does not prove general
-leak freedom. Reports include raw samples, frame callback execution intervals,
-native/V8 memory, machine/load, and exact artifact/fixture hashes:
-`packages/php-sdl-wasm/benchmarks/2026-09-22-throughput-first.json`,
-`packages/php-sdl-wasm/benchmarks/2026-09-22-throughput-second.json`.
-Use `test/perf/sdl/throughput.mjs` as described in `test/perf/sdl/README.md`.
-These runs include the mixer cleanup correction. Texture/uniform cases first
-render the opposite data, so stale state cannot mask a missing update; four
-driver no-op probes confirm those checks fail. SDL texture measurements use
-WebGL1, while the direct GL paths use WebGL2. The indexed-query investigation
-and target/concurrent mixer measurements follow below.
-
-## Indexed-draw query investigation
-
-Two further idle runs on the matching `f191496` pair interleave original browser
-methods with observers that count and time the real calls. Each sample draws
-four batches of 1,024 triangles and verifies the complete framebuffer; two
-warmups precede six rotating rounds. These are medians per batch in milliseconds:
-
-| Ordinary indexed submission | Run 1 / 2 |
-| --- | ---: |
-| Original browser methods | 100.875 / 100.000 |
-| Observed browser methods | 109.375 / 100.625 |
-| Inside 1,024 buffer-size queries | 100.488 / 92.338 |
-| Inside 1,024 bound-buffer queries | 1.425 / 1.438 |
-| Inside 1,024 draw calls | 1.462 / 1.363 |
-
-About 92% of observed submission time is inside `getBufferParameter`, including
-waiting for previously queued rendering. This is not an isolated CPU query
-cost or a hardware GPU result. Observers add overhead; both observed and
-original-method samples are retained. The instanced path performs one size
-query per batch, taking 0.138 / 0.125 ms inside that query. Ordinary non-indexed
-submission takes 1.500 / 1.500 ms with the original methods, although its
-readback still waits for rendering. Batching through the existing instanced
-API avoids repeating the checked index-range queries for each triangle.
-
-The binding keeps its bounds checks. A future size cache would need correct
-buffer reallocation/deletion, VAO/context and external WebGL mutation handling.
-Raw samples, exact call counts and input hashes are in
-`benchmarks/2026-09-22-index-queries-first.json` and `-second.json`;
-`test/perf/sdl/index-queries.mjs` reproduces the investigation. Native-mode
-driver counters are unobserved, not evidence of zero calls. Runtime artifacts
-are unchanged by this measurement.
-
-## Render-target and concurrent mixing measurements
-
-Two further runs use the matching `f191496` PHP 8.4 static Make pair, with
-all controlled builds, compression and other tests idle. Internal Chromium
-uses SwiftShader and software audio; background host services still run.
-These are medians per 128 × 128 target batch, including amortized readback:
-
-| Target | Total ms, run 1 / 2 |
-| --- | ---: |
-| Color and depth | 0.247 / 0.269 |
-| Two color outputs and depth | 0.289 / 0.287 |
-| Four-sample color/depth and resolve | 0.427 / 0.467 |
-
-Each sample repeats 1,024 clears, near/occluded-far draws and optional resolves.
-Four warmups precede twelve rotating samples. Full-image checks start from a
-verified opposite-color frame; disabling draws, depth rejection, the second
-color output or resolve independently fails verification. Submission samples
-are all above the SDL clock resolution. Reported frame intervals span the
-whole repeated sample and do not predict game FPS. Native live bytes plateau
-at 3,707,072 with 71 SDL allocations; graphics cleanup retains the three known
-SDL TLS allocations. Both complete reports, including outliers, are in
-`benchmarks/2026-09-22-targets-first.json` and `-second.json`.
-
-The mixing fixture measures real SDL Web Audio callbacks after settling,
-with 384 callbacks per case per run. Each buffer holds 1,024 stereo frames
-at 44.1 kHz (23.22 ms). Setup, WAV decoding and output PCM analysis are outside
-the callback timer; MP3 decoding and output conversion are inside it.
-
-| Playback | Median callback ms, run 1 / 2 | p95 ms, run 1 / 2 |
-| --- | ---: | ---: |
-| Silence | < clock resolution / < clock resolution | 0.1 / 0.1 |
-| One WAV channel | < clock resolution / < clock resolution | 0.1 / 0.1 |
-| Eight WAV channels | 0.1 / 0.1 | 0.1 / 0.2 |
-| 32 WAV channels | 0.1 / 0.2 | 0.2 / 0.3 |
-| MP3 music | 0.1 / 0.1 | 0.2 / 0.2 |
-| 32 WAV channels and MP3 | 0.2 / 0.2 | 0.3 / 0.4 |
-
-Actual PCM amplitude verifies that all 1/8/32 channels contribute; muting them
-fails the signal guard even while the native playing count remains 32.
-The largest callback was 6 ms in run two. No callback exceeded its buffer
-duration and no observed interval exceeded two buffers. These observations
-do not establish hardware latency or absence of audible underruns; the
-observer can affect scheduling. Native memory stays at 3,745,008 live bytes
-and 51 SDL allocations after warmup and every round in both runs. Explicit
-shutdown reaches zero SDL allocations, closes the audio context and disconnects
-the processor. PHP refresh then recreates two allocations with an invalid
-closed-device diagnostic; repeated refreshes preserve the count. That cleanup
-path is tracked separately in VO note 76, not treated as a growing playback leak.
-
-Raw callbacks, memory, source/artifact hashes and machine details are retained
-in `benchmarks/2026-09-22-mixing-first.json` and `-second.json`; negative controls
-and the refresh probe are in `benchmarks/2026-09-22-throughput-validation.json`.
-See `test/perf/sdl/README.md` for reproduction. These fixtures change no runtime
-binary; the matching size record remains `benchmarks/2026-09-22-focus-size.json`.
-
-## RWops and font lifetimes
+### RWops and fonts
 
 RWops created by `SDL_RWFromFile()`, `SDL_RWFromConstMem()`,
 `SDL_RWFromMem()` or `SDL_RWFromFP()` own their wrapper storage. `Close()` and
@@ -939,29 +525,7 @@ and rendered glyphs. Family/style queries return nullable strings, face counts
 return integers, and `TTF_FontFaceIsFixedWidth()` returns a native integer flag:
 test it for nonzero rather than comparing it with `1`.
 
-The stream/font corrections pass ten native Chromium regressions on PHP 8.4
-static, including callback and allocation checks. The 39 existing SDL tests and
-main-module verification also pass. The complete PHP/profile CI matrix remains
-pending; broader browser/device checks are still open. Later cursor and mixer
-verification is documented below.
-
-The same build passes both editor smoke tests and all nine Make/npm checks.
-Fresh imports and C syntax checks cover PHP 8.0–8.5. The size record
-`packages/php-sdl-wasm/benchmarks/2026-09-21-streams.json` reports +9,261 raw bytes,
-+414 gzip bytes and -8,370 Brotli bytes over the previous surface/buffer build,
-with matching JS/Wasm hashes and unchanged ICU.
-
-Two idle-build font-allocation runs agree: dropping 150 PHP font references left
-600 SDL allocations and 7,643,664 live heap bytes in the old runtime. The new
-runtime leaves no SDL allocations, and its 40-byte live-heap increase stays flat
-after the first batch. Final SDL_ttf shutdown releases the old retained fonts.
-The fixture and records are `test/perf/sdl/font-lifetimes.mjs` and
-`packages/php-sdl-wasm/benchmarks/2026-09-21-font-lifetimes-{first,second}.json`.
-Reserved heap capacity can remain reusable after frees; it is recorded separately
-from live allocations. This fixture does not establish performance or leak
-freedom for other resource types.
-
-## Cursors and mouse queries
+### Cursors and mouse queries
 
 Initialize SDL video before selecting a cursor. `SDL_Cursor` owns its native
 cursor. `SDL_GetCursor()` returns the existing
@@ -982,8 +546,7 @@ cloned, serialized or reinitialized, including after an explicit free.
 `SDL_SetCursor(null)` redraws the current cursor. `SDL_ShowCursor()` accepts
 `SDL_QUERY` (-1), `SDL_DISABLE` (0) and `SDL_ENABLE` (1), and returns an integer.
 A query leaves visibility unchanged. For a change, the pinned SDL implementation
-returns the **previous** visibility. This corrects the earlier bool parameter
-and return value, which accidentally treated queries as requests to show.
+returns the **previous** visibility.
 Mouse state outputs honor typed references and stop at the first exception.
 
 SDL's default event target follows the canvas supplied to `PhpSdl`, including
@@ -995,20 +558,6 @@ support mouse warping: `SDL_WarpMouseInWindow()`/`$window->WarpMouse()` leave
 that native limitation visible through `SDL_GetError()`. Pointer lock and
 relative motion still depend on browser gestures and focus; the cursor fixes
 do not add automatic permission or gesture handling.
-
-The cursor/input build passed 62 distinct native SDL browser tests on PHP 8.4
-static, including thirteen cursor/input cases, plus both editor smoke tests,
-nine Make/npm checks and the main-module validator. Fresh imports and C syntax
-checks cover PHP 8.0–8.5. Tests cover native canvas mouse coordinates and relative
-delta reset, custom IDs/shadow roots, cursor aliases, constructor reentry, video
-reference counts, pre-video allocation cleanup, repeated request refresh and GC.
-The complete remote PHP/profile matrix and the remaining mixer, input/device,
-rendering remain open; PHP 8.0 serialization verification is recorded below.
-
-`packages/php-sdl-wasm/benchmarks/2026-09-21-cursors.json` records the matching pair:
-51,807,175 raw bytes, 13,996,319 gzip bytes and 9,545,914 Brotli bytes. Against
-the stream/font pair, the changes are +3,062 raw, +1,069 gzip and +5,323 Brotli
-bytes; ICU is unchanged. These are size measurements, not speed claims.
 
 ### Mixer ownership and audio restarts
 
@@ -1062,42 +611,6 @@ honor `freesrc`, preserve PHP callback exceptions and recheck audio state after
 callbacks. WAV decoding releases the snapshot immediately; streamed music keeps
 it until freed. Query outputs honor PHP types and stop after an exception.
 
-The normal PHP 8.4 static Make build passes 79 distinct native browser cases:
-sixteen audio regressions, fourteen cursor/input regressions and 49 preceding
-SDL tests. Both editor smoke tests, nine Make/npm checks and main-module
-validation pass. Fresh imports/C syntax pass on PHP 8.0–8.5. Audio coverage
-includes actual PCM, pause/completion, suspended fades, resource callback
-reentry and three PHP refreshes with browser-side processor disconnection.
-The allocation fixture waits for SDL's first real Web Audio conversion callback
-before taking its baseline; repeated audio-object cycles must restore that
-exact SDL count. The full remote matrix and remaining window/input, rendering
-and broader device/stress work remain pending.
-
-The audio changes add 21,277 raw bytes (0.041%), 4,237 gzip bytes (0.030%)
-and 12,024 Brotli bytes (0.126%) over the cursor pair. Combined JS/Wasm totals
-are 51,828,452 raw, 14,000,556 gzip and 9,557,938 Brotli bytes; ICU is unchanged.
-`packages/php-sdl-wasm/benchmarks/2026-09-21-audio.json` records the matching hashes and identical
-compression settings.
-
-Two idle runs of `test/perf/sdl/audio-lifetimes.mjs` measured three batches of
-50 unused WAV chunk/music pairs after audio and decoder warmup:
-
-| Runtime | Retained SDL allocations | Live heap increase after 150 pairs | SDL allocations after quit |
-| --- | ---: | ---: | ---: |
-| Previous cursor build | 2,100 | 7,910,904 bytes | 2,100 |
-| Audio ownership build | 0 | 40 bytes | 0 |
-
-The new build's 40-byte increase occurs after the first batch and stays flat.
-These are native allocator counts and live dlmalloc bytes; reserved/Wasm
-capacity remains reusable and is recorded separately. The fixture measures
-ownership of these assets, not mixing throughput or general leak freedom.
-Raw samples, browser settings and asset/artifact hashes are recorded in
-`packages/php-sdl-wasm/benchmarks/2026-09-21-audio-lifetimes-first.json` and
-`packages/php-sdl-wasm/benchmarks/2026-09-21-audio-lifetimes-second.json`. To repeat it, start the
-checkout's `test/browser/server.mjs` harness and run the fixture with
-`PHP_VERSION=8.4 LIB_TYPE=static`, the two staged artifact directories and an
-output JSON path.
-
 ### Window ownership and checked outputs
 
 Window getters such as `SDL_GL_GetCurrentWindow()` reuse the owning PHP
@@ -1131,33 +644,12 @@ counts larger than the array and invalid rectangle values raise exceptions.
 The input list is retained across PHP getters, and destroying or reconstructing
 the target window during a getter causes an Error before native drawing.
 
-The normal PHP 8.4 static window build passes 91 distinct native SDL browser
-cases: twelve window/input ownership cases and all 79 preceding cases. Both
-editor smoke tests, nine Make/npm checks and the main-module validator pass;
-fresh imports and C syntax pass PHP 8.0–8.5. The window tests cover real renderer
-pixels, canonical aliases, constructor and property reentry, typed outputs,
-rectangle bounds, input-handle copying and 150 collected window cycles. Exact
-SDL allocation counts return to baseline after each batch and reach zero after
-final video/SDL shutdown. The full PHP/profile CI matrix and remaining coverage
-contract are still pending.
-
-`packages/php-sdl-wasm/benchmarks/2026-09-21-windows.json` records the matching JS/Wasm pair and
-unchanged ICU. Relative to the audio build, the window changes add 660 raw
-bytes (0.0013%), 988 gzip bytes (0.0071%) and 2,300 Brotli bytes (0.0241%).
-Combined totals are 51,829,112 raw, 14,001,544 gzip and 9,560,238 Brotli bytes,
-using the same compressors for both pairs.
-
-
 ### Window garbage collection
 
 Window collection reports PHP references without refreshing native metadata or
 running property destructors during traversal. Ordinary property enumeration
 still refreshes the native snapshot. This separates collection from observable
 property updates and fixes a PHP 8.0 crash with retained aliases and cycles.
-The corrected PHP 8.0 and 8.4 static builds each pass all 101 native SDL cases,
-including retained aliases, property-array copies, 150 collected window cycles
-and the new GC regressions, with no skips. Both editor smoke tests pass on each
-version.
 
 ### Native resource serialization
 
@@ -1168,7 +660,7 @@ chunk, music, joystick and controller objects. Serialize application data such
 as asset paths and settings, then create fresh native resources when loading it.
 Ordinary SDL rectangles, points and colors remain serializable.
 
-PHP 8.0 now supplies final public `__serialize(): array` and
+On PHP 8.0, these classes supply final public `__serialize(): array` and
 `__unserialize(array $data): void` guards. Subclasses cannot override these
 methods; attempting to do so produces PHP's normal final-method declaration
 error. Direct calls and valid serialized object payloads raise catchable
@@ -1177,231 +669,71 @@ native denial. PHP 8.1 and newer keep the built-in class flag that rejects
 serialization before any user hooks run. Native subclasses' other methods and
 properties continue to work normally.
 
-The bypass is reproduced on a fresh PHP 8.0 static baseline for all eight
-extensible classes. Six new regression cases fail there before the fix. Fresh
-imports/C syntax pass PHP 8.0–8.5, and nine Make/npm checks pass. The corrected
-PHP 8.0 and 8.4 static builds each pass 101 native SDL cases, main-module
-validation and both editor smoke tests. Warmed payload churn retains exactly
-2,687,568 live allocator bytes on PHP 8.0 and 3,399,800 on PHP 8.4 across all
-four samples, with zero counted SDL allocations. This measures the tested
-payload path, not general leak freedom or throughput.
+### Malformed PNG input
 
-The matching JS/Wasm comparisons are recorded in
-`benchmarks/2026-09-22-serialization-8.0.json` and
-`benchmarks/2026-09-22-serialization-8.4.json`. Combined raw/gzip/Brotli changes
-are +3,686/+737/+1,859 bytes on PHP 8.0 and +811/+204/−9,990 bytes on PHP 8.4,
-using identical compression tools on both sides. ICU is unchanged. The full
-PHP/profile CI matrix and the remaining browser API contract are still open.
+A PNG that ends early, whether in its header, image data or CRC, fails with a
+libpng read error. The loader releases its decoder and surface state and
+returns null with an SDL error, and later valid images load normally.
 
-### Coordinate conversion verification
+## Run the textured cube
 
-The normal PHP 8.4 static Make build passes five new native coordinate cases
-and both editor smoke tests. The cases verify letterboxed pixels, fractional
-viewports, target changes, resizing, checked numeric limits and output callback
-safety. A real browser mouse event matches conversion of its window position.
-Fresh imports/C syntax pass PHP 8.0–8.5; nine Make/npm checks and main-module
-validation pass. All 101 preceding native cases also pass on the new pair,
-with zero skips or flaky results: 106 distinct native SDL cases pass in total.
-The full PHP/profile matrix remains open.
+Select **SDL Cube** in the embedded PHP editor. It renders a rotating
+perspective cube using `sean-icon-32.png`, a TrueType text scroller, looping MP3 music, and a WAV sound effect. Four messages
+stream in from left to right with a sine wave through the individual letters,
+pause in reading order, then leave to the right. Their bold cyan/white/sand
+lettering and black outline sit over the spinning cube. Edit the example's
+`MESSAGES` array to change the text; long messages wrap to fit the canvas.
+Glyphs, gradient and outline are baked into one cached texture atlas.
+`SPIN_SPEED` and `KEYBOARD_SPEED` control automatic and manual rotation. The track is
+**Unreal Superhero 3** by **Kenët and rez**, credited from the supplied
+`WOJTEK3.mp3` ID3 tags. The texture
+uses `GL_NEAREST` without mipmaps, and the canvas uses pixelated scaling.
+**SDL Sine** remains available as the smaller original example.
 
-`benchmarks/2026-09-22-coordinates.json` records +5,171 raw bytes, +1,781 gzip
-bytes and −994 Brotli bytes relative to the serialization build, with identical
-compression settings on both pairs. ICU is unchanged. These figures measure
-binary size, not drawing performance.
+The cube canvas fills the editor's preview box. It updates its drawing buffer,
+viewport, perspective, and text overlay when the box changes size, preserving
+the cube's proportions in landscape and portrait layouts. Cleanup disconnects
+its resize observer.
 
-### Texture and context restoration verification
+The cube requires WebGL2. Click **Enable audio** to satisfy the browser's user
+gesture requirement, then focus the canvas for keyboard input:
 
-Twelve native Chromium cases pass on the normal PHP 8.4 static Make build,
-with no skips or flaky results. They cover immutable 2D/cube mip levels,
-array/volume sampling and layered framebuffers, compressed image/subimage
-pixels, complete pixel-store layouts, packed/integer/float pixels, sampler
-filtering and queries, WebGL1 rejection and real browser context restoration.
-All 55 compressed formats advertised by this browser accept their exact block
-layouts and reject short buffers; PVRTC is not available on this test device.
-Unsupported compressed capabilities are tested separately.
+| Control | Action |
+| --- | --- |
+| Arrows / WASD | Rotate the cube |
+| Space | Pause or resume rotation and text |
+| R | Reset rotation and restart the first message |
+| M | Mute or resume enabled audio |
+| Escape | Stop the demo |
 
-The tests exposed SDK integration defects: truncated custom pixel views,
-readback sized from unpack state, stale bindings and object names after context
-loss, and compressed extensions remaining disabled after restoration. The
-Make-linked JS helpers preserve checked byte spans, retire invalidated names,
-reset cached bindings and restore automatically enabled extensions. The recovery
-case verifies fresh ordinary/compressed texture pixels and multisample resolve
-into an array-layer framebuffer with no GL error.
+Audio pauses when focus leaves the canvas. **Run** restarts a stopped demo;
+**Refresh** releases its native resources. Graphics context loss pauses
+rendering, and restoration rebuilds the GL resources.
 
-Sampler churn creates and deletes 326 browser objects across 40 context cycles,
-then checks three PHP refreshes. No counted sampler remains. Native SDL allocation
-counts return exactly to the warmed baseline of three; those allocations are
-pinned SDL's main-thread TLS bookkeeping, also present in the old runtime.
-This measures the tested ownership paths; broader device and throughput work
-and the unchanged full PHP/profile CI matrix remain open.
+For your own page, use `demo-web/public/scripts/sdl-cube.php` and its asset
+loader, `demo-web/src/lib/sdlAssets.js`, from the php-wasm release that
+matches your runtime. Before running the cube, stage these files under
+`/preload/sdl` in PHP's virtual filesystem:
 
-The same pair passes all 106 preceding native SDL cases: **118 distinct native
-cases pass**, with zero skips, failures or flaky results. Both editor smoke tests,
-main-module validation and all nine Make/npm checks pass. Fresh OpenGL imports
-and C syntax checks pass across PHP 8.0–8.5. The matching pair is installed locally;
-the complete remote PHP/profile matrix remains pending.
+| File | Source in the php-wasm checkout |
+| --- | --- |
+| `sean-icon-32.png` | `demo-web/src/assets/icons/sean-icon-32.png` |
+| `DejaVuSansMono.ttf` | `demo-web/public/sdl/DejaVuSansMono.ttf` |
+| `WOJTEK3.mp3` | `demo-web/public/sdl/WOJTEK3.mp3` |
+| `click.wav` | `demo-web/public/sdl/click.wav` |
 
-`benchmarks/2026-09-22-textures.json` records the matching JS/Wasm pair against
-the verified coordinate build: +30,080 raw bytes (0.0580%), +6,989 gzip bytes
-(0.0499%) and +29,047 Brotli bytes (0.3042%). Combined totals are 51,865,174 raw,
-14,010,518 gzip and 9,578,301 Brotli bytes. Both sides use identical compression
-tools/settings, and ICU is unchanged. These figures measure size, not throughput.
+The asset loader also retains `loop.ogg` for code saved in older shared cube links.
 
-### Browser input and fullscreen verification
+The demo fetches all assets with HTTP and empty-body checks and a 30-second
+timeout, then writes them into the idle runtime's filesystem. A failed fetch
+reports its filename and can be retried with **Run**. A native audio decode
+failure presents **Retry audio** while rendering continues. Preserve the
+font/audio notices in `demo-web/public/sdl/LICENSE.txt` when copying assets.
 
-Fourteen native Chromium cases pass on the normal PHP 8.4 static Make build,
-with no skips or flaky results. They cover real browser blur/focus (held keys
-and modifiers are released), trusted touch motion/cancellation/restart,
-fullscreen on canvases with no ID, arbitrary IDs and shadow roots, deferred
-activation/cancellation, policy denial, and simulated controller reconnection.
-Active and pending fullscreen survive explicit window destruction, video quit
-and PHP refresh followed by immediate window/GL context recreation. Dimensions,
-viewport and rendered pixels remain correct, with no delayed JavaScript error.
+## Development notes
 
-Three active teardown cases fail on the preserved first input build: old
-fullscreen restoration overwrites the new canvas size, and a callback after
-PHP refresh reads freed native window data. The fix makes the supplied canvas's
-style restoration cancellable and runs cleanup before native destruction.
-The earlier canvas tests also reproduce the SDK's empty/bare-ID selector bug.
-Ordinary canvas dimensions are read directly; the SDK transferred-canvas path
-is retained. Browser policy denial now returns -1 before SDL changes flags.
-A successful request may still be deferred until a browser gesture.
-
-Fresh imports and window C syntax pass across PHP 8.0–8.5. The actual SDK JS
-library link check, style checks, main-module validator and nine Make/npm checks
-pass. The same pair passes all 118 preceding native SDL cases: **132 distinct
-native cases pass**, with zero skips, failures or flaky results. Both editor
-smoke tests also pass. The matching JS/Wasm pair is installed locally.
-
-The text audit against this pair reproduced invalid UTF-8 for some astral
-keypresses and missing browser input/composition events. The Unicode follow-up
-is recorded below. These are CDP transport probes, not physical OS IME coverage.
-Relative mouse mode tracks requested state rather than actual browser pointer
-lock; denial and notification behavior still needs verification. Gamepads are
-simulated, touch is injected through CDP, and host Chrome was unreachable.
-Physical-device coverage and the unchanged full remote matrix remain open.
-
-`benchmarks/2026-09-22-input.json` records +3,017 raw bytes (0.0058%),
-+544 gzip bytes (0.0039%) and +1,258 Brotli bytes (0.0131%) versus the accepted
-texture/restoration build. Combined totals are 51,868,191 raw, 14,011,062 gzip
-and 9,579,559 Brotli bytes. ICU is unchanged, and both pairs use identical
-compression tools/settings. These figures measure size, not throughput.
-
-### Browser Unicode and composition verification
-
-The normal PHP 8.4 static Make build passes 36 new native Chromium cases with
-no skips or flaky results. Preserved earlier builds reproduce malformed UTF-8
-from astral keypresses, missing Unicode/composition events, ignored text-input
-requests before window creation, and stale window access after a browser focus
-handler destroys or replaces the window being constructed.
-
-Both EditContext and the forced textarea fallback receive complete Unicode,
-preserve physical keys, convert UTF-16 selections to codepoints, commit once,
-and cancel unfinished composition. Native SDL splits long committed strings
-without splitting UTF-8 characters. Explicit start requests survive both
-SDL_Init and direct SDL_VideoInit before window creation; stop cancels pending
-activation. SDL's implicit initialization call retains ordinary keypress
-behavior without opening a browser editing surface.
-
-Tests cover CSS-scaled candidate rectangles in shadow roots, repeated start/stop,
-focus preservation, saved/replaced EditContexts, fullscreen input and the
-fallback's explicit fullscreen limitation. Window destruction, video shutdown,
-SDL_Quit and PHP refresh retire old editing callbacks. Window construction
-sets native metadata before focusing the editing surface and checks its owner
-generation afterward. A PHP focus handler that destroys or replaces the window
-causes a catchable Error; the replacement remains usable and receives its own
-Unicode events.
-
-Each transport completes 180 start/stop cycles with zero retained owned editing
-listeners. Native SDL allocation counts stay constant, and the final two live
-allocator samples agree. These checks cover the tested lifecycle, not general
-leak freedom or throughput. Fresh imports and C syntax pass PHP 8.0–8.5;
-nine Make/npm checks, style, main-module validation and both editor smoke tests
-pass. All 132 preceding native SDL cases also pass: **168 distinct native
-cases**, with zero skips, failures or flaky results. Both transports receive
-composition and committed text during PHP animation callbacks and while PHP
-explicitly awaits the next browser frame through `vrzno_await()`.
-
-The fullscreen-exit fixture now waits for native dimensions after the browser's
-asynchronous fullscreenchange event. An eight-cycle probe reproduces the DOM
-flag clearing before SDL receives that event; all eight restore their original
-size. Three repeat runs of the corrected fixture pass without a native
-fullscreen change.
-
-`benchmarks/2026-09-22-text-lifetimes.json` records the final matching pair,
-installed together locally. Compared with the accepted input build, it adds
-11,911 raw bytes (0.0230%), 3,266 gzip bytes (0.0233%) and 6,442 Brotli bytes
-(0.0672%). Totals are 51,880,102 raw, 14,014,328 gzip and 9,586,001 Brotli bytes.
-ICU is unchanged, and comparisons use identical compressors/settings. The
-intermediate text and ordering records preserve the reproduction builds.
-These figures measure size, not throughput.
-
-Pointer-lock rejection and window-cleanup reproductions are addressed in the
-verification section below (VO note 71). Physical IME, wider
-browsers/devices, broader stress/throughput, Make conformance and the unchanged
-full PHP/profile remote matrix also remain open.
-
-### Pointer-lock ownership and error verification
-
-The normal PHP 8.4 static Make build passes 27 pointer-lock cases and all 168
-preceding native SDL cases: **195 distinct native Chromium cases**, with no
-skips or flaky results in the accepted checks. Both editor smoke tests,
-main-module validation, nine Make/npm checks and JS style checks pass. Changed
-native C syntax passes PHP 8.0–8.5; the unchanged full remote matrix is pending.
-
-Four permanent regressions reproduce retained lock after window destruction,
-silent sandbox denial, and false success without a supported pointer-lock API
-or a focused SDL window. Requests now belong to native window IDs and request
-generations. Immediate failures return -1; asynchronous denial reports an SDL
-error while retaining SDL's requested-mode semantics. Promise rejections are
-handled, and legacy error events populate the SDL error before ordinary
-application listeners run. Retired requests cannot set a replacement's error.
-
-Tests exercise real lock and relative motion on no-ID/custom-ID/shadow-root
-canvases; deferred and active window/video/SDL/request cleanup; browser exit
-and click-to-retry; combined fullscreen cleanup; another element's lock;
-synchronous, Promise and legacy failures; and late completion before or after
-replacement. Late legacy completion releases its observers. Sixty controlled
-rejections and window restarts keep SDL allocation counts constant, with equal
-final live-allocator samples. This is evidence for these paths, not general
-leak freedom or engine-scale throughput.
-
-The first candidate exposed a legacy observer-retention bug and late error
-reporting, both covered by permanent failing tests before the correction. A
-late-grant fixture now records native acquisition when its Promise resolves:
-cleanup can release a retired lock before pointerlockchange dispatches. Gesture
-fixtures use actual clicks; the controlled allocation fixture avoids per-click
-PHP/JavaScript callback allocations.
-
-`benchmarks/2026-09-22-pointer.json` records the final matching pair installed
-locally. Relative to the accepted Unicode/focus build, it adds 5,531 raw bytes
-(0.0107%) and 2,526 gzip bytes (0.0180%); Brotli is 1,640 bytes smaller (0.0171%).
-Combined totals are 51,885,633 raw, 14,016,854 gzip and 9,584,361 Brotli bytes.
-ICU is unchanged; both sides use identical compression tools/settings. The
-first-candidate record preserves the intermediate reproduction build.
-
-Focused Linux checks also pass in Firefox 148.0.2 and WebKit 26.4: twelve
-existing native cases per browser, 24 total, with no skips, failures or flaky
-results. They cover Unicode/physical keys, supplied-canvas lock and motion,
-active teardown, competing elements, fullscreen and application error handlers.
-WebKit needs a focused window for pointer lock; its headless focus denial is
-reported through SDL. Its protocol-injected moves contain zero movement deltas,
-so the movement tests use native X11 input under Xvfb. Both browsers pass actual
-lock and release, and SDL deltas match the browser's real movement events.
-
-To reproduce these focused checks on Linux, install the repository-pinned
-Playwright Firefox/WebKit browsers and their dependencies, plus `xvfb` and
-`xdotool`. Audio checks need a working output destination; a PulseAudio null
-sink is sufficient in a container. Build/install the matching `php-sdl-wasm`
-package with `make sdl-mjs` and start the normal harness
-(`node test/browser/server.mjs`). In another terminal:
-
-```sh
-PHP_VERSION=8.4 PHP_VARIANT=_sdl LIB_TYPE=static \
-  xvfb-run -a npx playwright test -c test/browser/sdl-platform.config.mjs
-```
-
-This supplements the ordinary Chromium suite; it does not replace that suite
-or the full PHP/profile matrix. Physical IME, controllers and wider devices,
-malformed-asset/stress and throughput checks, Make cache/conformance work and
-the full remote CI matrix remain open.
+Test coverage, size measurements, performance baselines and per-change
+verification records are maintained with the package source. See the
+[`php-sdl-wasm` README](https://github.com/seanmorris/php-wasm/blob/develop/packages/php-sdl-wasm/README.md)
+and [coverage record](https://github.com/seanmorris/php-wasm/blob/develop/packages/php-sdl-wasm/COVERAGE.md),
+including the manual device checks that remain unverified.
