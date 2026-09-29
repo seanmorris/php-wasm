@@ -2,8 +2,8 @@
 title: .php-wasm-rc
 ---
 <!--
-Vendored from php-wasm-site commit 7417e78b166edb40a008b1197ed234ae527b8260
-Source: https://github.com/seanmorris/php-wasm-site/blob/7417e78b166edb40a008b1197ed234ae527b8260/pages/compiling/php-wasm-rc.md
+Vendored from php-wasm-site commit 8e01c217a591125c668f5639595b554af1593e47
+Source: https://github.com/seanmorris/php-wasm-site/blob/8e01c217a591125c668f5639595b554af1593e47/pages/compiling/php-wasm-rc.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/Makefile
@@ -82,7 +82,10 @@ PRELOAD_ASSETS='./php-scripts /some/directory ~/other-dir/example.php /path/to/o
 
 ### PHP_VERSION
 
-8.0|8.1|8.2|8.3|8.4|8.5
+8.0|8.1|8.2|8.3|**8.4**|8.5
+
+PHP 8.0 builds must also set `WITH_PDO_PGLITE=0`, because PDO-PGlite requires
+PHP 8.1 or newer.
 
 ---
 
