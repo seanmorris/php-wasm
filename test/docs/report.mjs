@@ -189,9 +189,12 @@ async function validateInstallAndInclude(page)
 	{
 		const runtimeFile = path.join(repoRoot, 'packages', packageName, runtime);
 		if(!fs.existsSync(runtimeFile)) continue;
-		const binaries = new Set(readLocal(runtimeFile).match(/[0-9a-f]{40}\.wasm/g));
-		assert.equal(binaries.size, 1, `${runtime} should reference one hashed Wasm file`);
-		assert.ok(fs.existsSync(path.join(path.dirname(runtimeFile), [...binaries][0])));
+		const source = readLocal(runtimeFile);
+		const hashed = [...new Set(source.match(/[0-9a-f]{40}\.wasm/g))];
+		// Builds reference `<runtime>.wasm` until packaging renames it by content hash.
+		const binary = hashed.length ? hashed[0] : `${runtime}.wasm`;
+		assert.ok(hashed.length ? hashed.length === 1 : source.includes(binary), `${runtime} should reference one Wasm file`);
+		assert.ok(fs.existsSync(path.join(path.dirname(runtimeFile), binary)), `${runtime} Wasm file is missing: ${binary}`);
 	}
 	assert.match(text, new RegExp(esmImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(cjsRequire.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
