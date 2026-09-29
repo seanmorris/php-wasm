@@ -141,8 +141,9 @@ async function validatePhpWasmRc(page)
 	assert.match(makefile, /PRELOAD_ASSET_SOURCES=\$\(foreach asset,\$\{PRELOAD_ASSETS\}/);
 	assert.match(envFiles, /WITH_GD=static/);
 	assert.match(markdown, /php-?8\.x-pdo-sqlite\.so/);
-	const versionLine = markdown.match(/^8\.0\|8\.1\|8\.2\|.*8\.5$/m)?.[0];
+	const versionLine = markdown.match(/^(?:\*\*)?8\.0(?:\*\*)?(?:\|(?:\*\*)?8\.\d(?:\*\*)?)+$/m)?.[0];
 	assert.ok(versionLine, 'PHP_VERSION values are listed');
+	assert.equal(versionLine.replaceAll('**', ''), '8.0|8.1|8.2|8.3|8.4|8.5');
 	assert.equal(versionLine.match(/\*\*(8\.\d)\*\*/)?.[1], makefile.match(/^PHP_VERSION_DEFAULT=(\S+)$/m)?.[1]);
 	assert.match(markdown, /Relative paths are resolved from the current project directory\./);
 	assert.match(markdown, /Anchored paths such as `\/path\/to\/file\.txt` and `~\/path\/to\/file\.txt` are left unprefixed/);

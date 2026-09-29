@@ -6,6 +6,8 @@ import {fileURLToPath} from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const runtimePackageFiles = ['package.json', 'README.md', 'LICENSE', 'LICENSE-GPL', 'NOTICE'];
+// Manifests written before the dual license have no LICENSE-GPL; they remain valid inputs.
+const requiredPackageFiles = runtimePackageFiles.filter(name => name !== 'LICENSE-GPL');
 export const digest = data => createHash('sha256').update(data).digest('hex');
 
 /** Validates the supported PHP release before constructing artifact paths. */
@@ -50,7 +52,7 @@ export async function verifyManifest(root, version, profile, {allowLegacy = fals
 		if(!names.has(name)) throw new Error(`${label} manifest is missing ${name}`);
 	if(!legacy)
 	{
-		for(const name of packageFiles)
+		for(const name of [...requiredPackageFiles, ...Object.keys(profile.extraFiles ?? {})])
 			if(!names.has(name)) throw new Error(`${label} manifest is missing ${name}`);
 		const pkg = JSON.parse(await fs.readFile(path.join(root, 'package.json'), 'utf8'));
 		if(pkg.name !== packageName || pkg.type !== 'module') throw new Error(`Invalid ${label} package metadata`);

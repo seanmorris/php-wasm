@@ -21,8 +21,7 @@
     "LICENSE-*",
     "NOTICE",
     "README.md",
-    "package.json",
-    "LICENSE-GPL"
+    "package.json"
   ],
   "type": "module",
   "exports": {

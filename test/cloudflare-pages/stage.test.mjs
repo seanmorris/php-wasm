@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { stageCloudflarePages, PAGES_BUNDLE_LIMIT } from '../../bin/stage-cloudflare-pages.mjs';
+import { verifyCloudflare } from '../../bin/package-cloudflare.mjs';
 import { artifactFixture, digest } from './fixtures.mjs';
 
 test('Pages staging copies only the selected raw module inventory and attests compressed R2 downloads', async t => {
@@ -97,4 +98,16 @@ test('Pages staging CLI fails closed on unknown or duplicate options', () => {
 		assert.equal(result.status, 1);
 		assert.match(result.stderr, /Invalid or duplicate staging option/);
 	}
+});
+
+test('manifests written before LICENSE-GPL still verify, while other package metadata stays required', async t => {
+	const fixture = await artifactFixture(t);
+	const withoutGpl = {...fixture.manifest, files: fixture.manifest.files.filter(file => file.path !== 'LICENSE-GPL')};
+	await fs.rm(path.join(fixture.artifactRoot, 'LICENSE-GPL'));
+	await fs.writeFile(fixture.manifestPath, JSON.stringify(withoutGpl));
+	await verifyCloudflare(fixture.artifactRoot, '8.5');
+
+	const withoutNotice = {...withoutGpl, files: withoutGpl.files.filter(file => file.path !== 'NOTICE')};
+	await fs.writeFile(fixture.manifestPath, JSON.stringify(withoutNotice));
+	await assert.rejects(verifyCloudflare(fixture.artifactRoot, '8.5'), /manifest is missing NOTICE/);
 });

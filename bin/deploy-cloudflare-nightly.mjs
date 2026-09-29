@@ -14,7 +14,7 @@ import {verifyCloudflareRelease} from './verify-cloudflare-release.mjs';
 export {PROJECT, PRODUCTION_URL, rawFetch} from './cloudflare-release-http.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // The deployment accepts only the exact Wrangler release pinned for this repository.
-export const WRANGLER_VERSION = JSON.parse(await fs.readFile(path.join(repoRoot, 'package.json'), 'utf8')).devDependencies.wrangler;
+export const WRANGLER_VERSION = JSON.parse(await fs.readFile(path.join(repoRoot, 'package.json'), 'utf8')).devDependencies?.wrangler;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const filePattern = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;
@@ -125,6 +125,7 @@ export async function verifyReleaseStage({projectDir, artifactRoot, buildId, php
 export async function runWrangler({args, cwd, env, timeoutMs}, dependencies = {})
 {
 	const metadata = JSON.parse(await (dependencies.readMetadata ?? fs.readFile)(path.join(repoRoot, 'node_modules/wrangler/package.json'), 'utf8'));
+	requireCondition(/^\d+\.\d+\.\d+$/.test(WRANGLER_VERSION ?? ''), `package.json must pin wrangler to an exact version, not ${WRANGLER_VERSION}`);
 	requireCondition(metadata.version === WRANGLER_VERSION, `Wrangler ${WRANGLER_VERSION} is required`);
 	const temporary = await fs.mkdtemp(path.join(os.tmpdir(), 'php-nightly-wrangler-'));
 	const output = path.join(temporary, 'result.ndjson');
