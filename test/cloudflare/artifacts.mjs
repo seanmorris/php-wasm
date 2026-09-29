@@ -38,7 +38,7 @@ export function readArtifact(root, version)
 		assert.equal(digest, file.sha256, `Artifact digest mismatch: ${file.path}`);
 	}
 	assert.ok(names.has(manifest.entrypoint) && names.has(manifest.runtime));
-	for(const name of ['package.json', 'README.md', 'LICENSE', 'NOTICE']) assert.ok(names.has(name), `Missing package metadata: ${name}`);
+	for(const name of ['package.json', 'README.md', 'LICENSE', 'LICENSE-GPL', 'NOTICE']) assert.ok(names.has(name), `Missing package metadata: ${name}`);
 	const pkg = JSON.parse(fs.readFileSync(path.join(directory, 'package.json'), 'utf8'));
 	assert.equal(pkg.name, 'php-cloud-wasm');
 	assert.equal(pkg.type, 'module');

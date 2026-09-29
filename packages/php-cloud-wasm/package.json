@@ -8,7 +8,7 @@
     "url": "git+https://github.com/seanmorris/php-wasm.git"
   },
   "author": "Sean Morris<php-wasm@seanmorr.is>",
-  "license": "Apache-2.0",
+  "license": "(Apache-2.0 OR GPL-2.0-only)",
   "exports": {
     "./package.json": "./package.json",
     "./public": {
@@ -50,6 +50,7 @@
     "LICENSE",
     "NOTICE",
     "README.md",
-    "package.json"
+    "package.json",
+    "LICENSE-GPL"
   ]
 }

@@ -158,7 +158,7 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 		const stage = path.join(root, 'stage', name);
 		await fs.mkdir(stage, {recursive: true});
 		const declarations = (await fs.readdir(template)).filter(file => /\.d\.(?:ts|mts|cts)$/.test(file) && !/^php8\./.test(file));
-		for(const file of ['package.json', 'README.md', 'LICENSE', 'NOTICE', ...declarations])
+		for(const file of ['package.json', 'README.md', 'LICENSE', 'LICENSE-GPL', 'NOTICE', ...declarations])
 			await fs.copyFile(path.join(template, file), path.join(stage, file));
 		const commonjs = !['php-cloud-wasm', 'php-sdl-wasm'].includes(name);
 		const visited = new Set();

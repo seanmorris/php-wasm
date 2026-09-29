@@ -146,7 +146,7 @@
     "url": "git+https://github.com/seanmorris/php-wasm.git"
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
-  "license": "Apache-2.0",
+  "license": "(Apache-2.0 OR GPL-2.0-only)",
   "engines": {
     "node": ">=24.5.0"
   },
@@ -178,6 +178,7 @@
     "NOTICE",
     "README.md",
     "package.json",
-    "*.d.cts"
+    "*.d.cts",
+    "LICENSE-GPL"
   ]
 }

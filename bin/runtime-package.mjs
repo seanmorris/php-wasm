@@ -5,7 +5,7 @@ import {createRequire} from 'node:module';
 import {fileURLToPath} from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-export const runtimePackageFiles = ['package.json', 'README.md', 'LICENSE', 'NOTICE'];
+export const runtimePackageFiles = ['package.json', 'README.md', 'LICENSE', 'LICENSE-GPL', 'NOTICE'];
 export const digest = data => createHash('sha256').update(data).digest('hex');
 
 /** Validates the supported PHP release before constructing artifact paths. */

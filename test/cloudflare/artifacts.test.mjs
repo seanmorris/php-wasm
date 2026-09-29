@@ -24,6 +24,7 @@ function fixture(context)
 		, 'package.json': JSON.stringify({name: 'php-cloud-wasm', type: 'module'})
 		, 'README.md': 'Fixture package documentation'
 		, 'LICENSE': 'Fixture license'
+		, 'LICENSE-GPL': 'Fixture GPL license'
 		, 'NOTICE': 'Fixture notice'
 	};
 	const manifest = {
@@ -46,7 +47,7 @@ function fixture(context)
 test('accepts the exact final entry, factory and statically imported hashed Wasm', context => {
 	const { root } = fixture(context);
 	const artifact = readArtifact(root, '8.3');
-	assert.equal(artifact.names.size, 7);
+	assert.equal(artifact.names.size, 8);
 	assert.match(artifact.wasm, /^[a-f0-9]{40}\.wasm$/);
 });
 

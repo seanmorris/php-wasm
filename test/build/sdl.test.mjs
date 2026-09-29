@@ -230,5 +230,5 @@ test('the SDL runtime npm payload excludes native build inputs and the former sh
 	]) {
 		assert.ok(!names.includes(name), name);
 	}
-	for(const name of ['public.d.ts', 'PhpSdl.d.mts', 'PhpWebBase.d.mts', 'LICENSE', 'NOTICE', 'README.md']) assert.ok(names.includes(name), name);
+	for(const name of ['public.d.ts', 'PhpSdl.d.mts', 'PhpWebBase.d.mts', 'LICENSE', 'LICENSE-GPL', 'NOTICE', 'README.md']) assert.ok(names.includes(name), name);
 });

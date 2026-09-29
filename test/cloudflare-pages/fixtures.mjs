@@ -27,6 +27,7 @@ export async function artifactFixture(t)
 		, 'package.json': JSON.stringify({name: 'php-cloud-wasm', type: 'module'})
 		, 'README.md': 'fixture package'
 		, LICENSE: 'fixture license'
+		, 'LICENSE-GPL': 'fixture GPL license'
 		, NOTICE: 'fixture notice'
 	};
 	for(const name of ['PhpCloudflare', 'PhpBase', 'OutputBuffer', '_Event', 'fsOps', 'resolveDependencies']) entries[`${name}.mjs`] = 'export {};\n';
