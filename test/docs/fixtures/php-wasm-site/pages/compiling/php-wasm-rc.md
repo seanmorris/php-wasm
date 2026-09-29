@@ -2,8 +2,8 @@
 title: .php-wasm-rc
 ---
 <!--
-Vendored from php-wasm-site commit e7dea4386c6099cfc1c0e510e636bb09ec051426
-Source: https://github.com/seanmorris/php-wasm-site/blob/e7dea4386c6099cfc1c0e510e636bb09ec051426/pages/compiling/php-wasm-rc.md
+Vendored from php-wasm-site commit 7417e78b166edb40a008b1197ed234ae527b8260
+Source: https://github.com/seanmorris/php-wasm-site/blob/7417e78b166edb40a008b1197ed234ae527b8260/pages/compiling/php-wasm-rc.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/Makefile
@@ -114,7 +114,7 @@ The optimization level to use while compiling libraries. Defaults to `OPTIMIZE`.
 
 ### ASSERTIONS
 
-0|**1**
+**0**|1
 
 Build with/without assertions.
 
@@ -146,14 +146,14 @@ The following extension may be compiled as static, shared or dynamic:
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
-WITH_LIBXML    # [0, 1, static, shared]
+WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]
 
 WITH_LIBZIP    # [0, 1, static, shared, dynamic]
 WITH_ZLIB      # [0, 1, static, shared, dynamic]
 
-WITH_GD        # [0, 1, static, shared, dynamic]
+WITH_GD        # [0, 1, static, dynamic]
 WITH_LIBPNG    # [0, 1, static, shared]
 WITH_FREETYPE  # [0, 1, static, shared]
 WITH_LIBJPEG   # [0, 1, static, shared]
@@ -161,8 +161,8 @@ WITH_LIBJPEG   # [0, 1, static, shared]
 WITH_YAML      # [0, 1, static, shared, dynamic]
 WITH_TIDY      # [0, 1, static, shared, dynamic]
 WITH_MBSTRING  # [0, 1, static, dynamic]
-WITH_ONIGURUMA # [0, 1, static, shared]
-WITH_OPENSSL   # [0, 1, shared, dynamic]
+WITH_ONIGURUMA # [0, 1, static, shared, dynamic]
+WITH_OPENSSL   # [0, 1, static, shared, dynamic]
 WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
 
@@ -205,7 +205,7 @@ When compiled as a `dynamic` extension, this will produce the extension file `ph
 
 ### WITH_LIBXML
 
-static|**shared**
+static|shared|**dynamic**
 
 This actual `php-libxml` extension must be statically compiled, but `libxml` itself may be loaded as a shared library.
 
@@ -337,7 +337,7 @@ If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbst
 
 ### WITH_OPENSSL
 
-shared|**dynamic**
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php8.x-openssl.so`.
 

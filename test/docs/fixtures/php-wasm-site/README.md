@@ -1,6 +1,6 @@
 Vendored docs fixture from `seanmorris/php-wasm-site`.
 
-- Commit: `e7dea4386c6099cfc1c0e510e636bb09ec051426`
+- Commit: `7417e78b166edb40a008b1197ed234ae527b8260`
 
 The markdown files under `pages/` are based on that commit and include inline HTML comments
 linking back to the source repo plus the php-wasm code the local docs harness validates against.
