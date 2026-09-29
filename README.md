@@ -208,7 +208,7 @@ If you import a different runtime version, copy the matching `php8.x-*.mjs.wasm`
 
 Core Node runtimes support both ESM and CommonJS.
 
-For `0.1.0`, use the published entrypoints across the runtime packages:
+For `0.2.0`, use the published entrypoints across the runtime packages:
 
 - `php-wasm/PhpNode`
 - `php-cgi-wasm/PhpCgiNode`
@@ -858,7 +858,7 @@ Maintainers can prepare a source-only release without publishing it:
 
 ```sh
 make package-builder
-npm install -g ./.cache/release/php-wasm-builder-0.1.0.tgz
+npm install -g ./.cache/release/php-wasm-builder-0.2.0.tgz
 ```
 
 The tarball and its SHA-256 inventory are written to `.cache/release/` (override
