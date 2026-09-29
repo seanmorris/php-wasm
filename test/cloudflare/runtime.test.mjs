@@ -35,7 +35,7 @@ async function bounded(promise, label)
 }
 
 before(async () => {
-	const { Miniflare } = await import('miniflare');
+	const { Miniflare, convertV4MiniflareOptions } = await import('miniflare');
 	temporaryDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'php-cloudflare-test-'));
 	const packageDirectory = path.join(temporaryDirectory, 'artifact');
 	fs.mkdirSync(packageDirectory);
@@ -63,7 +63,7 @@ export default createWorker(PhpCloudflare, factory, wasm);
 			, path: path.join(packageDirectory, name)
 		}))
 	];
-	miniflare = new Miniflare({
+	miniflare = new Miniflare(convertV4MiniflareOptions({
 		modules
 		, modulesRoot: temporaryDirectory
 		, compatibilityDate: '2024-02-01'
@@ -77,7 +77,7 @@ export default createWorker(PhpCloudflare, factory, wasm);
 			}
 			throw new Error(`Unexpected outbound fetch: ${request.method} ${request.url}`);
 		}
-	});
+	}));
 	await bounded(miniflare.ready, 'workerd startup');
 	assert.deepEqual(await request('setup'), { setup: true });
 }, { timeout: 60_000 });

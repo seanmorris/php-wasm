@@ -7,7 +7,7 @@ import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
-import { Miniflare } from 'miniflare';
+import { Miniflare, convertV4MiniflareOptions } from 'miniflare';
 import { createHash } from 'node:crypto';
 import { gunzipSync, brotliDecompressSync } from 'node:zlib';
 import assert from 'node:assert/strict';
@@ -58,7 +58,7 @@ before(async () => {
 	modules.sort((a, b) => Number(b.path.endsWith('/index.js')) - Number(a.path.endsWith('/index.js')));
 	directory = await fs.mkdtemp(path.join(os.tmpdir(), 'php-pages-live-test-'));
 	const r2Buckets = {NIGHTLY_BUILDS: 'nightly-pages-integration'};
-	miniflare = new Miniflare({
+	miniflare = new Miniflare(convertV4MiniflareOptions({
 		rootPath: directory
 		, d1Persist: false
 		, r2Persist: false
@@ -81,7 +81,7 @@ before(async () => {
 				}};`
 			}
 		]
-	});
+	}));
 	base = await miniflare.ready;
 	const seed = await miniflare.unsafeGetDirectURL('seed');
 	for(const asset of stage.assets)
