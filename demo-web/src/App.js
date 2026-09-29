@@ -1,8 +1,7 @@
 /**
  * Top-level router composition for the demo-web application.
  */
-import { Navigate, Route, Routes } from 'react-router';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 
 import CliPreview from './pages/CliPreview';
 import DbgPreview from './pages/DbgPreview';

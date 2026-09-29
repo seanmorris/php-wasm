@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 
 vi.mock('./pages/CliPreview', () => ({
 	default: () => React.createElement('div', null, 'CLI Preview')
