@@ -748,6 +748,12 @@ await php.writeFile(path, data, {encoding: 'utf8'});
 With persistence enabled, browser runtimes synchronize their mounted IDBFS
 storage while holding the `php-wasm-fs-lock` Web Lock.
 
+When Web Locks are unavailable, such as on a plain HTTP origin reached by a
+LAN IP address, browser runtimes fall back to a FIFO lock within the current
+page or worker. That fallback coordinates runtimes in the same JavaScript realm
+only. Use HTTPS, where Web Locks are available, when tabs or workers share
+persistent storage.
+
 Browser CGI batches queued filesystem calls into one transaction. After the
 queue becomes idle it waits up to 25 ms for more work. Storage is refreshed
 once per batch. A batch containing only `analyzePath`, `readdir`, `readFile`, or
@@ -799,41 +805,41 @@ For a manually managed transaction that performed only reads, use
 `await php.commitTransaction(true)` to close it without flushing. Never pass
 `true` after a mutation that must be persisted.
 
-### msg-bus
+### quickbus
 
-There is a `msg-bus` module supplied by `php-cgi-wasm` as a helper to communicate with PHP running inside a worker. The module exposes two functions: `sendMessageFor` and `onMessage`.
+Install [`quickbus`](https://www.npmjs.com/package/quickbus) 1.0.2 or newer to call
+`php-cgi-wasm` filesystem methods on the service worker from the page.
+`php.handleMessageEvent` already speaks its request/reply protocol, so each call
+can be awaited:
 
-This lets you simply `await` the result of calls to filesystem methods (see above) on the service worker:
-
-```javascript
-const result = await sendMessage(methodName, [param, param, param]);
+```bash
+npm install quickbus@^1.0.2
 ```
 
-#### onMessage & sendMessageFor
-
-* Use `onMessage` as an event handler for `message` events coming from the Service Worker.
-* Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker.
-
 ```javascript
-import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
+import { Client } from 'quickbus';
 
 const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
 await navigator.serviceWorker.register(SERVICE_WORKER_SCRIPT_URL, {type: 'module'});
-await navigator.serviceWorker.ready;
+const registration = await navigator.serviceWorker.ready;
 
-navigator.serviceWorker.addEventListener('message', onMessage);
+const bus = navigator.serviceWorker.controller
+	? Client.forServiceWorker(navigator.serviceWorker)
+	: Client.forServiceWorkerRegistration(registration);
 
-const sendMessage = sendMessageFor(SERVICE_WORKER_SCRIPT_URL);
-
-const result = await sendMessage(methodName, [param, param, param]);
+const result = await bus.analyzePath('/path/to/your/file');
 ```
 
-After registration, the generated function waits for the selected worker to
-activate before sending a message. Missing registrations, failed installations,
-and message-cloning failures reject the call. Runtime errors, including denied
-persistent storage, also reject through `onMessage`; handle these rejections in
-the page. Private-mode storage availability depends on the browser.
+* Use `Client.forServiceWorker(navigator.serviceWorker)` once the page is already controlled by the worker.
+* Use `Client.forServiceWorkerRegistration(registration)` on first load, after `await navigator.serviceWorker.ready`.
+
+Errors raised in the worker, including denied persistent storage, reject the
+call. Each call returns a request handle; call `abort()` on it to stop waiting
+locally. Private-mode storage availability depends on the browser.
+
+`php-cgi-wasm/msg-bus.mjs`, the original helper that quickbus grew out of, still
+ships for existing code. Use quickbus for new code.
 
 #### php.handleMessageEvent
 
@@ -998,6 +1004,9 @@ The following options may appear in `.php-wasm-rc`.
 ##### PHP_VERSION
 
 8.0|8.1|8.2|8.3|**8.4**|8.5
+
+PHP 8.0 builds must also set `WITH_PDO_PGLITE=0`, because PDO-PGlite requires
+PHP 8.1 or newer.
 
 ---
 

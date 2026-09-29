@@ -50,7 +50,7 @@ Enable `WITH_PDO_PGLITE=1` in `.php-wasm-rc`.
 
 ## Build Options
 
-- `WITH_PDO_PGLITE`: defaults to `1`. Set it to `0` if you want to exclude the extension from a custom build.
+- `WITH_PDO_PGLITE`: defaults to `1`. Set it to `0` to exclude the extension from a custom build. PHP 8.0 builds must set it to `0`.
 - `PDO_PGLITE_REPOSITORY`: optional Git repository override. Defaults to the upstream `pdo-pglite` repository.
 - `PDO_PGLITE_REF`: Git revision to build. The default is an immutable commit pin.
 - `PDO_PGLITE_DEV_PATH`: optional local source checkout to use instead of the pinned repository during the build.

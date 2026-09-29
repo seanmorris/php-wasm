@@ -46,13 +46,28 @@ Runtime-loadable extension helper JS packages remain ESM-only; pass extension as
 
 ## First messages to a service worker
 
-Register the worker and attach `onMessage` from `php-cgi-wasm/msg-bus.mjs` to
-`navigator.serviceWorker` before calling the function returned by
-`sendMessageFor(workerUrl)`. The helper waits through installation and activation,
-so a first request can be made immediately after registration resolves.
-Missing registrations, failed installations, and message-cloning failures
-reject the call. Runtime failures such as denied persistent storage also reject;
-private-mode storage support depends on the browser.
+Call the worker's filesystem methods from the page with
+[`quickbus`](https://www.npmjs.com/package/quickbus) 1.0.2 or newer.
+`php.handleMessageEvent` speaks its request/reply protocol:
+
+```javascript
+import { Client } from 'quickbus';
+
+await navigator.serviceWorker.register('/cgi-worker.mjs', {type: 'module'});
+const registration = await navigator.serviceWorker.ready;
+
+const bus = navigator.serviceWorker.controller
+	? Client.forServiceWorker(navigator.serviceWorker)
+	: Client.forServiceWorkerRegistration(registration);
+
+const entries = await bus.readdir('/persist', {withFileTypes: true});
+```
+
+On first load the page is not yet controlled, so use the registration client
+after `navigator.serviceWorker.ready`. Errors raised in the worker, such as
+denied persistent storage, reject the call; private-mode storage support depends
+on the browser. The original `php-cgi-wasm/msg-bus.mjs` helper still ships for
+existing code.
 
 ## Directory listings and persistence
 
