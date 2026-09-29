@@ -1,6 +1,6 @@
 {
   "name": "php-dbg-wasm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "phpdbg for wasm.",
   "main": "./PhpDbgNode.js",
   "module": "./PhpDbgNode.mjs",
@@ -98,7 +98,7 @@
     }
   ],
   "dependencies": {
-    "php-wasm": "^0.1.0"
+    "php-wasm": "^0.2.0"
   },
   "scripts": {
     "postpublish": "ls *.mjs *.js *.wasm *.data | while read FILENAME; do echo -n \"curl -X PURGE $FILENAME ... \";  curl -X PURGE https://cdn.jsdelivr.net/npm/php-dbg-wasm/$FILENAME; echo; done;"

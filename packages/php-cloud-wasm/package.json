@@ -1,6 +1,6 @@
 {
   "name": "php-cloud-wasm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Statically linked embedded PHP for Cloudflare Workers, with Vrzno, ZIP/zlib and PDO-CFD1",
   "type": "module",
   "repository": {

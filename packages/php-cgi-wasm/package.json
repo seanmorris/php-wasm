@@ -1,6 +1,6 @@
 {
   "name": "php-cgi-wasm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "php-cgi for wasm.",
   "main": "./PhpCgiNode.js",
   "module": "./PhpCgiNode.mjs",
