@@ -239,9 +239,8 @@ A PHP loop can explicitly await a JavaScript frame Promise with `vrzno_await()`.
 
 ## Input, textures, fonts and timing
 
-The current development build adds the bindings below. Ship the cube and its
-matching runtime together: the cube now uses native SDL_ttf UTF-8, bold and
-outline APIs, without converting its strings to Latin-1.
+`php-sdl-wasm` includes the bindings below. Ship the cube with its matching
+runtime: it uses native SDL_ttf UTF-8, bold and outline APIs.
 
 After a local native rebuild, restart Vite with `--force` and reload the demo.
 Vite can retain the previous generated JavaScript while serving the new Wasm;

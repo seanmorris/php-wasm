@@ -1,4 +1,4 @@
-# [![seanmorris/php-cgi-wasm](https://github.com/seanmorris/php-wasm/blob/master/docs/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-cgi-wasm
+# [![seanmorris/php-cgi-wasm](https://seanmorris.github.io/php-wasm/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-cgi-wasm
 
 find php-cgi-wasm on [npm](https://npmjs.com/package/php-cgi-wasm)
 

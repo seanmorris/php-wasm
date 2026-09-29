@@ -32,5 +32,5 @@ Enable `WITH_OPENSSL` in `.php-wasm-rc`.
 
 ## Build Options
 
-- `WITH_OPENSSL`: defaults to `dynamic`. Allowed values: `0`, `1`, `shared`, `dynamic`.
+- `WITH_OPENSSL`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `shared`, `dynamic`.
 - OpenSSL does not use a `static` mode in this package makefile. Shared and dynamic builds emit `libssl.so` and `libcrypto.so`.

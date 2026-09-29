@@ -27,13 +27,13 @@ _PHP in WebAssembly, npm not required._
 -->
 ## 📦 Current Packages
 
-* `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, and `php-wasm-builder` are published separately.
+* `php-wasm`, `php-cgi-wasm`, `php-cli-wasm`, `php-dbg-wasm`, `php-sdl-wasm`, `php-cloud-wasm`, and `php-wasm-builder` are published separately.
 * Published runtimes currently cover PHP `8.0` through `8.5`, depending on the package and entrypoint.
-* `php-wasm`, `php-cgi-wasm`, and `php-dbg-wasm` currently default to PHP `8.4`; `php-cli-wasm` currently defaults to PHP `8.3`. Pass `version` explicitly when your asset filenames need to line up.
-* Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, and `zlib`.
+* Runtimes default to PHP `8.4`, except `PhpCliWeb`, which defaults to `8.3`. `PhpNode`, `PhpCliNode`, and `PhpDbgNode` use the `PHP_VERSION` environment variable instead when it names a supported version. Pass `version` explicitly when your asset filenames need to line up.
+* Runtime-loadable libraries are available for `gd`, `iconv`, `intl`, `libxml`, `xml`, `dom`, `simplexml`, `xmlreader`, `xmlwriter`, `yaml`, `zip`, `mbstring`, `openssl`, `phar`, `sqlite`, `tidy`, and `zlib`.
 * [Vrzno](https://github.com/seanmorris/vrzno), [pdo_cfd1](https://github.com/seanmorris/pdo-cfd1), and [pdo_pglite](https://github.com/seanmorris/pdo-pglite) are maintained as separate packages.
-* [Cloudflare embedded PHP](CLOUDFLARE.md) has a dedicated static ES-module build and local workerd tests for PHP `8.0` through `8.5`; final assets use the existing nightly distribution.
-* The standalone `php-sdl-wasm` browser runtime supports SDL graphics and input. The current development build adds image loading, TrueType text, audio, and OpenGL shaders, with a textured cube example. See the [SDL guide](packages/php-sdl-wasm/README.md) for canvas setup, shared codec dependencies, controls, and measurements.
+* `php-cloud-wasm` is a dedicated static ES-module build for [Cloudflare Workers and Pages](CLOUDFLARE.md), tested with local workerd for PHP `8.0` through `8.5`.
+* The standalone `php-sdl-wasm` browser runtime supports SDL graphics, input, image loading, TrueType text, audio, and OpenGL shaders, with a textured cube example. See the [SDL guide](packages/php-sdl-wasm/README.md) for canvas setup, build flags, and supported APIs.
 
 [changelog](https://raw.githubusercontent.com/seanmorris/php-wasm/master/CHANGELOG.md)
 
@@ -44,6 +44,8 @@ $ npm i php-wasm
 $ npm i php-cgi-wasm
 $ npm i php-cli-wasm
 $ npm i php-dbg-wasm
+$ npm i php-sdl-wasm
+$ npm i php-cloud-wasm
 $ npm i php-wasm-builder
 ```
 
@@ -147,7 +149,7 @@ self.addEventListener('fetch',    event => php.handleFetchEvent(event));
 self.addEventListener('message',  event => php.handleMessageEvent(event));
 ```
 
-You can see examples of `php-cgi-wasm` running in a service worker and Node.js in [`demo-web/src/cgi-worker.mjs`](demo-web/src/cgi-worker.mjs) and [`demo-node/index.mjs`](demo-node/index.mjs) respectively.
+You can see examples of `php-cgi-wasm` running in a service worker and Node.js in [`demo-web/src/workers/cgi-worker.mjs`](demo-web/src/workers/cgi-worker.mjs) and [`demo-node/index.mjs`](demo-node/index.mjs) respectively.
 
 ***Note:*** `php-cgi-wasm` and `php-wasm` are separate packages. One embeds PHP directly into your JavaScript runtime; the other runs in CGI mode, like PHP under Apache or nginx.
 
@@ -409,13 +411,16 @@ The following extensions may be loaded at runtime. This allows the shared extens
 * xml (https://www.npmjs.com/package/php-wasm-xml)
 * dom (https://www.npmjs.com/package/php-wasm-dom)
 * simplexml (https://www.npmjs.com/package/php-wasm-simplexml)
-* yaml (https://www.npmjs.com/package/php-wasm-libyaml)
+* xmlreader (https://www.npmjs.com/package/php-wasm-xmlreader)
+* xmlwriter (https://www.npmjs.com/package/php-wasm-xmlwriter)
+* yaml (https://www.npmjs.com/package/php-wasm-yaml)
 * zip (https://www.npmjs.com/package/php-wasm-libzip)
 * mbstring (https://www.npmjs.com/package/php-wasm-mbstring)
 * openssl (https://www.npmjs.com/package/php-wasm-openssl)
 * phar (https://www.npmjs.com/package/php-wasm-phar)
 * sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
 * pdo-sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
+* tidy (https://www.npmjs.com/package/php-wasm-tidy)
 * zlib (https://www.npmjs.com/package/php-wasm-zlib)
 
 There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
@@ -488,7 +493,7 @@ const php = new PhpWeb({sharedLibs: [
 
 ### Loading Dynamic Extensions as JS Modules
 
-Dynamic extensions can be loaded as modules. As long as the main file of the module defines the `getLibs` and `getFiles` methods, extensions may be loaded like so:
+Dynamic extensions can be loaded as modules. The module's main file defines `getLibs`, and optionally `getFiles` for preload files. Extensions may be loaded like so:
 
 ```javascript
 new PhpNode({sharedLibs:[ await import('php-wasm-intl') ]})
@@ -501,7 +506,7 @@ Dynamic extensions can also be loaded as modules from any static HTTP server wit
 const php = new PhpWeb({sharedLibs: [ await import('https://cdn.jsdelivr.net/npm/php-wasm-sqlite') ]});
 ```
 
-This notation is not available for Service Workers, since they do not yet support dynamic `import()` in this workflow.
+This notation is not available in Service Workers, which do not support dynamic `import()`. Import the extension module statically or pass its asset URLs instead.
 
 The extension helper JS packages shown above are ESM-only. If you need to bypass those helper packages, pass the extension assets manually instead of importing the helper package:
 
@@ -810,7 +815,7 @@ const result = await sendMessage(methodName, [param, param, param]);
 * Use `sendMessageFor` to **GENERATE A FUNCTION** that you can use to send messages to your service worker.
 
 ```javascript
-import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus';
+import { onMessage, sendMessageFor } from 'php-cgi-wasm/msg-bus.mjs';
 
 const SERVICE_WORKER_SCRIPT_URL = '/cgi-worker.mjs';
 
@@ -929,6 +934,18 @@ Build `php-dbg-wasm` modules with:
 $ php-wasm-builder build node dbg mjs
 ```
 
+### SDL and Cloudflare Packages:
+
+Build the standalone `php-sdl-wasm` and `php-cloud-wasm` packages with:
+
+```sh
+$ php-wasm-builder build sdl mjs
+$ php-wasm-builder build cloudflare mjs
+```
+
+These targets support only embedded PHP as ES modules. See the
+[SDL guide](packages/php-sdl-wasm/README.md) and [CLOUDFLARE.md](CLOUDFLARE.md).
+
 This will build the package inside the current directory (or in `PHP_DIST_DIR`, *see below for more info.*)
 
 ### .php-wasm-rc
@@ -1025,7 +1042,7 @@ A list of files & directories to build to the `/preload` directory. Relative pat
 
 ##### ASSERTIONS
 
-0|**1**
+**0**|1
 
 Build with/without assertions.
 
@@ -1058,14 +1075,14 @@ The following extensions may be compiled as static, shared, or dynamic:
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
-WITH_LIBXML    # [0, 1, static, shared]
+WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]
 
 WITH_LIBZIP    # [0, 1, static, shared, dynamic]
 WITH_ZLIB      # [0, 1, static, shared, dynamic]
 
-WITH_GD        # [0, 1, static, shared, dynamic]
+WITH_GD        # [0, 1, static, dynamic]
 WITH_LIBPNG    # [0, 1, static, shared]
 WITH_FREETYPE  # [0, 1, static, shared]
 WITH_LIBJPEG   # [0, 1, static, shared]
@@ -1073,8 +1090,8 @@ WITH_LIBJPEG   # [0, 1, static, shared]
 WITH_YAML      # [0, 1, static, shared, dynamic]
 WITH_TIDY      # [0, 1, static, shared, dynamic]
 WITH_MBSTRING  # [0, 1, static, dynamic]
-WITH_ONIGURUMA # [0, 1, static, shared]
-WITH_OPENSSL   # [0, 1, shared, dynamic]
+WITH_ONIGURUMA # [0, 1, static, shared, dynamic]
+WITH_OPENSSL   # [0, 1, static, shared, dynamic]
 WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
 
@@ -1113,7 +1130,7 @@ When compiled as a `dynamic` extension, this will produce the extension file `ph
 
 ##### WITH_LIBXML
 
-static|**shared**
+static|shared|**dynamic**
 
 The `libxml` extension itself must be statically compiled, but `libxml2` may be loaded as a shared library.
 
@@ -1239,7 +1256,7 @@ If `WITH_MBSTRING` is `dynamic`, then loading will be deferred until after `mbst
 
 ##### WITH_OPENSSL
 
-shared|**dynamic**
+static|shared|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension `php8.x-openssl.so`.
 

@@ -1,4 +1,4 @@
-# [![seanmorris/php-dbg-wasm](https://github.com/seanmorris/php-wasm/blob/master/docs/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-dbg-wasm
+# [![seanmorris/php-dbg-wasm](https://seanmorris.github.io/php-wasm/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-dbg-wasm
 
 Find `php-dbg-wasm` on [npm](https://npmjs.com/package/php-dbg-wasm)
 

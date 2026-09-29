@@ -1,4 +1,4 @@
-# [![seanmorris/php-wasm](https://github.com/seanmorris/php-wasm/blob/master/docs/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-wasm
+# [![seanmorris/php-wasm](https://seanmorris.github.io/php-wasm/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-wasm
 
 Find `php-wasm` on [npm](https://npmjs.com/package/php-wasm)
 

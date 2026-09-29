@@ -1,4 +1,4 @@
-# [![seanmorris/php-cli-wasm](https://github.com/seanmorris/php-wasm/blob/master/docs/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-cli-wasm
+# [![seanmorris/php-cli-wasm](https://seanmorris.github.io/php-wasm/sean-icon.png)](https://github.com/seanmorris/php-wasm) php-cli-wasm
 
 Find `php-cli-wasm` on [npm](https://npmjs.com/package/php-cli-wasm)
 
