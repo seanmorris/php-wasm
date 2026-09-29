@@ -3,8 +3,8 @@ title: Install & Import
 weight: -900
 ---
 <!--
-Vendored from php-wasm-site working tree based on commit 842858b6c6158724c05beace20929ba35793ff57
-Source: https://github.com/seanmorris/php-wasm-site/blob/842858b6c6158724c05beace20929ba35793ff57/pages/getting-started/install-and-include.md
+Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
+Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/getting-started/install-and-include.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/packages/php-wasm/PhpWeb.mjs
@@ -95,7 +95,7 @@ const php = new PhpNode({version: '8.5'});
 
 Core Node runtimes support both ESM and CommonJS.
 
-For `0.1.0`, use the published entrypoints across the runtime packages.
+For `0.2.0`, use the published entrypoints across the runtime packages.
 
 - `php-wasm/PhpNode`
 - `php-cgi-wasm/PhpCgiNode`

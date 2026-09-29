@@ -2,13 +2,8 @@
 title: Transactions
 ---
 <!--
-Vendored from the php-wasm-site working tree based on commit bdf1555ad207242ac09292ff05b125f006a9d049
-Local update: bounded browser CGI batching, incremental IDBFS commits and durable acknowledgments.
-Source: https://github.com/seanmorris/php-wasm-site/blob/bdf1555ad207242ac09292ff05b125f006a9d049/pages/filesystem/transactions.md
-Validation refs:
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/PhpBase.mjs
-- https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/source/webTransactions.mjs
+Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
+Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/filesystem/transactions.md
 -->
 # Transactions
 
