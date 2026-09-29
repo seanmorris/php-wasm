@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { deployCloudflareNightly, verifyReleaseStage, runWrangler, rawFetch, PROJECT, PRODUCTION_URL } from '../../bin/deploy-cloudflare-nightly.mjs';
+import { deployCloudflareNightly, verifyReleaseStage, runWrangler, rawFetch, PROJECT, PRODUCTION_URL, WRANGLER_VERSION } from '../../bin/deploy-cloudflare-nightly.mjs';
 import { stageCloudflarePages } from '../../bin/stage-cloudflare-pages.mjs';
 import { artifactFixture, digest } from '../cloudflare-pages/fixtures.mjs';
 import {verifyCloudflareRelease, validateSmokeManifest} from '../../bin/verify-cloudflare-release.mjs';
@@ -602,7 +602,7 @@ test('pinned Wrangler runner invokes only the local executable and consumes stru
 	const result = await runWrangler({args: ['pages', 'deploy', '/fixture/dist', '--no-bundle'], cwd: '/fixture', env: {CI: 'true'}, timeoutMs: 5000}, {
 		readMetadata: async filename => {
 			assert.ok(filename.endsWith('/node_modules/wrangler/package.json'));
-			return JSON.stringify({version: '4.131.1'});
+			return JSON.stringify({version: WRANGLER_VERSION});
 		}
 		, spawn: (command, args, options) => {
 			assert.equal(command, process.execPath);
@@ -625,10 +625,16 @@ test('pinned Wrangler runner invokes only the local executable and consumes stru
 test('pinned Wrangler runner refuses a different version without spawning a process', async () => {
 	let called = false;
 	await assert.rejects(runWrangler({}, {
-		readMetadata: async () => '{"version":"4.130.0"}'
+		readMetadata: async () => '{"version":"0.0.0"}'
 		, spawn: () => called = true
-	}), /Wrangler 4\.131\.1 is required/);
+	}), new RegExp(`Wrangler ${WRANGLER_VERSION.replaceAll('.', '\\.')} is required`));
 	assert.equal(called, false);
+});
+
+test('deployment Wrangler pin is exact and matches the installed package', async () => {
+	assert.match(WRANGLER_VERSION, /^\d+\.\d+\.\d+$/);
+	const installed = JSON.parse(await fs.readFile(path.join(import.meta.dirname, '../../node_modules/wrangler/package.json'), 'utf8'));
+	assert.equal(installed.version, WRANGLER_VERSION);
 });
 
 test('raw HTTPS transport preserves encoded bytes and supports HEAD and null-body status codes', async () => {

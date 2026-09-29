@@ -13,7 +13,8 @@ import {verifyCloudflareRelease} from './verify-cloudflare-release.mjs';
 
 export {PROJECT, PRODUCTION_URL, rawFetch} from './cloudflare-release-http.mjs';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const WRANGLER_VERSION = '4.131.1';
+// The deployment accepts only the exact Wrangler release pinned for this repository.
+export const WRANGLER_VERSION = JSON.parse(await fs.readFile(path.join(repoRoot, 'package.json'), 'utf8')).devDependencies.wrangler;
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 const filePattern = /^[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)*$/;

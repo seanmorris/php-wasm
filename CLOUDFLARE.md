@@ -298,7 +298,7 @@ remain in place if a later deployment fails; the Pages rollback does not undo
 this hostname's cache policy or alter unrelated zone settings.
 
 The serialized publication job stages a Pages `_worker.js` **directory** with
-only the selected version's exact modules. Pinned Wrangler 4.131.1 uploads it
+only the selected version's exact modules. Pinned Wrangler 4.143.1 uploads it
 with `--no-bundle`, preserving the module inventory despite Vrzno's unused
 variable import helper. Advanced mode replaces the file-based Functions router;
 the staged entry explicitly preserves the nightly R2 routes.
