@@ -7,8 +7,8 @@ leftBarLink: false
 TOC: false
 ---
 <!--
-Vendored from php-wasm-site commit aca3403646bad9989828859a8dd21ad3f5537249
-Source: https://github.com/seanmorris/php-wasm-site/blob/aca3403646bad9989828859a8dd21ad3f5537249/pages/demos.md
+Vendored from php-wasm-site commit c3fecde1f5907cb17ea5de2a2e54a65367dac694
+Source: https://github.com/seanmorris/php-wasm-site/blob/c3fecde1f5907cb17ea5de2a2e54a65367dac694/pages/demos.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -39,7 +39,7 @@ has been removed from that menu.
 
 Use the editor below to write PHP scripts that run right in the page:
 
-<iframe class = "page-demo" src = "https://seanmorris.github.io/php-wasm/embedded-php.html?iframed=1&no-service-worker=1&demo=sdl-sine.php"></iframe>
+<iframe class = "page-demo" src = "https://seanmorris.github.io/php-wasm/embedded-php.html?iframed=1&no-service-worker=1&demo=sdl-cube.php"></iframe>
 
 ### SDL Cube and SDL Sine
 
@@ -60,6 +60,6 @@ The cube fills the preview and adjusts its perspective when it is resized.
 Edited source is shared in the URL's `#code=` fragment, keeping it out of HTTP
 requests; existing `?code=` links still work.
 
-The embedded example above runs the sine demo. See
-[SDL and OpenGL](/extensions/sdl.html) for the cube's source, runtime and
-asset setup, build flags, and error recovery.
+The embedded example above runs the cube; choose **SDL Sine** from its
+**Demo** menu for the smaller example. See [SDL and OpenGL](/extensions/sdl.html)
+for the cube's source, runtime and asset setup, build flags, and error recovery.
