@@ -190,21 +190,19 @@ const php = new PhpWeb;
 
 #### Pre-Packaged Static Assets:
 
-If you're using a bundler, use the vendor's documentation to move the versioned `.wasm` file that matches the runtime, PHP version, and module format you import. For example:
+Each runtime module loads its WebAssembly binary with
+`new URL('<hash>.wasm', import.meta.url)`. Bundlers that understand this
+pattern, such as Vite and webpack 5, emit the binary automatically.
+
+Otherwise, copy the binary referenced by each runtime you import next to the
+bundled module. It is named by its SHA-1 hash, which changes with every build:
 
 ```bash
-node_modules/php-wasm/php8.4-web.mjs.wasm
-node_modules/php-wasm/php8.4-worker.mjs.wasm # ONLY if you're running the standard build in a worker
+grep -o '[0-9a-f]\{40\}\.wasm' node_modules/php-wasm/php8.4-web.mjs | sort -u
+grep -o '[0-9a-f]\{40\}\.wasm' node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs | sort -u
 ```
 
-For `php-cgi-wasm`:
-
-```bash
-node_modules/php-cgi-wasm/php8.4-cgi-node.mjs.wasm # ONLY if you're running the CGI build in Node.js
-node_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm # ONLY if you're running the CGI build in a worker
-```
-
-If you import a different runtime version, copy the matching `php8.x-*.mjs.wasm` file as well.
+Repeat this after upgrading, and for each PHP version and runtime you import.
 
 Core Node runtimes support both ESM and CommonJS.
 

@@ -160,8 +160,7 @@ async function validateInstallAndInclude(page)
 	// Blocks 1-6
 	const cdnImport = "const { PhpWeb } = await import('https://cdn.jsdelivr.net/npm/php-wasm/PhpWeb.mjs');";
 	const unpkgImport = "const { PhpWeb } = await import('https://unpkg.com/php-wasm/PhpWeb.mjs');";
-	const npmInstalls = '$ npm i php-wasm\n$ npm i php-cgi-wasm\n$ npm i php-cli-wasm\n$ npm i php-dbg-wasm\n$ npm i php-wasm-builder';
-	const localAssets = 'node_modules/php-wasm/php8.4-web.mjs.wasm\nnode_modules/php-cgi-wasm/php8.4-cgi-worker.mjs.wasm';
+	const npmPackages = ['php-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm', 'php-sdl-wasm', 'php-cloud-wasm', 'php-wasm-builder'];
 	const esmImport = "import { PhpWeb } from 'php-wasm/PhpWeb.mjs';";
 	const cjsRequire = "const { PhpNode } = require('php-wasm/PhpNode');";
 	const text = page.blocks.map(block => block.code).join('\n');
@@ -169,8 +168,28 @@ async function validateInstallAndInclude(page)
 
 	assert.match(text, new RegExp(cdnImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(unpkgImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-	assert.match(text, new RegExp(npmInstalls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-	assert.match(text, new RegExp(localAssets.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+	assert.deepEqual([...text.matchAll(/^\$ npm i (\S+)$/gm)].map(match => match[1]), npmPackages);
+	const publishedNames = new Set([
+		JSON.parse(readLocal(path.join(repoRoot, 'package.json'))).name
+		, ...fs.readdirSync(path.join(repoRoot, 'packages'))
+			.map(directory => path.join(repoRoot, 'packages', directory, 'package.json'))
+			.filter(file => fs.existsSync(file))
+			.map(file => JSON.parse(readLocal(file)).name)
+	]);
+	for(const name of npmPackages) assert.ok(publishedNames.has(name), `Unknown package: ${name}`);
+
+	// Published runtimes reference content-hashed Wasm files. When a local build
+	// exists, the documented lookup must find exactly one existing binary.
+	const wasmLookups = [...text.matchAll(/node_modules\/([a-z-]+)\/(php8\.\d-[a-z-]+\.mjs)/g)];
+	assert.equal(wasmLookups.length, 2);
+	for(const [, packageName, runtime] of wasmLookups)
+	{
+		const runtimeFile = path.join(repoRoot, 'packages', packageName, runtime);
+		if(!fs.existsSync(runtimeFile)) continue;
+		const binaries = new Set(readLocal(runtimeFile).match(/[0-9a-f]{40}\.wasm/g));
+		assert.equal(binaries.size, 1, `${runtime} should reference one hashed Wasm file`);
+		assert.ok(fs.existsSync(path.join(path.dirname(runtimeFile), [...binaries][0])));
+	}
 	assert.match(text, new RegExp(esmImport.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(text, new RegExp(cjsRequire.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 	assert.match(markdown, /Core Node runtimes support both ESM and CommonJS\./);
@@ -257,9 +276,13 @@ async function validatePhpInStaticHtml(page)
 {
 	const text = page.blocks.map(block => block.code).join('\n');
 
+	// The CDN-specific php-tags entrypoints are deprecated and cannot load as
+	// classic scripts; the docs must use the php-tags.mjs module.
+	assert.doesNotMatch(text, /php-tags\.(?:jsdelivr|unpkg)\.mjs/);
+
 	for(const snippet of [
-		'php-tags.jsdelivr.mjs',
-		'php-tags.unpkg.mjs',
+		'type = "module" src = "https://cdn.jsdelivr.net/npm/php-wasm/php-tags.mjs"',
+		'type = "module" src = "https://unpkg.com/php-wasm/php-tags.mjs"',
 		'data-stdout',
 		'data-stdin',
 		'data-stderr',
