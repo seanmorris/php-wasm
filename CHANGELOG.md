@@ -4,6 +4,8 @@ Changes
 
 ## 0.2.0
 
+* Browser CGI in a Service Worker no longer falls back to a synchronous XMLHttpRequest when the Wasm binary fails to load. Service Workers have no XMLHttpRequest, so the fallback replaced the real failure with "XMLHttpRequest is not defined"; startup now reports Emscripten's own load error. Dedicated workers keep the fallback.
+
 * Expanded Bun testing to the shared Node/Deno suites, including extensions, documentation, packaging, CLI PHPT cases, CGI HTTP/cookies, and CommonJS/debugger coverage. CI now checks Bun 1.4.0 across PHP 8.0–8.5, all three library profiles, and raw/compressed artifacts, with fast wrapper and build-helper checks before native builds.
 
 * Fixed embedded-editor highlighting and false EOF diagnostics for indented PHP heredoc/nowdoc endings followed by expressions. Ace syntax validation remains enabled, including errors after the string.

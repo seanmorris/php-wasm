@@ -291,6 +291,19 @@ index ad4fd53..643d203 100644
  }
 
  // Hooks that are implemented differently in different runtime environments.
+diff --git a/src/web_or_worker_shell_read.js b/src/web_or_worker_shell_read.js
+--- a/src/web_or_worker_shell_read.js
++++ b/src/web_or_worker_shell_read.js
+@@ -5,7 +5,8 @@
+  */
+ 
+ #if ENVIRONMENT_MAY_BE_WORKER
+-  if (ENVIRONMENT_IS_WORKER) {
++  // Service workers lack XMLHttpRequest; leave readBinary undefined there.
++  if (ENVIRONMENT_IS_WORKER && typeof XMLHttpRequest != 'undefined') {
+     readBinary = (url) => {
+       var xhr = new XMLHttpRequest();
+       xhr.open('GET', url, false);
 diff --git a/tools/cmdline.py b/tools/cmdline.py
 index 1b6d02b..9ddf02e 100644
 --- a/tools/cmdline.py
