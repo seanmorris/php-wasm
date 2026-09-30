@@ -2,8 +2,8 @@
 title: CHANGELOG
 ---
 <!--
-Vendored from php-wasm-site commit b763f4bb74c9a6c9221bde29397c8333b4647ef4
-Source: https://github.com/seanmorris/php-wasm-site/blob/b763f4bb74c9a6c9221bde29397c8333b4647ef4/pages/CHANGELOG.md
+Vendored from php-wasm-site commit dc3bcf52fa38490eff9f62763fe85ac7e5737155
+Source: https://github.com/seanmorris/php-wasm-site/blob/dc3bcf52fa38490eff9f62763fe85ac7e5737155/pages/CHANGELOG.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -11,7 +11,7 @@ Validation refs:
 
 Changes
 
-## v0.2.0
+## v0.2.0 - Ramifying Sympodia
 
 * Expanded Bun testing to the shared Node/Deno suites, including extensions, documentation, packaging, CLI PHPT cases, CGI HTTP/cookies, and CommonJS/debugger coverage. CI now checks Bun 1.4.0 across PHP 8.0–8.5, all three library profiles, and raw/compressed artifacts, with fast wrapper and build-helper checks before native builds.
 * Fixed embedded-editor highlighting and false EOF diagnostics for indented PHP heredoc/nowdoc endings followed by expressions. Ace syntax validation remains enabled, including errors after the string.
