@@ -2,7 +2,7 @@
 
 Changes
 
-## 0.2.0
+## v0.2.0 - Ramifying Sympodia
 
 * Browser CGI in a Service Worker no longer falls back to a synchronous XMLHttpRequest when the Wasm binary fails to load. Service Workers have no XMLHttpRequest, so the fallback replaced the real failure with "XMLHttpRequest is not defined"; startup now reports Emscripten's own load error. Dedicated workers keep the fallback.
 
