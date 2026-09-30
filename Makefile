@@ -4,7 +4,7 @@
 	web-mjs web-js \
 	worker-mjs worker-js node-mjs \
 	webnode-js webview-mjs webview-js \
-	clean php-clean deep-clean show-ports show-versions show-files \
+	clean clean-packages php-clean deep-clean release-overlay show-ports show-versions show-files \
 	hooks image push-image pull-image \
 	dist demo serve-demo scripts run \
 	test test-node test-node-standard test-node-cjs test-node-cjs-standard \
@@ -1076,12 +1076,27 @@ php-clean:
 	}; done;'
 	- ${DOCKER_RUN_IN_PHP} make clean distclean
 
-clean:
+clean: clean-packages
 	${DOCKER_RUN} rm -rf \
 		.cache/config-cache \
 		.cache/php-configure \
 		.cache/php-configure-* \
 		.cache/sdl-config-* \
+		lib/* \
+		demo-source/public/*.so \
+		demo-source/public/*.wasm \
+		demo-source/public/*.data \
+		demo-source/public/*.map \
+		third_party/php${PHP_VERSION}-src/configured \
+		third_party/preload \
+		.cache/pre*.js \
+		.cache/preload-collected
+	${MAKE} php-clean
+
+# Removes every generated file under packages/ (runtimes, Wasm, data, maps,
+# manifests, sidecars) while keeping build caches, so a CI overlay starts clean.
+clean-packages:
+	${DOCKER_RUN} rm -rf \
 		packages/php-wasm/*.js \
 		packages/php-wasm/*.mjs \
 		packages/php-wasm/*.map \
@@ -1101,11 +1116,6 @@ clean:
 		packages/*/*.so \
 		packages/*/*.dat \
 		packages/*/*.wasm \
-		lib/* \
-		demo-source/public/*.so \
-		demo-source/public/*.wasm \
-		demo-source/public/*.data \
-		demo-source/public/*.map \
 		packages/php-wasm/*.data \
 		packages/php-wasm/*.mjs* \
 		packages/php-cgi-wasm/*.data \
@@ -1125,13 +1135,9 @@ clean:
 		packages/php-cloud-wasm/php*-cloudflare.d.mts \
 		packages/php-cloud-wasm/php*-cloudflare.manifest.json \
 		packages/*/test/*.generated.mjs \
-		third_party/php${PHP_VERSION}-src/configured \
-		third_party/preload \
-		.cache/pre*.js \
-		.cache/preload-collected
+		packages/all-libs.mjs
 	# Compressed sidecars and CI directory listings can appear at any depth.
-	${DOCKER_RUN} find packages -name node_modules -prune -o -type f \( -name '*.br' -o -name '*.gz' -o -name 'index.html' \) -delete
-	${MAKE} php-clean
+	${DOCKER_RUN} find packages -name node_modules -prune -o -type f \( -name '*.br' -o -name '*.gz' -o -name 'index.html' \) -exec rm -f {} +
 
 deep-clean: clean
 	${DOCKER_RUN} rm -rf \
@@ -1173,6 +1179,36 @@ package-builder:
 
 publish:
 	./publish-packages.sh ${NPM_PUBLISH_TAG} ${NPM_PUBLISH_DRY}
+
+RELEASE_REPO?=seanmorris/php-wasm
+RELEASE_ARTIFACT?=php-indexed-packages
+RELEASE_OVERLAY_TMP?=${CURDIR}/.cache/release-overlay
+RELEASE_ALLOW_MISMATCH?=
+RUN_ID?=
+CLEAN_PACKAGES_CMD?=${MAKE} clean-packages
+
+# Publishing prep: clean the generated package files, then overlay the packages
+# built by a successful Build Artifacts run for this exact commit.
+release-overlay:
+	@test -n "${RUN_ID}" || { echo 'Usage: make release-overlay RUN_ID=<successful Build Artifacts run id for HEAD>' >&2; exit 1; }
+	@run="$$(gh api repos/${RELEASE_REPO}/actions/runs/${RUN_ID} --jq '(.conclusion // "unfinished") + " " + .head_sha')" || exit 1; \
+	conclusion="$${run%% *}"; sha="$${run#* }"; head="$$(git rev-parse HEAD)"; \
+	if [ "$$conclusion" != success ] || [ "$$sha" != "$$head" ]; then \
+		echo "Run ${RUN_ID} is $$conclusion at $$sha, but HEAD is $$head." >&2; \
+		if [ -n "${RELEASE_ALLOW_MISMATCH}" ]; then echo 'RELEASE_ALLOW_MISMATCH is set; continuing anyway.' >&2; else exit 1; fi; \
+	fi
+	${CLEAN_PACKAGES_CMD}
+	./overlay-workspace-from-actions.sh --overwrite \
+		--artifact-name ${RELEASE_ARTIFACT} \
+		--run-id ${RUN_ID} \
+		--repo ${RELEASE_REPO} \
+		--workspace-root ${CURDIR} \
+		--tmp-root ${RELEASE_OVERLAY_TMP}; \
+	status=$$?; rm -rf ${RELEASE_OVERLAY_TMP}; exit $$status
+	# The indexed artifact carries CI directory listings and compressed sidecars; packages
+	# that ship whole directories (e.g. phar's test/) would otherwise publish them.
+	find packages -name node_modules -prune -o -type f \( -name '*.br' -o -name '*.gz' -o -name 'index.html' \) -exec rm -f {} +
+	rm -f packages/all-libs.mjs
 
 test:
 	${MAKE} test-node

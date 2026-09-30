@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.0 - Ramifying Sympodia
 
+* Added `make clean-packages`, which removes every generated package file while keeping build caches, and `make release-overlay RUN_ID=<id>`, which cleans the packages and overlays the output of a successful Build Artifacts run for the current commit before publishing. `make clean` now also removes stale SDL/Cloudflare runtimes, manifests, compressed sidecars and generated test files.
+
 * Browser CGI in a Service Worker no longer falls back to a synchronous XMLHttpRequest when the Wasm binary fails to load. Service Workers have no XMLHttpRequest, so the fallback replaced the real failure with "XMLHttpRequest is not defined"; startup now reports Emscripten's own load error. Dedicated workers keep the fallback.
 
 * Expanded Bun testing to the shared Node/Deno suites, including extensions, documentation, packaging, CLI PHPT cases, CGI HTTP/cookies, and CommonJS/debugger coverage. CI now checks Bun 1.4.0 across PHP 8.0–8.5, all three library profiles, and raw/compressed artifacts, with fast wrapper and build-helper checks before native builds.

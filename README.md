@@ -875,6 +875,22 @@ with `BUILDER_PACKAGE_OUTPUT`). Native outputs, caches, local environment files,
 and credentials are excluded. `./publish-packages.sh next --dry-run` includes
 this staged builder in the release inventory and skips unchanged packages.
 
+To prepare the publishable packages, start from a clean checkout of the release
+commit, then replace every generated package file with the output of a
+successful Build Artifacts run for that exact commit:
+
+```sh
+git worktree add --detach ../php-wasm-release v0.2.0
+cd ../php-wasm-release
+make release-overlay RUN_ID=<build-artifacts-run-id>
+./publish-packages.sh latest --dry-run
+```
+
+`make release-overlay` refuses runs that did not succeed or were built from a
+different commit, runs `make clean-packages` (which removes generated package
+files without touching build caches), then overlays the `php-indexed-packages`
+artifact with the GitHub CLI and deletes its download afterwards.
+
 Create the build environment (can be run from anywhere):
 
 ```sh
