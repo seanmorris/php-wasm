@@ -1064,8 +1064,8 @@ php-clean:
 		packages/php-cli-wasm/php${PHP_VERSION}-*.wasm \
 		packages/php-dbg-wasm/php${PHP_VERSION}-*.wasm \
 		packages/php-wasm/Php*.mjs \
-		packages/php-cgi-wasm/Php*.mjs' \
-		packages/php-cli-wasm/Php*.mjs' \
+		packages/php-cgi-wasm/Php*.mjs \
+		packages/php-cli-wasm/Php*.mjs \
 		packages/php-dbg-wasm/Php*.mjs'
 	${DOCKER_RUN} rm -rf lib/include/lexbor
 	${DOCKER_RUN} rm -rf third_party/php${PHP_VERSION}-src/ext/yaml
@@ -1112,10 +1112,25 @@ clean:
 		packages/php-cgi-wasm/*.mjs* \
 		packages/php-cli-wasm/*.data \
 		packages/php-cli-wasm/*.mjs* \
+		packages/php-dbg-wasm/*.data \
+		packages/php-wasm/stdlib/*.mjs \
+		packages/php-wasm/build.log \
+		packages/php-sdl-wasm/*.mjs \
+		packages/php-sdl-wasm/*.data \
+		packages/php-sdl-wasm/php*-sdl.d.mts \
+		packages/php-sdl-wasm/php*-sdl.manifest.json \
+		packages/php-sdl-wasm/LICENSE-PHP \
+		packages/php-sdl-wasm/LICENSE-sdl_* \
+		packages/php-cloud-wasm/*.mjs \
+		packages/php-cloud-wasm/php*-cloudflare.d.mts \
+		packages/php-cloud-wasm/php*-cloudflare.manifest.json \
+		packages/*/test/*.generated.mjs \
 		third_party/php${PHP_VERSION}-src/configured \
 		third_party/preload \
 		.cache/pre*.js \
 		.cache/preload-collected
+	# Compressed sidecars and CI directory listings can appear at any depth.
+	${DOCKER_RUN} find packages -name node_modules -prune -o -type f \( -name '*.br' -o -name '*.gz' -o -name 'index.html' \) -delete
 	${MAKE} php-clean
 
 deep-clean: clean
