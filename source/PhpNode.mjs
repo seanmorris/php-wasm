@@ -14,22 +14,6 @@ const defaultVersion = (
 	? process.env.PHP_VERSION
 	: '8.4';
 
-const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
-	? runtime
-	: {default: runtime};
-const isBun = typeof process !== 'undefined' && Boolean(process.versions?.bun);
-
-const loadRuntime = specifier => {
-	if(typeof require === 'function' && !isBun)
-	{
-		return Promise.resolve(
-			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
-		);
-	}
-
-	return import(specifier).then(normalizeRuntimeModule);
-};
-
 /**
  * Node.js-hosted PHP wrapper.
  */
@@ -49,14 +33,9 @@ export class PhpNode extends PhpBase
 
 			if(dir === '')
 			{
-				if(typeof __dirname === 'undefined')
-				{
-					dir = path.dirname(url.fileURLToPath(import.meta.url));
-				}
-				else
-				{
-					dir = __dirname;
-				}
+				// The CommonJS build replaces import.meta.url with undefined.
+				const moduleUrl = import.meta.url;
+				dir = moduleUrl ? path.dirname(url.fileURLToPath(moduleUrl)) : __dirname;
 			}
 
 			const located = path.resolve(path.format({dir, name}));
@@ -74,27 +53,27 @@ export class PhpNode extends PhpBase
 		switch(version)
 		{
 			case '8.5':
-				super(loadRuntime('./php8.5-node.mjs'), constructorArgs);
+				super(import('./php8.5-node.mjs'), constructorArgs);
 				break;
 
 			case '8.4':
-				super(loadRuntime('./php8.4-node.mjs'), constructorArgs);
+				super(import('./php8.4-node.mjs'), constructorArgs);
 				break;
 
 			case '8.3':
-				super(loadRuntime('./php8.3-node.mjs'), constructorArgs);
+				super(import('./php8.3-node.mjs'), constructorArgs);
 				break;
 
 			case '8.2':
-				super(loadRuntime('./php8.2-node.mjs'), constructorArgs);
+				super(import('./php8.2-node.mjs'), constructorArgs);
 				break;
 
 			case '8.1':
-				super(loadRuntime('./php8.1-node.mjs'), constructorArgs);
+				super(import('./php8.1-node.mjs'), constructorArgs);
 				break;
 
 			case '8.0':
-				super(loadRuntime('./php8.0-node.mjs'), constructorArgs);
+				super(import('./php8.0-node.mjs'), constructorArgs);
 				break;
 
 			default:

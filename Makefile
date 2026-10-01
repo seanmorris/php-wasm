@@ -964,8 +964,8 @@ ${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
 
 ${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
-	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|import\.meta\.url|undefined|g; s|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\(([\x27"])(\..+?)\.mjs\1\)|require($$1$$2.js$$1)|g' ${PHP_DIST_DIR}/$(notdir $@)
 
 ${PHP_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;

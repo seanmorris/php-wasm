@@ -3,8 +3,6 @@ import { _Event } from './_Event.mjs';
 import { fsOps } from './fsOps.mjs';
 import { resolveDependencies } from './resolveDependencies.mjs';
 
-const importMeta = import.meta;
-
 const STR = 'string';
 const NUM = 'number';
 const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
