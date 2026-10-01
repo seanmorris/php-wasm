@@ -148,7 +148,7 @@
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "(Apache-2.0 OR GPL-2.0-only)",
   "engines": {
-    "node": ">=24.5.0"
+    "node": ">=22"
   },
   "contributors": [
     {
