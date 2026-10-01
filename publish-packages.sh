@@ -154,7 +154,23 @@ PACKAGES_TO_PUBLISH=()
 SKIPPED_PACKAGES=()
 
 for PACKAGE in php-wasm-builder "${PACKAGES[@]}"; do
-	DIFF_ARGS=(diff --tag "${NPM_TAG}" --diff-name-only)
+	if [[ "${PACKAGE}" == "php-wasm-builder" ]]; then
+		PACKAGE_NAME="$(jq -r '.name' "${BUILDER_RELEASE_DIR}/builder.manifest.json")"
+		PACKAGE_VERSION="$(jq -r '.version' "${BUILDER_RELEASE_DIR}/builder.manifest.json")"
+	else
+		PACKAGE_NAME="$(jq -r '.name' "packages/${PACKAGE}/package.json")"
+		PACKAGE_VERSION="$(jq -r '.version' "packages/${PACKAGE}/package.json")"
+	fi
+
+	# Registry metadata may be cached for minutes after a publish, so a resumed run
+	# can diff against the previous version. Published versions are immutable.
+	if npm view "${PACKAGE_NAME}@${PACKAGE_VERSION}" version --prefer-online 2>/dev/null | grep -qxF "${PACKAGE_VERSION}"; then
+		SKIPPED_PACKAGES+=("${PACKAGE}")
+		echo -e "\033[33m${PACKAGE_NAME}@${PACKAGE_VERSION}\033[0m is already published; skipping"
+		continue
+	fi
+
+	DIFF_ARGS=(diff --tag "${NPM_TAG}" --diff-name-only --prefer-online)
 	if [[ "${PACKAGE}" == "php-wasm-builder" ]]; then
 		DIFF_ARGS+=(--diff "php-wasm-builder@${NPM_TAG}" --diff "${BUILDER_TARBALL}")
 	else
