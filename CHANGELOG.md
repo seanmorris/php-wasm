@@ -4,6 +4,12 @@ Changes
 
 ## v0.2.0 - Ramifying Sympodia
 
+* Added two runtime packages for PHP 8.0–8.5, neither of which depends on `php-wasm`. `php-sdl-wasm` is a standalone browser runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and OpenGL shader bindings (`import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs'`). `php-cloud-wasm` runs PHP in Cloudflare Workers with Vrzno, zlib/ZIP and PDO-CFD1 for D1 (`import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs'`). See the [SDL guide](packages/php-sdl-wasm/README.md) and the [Cloudflare guide](packages/php-cloud-wasm/README.md).
+
+* **Breaking:** SDL has moved out of `php-wasm`. The package no longer ships the `php8.x_sdl-web.mjs` runtimes; a nonempty `variant` option or `data-variant` script-tag attribute now throws a migration error. Install `php-sdl-wasm` and replace `new PhpWeb({version, variant: '_sdl', ...options})` with `new PhpSdl(options)` from the matching version's entry. This package also replaces the `php-wasm-sdl` extension shim.
+
+* Relicensed from Apache-2.0 to `Apache-2.0 OR GPL-2.0-only`. The dual license covers the build scripts and wrapper code in every package; compiled binaries (PHP and the bundled libraries) remain under their original licenses. Each package ships `LICENSE`, `LICENSE-GPL` and `NOTICE`.
+
 * Added `make clean-packages`, which removes every generated package file while keeping build caches, and `make release-overlay RUN_ID=<id>`, which cleans the packages and overlays the output of a successful Build Artifacts run for the current commit before publishing. `make clean` now also removes stale SDL/Cloudflare runtimes, manifests, compressed sidecars and generated test files.
 
 * Browser CGI in a Service Worker no longer falls back to a synchronous XMLHttpRequest when the Wasm binary fails to load. Service Workers have no XMLHttpRequest, so the fallback replaced the real failure with "XMLHttpRequest is not defined"; startup now reports Emscripten's own load error. Dedicated workers keep the fallback.

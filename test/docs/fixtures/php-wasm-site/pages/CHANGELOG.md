@@ -2,8 +2,8 @@
 title: CHANGELOG
 ---
 <!--
-Vendored from php-wasm-site commit dc3bcf52fa38490eff9f62763fe85ac7e5737155
-Source: https://github.com/seanmorris/php-wasm-site/blob/dc3bcf52fa38490eff9f62763fe85ac7e5737155/pages/CHANGELOG.md
+Vendored from php-wasm-site commit 3ac619717c7d99cb5f989ca6a117663df6c89299
+Source: https://github.com/seanmorris/php-wasm-site/blob/3ac619717c7d99cb5f989ca6a117663df6c89299/pages/CHANGELOG.md
 Validation refs:
 - https://github.com/seanmorris/php-wasm/blob/a8b1c8953c98c72811e0e4dadd1c95af38a94754/test/docs/report.mjs
 -->
@@ -13,6 +13,11 @@ Changes
 
 ## v0.2.0 - Ramifying Sympodia
 
+* Added two runtime packages for PHP 8.0–8.5, neither of which depends on `php-wasm`. `php-sdl-wasm` is a standalone browser runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and OpenGL shader bindings (`import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs'`). `php-cloud-wasm` runs PHP in Cloudflare Workers with Vrzno, zlib/ZIP and PDO-CFD1 for D1 (`import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs'`). See the [SDL guide](/extensions/sdl.html) and the [Cloudflare guide](/getting-started/php-in-cloudflare.html).
+* **Breaking:** SDL has moved out of `php-wasm`. The package no longer ships the `php8.x_sdl-web.mjs` runtimes; a nonempty `variant` option or `data-variant` script-tag attribute now throws a migration error. Install `php-sdl-wasm` and replace `new PhpWeb({version, variant: '_sdl', ...options})` with `new PhpSdl(options)` from the matching version's entry. This package also replaces the `php-wasm-sdl` extension shim.
+* Relicensed from Apache-2.0 to `Apache-2.0 OR GPL-2.0-only`. The dual license covers the build scripts and wrapper code in every package; compiled binaries (PHP and the bundled libraries) remain under their original licenses. Each package ships `LICENSE`, `LICENSE-GPL` and `NOTICE`.
+* Added `make clean-packages`, which removes every generated package file while keeping build caches, and `make release-overlay RUN_ID=<id>`, which cleans the packages and overlays the output of a successful Build Artifacts run for the current commit before publishing. `make clean` now also removes stale SDL/Cloudflare runtimes, manifests, compressed sidecars and generated test files.
+* Browser CGI in a Service Worker no longer falls back to a synchronous XMLHttpRequest when the Wasm binary fails to load. Service Workers have no XMLHttpRequest, so the fallback replaced the real failure with "XMLHttpRequest is not defined"; startup now reports Emscripten's own load error. Dedicated workers keep the fallback.
 * Expanded Bun testing to the shared Node/Deno suites, including extensions, documentation, packaging, CLI PHPT cases, CGI HTTP/cookies, and CommonJS/debugger coverage. CI now checks Bun 1.4.0 across PHP 8.0–8.5, all three library profiles, and raw/compressed artifacts, with fast wrapper and build-helper checks before native builds.
 * Fixed embedded-editor highlighting and false EOF diagnostics for indented PHP heredoc/nowdoc endings followed by expressions. Ace syntax validation remains enabled, including errors after the string.
 * Fixed closed SDL_mixer cleanup replacing the existing error and retaining a stale audio format. Decoder initialization after shutdown no longer recreates decoder lists; repeated PHP refresh stays at zero SDL allocations, and reopening supports a different audio format.
