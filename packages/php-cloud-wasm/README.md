@@ -16,7 +16,7 @@ import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs';
 export default {
   async fetch(request, env) {
     const php = new PhpCloudflare({ cfd1: { mainDb: env.DB } });
-    const version = await php.exec('return PHP_VERSION;');
+    const version = await php.exec('PHP_VERSION');
     return new Response(String(version));
   }
 };
