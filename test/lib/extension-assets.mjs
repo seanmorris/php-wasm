@@ -5,7 +5,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 const extensionNamePattern = /^php\d+\.\d+-/;
 
 const packageRoots = {
-	dom: path.join(repoRoot, 'packages/dom')
+	curl: path.join(repoRoot, 'packages/curl')
+	, dom: path.join(repoRoot, 'packages/dom')
 	, gd: path.join(repoRoot, 'packages/gd')
 	, iconv: path.join(repoRoot, 'packages/iconv')
 	, intl: path.join(repoRoot, 'packages/intl')
@@ -95,6 +96,9 @@ const packageFactories = {
 			, libDef('openssl', 'libssl.so')
 			, libDef('openssl', 'libcrypto.so')
 		]
+	})
+	, curl: phpVersion => ({
+		getLibs: () => [libDef('curl', versionedExtension(phpVersion, 'curl'), true)]
 	})
 	, phar: phpVersion => ({
 		getLibs: () => [libDef('phar', versionedExtension(phpVersion, 'phar'), true)]

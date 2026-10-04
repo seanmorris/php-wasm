@@ -44,6 +44,7 @@
     "php-cloud-wasm": "./packages/php-cloud-wasm",
     "php-dbg-wasm": "./packages/php-dbg-wasm",
     "php-wasm": "./packages/php-wasm",
+    "php-wasm-curl": "./packages/curl",
     "php-wasm-dom": "./packages/dom",
     "php-wasm-gd": "./packages/gd",
     "php-wasm-iconv": "./packages/iconv",
@@ -66,6 +67,7 @@
     "waitline": "./packages/waitline"
   },
   "workspaces": [
+    "packages/curl",
     "packages/dom",
     "packages/gd",
     "packages/iconv",

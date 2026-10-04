@@ -85,6 +85,7 @@ const packageSpecifierAliases = new Map([
 	, ['php-cgi-wasm', '/packages/php-cgi-wasm']
 	, ['php-cli-wasm', '/packages/php-cli-wasm']
 	, ['php-dbg-wasm', '/packages/php-dbg-wasm']
+	, ['php-wasm-curl', '/packages/curl']
 	, ['php-wasm-dom', '/packages/dom']
 	, ['php-wasm-gd', '/packages/gd']
 	, ['php-wasm-iconv', '/packages/iconv']
@@ -102,7 +103,8 @@ const packageSpecifierAliases = new Map([
 ]);
 
 const packageIndexSpecifiers = new Set([
-	'php-wasm-dom'
+	'php-wasm-curl'
+	, 'php-wasm-dom'
 	, 'php-wasm-gd'
 	, 'php-wasm-iconv'
 	, 'php-wasm-intl'
@@ -235,6 +237,18 @@ const server = http.createServer((req, res) => {
 		if(release) release();
 		else releasedGates.add(token);
 		send(res, 200, 'released');
+		return;
+	}
+
+	if(url.pathname === `${basePath}/curl-echo`)
+	{
+		const chunks = [];
+		req.on('data', chunk => chunks.push(chunk));
+		req.on('end', () => send(res, 200, JSON.stringify({
+			method: req.method
+			, headers: req.headers
+			, body: Buffer.concat(chunks).toString('utf8')
+		}), {'content-type': 'application/json; charset=utf-8', 'x-echo': 'yes'}));
 		return;
 	}
 

@@ -1046,6 +1046,7 @@ const extensionsByFlag = {
 	, WITH_OPENSSL: ['openssl']
 	, WITH_INTL: ['intl']
 	, WITH_PHAR: ['Phar']
+	, WITH_CURL: ['curl']
 };
 
 test('embedded demo loads the selected extensions', async ({ page }) => {
