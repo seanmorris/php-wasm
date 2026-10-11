@@ -71,6 +71,10 @@ export default createWorker(PhpCloudflare, factory, wasm);
 		, d1Databases: { DB: 'cloudflare-test-main', SECOND_DB: 'cloudflare-test-second' }
 		, d1Persist: false
 		, outboundService(request) {
+			if(request.url === 'https://curl.fixture.invalid/echo')
+			{
+				return request.text().then(body => Response.json({method: request.method, body}));
+			}
 			if(request.url === 'https://archive.fixture.invalid/example.zip')
 			{
 				return new Response(archive, { headers: { 'content-type': 'application/zip' } });
@@ -125,6 +129,11 @@ test('final static artifact initializes embedded PHP with its required extension
 
 test('Vrzno asynchronous calls, PHP callbacks and PHP eval work without JS eval', { timeout }, async () => {
 	assert.deepEqual(JSON.parse((await request('bridge')).stdout), [42, 42, 42]);
+});
+
+test('static curl performs HTTP requests under the strict Worker engine policy', {timeout}, async () => {
+	const result = await request('curl');
+	assert.deepEqual(JSON.parse(result.stdout), [true, 200, {method: 'POST', body: 'cloud-curl'}, 0]);
 });
 
 test('original synchronous raw-exports instantiation hook preserves Asyncify rewind', { timeout }, async () => {
@@ -243,7 +252,14 @@ test('D1 exec, quoting and insert IDs work without parameter binding', { timeout
 
 test('D1 unsafe insert IDs report getter errors without failing committed writes or batches', { timeout }, async () => {
 	assert.deepEqual(await d1('insert-id-safety'), [
-		1, false, '22003', '9007199254740993', true, false, '22003', '9007199254740995'
+		1
+		, false
+		, '22003'
+		, '9007199254740993'
+		, true
+		, false
+		, '22003'
+		, '9007199254740995'
 	]);
 });
 
@@ -254,7 +270,8 @@ test('D1 BLOB strings, streams, empty values and NUL text round-trip without byt
 		, ['', '6265666f7265006166746572', 'blob']
 		, [null, '6265666f7265006166746572', 'null']
 		, ['0080ff27414200', null, 'blob']
-	], 0, true]);
+	]
+	, 0, true]);
 });
 
 test('D1 buffered cursors, metadata, bound columns and PDO attributes preserve normal fetch behavior', { timeout }, async () => {
@@ -269,14 +286,25 @@ test('D1 atomic batches populate PDO statements and leave execute arrays availab
 	assert.deepEqual(await d1('batch'), [
 		true, { name: 'alpha', amount: 7, payload: '0080ff' }, 1, '1'
 		, true, { name: 'beta', amount: 9, payload: '0080ff' }
-		, { name: 'ordinary', amount: 11, payload: null }, 'alpha', true, 'alpha', true, false
+		, { name: 'ordinary', amount: 11, payload: null }
+		, 'alpha'
+		, true
+		, 'alpha'
+		, true
+		, false
 	]);
 });
 
 test('D1 batch rollback, preflight rejection and error modes leave no partial or stale results', { timeout }, async () => {
 	assert.deepEqual(await d1('batch-errors'), [
 		false, 'HY000', [0, false, false, '1'], false, 'HY093'
-		, [false, false, false, false], ['before'], false, [true], ['HY093', 'HY093'], true, 42
+		, [false, false, false, false]
+		, ['before']
+		, false
+		, [true]
+		, ['HY093', 'HY093']
+		, true
+		, 42
 	]);
 });
 

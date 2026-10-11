@@ -1,7 +1,8 @@
 # php-cloud-wasm
 
 Embedded PHP 8.0–8.5 for Cloudflare Workers, with statically linked Vrzno,
-ordinary ZIP/deflate, zlib and PDO-CFD1 with native parameters and atomic batches.
+Fetch-backed curl, ordinary ZIP/deflate, zlib and PDO-CFD1 with native parameters
+and atomic batches. Curl is available at startup and supports Guzzle's curl handlers.
 This package is independent of the browser/Node `php-wasm` package.
 
 Vrzno requires `WeakRef` and `FinalizationRegistry`. Use compatibility date

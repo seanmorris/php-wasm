@@ -404,6 +404,7 @@ const php = new PhpWeb({ini: `
 
 The following extensions may be loaded at runtime. This allows the shared extensions and their dependencies to be cached, reused, and selected a la carte for each application.
 
+* curl ([Fetch-backed HTTP, Guzzle, and browser limits](packages/curl/README.md))
 * gd (https://www.npmjs.com/package/php-wasm-gd)
 * iconv  (https://www.npmjs.com/package/php-wasm-iconv)
 * intl (https://www.npmjs.com/package/php-wasm-intl)
@@ -1100,6 +1101,7 @@ The following extensions may be compiled as static, shared, or dynamic:
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
+WITH_CURL      # [0, 1, static, dynamic] Defaults to dynamic
 WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]

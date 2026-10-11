@@ -15,6 +15,7 @@
     "clean": "make clean",
     "lint": "eslint source/ packages/ test/",
     "lint:fix": "eslint source/ packages/ test/ --fix",
+    "pretest:browser": "composer install --working-dir=test/fixtures/curl --no-interaction --no-progress --prefer-dist",
     "test:browser": "playwright test -c playwright.config.mjs",
     "tsc": "tsc -p jsconfig.json --noEmit",
     "test": "make test",

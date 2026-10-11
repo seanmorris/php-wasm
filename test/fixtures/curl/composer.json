@@ -1,0 +1,15 @@
+{
+    "name": "php-wasm-curl/guzzle-tests",
+    "description": "Guzzle integration tests for the fetch-backed libcurl implementation",
+    "type": "project",
+    "license": "(Apache-2.0 OR GPL-2.0-only)",
+    "require": {
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "config": {
+        "allow-plugins": false,
+        "platform": {
+            "php": "8.0.30"
+        }
+    }
+}

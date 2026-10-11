@@ -7,7 +7,6 @@
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "(Apache-2.0 OR GPL-2.0-only)",
-  "private": true,
   "version": "0.2.0",
   "main": "index.mjs",
   "types": "index.d.ts",
@@ -22,6 +21,8 @@
     "static.mak",
     "import-source.mjs",
     "*.so",
-    "LICENSE-GPL"
+    "LICENSE-GPL",
+    "LICENSE-PHP",
+    "COPYING.curl"
   ]
 }

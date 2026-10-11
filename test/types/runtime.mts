@@ -32,6 +32,10 @@ new PhpCgiBase(Promise.resolve(syncFactory));
 const signedHeap: PhpBinaryRuntime = { HEAPU8: new Int8Array(8) };
 
 const embedded = new PhpNode({ version: '8.5', persist: false, shared: { callback() {} } });
+new PhpWeb({libcurlFetchOptions: {credentials: 'include'}});
+new PhpCgiNode({libcurlFetchOptions: {credentials: 'omit'}});
+// @ts-expect-error Fetch credential policies must be spelled exactly.
+new PhpWeb({libcurlFetchOptions: {credentials: 'always'}});
 const status: Promise<number> = embedded.run('<?php echo 1;');
 const publicInstance: PublicBase = embedded;
 const refreshed: Promise<number> = embedded.refresh();

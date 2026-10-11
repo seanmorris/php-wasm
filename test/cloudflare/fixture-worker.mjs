@@ -76,6 +76,12 @@ export function createWorker(PhpCloudflare, factory, wasm)
 				let code;
 				switch(input.case)
 				{
+					case 'curl':
+						code = `$ch = curl_init('https://curl.fixture.invalid/echo');
+							curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_POSTFIELDS => 'cloud-curl']);
+							$body = curl_exec($ch);
+							echo json_encode([extension_loaded('curl'), curl_getinfo($ch, CURLINFO_HTTP_CODE), json_decode($body, true), curl_errno($ch)]);`;
+						break;
 					case 'd1-features':
 						// PHP supplied only by the local regression harness.
 						code = input.code;

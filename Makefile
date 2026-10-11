@@ -1388,8 +1388,21 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} deno test $(addprefix ./,${ESM_TEST_FILES}) --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
 
+# The pinned Guzzle fixture runs against the same binaries as the other package
+# tests, in Node, Deno, Bun, and the browser. Composer runs only after lock changes.
+.PHONY: curl-test-deps
+curl-test-deps: test/fixtures/curl/vendor/autoload.php
+
+test/fixtures/curl/vendor/autoload.php: test/fixtures/curl/composer.json test/fixtures/curl/composer.lock
+	composer install --working-dir=test/fixtures/curl --no-interaction --no-progress --prefer-dist
+	@touch $@
+
+ifneq ($(filter ${WITH_CURL},dynamic static),)
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-browser update-snapshots: curl-test-deps
+endif
+
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} WITH_CURL=${WITH_CURL} test/browser-test.sh
 
 DEMO_WEB_PHP_VERSION ?= 8.4
 

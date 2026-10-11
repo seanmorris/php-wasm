@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import {curlFixture} from '../lib/curl-server.mjs';
 
 const repoRoot = process.cwd();
 const basePath = '/php-wasm';
@@ -69,6 +70,10 @@ const mounts = [
 	, {
 		prefix: `${basePath}/harness/`
 		, root: path.resolve(repoRoot, 'test/browser/harness')
+	}
+	, {
+		prefix: '/packages/php-wasm/'
+		, root: path.resolve(repoRoot, process.env.PHP_WASM_ARTIFACT_ROOT ?? 'packages/php-wasm')
 	}
 	, {
 		prefix: '/packages/'
@@ -228,6 +233,7 @@ const resolveMountedFile = pathname => {
 };
 
 const server = http.createServer((req, res) => {
+	if(curlFixture(req, res)) return;
 	const url = new URL(req.url ?? '/', 'http://127.0.0.1');
 	const token = url.searchParams.get('token');
 
