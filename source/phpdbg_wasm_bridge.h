@@ -23,8 +23,10 @@ EM_ASYNC_JS(int, phpdbg_wasm_checkpoint_js, (void), {
     if (Module.dbgPauseRequested) { Module.dbgPauseRequested = false; return 1; }
     return 0;
 });
-/* Other translation units call a C function, not EM_ASYNC_JS's import alias. */
-int phpdbg_wasm_checkpoint(void) { return phpdbg_wasm_checkpoint_js(); }
+EM_JS(int, phpdbg_wasm_checkpoint_enabled, (void), { return !!Module['dbgYieldInterval']; });
+/* Other translation units call C, not EM_ASYNC_JS's import alias. Legacy callers
+ * do not enter Asyncify at all unless cooperative execution is requested. */
+int phpdbg_wasm_checkpoint(void) { return phpdbg_wasm_checkpoint_enabled() ? phpdbg_wasm_checkpoint_js() : 0; }
 
 EM_JS(void, phpdbg_wasm_output, (int type, int fd, const char *text, int length, int evaluating), {
     if (Module['onDbgOutput']) Module['onDbgOutput']({type, fd, bytes: HEAPU8.slice(text, text + length), evaluating: !!evaluating});
