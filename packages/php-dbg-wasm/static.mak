@@ -14,10 +14,10 @@ NOTPARALLEL+=\
 	webview-dbg-js \
 	node-dbg-js
 
-WEB_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgWeb.mjs php${PHP_SUFFIX}-dbg-web.mjs ${MJS_HELPERS_WEB})
-WEB_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWeb.js php${PHP_SUFFIX}-dbg-web.js ${CJS_HELPERS_WEB})
-WORKER_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWorker.mjs php${PHP_SUFFIX}-dbg-worker.mjs ${MJS_HELPERS_WEB})
-WORKER_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWorker.js php${PHP_SUFFIX}-dbg-worker.js ${CJS_HELPERS_WEB})
+WEB_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgWebBase.mjs PhpDbgWeb.mjs php${PHP_SUFFIX}-dbg-web.mjs ${MJS_HELPERS_WEB})
+WEB_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWebBase.js PhpDbgWeb.js php${PHP_SUFFIX}-dbg-web.js ${CJS_HELPERS_WEB})
+WORKER_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgWebBase.mjs PhpDbgWorker.mjs php${PHP_SUFFIX}-dbg-worker.mjs ${MJS_HELPERS_WEB})
+WORKER_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWebBase.js PhpDbgWorker.js php${PHP_SUFFIX}-dbg-worker.js ${CJS_HELPERS_WEB})
 WEBVIEW_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpDbgWebview.mjs php${PHP_SUFFIX}-dbg-webview.mjs ${MJS_HELPERS_WEB})
 WEBVIEW_DBG_JS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.js PhpDbgWebview.js php${PHP_SUFFIX}-dbg-webview.js ${CJS_HELPERS_WEB})
 NODE_DBG_MJS=$(addprefix ${PHP_DBG_DIST_DIR}/,PhpBase.mjs PhpDbgNode.mjs php${PHP_SUFFIX}-dbg-node.mjs ${MJS_HELPERS_WEB})
@@ -107,8 +107,8 @@ dbg: dbg-all
 dbg-all:
 	$(MAKE) web-dbg-mjs
 	$(MAKE) web-dbg-js
-#	$(MAKE) worker-dbg-mjs
-#	$(MAKE) worker-dbg-js
+	$(MAKE) worker-dbg-mjs
+	$(MAKE) worker-dbg-js
 #	$(MAKE) webview-dbg-mjs
 #	$(MAKE) webview-dbg-js
 #	$(MAKE) node-dbg-mjs
@@ -116,19 +116,25 @@ dbg-all:
 
 dbg-mjs:
 	$(MAKE) web-dbg-mjs
-#	$(MAKE) worker-dbg-mjs
+	$(MAKE) worker-dbg-mjs
 #	$(MAKE) webview-dbg-mjs
 #	$(MAKE) node-dbg-mjs
 
 dbg-cjs:
 	$(MAKE) web-dbg-js
-#	$(MAKE) worker-dbg-js
+	$(MAKE) worker-dbg-js
 #	$(MAKE) webview-dbg-js
 #	$(MAKE) node-dbg-js
 
 ifneq (${PRE_JS_FILES},)
 DBG_DEPENDENCIES+= ${PRE_JS_CACHE}
 endif
+
+DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/phpdbg-bridge
+
+third_party/php${PHP_VERSION}-src/phpdbg-bridge: third_party/php${PHP_VERSION}-src/patched bin/patch-phpdbg.mjs source/phpdbg_wasm_bridge.h
+	${DOCKER_RUN} node bin/patch-phpdbg.mjs third_party/php${PHP_VERSION}-src
+	${DOCKER_RUN} touch $@
 
 DBG_DEPENDENCIES+= third_party/php${PHP_VERSION}-src/configured ${PHP_LINK_DEPS}
 
@@ -143,7 +149,7 @@ ${PHP_DBG_DIST_DIR}/%.mjs: source/%.mjs
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ENVIRONMENT=web
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: FS_TYPE=${WEB_FS_TYPE}
-${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ${DBG_DEPENDENCIES} bin/dbg-assets.mjs | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php${PHP_SUFFIX}-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -154,6 +160,8 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js: ${DBG_DEPENDENCIES} | ${ORDER_O
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
+	node bin/dbg-assets.mjs $@
+	@if [ "${PHP_DBG_DIST_DIR}" != "${PHP_DBG_ASSET_DIR}" ]; then cp $@.assets.json ${PHP_DBG_ASSET_DIR}/; fi
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/dbg/php${PHP_SUFFIX}-dbg-web.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -161,7 +169,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.js.wasm.map.MAPPED: ${PHP_DBG_DIST_
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: ENVIRONMENT=web
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: FS_TYPE=${WEB_FS_TYPE}
-${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: ${DBG_DEPENDENCIES} bin/dbg-assets.mjs | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php${PHP_SUFFIX}-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -173,6 +181,8 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs: ${DBG_DEPENDENCIES} | ${ORDER_
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE} ${PHP_DBG_ASSET_DIR}
+	node bin/dbg-assets.mjs $@
+	@if [ "${PHP_DBG_DIST_DIR}" != "${PHP_DBG_ASSET_DIR}" ]; then cp $@.assets.json ${PHP_DBG_ASSET_DIR}/; fi
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/dbg/php${PHP_SUFFIX}-dbg-web.mjs.wasm.map ${PHP_DBG_DIST_DIR}
@@ -180,7 +190,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-web.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: BUILD_TYPE=js
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: ENVIRONMENT=worker
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: FS_TYPE=${WORKER_FS_TYPE}
-${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: ${DBG_DEPENDENCIES} bin/dbg-assets.mjs | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php${PHP_SUFFIX}-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -191,6 +201,8 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js: ${DBG_DEPENDENCIES} | ${ORDE
 	perl -pi -w -e 's|require("fs")|require(/* webpackIgnore: true */ "fs")|g' $@
 	node bin/transform-logical-assignments.mjs $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
+	node bin/dbg-assets.mjs $@
+	@if [ "${PHP_DBG_DIST_DIR}" != "${PHP_DBG_ASSET_DIR}" ]; then cp $@.assets.json ${PHP_DBG_ASSET_DIR}/; fi
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/dbg/php${PHP_SUFFIX}-dbg-worker.js.wasm.map ${PHP_DBG_DIST_DIR}
@@ -198,7 +210,7 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.js.wasm.map.MAPPED: ${PHP_DBG_DI
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: BUILD_TYPE=mjs
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: ENVIRONMENT=worker
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: FS_TYPE=${WORKER_FS_TYPE}
-${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORDER_ONLY}
+${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: ${DBG_DEPENDENCIES} bin/dbg-assets.mjs | ${ORDER_ONLY}
 	@ echo -e "\e[33;4mBuilding php${PHP_SUFFIX}-dbg for ${ENVIRONMENT} {${BUILD_TYPE}}\e[0m"
 	${DOCKER_RUN_IN_PHP} emmake make phpdbg install-phpdbg install-build install-programs install-headers ${BUILD_FLAGS} PHP_BINARIES=phpdbg WASM_SHARED_LIBS="$(addprefix /src/,${SHARED_LIBS})"
 	${DOCKER_RUN_IN_PHP} mv -f \
@@ -210,6 +222,8 @@ ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs: ${DBG_DEPENDENCIES} | ${ORD
 	perl -pi -w -e 's|var _script(Dir\|Name) = import.meta.url;|const importMeta = import.meta;var _script\1 = importMeta.url;|g' $@
 	perl -pi -w -e 's|REMOTE_PACKAGE_BASE="(.+?)"|REMOTE_PACKAGE_BASE=new URL("\1", import.meta.url).href|g' $@
 	- cp -Lprf ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-${ENVIRONMENT}.${BUILD_TYPE}.* ${PHP_DBG_ASSET_DIR}
+	node bin/dbg-assets.mjs $@
+	@if [ "${PHP_DBG_DIST_DIR}" != "${PHP_DBG_ASSET_DIR}" ]; then cp $@.assets.json ${PHP_DBG_ASSET_DIR}/; fi
 
 ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs.wasm.map.MAPPED: ${PHP_DBG_DIST_DIR}/php${PHP_SUFFIX}-dbg-worker.mjs
 	${DOCKER_RUN} ./remap-sourcemap.sh third_party/php${PHP_VERSION}-src/sapi/dbg/php${PHP_SUFFIX}-dbg-worker.mjs.wasm.map ${PHP_DBG_DIST_DIR}

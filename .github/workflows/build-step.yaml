@@ -121,6 +121,9 @@ jobs:
       - name: Build PHP DBG for Web
         run: time make --debug=basic web-dbg-mjs web-dbg-js
 
+      - name: Build PHP DBG for Worker
+        run: time make --debug=basic worker-dbg-mjs worker-dbg-js
+
       - name: Stage every declared runtime wrapper
         run: make --debug=basic runtime-wrappers
 

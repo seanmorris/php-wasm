@@ -48,6 +48,8 @@ jobs:
           MAKEFLAGS: '--debug=basic -- PHP_VERSION=8.3 LIB_TYPE=shared'
           WITH_GD: shared
         run: bun test --timeout 180000 ./test/builder-worktree.test.mjs ./test/preload-assets.test.mjs ./test/download-retry.test.mjs ./test/cgi-builder-workflow.test.mjs
+      - name: Verify debugger worker bridge and asset metadata
+        run: node --test test/build/dbg-worker.test.mjs
       - name: Verify packaged builder helpers
         run: node --test test/build/builder-tools-packaging.test.mjs
       - name: Verify Cloudflare wrapper, profile, artifact and D1 regressions

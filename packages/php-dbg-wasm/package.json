@@ -82,6 +82,45 @@
     "./public": {
       "types": "./public.d.ts",
       "default": "./public.d.ts"
+    },
+    "./*.assets.json": "./*.assets.json",
+    "./PhpDbgWebBase": {
+      "import": {
+        "types": "./PhpDbgWebBase.d.mts",
+        "default": "./PhpDbgWebBase.mjs"
+      },
+      "require": {
+        "types": "./PhpDbgWebBase.d.cts",
+        "default": "./PhpDbgWebBase.js"
+      },
+      "default": "./PhpDbgWebBase.mjs"
+    },
+    "./PhpDbgWebBase.mjs": {
+      "types": "./PhpDbgWebBase.d.mts",
+      "default": "./PhpDbgWebBase.mjs"
+    },
+    "./PhpDbgWebBase.js": {
+      "types": "./PhpDbgWebBase.d.cts",
+      "default": "./PhpDbgWebBase.js"
+    },
+    "./PhpDbgWorker": {
+      "import": {
+        "types": "./PhpDbgWorker.d.mts",
+        "default": "./PhpDbgWorker.mjs"
+      },
+      "require": {
+        "types": "./PhpDbgWorker.d.cts",
+        "default": "./PhpDbgWorker.js"
+      },
+      "default": "./PhpDbgWorker.mjs"
+    },
+    "./PhpDbgWorker.mjs": {
+      "types": "./PhpDbgWorker.d.mts",
+      "default": "./PhpDbgWorker.mjs"
+    },
+    "./PhpDbgWorker.js": {
+      "types": "./PhpDbgWorker.d.cts",
+      "default": "./PhpDbgWorker.js"
     }
   },
   "repository": {
@@ -122,6 +161,7 @@
     "package.json",
     "*.d.ts",
     "*.d.cts",
-    "LICENSE-GPL"
+    "LICENSE-GPL",
+    "*.assets.json"
   ]
 }
