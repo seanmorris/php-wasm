@@ -47,3 +47,27 @@ test('native debugger instrumentation is repeatable and fails on an unknown sour
 }
 	assert.throws(() => instrumentSource('phpdbg_prompt.c', 'unknown'), /Unsupported/);
 });
+
+test('release compression preserves debugger manifest references and binary integrity', async t => {
+	const {writeDbgManifest} = await import('../../bin/dbg-assets.mjs');
+	const {execFileSync} = await import('node:child_process');
+	const {createHash} = await import('node:crypto');
+	const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'dbg-compress-'));
+	t.after(() => fs.rm(directory, {recursive: true, force: true}));
+	const bytes = new Uint8Array([0,97,115,109,1,0,0,0]);
+	for(const environment of ['web','worker'])
+	{
+		const loader = `php8.4-dbg-${environment}.mjs`;
+		await fs.writeFile(path.join(directory, loader), `const wasm = '${loader}.wasm';`);
+		await fs.writeFile(path.join(directory, loader + '.wasm'), bytes);
+		await writeDbgManifest(path.join(directory, loader));
+	}
+	execFileSync('bash', [path.resolve('compress-package.sh'), directory], {stdio: 'pipe'});
+	for(const environment of ['web','worker'])
+	{
+		const manifest = JSON.parse(await fs.readFile(path.join(directory, `php8.4-dbg-${environment}.mjs.assets.json`)));
+		const binary = await fs.readFile(path.join(directory, manifest.wasm));
+		assert.equal(createHash('sha256').update(binary).digest('hex'), manifest.sha256);
+		assert.match(manifest.wasm, /^[a-f0-9]{40}\.wasm$/);
+	}
+});
