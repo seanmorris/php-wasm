@@ -3,14 +3,17 @@
 #define PHPDBG_WASM_BRIDGE_H
 #include <emscripten.h>
 #include "phpdbg_out.h"
+#include "Zend/zend_exceptions.h"
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 int phpdbg_wasm_checkpoint(void);
+int phpdbg_wasm_managed_shutdown(void);
 void phpdbg_wasm_output(int type, int fd, const char *text, int length, int evaluating);
 void phpdbg_wasm_event(const char *type, const char *name, const char *message, const char *file, int line, int status);
 
 #ifdef PHPDBG_WASM_BRIDGE_IMPL
 EMSCRIPTEN_KEEPALIVE int php_wasm_dbg_bridge_version(void) { return 1; }
 EMSCRIPTEN_KEEPALIVE int php_wasm_dbg_has_context(void) { return PHPDBG_G(ops) != NULL; }
+EM_JS(int, phpdbg_wasm_managed_shutdown, (void), { return !!Module['dbgManagedShutdown'] && !Module.dbgStopRequested; });
 
 EM_ASYNC_JS(int, phpdbg_wasm_checkpoint_js, (void), {
     if (!Module['dbgYieldInterval']) return 0;

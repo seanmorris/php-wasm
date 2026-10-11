@@ -4,11 +4,11 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const block = (name, text) => `/* phpdbg_wasm_bridge:${name} */\n${text}\n/* /phpdbg_wasm_bridge:${name} */`;
-function insert(source, name, anchor, text) {
+function insert(source, name, anchor, text, before = false) {
 	const pattern = new RegExp(`/\\* phpdbg_wasm_bridge:${name} \\*/[\\s\\S]*?/\\* /phpdbg_wasm_bridge:${name} \\*/`);
 	if(pattern.test(source)) return source.replace(pattern, () => block(name, text));
 	if(!source.includes(anchor)) throw new Error(`Unsupported phpdbg source layout: ${name}`);
-	return source.replace(anchor, anchor + '\n' + block(name, text));
+	return source.replace(anchor, before ? block(name, text) + '\n' + anchor : anchor + '\n' + block(name, text));
 }
 
 export function instrumentSource(name, source) {
@@ -18,6 +18,14 @@ export function instrumentSource(name, source) {
 	// Include after the phpdbg headers, where PHPDBG_G is defined.
 	const anchor = name === 'phpdbg_out.c' ? '#include "phpdbg_io.h"' : '#include "phpdbg.h"';
 	source = insert(source, 'include', anchor, include);
+	if(name === 'phpdbg.c') {
+		// phpdbg normally discards shutdown callbacks when it cleans the request.
+		// An embedded single-run session needs PHP's complete request lifecycle.
+		source = insert(source, 'shutdown-start', '\t\tif ((PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING)) == PHPDBG_IS_CLEANING) {',
+			'\t\tvolatile uint64_t wasm_shutdown_flags = PHPDBG_G(flags);\n\t\tvolatile int wasm_managed_shutdown = phpdbg_wasm_managed_shutdown() && (PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING | PHPDBG_IS_QUITTING)) == PHPDBG_IS_CLEANING;\n\t\tif (wasm_managed_shutdown) {\n\t\t\tPHPDBG_G(flags) &= ~PHPDBG_IS_STOPPING;\n\t\t\tPHPDBG_G(flags) |= PHPDBG_IS_RUNNING;\n\t\t\tif (EG(exception) && zend_is_unwind_exit(EG(exception))) zend_exception_error(EG(exception), E_ERROR);\n\t\t}', true);
+		source = insert(source, 'shutdown-end', '\t\t\tphp_request_shutdown(NULL);\n\t\t} zend_end_try();',
+			'\t\tif (wasm_managed_shutdown) PHPDBG_G(flags) = wasm_shutdown_flags | (PHPDBG_G(flags) & PHPDBG_IS_QUITTING);');
+	}
 	if(name === 'phpdbg_out.c') {
 		source = insert(source, 'output', source.match(/(?:static )?int phpdbg_process_print\([^\n]+\) \{/)?.[0] ?? '__missing_output_signature__',
 			'\tif (msg && msglen > 0) phpdbg_wasm_output(type == P_STDOUT ? 1 : type == P_STDERR ? 2 : type == P_ERROR ? 3 : 0, fd, msg, msglen, !!(PHPDBG_G(flags) & PHPDBG_IN_EVAL));');

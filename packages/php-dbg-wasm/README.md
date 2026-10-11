@@ -65,7 +65,11 @@ through `onDbgOutput({type,fd,bytes,evaluating})`, reports exception metadata th
 `onDbgEvent`, and allows cooperative pause/stop with `dbgYieldInterval`,
 `dbgPauseRequested`, and `dbgStopRequested`. Bridge version 1 is exposed as
 `php_wasm_dbg_bridge_version`. Existing callers retain their console output and
-do not enable cooperative yielding unless they request it.
+do not enable cooperative yielding unless they request it. Set
+`dbgManagedShutdown:true` for embedded single-run sessions to execute registered
+shutdown functions, object destructors, and output handlers during request cleanup.
+This is opt-in because standalone phpdbg normally discards those callbacks when
+resetting a debugging session.
 
 For a controller, styleable GUI, editor adapters, variable editing, structured
 results, and shared downloads, use
