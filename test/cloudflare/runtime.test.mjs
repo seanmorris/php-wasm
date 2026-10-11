@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { after, before, test } from 'node:test';
+import {createHash} from 'node:crypto';
 import { readArtifact } from './artifacts.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
@@ -71,6 +72,15 @@ export default createWorker(PhpCloudflare, factory, wasm);
 		, d1Databases: { DB: 'cloudflare-test-main', SECOND_DB: 'cloudflare-test-second' }
 		, d1Persist: false
 		, outboundService(request) {
+			if(request.url === 'https://curl.fixture.invalid/digest')
+			{
+				const fields = Object.fromEntries([...(request.headers.get('authorization') || '').matchAll(/(\w+)=(?:"([^"]*)"|([^,\s]+))/g)].map(match => [match[1], match[2] ?? match[3]]));
+				const hash = text => createHash('sha256').update(text).digest('hex');
+				const expected = hash(`${hash('user:cloud:secret')}:nonce:${fields.nc}:${fields.cnonce}:auth:${hash('GET:/digest')}`);
+				return fields.response === expected && fields.username === 'user' && fields.uri === '/digest'
+					? new Response('cloud-digest')
+					: new Response('challenge', {status: 401, headers: {'WWW-Authenticate': 'Digest realm="cloud", nonce="nonce", algorithm=SHA-256, qop="auth"'}});
+			}
 			if(request.url === 'https://curl.fixture.invalid/echo')
 			{
 				return request.text().then(body => Response.json({method: request.method, body}));
@@ -133,7 +143,7 @@ test('Vrzno asynchronous calls, PHP callbacks and PHP eval work without JS eval'
 
 test('static curl performs HTTP requests under the strict Worker engine policy', {timeout}, async () => {
 	const result = await request('curl');
-	assert.deepEqual(JSON.parse(result.stdout), [true, 200, {method: 'POST', body: 'cloud-curl'}, 0]);
+	assert.deepEqual(JSON.parse(result.stdout), [true, 200, {method: 'POST', body: 'cloud-curl'}, 0, 'cloud-digest']);
 });
 
 test('original synchronous raw-exports instantiation hook preserves Asyncify rewind', { timeout }, async () => {

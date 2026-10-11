@@ -6,15 +6,15 @@ const variant = process.env.PHP_VARIANT ?? '';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
 const curlMode = process.env.WITH_CURL ?? (libType === 'static' ? 'static' : 'dynamic');
 
-test.skip(curlMode === '0' || variant === '_sdl', 'curl is disabled in this runtime');
+test.skip(curlMode === '0', 'curl is disabled in this runtime');
 
 test('curl requests go through fetch and obey the browser origin rules', async ({page}) => {
 	await page.goto('harness/index.html');
-	const result = await page.evaluate(async ({version, curlMode, libType}) => {
+	const result = await page.evaluate(async ({version, variant, curlMode, libType}) => {
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		const curl = await import('/packages/curl/index.mjs');
-		const php = await createEmbeddedRuntime(version, '', {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])]});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])]});
 		let stdout = '', stderr = '';
 		php.addEventListener('output', event => stdout += event.detail.join(''));
 		php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -43,7 +43,7 @@ test('curl requests go through fetch and obey the browser origin rules', async (
 			]);
 		`);
 		return {status, stdout, stderr};
-	}, {version, curlMode, libType});
+	}, {version, variant, curlMode, libType});
 
 	expect(result.stderr).toBe('');
 	expect(result.status).toBe(0);
@@ -85,11 +85,11 @@ async function run(page, source, {credentials = 'same-origin', vendor = false} =
 	}
 	if(vendor) await collect('test/fixtures/curl/vendor', '/guzzle-vendor');
 	await page.goto('harness/index.html');
-	return page.evaluate(async ({version, curlMode, libType, source, credentials, files}) => {
+	return page.evaluate(async ({version, variant, curlMode, libType, source, credentials, files}) => {
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		const curl = await import('/packages/curl/index.mjs');
-		const php = await createEmbeddedRuntime(version, '', {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])], libcurlFetchOptions: {credentials}});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])], libcurlFetchOptions: {credentials}});
 		let stdout = '', stderr = '';
 		php.addEventListener('output', event => stdout += event.detail.join(''));
 		php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -102,7 +102,7 @@ async function run(page, source, {credentials = 'same-origin', vendor = false} =
 		const base = new URL('/php-wasm/curl', location.href).href;
 		const status = await php.run(`<?php $base = ${JSON.stringify(base)}; ?>${source}`);
 		return {status, stdout, stderr, requests: binary.libcurlFetch?.requests.size};
-	}, {version, curlMode, libType, source, credentials, files});
+	}, {version, variant, curlMode, libType, source, credentials, files});
 }
 
 test('curl streams bodies and stops on progress cancellation and timeouts', async ({page}) => {
@@ -162,6 +162,7 @@ test('curl refuses hidden browser redirects unless following is explicitly reque
 });
 
 test('curl loads in a CGI worker and honors its browser credential policy', async ({page, context}) => {
+	test.skip(variant === '_sdl', 'the SDL package provides an embedded runtime, not a CGI worker');
 	await page.goto('harness/index.html');
 	await context.addCookies([{name: 'curl_session', value: 'browser', url: new URL(page.url()).origin}]);
 	const result = await page.evaluate(args => new Promise((resolve, reject) => {

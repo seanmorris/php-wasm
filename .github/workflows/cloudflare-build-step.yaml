@@ -29,6 +29,8 @@ jobs:
           test/php-base-queue.test.mjs
           test/builder-help.test.mjs
           test/build/cloudflare-build.test.mjs
+          test/build/native-link.test.mjs
+          test/build/curl-importer.test.mjs
           test/build/pdo-cfd1-importer.test.mjs
           test/cloudflare/artifacts.test.mjs
       - name: Cache builder image only

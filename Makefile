@@ -202,13 +202,17 @@ WITH_CGI=1
 
 PHP_CONFIGURE_DEPS=
 PHP_LINK_DEPS=
-DEPENDENCIES=
+DEPENDENCIES=Makefile php.mk
 ORDER_ONLY=
 EXTRA_FILES=
 CONFIGURE_FLAGS?=
 EXTRA_FLAGS?=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
+WHOLE_ARCHIVES=
+# Keep each archive inside its linker flags: PHP's libtool otherwise moves it
+# after --no-whole-archive and silently drops unreferenced EM_JS helpers.
+WHOLE_ARCHIVE_FLAGS=$(foreach archive,$(sort ${WHOLE_ARCHIVES}),-Wl,--whole-archive,/src/${archive},--no-whole-archive)
 SHARED_LIBS=
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
@@ -500,6 +504,7 @@ endif
 BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
+	PHP_WASM_LINK_DEPS='$(addprefix /src/,$(sort ${ARCHIVES} ${PHP_LINK_DEPS} ${PRE_JS_CACHE})) /src/Makefile /src/php.mk' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CLI_PATH}'\
@@ -537,7 +542,8 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-I /src/third_party/php${PHP_VERSION}-src/sapi/ \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/ \
 		-I /src/lib/include \
-		$(addprefix /src/,$(sort ${ARCHIVES})) \
+		$(addprefix /src/,$(sort $(filter-out ${WHOLE_ARCHIVES},${ARCHIVES}))) \
+		$(if ${WHOLE_ARCHIVES},${WHOLE_ARCHIVE_FLAGS}) \
 		${FS_TYPE} \
 		${EXTRA_FILES} \
 		${EXTRA_FLAGS} \

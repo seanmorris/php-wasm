@@ -88,8 +88,8 @@ and CGI runtime constructors.
 - Downloads stream with incremental progress. Upload bodies are buffered before
   Fetch starts; upload progress and PHP's separate `stream` handler are not
   streaming upload support.
-- `fetch()` always decodes compressed responses. The `Content-Encoding` header is
-  and encoded `Content-Length` headers are removed. Cross-origin browser lengths
+- `fetch()` always decodes compressed responses. The `Content-Encoding` and
+  encoded `Content-Length` headers are removed. Cross-origin browser lengths
   may be unknown because CORS can hide the encoding header. Download statistics
   count decoded bytes.
 - TLS is handled by the host: certificates are always verified, and the

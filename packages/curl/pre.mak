@@ -17,6 +17,8 @@ CURL_SOURCE_STAMP=third_party/php-wasm-curl/.php-wasm-source.json
 
 ifeq (${WITH_CURL},static)
 ARCHIVES+= lib/lib/libcurl.a
+# Retain EM_JS-only objects such as the Digest helper in static builds.
+WHOLE_ARCHIVES+= lib/lib/libcurl.a
 PHP_CONFIGURE_DEPS+= lib/lib/libcurl.a
 CONFIGURE_FLAGS+= --with-curl ac_cv_lib_curl_curl_easy_perform=yes
 SKIP_LIBS+= -lcurl

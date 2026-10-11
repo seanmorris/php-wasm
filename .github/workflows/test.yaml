@@ -56,6 +56,7 @@ jobs:
           test/php-base-queue.test.mjs
           test/builder-help.test.mjs
           test/build/cloudflare-build.test.mjs
+          test/build/native-link.test.mjs
           test/cloudflare/artifacts.test.mjs
       - name: Verify Pages routing and safe nightly promotion
         run: npm run test:cloudflare-pages

@@ -14,7 +14,7 @@ const settings = (args = []) => JSON.parse(execFileSync('make', ['--no-print-dir
 PHP_VERSION=8.4
 include packages/curl/pre.mak
 all:
-	@printf '%s\\n' '{"mode":"$(WITH_CURL)","ref":"$(CURL_REF)","modules":"$(EXTRA_MODULES)","archives":"$(ARCHIVES)","configure":"$(CONFIGURE_FLAGS)","tests":"$(TEST_LIST)"}'
+	@printf '%s\\n' '{"mode":"$(WITH_CURL)","ref":"$(CURL_REF)","modules":"$(EXTRA_MODULES)","archives":"$(ARCHIVES)","whole":"$(WHOLE_ARCHIVES)","configure":"$(CONFIGURE_FLAGS)","tests":"$(TEST_LIST)"}'
 `
 }));
 
@@ -31,6 +31,7 @@ test('curl defaults to a shipped dynamic extension at the tested immutable commi
 	const statically = settings(['WITH_CURL=static']);
 	assert.equal(statically.modules, '');
 	assert.equal(statically.archives.trim(), 'lib/lib/libcurl.a');
+	assert.equal(statically.whole.trim(), 'lib/lib/libcurl.a');
 	assert.match(statically.configure, /--with-curl/);
 });
 
