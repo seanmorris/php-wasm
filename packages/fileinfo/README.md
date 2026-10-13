@@ -1,45 +1,41 @@
 # php-wasm-fileinfo
 
-fileinfo extension for php-wasm.
+`php-wasm-fileinfo` provides the `fileinfo` extension for `php-wasm`.
 
-https://github.com/seanmorris/php-wasm
+## Install
 
-https://www.npmjs.com/package/php-wasm
+```sh
+npm install php-wasm php-wasm-fileinfo
+```
+
+## What It Loads
+
+The package resolves the active runtime version to `php8.x-fileinfo.so`.
 
 ## Usage
 
-`php-wasm-fileinfo` can be loaded via dynamic imports:
+```js
+import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
+import fileinfo from 'php-wasm-fileinfo';
 
-```javascript
-const php = new PhpWeb({sharedLibs: [
-	await import('https://unpkg.com/php-wasm-fileinfo')
-]});
+const php = new PhpWeb({
+  version: '8.4',
+  sharedLibs: [fileinfo],
+});
+
+await php.run(`<?php
+  $finfo = new finfo(FILEINFO_MIME_TYPE);
+  echo $finfo->buffer('%PDF-1.4');
+`);
 ```
 
-You can rely on the default loading behavior if all `.so` files are served from the same directory as your `.wasm` files.
+The magic database is compiled into the extension, so no extra files are needed.
+Static builds can compile the extension in instead of loading it through `sharedLibs`.
 
-```javascript
-const php = new PhpWeb({sharedLibs: ['php8.4-fileinfo.so']});
-```
+## Custom Builds
 
-You can provide a callback as the `locateFile` option to map library names to URLs:
+Enable `WITH_FILEINFO` in `.php-wasm-rc`.
 
-```javascript
-const locateFile = (libName) => {
-	return `https://my-example-server.site/path/to/libs/${libName}`;
-};
+## Build Options
 
-const php = new PhpWeb({locateFile, sharedLibs: ['php8.4-fileinfo.so']});
-```
-
-## Build options:
-
-The following options may be set in `.php-wasm-rc` for custom builds of `php-wasm` & `php-cgi-wasm`.
-
-* WITH_FILEINFO
-
-### WITH_FILEINFO
-
-`0|static|dynamic`
-
-When compiled as a `dynamic` extension, this will produce the extension `php-8.x-fileinfo.so`.
+- `WITH_FILEINFO`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.

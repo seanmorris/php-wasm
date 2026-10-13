@@ -6,20 +6,19 @@
     "url": "git+https://github.com/seanmorris/php-wasm.git"
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
-  "version": "0.0.9-alpha-33",
+  "license": "(Apache-2.0 OR GPL-2.0-only)",
+  "version": "0.2.0",
   "main": "index.mjs",
+  "types": "index.d.ts",
   "files": [
-    "index.mjs",
-    "test/basic.mjs",
+    "*.mjs",
+    "index.d.ts",
+    "test/",
     "LICENSE",
     "NOTICE",
     "README.md",
     "static.mak",
-    "php8.5-fileinfo.so",
-    "php8.4-fileinfo.so",
-    "php8.3-fileinfo.so",
-    "php8.2-fileinfo.so",
-    "php8.1-fileinfo.so",
-    "php8.0-fileinfo.so"
+    "*.so",
+    "LICENSE-GPL"
   ]
 }
