@@ -78,7 +78,7 @@ test('Fileinfo Extension is enabled. (dynamic import)', async () => {
 
 	await php.binary;
 
-	const exitCode = await php.run('<?php $finfo = finfo_open(FILEINFO_MIME_TYPE); echo finfo_buffer($finfo, "GIF89a"); finfo_close($finfo);');
+	const exitCode = await php.run('<?php $finfo = finfo_open(FILEINFO_MIME_TYPE); echo finfo_buffer($finfo, "GIF89a"); unset($finfo);');
 
 	assert.equal(exitCode, 0);
 	assert.equal(stdOut, `image/gif`);
