@@ -47,6 +47,7 @@
     "php-wasm": "./packages/php-wasm",
     "php-wasm-curl": "./packages/curl",
     "php-wasm-dom": "./packages/dom",
+    "php-wasm-fileinfo": "./packages/fileinfo",
     "php-wasm-gd": "./packages/gd",
     "php-wasm-iconv": "./packages/iconv",
     "php-wasm-intl": "./packages/intl",
@@ -70,6 +71,7 @@
   "workspaces": [
     "packages/curl",
     "packages/dom",
+    "packages/fileinfo",
     "packages/gd",
     "packages/iconv",
     "packages/intl",

@@ -1102,6 +1102,7 @@ The following extensions may be compiled as static, shared, or dynamic:
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
 WITH_CURL      # [0, 1, static, dynamic] Defaults to dynamic
+WITH_FILEINFO  # [0, 1, static, dynamic]
 WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]
@@ -1152,6 +1153,14 @@ Set all four add-on flags to `0` for core SDL only. Build with the existing
 static|**dynamic**
 
 When compiled as a `dynamic` extension, this will produce the extension file `php8.x-phar.so`.
+
+---
+
+##### WITH_FILEINFO
+
+static|**dynamic**
+
+When compiled as a `dynamic` extension, this will produce the extension file `php8.x-fileinfo.so`.
 
 ---
 
