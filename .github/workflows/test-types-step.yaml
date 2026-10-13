@@ -16,6 +16,8 @@ jobs:
         run: npm ci
       - name: Verify shared extension importer and source/package contracts
         run: npm run test:importers
+      - name: Verify fileinfo packaging and build settings before native builds
+        run: node --test test/build/fileinfo.test.mjs
       - name: Check source and isolated npm declarations with pinned Deno
         run: npm run test:types
       - name: Verify queues, wrappers and Cloudflare packaging

@@ -1,0 +1,24 @@
+{
+  "name": "php-wasm-fileinfo",
+  "description": "fileinfo extension for php-wasm.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seanmorris/php-wasm.git"
+  },
+  "author": "Sean Morris <php-wasm@seanmorr.is>",
+  "license": "(Apache-2.0 OR GPL-2.0-only)",
+  "version": "0.2.0",
+  "main": "index.mjs",
+  "types": "index.d.ts",
+  "files": [
+    "*.mjs",
+    "index.d.ts",
+    "test/",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "static.mak",
+    "*.so",
+    "LICENSE-GPL"
+  ]
+}
