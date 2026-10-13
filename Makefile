@@ -202,13 +202,17 @@ WITH_CGI=1
 
 PHP_CONFIGURE_DEPS=
 PHP_LINK_DEPS=
-DEPENDENCIES=
+DEPENDENCIES=Makefile php.mk
 ORDER_ONLY=
 EXTRA_FILES=
 CONFIGURE_FLAGS?=
 EXTRA_FLAGS?=
 PHP_ARCHIVE_DEPS=third_party/php${PHP_VERSION}-src/configured third_party/php${PHP_VERSION}-src/patched
 ARCHIVES=
+WHOLE_ARCHIVES=
+# Keep each archive inside its linker flags: PHP's libtool otherwise moves it
+# after --no-whole-archive and silently drops unreferenced EM_JS helpers.
+WHOLE_ARCHIVE_FLAGS=$(foreach archive,$(sort ${WHOLE_ARCHIVES}),-Wl,--whole-archive,/src/${archive},--no-whole-archive)
 SHARED_LIBS=
 PRE_JS_FILES=source/env.js
 EXTRA_PRE_JS_FILES?=
@@ -500,6 +504,7 @@ endif
 BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
+	PHP_WASM_LINK_DEPS='$(addprefix /src/,$(sort ${ARCHIVES} ${PHP_LINK_DEPS} ${PRE_JS_CACHE})) /src/Makefile /src/php.mk' \
 	ZEND_EXTRA_LIBS='${ZEND_EXTRA_LIBS}' \
 	SAPI_CGI_PATH='${SAPI_CGI_PATH}' \
 	SAPI_CLI_PATH='${SAPI_CLI_PATH}'\
@@ -537,7 +542,8 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-I /src/third_party/php${PHP_VERSION}-src/sapi/ \
 		-I /src/third_party/php${PHP_VERSION}-src/ext/ \
 		-I /src/lib/include \
-		$(addprefix /src/,$(sort ${ARCHIVES})) \
+		$(addprefix /src/,$(sort $(filter-out ${WHOLE_ARCHIVES},${ARCHIVES}))) \
+		$(if ${WHOLE_ARCHIVES},${WHOLE_ARCHIVE_FLAGS}) \
 		${FS_TYPE} \
 		${EXTRA_FILES} \
 		${EXTRA_FLAGS} \
@@ -964,8 +970,8 @@ ${CLOUD_WRAPPERS}: ${PHP_CLOUD_WRAPPER_DIR}/%.mjs: source/%.mjs
 
 ${PHP_DIST_DIR}/%.js: source/%.mjs
 	npx babel $< --out-dir ${PHP_DIST_DIR}
-	perl -pi -w -e 's|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
-	perl -pi -w -e 's|require\("(\..+?).mjs"\)|require("\1.js")|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|import\.meta\.url|undefined|g; s|import.meta|(undefined /*import.meta*/)|g' ${PHP_DIST_DIR}/$(notdir $@)
+	perl -pi -w -e 's|require\(([\x27"])(\..+?)\.mjs\1\)|require($$1$$2.js$$1)|g' ${PHP_DIST_DIR}/$(notdir $@)
 
 ${PHP_DIST_DIR}/%.mjs: source/%.mjs
 	cp $< $@;
@@ -1254,6 +1260,7 @@ test-node test-bun: node-mjs node-cgi-mjs
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1282,6 +1289,7 @@ test-node-standard test-bun-standard: node-mjs node-cgi-mjs node-cli-mjs node-db
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1312,6 +1320,7 @@ test-node-cjs test-bun-cjs: node-js
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1340,6 +1349,7 @@ test-node-cjs-standard test-bun-cjs-standard: node-js node-cli-js node-dbg-js
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1370,6 +1380,7 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1388,8 +1399,21 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_SDL=${WITH_SDL} \
 	WITH_INTL=${WITH_INTL} deno test $(addprefix ./,${ESM_TEST_FILES}) --allow-read --allow-write --allow-env --allow-net --allow-sys --allow-run=npm,bash,node,make
 
+# The pinned Guzzle fixture runs against the same binaries as the other package
+# tests, in Node, Deno, Bun, and the browser. Composer runs only after lock changes.
+.PHONY: curl-test-deps
+curl-test-deps: test/fixtures/curl/vendor/autoload.php
+
+test/fixtures/curl/vendor/autoload.php: test/fixtures/curl/composer.json test/fixtures/curl/composer.lock
+	composer install --working-dir=test/fixtures/curl --no-interaction --no-progress --prefer-dist
+	@touch $@
+
+ifneq ($(filter ${WITH_CURL},dynamic static),)
+test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-browser update-snapshots: curl-test-deps
+endif
+
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} WITH_CURL=${WITH_CURL} test/browser-test.sh
 
 DEMO_WEB_PHP_VERSION ?= 8.4
 
@@ -1405,6 +1429,7 @@ test-cgi-node test-cgi-bun: node-mjs node-cgi-mjs
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1432,6 +1457,7 @@ ifeq (${LIB_TYPE},dynamic)
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1460,6 +1486,7 @@ test-cgi-node-cjs test-cgi-bun-cjs: node-js node-cgi-js
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
@@ -1488,6 +1515,7 @@ ifeq (${LIB_TYPE},dynamic)
 	WITH_SQLITE=${WITH_SQLITE} \
 	WITH_GD=${WITH_GD} \
 	WITH_PHAR=${WITH_PHAR} \
+	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \

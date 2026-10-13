@@ -88,6 +88,8 @@ declare interface PhpRuntimeArgs {
 	code?: string;
 	shared?: Record<string, PhpSharedValue>;
 	ENV?: Record<string, string>;
+	/** Browser cookie policy for the fetch-backed curl extension. */
+	libcurlFetchOptions?: {credentials?: 'omit' | 'same-origin' | 'include'};
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFileList;
 	sharedLibs?: PhpLibraryList;

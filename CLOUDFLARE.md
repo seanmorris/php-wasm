@@ -1,10 +1,15 @@
 # Cloudflare embedded PHP
 
 The Cloudflare profile builds embedded PHP 8.0–8.5 as ES modules for Workers.
-It includes Vrzno, statically linked zip/zlib, and PDO-CFD1 with native
+It includes Vrzno, statically linked curl and zip/zlib, and PDO-CFD1 with native
 parameters, binary values, and atomic batches. It is separate from the general
 browser, Node and CGI builds: neither the normal worker artifact nor
 `LIB_TYPE=static` selects it.
+
+PHP's curl extension sends HTTP requests through the Worker's Fetch API. It is
+available at startup without `sharedLibs`; Guzzle's curl handlers can use it.
+TLS and connection management remain under the host's control. See the
+[curl package guide](packages/curl/README.md) for supported options.
 
 ## Build and test locally
 

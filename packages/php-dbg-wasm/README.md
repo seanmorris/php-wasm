@@ -42,3 +42,35 @@ errors reject the call. See [filesystem operations](https://php-wasm.seanmorr.is
 For broader project documentation, see:
 
 https://github.com/seanmorris/php-wasm
+
+## Browser workers and embeddable debugger UI
+
+`PhpDbgWorker` exposes the same low-level debugger API as `PhpDbgWeb`, using a
+native `ENVIRONMENT=worker` artifact. Import it inside a module worker:
+
+```js
+import {PhpDbgWorker} from 'php-dbg-wasm/PhpDbgWorker';
+const php = new PhpDbgWorker({version:'8.4', persist:false});
+```
+
+`make worker-dbg-mjs` and `make worker-dbg-js` build the worker variants. `dbg-all`,
+`dbg-mjs`, and `dbg-cjs` include them. Web and worker builds emit an
+`.assets.json` manifest beside each loader with its exact WASM filename, SHA-256,
+required shared libraries, and bridge version. Deploy it with the loader and
+binary. `run()` is the debugger **process loop**; it resolves when phpdbg quits,
+not at an individual script's breakpoint or completion.
+
+The optional native browser bridge separates program output from debugger output
+through `onDbgOutput({type,fd,bytes,evaluating})`, reports exception metadata through
+`onDbgEvent`, and allows cooperative pause/stop with `dbgYieldInterval`,
+`dbgPauseRequested`, and `dbgStopRequested`. Bridge version 1 is exposed as
+`php_wasm_dbg_bridge_version`. Existing callers retain their console output and
+do not enable cooperative yielding unless they request it. Set
+`dbgManagedShutdown:true` for embedded single-run sessions to execute registered
+shutdown functions, object destructors, and output handlers during request cleanup.
+This is opt-in because standalone phpdbg normally discards those callbacks when
+resetting a debugging session.
+
+For a controller, styleable GUI, editor adapters, variable editing, structured
+results, and shared downloads, use
+[php-dbg-component](https://github.com/seanmorris/php-dbg-component).

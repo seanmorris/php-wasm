@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
+import {curlFixture} from '../lib/curl-server.mjs';
 
 const repoRoot = process.cwd();
 const basePath = '/php-wasm';
@@ -71,6 +72,10 @@ const mounts = [
 		, root: path.resolve(repoRoot, 'test/browser/harness')
 	}
 	, {
+		prefix: '/packages/php-wasm/'
+		, root: path.resolve(repoRoot, process.env.PHP_WASM_ARTIFACT_ROOT ?? 'packages/php-wasm')
+	}
+	, {
 		prefix: '/packages/'
 		, root: path.resolve(repoRoot, 'packages')
 	}
@@ -85,6 +90,7 @@ const packageSpecifierAliases = new Map([
 	, ['php-cgi-wasm', '/packages/php-cgi-wasm']
 	, ['php-cli-wasm', '/packages/php-cli-wasm']
 	, ['php-dbg-wasm', '/packages/php-dbg-wasm']
+	, ['php-wasm-curl', '/packages/curl']
 	, ['php-wasm-dom', '/packages/dom']
 	, ['php-wasm-gd', '/packages/gd']
 	, ['php-wasm-iconv', '/packages/iconv']
@@ -102,7 +108,8 @@ const packageSpecifierAliases = new Map([
 ]);
 
 const packageIndexSpecifiers = new Set([
-	'php-wasm-dom'
+	'php-wasm-curl'
+	, 'php-wasm-dom'
 	, 'php-wasm-gd'
 	, 'php-wasm-iconv'
 	, 'php-wasm-intl'
@@ -226,6 +233,7 @@ const resolveMountedFile = pathname => {
 };
 
 const server = http.createServer((req, res) => {
+	if(curlFixture(req, res)) return;
 	const url = new URL(req.url ?? '/', 'http://127.0.0.1');
 	const token = url.searchParams.get('token');
 
@@ -235,6 +243,18 @@ const server = http.createServer((req, res) => {
 		if(release) release();
 		else releasedGates.add(token);
 		send(res, 200, 'released');
+		return;
+	}
+
+	if(url.pathname === `${basePath}/curl-echo`)
+	{
+		const chunks = [];
+		req.on('data', chunk => chunks.push(chunk));
+		req.on('end', () => send(res, 200, JSON.stringify({
+			method: req.method
+			, headers: req.headers
+			, body: Buffer.concat(chunks).toString('utf8')
+		}), {'content-type': 'application/json; charset=utf-8', 'x-echo': 'yes'}));
 		return;
 	}
 

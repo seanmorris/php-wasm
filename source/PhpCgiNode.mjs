@@ -4,21 +4,6 @@ import url from 'node:url';
 import fs from 'node:fs';
 
 const defaultVersion = '8.4';
-const normalizeRuntimeModule = runtime => runtime && typeof runtime === 'object' && 'default' in runtime
-	? runtime
-	: {default: runtime};
-const isBun = typeof process !== 'undefined' && Boolean(process.versions?.bun);
-
-const loadRuntime = specifier => {
-	if(typeof require === 'function' && !isBun)
-	{
-		return Promise.resolve(
-			normalizeRuntimeModule(require(specifier.replace(/\.mjs$/, '.js')))
-		);
-	}
-
-	return import(specifier).then(normalizeRuntimeModule);
-};
 
 /**
  * Node.js-hosted PHP CGI wrapper.
@@ -39,14 +24,9 @@ export class PhpCgiNode extends PhpCgiBase
 
 			if(dir === '')
 			{
-				if(typeof __dirname === 'undefined')
-				{
-					dir = path.dirname(url.fileURLToPath(import.meta.url));
-				}
-				else
-				{
-					dir = __dirname;
-				}
+				// The CommonJS build replaces import.meta.url with undefined.
+				const moduleUrl = import.meta.url;
+				dir = moduleUrl ? path.dirname(url.fileURLToPath(moduleUrl)) : __dirname;
 			}
 
 			const located = path.resolve(path.format({dir, name}));
@@ -64,27 +44,27 @@ export class PhpCgiNode extends PhpCgiBase
 		switch(version)
 		{
 			case '8.5':
-				super(loadRuntime('./php8.5-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.5-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.4':
-				super(loadRuntime('./php8.4-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.4-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.3':
-				super(loadRuntime('./php8.3-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.3-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.2':
-				super(loadRuntime('./php8.2-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.2-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.1':
-				super(loadRuntime('./php8.1-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.1-cgi-node.mjs'), constructorArgs);
 				break;
 
 			case '8.0':
-				super(loadRuntime('./php8.0-cgi-node.mjs'), constructorArgs);
+				super(import('./php8.0-cgi-node.mjs'), constructorArgs);
 				break;
 
 			default:

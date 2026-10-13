@@ -16,6 +16,7 @@ const helpers = [
 const commands = new Set([
 	'php-wasm-builder.js', 'make-environment.cjs', 'source-importer.mjs'
 	, 'list-extension-packages.mjs'
+	, 'patch-phpdbg.mjs', 'dbg-assets.mjs'
 	, 'prepare-build-workspace.mjs', 'package-builder.mjs', 'package-cloudflare.mjs'
 	, 'merge-cloudflare.mjs', 'runtime-package.mjs', 'package-sdl.mjs', 'merge-sdl.mjs', 'generate-runtime-types.mjs', 'transform-logical-assignments.mjs'
 ]);

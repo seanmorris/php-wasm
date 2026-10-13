@@ -2,6 +2,14 @@
 
 Changes
 
+## v0.2.1
+
+* `php-cgi-wasm` now declares Node `>=22` instead of `>=24.5.0`, so installing it on Node 22 no longer warns or fails under `engine-strict`. CI runs the CGI server suite on Node 22 as well as 24 for PHP 8.4.
+
+* Fixed the `php-cloud-wasm` README example: `exec()` evaluates a single PHP expression, so `php.exec('return PHP_VERSION;')` returned an empty string. It now reads `php.exec('PHP_VERSION')`.
+
+* The Node wrappers (`PhpNode`, `PhpCgiNode`, `PhpCliNode`, `PhpDbgNode`) no longer load the wrong runtime file when a global `require` or `__dirname` exists, as in `node -e`, the Node REPL, or webpack/esbuild bundles for Node. Each version's runtime is imported by a fixed path again, so bundlers can resolve it, and the CommonJS build selects its own files at build time. Bundles also no longer warn about a standalone `import.meta` in `PhpBase`.
+
 ## v0.2.0 - Ramifying Sympodia
 
 * Added two runtime packages for PHP 8.0–8.5, neither of which depends on `php-wasm`. `php-sdl-wasm` is a standalone browser runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and OpenGL shader bindings (`import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs'`). `php-cloud-wasm` runs PHP in Cloudflare Workers with Vrzno, zlib/ZIP and PDO-CFD1 for D1 (`import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs'`). See the [SDL guide](packages/php-sdl-wasm/README.md) and the [Cloudflare guide](packages/php-cloud-wasm/README.md).

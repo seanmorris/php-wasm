@@ -8,6 +8,7 @@ persist/
 /docs/
 emscripten/
 node_modules/
+test/fixtures/curl/vendor/
 
 packages/**/*.so
 packages/**/*.dat
@@ -15,6 +16,7 @@ packages/**/*.map
 packages/**/*.log
 packages/**/*.BAK
 packages/**/*.wasm
+packages/**/*.assets.json
 
 packages/php-wasm/mapped
 packages/php-cli-wasm/mapped

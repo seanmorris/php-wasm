@@ -35,6 +35,8 @@ export interface PhpRuntimeArgs {
 	code?: string;
 	shared?: Record<string, object | string | number | boolean | Function | undefined>;
 	ENV?: Record<string, string>;
+	/** Browser cookie policy for the fetch-backed curl extension. */
+	libcurlFetchOptions?: {credentials?: 'omit' | 'same-origin' | 'include'};
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFile[];
 	sharedLibs?: Array<string | URL | PhpSharedLibrary>;
@@ -147,6 +149,8 @@ export type PhpRuntimeHook = (request: RuntimeRequest, response?: Response) => v
 export type PhpNotFoundHook = (request: RuntimeRequest) => Response | string | undefined;
 
 export interface PhpCgiRuntimeArgs {
+	/** Browser cookie policy for the fetch-backed curl extension. */
+	libcurlFetchOptions?: {credentials?: 'omit' | 'same-origin' | 'include'};
 	version?: PhpRuntimeVersion;
 	docroot?: string;
 	prefix?: string;

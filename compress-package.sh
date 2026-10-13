@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 PACKAGE_DIR=${1:?Usage: compress-package.sh PACKAGE_DIR}
 cd -- "${PACKAGE_DIR}/"
 
@@ -29,5 +30,8 @@ ls php*.wasm | while read FILENAME; do
 	perl -pi -w -e 's|'${FILENAME}'|'${HASHNAME}'|g' ${JS_FILE}.tmp
 
 	mv ${JS_FILE}.tmp ${JS_FILE}
+	if [[ -f "${JS_FILE}.assets.json" ]]; then
+		node "${SCRIPT_DIR}/bin/dbg-assets.mjs" "${JS_FILE}"
+	fi
 
 done;

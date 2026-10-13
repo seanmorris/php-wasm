@@ -15,6 +15,7 @@
     "clean": "make clean",
     "lint": "eslint source/ packages/ test/",
     "lint:fix": "eslint source/ packages/ test/ --fix",
+    "pretest:browser": "composer install --working-dir=test/fixtures/curl --no-interaction --no-progress --prefer-dist",
     "test:browser": "playwright test -c playwright.config.mjs",
     "tsc": "tsc -p jsconfig.json --noEmit",
     "test": "make test",
@@ -44,6 +45,7 @@
     "php-cloud-wasm": "./packages/php-cloud-wasm",
     "php-dbg-wasm": "./packages/php-dbg-wasm",
     "php-wasm": "./packages/php-wasm",
+    "php-wasm-curl": "./packages/curl",
     "php-wasm-dom": "./packages/dom",
     "php-wasm-fileinfo": "./packages/fileinfo",
     "php-wasm-gd": "./packages/gd",
@@ -67,6 +69,7 @@
     "waitline": "./packages/waitline"
   },
   "workspaces": [
+    "packages/curl",
     "packages/dom",
     "packages/fileinfo",
     "packages/gd",

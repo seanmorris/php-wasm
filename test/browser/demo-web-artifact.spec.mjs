@@ -1,8 +1,10 @@
+import fs from 'node:fs/promises';
 import { test, expect } from '@playwright/test';
 import {expectDebuggerContained} from '../lib/debugger-layout.mjs';
 import {getPlaywrightLaunchOptions} from '../lib/playwright-browser.mjs';
 
 const version = process.env.PHP_VERSION ?? '8.4';
+const libType = process.env.LIB_TYPE ?? 'dynamic';
 
 test.describe.configure({ mode: 'serial' });
 test.use({launchOptions: {
@@ -674,6 +676,32 @@ test('CodeIgniter 4 installs through ZipArchive and runs through CGI', async ({ 
 	expect(runtimeFailures).toEqual([]);
 });
 
+for(const {framework, name, welcome} of [
+	{framework: 'cakephp-5', name: 'CakePHP 5', welcome: 'Welcome to CakePHP'}
+	, {framework: 'laminas-3', name: 'Laminas 3', welcome: 'Laminas MVC Skeleton Application'}
+	, {framework: 'laravel-11', name: 'Laravel 11', welcome: 'Laravel has wonderful documentation'}
+]){
+	test(`${name} installs and runs through CGI`, async ({ page }) => {
+		test.setTimeout(600000);
+
+		const runtimeFailures = [];
+
+		page.on('pageerror', error => runtimeFailures.push(error.message));
+
+		await page.goto(`install-demo.html?framework=${framework}`, {
+			waitUntil: 'domcontentloaded'
+		});
+
+		await expect(page).toHaveURL(new RegExp(`/php-wasm/cgi-bin/${framework}/?$`), {
+			timeout: 540000
+		});
+		await expect(page.locator('body')).toContainText(welcome, {
+			timeout: 180000
+		});
+		expect(runtimeFailures).toEqual([]);
+	});
+}
+
 test('Drupal 11.4.5 installs and runs through the existing CGI service-worker route', async ({ page }) => {
 	test.setTimeout(600000);
 
@@ -768,6 +796,25 @@ test('Drupal 11.4.5 installs and runs through the existing CGI service-worker ro
 	await page.getByRole('button', { name: 'Log in' }).click();
 	await expect(page).not.toHaveURL(/\/user\/login(?:\?|$)/, { timeout: 180000 });
 	await expect(page.locator('body')).toContainText('admin', { timeout: 180000 });
+
+	// The session cookie must not break asset delivery for the authenticated page.
+	const authenticatedAssets = await page.evaluate(async prefix => {
+		const sources = [
+			...[...document.querySelectorAll('link[rel="stylesheet"][href]')].map(link => ['stylesheet', link.href])
+			, ...[...document.querySelectorAll('script[src]')].map(script => ['script', script.src])
+			, ...[...document.querySelectorAll('img[src]')].map(image => ['image', image.src])
+		].filter(([, url]) => new URL(url).pathname.startsWith(prefix));
+
+		return Promise.all(sources.map(async ([kind, url]) => {
+			const response = await fetch(url);
+
+			return {kind, url, status: response.status, size: (await response.arrayBuffer()).byteLength};
+		}));
+	}, drupalAssetPrefix);
+
+	expect(authenticatedAssets.some(asset => asset.kind === 'stylesheet')).toBe(true);
+	expect(authenticatedAssets.some(asset => asset.kind === 'script')).toBe(true);
+	expect(authenticatedAssets.filter(asset => asset.status !== 200 || asset.size === 0)).toEqual([]);
 });
 
 test('Drupal 11.4.5 installs and runs with PostgreSQL in PGlite', async ({ page }) => {
@@ -938,4 +985,163 @@ test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async
 	expect(aboutResponse?.status()).toBe(200);
 	await expect(page.locator('body')).toContainText('WordPress 7.1', { timeout: 180000 });
 	expect(runtimeFailures).toEqual([]);
+});
+
+/**
+ * Sends an action to the controlling CGI service worker, as the demo UI does.
+ * @param {object} page Playwright page.
+ * @param {string} action Worker action name.
+ * @param {...unknown} params Action arguments.
+ * @returns {Promise<unknown>} Worker response.
+ */
+const rpc = (page, action, ...params) => page.evaluate(({action, params}) => new Promise((resolve, reject) => {
+	const token = crypto.randomUUID();
+	const listener = event => {
+		if(event.data?.re !== token) return;
+		clearTimeout(timer);
+		navigator.serviceWorker.removeEventListener('message', listener);
+		if(event.data.error) reject(new Error(event.data.error.message));
+		else resolve(event.data.result);
+	};
+	const timer = setTimeout(() => {
+		navigator.serviceWorker.removeEventListener('message', listener);
+		reject(new Error('Worker did not reply to ' + action));
+	}, 60000);
+	navigator.serviceWorker.addEventListener('message', listener);
+	navigator.serviceWorker.controller.postMessage({action, token, params});
+}), {action, params});
+
+const waitForController = async page => {
+	await expect.poll(async () => {
+		try
+		{
+			return await page.evaluate(() => !!navigator.serviceWorker?.controller);
+		}
+		catch(error)
+		{
+			// The app reloads once when a newly installed worker takes control.
+			if(error.message.includes('Execution context was destroyed')) return false;
+			throw error;
+		}
+	}, {timeout: 180000}).toBe(true);
+	await rpc(page, 'runtimeReady');
+};
+
+// Extensions each lib type's demo is expected to load, keyed by build flag.
+const extensionsByFlag = {
+	WITH_LIBXML: ['libxml']
+	, WITH_DOM: ['dom']
+	, WITH_XML: ['xml']
+	, WITH_SIMPLEXML: ['SimpleXML']
+	, WITH_XMLREADER: ['xmlreader']
+	, WITH_XMLWRITER: ['xmlwriter']
+	, WITH_TIDY: ['tidy']
+	, WITH_LIBZIP: ['zip']
+	, WITH_ICONV: ['iconv']
+	, WITH_SQLITE: ['sqlite3', 'pdo_sqlite']
+	, WITH_GD: ['gd']
+	, WITH_ZLIB: ['zlib']
+	, WITH_YAML: ['yaml']
+	, WITH_MBSTRING: ['mbstring']
+	, WITH_OPENSSL: ['openssl']
+	, WITH_INTL: ['intl']
+	, WITH_PHAR: ['Phar']
+	, WITH_CURL: ['curl']
+};
+
+test('embedded demo loads the selected extensions', async ({ page }) => {
+	let flags = '';
+	let expected = [];
+	let absent = [];
+
+	if(libType === 'dynamic')
+	{
+		// Toggle bits follow demo-web Embedded.js: dom, gd, intl, libxml, sqlite and zlib on.
+		flags = `&extensionFlags=${2**0 | 2**1 | 2**3 | 2**4 | 2**12 | 2**14}`;
+		expected = ['dom', 'gd', 'intl', 'libxml', 'sqlite3', 'pdo_sqlite', 'zlib'];
+		absent = ['mbstring', 'openssl', 'SimpleXML'];
+	}
+	else
+	{
+		// Shared and static demos load the extensions their CI build enables.
+		const env = await fs.readFile(new URL(`../../.github/.env_${version}.${libType}.ci`, import.meta.url), 'utf8');
+
+		for(const [, flag, value] of env.matchAll(/^(WITH_[A-Z]+)=(\S+)$/gm))
+		{
+			if(extensionsByFlag[flag] && ['static', 'shared', 'dynamic'].includes(value)) expected.push(...extensionsByFlag[flag]);
+		}
+	}
+
+	await page.goto(`embedded-php.html?demo=list-extensions.php&version=${version}${flags}&no-service-worker`, {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const outputFrame = page.locator('iframe').nth(1);
+
+	await expect.poll(
+		async () => (await outputFrame.getAttribute('srcdoc')) ?? '',
+		{ timeout: 180000 }
+	).toMatch(/array\(\d+\)/);
+
+	const output = await outputFrame.getAttribute('srcdoc');
+	const loaded = [...output.matchAll(/string\(\d+\) (?:&quot;|")([^&"]+)(?:&quot;|")/g)].map(match => match[1]);
+
+	expect(expected.length).toBeGreaterThan(0);
+	expect(expected.filter(name => !loaded.includes(name))).toEqual([]);
+	expect(absent.filter(name => loaded.includes(name))).toEqual([]);
+});
+
+test('concurrent iframes each receive their own CGI response', async ({ page }) => {
+	test.setTimeout(300000);
+
+	await page.goto('select-framework.html', {waitUntil: 'domcontentloaded'});
+	await waitForController(page);
+	await rpc(page, 'mkdir', '/persist/www').catch(() => {});
+	await rpc(page, 'writeFile', '/persist/www/concurrency.php', '<?php header("Content-Type: application/json"); echo json_encode(["id" => $_GET["id"], "uri" => $_SERVER["REQUEST_URI"]]);');
+
+	const responses = await page.evaluate(count => Promise.all(Array.from({length: count}, (_, id) => new Promise((resolve, reject) => {
+		const frame = document.createElement('iframe');
+		frame.onload = () => resolve({id: String(id), body: frame.contentDocument.body.textContent});
+		frame.onerror = () => reject(new Error(`Frame ${id} failed to load`));
+		frame.src = `cgi-bin/concurrency.php?id=${id}`;
+		document.body.append(frame);
+	}))), 6);
+
+	for(const {id, body} of responses)
+	{
+		expect(JSON.parse(body)).toEqual({id, uri: `/php-wasm/cgi-bin/concurrency.php?id=${id}`});
+	}
+});
+
+test('backup, clear and restore round-trip the persisted filesystem', async ({ page }) => {
+	test.setTimeout(600000);
+
+	const marker = '/persist/www/backup-marker.txt';
+	const readMarker = () => rpc(page, 'readFile', marker)
+		.then(result => typeof result === 'string' ? result : new TextDecoder().decode(Uint8Array.from(Object.values(result))))
+		.catch(() => null);
+
+	await page.goto('select-framework.html', {waitUntil: 'domcontentloaded'});
+	await waitForController(page);
+	await rpc(page, 'mkdir', '/persist/www').catch(() => {});
+	await rpc(page, 'writeFile', marker, 'backup round trip');
+
+	const download = page.waitForEvent('download', {timeout: 300000});
+
+	await page.getByRole('button', {name: 'Backup'}).click();
+
+	const backupPath = await (await download).path();
+	const backup = await fs.readFile(backupPath);
+
+	expect(backup.subarray(0, 2).toString()).toBe('PK');
+	expect(backup.includes('www/backup-marker.txt')).toBe(true);
+
+	await page.getByRole('button', {name: 'Clear'}).click();
+	await page.getByRole('button', {name: 'Confirm'}).click();
+	await expect.poll(readMarker, {timeout: 180000}).toBeNull();
+
+	await page.getByRole('button', {name: 'Restore'}).click();
+	await page.locator('input[type="file"]').setInputFiles(backupPath);
+	await page.getByRole('button', {name: 'Continue'}).click();
+	await expect.poll(readMarker, {timeout: 300000}).toBe('backup round trip');
 });

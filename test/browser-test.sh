@@ -18,6 +18,7 @@ PLAYWRIGHT_ARGS=(
 	test/browser/browser.spec.mjs
 	test/browser/runtime-regressions.spec.mjs
 	test/browser/idbfs.spec.mjs
+	test/browser/curl.spec.mjs
 	test/browser/sdl.spec.mjs
 	test/browser/sdl-bindings.spec.mjs
 	test/browser/sdl-engine.spec.mjs

@@ -3,9 +3,9 @@
 # managed clean checkout. Artifact-only tests do not prepare native workspaces.
 BUILD_WORKSPACE ?= $(if $(filter cloudflare-mjs,${MAKECMDGOALS}),$(or ${CLOUDFLARE_CACHE_DIR},${ENV_DIR}/.cache/build),)
 BUILD_WORKSPACE_TARGETS = $(filter-out test-cloudflare,${MAKECMDGOALS})
-BUILD_PACKAGES := vrzno pdo-cfd1 zlib libzip php-cloud-wasm
+BUILD_PACKAGES := vrzno pdo-cfd1 zlib libzip curl php-cloud-wasm
 MAKE_SHUFFLE :=
-EXTENSION_PACKAGE_DIRS := packages/vrzno packages/pdo-cfd1 packages/zlib packages/libzip
+EXTENSION_PACKAGE_DIRS := packages/vrzno packages/pdo-cfd1 packages/zlib packages/libzip packages/curl
 PHP_DIST_DIR = .cache/cloudflare-raw/php${PHP_VERSION}
 CPU_COUNT ?= 8
 MAIN_MODULE := 0
@@ -16,6 +16,7 @@ EXTRA_CFLAGS := -DWITH_VRZNO=1 -DWITH_PDO_CFD1=1
 WITH_PDO_PGLITE := 0
 WITH_ZLIB := static
 WITH_LIBZIP := static
+WITH_CURL := static
 LIBZIP_CMAKE_FLAGS := -DENABLE_COMMONCRYPTO=OFF -DENABLE_GNUTLS=OFF -DENABLE_MBEDTLS=OFF -DENABLE_OPENSSL=OFF -DENABLE_BZIP2=OFF -DENABLE_LZMA=OFF -DENABLE_ZSTD=OFF -DBUILD_TOOLS=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF
 WITH_LIBXML := 0
 WITH_ONIGURUMA := 0

@@ -34,7 +34,8 @@ const runtimeWrapperByKind = {
 	, dbg: version => path.resolve(`/app/packages/php-dbg-wasm/php${version}-dbg-node.mjs`)
 };
 const packageBuildFlagMap = {
-	dom: 'WITH_DOM'
+	curl: 'WITH_CURL'
+	, dom: 'WITH_DOM'
 	, gd: 'WITH_GD'
 	, iconv: 'WITH_ICONV'
 	, intl: 'WITH_INTL'

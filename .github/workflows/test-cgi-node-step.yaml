@@ -85,6 +85,11 @@ jobs:
         run: |
           PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
           PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node-cjs
+          if [ "${{ inputs.phpVersion }}" = "8.4" ]; then
+            # php-cgi-wasm declares engines.node >=22; keep that floor tested.
+            CGI_NODE_TEST_IMAGE=node:22 PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node
+            CGI_NODE_TEST_IMAGE=node:22 PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-cgi-node-cjs
+          fi
 
       - name: Take Failure Snapshot
         if: ${{ failure() }}

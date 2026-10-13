@@ -404,6 +404,7 @@ const php = new PhpWeb({ini: `
 
 The following extensions may be loaded at runtime. This allows the shared extensions and their dependencies to be cached, reused, and selected a la carte for each application.
 
+* curl ([Fetch-backed HTTP, Guzzle, and browser limits](packages/curl/README.md))
 * gd (https://www.npmjs.com/package/php-wasm-gd)
 * iconv  (https://www.npmjs.com/package/php-wasm-iconv)
 * intl (https://www.npmjs.com/package/php-wasm-intl)
@@ -1100,6 +1101,7 @@ The following extensions may be compiled as static, shared, or dynamic:
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
+WITH_CURL      # [0, 1, static, dynamic] Defaults to dynamic
 WITH_FILEINFO  # [0, 1, static, dynamic]
 WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
@@ -1391,6 +1393,19 @@ make test-cgi-bun-cjs ENV_FILE=.github/.env_8.3.dynamic.ci PHP_VERSION=8.3 LIB_T
 The `-standard` targets also exercise CLI PHPT cases and the debugger. `test-bun-cjs` and `test-bun-cjs-standard` mirror the corresponding Node CommonJS targets. The `test-cgi-bun` targets use the shared CGI HTTP/cookie harness with a pinned Bun Docker image, plus dynamic-profile CGI documentation examples. Bun Make targets use a five-minute per-test timeout to accommodate full tarball checks, configurable through `BUN_TEST_FLAGS`.
 
 The Build Artifacts workflow tests Node, Deno, and Bun across PHP 8.0–8.5, dynamic/shared/static builds, and uncompressed/compressed packages. Bun and Node run both ESM and CommonJS standard and CGI suites. These tests reuse the existing native build artifacts. Fast Bun wrapper and build-helper checks also run before native builds.
+
+#### Browser and demo tests
+
+Browser tests use Playwright with an installed Chrome or Chromium. The first of `PLAYWRIGHT_CHROMIUM_PATH`, `CHROMIUM_BIN`, `CHROME_BIN`, `/usr/bin/chromium` or `/usr/bin/google-chrome` that exists is used. CI installs `google-chrome-stable`; Firefox and WebKit are not covered.
+
+| Suite | Command | Port | CI coverage |
+| --- | --- | --- | --- |
+| Runtime browser tests (`browser`, `runtime-regressions`, `idbfs` and the SDL specs) | `make test-browser PHP_VERSION=8.4 LIB_TYPE=dynamic` | 9000 | PHP 8.0–8.5 × dynamic/shared/static, plus compressed dynamic |
+| Built demo end to end (`demo-web-artifact`, `query-workbench`, `editor`) | `make test-demo-web LIB_TYPE=dynamic DEMO_WEB_ARTIFACT_ROOT=docs` | 9414 | PHP 8.4 × dynamic/shared/static |
+| CGI HTTP server | `make test-cgi-node` (Docker, `node:24`; `CGI_NODE_TEST_IMAGE` overrides) | 9001 → 3003 | every PHP version and lib type; Node 22 for PHP 8.4 |
+| demo-web unit tests and lint | `cd demo-web && npm test && npm run lint` | — | with the fast type and wrapper checks |
+
+`DEMO_WEB_ARTIFACT_ROOT` must point at a built demo, either from `demo-web/npm-build.sh` or a `php-demo-web-<lib type>` CI artifact. Override ports with `BROWSER_TEST_PORT`.
 
 ## 🤝 php-wasm started as a fork of oraoto/PIB...
 

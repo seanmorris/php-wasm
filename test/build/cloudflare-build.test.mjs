@@ -16,7 +16,7 @@ const digest = data => createHash('sha256').update(data).digest('hex');
 const wasm = new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0]);
 const helpers = ['PhpCloudflare.mjs', 'PhpBase.mjs', 'OutputBuffer.mjs', '_Event.mjs', 'fsOps.mjs', 'resolveDependencies.mjs'];
 const declarations = ['PhpCloudflare.d.mts', 'PhpBase.d.mts', 'public.d.ts'];
-const buildPackages = ['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm'];
+const buildPackages = ['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'curl', 'php-cloud-wasm'];
 const buildRootFiles = ['Makefile', 'build-workspace.mak', 'php.mk', 'info.mak', 'ico.ans', 'compress-package.sh', 'emscripten-builder.dockerfile', 'docker-compose.yml', '.babelrc'];
 
 /**
@@ -118,7 +118,7 @@ test('Cloudflare snapshot hashes only selected sources and never follows symlink
 	await fs.mkdir(fixture);
 	for(const name of buildRootFiles) await fs.writeFile(path.join(fixture, name), 'fixture source\n');
 	await fs.copyFile(path.join(repoRoot, 'package.json'), path.join(fixture, 'package.json'));
-	for(const name of ['source', 'patch', 'profiles', 'bin', '.github/bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
+	for(const name of ['source', 'patch', 'profiles', 'bin', '.github/bin', ...['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'curl', 'php-cloud-wasm', 'php-cgi-wasm', 'php-cli-wasm', 'php-dbg-wasm'].map(name => `packages/${name}`)]) await fs.mkdir(path.join(fixture, name), {recursive: true});
 	await fs.writeFile(path.join(fixture, 'source/probe.c'), 'int main(void) { return 0; }\n');
 	await fs.writeFile(path.join(fixture, 'source/.env'), 'FIXTURE_SECRET=never-copy\n');
 	await fs.writeFile(path.join(fixture, 'source/private.key'), 'fixture key, not a real credential\n');
@@ -643,12 +643,12 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	for(const [name, value] of Object.entries(installedMetadata.dependencies))
 		if(value.startsWith('./packages/')) installedMetadata.dependencies[name] = '0.0.0';
 	await fs.writeFile(path.join(installed, 'package.json'), JSON.stringify(installedMetadata));
-	const packages = {'vrzno': 'vrzno', 'pdo-cfd1': 'pdo-cfd1', 'zlib': 'php-wasm-zlib', 'libzip': 'php-wasm-libzip', 'php-cloud-wasm': 'php-cloud-wasm', 'php-cgi-wasm': 'php-cgi-wasm', 'php-cli-wasm': 'php-cli-wasm', 'php-dbg-wasm': 'php-dbg-wasm'};
+	const packages = {'vrzno': 'vrzno', 'pdo-cfd1': 'pdo-cfd1', 'zlib': 'php-wasm-zlib', 'libzip': 'php-wasm-libzip', 'curl': 'php-wasm-curl', 'php-cloud-wasm': 'php-cloud-wasm', 'php-cgi-wasm': 'php-cgi-wasm', 'php-cli-wasm': 'php-cli-wasm', 'php-dbg-wasm': 'php-dbg-wasm'};
 	for(const [folder, packageName] of Object.entries(packages))
 	{
 		const dependency = path.join(root, 'project/node_modules', packageName);
 		await fs.mkdir(dependency);
-		if(['vrzno', 'pdo-cfd1'].includes(folder))
+		if(['vrzno', 'pdo-cfd1', 'curl'].includes(folder))
 		{
 			const packedDependency = spawnSync('npm', ['pack', '--json', '--ignore-scripts', path.join(repoRoot, 'packages', folder), '--pack-destination', root, '--cache', path.join(root, 'npm-cache')], {cwd: root, encoding: 'utf8'});
 			assert.equal(packedDependency.status, 0, packedDependency.stderr);
@@ -672,10 +672,10 @@ test('packed Cloudflare builder resolves source dependencies without a monorepo 
 	}
 	const destination = path.join(root, 'snapshot');
 	await snapshot(destination, installed, buildPackages);
-	for(const folder of ['vrzno', 'pdo-cfd1', 'zlib', 'libzip'])
+	for(const folder of ['vrzno', 'pdo-cfd1', 'zlib', 'libzip', 'curl'])
 	{
 		const makefile = await fs.readFile(path.join(destination, 'packages', folder, 'static.mak'), 'utf8');
-		if(['vrzno', 'pdo-cfd1'].includes(folder)) assert.equal(makefile, await fs.readFile(path.join(repoRoot, 'packages', folder, 'static.mak'), 'utf8'));
+		if(['vrzno', 'pdo-cfd1', 'curl'].includes(folder)) assert.equal(makefile, await fs.readFile(path.join(repoRoot, 'packages', folder, 'static.mak'), 'utf8'));
 		else assert.match(makefile, /fixture/);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, '.env')).then(() => true, () => false), false);
 		assert.equal(await fs.stat(path.join(destination, 'packages', folder, 'unneeded.wasm')).then(() => true, () => false), false);
