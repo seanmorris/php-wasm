@@ -3,10 +3,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
 import url from 'node:url';
+import { PhpDbgWeb } from '../source/PhpDbgWeb.mjs';
+import { PhpDbgWorker } from '../source/PhpDbgWorker.mjs';
+import { PhpDbgWebBase } from '../source/PhpDbgWebBase.mjs';
 
 const repoRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), '..');
 const cliWrappers = ['source/PhpCliNode.mjs', 'source/PhpCliWeb.mjs'];
-const phpdbgWrappers = ['source/PhpDbgNode.mjs', 'source/PhpDbgWeb.mjs'];
+const phpdbgWrappers = ['source/PhpDbgNode.mjs', 'source/PhpDbgWebBase.mjs'];
 const phpVersions = ['8.0', '8.1', '8.2', '8.3', '8.4', '8.5'];
 
 test('CLI wrappers call the explicit Emscripten entrypoint with terminated argv', () => {
@@ -30,6 +33,15 @@ test('phpdbg wrappers call the explicit Emscripten entrypoint with terminated ar
 		assert.match(contents, /setValue\([^\n]+4 \* ptrs\.length, 0, '\*'\)/, wrapper);
 		assert.match(contents, /'wasm_sapi_phpdbg_main'/, wrapper);
 		assert.doesNotMatch(contents, /ccall\(\s*'main'/, wrapper);
+	}
+});
+
+test('web and worker debuggers inherit the shared native entrypoint implementation', () => {
+	for(const Wrapper of [PhpDbgWeb, PhpDbgWorker])
+	{
+		assert.equal(Object.getPrototypeOf(Wrapper.prototype), PhpDbgWebBase.prototype);
+		assert.equal(Wrapper.prototype._main, PhpDbgWebBase.prototype._main, Wrapper.name);
+		assert.equal(Wrapper.prototype.run, PhpDbgWebBase.prototype.run, Wrapper.name);
 	}
 });
 
