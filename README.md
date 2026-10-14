@@ -362,11 +362,16 @@ Expose a tag's `PhpWeb` instance to JavaScript with `data-bind-php-window`:
 <script type="text/php" data-bind-php-window="phpInstance"><?php echo 'Hello!'; ?></script>
 ```
 
-An empty attribute binds to `window.php`; a value binds to that name (here,
-`window.phpInstance`). The binding becomes available asynchronously when the
-instance is created. Without the attribute, no window binding is created.
-This enables interactive debugging from the browser console after page load,
-including inspecting or modifying the filesystem and running PHP:
+An empty attribute binds to `window.php`; a value selects another name, such as
+`window.phpInstance`. Works with inline PHP and `src` tags; without the attribute,
+no binding is created.
+
+Use unique names: existing globals are overwritten, and the last instance
+created wins regardless of tag order. Binding is asynchronous and precedes
+`ready` and initial execution; page load guarantees neither readiness nor
+completion of the initial script.
+
+Once initialized, use the browser console to inspect or modify files and run PHP:
 
 ```js
 await phpInstance.readdir('/preload/');
