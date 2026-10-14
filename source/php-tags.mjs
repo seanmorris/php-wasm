@@ -138,6 +138,12 @@ const runPhpScriptTag = async (element) => {
 		, canvas:     scope.canvas
 	});
 
+	// Bind to window.php by default, or to the name provided by the attribute.
+	if(element.hasAttribute('data-bind-php-window')){
+		const name = element.getAttribute('data-bind-php-window') || 'php';
+		window[name] = php;
+	}
+
 	php.inputString(input);
 
 	const outListener = event => {

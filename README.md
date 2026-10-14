@@ -353,6 +353,31 @@ Dynamic extensions can be loaded in static webpages like so:
 
 The example above assumes the default `php-tags` runtime version (`8.4`). If you set `data-version` to something else, update the `php8.x-*.so` filenames to match.
 
+### Browser console debugging
+
+Expose a tag's `PhpWeb` instance to JavaScript with `data-bind-php-window`:
+
+```html
+<script type="text/php" data-bind-php-window><?php echo 'Hello!'; ?></script>
+<script type="text/php" data-bind-php-window="phpInstance"><?php echo 'Hello!'; ?></script>
+```
+
+An empty attribute binds to `window.php`; a value selects another name, such as
+`window.phpInstance`. Works with inline PHP and `src` tags; without the attribute,
+no binding is created.
+
+Use unique names: existing globals are overwritten, and the last instance
+created wins regardless of tag order. Binding is asynchronous and precedes
+`ready` and initial execution; page load guarantees neither readiness nor
+completion of the initial script.
+
+Once initialized, use the browser console to inspect or modify files and run PHP:
+
+```js
+await phpInstance.readdir('/preload/');
+await phpInstance.run('<?php print_r(get_declared_classes());');
+```
+
 ## ⚙️ Configuration
 
 You can pass in the `ini` property to the constructor to add lines to `/php.ini`:
