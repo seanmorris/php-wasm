@@ -378,3 +378,113 @@ test('controller reconnection at a reused browser index keeps old handles detach
 	SDL_GameControllerClose($next); SDL_JoystickClose($nextJoy); ${cleanup}
 	`)).toEqual([[0,1],true,true]);
 });
+
+test('controller rumble targets exact sparse pads, preserves motors, and validates PHP ranges', async ({page}) => {
+	await page.addInitScript(() => {
+		window.rumbleCalls = [];
+		const pad = (index, effects) => ({
+			id: `Rumble Pad ${index}`
+			, index, connected: true, mapping: 'standard', timestamp: index + 1
+			, axes: [0,0,0,0]
+			, buttons: Array.from({length: 17}, () => ({pressed: false,touched: false,value: 0}))
+			, vibrationActuator: {
+				...(effects ? {effects} : {})
+				, playEffect(type, parameters) {
+					rumbleCalls.push({index,type,parameters});
+
+					return Promise.resolve('complete');
+				}
+			}
+		});
+		window.rumblePads = [pad(0), null, pad(2, ['dual-rumble','trigger-rumble'])];
+		Object.defineProperty(navigator, 'getGamepads', {value: () => rumblePads});
+	});
+	await start(page);
+	const result = await run(page, String.raw`${windowSetup}
+	$first=SDL_GameControllerOpen(0); $second=SDL_GameControllerOpen(1);
+	$joystick=SDL_GameControllerGetJoystick($second);
+	$capabilities=[
+		SDL_GameControllerHasRumble($first),SDL_GameControllerHasRumbleTriggers($first),
+		SDL_GameControllerHasRumble($second),SDL_GameControllerHasRumbleTriggers($second),
+		SDL_JoystickHasRumble($joystick),SDL_JoystickHasRumbleTriggers($joystick)
+	];
+	$statuses=[
+		SDL_GameControllerRumble($second,16384,49151,5000),
+		SDL_GameControllerRumbleTriggers($second,1000,2000,5000),
+		SDL_JoystickRumble($joystick,32768,8192,'4294967295')
+	];
+	$rejected=[];
+	foreach([
+		fn()=>SDL_GameControllerRumble($second,-1,0,1),
+		fn()=>SDL_GameControllerRumble($second,0,65536,1),
+		fn()=>SDL_GameControllerRumble($second,0,0,-1),
+		fn()=>SDL_GameControllerRumble($second,0,0,'4294967296'),
+		fn()=>SDL_GameControllerRumble($second,0,0,'1ms')
+	] as $index=>$call) { try {$call();} catch(ValueError $error) {$rejected[]=$index;} }
+	SDL_GameControllerRumble($second,0,0,0);
+	SDL_GameControllerClose($second);
+	$closed=false; try {SDL_GameControllerHasRumble($second);} catch(Error $error) {$closed=true;}
+	echo json_encode(compact('capabilities','statuses','rejected','closed'));
+	SDL_JoystickClose($joystick); SDL_GameControllerClose($first); ${cleanup}
+	`);
+
+	expect(result).toEqual({
+		capabilities: [true,false,true,true,true,true]
+		, statuses: [0,0,0]
+		, rejected: [0,1,2,3,4]
+		, closed: true
+	});
+	const calls = await page.evaluate(() => rumbleCalls);
+	expect(calls.every(call => call.index === 2)).toBe(true);
+	expect(calls[0]).toMatchObject({
+		type: 'dual-rumble'
+		, parameters: {duration: 3000,startDelay: 0,leftTrigger: 0,rightTrigger: 0}
+	});
+	expect(calls[0].parameters.strongMagnitude).toBeCloseTo(16384 / 65535, 6);
+	expect(calls[0].parameters.weakMagnitude).toBeCloseTo(49151 / 65535, 6);
+	expect(calls[1].parameters).toMatchObject({
+		strongMagnitude: calls[0].parameters.strongMagnitude
+		, weakMagnitude: calls[0].parameters.weakMagnitude
+		, leftTrigger: 1000 / 65535
+		, rightTrigger: 2000 / 65535
+	});
+	expect(calls.at(-1).parameters).toMatchObject({
+		strongMagnitude: 0,weakMagnitude: 0,leftTrigger: 0,rightTrigger: 0
+	});
+});
+
+test('unsupported and disconnected rumble devices fail without touching replacement pads', async ({page}) => {
+	await page.addInitScript(() => {
+		window.rumbleCalls = [];
+		window.inputPad = {
+			id: 'No Rumble', index: 0, connected: true, mapping: 'standard', timestamp: 1
+			, axes: [0,0,0,0]
+			, buttons: Array.from({length: 17}, () => ({pressed: false,touched: false,value: 0}))
+		};
+		Object.defineProperty(navigator, 'getGamepads', {value: () => inputPad.connected ? [inputPad] : []});
+	});
+	await start(page);
+	expect(await run(page, String.raw`${windowSetup}
+	$old=SDL_GameControllerOpen(0);
+	echo json_encode([SDL_GameControllerHasRumble($old),SDL_GameControllerRumble($old,1,1,10)]);
+	`)).toEqual([false,-1]);
+	await page.evaluate(() => {
+		inputPad.connected = false;
+		window.dispatchEvent(Object.assign(new Event('gamepaddisconnected'), {gamepad: inputPad}));
+		inputPad = {
+			...inputPad,id: 'Replacement',connected: true,timestamp: 2
+			, vibrationActuator: {
+				playEffect(type, parameters) {rumbleCalls.push({type,parameters}); return Promise.resolve();}
+			}
+		};
+		window.dispatchEvent(Object.assign(new Event('gamepadconnected'), {gamepad: inputPad}));
+	});
+	expect(await run(page, `
+	SDL_GameControllerUpdate(); $next=SDL_GameControllerOpen(0);
+	$stale=[SDL_GameControllerGetAttached($old),SDL_GameControllerHasRumble($old),SDL_GameControllerRumble($old,1,1,10)];
+	$fresh=[SDL_GameControllerGetAttached($next),SDL_GameControllerHasRumble($next),SDL_GameControllerRumble($next,1,2,10)];
+	echo json_encode([$stale,$fresh]);
+	SDL_GameControllerClose($old); SDL_GameControllerClose($next); ${cleanup}
+	`)).toEqual([[false,false,-1],[true,true,0]]);
+	expect(await page.evaluate(() => rumbleCalls.length)).toBe(2);
+});

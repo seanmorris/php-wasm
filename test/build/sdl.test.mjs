@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
-import {mkdtemp, rm, writeFile} from 'node:fs/promises';
+import {appendFile, copyFile, mkdir, mkdtemp, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {promisify} from 'node:util';
@@ -111,6 +111,35 @@ test('native SDL patches invalidate extracted sources and their archives', async
 		const archive = rules.find(line => line.startsWith(`lib/lib/libSDL2_${name}.a:`));
 		assert.ok(archive?.includes(configure.split(':')[0]));
 	}
+	const core = rules.find(line => line.startsWith('lib/lib/libSDL2.a:'));
+	assert.ok(core?.includes('packages/php-sdl-wasm/ports/sdl2-rumble.py'));
+	assert.ok(core?.includes('packages/php-sdl-wasm/patches/SDL2-rumble.patch'));
+	const recipe = rules.slice(rules.indexOf(core), rules.indexOf(core) + 12).join('\n');
+	assert.match(recipe, /retry-embuilder build \/src\/\$\{SDL_RUMBLE_PORT\}/);
+});
+
+test('the SDL rumble port cache identity covers its recipe and patch', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'php-sdl-rumble-port-'));
+	const ports = join(directory, 'ports'), patches = join(directory, 'patches');
+	const port = join(ports, 'sdl2-rumble.py'), patch = join(patches, 'SDL2-rumble.patch');
+	const sourcePort = new URL('../../packages/php-sdl-wasm/ports/sdl2-rumble.py', import.meta.url);
+	const sourcePatch = new URL('../../packages/php-sdl-wasm/patches/SDL2-rumble.patch', import.meta.url);
+	const name = async() => (await run('python3', [port, '--print-library'])).stdout.trim();
+	try
+	{
+		await mkdir(ports); await mkdir(patches);
+		await copyFile(sourcePort, port); await copyFile(sourcePatch, patch);
+		const baseline = await name();
+		await appendFile(patch, '\n# cache identity probe\n');
+		assert.notEqual(await name(), baseline);
+		await copyFile(sourcePatch, patch);
+		await appendFile(port, '\n# cache identity probe\n');
+		assert.notEqual(await name(), baseline);
+	}
+	finally
+	{
+		await rm(directory, {recursive: true, force: true});
+	}
 });
 
 test('a fresh SDL web build does not require the standard Node runtime', async () => {
@@ -166,6 +195,8 @@ test('the SDL runtime npm payload excludes native build inputs and the former sh
 		, 'extensions.mak'
 		, 'patches/sdl-events.patch'
 		, 'patches/sdl-bindings.patch'
+		, 'patches/SDL2-rumble.patch'
+		, 'ports/sdl2-rumble.py'
 		, 'core/joystick.c'
 		, 'core/glcontext.c'
 		, 'core/glcontext.h'
