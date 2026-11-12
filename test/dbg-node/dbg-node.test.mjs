@@ -240,6 +240,25 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.equal((await php.describeValue(variables.localArray.nested.ratio)).type, 'int');
 	assert.deepEqual([objectLabel.type, objectLabel.count, objectLabel.value], ['string', 12, 'object-value']);
 
+	// A key can share its name with a property of the JavaScript stand-in for
+	// the array. The child is the PHP element, not that property.
+	const lookalike = variables.localLookalike;
+	const lengthChild = await php.describeChild(lookalike, 'length');
+	const constructorChild = await php.describeChild(lookalike, 'constructor');
+
+	assert.deepEqual([lengthChild.type, lengthChild.value], ['string', 'data']);
+	assert.deepEqual([constructorChild.type, constructorChild.value], ['float', 1]);
+
+	// Private and protected properties are stored under PHP's mangled names,
+	// which contain NUL bytes.
+	const hidden = await php.describeChild(variables.localSealed, '\0PhpDbgInspectionSealed\0hidden');
+	const guarded = await php.describeChild(variables.localSealed, '\0*\0guarded');
+	const open = await php.describeChild(variables.localSealed, 'open');
+
+	assert.deepEqual([hidden.type, hidden.value], ['float', 4]);
+	assert.deepEqual([guarded.type, guarded.value], ['string', 'guarded-value']);
+	assert.deepEqual([open.type, open.value], ['int', 7]);
+
 	const userGlobals = await php.dumpGlobals({user: true});
 	const describedConstants = await php.describeConstants();
 
@@ -289,6 +308,53 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.ok(stdOut().includes('inspection-complete:outer-value:local-value:42:true:null:42:object-value:global-value'));
 	assert.equal(stdErr(), '');
 	assert.equal(exitCode, 0);
+});
+
+test('reads the debugger API version without calling a missing export', () => {
+	// Stands in for a runtime built with assertions: ccall() on an export
+	// that does not exist aborts it, and catching the error does not undo that.
+	const runtime = exports => {
+		const php = {
+			aborted: false
+			, ccall: name => {
+				if(!exports.includes(name))
+				{
+					php.aborted = true;
+
+					throw new Error(`Aborted(Assertion failed: Cannot call unknown function ${name})`);
+				}
+
+				return 2;
+			}
+		};
+
+		return php;
+	};
+	const versionOf = php => {
+		const wrapper = Object.create(PhpDbgNode.prototype);
+
+		wrapper.dbgApiVersion = null;
+
+		return wrapper._dbgApiVersion(php);
+	};
+
+	const legacy = runtime([]);
+
+	assert.equal(versionOf(legacy), 1);
+	assert.equal(legacy.aborted, false, 'the probe aborted a runtime whose Vrzno has no version export');
+
+	// Vrzno linked into the runtime exports the function on the module.
+	const linked = runtime(['vrzno_dbg_api_version']);
+
+	linked._vrzno_dbg_api_version = () => 2;
+	assert.equal(versionOf(linked), 2);
+
+	// Vrzno loaded as a side module is reached through the symbol resolver.
+	const loaded = runtime(['vrzno_dbg_api_version']);
+
+	loaded.resolveGlobalSymbol = name => ({sym: name === 'vrzno_dbg_api_version' ? () => 2 : undefined, name});
+	assert.equal(versionOf(loaded), 2);
+	assert.equal(loaded.aborted, false);
 });
 
 test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node for PHP ${version}`, async () => {

@@ -101,6 +101,15 @@ const inspectBreakpoint = async php => {
 	const outerBacktrace = await php.dumpBacktrace();
 	const restoredFrame = await php.switchFrame(oldFrame);
 
+	const lengthChild = await php.describeChild(variables.localLookalike, 'length');
+	// Private and protected properties are stored under mangled names with NUL bytes.
+	const sealedChildren = {};
+
+	for(const [label, key] of [['hidden', '\0PhpDbgInspectionSealed\0hidden'], ['guarded', '\0*\0guarded'], ['open', 'open']])
+	{
+		sealedChildren[label] = (await php.describeChild(variables.localSealed, key)).value;
+	}
+
 	return {
 		currentFile: await php.currentFile()
 		, currentLine: await php.currentLine()
@@ -126,6 +135,10 @@ const inspectBreakpoint = async php => {
 			, localArray: described.localArray
 			, localObject: described.localObject
 			, breakpointValue: described.breakpointValue
+		}
+		, children: {
+			length: [lengthChild.type, lengthChild.value]
+			, sealed: sealedChildren
 		}
 		, unimportedGlobal: userGlobals.phpdbgInspectionUnimported
 		, constants: {

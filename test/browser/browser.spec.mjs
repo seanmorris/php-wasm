@@ -210,6 +210,12 @@ test('inspects a live phpdbg frame in the browser harness', async ({ page }) => 
 	expect(inspection.currentLine).toBeGreaterThan(0);
 	expect(inspection.files).toContain('/preload/test_www/phpdbg-inspection-include.php');
 	expect(inspection.backtrace.length).toBeGreaterThanOrEqual(2);
+	// A key named like a JavaScript array property, and private and protected
+	// properties, are read from PHP by key.
+	expect(inspection.children).toEqual({
+		length: ['string', 'data']
+		, sealed: {hidden: 4, guarded: 'guarded-value', open: 7}
+	});
 });
 
 test('serves php through the cgi worker harness', async ({ page }) => {

@@ -25,6 +25,7 @@ test('WebView compiler flags include the web environment required for asynchrono
 		});
 		const expected = environment === 'webview' ? 'web,webview' : environment;
 		assert.ok(flags.includes(`-s ENVIRONMENT=${expected} `), flags);
+		assert.match(flags, /EXPORTED_RUNTIME_METHODS=[^\n]*"resolveGlobalSymbol"/);
 	}
 });
 

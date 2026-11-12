@@ -592,21 +592,35 @@ export class PhpDbgNode extends PhpBase
 	{
 		if(this.dbgApiVersion === null)
 		{
-			let version = 1;
-
-			try
-			{
-				version = php.ccall('vrzno_dbg_api_version', NUM, [], [], {});
-			}
-			catch(error)
-			{
-				// An older Vrzno has no version export.
-			}
+			// An older Vrzno has no version export.
+			const version = this._hasNativeExport(php, 'vrzno_dbg_api_version')
+				? php.ccall('vrzno_dbg_api_version', NUM, [], [], {})
+				: 1;
 
 			this.dbgApiVersion = version >= 2 ? version : 1;
 		}
 
 		return this.dbgApiVersion;
+	}
+
+	/**
+	 * Finds a native export without calling it. ccall() on a missing export
+	 * aborts a runtime built with assertions, and catching the error does not
+	 * undo the abort.
+	 * @param {object} php PHP module instance.
+	 * @param {string} name Export name, without the leading underscore.
+	 * @returns {boolean} Whether the export can be called.
+	 */
+	_hasNativeExport(php, name)
+	{
+		if(typeof php['_' + name] === 'function')
+		{
+			return true;
+		}
+
+		// A Vrzno loaded as a side module keeps its exports out of the module
+		// object. The runtime's symbol resolver finds them where it is exported.
+		return typeof php.resolveGlobalSymbol?.(name)?.sym === 'function';
 	}
 
 	/**
@@ -687,7 +701,6 @@ export class PhpDbgNode extends PhpBase
 
 		this._requireDbgApi(php, 'describeChild()');
 
-		const value = parent[key];
 		const parentZv = zvalPointer(parent);
 		let zv = 0;
 
@@ -704,6 +717,10 @@ export class PhpDbgNode extends PhpBase
 
 			php._free(keyPtr);
 		}
+
+		// Convert the element PHP found. Reading it through the parent returns
+		// the stand-in's own property for a key such as "length".
+		const value = zv ? php.zvalToJS(zv) : parent[key];
 
 		zv = zv || zvalPointer(value);
 
