@@ -3,19 +3,25 @@
 `vrzno` is the PHP-to-JavaScript bridge extension used by `php-wasm`.
 
 It lets PHP code interact with JavaScript objects, classes, promises, callbacks, and values on `globalThis`.
-The standard `php-wasm` runtime already includes Vrzno by default, so most consumers do not need to import anything from this package directly. This folder mainly exists for custom-build plumbing.
+Standard `php-wasm` profiles include Vrzno statically by default. Custom builds
+can opt into the dynamic loader without a separate companion JavaScript file;
+Vrzno's embedded `EM_JS` code travels in the side module.
 
 Vrzno requires `WeakRef` and `FinalizationRegistry`. Cloudflare Workers using a
 compatibility date before `2025-05-05` must enable `enable_weak_ref`.
 
 ## Usage
 
+For a runtime built with `WITH_VRZNO=dynamic`:
+
 ```js
 import { PhpNode } from 'php-wasm/PhpNode.mjs';
+import vrzno from 'vrzno';
 
 const php = new PhpNode({
   version: '8.4',
   answer: 42,
+  sharedLibs: [vrzno],
 });
 
 await php.run(`<?php
@@ -35,12 +41,12 @@ Use `vrzno_import()` to dynamically import JavaScript modules from PHP.
 
 ## Custom Builds
 
-Enable `WITH_VRZNO=1` in `.php-wasm-rc`.
-That is the default for the main `php-wasm` runtime.
+`WITH_VRZNO=1` remains the default and compiles Vrzno statically. Set
+`WITH_VRZNO=dynamic` to produce `packages/vrzno/php8.x-vrzno.so`.
 
 ## Build Options
 
-- `WITH_VRZNO`: defaults to `1`. Set it to `0` to remove the extension from a custom build.
+- `WITH_VRZNO`: accepts `0`, `1`, `static`, or `dynamic`; defaults to `1`, which is an alias for `static`.
 - `VRZNO_REPOSITORY`: optional Git repository override. Defaults to the upstream Vrzno repository.
 - `VRZNO_REF`: exact Git commit to build. The default pins the Vrzno 0.2.0 bridge with Make-embedded JavaScript.
 - `VRZNO_DEV_PATH`: optional local source checkout to use instead of cloning the upstream `vrzno` repository during the build.

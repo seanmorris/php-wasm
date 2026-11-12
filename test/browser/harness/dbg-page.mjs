@@ -144,7 +144,7 @@ const main = async () => {
 		files
 		, ini: createIni()
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
-		, sharedLibs: loadDbgSharedLibs(libType)
+		, sharedLibs: loadDbgSharedLibs(libType, runtimeVersion)
 		, version: runtimeVersion
 	});
 

@@ -6,6 +6,7 @@ import libxml from '/packages/libxml/index.mjs';
 import libzip from '/packages/libzip/index.mjs';
 import mbstring from '/packages/mbstring/index.mjs';
 import openssl from '/packages/openssl/index.mjs';
+import pdoPglite from '/packages/pdo-pglite/index.mjs';
 import simplexml from '/packages/simplexml/index.mjs';
 import sqlite from '/packages/sqlite/index.mjs';
 import tidy from '/packages/tidy/index.mjs';
@@ -186,11 +187,16 @@ const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
 	return [];
 };
 
-export const loadEmbeddedSharedLibs = (libType, variant = '') => {
+export const loadEmbeddedSharedLibs = (libType, variant = '', runtimeVersion = '8.4') => {
 	// The SDL package owns all native libraries required by its build.
-	if(variant === '_sdl' || libType === 'dynamic')
+	if(variant === '_sdl')
 	{
 		return [];
+	}
+
+	if(libType === 'dynamic')
+	{
+		return runtimeVersion === '8.0' ? [] : [pdoPglite];
 	}
 
 	if(libType === 'shared')
@@ -231,20 +237,17 @@ export const loadEmbeddedDynamicLibs = demoName => {
 	return [yaml];
 };
 
-export const loadCliSharedLibs = libType => pickLibsForLibType(
-	libType,
-	dynamicCliLibs,
-	sharedCliLibs
-);
+export const loadCliSharedLibs = (libType, runtimeVersion = '8.4') => [
+	...(libType === 'dynamic' && runtimeVersion !== '8.0' ? [pdoPglite] : [])
+	, ...pickLibsForLibType(libType, dynamicCliLibs, sharedCliLibs)
+];
 
-export const loadDbgSharedLibs = libType => pickLibsForLibType(
-	libType,
-	dynamicDbgLibs,
-	sharedDbgLibs
-);
+export const loadDbgSharedLibs = (libType, runtimeVersion = '8.4') => [
+	...(libType === 'dynamic' && runtimeVersion !== '8.0' ? [pdoPglite] : [])
+	, ...pickLibsForLibType(libType, dynamicDbgLibs, sharedDbgLibs)
+];
 
-export const loadCgiSharedLibs = libType => pickLibsForLibType(
-	libType,
-	dynamicCgiLibs,
-	sharedCgiLibs
-);
+export const loadCgiSharedLibs = (libType, runtimeVersion = '8.4') => [
+	...(libType === 'dynamic' && runtimeVersion !== '8.0' ? [pdoPglite] : [])
+	, ...pickLibsForLibType(libType, dynamicCgiLibs, sharedCgiLibs)
+];

@@ -26,6 +26,7 @@ const extensionPackageMap = new Map([
 	, ['mbstring', ['mbstring']]
 	, ['openssl', ['openssl']]
 	, ['pdo_sqlite', ['sqlite']]
+	, ['pdo_pglite', ['pdo-pglite']]
 	, ['phar', ['phar']]
 	, ['simplexml', ['libxml', 'simplexml']]
 	, ['sqlite3', ['sqlite']]
@@ -36,6 +37,8 @@ const extensionPackageMap = new Map([
 	, ['yaml', ['yaml']]
 	, ['zip', ['zlib', 'libzip']]
 	, ['zlib', ['zlib']]
+	, ['vrzno', ['vrzno']]
+	, ['waitline', ['waitline']]
 ]);
 const packageBuildFlagMap = {
 	dom: 'WITH_DOM'
@@ -47,6 +50,7 @@ const packageBuildFlagMap = {
 	, mbstring: 'WITH_MBSTRING'
 	, openssl: 'WITH_OPENSSL'
 	, phar: 'WITH_PHAR'
+	, 'pdo-pglite': 'WITH_PDO_PGLITE'
 	, simplexml: 'WITH_SIMPLEXML'
 	, sqlite: 'WITH_SQLITE'
 	, tidy: 'WITH_TIDY'
@@ -55,6 +59,8 @@ const packageBuildFlagMap = {
 	, xmlwriter: 'WITH_XMLWRITER'
 	, yaml: 'WITH_YAML'
 	, zlib: 'WITH_ZLIB'
+	, vrzno: 'WITH_VRZNO'
+	, waitline: 'WITH_WAITLINE'
 };
 const parsePhpt = source => {
 	const sections = {};
@@ -431,6 +437,7 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 			, mbstring: 'WITH_MBSTRING'
 			, openssl: 'WITH_OPENSSL'
 			, pdo_sqlite: 'WITH_SQLITE'
+			, pdo_pglite: 'WITH_PDO_PGLITE'
 			, phar: 'WITH_PHAR'
 			, simplexml: 'WITH_SIMPLEXML'
 			, sqlite3: 'WITH_SQLITE'
@@ -441,6 +448,8 @@ const resolveExtensionPackages = async ({ sections, version, phpOptions = {} }) 
 			, yaml: 'WITH_YAML'
 			, zip: 'WITH_LIBZIP'
 			, zlib: 'WITH_ZLIB'
+			, vrzno: 'WITH_VRZNO'
+			, waitline: 'WITH_WAITLINE'
 		})[extensionName];
 
 		if(buildFlag && resolvedEnv[buildFlag] === '0')

@@ -14,7 +14,7 @@ test('curl requests go through fetch and obey the browser origin rules', async (
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		const curl = await import('/packages/curl/index.mjs');
-		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])]});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType, variant, version), ...(curlMode === 'static' ? [] : [curl])]});
 		let stdout = '', stderr = '';
 		php.addEventListener('output', event => stdout += event.detail.join(''));
 		php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -89,7 +89,7 @@ async function run(page, source, {credentials = 'same-origin', vendor = false} =
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		const curl = await import('/packages/curl/index.mjs');
-		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])], libcurlFetchOptions: {credentials}});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: [...loadEmbeddedSharedLibs(libType, variant, version), ...(curlMode === 'static' ? [] : [curl])], libcurlFetchOptions: {credentials}});
 		let stdout = '', stderr = '';
 		php.addEventListener('output', event => stdout += event.detail.join(''));
 		php.addEventListener('error', event => stderr += event.detail.join(''));

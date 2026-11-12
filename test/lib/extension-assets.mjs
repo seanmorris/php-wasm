@@ -15,9 +15,12 @@ const packageRoots = {
 	, mbstring: path.join(repoRoot, 'packages/mbstring')
 	, openssl: path.join(repoRoot, 'packages/openssl')
 	, phar: path.join(repoRoot, 'packages/phar')
+	, 'pdo-pglite': path.join(repoRoot, 'packages/pdo-pglite')
 	, simplexml: path.join(repoRoot, 'packages/simplexml')
 	, sqlite: path.join(repoRoot, 'packages/sqlite')
 	, tidy: path.join(repoRoot, 'packages/tidy')
+	, vrzno: path.join(repoRoot, 'packages/vrzno')
+	, waitline: path.join(repoRoot, 'packages/waitline')
 	, xml: path.join(repoRoot, 'packages/xml')
 	, xmlreader: path.join(repoRoot, 'packages/xmlreader')
 	, xmlwriter: path.join(repoRoot, 'packages/xmlwriter')
@@ -103,6 +106,9 @@ const packageFactories = {
 	, phar: phpVersion => ({
 		getLibs: () => [libDef('phar', versionedExtension(phpVersion, 'phar'), true)]
 	})
+	, 'pdo-pglite': phpVersion => ({
+		getLibs: () => [libDef('pdo-pglite', versionedExtension(phpVersion, 'pdo-pglite'), true)]
+	})
 	, simplexml: phpVersion => ({
 		getLibs: () => [libDef('simplexml', versionedExtension(phpVersion, 'simplexml'), true)]
 	})
@@ -118,6 +124,12 @@ const packageFactories = {
 			libDef('tidy', versionedExtension(phpVersion, 'tidy'), true)
 			, libDef('tidy', 'libtidy.so')
 		]
+	})
+	, vrzno: phpVersion => ({
+		getLibs: () => [libDef('vrzno', versionedExtension(phpVersion, 'vrzno'), true)]
+	})
+	, waitline: phpVersion => ({
+		getLibs: () => [libDef('waitline', versionedExtension(phpVersion, 'waitline'), true)]
 	})
 	, xml: phpVersion => ({
 		getLibs: () => [libDef('xml', versionedExtension(phpVersion, 'xml'), true)]

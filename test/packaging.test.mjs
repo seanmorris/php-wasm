@@ -14,6 +14,9 @@ const packageDirs = [
 	, 'packages/php-dbg-wasm'
 	, 'packages/php-cloud-wasm'
 	, 'packages/php-sdl-wasm'
+	, 'packages/vrzno'
+	, 'packages/pdo-pglite'
+	, 'packages/waitline'
 ];
 const packageRoot = path.join(repoRoot, 'packages');
 

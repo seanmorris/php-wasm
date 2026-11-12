@@ -4,6 +4,10 @@ Changes
 
 ## v0.2.1
 
+* Added versioned dynamic loaders for PDO-PGlite and optional custom Vrzno/Waitline builds. Standard profiles retain static Vrzno and Waitline; dynamic PDO-PGlite loads explicitly with the existing static bridge. Shared PDO-PGlite falls back to static bindings because its JavaScript provider has no native support library. PHP 8.0 and Cloudflare keep PDO-PGlite disabled. Loader objects now work in the runtime TypeScript declarations, and demos load the driver where needed.
+
+* Fixed static Vrzno mode validation for the Cloudflare PDO-CFD1 build. The dedicated Cloudflare profile keeps its existing restricted extension set and memory limits.
+
 * `php-cgi-wasm` now declares Node `>=22` instead of `>=24.5.0`, so installing it on Node 22 no longer warns or fails under `engine-strict`. CI runs the CGI server suite on Node 22 as well as 24 for PHP 8.4.
 
 * Fixed the `php-cloud-wasm` README example: `exec()` evaluates a single PHP expression, so `php.exec('return PHP_VERSION;')` returned an empty string. It now reads `php.exec('PHP_VERSION')`.

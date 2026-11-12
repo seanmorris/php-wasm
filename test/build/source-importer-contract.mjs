@@ -368,7 +368,7 @@ fs.renameSync = (source, destination) => {
 		if(spec.requiresVrzno) test('enabling the PDO extension explicitly requires Vrzno', t => {
 			const f = fixture(t);
 			const result = f.run({ goal: 'dependencies', variables: { WITH_VRZNO: '0' }, success: false });
-			assert.ok(result.stderr.includes(`WITH_${prefix}=1 requires WITH_VRZNO=1`), result.stderr);
+				assert.match(result.stderr, new RegExp(`WITH_${prefix}=(?:1|static) requires WITH_VRZNO=`));
 		});
 	});
 }

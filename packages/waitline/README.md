@@ -2,8 +2,9 @@
 
 `waitline` is the line-reader extension used by `php-wasm` for interactive CLI and debugger input.
 
-This package exists so the build system can vendor the upstream `waitline` extension into `php-cli-wasm` and related builds.
-It does not expose a separate JavaScript API from this folder.
+This package vendors the upstream extension and exposes a dynamic-loader entrypoint
+for `php-cli-wasm` and related builds. Its embedded JavaScript is carried by the
+side module; no companion JavaScript asset is required.
 
 ## What It Is For
 
@@ -14,8 +15,17 @@ That is what makes browser-hosted `php -a` sessions and `phpdbg` prompts workabl
 
 Usually no.
 
-If you are using the published CLI/debug runtime packages, `waitline` is expected to already be included.
+Published CLI/debug runtimes include Waitline statically in every standard profile.
 You normally only care about this package when you are maintaining custom builds, debugging interactive input behavior, or overriding the vendored source checkout.
+
+For a custom build with `WITH_WAITLINE=dynamic`, pass the loader to the runtime:
+
+```js
+import { PhpCliWeb } from 'php-cli-wasm/PhpCliWeb.mjs';
+import waitline from 'waitline';
+
+const php = new PhpCliWeb({version: '8.4', sharedLibs: [waitline]});
+```
 
 ## Custom Builds
 
@@ -32,7 +42,7 @@ Important distinction:
 
 ## Build Options
 
-- `WITH_WAITLINE`: defaults to `0` in the custom builder. Set it to `1` to compile the extension in.
+- `WITH_WAITLINE`: accepts `0`, `1`, `static`, or `dynamic` and defaults to `0`. `1` remains an alias for `static`.
 - `WAITLINE_REPOSITORY`: optional Git repository override. Defaults to the upstream Waitline repository.
 - `WAITLINE_REF`: Git commit or ref to build. The default pins `94d7d7670de85b5b5018ed9f35206d56146efc0a`, which includes the readline API and interactive-input implementation used by the integration tests.
 - `WAITLINE_BRANCH`: legacy branch override, used only when `WAITLINE_REF` is not explicitly set. Leave it unset to use the pinned commit.

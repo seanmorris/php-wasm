@@ -2,13 +2,15 @@
 
 `pdo-pglite` is the PostgreSQL-compatible PDO driver extension used by `php-wasm` via `@electric-sql/pglite`.
 
-This package mainly exists so custom `php-wasm` builds can compile in the `pdo_pglite` extension.
-It does not expose a separate JavaScript entrypoint from this folder. At runtime, support is activated by passing a `PGlite` constructor into the `php-wasm` runtime.
+The package includes static-build integration and a dynamic loader. Add the
+loader to `sharedLibs` when using the dynamic profile, and pass a `PGlite`
+constructor into the runtime. The standard Vrzno bridge remains compiled in.
 
 ## Requirements
 
 `pdo_pglite` requires PHP 8.1 or newer.
-Custom builds must also keep the Vrzno extension enabled (`WITH_VRZNO=1`).
+Custom builds must enable Vrzno. Dynamic PDO-PGlite can use either static or
+dynamic Vrzno; static PDO-PGlite requires static Vrzno.
 
 ## Install
 
@@ -18,13 +20,17 @@ npm install php-wasm pdo-pglite @electric-sql/pglite@^0.5.8
 
 ## Usage
 
+For the dynamic profile, built with `WITH_PDO_PGLITE=dynamic` and static Vrzno:
+
 ```js
 import { PhpWeb } from 'php-wasm/PhpWeb.mjs';
 import { PGlite } from '@electric-sql/pglite';
+import pdoPglite from 'pdo-pglite';
 
 const php = new PhpWeb({
   version: '8.4',
   PGlite,
+  sharedLibs: [pdoPglite],
 });
 
 await php.run(`<?php
@@ -46,11 +52,25 @@ See the [PGlite upgrade guide](https://pglite.dev/docs/upgrade) and
 
 ## Custom Builds
 
-Enable `WITH_PDO_PGLITE=1` in `.php-wasm-rc`.
+`WITH_PDO_PGLITE=1` compiles PDO-PGlite statically. Use
+`WITH_PDO_PGLITE=dynamic` to produce the versioned side module. The standard
+dynamic profile uses this mode; the static profile compiles the driver in.
+
+The shared profile requests `WITH_PDO_PGLITE=shared`, which falls back to static
+bindings because the PGlite provider is JavaScript and has no separate native
+support library to share. Dynamic build errors do not trigger a static fallback.
+
+For a custom build with dynamic Vrzno, explicitly load it first:
+
+```js
+import vrzno from 'vrzno';
+// The PDO-PGlite loader returns only its own module.
+const sharedLibs = [vrzno, pdoPglite];
+```
 
 ## Build Options
 
-- `WITH_PDO_PGLITE`: defaults to `1`. Set it to `0` to exclude the extension from a custom build. PHP 8.0 builds must set it to `0`.
+- `WITH_PDO_PGLITE`: accepts `0`, `1`, `static`, `shared`, or `dynamic`. Custom builds default to `1` (static) on PHP 8.1+ and `0` on PHP 8.0. PHP 8.0 cannot enable the driver.
 - `PDO_PGLITE_REPOSITORY`: optional Git repository override. Defaults to the upstream `pdo-pglite` repository.
 - `PDO_PGLITE_REF`: Git revision to build. The default is an immutable commit pin.
 - `PDO_PGLITE_DEV_PATH`: optional local source checkout to use instead of the pinned repository during the build.

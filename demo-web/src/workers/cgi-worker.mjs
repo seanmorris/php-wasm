@@ -27,6 +27,7 @@ import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { coordinateDemoDatabase, withDemoDatabaseLock } from '../lib/demoDatabaseRuntime.worker.js';
 import { createWorkbenchActions } from '../lib/queryWorkbench.worker.js';
 import { createEditorFilesystemActions } from '../lib/editorFilesystem.worker.js';
+import { pdoPgliteLibraries } from '../lib/pdoPgliteLibraries.js';
 
 const sharedLibs = [];
 const workerLibType = typeof __DEMO_LIB_TYPE__ !== 'undefined'
@@ -174,7 +175,7 @@ const init = () => {
 		version: '8.3'
 		, onRequest
 		, notFound
-		, sharedLibs
+		, sharedLibs: [...sharedLibs, ...pdoPgliteLibraries(workerLibType, '8.3')]
 		, files
 		, PGlite: DemoPGlite
 		, actions

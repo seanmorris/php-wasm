@@ -11,6 +11,19 @@ import { PhpDbgNode } from 'php-dbg-wasm';
 import { PhpDbgWeb } from 'php-dbg-wasm/PhpDbgWeb';
 import type { PhpBinaryRuntime, PhpRuntimeArgs, PhpRuntimeFactory, PhpFileNode } from 'php-wasm/public';
 import type { PhpBase as PublicBase } from 'php-wasm/public';
+import vrzno from 'vrzno';
+import pdoPglite from 'pdo-pglite';
+import waitline from 'waitline';
+
+const bridgeLibraries = [vrzno, pdoPglite, waitline];
+new PhpWeb({version: '8.4', sharedLibs: bridgeLibraries});
+new PhpNode({version: '8.4', sharedLibs: [pdoPglite]});
+new PhpCgiNode({version: '8.4', sharedLibs: bridgeLibraries});
+new PhpCliWeb({version: '8.4', sharedLibs: bridgeLibraries});
+new PhpDbgWeb({version: '8.4', sharedLibs: bridgeLibraries});
+new PhpWeb({dynamicLibs: [pdoPglite]});
+// @ts-expect-error Library objects must provide an asset URL or loader.
+new PhpWeb({sharedLibs: [{}]});
 
 const runtime: PhpBinaryRuntime = { HEAPU8: new Uint8Array(8) };
 const syncFactory: PhpRuntimeFactory = (_args: PhpRuntimeArgs) => runtime;

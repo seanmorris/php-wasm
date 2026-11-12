@@ -53,6 +53,11 @@ declare interface RuntimeFetchEvent {
 	respondWith(response: Response | Promise<Response>): void;
 }
 
+declare interface PhpLibraryLoader {
+	getLibs(php: {phpVersion?: PhpRuntimeVersion}): PhpSharedLibrary[];
+	getFiles?(php: {phpVersion?: PhpRuntimeVersion}): PhpPreloadFile[];
+}
+
 declare interface PhpSharedLibrary {
 	name?: string;
 	url: string | URL;
@@ -67,7 +72,7 @@ declare interface PhpVhost {
 	entrypoint: string;
 }
 
-declare type PhpLibraryList = Array<string | URL | PhpSharedLibrary>;
+declare type PhpLibraryList = Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
 declare type PhpPreloadFileList = PhpPreloadFile[];
 declare type PhpVhostList = PhpVhost[];
 

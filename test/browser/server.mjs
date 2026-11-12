@@ -100,11 +100,14 @@ const packageSpecifierAliases = new Map([
 	, ['php-wasm-libzip', '/packages/libzip']
 	, ['php-wasm-mbstring', '/packages/mbstring']
 	, ['php-wasm-openssl', '/packages/openssl']
+	, ['pdo-pglite', '/packages/pdo-pglite']
 	, ['php-wasm-simplexml', '/packages/simplexml']
 	, ['php-wasm-sqlite', '/packages/sqlite']
 	, ['php-wasm-tidy', '/packages/tidy']
 	, ['php-wasm-xml', '/packages/xml']
 	, ['php-wasm-zlib', '/packages/zlib']
+	, ['vrzno', '/packages/vrzno']
+	, ['waitline', '/packages/waitline']
 ]);
 
 const packageIndexSpecifiers = new Set([
@@ -118,11 +121,14 @@ const packageIndexSpecifiers = new Set([
 	, 'php-wasm-libzip'
 	, 'php-wasm-mbstring'
 	, 'php-wasm-openssl'
+	, 'pdo-pglite'
 	, 'php-wasm-simplexml'
 	, 'php-wasm-sqlite'
 	, 'php-wasm-tidy'
 	, 'php-wasm-xml'
 	, 'php-wasm-zlib'
+	, 'vrzno'
+	, 'waitline'
 ]);
 
 const send = (res, status, body, headers = {}) => {
