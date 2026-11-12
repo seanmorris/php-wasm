@@ -671,63 +671,63 @@ ${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm &: ${DEPENDENCIES} third_party/
 	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' ${CLOUDFLARE_RUNTIME}
 
 web-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
+	$(if $(strip ${WEB_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS})
 ifneq (${STDLIB_WEB_TARGET},)
 	${MAKE} ${STDLIB_WEB_TARGET}
 endif
 	@ cat ico.ans >&2
 
 web-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
+	$(if $(strip ${WEB_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS})
 	@ cat ico.ans >&2
 
 worker-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
+	$(if $(strip ${WORKER_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS})
 ifneq (${STDLIB_WORKER_TARGET},)
 	${MAKE} ${STDLIB_WORKER_TARGET}
 endif
 	@ cat ico.ans >&2
 
 worker-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_JS_ASSETS}
+	$(if $(strip ${WORKER_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_JS_ASSETS})
 	@ cat ico.ans >&2
 
 webview-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
+	$(if $(strip ${WEBVIEW_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS})
 ifneq (${STDLIB_WEBVIEW_TARGET},)
 	${MAKE} ${STDLIB_WEBVIEW_TARGET}
 endif
 	@ cat ico.ans >&2
 
 webview-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_JS_ASSETS}
+	$(if $(strip ${WEBVIEW_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_JS_ASSETS})
 	@ cat ico.ans >&2
 
 node-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
+	$(if $(strip ${NODE_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS})
 ifneq (${STDLIB_NODE_TARGET},)
 	${MAKE} ${STDLIB_NODE_TARGET}
 endif
 	@ cat ico.ans >&2
 
 node-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS}
+	$(if $(strip ${NODE_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS})
 	@ cat ico.ans >&2
 
 # You must have one of the above "Single Builds" done to use the following step.
@@ -999,18 +999,18 @@ ${ENV_FILE}:
 	touch -a ${ENV_FILE}
 
 archives:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES}
+	$(if $(strip ${ARCHIVES}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES})
 
 shared:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS}
+	$(if $(strip ${SHARED_LIBS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS})
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
-	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${ARCHIVES} ${PHP_CONFIGURE_DEPS}),${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS})
 
 dynamic:
-	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
+	$(if $(strip ${DYNAMIC_LIBS}),${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS})
 
 dynamic-libs.json:
 	echo ${DYNAMIC_LIBS_GROUPED} | jq -Rc 'split(" ")' > $@

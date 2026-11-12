@@ -105,3 +105,50 @@ $(SAPI_CLI_PATH) $(SAPI_CGI_PATH) $(SAPI_PHPDBG_PATH):
 	build();
 	for(const name of targets) assert.equal(fs.readFileSync(path.join(directory, name), 'utf8'), 'new curl with Digest');
 });
+
+test('build targets never start a sub-make without goals', t => {
+	const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'php-submake-goals-'));
+	t.after(() => fs.rmSync(directory, {recursive: true, force: true}));
+	const log = path.join(directory, 'calls');
+	const recorder = path.join(directory, 'record-make.cjs');
+	// Stand in for $(MAKE) in the production recipes: record each sub-make's
+	// arguments instead of running it. A sub-make with no goal would build the
+	// default goal, which leads back to these same recipes.
+	fs.writeFileSync(recorder, `require('node:fs').appendFileSync(${JSON.stringify(log)}, JSON.stringify(process.argv.slice(2)) + '\\n');\n`);
+	const subMakes = (target, ...variables) => {
+		fs.writeFileSync(log, '');
+		execFileSync('make', [
+			'--no-print-directory', '-f', 'Makefile'
+			, 'ENV_FILE=/dev/null'
+			, 'PHP_VERSION=8.4'
+			, 'BUILD_WORKSPACE='
+			, 'MAKE_SHUFFLE='
+			, `MAKE=node '${recorder}'`
+			, ...variables
+			, target
+		], {cwd: root, env: makeEnvironment.independentMakeEnvironment(), stdio: 'pipe'});
+		return fs.readFileSync(log, 'utf8').split('\n').filter(Boolean).map(line => JSON.parse(line));
+	};
+	const goals = call => call.filter(argument => !argument.startsWith('-'));
+	// No extension packages and no preload data leave PHP_CONFIGURE_DEPS, the
+	// CommonJS asset lists and the library lists empty.
+	const bare = ['EXTENSION_PACKAGE_DIRS=', 'PRELOAD_ASSETS='];
+	const runtimeTargets = ['', '-cgi', '-cli', '-dbg'].flatMap(
+		sapi => ['web', 'worker', 'webview', 'node'].flatMap(
+			runtime => ['mjs', 'js'].map(format => `${runtime}${sapi}-${format}`)
+		)
+	);
+	for(const target of runtimeTargets)
+	{
+		const calls = subMakes(target, ...bare);
+		assert.ok(calls.length > 0, `${target} built nothing`);
+		for(const call of calls) assert.notDeepEqual(goals(call), [], `${target} started a sub-make without goals: make ${call.join(' ')}`);
+	}
+	for(const target of ['archives', 'shared', 'dynamic', 'deps'])
+		assert.deepEqual(subMakes(target, ...bare), [], `${target} started a sub-make with nothing to build`);
+	// A list with entries still reaches its sub-make.
+	for(const [target, variable] of [['archives', 'ARCHIVES'], ['shared', 'SHARED_LIBS'], ['dynamic', 'DYNAMIC_LIBS'], ['deps', 'PHP_CONFIGURE_DEPS']])
+		assert.deepEqual(subMakes(target, ...bare, `${variable}=requested-goal`).map(goals), [['requested-goal']], target);
+	assert.deepEqual(goals(subMakes('node-dbg-js', ...bare, 'PHP_CONFIGURE_DEPS=requested-goal')[0]), ['requested-goal']);
+	assert.deepEqual(goals(subMakes('web-js', ...bare, 'EXTRA_MODULES=requested-goal').at(-1)), ['requested-goal']);
+});

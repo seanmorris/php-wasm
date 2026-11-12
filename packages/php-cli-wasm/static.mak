@@ -55,51 +55,51 @@ NODE_CLI_JS_ASSETS+= ${PHP_CLI_DIST_DIR}/php${PHP_SUFFIX}-cli-node.js.wasm.map.M
 endif
 
 web-cli-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_CLI_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_CLI_MJS_ASSETS}
+	$(if $(strip ${WEB_CLI_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_CLI_MJS_ASSETS})
 	@ cat ico.ans >&2
 
 web-cli-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_CLI_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_CLI_JS_ASSETS}
+	$(if $(strip ${WEB_CLI_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_CLI_JS_ASSETS})
 	@ cat ico.ans >&2
 
 worker-cli-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_CLI_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_CLI_MJS_ASSETS}
+	$(if $(strip ${WORKER_CLI_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_CLI_MJS_ASSETS})
 	@ cat ico.ans >&2
 
 worker-cli-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_CLI_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_CLI_JS_ASSETS}
+	$(if $(strip ${WORKER_CLI_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_CLI_JS_ASSETS})
 	@ cat ico.ans >&2
 
 webview-cli-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_CLI_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_CLI_MJS_ASSETS}
+	$(if $(strip ${WEBVIEW_CLI_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_CLI_MJS_ASSETS})
 	@ cat ico.ans >&2
 
 webview-cli-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_CLI_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_CLI_JS_ASSETS}
+	$(if $(strip ${WEBVIEW_CLI_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_CLI_JS_ASSETS})
 	@ cat ico.ans >&2
 
 node-cli-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_CLI_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_CLI_MJS_ASSETS}
+	$(if $(strip ${NODE_CLI_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_CLI_MJS_ASSETS})
 	@ cat ico.ans >&2
 
 node-cli-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_CLI_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_CLI_JS_ASSETS}
+	$(if $(strip ${NODE_CLI_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_CLI_JS_ASSETS})
 	@ cat ico.ans >&2
 
 cli: cli-all
