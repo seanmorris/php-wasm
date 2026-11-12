@@ -5,6 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
+import {missingRuntimeImports} from './lib/runtime-imports.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirs = [
@@ -327,6 +328,20 @@ test('runtime package tarballs only ship hashed wasm payloads', () => {
 			unhashedWasmFiles,
 			[],
 			`${packageDir} tarball includes unhashed wasm files: ${unhashedWasmFiles.join(', ')}`
+		);
+	}
+});
+
+test('public runtime wrappers ship every native loader they import', () => {
+	for(const packageDir of packageDirs.slice(0, 4))
+	{
+		assert.deepEqual(
+			missingRuntimeImports(path.join(repoRoot, packageDir), {
+				files: packFiles(packageDir)
+				, phpVersion: process.env.PHP_VERSION
+			})
+			, []
+			, `${packageDir} omits native loaders needed when its public wrappers are instantiated`
 		);
 	}
 });

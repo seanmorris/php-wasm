@@ -9,6 +9,25 @@ import makeEnvironment from '../../bin/make-environment.cjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 
+test('WebView compiler flags include the web environment required for asynchronous asset loading', () => {
+	for(const environment of ['web', 'worker', 'webview', 'node'])
+	{
+		const flags = execFileSync('make', [
+			'--no-print-directory', '-f', 'Makefile', '-f', '-', 'environment-flags'
+			, 'ENV_FILE=/dev/null', 'MAKE_SHUFFLE=', 'BUILD_WORKSPACE='
+			, 'EXTENSION_PACKAGE_DIRS=', 'FS_TYPE='
+			, `ENVIRONMENT=${environment}`
+		], {
+			cwd: root
+			, env: makeEnvironment.independentMakeEnvironment()
+			, encoding: 'utf8'
+			, input: 'environment-flags:\n\t@echo $(BUILD_FLAGS)\n'
+		});
+		const expected = environment === 'webview' ? 'web,webview' : environment;
+		assert.ok(flags.includes(`-s ENVIRONMENT=${expected} `), flags);
+	}
+});
+
 test('standalone CGI, CLI and debugger builds prepare pre-JS before their native link', t => {
 	const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'php-sapi-pre-js-'));
 	t.after(() => fs.rmSync(directory, {recursive: true, force: true}));

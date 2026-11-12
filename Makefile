@@ -467,6 +467,8 @@ endif
 WEB_FS_TYPE?=-lidbfs.js
 NODE_FS_TYPE?=-lnodefs.js
 WORKER_FS_TYPE?=${WEB_FS_TYPE}
+# Emscripten treats webview as a web subset and requires both names.
+WEBVIEW_ENVIRONMENTS=web,webview
 
 ifneq (${NODE_RAW_FS},0)
 NODE_FS_TYPE+= -lnoderawfs.js
@@ -525,7 +527,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
-		-s ENVIRONMENT=${ENVIRONMENT}       \
+		-s ENVIRONMENT=$(if $(filter webview,${ENVIRONMENT}),${WEBVIEW_ENVIRONMENTS},${ENVIRONMENT}) \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0     \
 		-s ALLOW_MEMORY_GROWTH=1            \
 		-s TOTAL_STACK=32MB                 \
