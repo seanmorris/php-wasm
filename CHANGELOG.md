@@ -16,6 +16,10 @@ Changes
 
 * The Node wrappers (`PhpNode`, `PhpCgiNode`, `PhpCliNode`, `PhpDbgNode`) no longer load the wrong runtime file when a global `require` or `__dirname` exists, as in `node -e`, the Node REPL, or webpack/esbuild bundles for Node. Each version's runtime is imported by a fixed path again, so bundlers can resolve it, and the CommonJS build selects its own files at build time. Bundles also no longer warn about a standalone `import.meta` in `PhpBase`.
 
+* `php-dbg-wasm`: added `PhpDbgWorker` (`php-dbg-wasm/PhpDbgWorker`), which runs phpdbg inside a module worker with the same API as `PhpDbgWeb`. `make worker-dbg-mjs` and `make worker-dbg-js` build it, and `dbg-all`, `dbg-mjs` and `dbg-cjs` include it. Web and worker builds now write an `.assets.json` manifest beside each loader, listing its `.wasm` filename, SHA-256, required shared libraries and bridge version.
+
+* `php-dbg-wasm`: added an optional bridge for embedding the debugger in a page (bridge version 1, exported as `php_wasm_dbg_bridge_version`). `onDbgOutput({type, fd, bytes, evaluating})` receives program output and debugger output separately, and `onDbgEvent` reports exception details. With `dbgYieldInterval` set, a running script yields to the event loop at that interval and can be paused or stopped through the module's `dbgPauseRequested` and `dbgStopRequested` flags. `dbgManagedShutdown: true` enables shutdown functions, destructors and output handlers during managed cleanup. Callers that set none of these keep their console output and do not yield.
+
 * `php-dbg-wasm`: `dumpBacktrace()` now numbers frames from the innermost frame whichever frame `switchFrame()` selected, and marks the selected frame with `selected`. Before, the list started at the selected frame and numbered it 0, so its indexes stopped matching `switchFrame()` once a caller was selected.
 
 * `php-dbg-wasm`: the debugger wrappers accept `dbgArgs`, extra phpdbg command-line arguments. `dbgArgs: ['-q']` starts without the welcome banner; command notices are unaffected.
