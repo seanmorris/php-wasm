@@ -233,8 +233,14 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.equal(described.localString.reference, false);
 
 	const nestedArray = await php.describeValue(variables.localArray.nested);
+	const nestedRatio = await php.describeChild(variables.localArray.nested, 'ratio');
+	const objectLabel = await php.describeChild(variables.localObject, 'label');
 
-	assert.deepEqual([nestedArray.type, nestedArray.className, nestedArray.count], ['array', null, 1]);
+	assert.deepEqual([nestedArray.type, nestedArray.className, nestedArray.count], ['array', null, 2]);
+	// A child keeps its own type: 2.0 would read as an int once it is a JavaScript number.
+	assert.deepEqual([nestedRatio.type, nestedRatio.value], ['float', 2]);
+	assert.equal((await php.describeValue(variables.localArray.nested.ratio)).type, 'int');
+	assert.deepEqual([objectLabel.type, objectLabel.count, objectLabel.value], ['string', 12, 'object-value']);
 
 	const userGlobals = await php.dumpGlobals({user: true});
 	const describedConstants = await php.describeConstants();
@@ -336,4 +342,93 @@ test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node 
 	assert.match(stdOut(), /dl-registered/);
 	assert.equal(stdErr(), '');
 	assert.throws(() => new PhpDbgNode({version, dbgArgs: '-q'}), /dbgArgs must be an array of strings/);
+});
+
+test(`lists the frames switchFrame() selects when an internal function is on the stack in Node for PHP ${version}`, async () => {
+	const callbackPath = '/preload/test_www/phpdbg-callback-frames.php';
+	const callbackFile = path.join(__dirname, '../browser/fixtures/scripts/phpdbg-callback-frames.php');
+	const callbackUrl = pathToFileURL(callbackFile).href;
+	const callbackLine = fs.readFileSync(callbackFile, 'utf8')
+		.split(/\r?\n/)
+		.findIndex(line => line.includes('PHPDBG_CALLBACK_BREAKPOINT')) + 1;
+
+	const php = new PhpDbgNode(nodeRuntimeOptions({
+		runtime: 'dbg'
+		, files: [{parent: '/preload/test_www/', name: 'phpdbg-callback-frames.php', url: callbackUrl}]
+		, version
+		, dbgArgs: ['-q']
+	}));
+	const {stdOut, stdErr} = attachOutput(php);
+
+	const process = php.run();
+
+	await waitForPromptState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(60000, 30000),
+		'boot prompt'
+	);
+
+	await php.provideInput(`exec ${callbackPath}`);
+	await php.provideInput(`break ${callbackPath}:${callbackLine}`);
+	await php.provideInput('run');
+
+	const pauseStart = Date.now();
+
+	while(
+		!(await php.isExecuting().catch(() => 0) && await php.currentLine().catch(() => 0) === callbackLine)
+		&& Date.now() - pauseStart < timeoutForVersion(45000, 20000)
+	) {
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	const frames = await php.dumpBacktrace();
+
+	// array_map()'s own frame runs no PHP code, so it is not a frame to inspect.
+	assert.deepEqual(
+		frames.map(frame => [frame.frame, frame.className, frame.functionName])
+		, [[0, '', 'phpdbg_callback_double'], [1, 'PhpDbgCallbackJob', 'run'], [2, '', '']]
+	);
+	assert.deepEqual(frames.map(frame => frame.filename), [callbackPath, callbackPath, callbackPath]);
+
+	// Every listed index selects the frame it names, and listing again does not move the selection.
+	const frameLocals = [];
+
+	for(const frame of frames)
+	{
+		await php.switchFrame(frame.frame);
+
+		frameLocals.push(Object.keys(await php.dumpVars()));
+
+		assert.equal((await php.dumpBacktrace()).findIndex(candidate => candidate.selected), frame.frame);
+	}
+
+	assert.ok(frameLocals[0].includes('number'), `callback frame: ${frameLocals[0]}`);
+	assert.ok(frameLocals[1].includes('items'), `method frame: ${frameLocals[1]}`);
+	assert.ok(frameLocals[2].includes('phpdbgCallbackJob'), `top-level frame: ${frameLocals[2]}`);
+
+	await php.switchFrame(0);
+	await php.provideInput('continue');
+
+	const completionStart = Date.now();
+
+	while(!stdOut().includes('callback-complete:42') && Date.now() - completionStart < 20000)
+	{
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	await php.provideInput('quit');
+
+	await process.catch(error => {
+		if(error && typeof error === 'object' && 'status' in error)
+		{
+			return error.status;
+		}
+
+		throw error;
+	});
+
+	assert.ok(stdOut().includes('callback-complete:42'));
+	assert.equal(stdErr(), '');
 });

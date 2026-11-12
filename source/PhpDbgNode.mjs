@@ -660,7 +660,7 @@ export class PhpDbgNode extends PhpBase
 
 	/**
 	 * Describes a value taken from a dump, such as an array element or a property.
-	 * A scalar reached through a parent carries no PHP type, so an integral float reads as `int`.
+	 * A scalar reached through a parent carries no PHP type, so an integral float reads as `int`; use describeChild() to keep it.
 	 * @param {PhpRuntimeValue} value Value from a debugger dump.
 	 * @returns {Promise<object>} `{type, className, count, reference, value}`.
 	 */
@@ -671,6 +671,41 @@ export class PhpDbgNode extends PhpBase
 		this._requireDbgApi(php, 'describeValue()');
 
 		const zv = zvalPointer(value);
+
+		return {...(zv ? this._describeZval(php, zv) : describeScalar(value)), value};
+	}
+
+	/**
+	 * Describes one array element or object property from a dump, with its own PHP type.
+	 * @param {object} parent Array or object from a debugger dump.
+	 * @param {string} key Element key or property name, as `Object.keys(parent)` lists it.
+	 * @returns {Promise<object>} `{type, className, count, reference, value}`.
+	 */
+	async describeChild(parent, key)
+	{
+		const php = await this.binary;
+
+		this._requireDbgApi(php, 'describeChild()');
+
+		const value = parent[key];
+		const parentZv = zvalPointer(parent);
+		let zv = 0;
+
+		if(parentZv)
+		{
+			// Private and protected property names contain NUL bytes, so pass the length.
+			const bytes = new TextEncoder().encode(String(key));
+			const keyPtr = php._malloc(bytes.length + 1);
+
+			php.HEAPU8.set(bytes, keyPtr);
+			php.HEAPU8[keyPtr + bytes.length] = 0;
+
+			zv = php.ccall('vrzno_dbg_zval_child', NUM, [NUM, NUM, NUM], [parentZv, keyPtr, bytes.length], {});
+
+			php._free(keyPtr);
+		}
+
+		zv = zv || zvalPointer(value);
 
 		return {...(zv ? this._describeZval(php, zv) : describeScalar(value)), value};
 	}

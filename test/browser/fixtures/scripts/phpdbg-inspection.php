@@ -39,7 +39,7 @@ function phpdbg_inspection_inner(string $argument): string
 	$localFloat = 3.0;
 	$localBoolean = true;
 	$localNull = null;
-	$localArray = ['nested' => ['answer' => 42]];
+	$localArray = ['nested' => ['answer' => 42, 'ratio' => 2.0]];
 	$localObject = new PhpDbgInspectionClass('object-value');
 	$breakpointValue = $argument; // PHPDBG_INSPECTION_BREAKPOINT
 

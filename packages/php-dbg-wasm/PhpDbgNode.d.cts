@@ -30,5 +30,6 @@ export class PhpDbgNode extends PhpBase<[], number> {
 	describeGlobals(options?: {user?: boolean}): Promise<Array<import('./public.d.ts').PhpDbgSymbol>>;
 	describeConstants(): Promise<Array<import('./public.d.ts').PhpDbgSymbol>>;
 	describeValue(value: import('./public.d.ts').PhpRuntimeValue): Promise<import('./public.d.ts').PhpDbgValue>;
+	describeChild(parent: object, key: string): Promise<import('./public.d.ts').PhpDbgValue>;
 	switchFrame(frame: number): Promise<number>;
 }
