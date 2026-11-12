@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
 import {missingRuntimeImports} from './lib/runtime-imports.mjs';
+import {oversizedPackages, pack, publishablePackageDirs, unsharedBinaries} from './lib/package-checks.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirs = [
@@ -21,108 +22,9 @@ const packageDirs = [
 ];
 const packageRoot = path.join(repoRoot, 'packages');
 
-// jsDelivr documents that "packages larger than 150 MB" are not supported. Past
-// that, it answers every file of the package with 403 "Package size exceeded
-// the configured limit of 150 MB." It counts the unpacked files.
-const cdnPackageByteLimit = 150_000_000;
-
-const packResults = new Map;
-
-/**
- * Runs `npm pack --dry-run` once per package directory.
- * @param {string} packageDir Package directory, relative to the root.
- * @param {string} root Directory that holds `packages/`.
- * @returns {{files: {path: string, size: number}[], unpackedSize: number}} npm's description of the tarball.
- */
-function pack(packageDir, root = repoRoot)
-{
-	const key = path.resolve(root, packageDir);
-
-	if(!packResults.has(key))
-	{
-		const output = execFileSync(
-			'npm'
-			, ['pack', '--dry-run', `./${packageDir}`, '--json']
-			, {cwd: root, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024}
-		);
-		const [result] = JSON.parse(output);
-
-		packResults.set(key, result);
-	}
-
-	return packResults.get(key);
-}
-
 function packFiles(packageDir)
 {
 	return new Set(pack(packageDir).files.map(file => file.path));
-}
-
-/**
- * Lists the packages publish-packages.sh would publish.
- * @param {string} root Directory that holds `packages/`.
- * @returns {string[]} Package directories, relative to the root.
- */
-function publishablePackageDirs(root = repoRoot)
-{
-	const isPublished = name => {
-		const manifest = path.join(root, 'packages', name, 'package.json');
-
-		return fs.existsSync(manifest)
-			&& JSON.parse(fs.readFileSync(manifest, 'utf8')).private !== true;
-	};
-
-	return fs.readdirSync(path.join(root, 'packages')).sort()
-		.filter(isPublished)
-		.map(name => `packages/${name}`);
-}
-
-/**
- * Finds packages whose unpacked size is over the CDN's package limit.
- * @param {string[]} packageDirs Package directories, relative to the root.
- * @param {string} root Directory that holds `packages/`.
- * @param {number} limit Largest unpacked size allowed, in bytes.
- * @returns {string[]} One sentence per package over the limit.
- */
-function oversizedPackages(packageDirs, root = repoRoot, limit = cdnPackageByteLimit)
-{
-	return packageDirs
-		.map(packageDir => ({packageDir, bytes: pack(packageDir, root).unpackedSize}))
-		.filter(({bytes}) => bytes > limit)
-		.map(({packageDir, bytes}) => `${packageDir} unpacks to ${bytes} bytes, ${bytes - limit} over the ${limit}-byte CDN package limit`);
-}
-
-/**
- * Finds packages with more interpreter binaries than PHP versions. Every
- * environment of one PHP version (Node, web, worker; ESM and CommonJS) links
- * to the same binary, so hashing leaves one .wasm per version. A variant that
- * came out with its own binary would add about 13 MB per version.
- * @param {string[]} packageDirs Package directories, relative to the root.
- * @param {string} root Directory that holds `packages/`.
- * @returns {string[]} One sentence per package with unshared binaries.
- */
-function unsharedBinaries(packageDirs, root = repoRoot)
-{
-	const problems = [];
-
-	for(const packageDir of packageDirs)
-	{
-		const files = pack(packageDir, root).files.map(file => file.path);
-		const versions = new Set(files
-			.map(file => file.match(/^php(\d+\.\d+)-[^/]+\.(?:mjs|js)$/)?.[1])
-			.filter(Boolean));
-		const binaries = files.filter(file => /^[0-9a-f]+\.wasm$/.test(file));
-
-		if(binaries.length > versions.size)
-		{
-			problems.push(
-				`${packageDir} ships ${binaries.length} wasm binaries for ${versions.size} PHP versions`
-				+ ` (${[...versions].sort().join(', ') || 'none'}); the environments of a version must share one`
-			);
-		}
-	}
-
-	return problems;
 }
 
 function addTarget(targets, value)
@@ -344,10 +246,6 @@ test('public runtime wrappers ship every native loader they import', () => {
 			, `${packageDir} omits native loaders needed when its public wrappers are instantiated`
 		);
 	}
-});
-
-test('published packages stay within the CDN package size limit', () => {
-	assert.deepEqual(oversizedPackages(publishablePackageDirs()), []);
 });
 
 test('runtime packages ship one wasm binary per PHP version', () => {
