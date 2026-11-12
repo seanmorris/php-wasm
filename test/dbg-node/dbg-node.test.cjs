@@ -214,9 +214,16 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 
 	const oldFrame = await php.switchFrame(1);
 	const outerVariables = await php.dumpVars();
+	const outerBacktrace = await php.dumpBacktrace();
+	const withoutSelection = frames => frames.map(({filename, lineNo, frame}) => ({filename, lineNo, frame}));
 
 	assert.equal(oldFrame, 0);
 	assert.equal(outerVariables.outerValue, 'outer-value');
+	// The backtrace is numbered from the innermost frame whichever frame is
+	// selected, and listing it leaves the selection where it was.
+	assert.deepEqual(withoutSelection(outerBacktrace), withoutSelection(backtrace));
+	assert.deepEqual(backtrace.map(frame => frame.selected), backtrace.map((frame, index) => index === 0));
+	assert.deepEqual(outerBacktrace.map(frame => frame.selected), backtrace.map((frame, index) => index === 1));
 	assert.equal(await php.switchFrame(oldFrame), 1);
 
 	await php.provideInput('continue');
@@ -242,7 +249,48 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.match(prompt, /prompt>/i);
 	assert.ok(stdOut().includes(`[Set execution context: ${scriptPath}]`));
 	assert.ok(stdOut().includes(`[Successful compilation of ${scriptPath}]`));
+	assert.match(stdOut(), /Welcome to phpdbg/);
 	assert.ok(stdOut().includes('inspection-complete:outer-value:local-value:42:true:null:42:object-value:global-value'));
 	assert.equal(stdErr(), '');
 	assert.equal(exitCode, 0);
+});
+
+test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node for PHP ${version}`, async () => {
+	const php = new PhpDbgNode(nodeRuntimeOptions({runtime: 'dbg', files: preloadFiles, version, dbgArgs: ['-q']}));
+	const {stdOut, stdErr} = attachOutput(php);
+
+	const process = php.run();
+
+	await waitForPromptState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(60000, 30000),
+		'boot prompt'
+	);
+
+	await php.provideInput(`exec ${scriptPath}`);
+
+	// Command notices still arrive; only the banner is gone.
+	await waitForReadyState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(45000, 20000)
+	);
+
+	await php.provideInput('quit');
+
+	await process.catch(error => {
+		if(error && typeof error === 'object' && 'status' in error)
+		{
+			return error.status;
+		}
+
+		throw error;
+	});
+
+	assert.doesNotMatch(stdOut(), /Welcome to phpdbg/);
+	assert.equal(stdErr(), '');
+	assert.throws(() => new PhpDbgNode({version, dbgArgs: '-q'}), /dbgArgs must be an array of strings/);
 });

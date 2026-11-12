@@ -26,7 +26,7 @@ export class PhpDbgWebBase extends PhpBase<[], void> {
 	dumpFunctions(): Promise<object>;
 	dumpClasses(): Promise<object>;
 	dumpFiles(): Promise<string[]>;
-	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number}>>;
+	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean}>>;
 	switchFrame(frame: number): Promise<number>;
 	refresh(): Promise<void>;
 	_enqueue(callback: (...params: Array<string | number | boolean | object | undefined>) => Promise<PhpRuntimeValue>, params?: Array<string | number | boolean | object | undefined>, readOnly?: boolean): Promise<PhpRuntimeValue>;

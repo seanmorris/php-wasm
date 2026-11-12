@@ -16,6 +16,10 @@ Changes
 
 * The Node wrappers (`PhpNode`, `PhpCgiNode`, `PhpCliNode`, `PhpDbgNode`) no longer load the wrong runtime file when a global `require` or `__dirname` exists, as in `node -e`, the Node REPL, or webpack/esbuild bundles for Node. Each version's runtime is imported by a fixed path again, so bundlers can resolve it, and the CommonJS build selects its own files at build time. Bundles also no longer warn about a standalone `import.meta` in `PhpBase`.
 
+* `php-dbg-wasm`: `dumpBacktrace()` now numbers frames from the innermost frame whichever frame `switchFrame()` selected, and marks the selected frame with `selected`. Before, the list started at the selected frame and numbered it 0, so its indexes stopped matching `switchFrame()` once a caller was selected.
+
+* `php-dbg-wasm`: the debugger wrappers accept `dbgArgs`, extra phpdbg command-line arguments. `dbgArgs: ['-q']` starts without the welcome banner; command notices are unaffected.
+
 ## v0.2.0 - Ramifying Sympodia
 
 * Added two runtime packages for PHP 8.0–8.5, neither of which depends on `php-wasm`. `php-sdl-wasm` is a standalone browser runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and OpenGL shader bindings (`import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs'`). `php-cloud-wasm` runs PHP in Cloudflare Workers with Vrzno, zlib/ZIP and PDO-CFD1 for D1 (`import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs'`). See the [SDL guide](packages/php-sdl-wasm/README.md) and the [Cloudflare guide](packages/php-cloud-wasm/README.md).

@@ -40,10 +40,15 @@ export class PhpDbgNode extends PhpBase
 {
 	/**
 	 * Creates a Node.js-hosted PHP debugger runtime.
-	 * @param {PhpRuntimeArgs} args Debug runtime configuration.
+	 * @param {PhpRuntimeArgs} args Debug runtime configuration. `dbgArgs` adds phpdbg command-line arguments, such as `['-q']` to skip the welcome banner.
 	 */
 	constructor(args = {})
 	{
+		if(args.dbgArgs !== undefined && !(Array.isArray(args.dbgArgs) && args.dbgArgs.every(arg => typeof arg === 'string')))
+		{
+			throw new TypeError('dbgArgs must be an array of strings');
+		}
+
 		const version = /** @type {PhpRuntimeVersion} */ (args.version ?? defaultVersion);
 		const constructorArgs = {locateFile: createLocateFile(), version, ...args};
 
@@ -77,6 +82,7 @@ export class PhpDbgNode extends PhpBase
 				throw new Error(`Unsupported PHP runtime: ${version}`);
 		}
 
+		this.dbgArgs = [...(args.dbgArgs ?? [])];
 		this.running = false;
 		this.paused = false;
 		this.currentFilePtr = null;
@@ -131,7 +137,7 @@ export class PhpDbgNode extends PhpBase
 	async _main()
 	{
 		const php = await this.binary;
-		const cmd = ['phpdbg', '-c', '/php.ini', '-e'];
+		const cmd = ['phpdbg', '-c', '/php.ini', ...this.dbgArgs, '-e'];
 		const ptrs = cmd.map(part => {
 			const len = php.lengthBytesUTF8(part) + 1;
 			const loc = php._malloc(len);
@@ -464,13 +470,22 @@ export class PhpDbgNode extends PhpBase
 	}
 
 	/**
-	 * Dumps the current debugger backtrace.
-	 * @returns {Promise<Array<{filename: string, lineNo: number, frame: number}>>} Stack frames for the current backtrace.
+	 * Dumps the current debugger backtrace, numbered from the innermost frame whichever frame is selected.
+	 * @returns {Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean}>>} Stack frames for the current backtrace.
 	 */
 	async dumpBacktrace()
 	{
 		const php = await this.binary;
+		// The native dump starts at the selected frame. List from the innermost
+		// frame so indexes match switchFrame(), then put the selection back.
+		const selected = php.ccall('vrzno_dbg_switch_frame', NUM, [NUM], [0], {});
 		const ptr = php.ccall('vrzno_dbg_dump_backtrace', NUM, [], [], {});
+
+		if(selected > 0)
+		{
+			php.ccall('vrzno_dbg_switch_frame', NUM, [NUM], [selected], {});
+		}
+
 		const heap = new DataView(php.HEAPU8.buffer);
 		const end = ptr + heap.getUint32(ptr, true);
 		const pointerLen = 4;
@@ -490,7 +505,7 @@ export class PhpDbgNode extends PhpBase
 			const lineNo = heap.getUint32(cur, true);
 			cur += pointerLen;
 
-			frames.push({filename, lineNo, frame: index});
+			frames.push({filename, lineNo, frame: index, selected: index === Math.max(selected, 0)});
 			index++;
 		}
 
