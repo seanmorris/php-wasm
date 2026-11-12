@@ -20,7 +20,7 @@ Changes
 
 * `php-dbg-wasm`: the debugger wrappers accept `dbgArgs`, extra phpdbg command-line arguments. `dbgArgs: ['-q']` starts without the welcome banner; command notices are unaffected.
 
-* `php-dbg-wasm`: with a Vrzno that provides debugger API 2 (`debuggerApiVersion()`), backtrace frames carry `functionName` and `className` and are counted the way `switchFrame()` counts them; `dumpGlobals({user: true})` lists user-defined globals from any frame; and `describeVars()`, `describeGlobals()`, `describeConstants()` and `describeValue()` report each value's PHP type, class, size and whether it is a reference. Existing methods keep their results.
+* `php-dbg-wasm`: with a Vrzno that provides debugger API 2 (`debuggerApiVersion()`), backtrace frames carry `functionName` and `className` and are counted the way `switchFrame()` counts them; `dumpGlobals({user: true})` lists user-defined globals from any frame; and `describeVars()`, `describeGlobals()`, `describeConstants()`, `describeChild()` and `describeValue()` report each value's PHP type, class, size and whether it is a reference. Existing methods keep their results.
 
 * `php-dbg-wasm`: `dl()` is now registered under phpdbg, as it is under the CLI. PHP leaves `dl()` to each SAPI and phpdbg did not add it.
 

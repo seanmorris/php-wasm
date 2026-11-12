@@ -114,6 +114,7 @@ for (const dbg of [new PhpDbgNode(), new PhpDbgWeb()]) {
 	const userGlobals: Promise<object | undefined> = dbg.dumpGlobals({user: true});
 	const described: Promise<Array<{name: string; type: string; className: string | null; count: number | null; reference: boolean}>> = dbg.describeVars();
 	const describedValue: Promise<{type: string; className: string | null}> = dbg.describeValue(1);
+	const describedChild: Promise<{type: string; count: number | null}> = dbg.describeChild({}, 'key');
 	// @ts-expect-error Described symbols are a list, not a name-keyed table.
 	const describedTable: Promise<Record<string, object>> = dbg.describeGlobals({user: true});
 	const symbols: object = dbg.dumpSymbols(0, runtime);

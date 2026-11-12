@@ -89,11 +89,12 @@ With version 2:
   `{name, type, className, count, reference, value}` for each symbol. `type` is
   a PHP type name, or `undefined` for a variable that has not been assigned
   yet; `count` is the number of elements in an array or of bytes in a string.
-  `describeValue(value)` does the same for a value taken from a dump, such as
-  an array element. A scalar reached that way carries no PHP type, so an
-  integral float reads as `int`.
+  `describeChild(parent, key)` does the same for one element of an array or
+  property of an object taken from a dump, and keeps its real type.
+  `describeValue(value)` describes a value on its own; a scalar carries no PHP
+  type by then, so an integral float reads as `int`.
 
-With version 1 those four methods and `dumpGlobals({user: true})` throw.
+With version 1 those five methods and `dumpGlobals({user: true})` throw.
 
 `dl()` is registered in the debugger runtime, as it is under the CLI.
 
