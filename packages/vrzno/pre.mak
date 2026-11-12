@@ -11,7 +11,7 @@ endif
 
 ifneq (${WITH_VRZNO},0)
 VRZNO_REPOSITORY?=https://github.com/seanmorris/vrzno.git
-VRZNO_REF?=a35c6fec588817bb421aebda2ebe83d48af2e870
+VRZNO_REF?=2be4aaab7ade5f626041827d893cc5391baaecd0
 VRZNO_SOURCE_STAMP=third_party/vrzno/.php-wasm-source.json
 VRZNO_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/vrzno/.php-wasm-source.json
 TEST_LIST+=$(wildcard packages/vrzno/test/*.mjs)
