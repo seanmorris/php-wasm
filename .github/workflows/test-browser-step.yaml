@@ -57,10 +57,11 @@ jobs:
       - name: Verify browser harness assets
         run: node test/browser/verify-browser-assets.mjs
 
-      - name: Install Playwright Chromium
+      - name: Use runner Chrome
         run: |
-          npx playwright install --with-deps chromium
-          node --input-type=module -e "import { chromium } from '@playwright/test'; console.log('PLAYWRIGHT_CHROMIUM_PATH=' + chromium.executablePath())" >> "$GITHUB_ENV"
+          BROWSER_EXECUTABLE="$(command -v google-chrome)"
+          "$BROWSER_EXECUTABLE" --version
+          printf '%s\n' "PLAYWRIGHT_CHROMIUM_PATH=$BROWSER_EXECUTABLE" >> "$GITHUB_ENV"
 
       - name: Run tests
         run: PHP_VERSION=${{ inputs.phpVersion }} PHP_VARIANT=${{ inputs.phpVariant }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-browser
