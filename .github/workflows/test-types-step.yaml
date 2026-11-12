@@ -36,6 +36,7 @@ jobs:
           test/build/builder-package.test.mjs
           test/build/web-exports.test.mjs
           test/build/runtime-imports.test.mjs test/build/native-link.test.mjs test/build/bridge-staging.test.mjs test/build/sdl-host-python.test.mjs
+          test/build/bridge-module-copy.test.mjs
           test/msg-bus.test.mjs test/php-tags.test.mjs
       - name: Verify CGI regressions on pinned Deno before native builds
         run: >-

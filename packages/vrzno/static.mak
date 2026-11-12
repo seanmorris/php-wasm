@@ -30,9 +30,14 @@ third_party/vrzno/vrzno.c: ${VRZNO_SOURCE_STAMP}
 third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c third_party/php${PHP_VERSION}-src/ext/vrzno/config.m4: ${VRZNO_EXTENSION_STAMP}
 	@test -f "$@"
 
+# A static build compiles in ext/vrzno and leaves its objects and generated headers
+# there. They are newer than the sources, so the side-module build would link them
+# as they are: a module without get_module, which PHP rejects. Copy the sources only.
 third_party/php${PHP_VERSION}-vrzno/config.m4: ${VRZNO_EXTENSION_STAMP}
 	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-vrzno
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/vrzno /src/third_party/php${PHP_VERSION}-vrzno
+	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-vrzno/generated /src/third_party/php${PHP_VERSION}-vrzno/.libs /src/third_party/php${PHP_VERSION}-vrzno/modules
+	${DOCKER_RUN} find /src/third_party/php${PHP_VERSION}-vrzno -type f \( -name '*.o' -o -name '*.lo' -o -name '*.dep' \) -delete
 	${DOCKER_RUN} touch /src/$@
 
 packages/vrzno/php${PHP_VERSION}-vrzno.so: ${PHPIZE} third_party/php${PHP_VERSION}-vrzno/config.m4

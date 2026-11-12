@@ -29,9 +29,14 @@ third_party/waitline/waitline.c third_party/waitline/config.m4: ${WAITLINE_SOURC
 third_party/php${PHP_VERSION}-src/ext/waitline/waitline.c third_party/php${PHP_VERSION}-src/ext/waitline/config.m4: ${WAITLINE_EXTENSION_STAMP}
 	@test -f "$@"
 
+# A static build compiles in ext/waitline and leaves its objects and generated headers
+# there. They are newer than the sources, so the side-module build would link them
+# as they are: a module without get_module, which PHP rejects. Copy the sources only.
 third_party/php${PHP_VERSION}-waitline/config.m4: ${WAITLINE_EXTENSION_STAMP}
 	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-waitline
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/waitline /src/third_party/php${PHP_VERSION}-waitline
+	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-waitline/generated /src/third_party/php${PHP_VERSION}-waitline/.libs /src/third_party/php${PHP_VERSION}-waitline/modules
+	${DOCKER_RUN} find /src/third_party/php${PHP_VERSION}-waitline -type f \( -name '*.o' -o -name '*.lo' -o -name '*.dep' \) -delete
 	${DOCKER_RUN} touch /src/$@
 
 packages/waitline/php${PHP_VERSION}-waitline.so: ${PHPIZE} third_party/php${PHP_VERSION}-waitline/config.m4
