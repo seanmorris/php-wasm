@@ -34,6 +34,27 @@ index ac51fe7..0b9c8df 100644
        }
 
        callback(null);
+diff --git a/src/lib/libccall.js b/src/lib/libccall.js
+index 6ecec65..4cbad87 100644
+--- a/src/lib/libccall.js
++++ b/src/lib/libccall.js
+@@ -7,11 +7,16 @@ addToLibrary({
+ #if MODULARIZE == 'instance' && !INCLUDE_FULL_LIBRARY
+   $getCFunc__deps: [() => error('ccall is not yet compatible with MODULARIZE=instance')],
++#elif MAIN_MODULE
++  $getCFunc__deps: ['$resolveGlobalSymbol'],
+ #endif
+   $getCFunc__internal: true,
+   $getCFunc: (ident) => {
+     var func = Module['_' + ident]; // closure exported function
++#if MAIN_MODULE
++    func ??= resolveGlobalSymbol(ident).sym;
++#endif
+ #if ASSERTIONS
+     assert(func, `Cannot call unknown function ${ident}, make sure it is exported`);
+ #endif
+     return func;
+   },
 diff --git a/src/lib/libasync.js b/src/lib/libasync.js
 --- a/src/lib/libasync.js
 +++ b/src/lib/libasync.js
