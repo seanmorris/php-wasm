@@ -71,6 +71,12 @@ shutdown functions, object destructors, and output handlers during request clean
 This is opt-in because standalone phpdbg normally discards those callbacks when
 resetting a debugging session.
 
+Pass `dbgArgs` to add phpdbg command-line arguments: `dbgArgs: ['-q']` starts
+without the welcome banner. Command notices are unaffected.
+
+`dumpBacktrace()` numbers frames from the innermost one, whichever frame
+`switchFrame()` selected, and marks the selected frame with `selected: true`.
+
 For a controller, styleable GUI, editor adapters, variable editing, structured
 results, and shared downloads, use
 [php-dbg-component](https://github.com/seanmorris/php-dbg-component).

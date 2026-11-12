@@ -106,7 +106,7 @@ for (const dbg of [new PhpDbgNode(), new PhpDbgWeb()]) {
 	const exit: Promise<number> = dbg.run();
 	const running: Promise<number> = dbg.isRunning();
 	const files: Promise<string[]> = dbg.dumpFiles();
-	const frames: Promise<Array<{filename: string; lineNo: number; frame: number}>> = dbg.dumpBacktrace();
+	const frames: Promise<Array<{filename: string; lineNo: number; frame: number; selected: boolean}>> = dbg.dumpBacktrace();
 	const symbols: object = dbg.dumpSymbols(0, runtime);
 	// @ts-expect-error No symbol table is returned when its native pointer is zero.
 	const locals: Promise<object> = dbg.dumpVars();

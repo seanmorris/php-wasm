@@ -23,6 +23,6 @@ export class PhpDbgNode extends PhpBase<[], number> {
 	dumpFunctions(): Promise<object>;
 	dumpClasses(): Promise<object>;
 	dumpFiles(): Promise<string[]>;
-	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number}>>;
+	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean}>>;
 	switchFrame(frame: number): Promise<number>;
 }
