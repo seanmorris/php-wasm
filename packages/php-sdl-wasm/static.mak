@@ -3,7 +3,6 @@
 DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} -sASYNCIFY -sUSE_SDL=2' -w /src/third_party/php${PHP_VERSION}-sdl/ emscripten-builder
 SDL_RUMBLE_PORT=packages/php-sdl-wasm/ports/sdl2-rumble.py
 SDL_RUMBLE_PATCH=packages/php-sdl-wasm/patches/SDL2-rumble.patch
-SDL_RUMBLE_LIBRARY=$(shell python3 ${SDL_RUMBLE_PORT} --print-library)
 
 third_party/php${PHP_VERSION}-sdl/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-sdl\e[0m"
@@ -48,6 +47,6 @@ lib/lib/libSDL2.a: ${SDL_RUMBLE_PORT} ${SDL_RUMBLE_PATCH}
 	${DOCKER_RUN} mkdir -p /src/lib/include /src/lib/lib
 	${DOCKER_RUN} rm -rf /src/lib/include/SDL2
 	${DOCKER_RUN} cp -r /emsdk/upstream/emscripten/cache/sysroot/include/SDL2 /src/lib/include/SDL2
-	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/${SDL_RUMBLE_LIBRARY} /src/$@
+	${DOCKER_RUN} bash -euc 'library="$$(python3 /src/${SDL_RUMBLE_PORT} --print-library)"; test -n "$$library"; cp "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/$$library" /src/$@'
 
 include packages/php-sdl-wasm/extensions.mak
