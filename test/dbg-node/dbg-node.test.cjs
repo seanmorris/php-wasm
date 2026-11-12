@@ -227,6 +227,9 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.equal(described.localNull.type, 'null');
 	assert.deepEqual([described.localArray.type, described.localArray.count], ['array', 1]);
 	assert.deepEqual([described.localObject.type, described.localObject.className], ['object', 'PhpDbgInspectionClass']);
+	// An anonymous class's name continues past a NUL byte with the file and
+	// line that declare it, which tells one such class from another.
+	assert.match(described.localAnonymous.className, /^class@anonymous\0.*phpdbg-inspection\.php:\d+\$[0-9a-f]+$/);
 	// The breakpoint line has not run yet, so its variable exists without a value.
 	assert.equal(described.breakpointValue.type, 'undefined');
 	assert.equal(described.phpdbgInspectionGlobal.reference, true);
@@ -496,5 +499,94 @@ test(`lists the frames switchFrame() selects when an internal function is on the
 	});
 
 	assert.ok(stdOut().includes('callback-complete:42'));
+	assert.equal(stdErr(), '');
+});
+
+test(`lists PHP frames while an internal function is waiting in Node for PHP ${version}`, async () => {
+	const awaitPath = '/preload/test_www/phpdbg-await-frames.php';
+	const awaitFile = path.join(__dirname, '../browser/fixtures/scripts/phpdbg-await-frames.php');
+	const awaitUrl = pathToFileURL(awaitFile).href;
+	const awaitLine = fs.readFileSync(awaitFile, 'utf8')
+		.split(/\r?\n/)
+		.findIndex(line => line.includes('PHPDBG_AWAIT_LINE')) + 1;
+
+	// PHP waits on this until the test has looked at the stack.
+	let release;
+	let reportWaiting;
+	const waiting = new Promise(resolve => reportWaiting = resolve);
+	const gate = {
+		then: resolve => {
+			release = resolve;
+			reportWaiting(true);
+		}
+	};
+
+	const php = new PhpDbgNode(nodeRuntimeOptions({
+		runtime: 'dbg'
+		, files: [{parent: '/preload/test_www/', name: 'phpdbg-await-frames.php', url: awaitUrl}]
+		, version
+		, dbgArgs: ['-q']
+		, shared: {phpdbgGate: gate}
+	}));
+	const {stdOut, stdErr} = attachOutput(php);
+
+	const process = php.run();
+
+	await waitForPromptState(
+		php,
+		stdOut,
+		stdErr,
+		timeoutForVersion(60000, 30000),
+		'boot prompt'
+	);
+
+	await php.provideInput(`exec ${awaitPath}`);
+	await php.provideInput('run');
+
+	const timeout = new Promise(resolve => setTimeout(resolve, timeoutForVersion(45000, 20000), false));
+
+	assert.ok(
+		await Promise.race([waiting, timeout])
+		, formatDiagnostics('to reach vrzno_await()', stdOut, stdErr)
+	);
+
+	const frames = await php.dumpBacktrace();
+
+	// vrzno_await()'s own frame runs no PHP code. Frame 0 is the function
+	// that called it, at the line of the call.
+	assert.deepEqual(
+		frames.map(frame => [frame.frame, frame.functionName, frame.filename])
+		, [[0, 'phpdbg_await_inner', awaitPath], [1, 'phpdbg_await_outer', awaitPath], [2, '', awaitPath]]
+	);
+	assert.deepEqual([frames[0].lineNo, frames[0].selected], [awaitLine, true]);
+
+	// The variables shown for a frame are that frame's.
+	assert.ok(Object.keys(await php.dumpVars()).includes('label'));
+	assert.equal(await php.switchFrame(1), 0);
+	assert.ok(Object.keys(await php.dumpVars()).includes('outerLabel'));
+	assert.equal((await php.dumpBacktrace()).findIndex(frame => frame.selected), 1);
+	assert.equal(await php.switchFrame(0), 1);
+
+	release('released');
+
+	const completionStart = Date.now();
+
+	while(!stdOut().includes('await-complete:released') && Date.now() - completionStart < 20000)
+	{
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
+	await php.provideInput('quit');
+
+	await process.catch(error => {
+		if(error && typeof error === 'object' && 'status' in error)
+		{
+			return error.status;
+		}
+
+		throw error;
+	});
+
+	assert.ok(stdOut().includes('await-complete:released'));
 	assert.equal(stdErr(), '');
 });

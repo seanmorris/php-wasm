@@ -134,6 +134,7 @@ const inspectBreakpoint = async php => {
 			localFloat: described.localFloat
 			, localArray: described.localArray
 			, localObject: described.localObject
+			, localAnonymous: described.localAnonymous
 			, breakpointValue: described.breakpointValue
 		}
 		, children: {

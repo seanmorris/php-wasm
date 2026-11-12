@@ -51,6 +51,7 @@ function phpdbg_inspection_inner(string $argument): string
 	// Keys that are also properties of a JavaScript array, and members listed under mangled names.
 	$localLookalike = ['length' => 'data', 'constructor' => 1.0];
 	$localSealed = new PhpDbgInspectionSealed;
+	$localAnonymous = new class { public int $open = 1; };
 	$breakpointValue = $argument; // PHPDBG_INSPECTION_BREAKPOINT
 
 	return implode(':', [

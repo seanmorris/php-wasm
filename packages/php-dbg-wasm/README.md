@@ -83,12 +83,18 @@ With version 2:
 - Each frame also has `functionName` and `className` (empty for top-level code
   and outside a class), and a frame's `frame` is always the index
   `switchFrame()` takes, including when an internal function is on the stack.
+  Frame 0 is the innermost frame running PHP code: asked while PHP waits
+  inside an internal function such as `vrzno_await()`, it is that function's
+  caller.
 - `dumpGlobals({user: true})` lists user-defined globals with the superglobals,
   from any frame. Without the option it lists superglobals only, as before.
 - `describeVars()`, `describeGlobals({user})` and `describeConstants()` return
   `{name, type, className, count, reference, value}` for each symbol. `type` is
   a PHP type name, or `undefined` for a variable that has not been assigned
   yet; `count` is the number of elements in an array or of bytes in a string.
+  `className` is PHP's own name for the class. For an anonymous class that is
+  `class@anonymous`, a NUL byte, then the file and line that declare it, so
+  cut it at the NUL to show it.
   `describeChild(parent, key)` does the same for one element of an array or
   property of an object taken from a dump, and keeps its real type.
   `describeValue(value)` describes a value on its own; a scalar carries no PHP

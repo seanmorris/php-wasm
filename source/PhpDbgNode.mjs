@@ -129,6 +129,7 @@ export class PhpDbgNode extends PhpBase
 
 		this.dbgArgs = [...(args.dbgArgs ?? [])];
 		this.dbgApiVersion = null;
+		this.dbgClassNameLength = null;
 		this.running = false;
 		this.paused = false;
 		this.currentFilePtr = null;
@@ -791,10 +792,34 @@ export class PhpDbgNode extends PhpBase
 
 		return {
 			type
-			, className: type === 'object' ? php.ccall('vrzno_dbg_zval_class', STR, [NUM], [zv], {}) : null
+			, className: type === 'object' ? this._zvalClassName(php, zv) : null
 			, count: count < 0 ? null : count
 			, reference: !!php.ccall('vrzno_dbg_zval_is_reference', NUM, [NUM], [zv], {})
 		};
+	}
+
+	/**
+	 * Reads the class name of an object. An anonymous class is named
+	 * "class@anonymous", a NUL byte, then the file and line that declare it,
+	 * so the name is read by its length where the runtime reports one. An
+	 * older Vrzno gives the part before the NUL.
+	 * @param {object} php PHP module instance.
+	 * @param {number} zv Pointer to the object's zval.
+	 * @returns {string} Class name.
+	 */
+	_zvalClassName(php, zv)
+	{
+		this.dbgClassNameLength ??= this._hasNativeExport(php, 'vrzno_dbg_zval_class_length');
+
+		if(!this.dbgClassNameLength)
+		{
+			return php.ccall('vrzno_dbg_zval_class', STR, [NUM], [zv], {});
+		}
+
+		const ptr = php.ccall('vrzno_dbg_zval_class', NUM, [NUM], [zv], {});
+		const length = php.ccall('vrzno_dbg_zval_class_length', NUM, [NUM], [zv], {});
+
+		return new TextDecoder().decode(php.HEAPU8.slice(ptr, ptr + length));
 	}
 
 	/**

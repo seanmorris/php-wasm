@@ -216,6 +216,10 @@ test('inspects a live phpdbg frame in the browser harness', async ({ page }) => 
 		length: ['string', 'data']
 		, sealed: {hidden: 4, guarded: 'guarded-value', open: 7}
 	});
+	// An anonymous class's name continues past a NUL byte with the file and
+	// line that declare it.
+	expect(inspection.described.localAnonymous.className)
+		.toMatch(/^class@anonymous\0.*phpdbg-inspection\.php:\d+\$[0-9a-f]+$/);
 });
 
 test('serves php through the cgi worker harness', async ({ page }) => {
