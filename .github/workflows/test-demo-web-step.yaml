@@ -38,14 +38,10 @@ jobs:
       - name: Install NPM packages
         run: npm ci
 
-      - name: Install Chrome's APT key
-        run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-
-      - name: Install Chrome's APT source
-        run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-
-      - name: Install Chrome
-        run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
+      - name: Install Playwright Chromium
+        run: |
+          npx playwright install --with-deps chromium
+          node --input-type=module -e "import { chromium } from '@playwright/test'; console.log('PLAYWRIGHT_CHROMIUM_PATH=' + chromium.executablePath())" >> "$GITHUB_ENV"
 
       - name: Run tests
         run: LIB_TYPE=${{ inputs.libType }} DEMO_WEB_ARTIFACT_ROOT=docs make --debug=basic test-demo-web
