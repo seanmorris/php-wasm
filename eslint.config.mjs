@@ -34,6 +34,7 @@ const definedTypes = [
 	'PhpCgiRuntimeArgs',
 	'PhpCgiModuleFactory',
 	'PhpRuntimeArgs',
+	'PhpDbgRuntimeArgs',
 	'PhpRuntimeHook',
 	'PhpRuntimeValue',
 	'PhpSharedLibrary',

@@ -21,6 +21,9 @@ new PhpNode({version: '8.4', sharedLibs: [pdoPglite]});
 new PhpCgiNode({version: '8.4', sharedLibs: bridgeLibraries});
 new PhpCliWeb({version: '8.4', sharedLibs: bridgeLibraries});
 new PhpDbgWeb({version: '8.4', sharedLibs: bridgeLibraries});
+new PhpDbgWeb({dbgArgs: ['-q'], onDbgOutput: output => void output.bytes.length, dbgManagedShutdown: true});
+// @ts-expect-error phpdbg arguments are a list.
+new PhpDbgWeb({dbgArgs: '-q'});
 new PhpWeb({dynamicLibs: [pdoPglite]});
 // @ts-expect-error Library objects must provide an asset URL or loader.
 new PhpWeb({sharedLibs: [{}]});
@@ -106,7 +109,13 @@ for (const dbg of [new PhpDbgNode(), new PhpDbgWeb()]) {
 	const exit: Promise<number> = dbg.run();
 	const running: Promise<number> = dbg.isRunning();
 	const files: Promise<string[]> = dbg.dumpFiles();
-	const frames: Promise<Array<{filename: string; lineNo: number; frame: number; selected: boolean}>> = dbg.dumpBacktrace();
+	const frames: Promise<Array<{filename: string; lineNo: number; frame: number; selected: boolean; functionName?: string; className?: string}>> = dbg.dumpBacktrace();
+	const debuggerApi: Promise<number> = dbg.debuggerApiVersion();
+	const userGlobals: Promise<object | undefined> = dbg.dumpGlobals({user: true});
+	const described: Promise<Array<{name: string; type: string; className: string | null; count: number | null; reference: boolean}>> = dbg.describeVars();
+	const describedValue: Promise<{type: string; className: string | null}> = dbg.describeValue(1);
+	// @ts-expect-error Described symbols are a list, not a name-keyed table.
+	const describedTable: Promise<Record<string, object>> = dbg.describeGlobals({user: true});
 	const symbols: object = dbg.dumpSymbols(0, runtime);
 	// @ts-expect-error No symbol table is returned when its native pointer is zero.
 	const locals: Promise<object> = dbg.dumpVars();

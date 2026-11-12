@@ -39,5 +39,13 @@ EM_JS(void, phpdbg_wasm_event, (const char *type, const char *name, const char *
     if (Module['onDbgEvent']) Module['onDbgEvent']({type: UTF8ToString(type), name: name ? UTF8ToString(name) : null,
         message: message ? UTF8ToString(message) : null, file: file ? UTF8ToString(file) : null, line, status});
 });
+
+/* PHP leaves dl() to each SAPI: cli, cgi and embed register it, phpdbg does not. */
+#include "ext/standard/dl.h"
+#include "ext/standard/dl_arginfo.h"
+static const zend_function_entry phpdbg_wasm_additional_functions[] = {
+	ZEND_FE(dl, arginfo_dl)
+	ZEND_FE_END
+};
 #endif
 #endif

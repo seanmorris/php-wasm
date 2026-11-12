@@ -92,8 +92,13 @@ const inspectBreakpoint = async php => {
 		, php.dumpBacktrace()
 	]);
 
+	const debuggerApi = await php.debuggerApiVersion();
+	const described = Object.fromEntries((await php.describeVars()).map(({name, type, className, count}) => [name, {type, className, count}]));
+	const userGlobals = await php.dumpGlobals({user: true});
+
 	const oldFrame = await php.switchFrame(1);
 	const outerVariables = await php.dumpVars();
+	const outerBacktrace = await php.dumpBacktrace();
 	const restoredFrame = await php.switchFrame(oldFrame);
 
 	return {
@@ -113,6 +118,16 @@ const inspectBreakpoint = async php => {
 			, globalReference: variables.phpdbgInspectionGlobal
 		}
 		, hasServerSuperglobal: Boolean(globals._SERVER)
+		, debuggerApi
+		, frameNames: backtrace.map(frame => frame.functionName)
+		, selectedFrames: [backtrace, outerBacktrace].map(frames => frames.findIndex(frame => frame.selected))
+		, described: {
+			localFloat: described.localFloat
+			, localArray: described.localArray
+			, localObject: described.localObject
+			, breakpointValue: described.breakpointValue
+		}
+		, unimportedGlobal: userGlobals.phpdbgInspectionUnimported
 		, constants: {
 			main: constants.PHPDBG_INSPECTION_CONSTANT
 			, included: constants.PHPDBG_INCLUDED_CONSTANT

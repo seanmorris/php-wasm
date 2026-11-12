@@ -177,6 +177,16 @@ test('inspects a live phpdbg frame in the browser harness', async ({ page }) => 
 			globalReference: 'global-value',
 		},
 		hasServerSuperglobal: true,
+		debuggerApi: 2,
+		frameNames: ['phpdbg_inspection_inner', 'phpdbg_inspection_outer', ''],
+		selectedFrames: [0, 1],
+		described: {
+			localFloat: {type: 'float', className: null, count: null},
+			localArray: {type: 'array', className: null, count: 1},
+			localObject: {type: 'object', className: 'PhpDbgInspectionClass', count: null},
+			breakpointValue: {type: 'undefined', className: null, count: null},
+		},
+		unimportedGlobal: 'unimported-global',
 		constants: {
 			main: 'constant-value',
 			included: 'included-constant-value',

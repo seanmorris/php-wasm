@@ -5,6 +5,51 @@ import url from 'node:url';
 
 const NUM = 'number';
 const STR = 'string';
+
+/** PHP type names indexed by Zend type tag. */
+const zvalTypeNames = ['undefined', 'null', 'bool', 'bool', 'int', 'float', 'string', 'array', 'object', 'resource'];
+
+/**
+ * Finds the zval behind a value that a debugger dump returned.
+ * @param {PhpRuntimeValue} value Value from a debugger dump.
+ * @returns {number} Pointer to the zval, or 0 for a plain JavaScript value.
+ */
+const zvalPointer = value => {
+	if(value === null || (typeof value !== 'object' && typeof value !== 'function'))
+	{
+		return 0;
+	}
+
+	const symbol = Object.getOwnPropertySymbols(value).find(candidate => candidate.description === 'origZval');
+
+	return symbol ? value[symbol] : 0;
+};
+
+/**
+ * Describes a value that has no zval, from what JavaScript can tell.
+ * @param {PhpRuntimeValue} value Scalar reached through a parent array or object.
+ * @returns {{type: string, className: null, count: number|null, reference: boolean}} Inferred description.
+ */
+const describeScalar = value => {
+	const names = {undefined: 'undefined', boolean: 'bool', string: 'string', function: 'callable'};
+	let type = names[typeof value] ?? 'unknown';
+
+	if(value === null)
+	{
+		type = 'null';
+	}
+	else if(typeof value === 'number')
+	{
+		type = Number.isInteger(value) ? 'int' : 'float';
+	}
+
+	return {
+		type
+		, className: null
+		, count: type === 'string' ? new TextEncoder().encode(String(value)).length : null
+		, reference: false
+	};
+};
 const SUPPORTED_VERSIONS = new Set(['8.5', '8.4', '8.3', '8.2', '8.1', '8.0']);
 const defaultVersion = /** @type {PhpRuntimeVersion} */ (
 	SUPPORTED_VERSIONS.has(process.env.PHP_VERSION ?? '')
@@ -40,7 +85,7 @@ export class PhpDbgNode extends PhpBase
 {
 	/**
 	 * Creates a Node.js-hosted PHP debugger runtime.
-	 * @param {PhpRuntimeArgs} args Debug runtime configuration. `dbgArgs` adds phpdbg command-line arguments, such as `['-q']` to skip the welcome banner.
+	 * @param {PhpDbgRuntimeArgs} args Debug runtime configuration. `dbgArgs` adds phpdbg command-line arguments, such as `['-q']` to skip the welcome banner.
 	 */
 	constructor(args = {})
 	{
@@ -83,6 +128,7 @@ export class PhpDbgNode extends PhpBase
 		}
 
 		this.dbgArgs = [...(args.dbgArgs ?? [])];
+		this.dbgApiVersion = null;
 		this.running = false;
 		this.paused = false;
 		this.currentFilePtr = null;
@@ -296,12 +342,20 @@ export class PhpDbgNode extends PhpBase
 
 	/**
 	 * Dumps global variables from the debugger session.
+	 * @param {object} [options] Dump options.
+	 * @param {boolean} [options.user] Include user-defined globals as well as superglobals. Needs debugger API 2.
 	 * @returns {Promise<object|undefined>} Dumped global symbol table.
 	 */
-	async dumpGlobals()
+	async dumpGlobals({user = false} = {})
 	{
 		const php = await this.binary;
-		const ptr = php.ccall('vrzno_dbg_dump_symbols', NUM, [NUM], [true], {});
+
+		if(user)
+		{
+			this._requireDbgApi(php, 'dumpGlobals({user: true})');
+		}
+
+		const ptr = php.ccall('vrzno_dbg_dump_symbols', NUM, [NUM], [user ? 2 : 1], {});
 
 		if(ptr)
 		{
@@ -471,11 +525,17 @@ export class PhpDbgNode extends PhpBase
 
 	/**
 	 * Dumps the current debugger backtrace, numbered from the innermost frame whichever frame is selected.
-	 * @returns {Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean}>>} Stack frames for the current backtrace.
+	 * With debugger API 2 each frame also has `functionName` and `className`, and its index always matches switchFrame().
+	 * @returns {Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean, functionName?: string, className?: string}>>} Stack frames for the current backtrace.
 	 */
 	async dumpBacktrace()
 	{
 		const php = await this.binary;
+		if(this._dbgApiVersion(php) >= 2)
+		{
+			return this._dumpFrames(php);
+		}
+
 		// The native dump starts at the selected frame. List from the innermost
 		// frame so indexes match switchFrame(), then put the selection back.
 		const selected = php.ccall('vrzno_dbg_switch_frame', NUM, [NUM], [0], {});
@@ -507,6 +567,229 @@ export class PhpDbgNode extends PhpBase
 
 			frames.push({filename, lineNo, frame: index, selected: index === Math.max(selected, 0)});
 			index++;
+		}
+
+		php._free(ptr);
+
+		return frames;
+	}
+
+	/**
+	 * Reports which native debugger exports this runtime's Vrzno provides.
+	 * @returns {Promise<number>} 2 when frame names, user globals and value types are available, otherwise 1.
+	 */
+	async debuggerApiVersion()
+	{
+		return this._dbgApiVersion(await this.binary);
+	}
+
+	/**
+	 * Reads and caches the native debugger API version.
+	 * @param {object} php PHP module instance.
+	 * @returns {number} Debugger API version.
+	 */
+	_dbgApiVersion(php)
+	{
+		if(this.dbgApiVersion === null)
+		{
+			let version = 1;
+
+			try
+			{
+				version = php.ccall('vrzno_dbg_api_version', NUM, [], [], {});
+			}
+			catch(error)
+			{
+				// An older Vrzno has no version export.
+			}
+
+			this.dbgApiVersion = version >= 2 ? version : 1;
+		}
+
+		return this.dbgApiVersion;
+	}
+
+	/**
+	 * Rejects a call that needs exports an older Vrzno lacks.
+	 * @param {object} php PHP module instance.
+	 * @param {string} method Name of the calling method, for the message.
+	 * @returns {void}
+	 */
+	_requireDbgApi(php, method)
+	{
+		if(this._dbgApiVersion(php) < 2)
+		{
+			throw new Error(`${method} needs debugger API 2, and this runtime's Vrzno provides API 1`);
+		}
+	}
+
+	/**
+	 * Dumps local variables with their PHP types.
+	 * @returns {Promise<Array<object>>} One `{name, type, className, count, reference, value}` per variable.
+	 */
+	async describeVars()
+	{
+		return this._describeScope(0, 'describeVars()');
+	}
+
+	/**
+	 * Dumps global variables with their PHP types.
+	 * @param {object} [options] Dump options.
+	 * @param {boolean} [options.user] Include user-defined globals as well as superglobals.
+	 * @returns {Promise<Array<object>>} One `{name, type, className, count, reference, value}` per variable.
+	 */
+	async describeGlobals({user = false} = {})
+	{
+		return this._describeScope(user ? 2 : 1, 'describeGlobals()');
+	}
+
+	/**
+	 * Dumps user-defined constants with their PHP types.
+	 * @returns {Promise<Array<object>>} One `{name, type, className, count, reference, value}` per constant.
+	 */
+	async describeConstants()
+	{
+		const php = await this.binary;
+
+		this._requireDbgApi(php, 'describeConstants()');
+
+		const ptr = php.ccall('vrzno_dbg_dump_constants', NUM, [], [], {});
+
+		return ptr ? this._describeSymbols(ptr, php) : [];
+	}
+
+	/**
+	 * Describes a value taken from a dump, such as an array element or a property.
+	 * A scalar reached through a parent carries no PHP type, so an integral float reads as `int`.
+	 * @param {PhpRuntimeValue} value Value from a debugger dump.
+	 * @returns {Promise<object>} `{type, className, count, reference, value}`.
+	 */
+	async describeValue(value)
+	{
+		const php = await this.binary;
+
+		this._requireDbgApi(php, 'describeValue()');
+
+		const zv = zvalPointer(value);
+
+		return {...(zv ? this._describeZval(php, zv) : describeScalar(value)), value};
+	}
+
+	/**
+	 * Dumps one symbol scope with types.
+	 * @param {number} scope 0 for locals, 1 for superglobals, 2 for every global.
+	 * @param {string} method Name of the calling method, for the message.
+	 * @returns {Promise<Array<object>>} Described symbols.
+	 */
+	async _describeScope(scope, method)
+	{
+		const php = await this.binary;
+
+		this._requireDbgApi(php, method);
+
+		const ptr = php.ccall('vrzno_dbg_dump_symbols', NUM, [NUM], [scope], {});
+
+		return ptr ? this._describeSymbols(ptr, php) : [];
+	}
+
+	/**
+	 * Decodes a native symbol dump buffer into described symbols.
+	 * @param {number} ptr Pointer to the native symbol dump buffer.
+	 * @param {object} php PHP module instance.
+	 * @returns {Array<object>} Described symbols.
+	 */
+	_describeSymbols(ptr, php)
+	{
+		const heap = new DataView(php.HEAPU8.buffer);
+		const end = ptr + heap.getUint32(ptr, true);
+		const pointerLen = 4;
+		const decoder = new TextDecoder;
+		const entries = [];
+		let cur = ptr + pointerLen;
+
+		// Read the whole buffer before converting values: conversion can grow
+		// the heap, which would detach this view.
+		while(cur < end)
+		{
+			const zv = heap.getUint32(cur, true);
+			cur += pointerLen;
+
+			const nameLen = heap.getUint32(cur, true);
+			cur += pointerLen;
+
+			entries.push({zv, name: decoder.decode(php.HEAPU8.slice(cur, cur + nameLen))});
+			cur += nameLen + 1;
+		}
+
+		php._free(ptr);
+
+		return entries.map(({zv, name}) => ({name, ...this._describeZval(php, zv), value: php.zvalToJS(zv)}));
+	}
+
+	/**
+	 * Reads the PHP type of a zval.
+	 * @param {object} php PHP module instance.
+	 * @param {number} zv Pointer to the zval.
+	 * @returns {{type: string, className: string|null, count: number|null, reference: boolean}} Type description.
+	 */
+	_describeZval(php, zv)
+	{
+		const type = zvalTypeNames[php.ccall('vrzno_dbg_zval_type', NUM, [NUM], [zv], {})] ?? 'unknown';
+		const count = php.ccall('vrzno_dbg_zval_count', NUM, [NUM], [zv], {});
+
+		return {
+			type
+			, className: type === 'object' ? php.ccall('vrzno_dbg_zval_class', STR, [NUM], [zv], {}) : null
+			, count: count < 0 ? null : count
+			, reference: !!php.ccall('vrzno_dbg_zval_is_reference', NUM, [NUM], [zv], {})
+		};
+	}
+
+	/**
+	 * Decodes the frame dump of debugger API 2.
+	 * @param {object} php PHP module instance.
+	 * @returns {Array<object>} Stack frames from the innermost one.
+	 */
+	_dumpFrames(php)
+	{
+		const ptr = php.ccall('vrzno_dbg_dump_frames', NUM, [], [], {});
+		const frames = [];
+
+		if(!ptr)
+		{
+			return frames;
+		}
+
+		const heap = new DataView(php.HEAPU8.buffer);
+		const pointerLen = 4;
+		const end = ptr + pointerLen + heap.getUint32(ptr, true);
+		const decoder = new TextDecoder;
+		let cur = ptr + pointerLen;
+
+		const readWord = () => {
+			const value = heap.getUint32(cur, true);
+			cur += pointerLen;
+
+			return value;
+		};
+
+		const readString = () => {
+			const len = readWord();
+			const value = decoder.decode(php.HEAPU8.slice(cur, cur + len));
+			cur += len + 1;
+
+			return value;
+		};
+
+		while(cur < end)
+		{
+			const filename = readString();
+			const lineNo = readWord();
+			const functionName = readString();
+			const className = readString();
+			const flags = readWord();
+
+			frames.push({filename, lineNo, frame: frames.length, selected: !!(flags & 1), functionName, className});
 		}
 
 		php._free(ptr);

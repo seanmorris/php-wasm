@@ -25,6 +25,9 @@ export function instrumentSource(name, source) {
 			'\t\tvolatile uint64_t wasm_shutdown_flags = PHPDBG_G(flags);\n\t\tvolatile int wasm_managed_shutdown = phpdbg_wasm_managed_shutdown() && (PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING | PHPDBG_IS_QUITTING)) == PHPDBG_IS_CLEANING;\n\t\tif (wasm_managed_shutdown) {\n\t\t\tPHPDBG_G(flags) &= ~PHPDBG_IS_STOPPING;\n\t\t\tPHPDBG_G(flags) |= PHPDBG_IS_RUNNING;\n\t\t\tif (EG(exception) && zend_is_unwind_exit(EG(exception))) zend_exception_error(EG(exception), E_ERROR);\n\t\t}', true);
 		source = insert(source, 'shutdown-end', '\t\t\tphp_request_shutdown(NULL);\n\t\t} zend_end_try();',
 			'\t\tif (wasm_managed_shutdown) PHPDBG_G(flags) = wasm_shutdown_flags | (PHPDBG_G(flags) & PHPDBG_IS_QUITTING);');
+		// Module startup registers a SAPI's additional functions, so set them first, as the CLI does for dl().
+		source = insert(source, 'additional-functions', '\tif (phpdbg->startup(phpdbg) == SUCCESS) {',
+			'\tphpdbg->additional_functions = phpdbg_wasm_additional_functions;', true);
 	}
 	if(name === 'phpdbg_out.c') {
 		source = insert(source, 'output', source.match(/(?:static )?int phpdbg_process_print\([^\n]+\) \{/)?.[0] ?? '__missing_output_signature__',

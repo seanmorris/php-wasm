@@ -20,6 +20,12 @@ Changes
 
 * `php-dbg-wasm`: the debugger wrappers accept `dbgArgs`, extra phpdbg command-line arguments. `dbgArgs: ['-q']` starts without the welcome banner; command notices are unaffected.
 
+* `php-dbg-wasm`: with a Vrzno that provides debugger API 2 (`debuggerApiVersion()`), backtrace frames carry `functionName` and `className` and are counted the way `switchFrame()` counts them; `dumpGlobals({user: true})` lists user-defined globals from any frame; and `describeVars()`, `describeGlobals()`, `describeConstants()` and `describeValue()` report each value's PHP type, class, size and whether it is a reference. Existing methods keep their results.
+
+* `php-dbg-wasm`: `dl()` is now registered under phpdbg, as it is under the CLI. PHP leaves `dl()` to each SAPI and phpdbg did not add it.
+
+* `php-dbg-wasm`: the debugger constructors are typed with `PhpDbgRuntimeArgs`, which declares `dbgArgs`, `onDbgOutput`, `onDbgEvent`, `dbgYieldInterval` and `dbgManagedShutdown`. The result types `PhpDbgFrame`, `PhpDbgSymbol` and `PhpDbgValue` are exported from `php-dbg-wasm/public`.
+
 ## v0.2.0 - Ramifying Sympodia
 
 * Added two runtime packages for PHP 8.0–8.5, neither of which depends on `php-wasm`. `php-sdl-wasm` is a standalone browser runtime with SDL2, SDL_image, SDL_mixer, SDL_ttf and OpenGL shader bindings (`import { PhpSdl } from 'php-sdl-wasm/php8.4-sdl.mjs'`). `php-cloud-wasm` runs PHP in Cloudflare Workers with Vrzno, zlib/ZIP and PDO-CFD1 for D1 (`import { PhpCloudflare } from 'php-cloud-wasm/php8.5-cloudflare.mjs'`). See the [SDL guide](packages/php-sdl-wasm/README.md) and the [Cloudflare guide](packages/php-cloud-wasm/README.md).
