@@ -7,7 +7,7 @@ export class PhpDbgNode extends PhpBase<[], number> {
 	currentFilePtr: number | null;
 	currentLinePtr: number | null;
 	bpCountPtr: number | null;
-	constructor(args?: PhpRuntimeArgs);
+	constructor(args?: import('./public.d.ts').PhpDbgRuntimeArgs);
 	run(): Promise<number>;
 	provideInput(line: string): Promise<void>;
 	getPrompt(): Promise<string>;
@@ -18,11 +18,16 @@ export class PhpDbgNode extends PhpBase<[], number> {
 	bpCount(): Promise<number>;
 	dumpSymbols(ptr: number, php: import('./public.d.ts').PhpBinaryRuntime): object;
 	dumpVars(): Promise<object | undefined>;
-	dumpGlobals(): Promise<object | undefined>;
+	dumpGlobals(options?: {user?: boolean}): Promise<object | undefined>;
 	dumpConstants(): Promise<object | undefined>;
 	dumpFunctions(): Promise<object>;
 	dumpClasses(): Promise<object>;
 	dumpFiles(): Promise<string[]>;
-	dumpBacktrace(): Promise<Array<{filename: string, lineNo: number, frame: number, selected: boolean}>>;
+	dumpBacktrace(): Promise<Array<import('./public.d.ts').PhpDbgFrame>>;
+	debuggerApiVersion(): Promise<number>;
+	describeVars(): Promise<Array<import('./public.d.ts').PhpDbgSymbol>>;
+	describeGlobals(options?: {user?: boolean}): Promise<Array<import('./public.d.ts').PhpDbgSymbol>>;
+	describeConstants(): Promise<Array<import('./public.d.ts').PhpDbgSymbol>>;
+	describeValue(value: import('./public.d.ts').PhpRuntimeValue): Promise<import('./public.d.ts').PhpDbgValue>;
 	switchFrame(frame: number): Promise<number>;
 }

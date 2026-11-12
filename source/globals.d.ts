@@ -107,6 +107,15 @@ declare interface PhpRuntimeArgs {
 	[key: string]: object | string | number | boolean | Function | undefined;
 }
 
+/** Constructor options for the debugger wrappers. */
+declare interface PhpDbgRuntimeArgs extends PhpRuntimeArgs {
+	dbgArgs?: string[];
+	onDbgOutput?: (output: {type: number, fd: number, bytes: Uint8Array, evaluating: boolean}) => void;
+	onDbgEvent?: (event: {type: string, name: string | null, message: string | null, file: string | null, line: number, status: number}) => void;
+	dbgYieldInterval?: number;
+	dbgManagedShutdown?: boolean;
+}
+
 // Native modules are generated beside the wrappers at build time.
 declare module '*-web.mjs' {
 	const PhpBinary: PhpRuntimeFactory;

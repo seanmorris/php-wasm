@@ -212,6 +212,38 @@ test(`inspects a live phpdbg frame in Node for PHP ${version}`, async () => {
 	assert.equal(backtrace[0].filename, scriptPath);
 	assert.ok(await php.isRunning(), 'phpdbg did not report an active run');
 
+	// Debugger API 2: frame names, PHP types, and globals the frame did not import.
+	assert.equal(await php.debuggerApiVersion(), 2, 'the pinned Vrzno lacks debugger API 2');
+	assert.deepEqual(backtrace.map(frame => frame.functionName), ['phpdbg_inspection_inner', 'phpdbg_inspection_outer', '']);
+	assert.deepEqual(backtrace.map(frame => frame.className), ['', '', '']);
+
+	const described = Object.fromEntries((await php.describeVars()).map(variable => [variable.name, variable]));
+
+	assert.equal(described.localNumber.type, 'int');
+	assert.equal(described.localFloat.type, 'float');
+	assert.equal(described.localFloat.value, 3);
+	assert.deepEqual([described.localString.type, described.localString.count], ['string', 11]);
+	assert.equal(described.localBoolean.type, 'bool');
+	assert.equal(described.localNull.type, 'null');
+	assert.deepEqual([described.localArray.type, described.localArray.count], ['array', 1]);
+	assert.deepEqual([described.localObject.type, described.localObject.className], ['object', 'PhpDbgInspectionClass']);
+	// The breakpoint line has not run yet, so its variable exists without a value.
+	assert.equal(described.breakpointValue.type, 'undefined');
+	assert.equal(described.phpdbgInspectionGlobal.reference, true);
+	assert.equal(described.localString.reference, false);
+
+	const nestedArray = await php.describeValue(variables.localArray.nested);
+
+	assert.deepEqual([nestedArray.type, nestedArray.className, nestedArray.count], ['array', null, 1]);
+
+	const userGlobals = await php.dumpGlobals({user: true});
+	const describedConstants = await php.describeConstants();
+
+	assert.equal(userGlobals.phpdbgInspectionUnimported, 'unimported-global');
+	assert.ok(userGlobals._SERVER, 'user globals are listed with superglobals, not instead of them');
+	assert.equal(globals.phpdbgInspectionUnimported, undefined);
+	assert.equal(describedConstants.find(constant => constant.name === 'PHPDBG_INSPECTION_CONSTANT')?.type, 'string');
+
 	const oldFrame = await php.switchFrame(1);
 	const outerVariables = await php.dumpVars();
 	const outerBacktrace = await php.dumpBacktrace();
@@ -279,6 +311,16 @@ test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node 
 		timeoutForVersion(45000, 20000)
 	);
 
+	// phpdbg registers dl() the way the CLI does.
+	await php.provideInput('ev print(function_exists("dl") ? "dl-registered" : "dl-missing")');
+
+	const dlProbeStart = Date.now();
+
+	while(!/dl-(registered|missing)/.test(stdOut()) && Date.now() - dlProbeStart < 20000)
+	{
+		await new Promise(resolve => setTimeout(resolve, 100));
+	}
+
 	await php.provideInput('quit');
 
 	await process.catch(error => {
@@ -291,6 +333,7 @@ test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node 
 	});
 
 	assert.doesNotMatch(stdOut(), /Welcome to phpdbg/);
+	assert.match(stdOut(), /dl-registered/);
 	assert.equal(stdErr(), '');
 	assert.throws(() => new PhpDbgNode({version, dbgArgs: '-q'}), /dbgArgs must be an array of strings/);
 });

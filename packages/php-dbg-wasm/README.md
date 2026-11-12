@@ -77,6 +77,26 @@ without the welcome banner. Command notices are unaffected.
 `dumpBacktrace()` numbers frames from the innermost one, whichever frame
 `switchFrame()` selected, and marks the selected frame with `selected: true`.
 
+`await php.debuggerApiVersion()` reports what the runtime's Vrzno can inspect.
+With version 2:
+
+- Each frame also has `functionName` and `className` (empty for top-level code
+  and outside a class), and a frame's `frame` is always the index
+  `switchFrame()` takes, including when an internal function is on the stack.
+- `dumpGlobals({user: true})` lists user-defined globals with the superglobals,
+  from any frame. Without the option it lists superglobals only, as before.
+- `describeVars()`, `describeGlobals({user})` and `describeConstants()` return
+  `{name, type, className, count, reference, value}` for each symbol. `type` is
+  a PHP type name, or `undefined` for a variable that has not been assigned
+  yet; `count` is the number of elements in an array or of bytes in a string.
+  `describeValue(value)` does the same for a value taken from a dump, such as
+  an array element. A scalar reached that way carries no PHP type, so an
+  integral float reads as `int`.
+
+With version 1 those four methods and `dumpGlobals({user: true})` throw.
+
+`dl()` is registered in the debugger runtime, as it is under the CLI.
+
 For a controller, styleable GUI, editor adapters, variable editing, structured
 results, and shared downloads, use
 [php-dbg-component](https://github.com/seanmorris/php-dbg-component).

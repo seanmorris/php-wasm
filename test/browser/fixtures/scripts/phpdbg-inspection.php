@@ -36,6 +36,7 @@ function phpdbg_inspection_inner(string $argument): string
 
 	$localString = 'local-value';
 	$localNumber = 42;
+	$localFloat = 3.0;
 	$localBoolean = true;
 	$localNull = null;
 	$localArray = ['nested' => ['answer' => 42]];
@@ -62,6 +63,7 @@ function phpdbg_inspection_outer(): string
 }
 
 $phpdbgInspectionGlobal = 'global-value';
+$phpdbgInspectionUnimported = 'unimported-global';
 $inspectionResult = phpdbg_inspection_outer();
 
 echo "inspection-complete:$inspectionResult\n";
