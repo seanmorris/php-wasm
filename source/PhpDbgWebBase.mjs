@@ -720,7 +720,7 @@ export class PhpDbgWebBase extends PhpBase
 	/**
 	 * Describes one array element or object property from a dump, with its own PHP type.
 	 * @param {object} parent Array or object from a debugger dump.
-	 * @param {string} key Element key or property name, as `Object.keys(parent)` lists it.
+	 * @param {string} key Element key or property name; object keys may include PHP's NUL-mangled private or protected names.
 	 * @returns {Promise<object>} `{type, className, count, reference, value}`.
 	 */
 	async describeChild(parent, key)

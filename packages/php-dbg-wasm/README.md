@@ -97,6 +97,10 @@ With version 2:
   cut it at the NUL to show it.
   `describeChild(parent, key)` does the same for one element of an array or
   property of an object taken from a dump, and keeps its real type.
+  `Reflect.ownKeys(parent)` lists object properties including the NUL-mangled
+  names PHP uses for private and protected properties. For arrays, JavaScript's
+  own `length` property can obscure a PHP key named `length`; passing that key
+  explicitly to `describeChild()` still retrieves the PHP value.
   `describeValue(value)` describes a value on its own; a scalar carries no PHP
   type by then, so an integral float reads as `int`.
 
