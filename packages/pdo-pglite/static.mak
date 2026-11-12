@@ -34,6 +34,7 @@ third_party/php${PHP_VERSION}-src/ext/pdo_pglite/pdo_pglite.c third_party/php${P
 third_party/php${PHP_VERSION}-pdo-pglite/config.m4: ${PDO_PGLITE_EXTENSION_STAMP}
 	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-pdo-pglite
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/pdo_pglite /src/third_party/php${PHP_VERSION}-pdo-pglite
+	${DOCKER_RUN} touch /src/$@
 
 packages/pdo-pglite/php${PHP_VERSION}-pdo-pglite.so: ${PHPIZE} ${VRZNO_EXTENSION_STAMP} third_party/php${PHP_VERSION}-pdo-pglite/config.m4
 	@ echo -e "\e[33;4mBuilding php-pdo-pglite\e[0m"

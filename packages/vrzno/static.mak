@@ -33,6 +33,7 @@ third_party/php${PHP_VERSION}-src/ext/vrzno/vrzno.c third_party/php${PHP_VERSION
 third_party/php${PHP_VERSION}-vrzno/config.m4: ${VRZNO_EXTENSION_STAMP}
 	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-vrzno
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/vrzno /src/third_party/php${PHP_VERSION}-vrzno
+	${DOCKER_RUN} touch /src/$@
 
 packages/vrzno/php${PHP_VERSION}-vrzno.so: ${PHPIZE} third_party/php${PHP_VERSION}-vrzno/config.m4
 	@ echo -e "\e[33;4mBuilding php-vrzno\e[0m"

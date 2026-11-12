@@ -32,6 +32,7 @@ third_party/php${PHP_VERSION}-src/ext/waitline/waitline.c third_party/php${PHP_V
 third_party/php${PHP_VERSION}-waitline/config.m4: ${WAITLINE_EXTENSION_STAMP}
 	${DOCKER_RUN} rm -rf /src/third_party/php${PHP_VERSION}-waitline
 	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/waitline /src/third_party/php${PHP_VERSION}-waitline
+	${DOCKER_RUN} touch /src/$@
 
 packages/waitline/php${PHP_VERSION}-waitline.so: ${PHPIZE} third_party/php${PHP_VERSION}-waitline/config.m4
 	@ echo -e "\e[33;4mBuilding php-waitline\e[0m"
