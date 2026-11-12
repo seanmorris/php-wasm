@@ -4,7 +4,13 @@
 #include <emscripten.h>
 #include "phpdbg_out.h"
 #include "Zend/zend_exceptions.h"
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+/* A Vrzno built as a side module reaches phpdbg through the dynamic linker, which
+ * binds only symbols with default visibility. Left hidden, these three resolve to
+ * null there: superglobals go missing and frames cannot be selected. */
+#define PHPDBG_WASM_VISIBLE __attribute__((visibility("default")))
+PHPDBG_WASM_VISIBLE ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+PHPDBG_WASM_VISIBLE void phpdbg_restore_frame(void);
+PHPDBG_WASM_VISIBLE int phpdbg_arm_auto_global(zval *ptrzv);
 int phpdbg_wasm_checkpoint(void);
 int phpdbg_wasm_managed_shutdown(void);
 void phpdbg_wasm_output(int type, int fd, const char *text, int length, int evaluating);

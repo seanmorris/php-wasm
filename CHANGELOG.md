@@ -30,6 +30,8 @@ Changes
 
 * `php-dbg-wasm`: `dl()` is now registered under phpdbg, as it is under the CLI. PHP leaves `dl()` to each SAPI and phpdbg did not add it.
 
+* `php-dbg-wasm`: the debugger runtime exports `phpdbg_globals`, `phpdbg_restore_frame` and `phpdbg_arm_auto_global`. A Vrzno built as a side module (`WITH_VRZNO=dynamic`) reaches phpdbg through the dynamic linker, which binds exported symbols only; without these three, `dumpGlobals()` returned no superglobals and `switchFrame()` returned -1 in such a build. Standard runtimes link Vrzno in and behave as before.
+
 * `php-dbg-wasm`: the debugger constructors are typed with `PhpDbgRuntimeArgs`, which declares `dbgArgs`, `onDbgOutput`, `onDbgEvent`, `dbgYieldInterval` and `dbgManagedShutdown`. The result types `PhpDbgFrame`, `PhpDbgSymbol` and `PhpDbgValue` are exported from `php-dbg-wasm/public`.
 
 ## v0.2.0 - Ramifying Sympodia

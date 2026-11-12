@@ -360,6 +360,22 @@ test('reads the debugger API version without calling a missing export', () => {
 	assert.equal(loaded.aborted, false);
 });
 
+test(`exports the phpdbg symbols a side-module Vrzno binds in Node for PHP ${version}`, async () => {
+	// Vrzno's debugger code holds weak references to these. Linked into the
+	// runtime they bind at link time; loaded as a side module they bind through
+	// the dynamic linker, which finds exported symbols only. Unexported, they
+	// are null there: no superglobals, and switchFrame() answers -1.
+	const php = new PhpDbgNode(nodeRuntimeOptions({runtime: 'dbg', version}));
+	const binary = await php.binary;
+
+	assert.equal(typeof binary.resolveGlobalSymbol, 'function');
+
+	for(const name of ['phpdbg_globals', 'phpdbg_restore_frame', 'phpdbg_arm_auto_global'])
+	{
+		assert.notEqual(binary.resolveGlobalSymbol(name).sym, undefined, `${name} is not exported`);
+	}
+});
+
 test(`starts phpdbg without the welcome banner when dbgArgs asks for it in Node for PHP ${version}`, async () => {
 	const php = new PhpDbgNode(nodeRuntimeOptions({runtime: 'dbg', files: preloadFiles, version, dbgArgs: ['-q']}));
 	const {stdOut, stdErr} = attachOutput(php);

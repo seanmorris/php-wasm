@@ -11,6 +11,10 @@ function insert(source, name, anchor, text, before = false) {
 	return source.replace(anchor, before ? block(name, text) + '\n' + anchor : anchor + '\n' + block(name, text));
 }
 
+// phpdbg_frame.c and phpdbg_info.c define the functions the bridge header makes visible
+// to a Vrzno side module; visibility is taken from the declaration their definition sees.
+export const instrumentedSources = ['phpdbg.c', 'phpdbg_prompt.c', 'phpdbg_out.c', 'phpdbg_frame.c', 'phpdbg_info.c'];
+
 export function instrumentSource(name, source) {
 	const include = name === 'phpdbg.c'
 		? '#define PHPDBG_WASM_BRIDGE_IMPL\n#include "phpdbg_wasm_bridge.h"\n#undef PHPDBG_WASM_BRIDGE_IMPL'
@@ -53,13 +57,19 @@ export function instrumentSource(name, source) {
 export async function patchPhpDbg(root) {
 	const directory = path.join(root, 'sapi/phpdbg');
 	const header = await fs.readFile(new URL('../source/phpdbg_wasm_bridge.h', import.meta.url));
-	const updates = await Promise.all(['phpdbg.c','phpdbg_prompt.c','phpdbg_out.c'].map(async name => {
+	const updates = await Promise.all(instrumentedSources.map(async name => {
 		const filename = path.join(directory, name);
 		const source = await fs.readFile(filename, 'utf8');
 		return {filename, source, patched: instrumentSource(name, source)};
 	}));
 	for(const {filename, source, patched} of updates) if(source !== patched) await fs.writeFile(filename, patched);
 	const target = path.join(directory, 'phpdbg_wasm_bridge.h');
-	if(!header.equals(await fs.readFile(target).catch(() => Buffer.alloc(0)))) await fs.writeFile(target, header);
+	if(!header.equals(await fs.readFile(target).catch(() => Buffer.alloc(0)))) {
+		await fs.writeFile(target, header);
+		// Not every supported PHP tracks header dependencies (8.0 does not), so a
+		// changed header alone would leave the objects that include it as they were.
+		const now = new Date();
+		await Promise.all(updates.map(({filename}) => fs.utimes(filename, now, now)));
+	}
 }
 if(process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await patchPhpDbg(process.argv[2]);
