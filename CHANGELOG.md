@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Added SDL joystick and game-controller rumble APIs, including trigger motors where the browser supports them. The patched SDL port selects the advertised browser effect, preserves both motor pairs, refreshes active effects, and stops them on expiration and cleanup. PHP bindings validate motor strengths and uint32 durations, including decimal-string durations on wasm32. Coverage uses simulated gamepads; physical controller support still depends on the browser and device.
+
 * Added versioned dynamic loaders for PDO-PGlite and optional custom Vrzno/Waitline builds. Standard profiles retain static Vrzno and Waitline; dynamic PDO-PGlite loads explicitly with the existing static bridge. Shared PDO-PGlite falls back to static bindings because its JavaScript provider has no native support library. PHP 8.0 and Cloudflare keep PDO-PGlite disabled. Loader objects now work in the runtime TypeScript declarations, and demos load the driver where needed.
 
 * Fixed static Vrzno mode validation for the Cloudflare PDO-CFD1 build. The dedicated Cloudflare profile keeps its existing restricted extension set and memory limits.
