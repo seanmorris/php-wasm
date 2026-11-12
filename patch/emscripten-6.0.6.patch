@@ -55,6 +55,17 @@ index 6ecec65..4cbad87 100644
  #endif
      return func;
    },
+diff --git a/src/lib/libdylink.js b/src/lib/libdylink.js
+--- a/src/lib/libdylink.js
++++ b/src/lib/libdylink.js
+@@ -118,7 +118,6 @@ addToLibrary({
+     '$createInvokeFunction',
+ #endif
+   ],
+-  $resolveGlobalSymbol__internal: true,
+   $resolveGlobalSymbol: (symName, direct = false) => {
+     var sym;
+ #if !WASM_BIGINT
 diff --git a/src/lib/libasync.js b/src/lib/libasync.js
 --- a/src/lib/libasync.js
 +++ b/src/lib/libasync.js

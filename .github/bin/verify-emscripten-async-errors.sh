@@ -123,6 +123,9 @@ test('side module frames survive repeated calls into a suspending main-module im
 
 test('ccall resolves native exports and embedded JS from a side module', {timeout: 2000}, async () => {
 	const runtime = await createRuntime();
+	assert.equal(typeof runtime.resolveGlobalSymbol('dynamic_native').sym, 'function');
+	assert.equal(runtime.resolveGlobalSymbol('php_wasm_missing_probe').sym, undefined);
+	assert.equal(runtime.ccall('probe', 'number', ['number'], [0]), 42);
 	assert.equal(runtime.ccall('dynamic_native', 'number', ['number'], [41]), 42);
 	assert.equal(runtime.ccall('side_js_call', 'number', ['number'], [41]), 42);
 	assert.equal(await runtime.ccall('side_async_js_call', 'number', ['number'], [41], {async: true}), 42);
@@ -186,7 +189,7 @@ for assertions in 0 1; do
 		-sENVIRONMENT=node \
 		-sEXIT_RUNTIME=1 \
 		-sASSERTIONS="${assertions}" \
-		-sEXPORTED_RUNTIME_METHODS=ccall \
+		'-sEXPORTED_RUNTIME_METHODS=["ccall","resolveGlobalSymbol"]' \
 		-o async-errors.mjs
 	node --test async-errors.test.mjs
 done
