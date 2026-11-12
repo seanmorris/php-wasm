@@ -87,3 +87,63 @@ for(const name of ['vrzno', 'waitline'])
 		}
 	});
 }
+
+const modules = ['packages/vrzno/php8.4-vrzno.so', 'packages/waitline/php8.4-waitline.so'];
+const profile = mode => [
+	'ENV_FILE=/dev/null'
+	, 'MAKE_SHUFFLE='
+	, 'BUILD_WORKSPACE='
+	, 'PHP_VERSION=8.4'
+	, `WITH_VRZNO=${mode}`
+	, `WITH_WAITLINE=${mode}`
+	, 'WITH_PDO_PGLITE=0'
+];
+
+test('bridge-modules names both side modules whichever way the runtimes link them', () => {
+	const listed = mode => execFileSync('make', [
+		'--no-print-directory'
+		, '-f'
+		, 'Makefile'
+		, '-f'
+		, '-'
+		, 'print-bridge-modules'
+		, ...profile(mode)
+	], {
+		cwd: root
+		, env: makeEnvironment.independentMakeEnvironment()
+		, encoding: 'utf8'
+		, stdio: ['pipe', 'pipe', 'pipe']
+		, input: 'print-bridge-modules:\n\t@printf \'%s|%s\\n\' "$(strip ${BRIDGE_MODULES})" "$(strip ${EXTRA_MODULES})"\n'
+	}).trim().split('\n').pop().split('|').map(list => list.split(' ').filter(Boolean));
+
+	// Linked into the runtimes, as in every CI profile: no runtime asks for the
+	// modules, but the npm packages ship loaders that name them.
+	const [linkedBridge, linkedExtra] = listed('static');
+
+	assert.deepEqual(linkedBridge, modules);
+	assert.deepEqual(linkedExtra.filter(file => modules.includes(file)), []);
+
+	// Built as side modules, the runtimes ask for them too.
+	const [loadedBridge, loadedExtra] = listed('dynamic');
+
+	assert.deepEqual(loadedBridge, modules);
+	assert.deepEqual(loadedExtra.filter(file => modules.includes(file)), modules);
+
+	// A build without the extensions has no module to offer.
+	assert.deepEqual(listed('0')[0], []);
+});
+
+test('bridge-modules links both side modules in a profile that links the extensions statically', () => {
+	const plan = execFileSync('make', ['-n', 'bridge-modules', ...profile('static')], {
+		cwd: root
+		, env: makeEnvironment.independentMakeEnvironment()
+		, encoding: 'utf8'
+		, stdio: ['ignore', 'pipe', 'pipe']
+		, maxBuffer: 64 * 1024 * 1024
+	});
+
+	for(const module of modules)
+	{
+		assert.ok(plan.includes(`emcc -shared -o /src/${module} `), `${module} is not linked`);
+	}
+});

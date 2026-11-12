@@ -145,6 +145,7 @@ $(error PHP_VERSION MUST BE 8.5, 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION})
 endif
 
 EXTRA_MODULES=
+BRIDGE_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
@@ -1015,6 +1016,11 @@ deps:
 
 dynamic:
 	$(if $(strip ${DYNAMIC_LIBS}),${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS})
+
+# Side modules of the bridge extensions, for the loaders in their npm packages. In a
+# profile that links the extension into its runtimes nothing else asks for them.
+.PHONY: bridge-modules
+bridge-modules: ${BRIDGE_MODULES}
 
 dynamic-libs.json:
 	echo ${DYNAMIC_LIBS_GROUPED} | jq -Rc 'split(" ")' > $@

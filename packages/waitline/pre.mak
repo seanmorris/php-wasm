@@ -16,6 +16,9 @@ WAITLINE_REF?=$(or ${WAITLINE_BRANCH},94d7d7670de85b5b5018ed9f35206d56146efc0a)
 WAITLINE_SOURCE_STAMP=third_party/waitline/.php-wasm-source.json
 WAITLINE_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/waitline/.php-wasm-source.json
 TEST_LIST+=$(wildcard packages/waitline/test/*.mjs)
+# The npm package ships a loader for every PHP version, so every profile can build
+# the module those loaders name, also one that links the extension into its runtimes.
+BRIDGE_MODULES+= packages/waitline/php${PHP_VERSION}-waitline.so
 # All TEST_LIST consumers run the ESM waitline tests, including CJS lanes.
 test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard: node-cli-mjs
 endif

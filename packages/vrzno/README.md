@@ -7,6 +7,11 @@ Standard `php-wasm` profiles include Vrzno statically by default. Custom builds
 can opt into the dynamic loader without a separate companion JavaScript file;
 Vrzno's embedded `EM_JS` code travels in the side module.
 
+The package ships that side module, `php8.x-vrzno.so`, for PHP 8.0 to 8.5, built
+from the same PHP sources and with the same flags as the published runtimes. A
+standard runtime already has Vrzno linked in and has no use for it: given the
+loader, PHP only warns that the module is already loaded.
+
 Vrzno requires `WeakRef` and `FinalizationRegistry`. Cloudflare Workers using a
 compatibility date before `2025-05-05` must enable `enable_weak_ref`.
 
@@ -43,6 +48,8 @@ Use `vrzno_import()` to dynamically import JavaScript modules from PHP.
 
 `WITH_VRZNO=1` remains the default and compiles Vrzno statically. Set
 `WITH_VRZNO=dynamic` to produce `packages/vrzno/php8.x-vrzno.so`.
+`make bridge-modules` builds that module in any profile that enables Vrzno, also one
+that links it into its runtimes; the release packages get theirs that way.
 
 ## Build Options
 

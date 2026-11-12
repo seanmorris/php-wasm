@@ -16,6 +16,8 @@ That is what makes browser-hosted `php -a` sessions and `phpdbg` prompts workabl
 Usually no.
 
 Published CLI/debug runtimes include Waitline statically in every standard profile.
+The package also ships the side module, `php8.x-waitline.so`, for PHP 8.0 to 8.5, for
+custom runtimes built without Waitline linked in. A standard runtime has no use for it.
 You normally only care about this package when you are maintaining custom builds, debugging interactive input behavior, or overriding the vendored source checkout.
 
 For a custom build with `WITH_WAITLINE=dynamic`, pass the loader to the runtime:

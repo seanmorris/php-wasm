@@ -34,6 +34,8 @@ Changes
 
 * `WITH_VRZNO=dynamic` and `WITH_WAITLINE=dynamic` build working side modules in a tree that has already built the extension statically. The side-module build copied the extension directory together with the static build's objects and linked those, which gave a `php8.x-vrzno.so` or `php8.x-waitline.so` without `get_module` that PHP rejected as "Invalid library". It now starts from the sources.
 
+* The `vrzno` and `waitline` packages ship the side modules their loaders name, `php8.x-vrzno.so` and `php8.x-waitline.so` for PHP 8.0 to 8.5. `make bridge-modules` builds them in any profile that enables the extensions, including the standard ones that link both into the runtimes.
+
 * `php-dbg-wasm`: the debugger constructors are typed with `PhpDbgRuntimeArgs`, which declares `dbgArgs`, `onDbgOutput`, `onDbgEvent`, `dbgYieldInterval` and `dbgManagedShutdown`. The result types `PhpDbgFrame`, `PhpDbgSymbol` and `PhpDbgValue` are exported from `php-dbg-wasm/public`.
 
 ## v0.2.0 - Ramifying Sympodia

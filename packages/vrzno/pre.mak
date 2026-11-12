@@ -15,6 +15,9 @@ VRZNO_REF?=f963f8c1ebb94fca2c5340fc82130183141776a5
 VRZNO_SOURCE_STAMP=third_party/vrzno/.php-wasm-source.json
 VRZNO_EXTENSION_STAMP=third_party/php${PHP_VERSION}-src/ext/vrzno/.php-wasm-source.json
 TEST_LIST+=$(wildcard packages/vrzno/test/*.mjs)
+# The npm package ships a loader for every PHP version, so every profile can build
+# the module those loaders name, also one that links the extension into its runtimes.
+BRIDGE_MODULES+= packages/vrzno/php${PHP_VERSION}-vrzno.so
 endif
 
 ifeq (${WITH_VRZNO},static)
