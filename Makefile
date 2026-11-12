@@ -311,6 +311,12 @@ CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js idbfsSync.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
+# Package rules expand native prerequisites when they are read. Resolve this
+# after package pre.mak additions and before including the native build rules.
+ifneq (${PRE_JS_FILES},)
+PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
+endif
+
 -include $(addsuffix /static.mak,${EXTENSION_PACKAGE_DIRS})
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-cli-wasm/static.mak
@@ -450,7 +456,6 @@ EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
 ifneq (${PRE_JS_FILES},)
-PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
 EXTRA_FLAGS+= --pre-js /src/${PRE_JS_CACHE}
 endif
 
