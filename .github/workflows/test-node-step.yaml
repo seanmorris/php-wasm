@@ -104,6 +104,21 @@ jobs:
 
           make --debug=basic ${TARGET} PHP_VERSION=${{ inputs.phpVersion }} LIB_TYPE=${{ inputs.libType }}
 
+      - name: Test shipped bridge side modules
+        if: ${{ inputs.phpVersion == '8.4' && inputs.libType == 'dynamic' && inputs.testType == 'node' && startsWith(inputs.artifactPattern, 'php-uncompressed-') }}
+        env:
+          PHP_VERSION: '8.4'
+          WITH_VRZNO: dynamic
+          WITH_WAITLINE: dynamic
+          WITH_PDO_PGLITE: dynamic
+        run: |
+          sha256sum packages/vrzno/php8.4-vrzno.so packages/waitline/php8.4-waitline.so > /tmp/bridge-modules.sha256
+          make --debug=basic node-mjs node-cli-mjs node-dbg-mjs WITH_VRZNO=dynamic WITH_WAITLINE=dynamic
+          sha256sum -c /tmp/bridge-modules.sha256
+          node --test test/dbg-node/dbg-node.test.mjs
+          node --expose-gc --test packages/vrzno/test/*.mjs
+          node --test packages/waitline/test/*.mjs
+
       - name: Take Failure Snapshot
         if: ${{ failure() }}
         run: |

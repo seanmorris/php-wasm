@@ -133,6 +133,10 @@ jobs:
       - name: Stage every declared runtime wrapper
         run: make --debug=basic runtime-wrappers
 
+      - name: Build bridge extension side modules for npm
+        if: ${{ inputs.libType == 'dynamic' }}
+        run: time make --debug=basic bridge-modules
+
       - name: Verify public wrappers have their native loaders
         run: >-
           node test/lib/runtime-imports.mjs --php-version '${{ inputs.phpVersion }}'

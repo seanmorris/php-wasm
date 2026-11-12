@@ -1005,10 +1005,9 @@ jobs:
           done
           node bin/merge-cloudflare.mjs packages/php-cloud-wasm cloudflare-stage/*/packages/php-cloud-wasm
       - name: Verify assembled package size and shared Wasm payloads
-        run: >-
-          node --test
-          --test-name-pattern='published packages stay within the CDN package size limit|runtime packages ship one wasm binary per PHP version'
-          test/packaging.test.mjs
+        run: |
+          node --test test/release/packages.test.mjs
+          node --test --test-name-pattern='runtime packages ship one wasm binary per PHP version' test/packaging.test.mjs
       - name: Archive npm packages
         run: tar -czf npm-release-packages.tar.gz packages
       - uses: actions/upload-artifact@v6
