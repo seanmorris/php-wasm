@@ -483,6 +483,8 @@ PHP_CLI_OBJS=sapi/embed/php_embed.lo
 
 MAIN_MODULE?=1
 ASYNCIFY?=1
+# The resolver belongs to Emscripten's dynamic linker, which Cloudflare omits.
+DYNAMIC_LINK_RUNTIME_METHODS="resolveGlobalSymbol",
 
 # PHP compilation cannot suspend, but Emscripten's conservative invoke_* call
 # analysis otherwise instruments recursive Zend compiler helpers.  Those
@@ -524,7 +526,7 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \
 		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "resolveGlobalSymbol", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", $(if $(filter-out 0,${MAIN_MODULE}),${DYNAMIC_LINK_RUNTIME_METHODS}) "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
 		-s ENVIRONMENT=$(if $(filter webview,${ENVIRONMENT}),${WEBVIEW_ENVIRONMENTS},${ENVIRONMENT}) \

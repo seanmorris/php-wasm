@@ -9,24 +9,31 @@ import makeEnvironment from '../../bin/make-environment.cjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 
-test('WebView compiler flags include the web environment required for asynchronous asset loading', () => {
-	for(const environment of ['web', 'worker', 'webview', 'node'])
-	{
-		const flags = execFileSync('make', [
+test('compiler flags select WebView support and only export the resolver for dynamic-linking builds', () => {
+	const flagsFor = (environment, mainModule = 1) => execFileSync('make', [
 			'--no-print-directory', '-f', 'Makefile', '-f', '-', 'environment-flags'
 			, 'ENV_FILE=/dev/null', 'MAKE_SHUFFLE=', 'BUILD_WORKSPACE='
 			, 'EXTENSION_PACKAGE_DIRS=', 'FS_TYPE='
-			, `ENVIRONMENT=${environment}`
-		], {
+			, `ENVIRONMENT=${environment}`, `MAIN_MODULE=${mainModule}`
+	], {
 			cwd: root
 			, env: makeEnvironment.independentMakeEnvironment()
 			, encoding: 'utf8'
 			, input: 'environment-flags:\n\t@echo $(BUILD_FLAGS)\n'
-		});
+	});
+	const runtimeMethods = flags => {
+		const match = flags.match(/EXPORTED_RUNTIME_METHODS='?(\[[^\]]+\])/);
+		assert.ok(match, flags);
+		return JSON.parse(match[1]);
+	};
+	for(const environment of ['web', 'worker', 'webview', 'node'])
+	{
+		const flags = flagsFor(environment);
 		const expected = environment === 'webview' ? 'web,webview' : environment;
 		assert.ok(flags.includes(`-s ENVIRONMENT=${expected} `), flags);
-		assert.match(flags, /EXPORTED_RUNTIME_METHODS=[^\n]*"resolveGlobalSymbol"/);
+		assert.ok(runtimeMethods(flags).includes('resolveGlobalSymbol'));
 	}
+	assert.deepEqual(runtimeMethods(flagsFor('worker', 0)), runtimeMethods(flagsFor('worker')).filter(name => name !== 'resolveGlobalSymbol'));
 });
 
 test('standalone CGI, CLI and debugger builds prepare pre-JS before their native link', t => {
