@@ -147,3 +147,38 @@ test('bridge-modules links both side modules in a profile that links the extensi
 		assert.ok(plan.includes(`emcc -shared -o /src/${module} `), `${module} is not linked`);
 	}
 });
+
+test('every copy of an extension\'s sources keeps their timestamps', () => {
+	// phpize's Makefile regenerates X_arginfo.h whenever X.stub.php is newer, by running the
+	// PHP it was configured with, and here that is the Emscripten build's JavaScript. A copy
+	// that stamps each file with the time it was written leaves the order to chance.
+	const copies = [];
+
+	for(const directory of fs.readdirSync(path.join(root, 'packages')))
+	{
+		const makefile = path.join(root, 'packages', directory, 'static.mak');
+
+		if(!fs.existsSync(makefile))
+		{
+			continue;
+		}
+
+		for(const line of fs.readFileSync(makefile, 'utf8').split('\n'))
+		{
+			const copy = line.match(/\bcp\s+-(\w+)\s+\/src\/third_party\/php\$\{PHP_VERSION\}-src\/ext\//);
+
+			if(copy)
+			{
+				copies.push({directory, flags: copy[1]});
+			}
+		}
+	}
+
+	// The check is of no use if the copies stop looking like this.
+	assert.ok(copies.length >= 10, `found only ${copies.length} extension source copies`);
+
+	assert.deepEqual(
+		copies.filter(copy => !copy.flags.includes('p')).map(copy => copy.directory)
+		, []
+	);
+});

@@ -36,6 +36,8 @@ Changes
 
 * The `vrzno` and `waitline` packages ship the side modules their loaders name, `php8.x-vrzno.so` and `php8.x-waitline.so` for PHP 8.0 to 8.5. `make bridge-modules` builds them in any profile that enables the extensions, including the standard ones that link both into the runtimes.
 
+* Fixed an intermittent failure building `php8.x-simplexml.so`: `Parse …/simplexml.stub.php to generate …/simplexml_arginfo.h`, then a shell syntax error from `/src/lib/php8.x/bin/php`. The package copied the extension's sources without their timestamps, so `simplexml.stub.php` could end up newer than its generated header and phpize's Makefile tried to regenerate the header with the Emscripten build of PHP. The copy now keeps timestamps, as every other extension's does.
+
 * `php-dbg-wasm`: the debugger constructors are typed with `PhpDbgRuntimeArgs`, which declares `dbgArgs`, `onDbgOutput`, `onDbgEvent`, `dbgYieldInterval` and `dbgManagedShutdown`. The result types `PhpDbgFrame`, `PhpDbgSymbol` and `PhpDbgValue` are exported from `php-dbg-wasm/public`.
 
 ## v0.2.0 - Ramifying Sympodia
