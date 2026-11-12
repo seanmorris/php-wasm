@@ -38,7 +38,7 @@ async function cache(settings = [])
 test('PHP configure caches separate versions and effective configurations', async () => {
 	const base = await cache(['WITH_SDL=1']);
 	for(const settings of [
-		['PHP_VERSION=8.0', 'WITH_SDL=1']
+		['ENV_FILE=.github/.env_8.0.static.ci', 'PHP_VERSION=8.0', 'WITH_SDL=1']
 		, ['ENV_FILE=.github/.env_8.4.shared.ci', 'WITH_SDL=1']
 		, ['ENV_FILE=.github/.env_8.4.dynamic.ci', 'WITH_SDL=1']
 		, ['WITH_SDL=0']
@@ -103,7 +103,7 @@ test('CI build snapshots retain their configure stamp when runtime tests select 
 });
 
 test('PHP cleanup removes the selected version cache from the build root', async () => {
-	const {stdout} = await make(['PHP_VERSION=8.0'], ['-n', 'php-clean']);
+	const {stdout} = await make(['ENV_FILE=.github/.env_8.0.static.ci', 'PHP_VERSION=8.0'], ['-n', 'php-clean']);
 	assert.match(stdout, /rm -rf \.cache\/php-configure\/php8\.0\.30/);
 	assert.match(stdout, /rm -f \.cache\/php-configure-8\.0/);
 	assert.doesNotMatch(stdout, /-w \/src\/third_party\/php8\.0-src\/.*rm -f \.cache\/config-cache/);
