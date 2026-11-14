@@ -5,6 +5,18 @@ const version = process.env.PHP_VERSION ?? '8.4';
 const variant = process.env.PHP_VARIANT ?? '';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
 
+test('SDL selects PGlite only for supported dynamic builds', async ({page}) => {
+	await page.goto('harness/index.html');
+	const selected = await page.evaluate(async () => {
+		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+		const {default: pdoPglite} = await import('/packages/pdo-pglite/index.mjs');
+		return ['8.0', '8.1', '8.4'].map(version =>
+			['dynamic', 'shared', 'static'].map(profile =>
+				loadEmbeddedSharedLibs(profile, '_sdl', version).includes(pdoPglite)));
+	});
+	expect(selected).toEqual([[false, false, false], [true, false, false], [true, false, false]]);
+});
+
 if(variant === '_sdl')
 {
 	test('SDL string conversion methods declare their return types without startup warnings', async ({page}) => {

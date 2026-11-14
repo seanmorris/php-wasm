@@ -188,10 +188,10 @@ const pickLibsForLibType = (libType, dynamicLibs, sharedLibs) => {
 };
 
 export const loadEmbeddedSharedLibs = (libType, variant = '', runtimeVersion = '8.4') => {
-	// The SDL package owns all native libraries required by its build.
+	// SDL owns its native dependencies, but optional PHP extensions are separate.
 	if(variant === '_sdl')
 	{
-		return [];
+		return libType === 'dynamic' && runtimeVersion !== '8.0' ? [pdoPglite] : [];
 	}
 
 	if(libType === 'dynamic')
