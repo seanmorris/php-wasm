@@ -11,12 +11,64 @@ export interface PhpPreloadFile {
 	name?: string;
 }
 
+/** A version-aware extension package accepted by sharedLibs and dynamicLibs. */
+export interface PhpLibraryLoader {
+	getLibs(php: {phpVersion?: PhpRuntimeVersion}): PhpSharedLibrary[];
+	getFiles?(php: {phpVersion?: PhpRuntimeVersion}): PhpPreloadFile[];
+}
+
 export interface PhpSharedLibrary {
 	name?: string;
 	url: string | URL;
 	ini?: boolean;
 	getLibs?: Function;
 	getFiles?: Function;
+}
+
+/** Output passed to `onDbgOutput`. `type` is 1 for stdout, 2 for stderr, 3 for a debugger error and 0 for any other debugger message. */
+export interface PhpDbgOutput {
+	type: 0 | 1 | 2 | 3;
+	fd: number;
+	bytes: Uint8Array;
+	/** True while phpdbg is evaluating an `ev` expression. */
+	evaluating: boolean;
+}
+
+/** Event passed to `onDbgEvent`. The only type today is `exception`. */
+export interface PhpDbgEvent {
+	type: string;
+	name: string | null;
+	message: string | null;
+	file: string | null;
+	line: number;
+	status: number;
+}
+
+/** A stack frame from `dumpBacktrace()`. `frame` is the index `switchFrame()` takes; 0 is the innermost frame. */
+export interface PhpDbgFrame {
+	filename: string;
+	lineNo: number;
+	frame: number;
+	selected: boolean;
+	/** Debugger API 2 only. Empty for top-level code. */
+	functionName?: string;
+	/** Debugger API 2 only. Empty outside a class. */
+	className?: string;
+}
+
+export type PhpDbgType = 'undefined' | 'null' | 'bool' | 'int' | 'float' | 'string' | 'array' | 'object' | 'resource' | 'callable' | 'unknown';
+
+/** A value's PHP type. `count` is the number of elements in an array or of bytes in a string. */
+export interface PhpDbgValue {
+	type: PhpDbgType;
+	className: string | null;
+	count: number | null;
+	reference: boolean;
+	value: PhpRuntimeValue;
+}
+
+export interface PhpDbgSymbol extends PhpDbgValue {
+	name: string;
 }
 
 export interface PhpVhost {
@@ -39,14 +91,27 @@ export interface PhpRuntimeArgs {
 	libcurlFetchOptions?: {credentials?: 'omit' | 'same-origin' | 'include'};
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFile[];
-	sharedLibs?: Array<string | URL | PhpSharedLibrary>;
-	dynamicLibs?: Array<string | URL | PhpSharedLibrary>;
+	sharedLibs?: Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
+	dynamicLibs?: Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
 	debug?: boolean;
 	ini?: string;
 	persist?: object | boolean;
 	staticFS?: boolean;
 	vHosts?: PhpVhost[];
 	[key: string]: object | string | number | boolean | Function | undefined;
+}
+
+/** Constructor options for the debugger wrappers. */
+export interface PhpDbgRuntimeArgs extends PhpRuntimeArgs {
+	/** Extra phpdbg command-line arguments, such as `['-q']` to start without the welcome banner. */
+	dbgArgs?: string[];
+	/** Receives program and debugger output separately from the console streams. */
+	onDbgOutput?: (output: PhpDbgOutput) => void;
+	onDbgEvent?: (event: PhpDbgEvent) => void;
+	/** Milliseconds between cooperative yields. Unset means the debugger never yields. */
+	dbgYieldInterval?: number;
+	/** Run shutdown functions, destructors and output handlers when a debugging session ends. */
+	dbgManagedShutdown?: boolean;
 }
 
 export type PhpRuntimeFactory<Args = PhpRuntimeArgs> = ((args: Args) => PhpBinaryRuntime | Promise<PhpBinaryRuntime>)

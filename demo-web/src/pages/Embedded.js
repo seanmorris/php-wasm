@@ -17,6 +17,7 @@ import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 import { prepareSdlAssets } from '../lib/sdlAssets';
 import { readEmbeddedCode, replaceEmbeddedUrl } from '../lib/embeddedUrl';
 import { createPhpEditorMode } from '../lib/phpEditorMode';
+import { pdoPgliteLibraries } from '../lib/pdoPgliteLibraries';
 
 import 'ace-builds/src-noconflict/theme-monokai';
 
@@ -245,6 +246,7 @@ function Embedded()
 		const runtimeSharedLibs = runtime === 'sdl' && libType === 'shared'
 			? sharedLibs.current.filter(library => !sharedSupportLibs.includes(library))
 			: [...sharedLibs.current];
+		runtimeSharedLibs.push(...pdoPgliteLibraries(libType, version));
 
 		const Runtime = runtime === 'sdl' ? await loadSdlRuntime(version) : PhpWeb;
 

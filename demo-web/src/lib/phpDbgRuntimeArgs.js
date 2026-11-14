@@ -4,6 +4,7 @@
 import { PGlite } from '@electric-sql/pglite';
 import { libType } from './runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { pdoPgliteLibraries } from './pdoPgliteLibraries';
 
 const sharedLibs = [];
 
@@ -43,7 +44,7 @@ else if(libType === 'shared')
 export const createPhpDbgRuntimeArgs = (version = '8.3', program = null) => ({
 	version
 	, ...(program ? {program} : {})
-	, sharedLibs
+	, sharedLibs: [...sharedLibs, ...pdoPgliteLibraries(libType, version)]
 	, ini: `
 		date.timezone=${Intl.DateTimeFormat().resolvedOptions().timeZone}
 		expose_php=0

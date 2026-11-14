@@ -7,7 +7,30 @@ trap 'rm -rf "${WORK_DIR}"' EXIT
 cd "${WORK_DIR}"
 
 cat > async-side.c <<'EOF'
+#include <emscripten.h>
+
 extern int suspending_callback(int value);
+
+EMSCRIPTEN_KEEPALIVE int dynamic_native(int value) {
+	return value + 1;
+}
+
+EM_JS(int, dynamic_js, (int value), {
+	return Module.ccall('dynamic_native', 'number', ['number'], [value]);
+});
+
+EM_ASYNC_JS(int, dynamic_async_js, (int value), {
+	await Promise.resolve();
+	return Module.ccall('dynamic_native', 'number', ['number'], [value]);
+});
+
+EMSCRIPTEN_KEEPALIVE int side_js_call(int value) {
+	return dynamic_js(value);
+}
+
+EMSCRIPTEN_KEEPALIVE int side_async_js_call(int value) {
+	return dynamic_async_js(value);
+}
 
 int side_call(int value) {
 	volatile int saved = value;
@@ -98,6 +121,16 @@ test('side module frames survive repeated calls into a suspending main-module im
 	assert.equal(await call(runtime, 9), 42);
 });
 
+test('ccall resolves native exports and embedded JS from a side module', {timeout: 2000}, async () => {
+	const runtime = await createRuntime();
+	assert.equal(typeof runtime.resolveGlobalSymbol('dynamic_native').sym, 'function');
+	assert.equal(runtime.resolveGlobalSymbol('php_wasm_missing_probe').sym, undefined);
+	assert.equal(runtime.ccall('probe', 'number', ['number'], [0]), 42);
+	assert.equal(runtime.ccall('dynamic_native', 'number', ['number'], [41]), 42);
+	assert.equal(runtime.ccall('side_js_call', 'number', ['number'], [41]), 42);
+	assert.equal(await runtime.ccall('side_async_js_call', 'number', ['number'], [41], {async: true}), 42);
+});
+
 for (const mode of [2, 3, 6]) {
 	for (const failure of [new Error('native import failed'), undefined, null, 'import failure']) {
 		test(`mode ${mode} rejects with ${String(failure)} and disables the failed instance`, {timeout: 2000}, async () => {
@@ -156,7 +189,7 @@ for assertions in 0 1; do
 		-sENVIRONMENT=node \
 		-sEXIT_RUNTIME=1 \
 		-sASSERTIONS="${assertions}" \
-		-sEXPORTED_RUNTIME_METHODS=ccall \
+		'-sEXPORTED_RUNTIME_METHODS=["ccall","resolveGlobalSymbol"]' \
 		-o async-errors.mjs
 	node --test async-errors.test.mjs
 done

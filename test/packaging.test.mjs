@@ -5,6 +5,8 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
+import {missingRuntimeImports} from './lib/runtime-imports.mjs';
+import {oversizedPackages, pack, publishablePackageDirs, unsharedBinaries} from './lib/package-checks.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const packageDirs = [
@@ -14,23 +16,15 @@ const packageDirs = [
 	, 'packages/php-dbg-wasm'
 	, 'packages/php-cloud-wasm'
 	, 'packages/php-sdl-wasm'
+	, 'packages/vrzno'
+	, 'packages/pdo-pglite'
+	, 'packages/waitline'
 ];
 const packageRoot = path.join(repoRoot, 'packages');
 
 function packFiles(packageDir)
 {
-	const output = execFileSync(
-		'npm',
-		['pack', '--dry-run', `./${packageDir}`, '--json'],
-		{
-			cwd: repoRoot,
-			encoding: 'utf8',
-			maxBuffer: 16 * 1024 * 1024,
-		}
-	);
-	const [result] = JSON.parse(output);
-
-	return new Set(result.files.map(file => file.path));
+	return new Set(pack(packageDir).files.map(file => file.path));
 }
 
 function addTarget(targets, value)
@@ -238,6 +232,101 @@ test('runtime package tarballs only ship hashed wasm payloads', () => {
 			`${packageDir} tarball includes unhashed wasm files: ${unhashedWasmFiles.join(', ')}`
 		);
 	}
+});
+
+test('public runtime wrappers ship every native loader they import', () => {
+	for(const packageDir of packageDirs.slice(0, 4))
+	{
+		assert.deepEqual(
+			missingRuntimeImports(path.join(repoRoot, packageDir), {
+				files: packFiles(packageDir)
+				, phpVersion: process.env.PHP_VERSION
+			})
+			, []
+			, `${packageDir} omits native loaders needed when its public wrappers are instantiated`
+		);
+	}
+});
+
+test('runtime packages ship one wasm binary per PHP version', () => {
+	assert.deepEqual(unsharedBinaries(publishablePackageDirs()), []);
+});
+
+test('the size and shared-binary checks report an oversized package and a duplicated binary', t => {
+	const root = fs.mkdtempSync(path.join(os.tmpdir(), 'package-limits-'));
+
+	t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+
+	const hash = digit => `${digit.repeat(40)}.wasm`;
+	const writePackage = (name, files, manifest = {}) => {
+		const directory = path.join(root, 'packages', name);
+
+		fs.mkdirSync(directory, { recursive: true });
+		fs.writeFileSync(path.join(directory, 'package.json'), JSON.stringify({
+			name: `@test/${name}`
+			, version: '1.0.0'
+			, files: ['*.mjs', '*.js', '[0-9a-f]*.wasm']
+			, ...manifest
+		}));
+
+		for(const [file, bytes] of Object.entries(files))
+		{
+			fs.writeFileSync(path.join(directory, file), Buffer.alloc(bytes, 1));
+		}
+	};
+
+	// Two PHP versions, three environments each, one binary per version.
+	writePackage('shared', {
+		'php8.3-node.mjs': 10
+		, 'php8.3-node.js': 10
+		, 'php8.3-web.mjs': 10
+		, [hash('a')]: 1000
+		, 'php8.4-node.mjs': 10
+		, 'php8.4-node.js': 10
+		, 'php8.4-web.mjs': 10
+		, [hash('b')]: 1000
+	});
+	// The same, except that the 8.4 web build did not link to the shared binary.
+	writePackage('duplicated', {
+		'php8.3-node.mjs': 10
+		, 'php8.3-web.mjs': 10
+		, [hash('a')]: 1000
+		, 'php8.4-node.mjs': 10
+		, 'php8.4-web.mjs': 10
+		, [hash('b')]: 1000
+		, [hash('c')]: 1000
+	});
+	// One version built and not hashed yet, as in a per-version test job.
+	writePackage('partial', {'php8.4-node.mjs': 10, 'php8.4-node.mjs.wasm': 1000});
+	// An extension package has no interpreter binary at all.
+	writePackage('extension', {'index.mjs': 10, 'php8.4-example.so': 500}, {files: ['*.mjs', '*.so']});
+	writePackage('unpublished', {[hash('d')]: 5000}, {private: true});
+	fs.mkdirSync(path.join(root, 'packages', 'not-a-package'));
+
+	const packageDirs = publishablePackageDirs(root);
+
+	assert.deepEqual(packageDirs, ['duplicated', 'extension', 'partial', 'shared'].map(name => `packages/${name}`));
+	assert.deepEqual(unsharedBinaries(packageDirs, root), [
+		'packages/duplicated ships 3 wasm binaries for 2 PHP versions (8.3, 8.4); the environments of a version must share one'
+	]);
+	assert.ok(!pack('packages/partial', root).files.some(file => file.path.endsWith('.wasm')), 'an unhashed binary is not packed');
+
+	// Every fixture is far below the real limit.
+	assert.deepEqual(oversizedPackages(packageDirs, root), []);
+
+	// With the limit set to a package's exact size it still fits; one byte less and it is reported.
+	const bytes = pack('packages/shared', root).unpackedSize;
+
+	assert.ok(bytes > 2000, `npm reported ${bytes} unpacked bytes`);
+	assert.deepEqual(oversizedPackages(['packages/shared'], root, bytes), []);
+	assert.deepEqual(oversizedPackages(['packages/shared'], root, bytes - 1), [
+		`packages/shared unpacks to ${bytes} bytes, 1 over the ${bytes - 1}-byte CDN package limit`
+	]);
+	// The larger package is over a limit the smaller ones meet.
+	assert.deepEqual(
+		oversizedPackages(packageDirs, root, bytes).map(problem => problem.split(' ')[0])
+		, ['packages/duplicated']
+	);
 });
 
 test('package index.mjs relative imports ship in the npm tarballs', () => {

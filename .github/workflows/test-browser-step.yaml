@@ -57,14 +57,11 @@ jobs:
       - name: Verify browser harness assets
         run: node test/browser/verify-browser-assets.mjs
 
-      - name: Install Chrome's APT key
-        run: wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-
-      - name: Install Chrome's APT source
-        run: sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
-
-      - name: Install Chrome
-        run: sudo apt-get update && sudo apt install -y software-properties-common google-chrome-stable
+      - name: Use runner Chrome
+        run: |
+          BROWSER_EXECUTABLE="$(command -v google-chrome)"
+          "$BROWSER_EXECUTABLE" --version
+          printf '%s\n' "PLAYWRIGHT_CHROMIUM_PATH=$BROWSER_EXECUTABLE" >> "$GITHUB_ENV"
 
       - name: Run tests
         run: PHP_VERSION=${{ inputs.phpVersion }} PHP_VARIANT=${{ inputs.phpVariant }} LIB_TYPE=${{ inputs.libType }} make --debug=basic test-browser

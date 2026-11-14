@@ -53,6 +53,11 @@ declare interface RuntimeFetchEvent {
 	respondWith(response: Response | Promise<Response>): void;
 }
 
+declare interface PhpLibraryLoader {
+	getLibs(php: {phpVersion?: PhpRuntimeVersion}): PhpSharedLibrary[];
+	getFiles?(php: {phpVersion?: PhpRuntimeVersion}): PhpPreloadFile[];
+}
+
 declare interface PhpSharedLibrary {
 	name?: string;
 	url: string | URL;
@@ -67,7 +72,7 @@ declare interface PhpVhost {
 	entrypoint: string;
 }
 
-declare type PhpLibraryList = Array<string | URL | PhpSharedLibrary>;
+declare type PhpLibraryList = Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
 declare type PhpPreloadFileList = PhpPreloadFile[];
 declare type PhpVhostList = PhpVhost[];
 
@@ -100,6 +105,15 @@ declare interface PhpRuntimeArgs {
 	staticFS?: boolean;
 	vHosts?: PhpVhostList;
 	[key: string]: object | string | number | boolean | Function | undefined;
+}
+
+/** Constructor options for the debugger wrappers. */
+declare interface PhpDbgRuntimeArgs extends PhpRuntimeArgs {
+	dbgArgs?: string[];
+	onDbgOutput?: (output: {type: number, fd: number, bytes: Uint8Array, evaluating: boolean}) => void;
+	onDbgEvent?: (event: {type: string, name: string | null, message: string | null, file: string | null, line: number, status: number}) => void;
+	dbgYieldInterval?: number;
+	dbgManagedShutdown?: boolean;
 }
 
 // Native modules are generated beside the wrappers at build time.

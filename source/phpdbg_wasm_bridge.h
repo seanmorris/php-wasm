@@ -4,7 +4,13 @@
 #include <emscripten.h>
 #include "phpdbg_out.h"
 #include "Zend/zend_exceptions.h"
-ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+/* A Vrzno built as a side module reaches phpdbg through the dynamic linker, which
+ * binds only symbols with default visibility. Left hidden, these three resolve to
+ * null there: superglobals go missing and frames cannot be selected. */
+#define PHPDBG_WASM_VISIBLE __attribute__((visibility("default")))
+PHPDBG_WASM_VISIBLE ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
+PHPDBG_WASM_VISIBLE void phpdbg_restore_frame(void);
+PHPDBG_WASM_VISIBLE int phpdbg_arm_auto_global(zval *ptrzv);
 int phpdbg_wasm_checkpoint(void);
 int phpdbg_wasm_managed_shutdown(void);
 void phpdbg_wasm_output(int type, int fd, const char *text, int length, int evaluating);
@@ -39,5 +45,13 @@ EM_JS(void, phpdbg_wasm_event, (const char *type, const char *name, const char *
     if (Module['onDbgEvent']) Module['onDbgEvent']({type: UTF8ToString(type), name: name ? UTF8ToString(name) : null,
         message: message ? UTF8ToString(message) : null, file: file ? UTF8ToString(file) : null, line, status});
 });
+
+/* PHP leaves dl() to each SAPI: cli, cgi and embed register it, phpdbg does not. */
+#include "ext/standard/dl.h"
+#include "ext/standard/dl_arginfo.h"
+static const zend_function_entry phpdbg_wasm_additional_functions[] = {
+	ZEND_FE(dl, arginfo_dl)
+	ZEND_FE_END
+};
 #endif
 #endif

@@ -1,6 +1,8 @@
 #!/usr/bin/env make
 
 DOCKER_RUN_IN_EXT_SDL=${DOCKER_ENV} -e EMCC_CFLAGS='-fPIC -flto -O${SUB_OPTIMIZE} -sASYNCIFY -sUSE_SDL=2' -w /src/third_party/php${PHP_VERSION}-sdl/ emscripten-builder
+SDL_RUMBLE_PORT=packages/php-sdl-wasm/ports/sdl2-rumble.py
+SDL_RUMBLE_PATCH=packages/php-sdl-wasm/patches/SDL2-rumble.patch
 
 third_party/php${PHP_VERSION}-sdl/config.m4:
 	@ echo -e "\e[33;4mDownloading ext-sdl\e[0m"
@@ -37,14 +39,14 @@ lib/lib/libGL.a:
 	${DOCKER_RUN} mkdir -p /src/lib/lib
 	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libGL-mt-webgl2-ofb-full_es3-getprocaddr.a /src/$@
 
-lib/lib/libSDL2.a:
+lib/lib/libSDL2.a: ${SDL_RUMBLE_PORT} ${SDL_RUMBLE_PATCH}
 	@ echo -e "\e[33;4mBuilding LIBSDL\e[0m"
 	# SDL writes its pkg-config file before compiling, so bootstrap a cold SDK cache first.
 	${DOCKER_RUN} retry-embuilder build sysroot
-	${DOCKER_RUN} retry-embuilder build sdl2 --lto --pic --verbose
+	${DOCKER_RUN} retry-embuilder build /src/${SDL_RUMBLE_PORT} --lto --pic --verbose
 	${DOCKER_RUN} mkdir -p /src/lib/include /src/lib/lib
 	${DOCKER_RUN} rm -rf /src/lib/include/SDL2
 	${DOCKER_RUN} cp -r /emsdk/upstream/emscripten/cache/sysroot/include/SDL2 /src/lib/include/SDL2
-	${DOCKER_RUN} cp /emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/libSDL2.a /src/$@
+	${DOCKER_RUN} bash -euc 'library="$$(python3 /src/${SDL_RUMBLE_PORT} --print-library)"; test -n "$$library"; cp "/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/lto-pic/$$library" /src/$@'
 
 include packages/php-sdl-wasm/extensions.mak

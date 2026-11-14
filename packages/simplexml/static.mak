@@ -6,7 +6,7 @@ WITH_SIMPLEXML?=dynamic
 
 SIMPLEXML_TEST_LIST=$(filter-out packages/simplexml/test/async-errors.mjs,$(wildcard packages/simplexml/test/*.mjs))
 # Awaiting JavaScript in a PHP callback requires the optional Vrzno bridge.
-ifeq (${WITH_VRZNO},1)
+ifneq ($(filter ${WITH_VRZNO},1 static dynamic),)
 SIMPLEXML_TEST_LIST+=packages/simplexml/test/async-errors.mjs
 endif
 
@@ -35,7 +35,7 @@ EXTRA_MODULES+= packages/simplexml/php${PHP_VERSION}-simplexml.so
 endif
 
 third_party/php${PHP_VERSION}-simplexml/config.m4: third_party/php${PHP_VERSION}-src/patched
-	${DOCKER_RUN} cp -Lrf /src/third_party/php${PHP_VERSION}-src/ext/simplexml /src/third_party/php${PHP_VERSION}-simplexml
+	${DOCKER_RUN} cp -Lprf /src/third_party/php${PHP_VERSION}-src/ext/simplexml /src/third_party/php${PHP_VERSION}-simplexml
 	${DOCKER_RUN} touch third_party/php${PHP_VERSION}-simplexml/config.m4
 
 packages/simplexml/php${PHP_VERSION}-simplexml.so: ${PHPIZE} third_party/php${PHP_VERSION}-simplexml/config.m4

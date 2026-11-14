@@ -22,12 +22,14 @@ test('the actual builder tarball installs independently and scaffolds a build', 
 	assert.ok(packed.files.includes('packages/php-sdl-wasm/js/text-input.js'));
 	assert.ok(packed.files.includes('packages/php-sdl-wasm/opengl/php_webgl.c'));
 	assert.ok(packed.files.includes('packages/php-sdl-wasm/patches/sdl_mixer.patch'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/ports/sdl2-rumble.py'));
+	assert.ok(packed.files.includes('packages/php-sdl-wasm/patches/SDL2-rumble.patch'));
 	assert.ok(packed.files.includes('bin/source-importer.mjs'));
 	assert.ok(packed.files.includes('bin/patch-phpdbg.mjs'));
 	assert.ok(packed.files.includes('bin/dbg-assets.mjs'));
 	assert.ok(packed.files.includes('source/phpdbg_wasm_bridge.h'));
 	assert.ok(packed.files.includes('.github/bin/verify-emscripten-async-errors.sh'));
-	assert.equal(packed.files.some(name => /\.(wasm|so|data|dat|gz|br|log)$/.test(name)), false);
+	assert.equal(packed.files.some(name => /\.(wasm|so|data|dat|gz|br|log|pyc|pyo)$/.test(name)), false);
 	assert.equal(packed.files.some(name => /(^|\/)(\.cache|\.git|\.env[^/]*|\.npmrc|node_modules)(\/|$)/.test(name)), false);
 	assert.equal(packed.files.some(name => /^packages\/php-(wasm|cgi-wasm|cli-wasm|dbg-wasm)\/.*\.(mjs|js)$/.test(name)), false);
 	assert.equal(packed.files.includes('bin/deploy-cloudflare-nightly.mjs'), false);

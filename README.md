@@ -421,7 +421,10 @@ The following extensions may be loaded at runtime. This allows the shared extens
 * phar (https://www.npmjs.com/package/php-wasm-phar)
 * sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
 * pdo-sqlite (https://www.npmjs.com/package/php-wasm-sqlite)
+* PDO-PGlite ([PGlite-backed PostgreSQL PDO](packages/pdo-pglite/README.md); PHP 8.1+)
 * tidy (https://www.npmjs.com/package/php-wasm-tidy)
+* Vrzno ([PHP-to-JavaScript bridge](packages/vrzno/README.md))
+* Waitline ([async CLI/debugger input](packages/waitline/README.md))
 * zlib (https://www.npmjs.com/package/php-wasm-zlib)
 
 There are two ways to load extensions at runtime, using the `dl()` function or `php.ini`.
@@ -1093,16 +1096,18 @@ WITH_CTYPE     # [0, 1] Enabled by default
 WITH_EXIF      # [0, 1] Enabled by default
 WITH_FILTER    # [0, 1] Enabled by default
 WITH_TOKENIZER # [0, 1] Enabled by default
-WITH_VRZNO     # [0, 1] Enabled by default
-WITH_WAITLINE  # [0, 1] Disabled by default in raw custom builds
 ```
 
-The following extensions may be compiled as static, shared, or dynamic:
+The following extensions have selectable build modes (the accepted modes are
+listed for each option):
 
 ```
 WITH_PHAR      # [0, 1, static, dynamic]
 WITH_CURL      # [0, 1, static, dynamic] Defaults to dynamic
 WITH_FILEINFO  # [0, 1, static, dynamic]
+WITH_VRZNO     # [0, 1, static, dynamic] Defaults to 1 (static)
+WITH_PDO_PGLITE # [0, 1, static, shared, dynamic] Custom default: 1 (static); PHP 8.1+
+WITH_WAITLINE  # [0, 1, static, dynamic] Defaults to 0
 WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]
 WITH_SQLITE    # [0, 1, static, shared, dynamic]
@@ -1122,6 +1127,18 @@ WITH_ONIGURUMA # [0, 1, static, shared, dynamic]
 WITH_OPENSSL   # [0, 1, static, shared, dynamic]
 WITH_INTL      # [0, 1, static, shared, dynamic]
 ```
+
+For Vrzno, PDO-PGlite, and Waitline, `1` remains a compatibility alias for
+`static`; use `dynamic` explicitly to build the versioned `.so` packages.
+Standard profiles keep Vrzno and Waitline static. PDO-PGlite follows the selected
+profile: dynamic builds require its loader explicitly; static builds compile it
+in. The shared profile falls back to static PDO-PGlite bindings because its
+JavaScript provider has no native support library to share. PHP 8.0 and the
+dedicated Cloudflare profile disable PDO-PGlite.
+
+Dynamic PDO-PGlite can use static Vrzno. If a custom build also makes Vrzno
+dynamic, put its loader before PDO-PGlite in `sharedLibs`. Static PDO-PGlite
+requires static Vrzno.
 
 ---
 

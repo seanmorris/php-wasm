@@ -16,6 +16,7 @@ done
 PLAYWRIGHT_ARGS=(
 	-c playwright.config.mjs
 	test/browser/browser.spec.mjs
+	test/browser/runtime-entrypoints.spec.mjs
 	test/browser/runtime-regressions.spec.mjs
 	test/browser/idbfs.spec.mjs
 	test/browser/curl.spec.mjs

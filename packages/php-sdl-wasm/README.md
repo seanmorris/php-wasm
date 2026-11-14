@@ -210,7 +210,7 @@ both files must come from the same build.
 | Events | Mouse-up, precise wheel, relative motion, key state/repeat/scancode/modifiers, text/composition payloads, touch, joystick hats/balls and hotplug, controller axes/buttons/hotplug/touchpads, audio/display/drop payloads |
 | Textures | Packed updates, streaming locks, color/alpha/blend/scale settings, checked readback, and `SDL_SetRenderTarget($renderer, null)` |
 | Fonts | UTF-8 Solid/Blended/Shaded rendering and wrapping; text/glyph metrics; bold/italic/underline/strikeout, outline, hinting, kerning and size |
-| Controllers | Standard axes/buttons, direct joystick button/hat polling, attachment and instance IDs, mappings and explicit updates |
+| Controllers | Standard axes/buttons, direct joystick button/hat polling, attachment and instance IDs, mappings, explicit updates and dual-motor/trigger rumble |
 | OpenGL | Float/int scalar and vector-array uniforms (1–4 components), square 2/3/4 matrices and WebGL2 rectangular matrices |
 | Timing | `SDL_GetTicks`, `SDL_GetTicks64`, `SDL_GetPerformanceCounter`, `SDL_GetPerformanceFrequency` |
 
@@ -293,6 +293,9 @@ if ($controller && SDL_GameControllerGetAttached($controller)) {
     SDL_GameControllerUpdate();
     $horizontal = SDL_GameControllerGetAxis($controller, SDL_CONTROLLER_AXIS_LEFTX);
     $pressed = SDL_GameControllerGetButton($controller, SDL_CONTROLLER_BUTTON_A);
+    if (SDL_GameControllerHasRumble($controller)) {
+        SDL_GameControllerRumble($controller, 0xffff, 0x8000, 120);
+    }
 }
 if ($controller) { SDL_GameControllerClose($controller); }
 SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
@@ -306,6 +309,14 @@ a device-specific entry from the browser's default mapping, close and reopen
 the controller once to select that entry. Subsequent edits to that same entry
 update its open controller handle. Browser gamepads expose their hats as
 buttons; `SDL_JoystickNumHats()` is zero on this backend.
+`SDL_JoystickRumble()` and `SDL_GameControllerRumble()` map low frequency to
+the strong motor and high frequency to the weak motor. Trigger rumble is
+advertised separately through the matching `HasRumbleTriggers()` calls. Motor
+strengths are 0–65535. Durations are 0–4294967295; because this runtime uses
+32-bit PHP integers, pass larger durations as decimal strings. SDL refreshes
+browser effects while they remain active. Browser support and user permissions
+still determine whether a physical device vibrates.
+
 Opening an unavailable device returns null. Closed handles raise an Error on
 use; closing twice is harmless. `SDL_GameControllerGetJoystick()` acquires a
 separate reference, so closing either handle leaves the other usable. Close
@@ -394,7 +405,7 @@ to float for ordinary elapsed-time calculations and retain strings for exact
 counter/identifier values. Counter units come from
 `SDL_GetPerformanceFrequency()`; ticks are milliseconds.
 
-Desktop window management, threads, haptics, sensors and additional codecs
+Desktop window management, threads, general `SDL_Haptic*` effects, sensors and additional codecs
 remain outside this build. The browser/Emscripten backend still determines
 which native features can produce events.
 

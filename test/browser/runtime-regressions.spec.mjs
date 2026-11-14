@@ -5,6 +5,18 @@ const version = process.env.PHP_VERSION ?? '8.4';
 const variant = process.env.PHP_VARIANT ?? '';
 const libType = process.env.LIB_TYPE ?? 'dynamic';
 
+test('SDL selects PGlite only for supported dynamic builds', async ({page}) => {
+	await page.goto('harness/index.html');
+	const selected = await page.evaluate(async () => {
+		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
+		const {default: pdoPglite} = await import('/packages/pdo-pglite/index.mjs');
+		return ['8.0', '8.1', '8.4'].map(version =>
+			['dynamic', 'shared', 'static'].map(profile =>
+				loadEmbeddedSharedLibs(profile, '_sdl', version).includes(pdoPglite)));
+	});
+	expect(selected).toEqual([[false, false, false], [true, false, false], [true, false, false]]);
+});
+
 if(variant === '_sdl')
 {
 	test('SDL string conversion methods declare their return types without startup warnings', async ({page}) => {
@@ -12,7 +24,7 @@ if(variant === '_sdl')
 		const result = await page.evaluate(async ({version, variant, libType}) => {
 			const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
+			const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant, version)});
 			let stdout = '', stderr = '';
 			php.addEventListener('output', event => stdout += event.detail.join(''));
 			php.addEventListener('error', event => stderr += event.detail.join(''));
@@ -79,7 +91,7 @@ test('repeated PHP dumps of a JavaScript object retain a stable debug class name
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
 		window.__php_action = new (class WindowPhpActionService {})();
-		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant, version)});
 		let output = '';
 		php.addEventListener('output', event => output += event.detail.join(''));
 		const status = await php.run(`<?php
@@ -241,7 +253,7 @@ test('browser PHP supports strict source and PHP objects as native fetch options
 	const result = await page.evaluate(async ({version, variant, libType}) => {
 		const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 		const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
+		const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant, version)});
 		let output = '';
 		php.addEventListener('output', event => output += event.detail.join(''));
 		const status = await php.run('<?php declare(strict_types=1); echo "strict";');
@@ -262,7 +274,7 @@ for(const order of ['legacy-first', 'php-first'])
 			const before = Object.getOwnPropertyDescriptor(globalThis, 'buffer');
 			const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
+			const php = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant, version)});
 			const status = await php.run('<?php echo "ready";');
 			const after = Object.getOwnPropertyDescriptor(globalThis, 'buffer');
 			return {status, preserved: before?.value === after?.value && before?.get === after?.get && before?.configurable === after?.configurable};
@@ -294,7 +306,7 @@ for(const order of ['perl-first', 'php-first'])
 		const startPhp = () => page.evaluate(async ({version, variant, libType}) => {
 			const {createEmbeddedRuntime} = await import('/php-wasm/harness/embedded-runtime.mjs');
 			const {loadEmbeddedSharedLibs} = await import('/php-wasm/harness/runtime-libs.mjs');
-			window.compatPhp = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant)});
+			window.compatPhp = await createEmbeddedRuntime(version, variant, {sharedLibs: loadEmbeddedSharedLibs(libType, variant, version)});
 			window.phpOutput = '';
 			window.compatPhp.addEventListener('output', event => window.phpOutput += event.detail.join(''));
 			await window.compatPhp.run('<?php echo "php-ready";');

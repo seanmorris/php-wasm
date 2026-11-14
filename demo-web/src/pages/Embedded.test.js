@@ -106,6 +106,15 @@ echo "Hello, World!";
 		);
 	});
 
+	it('explicitly loads PDO-PGlite for a supported dynamic PHP runtime', async () => {
+		window.history.replaceState({}, '', '/embedded-php.html?version=8.4&extensionFlags=0');
+		render(<Embedded />);
+		await waitFor(() => expect(PhpWeb).toHaveBeenCalled());
+		const [options] = PhpWeb.mock.calls[0];
+		expect(options.sharedLibs.flatMap(loader => loader.getLibs({phpVersion: '8.4'})).map(lib => lib.name))
+			.toEqual(['php8.4-pdo-pglite.so']);
+	});
+
 	it('autoruns the fetched demo code even if Ace is still empty', async () => {
 		render(<Embedded />);
 

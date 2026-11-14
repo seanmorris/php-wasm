@@ -145,6 +145,7 @@ $(error PHP_VERSION MUST BE 8.5, 8.4, 8.3, 8.2, 8.1 or 8.0. (got ${PHP_VERSION})
 endif
 
 EXTRA_MODULES=
+BRIDGE_MODULES=
 DYNAMIC_LIBS_GROUPED=
 STATIC_LIB_CONFIG=
 SHARED_LIB_CONFIG=
@@ -311,6 +312,12 @@ CJS_HELPERS_WEB=${CJS_HELPERS} webTransactions.js idbfsSync.js
 
 PHP_SUFFIX?=${PHP_VERSION}${PHP_VARIANT}
 
+# Package rules expand native prerequisites when they are read. Resolve this
+# after package pre.mak additions and before including the native build rules.
+ifneq (${PRE_JS_FILES},)
+PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
+endif
+
 -include $(addsuffix /static.mak,${EXTENSION_PACKAGE_DIRS})
 -include packages/php-cgi-wasm/static.mak
 -include packages/php-cli-wasm/static.mak
@@ -450,7 +457,6 @@ EXTRA_FLAGS+= --source-map-base ${SOURCE_MAP_BASE}
 endif
 
 ifneq (${PRE_JS_FILES},)
-PRE_JS_CACHE:=.cache/pre.$(shell printf '%s\n' '${PRE_JS_FILES}' | sha1sum | cut -d' ' -f1).js
 EXTRA_FLAGS+= --pre-js /src/${PRE_JS_CACHE}
 endif
 
@@ -462,6 +468,8 @@ endif
 WEB_FS_TYPE?=-lidbfs.js
 NODE_FS_TYPE?=-lnodefs.js
 WORKER_FS_TYPE?=${WEB_FS_TYPE}
+# Emscripten treats webview as a web subset and requires both names.
+WEBVIEW_ENVIRONMENTS=web,webview
 
 ifneq (${NODE_RAW_FS},0)
 NODE_FS_TYPE+= -lnoderawfs.js
@@ -476,6 +484,8 @@ PHP_CLI_OBJS=sapi/embed/php_embed.lo
 
 MAIN_MODULE?=1
 ASYNCIFY?=1
+# The resolver belongs to Emscripten's dynamic linker, which Cloudflare omits.
+DYNAMIC_LINK_RUNTIME_METHODS="resolveGlobalSymbol",
 
 # PHP compilation cannot suspend, but Emscripten's conservative invoke_* call
 # analysis otherwise instruments recursive Zend compiler helpers.  Those
@@ -517,10 +527,10 @@ BUILD_FLAGS+=-f ../../php.mk \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \
 		-s EXPORTED_FUNCTIONS='\''["_malloc", "_free", "_main"]'\'' \
-		-s EXPORTED_RUNTIME_METHODS='\''["ccall", "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
+		-s EXPORTED_RUNTIME_METHODS='\''["ccall", $(if $(filter-out 0,${MAIN_MODULE}),${DYNAMIC_LINK_RUNTIME_METHODS}) "UTF8ToString", "lengthBytesUTF8", "stringToUTF8", "getValue", "setValue", "lengthBytesUTF8", "FS", "ENV", "HEAPU8"]'\'' \
 		-s INITIAL_MEMORY=${INITIAL_MEMORY} \
 		-s MAXIMUM_MEMORY=${MAXIMUM_MEMORY} \
-		-s ENVIRONMENT=${ENVIRONMENT}       \
+		-s ENVIRONMENT=$(if $(filter webview,${ENVIRONMENT}),${WEBVIEW_ENVIRONMENTS},${ENVIRONMENT}) \
 		-s ERROR_ON_UNDEFINED_SYMBOLS=0     \
 		-s ALLOW_MEMORY_GROWTH=1            \
 		-s TOTAL_STACK=32MB                 \
@@ -666,63 +676,63 @@ ${CLOUDFLARE_RUNTIME} ${CLOUDFLARE_RUNTIME}.wasm &: ${DEPENDENCIES} third_party/
 	perl -pi -e 's/php${PHP_VERSION}-cloudflare-runtime\.wasm/php${PHP_VERSION}-cloudflare-runtime.mjs.wasm/g' ${CLOUDFLARE_RUNTIME}
 
 web-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS}
+	$(if $(strip ${WEB_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_MJS_ASSETS})
 ifneq (${STDLIB_WEB_TARGET},)
 	${MAKE} ${STDLIB_WEB_TARGET}
 endif
 	@ cat ico.ans >&2
 
 web-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEB_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS}
+	$(if $(strip ${WEB_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEB_JS_ASSETS})
 	@ cat ico.ans >&2
 
 worker-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS}
+	$(if $(strip ${WORKER_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_MJS_ASSETS})
 ifneq (${STDLIB_WORKER_TARGET},)
 	${MAKE} ${STDLIB_WORKER_TARGET}
 endif
 	@ cat ico.ans >&2
 
 worker-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WORKER_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_JS_ASSETS}
+	$(if $(strip ${WORKER_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WORKER_JS_ASSETS})
 	@ cat ico.ans >&2
 
 webview-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS}
+	$(if $(strip ${WEBVIEW_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_MJS_ASSETS})
 ifneq (${STDLIB_WEBVIEW_TARGET},)
 	${MAKE} ${STDLIB_WEBVIEW_TARGET}
 endif
 	@ cat ico.ans >&2
 
 webview-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${WEBVIEW_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_JS_ASSETS}
+	$(if $(strip ${WEBVIEW_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${WEBVIEW_JS_ASSETS})
 	@ cat ico.ans >&2
 
 node-mjs:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_MJS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS}
+	$(if $(strip ${NODE_MJS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_MJS_ASSETS})
 ifneq (${STDLIB_NODE_TARGET},)
 	${MAKE} ${STDLIB_NODE_TARGET}
 endif
 	@ cat ico.ans >&2
 
 node-js:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${PHP_CONFIGURE_DEPS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${PHP_CONFIGURE_DEPS})
 	$(MAKE) ${NODE_JS}
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS}
+	$(if $(strip ${NODE_JS_ASSETS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${NODE_JS_ASSETS})
 	@ cat ico.ans >&2
 
 # You must have one of the above "Single Builds" done to use the following step.
@@ -994,18 +1004,23 @@ ${ENV_FILE}:
 	touch -a ${ENV_FILE}
 
 archives:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES}
+	$(if $(strip ${ARCHIVES}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES})
 
 shared:
-	$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS}
+	$(if $(strip ${SHARED_LIBS}),$(MAKE) -j${CPU_COUNT} -l${MAX_LOAD} ${SHARED_LIBS})
 
 assets: $(foreach P,$(sort ${SHARED_ASSET_PATHS}),$(addprefix ${P}/,${PHP_ASSET_LIST}))
 
 deps:
-	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS}
+	$(if $(strip ${ARCHIVES} ${PHP_CONFIGURE_DEPS}),${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${ARCHIVES} ${PHP_CONFIGURE_DEPS})
 
 dynamic:
-	${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS}
+	$(if $(strip ${DYNAMIC_LIBS}),${MAKE} -j${CPU_COUNT} -l${MAX_LOAD} ${DYNAMIC_LIBS})
+
+# Side modules of the bridge extensions, for the loaders in their npm packages. In a
+# profile that links the extension into its runtimes nothing else asks for them.
+.PHONY: bridge-modules
+bridge-modules: ${BRIDGE_MODULES}
 
 dynamic-libs.json:
 	echo ${DYNAMIC_LIBS_GROUPED} | jq -Rc 'split(" ")' > $@
@@ -1262,6 +1277,9 @@ test-node test-bun: node-mjs node-cgi-mjs
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1291,6 +1309,9 @@ test-node-standard test-bun-standard: node-mjs node-cgi-mjs node-cli-mjs node-db
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1322,6 +1343,9 @@ test-node-cjs test-bun-cjs: node-js
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1351,6 +1375,9 @@ test-node-cjs-standard test-bun-cjs-standard: node-js node-cli-js node-dbg-js
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1382,6 +1409,9 @@ test-deno: node-mjs node-cgi-mjs
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1413,7 +1443,7 @@ test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test
 endif
 
 test-browser:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} WITH_CURL=${WITH_CURL} test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} WITH_CURL=${WITH_CURL} WITH_VRZNO=${WITH_VRZNO} WITH_PDO_PGLITE=${WITH_PDO_PGLITE} WITH_WAITLINE=${WITH_WAITLINE} test/browser-test.sh
 
 DEMO_WEB_PHP_VERSION ?= 8.4
 
@@ -1431,6 +1461,9 @@ test-cgi-node test-cgi-bun: node-mjs node-cgi-mjs
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1459,6 +1492,9 @@ ifeq (${LIB_TYPE},dynamic)
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1488,6 +1524,9 @@ test-cgi-node-cjs test-cgi-bun-cjs: node-js node-cgi-js
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1517,6 +1556,9 @@ ifeq (${LIB_TYPE},dynamic)
 	WITH_PHAR=${WITH_PHAR} \
 	WITH_CURL=${WITH_CURL} \
 	WITH_FILEINFO=${WITH_FILEINFO} \
+	WITH_VRZNO=${WITH_VRZNO} \
+	WITH_PDO_PGLITE=${WITH_PDO_PGLITE} \
+	WITH_WAITLINE=${WITH_WAITLINE} \
 	WITH_ZLIB=${WITH_ZLIB} \
 	WITH_LIBPNG=${WITH_LIBPNG} \
 	WITH_FREETYPE=${WITH_FREETYPE} \
@@ -1536,7 +1578,7 @@ ifeq (${LIB_TYPE},dynamic)
 endif
 
 update-snapshots:
-	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} UPDATE_SNAPSHOTS=1 test/browser-test.sh
+	PHP_VERSION=${PHP_VERSION} PHP_VARIANT=${PHP_VARIANT} LIB_TYPE=${LIB_TYPE} WITH_VRZNO=${WITH_VRZNO} WITH_PDO_PGLITE=${WITH_PDO_PGLITE} WITH_WAITLINE=${WITH_WAITLINE} UPDATE_SNAPSHOTS=1 test/browser-test.sh
 
 run:
 	${DOCKER_ENV} emscripten-builder bash

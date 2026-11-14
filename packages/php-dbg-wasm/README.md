@@ -71,6 +71,43 @@ shutdown functions, object destructors, and output handlers during request clean
 This is opt-in because standalone phpdbg normally discards those callbacks when
 resetting a debugging session.
 
+Pass `dbgArgs` to add phpdbg command-line arguments: `dbgArgs: ['-q']` starts
+without the welcome banner. Command notices are unaffected.
+
+`dumpBacktrace()` numbers frames from the innermost one, whichever frame
+`switchFrame()` selected, and marks the selected frame with `selected: true`.
+
+`await php.debuggerApiVersion()` reports what the runtime's Vrzno can inspect.
+With version 2:
+
+- Each frame also has `functionName` and `className` (empty for top-level code
+  and outside a class), and a frame's `frame` is always the index
+  `switchFrame()` takes, including when an internal function is on the stack.
+  Frame 0 is the innermost frame running PHP code: asked while PHP waits
+  inside an internal function such as `vrzno_await()`, it is that function's
+  caller.
+- `dumpGlobals({user: true})` lists user-defined globals with the superglobals,
+  from any frame. Without the option it lists superglobals only, as before.
+- `describeVars()`, `describeGlobals({user})` and `describeConstants()` return
+  `{name, type, className, count, reference, value}` for each symbol. `type` is
+  a PHP type name, or `undefined` for a variable that has not been assigned
+  yet; `count` is the number of elements in an array or of bytes in a string.
+  `className` is PHP's own name for the class. For an anonymous class that is
+  `class@anonymous`, a NUL byte, then the file and line that declare it, so
+  cut it at the NUL to show it.
+  `describeChild(parent, key)` does the same for one element of an array or
+  property of an object taken from a dump, and keeps its real type.
+  `Reflect.ownKeys(parent)` lists object properties including the NUL-mangled
+  names PHP uses for private and protected properties. For arrays, JavaScript's
+  own `length` property can obscure a PHP key named `length`; passing that key
+  explicitly to `describeChild()` still retrieves the PHP value.
+  `describeValue(value)` describes a value on its own; a scalar carries no PHP
+  type by then, so an integral float reads as `int`.
+
+With version 1 those five methods and `dumpGlobals({user: true})` throw.
+
+`dl()` is registered in the debugger runtime, as it is under the CLI.
+
 For a controller, styleable GUI, editor adapters, variable editing, structured
 results, and shared downloads, use
 [php-dbg-component](https://github.com/seanmorris/php-dbg-component).

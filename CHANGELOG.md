@@ -4,11 +4,41 @@ Changes
 
 ## v0.2.1
 
+* Added SDL joystick and game-controller rumble APIs, including trigger motors where the browser supports them. The patched SDL port selects the advertised browser effect, preserves both motor pairs, refreshes active effects, and stops them on expiration and cleanup. PHP bindings validate motor strengths and uint32 durations, including decimal-string durations on wasm32. Coverage uses simulated gamepads; physical controller support still depends on the browser and device.
+
+* Added versioned dynamic loaders for PDO-PGlite and optional custom Vrzno/Waitline builds. Standard profiles retain static Vrzno and Waitline; dynamic PDO-PGlite loads explicitly with the existing static bridge. Shared PDO-PGlite falls back to static bindings because its JavaScript provider has no native support library. PHP 8.0 and Cloudflare keep PDO-PGlite disabled. Loader objects now work in the runtime TypeScript declarations, and demos load the driver where needed.
+
+* Fixed static Vrzno mode validation for the Cloudflare PDO-CFD1 build. The dedicated Cloudflare profile keeps its existing restricted extension set and memory limits.
+
 * `php-cgi-wasm` now declares Node `>=22` instead of `>=24.5.0`, so installing it on Node 22 no longer warns or fails under `engine-strict`. CI runs the CGI server suite on Node 22 as well as 24 for PHP 8.4.
 
 * Fixed the `php-cloud-wasm` README example: `exec()` evaluates a single PHP expression, so `php.exec('return PHP_VERSION;')` returned an empty string. It now reads `php.exec('PHP_VERSION')`.
 
 * The Node wrappers (`PhpNode`, `PhpCgiNode`, `PhpCliNode`, `PhpDbgNode`) no longer load the wrong runtime file when a global `require` or `__dirname` exists, as in `node -e`, the Node REPL, or webpack/esbuild bundles for Node. Each version's runtime is imported by a fixed path again, so bundlers can resolve it, and the CommonJS build selects its own files at build time. Bundles also no longer warn about a standalone `import.meta` in `PhpBase`.
+
+* Runtime artifacts now include the native loaders used by `PhpWorker`, `PhpWebview`, `PhpCgiWeb` and `PhpCgiWebview` in both module formats. WebView builds enable asynchronous asset loading, so preloaded files and shared libraries can load at startup.
+
+* `php-dbg-wasm`: added `PhpDbgWorker` (`php-dbg-wasm/PhpDbgWorker`), which runs phpdbg inside a module worker with the same API as `PhpDbgWeb`. `make worker-dbg-mjs` and `make worker-dbg-js` build it, and `dbg-all`, `dbg-mjs` and `dbg-cjs` include it. Web and worker builds now write an `.assets.json` manifest beside each loader, listing its `.wasm` filename, SHA-256, required shared libraries and bridge version.
+
+* `php-dbg-wasm`: added an optional bridge for embedding the debugger in a page (bridge version 1, exported as `php_wasm_dbg_bridge_version`). `onDbgOutput({type, fd, bytes, evaluating})` receives program output and debugger output separately, and `onDbgEvent` reports exception details. With `dbgYieldInterval` set, a running script yields to the event loop at that interval and can be paused or stopped through the module's `dbgPauseRequested` and `dbgStopRequested` flags. `dbgManagedShutdown: true` enables shutdown functions, destructors and output handlers during managed cleanup. Callers that set none of these keep their console output and do not yield.
+
+* `php-dbg-wasm`: `dumpBacktrace()` now numbers frames from the innermost frame whichever frame `switchFrame()` selected, and marks the selected frame with `selected`. Before, the list started at the selected frame and numbered it 0, so its indexes stopped matching `switchFrame()` once a caller was selected.
+
+* `php-dbg-wasm`: the debugger wrappers accept `dbgArgs`, extra phpdbg command-line arguments. `dbgArgs: ['-q']` starts without the welcome banner; command notices are unaffected.
+
+* `php-dbg-wasm`: with a Vrzno that provides debugger API 2 (`debuggerApiVersion()`), backtrace frames carry `functionName` and `className` and are counted the way `switchFrame()` counts them; `dumpGlobals({user: true})` lists user-defined globals from any frame; and `describeVars()`, `describeGlobals()`, `describeConstants()`, `describeChild()` and `describeValue()` report each value's PHP type, class, size and whether it is a reference. Frame 0 is the innermost frame running PHP code, also when the list is requested while PHP is inside an internal function such as `vrzno_await()`. An anonymous class is reported under PHP's full name for it, which continues past a NUL byte with the file and line that declare it. Existing methods keep their results.
+
+* `php-dbg-wasm`: `dl()` is now registered under phpdbg, as it is under the CLI. PHP leaves `dl()` to each SAPI and phpdbg did not add it.
+
+* `php-dbg-wasm`: the debugger runtime exports `phpdbg_globals`, `phpdbg_restore_frame` and `phpdbg_arm_auto_global`. A Vrzno built as a side module (`WITH_VRZNO=dynamic`) reaches phpdbg through the dynamic linker, which binds exported symbols only; without these three, `dumpGlobals()` returned no superglobals and `switchFrame()` returned -1 in such a build. Standard runtimes link Vrzno in and behave as before.
+
+* `WITH_VRZNO=dynamic` and `WITH_WAITLINE=dynamic` build working side modules in a tree that has already built the extension statically. The side-module build copied the extension directory together with the static build's objects and linked those, which gave a `php8.x-vrzno.so` or `php8.x-waitline.so` without `get_module` that PHP rejected as "Invalid library". It now starts from the sources.
+
+* The `vrzno` and `waitline` packages ship the side modules their loaders name, `php8.x-vrzno.so` and `php8.x-waitline.so` for PHP 8.0 to 8.5. `make bridge-modules` builds them in any profile that enables the extensions, including the standard ones that link both into the runtimes.
+
+* Fixed an intermittent failure building `php8.x-simplexml.so`: `Parse …/simplexml.stub.php to generate …/simplexml_arginfo.h`, then a shell syntax error from `/src/lib/php8.x/bin/php`. The package copied the extension's sources without their timestamps, so `simplexml.stub.php` could end up newer than its generated header and phpize's Makefile tried to regenerate the header with the Emscripten build of PHP. The copy now keeps timestamps, as every other extension's does.
+
+* `php-dbg-wasm`: the debugger constructors are typed with `PhpDbgRuntimeArgs`, which declares `dbgArgs`, `onDbgOutput`, `onDbgEvent`, `dbgYieldInterval` and `dbgManagedShutdown`. The result types `PhpDbgFrame`, `PhpDbgSymbol` and `PhpDbgValue` are exported from `php-dbg-wasm/public`.
 
 ## v0.2.0 - Ramifying Sympodia
 

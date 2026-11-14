@@ -968,7 +968,12 @@ test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async
 	await loginLink.click();
 	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-login\\.php`));
 	await page.locator('input[name="log"]').fill('admin');
-	await page.locator('input[name="pwd"]').fill('admin');
+	const password = page.locator('input[name="pwd"]');
+	// Check the currently attached field: a fill was lost in the shared CI run.
+	await expect.poll(async () => {
+		await password.fill('admin');
+		return password.inputValue();
+	}, {timeout: 15000}).toBe('admin');
 	await page.getByRole('button', { name: 'Log In' }).click();
 	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-admin/`), {
 		timeout: 180000
