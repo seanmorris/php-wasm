@@ -140,6 +140,19 @@ test('embedded php hello world runs', async ({ page }) => {
 	).toContain('Hello, World!');
 });
 
+test('embedded PHP curl example fetches its same-origin response', async ({ page }) => {
+	await page.goto(`embedded-php.html?demo=curl.php&version=${version}&no-service-worker`, {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const outputFrame = page.locator('iframe').nth(1);
+	await expect.poll(
+		async () => (await outputFrame.getAttribute('srcdoc')) ?? '',
+		{timeout: 180000}
+	).toContain('Hello from php-wasm cURL!');
+	await expect(outputFrame).toHaveAttribute('srcdoc', /HTTP 200/);
+});
+
 test.describe('SDL demo controls', () => {
 	test('cube shader nowdocs preserve highlighting and syntax validation', async ({page}) => {
 		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});

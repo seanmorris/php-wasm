@@ -278,12 +278,17 @@ function Embedded()
 		return php;
 	}, [disposePhp, onError, onOutput]);
 
-	const loadExtensions = useCallback(async () => {
+	const loadExtensions = useCallback(async (settings = parseDemoSettings(input.current)) => {
+		const loadCurl = settings.extensions?.includes('curl');
+		const curlModule = loadCurl && libType !== 'static'
+			? (await import('php-wasm-curl')).default
+			: null;
+
 		if(!canToggleExtensions)
 		{
 			if(libType === 'shared')
 			{
-				sharedLibs.current = [...baseSharedLibs];
+				sharedLibs.current = [...baseSharedLibs, ...(curlModule ? [curlModule] : [])];
 			}
 
 			return;
@@ -307,6 +312,7 @@ function Embedded()
 		setExtensionsEnabled(enabled);
 
 		sharedLibs.current = await resolveDynamicExtensionModules(toggleable.current);
+		if(curlModule) sharedLibs.current.push(curlModule);
 	}, [query]);
 
 	const applySettings = useCallback(settings => {
@@ -371,6 +377,7 @@ function Embedded()
 			, 'version': version
 			, 'runtime': runtime
 			, 'assets': settings.assets
+			, 'extensions': settings.extensions
 		})}\n`);
 
 		query.set('canvas', showCanvas ? '1' : '0');
@@ -378,6 +385,10 @@ function Embedded()
 		query.delete('variant');
 		query.set('runtime', runtime);
 		replaceEmbeddedUrl(query, code);
+		code = code.replaceAll(
+			'__PHP_WASM_CURL_DEMO_URL__'
+			, new URL(basePath('scripts/curl-example.json'), window.location.origin).href
+		);
 
 		if(single.current.checked)
 		{
@@ -687,6 +698,7 @@ function Embedded()
 						<option value = "import.php">Import Javascript Modules</option>
 						<option value = "curvature.php">Curvature</option>
 						<option value = "fetch.php">Fetch</option>
+						<option value = "curl.php">PHP cURL</option>
 						<option value = "promise.php">Promise</option>
 						<option value = "persistent-memory.php">Persistent Memory</option>
 						{isIframe || <option value = "dom-access.php">DOM Access</option>}

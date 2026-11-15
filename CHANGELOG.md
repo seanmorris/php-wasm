@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Added a PHP cURL example to the embedded demo. It loads the optional curl module for that example in dynamic and shared builds, requests a same-origin fixture, and keeps the module choice in shared links.
+
 * Fixed extension compatibility values such as `WITH_FILEINFO=1` when supplied on the Make command line or through `make -e`. GD's `1` alias now selects `dynamic`, and codec aliases are normalized before GD selects their dependencies.
 
 * Added SDL joystick and game-controller rumble APIs, including trigger motors where the browser supports them. The patched SDL port selects the advertised browser effect, preserves both motor pairs, refreshes active effects, and stops them on expiration and cleanup. PHP bindings validate motor strengths and uint32 durations, including decimal-string durations on wasm32. Coverage uses simulated gamepads; physical controller support still depends on the browser and device.
