@@ -11,7 +11,7 @@ $(error WITH_TIDY MUST BE 0, 1, static, shared OR dynamic. PLEASE CHECK YOUR SET
 endif
 
 ifeq (${WITH_TIDY},1)
-WITH_TIDY=dynamic
+override WITH_TIDY=dynamic
 endif
 
 ifeq (${WITH_TIDY},static)

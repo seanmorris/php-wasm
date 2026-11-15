@@ -15,7 +15,7 @@ $(error WITH_SIMPLEXML MUST BE 0, 1, static, OR dynamic. WITH_SIMPLEXML: '${WITH
 endif
 
 ifeq (${WITH_SIMPLEXML},1)
-WITH_SIMPLEXML=dynamic
+override WITH_SIMPLEXML=dynamic
 endif
 
 ifeq (${WITH_SIMPLEXML},static)

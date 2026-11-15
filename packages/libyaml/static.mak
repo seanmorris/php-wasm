@@ -11,7 +11,7 @@ $(error WITH_YAML MUST BE 0, 1, static, shared, OR dynamic. WITH_YAML: '${WITH_Y
 endif
 
 ifeq (${WITH_YAML},1)
-WITH_YAML=dynamic
+override WITH_YAML=dynamic
 endif
 
 ifeq (${WITH_YAML},static)

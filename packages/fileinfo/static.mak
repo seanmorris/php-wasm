@@ -13,7 +13,7 @@ $(error WITH_FILEINFO MUST BE 0, 1, static, dynamic. WITH_FILEINFO: '${WITH_FILE
 endif
 
 ifeq (${WITH_FILEINFO},1)
-WITH_FILEINFO=dynamic
+override WITH_FILEINFO=dynamic
 endif
 
 ifeq (${WITH_FILEINFO},static)

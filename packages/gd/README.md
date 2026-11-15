@@ -36,5 +36,6 @@ Feature-complete GD builds usually also enable the matching image and font depen
 ## Build Options
 
 - `WITH_GD`: defaults to `dynamic`. Allowed values: `0`, `1`, `static`, `dynamic`.
+  The compatibility value `1` selects `dynamic`; codec flags set to `1` select `shared`.
 - `WITH_FREETYPE`, `WITH_LIBJPEG`, `WITH_LIBPNG`, `WITH_LIBWEBP`: each defaults to `shared`. Allowed values: `0`, `1`, `static`, `shared`.
 - Those companion library flags control whether the GD side libraries are built and emitted alongside `php8.x-gd.so`.

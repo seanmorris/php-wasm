@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Fixed extension compatibility values such as `WITH_FILEINFO=1` when supplied on the Make command line or through `make -e`. GD's `1` alias now selects `dynamic`, and codec aliases are normalized before GD selects their dependencies.
+
 * Added SDL joystick and game-controller rumble APIs, including trigger motors where the browser supports them. The patched SDL port selects the advertised browser effect, preserves both motor pairs, refreshes active effects, and stops them on expiration and cleanup. PHP bindings validate motor strengths and uint32 durations, including decimal-string durations on wasm32. Coverage uses simulated gamepads; physical controller support still depends on the browser and device.
 
 * Added versioned dynamic loaders for PDO-PGlite and optional custom Vrzno/Waitline builds. Standard profiles retain static Vrzno and Waitline; dynamic PDO-PGlite loads explicitly with the existing static bridge. Shared PDO-PGlite falls back to static bindings because its JavaScript provider has no native support library. PHP 8.0 and Cloudflare keep PDO-PGlite disabled. Loader objects now work in the runtime TypeScript declarations, and demos load the driver where needed.

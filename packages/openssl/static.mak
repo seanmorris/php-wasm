@@ -19,7 +19,7 @@ $(error WITH_OPENSSL MUST BE 0, 1, static, shared, or dynamic. WITH_OPENSSL: '${
 endif
 
 ifeq (${WITH_OPENSSL},1)
-WITH_OPENSSL=dynamic
+override WITH_OPENSSL=dynamic
 endif
 
 ifneq ($(filter ${WITH_OPENSSL},shared dynamic),)
