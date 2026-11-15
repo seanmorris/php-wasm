@@ -1073,6 +1073,12 @@ test('embedded demo loads the selected extensions', async ({ page }) => {
 
 		for(const [, flag, value] of env.matchAll(/^(WITH_[A-Z]+)=(\S+)$/gm))
 		{
+			// The shared embedded demo does not load the optional curl side module.
+			if(flag === 'WITH_CURL' && value === 'dynamic')
+			{
+				absent.push('curl');
+				continue;
+			}
 			if(extensionsByFlag[flag] && ['static', 'shared', 'dynamic'].includes(value)) expected.push(...extensionsByFlag[flag]);
 		}
 	}
