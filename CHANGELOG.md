@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Fixed the shared demo's Backup and Restore actions by loading the runtime's native support libraries. Filesystem errors now show their message instead of `{}`.
+
 * Added a PHP cURL example to the embedded demo. It loads the optional curl module for that example in dynamic and shared builds, requests a same-origin fixture, and keeps the module choice in shared links.
 
 * Fixed extension compatibility values such as `WITH_FILEINFO=1` when supplied on the Make command line or through `make -e`. GD's `1` alias now selects `dynamic`, and codec aliases are normalized before GD selects their dependencies.
