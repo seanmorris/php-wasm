@@ -14,17 +14,20 @@ const phpMakefile = [
 	'CFLAGS_CLEAN = -fno-common -Wall -g -O2 -ffp-contract=off -fvisibility=hidden'
 	, 'CXXFLAGS_CLEAN = -g -O2'
 	, 'EXTRA_LIBS ='
-	, '.PHONY: flags'
-	, 'flags:'
+	, '.PHONY: flags Zend/zend_compile.lo Zend/zend_execute.lo'
+	, 'flags: Zend/zend_compile.lo Zend/zend_execute.lo'
 	, '\t@echo "C: $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)"'
 	, '\t@echo "CXX: $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)"'
+	, 'Zend/zend_compile.lo Zend/zend_execute.lo:'
+	, '\t@echo "$@: $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)"'
 	, ''
 ].join('\n');
 
 /**
  * Reads the flags PHP's sources are compiled with, through the real Makefile and php.mk.
  * @param {string[]} settings Make variable assignments for the outer build.
- * @returns {{c: string[], cxx: string[]}} Flags for C and C++ sources, in command-line order.
+ * @returns {{c: string[], cxx: string[], compiler: string[], executor: string[]}} Flags in command-line
+ * order: for any C source, any C++ source, PHP's compiler and PHP's executor.
  */
 function compileFlags(settings = [])
 {
@@ -55,7 +58,12 @@ function compileFlags(settings = [])
 
 		const line = prefix => output.split('\n').find(text => text.startsWith(prefix)).slice(prefix.length).trim().split(/\s+/);
 
-		return {c: line('C: '), cxx: line('CXX: ')};
+		return {
+			c: line('C: ')
+			, cxx: line('CXX: ')
+			, compiler: line('Zend/zend_compile.lo: ')
+			, executor: line('Zend/zend_execute.lo: ')
+		};
 	}
 	finally
 	{
@@ -79,6 +87,20 @@ for(const level of ['3', '2', 's', 'z', '0'])
 
 test("PHP's debug symbols follow the build's own setting, not configure's -g", () => {
 	assert.ok(!compileFlags().c.includes('-g'));
+});
+
+test("PHP's compiler alone stays unoptimised, to keep its recursion off the engine's stack", () => {
+	const {c, compiler, executor} = compileFlags(['OPTIMIZE=3']);
+
+	assert.equal(levels(compiler).at(-1), '-O0');
+	assert.equal(levels(executor).at(-1), '-O3');
+	assert.deepEqual(executor, c);
+});
+
+test('PHP_COMPILER_CFLAGS= optimises the compiler like everything else', () => {
+	const {c, compiler} = compileFlags(['OPTIMIZE=3', 'PHP_COMPILER_CFLAGS=']);
+
+	assert.deepEqual(compiler, c);
 });
 
 test('a level in EXTRA_CFLAGS overrides the default', () => {

@@ -13,5 +13,10 @@ EXTRA_LIBS:=$(sort $(filter-out ${SKIP_LIBS}, ${EXTRA_LIBS}))
 # replacement compiles the whole interpreter unoptimised.
 CFLAGS_CLEAN:=$(sort $(filter-out -g -O2, ${CFLAGS_CLEAN}))
 
+# Flags for PHP's compiler alone, after everything else, so they win.  The
+# outer Makefile explains the default.
+PHP_WASM_COMPILER_CFLAGS ?=
+Zend/zend_compile.lo: override EXTRA_CFLAGS += $(PHP_WASM_COMPILER_CFLAGS)
+
 print:
 	echo ${EXTRA_LIBS}

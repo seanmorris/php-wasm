@@ -515,7 +515,17 @@ endif
 # passed here.  Without one Clang compiles at -O0 and, under LTO, marks every
 # function "optnone", which the link-time optimiser then leaves alone whatever
 # -O the link is given.  A level in EXTRA_CFLAGS on the command line still wins.
+#
+# PHP's compiler is the exception.  It recurses once per nested expression, and
+# optimised code keeps its locals on the JavaScript engine's stack instead of
+# in PHP's own stack in linear memory.  Measured on PHP 8.3 with a long
+# expression, the engine's stack then ran out after about 5,400 levels instead
+# of 8,100 on JavaScriptCore.  Unoptimised, zend_compile.c keeps the old depth
+# and PHP compiles source about 1.3 times slower than it would fully optimised.
+# Set PHP_COMPILER_CFLAGS= to optimise it like everything else.
+PHP_COMPILER_CFLAGS?=-O0
 BUILD_FLAGS+=-f ../../php.mk \
+	PHP_WASM_COMPILER_CFLAGS='${PHP_COMPILER_CFLAGS}' \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
 	PHP_WASM_LINK_DEPS='$(addprefix /src/,$(sort ${ARCHIVES} ${PHP_LINK_DEPS} ${PRE_JS_CACHE})) /src/Makefile /src/php.mk' \
