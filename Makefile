@@ -511,6 +511,10 @@ $(error PHP ${PHP_VERSION} Zend Fibers require ASYNCIFY=1)
 endif
 endif
 
+# php.mk drops the "-g -O2" that PHP's configure chooses, so the level has to be
+# passed here.  Without one Clang compiles at -O0 and, under LTO, marks every
+# function "optnone", which the link-time optimiser then leaves alone whatever
+# -O the link is given.  A level in EXTRA_CFLAGS on the command line still wins.
 BUILD_FLAGS+=-f ../../php.mk \
 	-j${CPU_COUNT} -l${MAX_LOAD} \
 	SKIP_LIBS='${SKIP_LIBS}' \
@@ -521,8 +525,8 @@ BUILD_FLAGS+=-f ../../php.mk \
 	BUILD_BINARY='${SAPI_PHPDBG_PATH}'\
 	SAPI_PHPDBG_PATH='${SAPI_PHPDBG_PATH}'\
 	PHP_CLI_OBJS='${PHP_CLI_OBJS}' \
-	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
-	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC  ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
+	EXTRA_CFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC -O${OPTIMIZE} ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} -D HAVE_REALLOCARRAY=1 '\
+	EXTRA_CXXFLAGS=' -Wno-int-conversion -Wimplicit-function-declaration ${LTO_FLAG} -fPIC -O${OPTIMIZE} ${EXTRA_CFLAGS} ${SYMBOL_FLAGS} '\
 	EXTRA_LDFLAGS_PROGRAM='-O${OPTIMIZE} -static \
 		-Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -L/src/lib/lib \
 		${SYMBOL_FLAGS} ${LTO_FLAG} -fPIC \

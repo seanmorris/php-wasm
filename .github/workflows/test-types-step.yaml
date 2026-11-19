@@ -20,6 +20,8 @@ jobs:
         run: node --test test/build/fileinfo.test.mjs
       - name: Verify extension compatibility aliases before native builds
         run: node --test test/build/extension-aliases.test.mjs
+      - name: Verify PHP is compiled with an optimisation level before native builds
+        run: node --test test/build/php-optimization.test.mjs
       - name: Verify bridge extension modes, loaders and Cloudflare isolation
         run: node --test test/build/dynamic-bridge-extensions.test.mjs
       - name: Verify debugger entrypoints and worker contracts before native builds

@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Fixed PHP itself being compiled without optimisation. Since the build began removing `-O2` from PHP's compile flags in June 2024, the engine, the SAPIs and the statically built extensions were compiled at `-O0`, and link-time optimisation skipped every function. PHP's sources now get `-O${OPTIMIZE}`, as the link already did. In a PHP 8.3 Node test build, interpreter micro-benchmarks ran 1.6 to 2.1 times faster and the main module was 19% smaller before compression.
+
 * Fixed the shared demo's Backup and Restore actions by loading the runtime's native support libraries. Filesystem errors now show their message instead of `{}`.
 
 * Added a PHP cURL example to the embedded demo. It loads the optional curl module for that example in dynamic and shared builds, requests a same-origin fixture, and keeps the module choice in shared links.
