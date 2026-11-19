@@ -4,6 +4,7 @@ Changes
 
 ## v0.2.1
 
+* `WITH_PDO_PGLITE` now defaults to `dynamic` on PHP 8.1 and newer, like the other optional extensions. A custom build whose settings file does not name it now produces the `php<version>-pdo-pglite.so` side module, loaded through the `pdo-pglite` package, where it used to compile the driver into PHP. Set `WITH_PDO_PGLITE=1` to keep the driver compiled in. Until now the demo's default profile requested a side module that a default build never produced, and every CGI request returned a 500.
 * Fixed the runtime failing to start when an `EM_ASYNC_JS` import is called from a function that uses `setjmp`. Such a call goes through an `invoke_*` wrapper that needs the import's address, and Emscripten's dynamic linker could not find it under its `__asyncjs__` name. Optimised builds hit this through waitline's `readline()`. The builder's Emscripten patch now resolves it, so rebuild the builder image (`make image`).
 
 * Fixed a crash when PHP suspended while compiling. A user error handler that awaited JavaScript or switched Fibers on a compile-time deprecation ended the runtime with `RuntimeError: unreachable`, because the build had removed Asyncify's instrumentation from PHP's compiler. The compiler is instrumented again.

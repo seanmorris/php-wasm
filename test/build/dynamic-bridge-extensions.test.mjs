@@ -128,6 +128,26 @@ test('PHP 8.0 disables PDO-PGlite by default and rejects an explicit unsupported
 	assert.match(enabled.stderr, /requires PHP 8\.1 or newer/);
 });
 
+test('PDO-PGlite defaults to a side module on PHP 8.1 and newer', () => {
+	const result = evaluateModes({});
+	assert.equal(result.status, 0, result.stderr);
+	assert.match(result.stdout, /^vrzno=static$/m);
+	assert.match(result.stdout, /^pdo=dynamic$/m);
+	assert.doesNotMatch(result.stdout, /--enable-pdo-pglite/);
+	assert.match(result.stdout, /packages\/pdo-pglite\/php8\.4-pdo-pglite\.so/);
+});
+
+test('runtime test helpers follow the PDO-PGlite default when the settings do not name it', () => {
+	for(const helper of [nodeRuntimeOptions, commonJsRuntimeOptions])
+	{
+		// One named setting stops the helpers from guessing a CI profile, and leaves PDO-PGlite to its default.
+		const bridges = version => (helper({runtime: 'php', version}, {PHP_VERSION: version, WITH_VRZNO: 'static'}).sharedLibs ?? [])
+			.map(pkg => pkg.__packageKey);
+		assert.deepEqual(bridges('8.4'), ['pdo-pglite']);
+		assert.deepEqual(bridges('8.0'), []);
+	}
+});
+
 test('Node dynamic runtime plumbing loads bridge extensions in dependency order', () => {
 	const options = nodeRuntimeOptions({runtime: 'php', version: '8.4'}, {
 		PHP_VERSION: '8.4'

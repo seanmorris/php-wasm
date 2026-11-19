@@ -1106,7 +1106,7 @@ WITH_PHAR      # [0, 1, static, dynamic]
 WITH_CURL      # [0, 1, static, dynamic] Defaults to dynamic
 WITH_FILEINFO  # [0, 1, static, dynamic]
 WITH_VRZNO     # [0, 1, static, dynamic] Defaults to 1 (static)
-WITH_PDO_PGLITE # [0, 1, static, shared, dynamic] Custom default: 1 (static); PHP 8.1+
+WITH_PDO_PGLITE # [0, 1, static, shared, dynamic] Defaults to dynamic; PHP 8.1+
 WITH_WAITLINE  # [0, 1, static, dynamic] Defaults to 0
 WITH_LIBXML    # [0, 1, static, shared, dynamic]
 WITH_ICONV     # [0, 1, static, shared, dynamic]

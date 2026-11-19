@@ -52,9 +52,11 @@ See the [PGlite upgrade guide](https://pglite.dev/docs/upgrade) and
 
 ## Custom Builds
 
-`WITH_PDO_PGLITE=1` compiles PDO-PGlite statically. Use
-`WITH_PDO_PGLITE=dynamic` to produce the versioned side module. The standard
-dynamic profile uses this mode; the static profile compiles the driver in.
+A custom build produces the versioned side module unless its settings say
+otherwise (`WITH_PDO_PGLITE=dynamic`). Load it through this package, as shown
+above. `WITH_PDO_PGLITE=1` or `static` compiles the driver into PHP. The
+standard dynamic profile uses the side module; the static profile compiles the
+driver in.
 
 The shared profile requests `WITH_PDO_PGLITE=shared`, which falls back to static
 bindings because the PGlite provider is JavaScript and has no separate native
@@ -70,7 +72,7 @@ const sharedLibs = [vrzno, pdoPglite];
 
 ## Build Options
 
-- `WITH_PDO_PGLITE`: accepts `0`, `1`, `static`, `shared`, or `dynamic`. Custom builds default to `1` (static) on PHP 8.1+ and `0` on PHP 8.0. PHP 8.0 cannot enable the driver.
+- `WITH_PDO_PGLITE`: accepts `0`, `1`, `static`, `shared`, or `dynamic`. Custom builds default to `dynamic` on PHP 8.1+ and `0` on PHP 8.0. `1` means `static`. PHP 8.0 cannot enable the driver.
 - `PDO_PGLITE_REPOSITORY`: optional Git repository override. Defaults to the upstream `pdo-pglite` repository.
 - `PDO_PGLITE_REF`: Git revision to build. The default is an immutable commit pin.
 - `PDO_PGLITE_DEV_PATH`: optional local source checkout to use instead of the pinned repository during the build.

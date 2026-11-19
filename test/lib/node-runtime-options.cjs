@@ -71,10 +71,11 @@ const runtimeLibraryPackages = {
 	, dbg: ['vrzno', 'pdo-pglite', 'waitline']
 };
 
+// The Makefile's defaults for a build whose settings do not name the extension.
 const packageBuildDefaults = {
-	vrzno: 'static'
-	, 'pdo-pglite': 'static'
-	, waitline: '0'
+	vrzno: () => 'static'
+	, 'pdo-pglite': phpVersion => phpVersion === '8.0' ? '0' : 'dynamic'
+	, waitline: () => '0'
 };
 
 const tagPackage = (packageKey, pkg) => ({ __packageKey: packageKey, ...pkg });
@@ -215,9 +216,9 @@ const getNodeEnvSharedLibs = (env = currentEnv()) => {
 	return supportPackages;
 };
 
-const effectivePackageBuildMode = (packageKey, env = currentEnv()) => normalizeBuildMode(
+const effectivePackageBuildMode = (packageKey, env = currentEnv(), phpVersion = currentPhpVersion(env)) => normalizeBuildMode(
 	packageKey,
-	env[packageBuildFlagMap[packageKey]] ?? packageBuildDefaults[packageKey] ?? 'dynamic'
+	env[packageBuildFlagMap[packageKey]] ?? packageBuildDefaults[packageKey]?.(phpVersion) ?? 'dynamic'
 );
 
 const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
@@ -241,7 +242,7 @@ const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
 
 		seenPackages.add(packageKey);
 
-		switch(effectivePackageBuildMode(packageKey, env))
+		switch(effectivePackageBuildMode(packageKey, env, phpVersion))
 		{
 			case 'dynamic':
 				resolvedPackages.push(tagPackage(packageKey, getPackage(packageKey, phpVersion)));

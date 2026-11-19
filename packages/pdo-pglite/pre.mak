@@ -1,5 +1,8 @@
 #!/usr/bin/env make
-WITH_PDO_PGLITE?=$(if $(filter 8.0,${PHP_VERSION}),0,1)
+# Unset means a side module, as for the other optional extensions. `1` stays
+# the alias for static, so settings files written before the modes existed
+# keep the driver compiled in.
+WITH_PDO_PGLITE?=$(if $(filter 8.0,${PHP_VERSION}),0,dynamic)
 
 ifeq ($(filter ${WITH_PDO_PGLITE},0 1 static shared dynamic),)
 $(error WITH_PDO_PGLITE MUST BE 0, 1, static, shared, OR dynamic. WITH_PDO_PGLITE: '${WITH_PDO_PGLITE}' PLEASE CHECK YOUR SETTINGS FILE: $(abspath ${ENV_FILE}))
