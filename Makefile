@@ -487,13 +487,19 @@ ASYNCIFY?=1
 # The resolver belongs to Emscripten's dynamic linker, which Cloudflare omits.
 DYNAMIC_LINK_RUNTIME_METHODS="resolveGlobalSymbol",
 
-# PHP compilation cannot suspend, but Emscripten's conservative invoke_* call
-# analysis otherwise instruments recursive Zend compiler helpers.  Those
-# enlarged Wasm frames can exhaust WebKit's mixed JS/Wasm stack while loading
-# large applications such as Drupal.  Keep this make-overridable so a toolchain
-# experiment can replace or disable the list with ASYNCIFY_REMOVE= on the make
-# command line.
-ASYNCIFY_REMOVE?=zend_compile*,zend_add_literal*
+# Functions named here lose their Asyncify instrumentation.  Anything that
+# suspends while one of them is on the stack then destroys the runtime, so the
+# list is empty by default.
+#
+# From August to November 2026 it held "zend_compile*,zend_add_literal*", to
+# save stack while WebKit compiled large applications such as Drupal, on the
+# assumption that PHP compilation cannot suspend.  It can: PHP calls user error
+# handlers for deprecations raised during compilation, and a handler that
+# awaited JavaScript or switched Fibers there trapped with "unreachable"
+# (test/compile-suspend.mjs).  Measured on PHP 8.3 the list was worth about 3%
+# of the compiler's recursion depth on JavaScriptCore.  It stays overridable
+# for experiments.
+ASYNCIFY_REMOVE?=
 ASYNCIFY_FLAGS=
 
 ifneq (${ASYNCIFY},0)

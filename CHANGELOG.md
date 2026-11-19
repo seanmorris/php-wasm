@@ -4,6 +4,8 @@ Changes
 
 ## v0.2.1
 
+* Fixed a crash when PHP suspended while compiling. A user error handler that awaited JavaScript or switched Fibers on a compile-time deprecation ended the runtime with `RuntimeError: unreachable`, because the build had removed Asyncify's instrumentation from PHP's compiler. The compiler is instrumented again.
+
 * Fixed PHP itself being compiled without optimisation. Since the build began removing `-O2` from PHP's compile flags in June 2024, the engine, the SAPIs and the statically built extensions were compiled at `-O0`, and link-time optimisation skipped every function. PHP's sources now get `-O${OPTIMIZE}`, as the link already did. In a PHP 8.3 Node test build, interpreter micro-benchmarks ran 1.6 to 2.1 times faster and the main module was 19% smaller before compression. PHP's compiler, `zend_compile.c`, stays unoptimised by default: optimised, deeply nested code exhausted the JavaScript engine's stack about a third sooner. `PHP_COMPILER_CFLAGS=` optimises it as well.
 
 * Fixed the shared demo's Backup and Restore actions by loading the runtime's native support libraries. Filesystem errors now show their message instead of `{}`.
