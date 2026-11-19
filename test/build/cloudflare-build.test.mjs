@@ -102,7 +102,7 @@ async function tree(root)
 }
 
 test('Cloudflare source filtering excludes environment files, generated assets and dependency trees', () => {
-	for(const name of ['source/.env', 'source/.env.local', 'packages/vrzno/.php-wasm-rc', 'source/node_modules/a.js', 'bin/.git/config', 'packages/php-cloud-wasm/mapped/index.js', 'packages/php-cloud-wasm/php8.3-node.mjs', 'packages/php-cloud-wasm/old.manifest.json', 'source/runtime.wasm', 'packages/zlib/libz.so', 'source/debug.log', 'bin/.npmrc', 'source/.aws/credentials', 'packages/vrzno/.ssh/id_rsa', 'source/certificate.pem', 'source/private.key', 'source/certificate.p12', 'source/certificate.pfx'])
+	for(const name of ['source/.env', 'source/.env.local', 'packages/vrzno/.php-wasm-rc', 'source/node_modules/a.js', 'bin/.git/config', 'packages/php-cloud-wasm/mapped/index.js', 'packages/php-cloud-wasm/php8.3-node.mjs', 'packages/php-cloud-wasm/old.manifest.json', 'source/runtime.wasm', 'packages/zlib/libz.so', 'source/debug.log', 'bin/.npmrc', 'source/.aws/credentials', 'packages/vrzno/.ssh/id_rsa', 'source/certificate.pem', 'source/private.key', 'source/certificate.p12', 'source/certificate.pfx', 'packages/php-sdl-wasm/ports/__pycache__/sdl2-rumble.cpython-312.pyc', 'packages/php-sdl-wasm/ports/legacy.pyc'])
 	{
 		assert.equal(allowedSource(name), false, name);
 	}

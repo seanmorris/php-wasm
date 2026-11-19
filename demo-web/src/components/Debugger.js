@@ -11,6 +11,7 @@ import loading from '../assets/ui/loading.svg';
 import Convert from 'ansi-to-html';
 import { libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { pdoPgliteLibraries } from '../lib/pdoPgliteLibraries';
 
 const parser = new Convert;
 
@@ -329,7 +330,7 @@ export default forwardRef(function Debugger({
 
 		const php = new PhpDbgWeb({
 			version
-			, sharedLibs
+			, sharedLibs: [...sharedLibs, ...pdoPgliteLibraries(libType, version)]
 			, files
 			, ini
 			, PGlite

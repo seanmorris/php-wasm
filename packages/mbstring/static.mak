@@ -14,7 +14,7 @@ $(error WITH_MBSTRING MUST BE 0, 1, static, or dynamic. WITH_MBSTRING: '${WITH_M
 endif
 
 ifeq (${WITH_MBSTRING},1)
-WITH_MBSTRING=dynamic
+override WITH_MBSTRING=dynamic
 endif
 
 ifeq (${WITH_MBSTRING},static)
@@ -32,7 +32,7 @@ $(error WITH_ONIGURUMA MUST BE 0, 1, static, shared, OR dynamic. WITH_ONIGURUMA:
 endif
 
 ifeq (${WITH_ONIGURUMA},1)
-WITH_ONIGURUMA=dynamic
+override WITH_ONIGURUMA=dynamic
 endif
 
 ifeq (${WITH_MBSTRING},dynamic)

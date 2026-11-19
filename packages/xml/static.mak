@@ -9,7 +9,7 @@ $(error WITH_XML MUST BE 0, 1, static, OR dynamic. WITH_XML: '${WITH_XML}' PLEAS
 endif
 
 ifeq (${WITH_XML},1)
-WITH_XML=dynamic
+override WITH_XML=dynamic
 endif
 
 ifeq (${WITH_XML},static)

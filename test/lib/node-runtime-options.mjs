@@ -6,7 +6,10 @@ import { getPackage, getSupportPackage } from './extension-assets.mjs';
 const currentEnv = () => globalThis.process?.env ?? {};
 const envFlagIsShared = value => value === 'shared';
 const envFlagNeedsOpenSslLibs = value => ['1', 'shared', 'dynamic'].includes(value ?? '');
-const normalizeBuildMode = value => value === '1' ? 'dynamic' : value;
+const staticAliasPackages = new Set(['vrzno', 'pdo-pglite', 'waitline']);
+const normalizeBuildMode = (packageKey, value) => value === '1'
+	? (staticAliasPackages.has(packageKey) ? 'static' : 'dynamic')
+	: value;
 const sharedWrapperMarkers = ['php.data', 'getDylinkMetadata', 'LDSO'];
 const sharedBuildFlags = new Set([
 	'WITH_LIBXML'
@@ -26,6 +29,9 @@ const sharedBuildFlags = new Set([
 	, 'WITH_XMLREADER'
 	, 'WITH_TIDY'
 	, 'WITH_YAML'
+	, 'WITH_VRZNO'
+	, 'WITH_PDO_PGLITE'
+	, 'WITH_WAITLINE'
 ]);
 const runtimeWrapperByKind = {
 	php: version => path.resolve(`/app/packages/php-wasm/php${version}-node.mjs`)
@@ -44,6 +50,7 @@ const packageBuildFlagMap = {
 	, mbstring: 'WITH_MBSTRING'
 	, openssl: 'WITH_OPENSSL'
 	, phar: 'WITH_PHAR'
+	, 'pdo-pglite': 'WITH_PDO_PGLITE'
 	, simplexml: 'WITH_SIMPLEXML'
 	, sqlite: 'WITH_SQLITE'
 	, tidy: 'WITH_TIDY'
@@ -51,10 +58,22 @@ const packageBuildFlagMap = {
 	, xmlreader: 'WITH_XMLREADER'
 	, xmlwriter: 'WITH_XMLWRITER'
 	, yaml: 'WITH_YAML'
+	, vrzno: 'WITH_VRZNO'
+	, waitline: 'WITH_WAITLINE'
 	, zlib: 'WITH_ZLIB'
 };
 const runtimeLibraryPackages = {
-	cgi: ['libxml', 'dom', 'zlib', 'libzip', 'gd', 'iconv', 'intl', 'openssl', 'mbstring', 'phar', 'sqlite', 'xml', 'simplexml', 'tidy', 'yaml']
+	php: ['vrzno', 'pdo-pglite']
+	, cgi: ['vrzno', 'pdo-pglite', 'libxml', 'dom', 'zlib', 'libzip', 'gd', 'iconv', 'intl', 'openssl', 'mbstring', 'phar', 'sqlite', 'xml', 'simplexml', 'tidy', 'yaml']
+	, cli: ['vrzno', 'pdo-pglite', 'waitline']
+	, dbg: ['vrzno', 'pdo-pglite', 'waitline']
+};
+
+// The Makefile's defaults for a build whose settings do not name the extension.
+const packageBuildDefaults = {
+	vrzno: () => 'static'
+	, 'pdo-pglite': phpVersion => phpVersion === '8.0' ? '0' : 'dynamic'
+	, waitline: () => '0'
 };
 
 const tagPackage = (packageKey, pkg) => ({ __packageKey: packageKey, ...pkg });
@@ -195,8 +214,9 @@ export const getNodeEnvSharedLibs = (env = currentEnv()) => {
 	return supportPackages;
 };
 
-const effectivePackageBuildMode = (packageKey, env = currentEnv()) => normalizeBuildMode(
-	env[packageBuildFlagMap[packageKey]] ?? 'dynamic'
+const effectivePackageBuildMode = (packageKey, env = currentEnv(), phpVersion = currentPhpVersion(env)) => normalizeBuildMode(
+	packageKey,
+	env[packageBuildFlagMap[packageKey]] ?? packageBuildDefaults[packageKey]?.(phpVersion) ?? 'dynamic'
 );
 
 const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
@@ -220,7 +240,7 @@ const getNodeEnvRuntimeLibs = (options = {}, env = currentEnv()) => {
 
 		seenPackages.add(packageKey);
 
-		switch(effectivePackageBuildMode(packageKey, env))
+		switch(effectivePackageBuildMode(packageKey, env, phpVersion))
 		{
 			case 'dynamic':
 				resolvedPackages.push(tagPackage(packageKey, getPackage(packageKey, phpVersion)));

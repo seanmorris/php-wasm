@@ -108,7 +108,7 @@ test('SDL port builds use the retry wrapper', () => {
 	assert.doesNotMatch(contents, /\$\{DOCKER_RUN\} embuilder build/);
 	assert.match(
 		contents,
-		/\$\{DOCKER_RUN\} retry-embuilder build sdl2 --lto --pic --verbose/
+		/\$\{DOCKER_RUN\} retry-embuilder build \/src\/\$\{SDL_RUMBLE_PORT\} --lto --pic --verbose/
 	);
 	assert.match(
 		contents,

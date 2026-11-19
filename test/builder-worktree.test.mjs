@@ -201,7 +201,7 @@ test('normal builder builds preserve inherited Make invocation state and configu
  * @param {object} t Node test context.
  * @param {object} options Target and waitline configuration.
  * @param {string} options.target Test target to exercise.
- * @param {number} [options.enabled] Explicit waitline flag; omit to test its default.
+ * @param {number|string} [options.enabled] Explicit waitline flag; omit to test its default.
  * @param {boolean} [options.omitDependency] Remove the production rule as a negative control.
  * @returns {object} Make result and observed fixture outputs.
  */
@@ -224,7 +224,7 @@ node-cli-mjs:
 \t@printf 'built\\n' > '\${PHP_BUILDER_DIR}/cli-mjs'
 test-node test-node-standard test-node-cjs test-node-cjs-standard test-deno test-bun test-bun-standard test-bun-cjs test-bun-cjs-standard test-browser:
 \t@printf '%s\\n' '\${TEST_LIST}' > '\${PHP_BUILDER_DIR}/tests'
-\t@if test '\${WITH_WAITLINE}' = 1 && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
+\t@if test '\${WITH_WAITLINE}' != 0 && test '$@' != test-browser; then test -f '\${PHP_BUILDER_DIR}/cli-mjs' || { echo 'CLI MJS prerequisite missing' >&2; exit 23; }; fi
 `);
 	const cleanEnv = { ...env, EXTENSION_PACKAGE_DIRS: packageDir };
 	delete cleanEnv.WITH_WAITLINE;
@@ -248,12 +248,15 @@ const waitlineTestTargets = ['test-node', 'test-node-standard', 'test-node-cjs',
 const esmStandardTargets = ['test-node-standard', 'test-bun-standard'];
 
 test('every waitline TEST_LIST consumer builds CLI MJS before clean parallel tests', t => {
-	for(const target of waitlineTestTargets)
+	for(const enabled of [1, 'static', 'dynamic'])
 	{
-		const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled: 1 });
-		assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
-		assert.equal(cliBuilt, true, target);
-		assert.match(tests, /packages\/waitline\/test\/basic\.mjs/, target);
+		for(const target of waitlineTestTargets)
+		{
+			const { result, cliBuilt, tests } = runWaitlineMakeFixture(t, { target, enabled });
+			assert.equal(result.status, 0, `${target}: ${result.stdout}${result.stderr}`);
+			assert.equal(cliBuilt, true, target);
+			assert.match(tests, /packages\/waitline\/test\/basic\.mjs/, target);
+		}
 	}
 });
 

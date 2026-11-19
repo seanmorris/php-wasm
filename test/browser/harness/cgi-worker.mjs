@@ -63,7 +63,7 @@ const init = () => {
 		]
 		, notFound: createNotFoundResponse
 		, prefix
-		, sharedLibs: loadCgiSharedLibs(libType)
+		, sharedLibs: loadCgiSharedLibs(libType, runtimeVersion)
 		, staticFS: false
 		, types: {
 			html: 'text/html'

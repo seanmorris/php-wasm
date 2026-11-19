@@ -9,7 +9,8 @@ test('finfo_file reads streams whose reads await JavaScript', {timeout: 10000}, 
 	let waits = 0;
 	let stdout = '', stderr = '';
 	const php = new PhpNode(nodeRuntimeOptions({
-		sharedLibs: env.WITH_FILEINFO === 'dynamic' ? [fileinfo] : []
+		runtime: 'php'
+		, sharedLibs: env.WITH_FILEINFO === 'dynamic' ? [fileinfo] : []
 		, waitForRead: async () => {
 			await Promise.resolve();
 			++waits;

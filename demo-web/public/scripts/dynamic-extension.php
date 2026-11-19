@@ -1,4 +1,4 @@
-<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text"}
+<?php // {"autorun":true, "persist":false, "single-expression": false, "render-as": "text", "extensionFlags": 0}
 
 $version = PHP_MAJOR_VERSION . "." . PHP_MINOR_VERSION;
 

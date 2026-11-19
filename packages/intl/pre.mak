@@ -21,7 +21,7 @@ $(error WITH_INTL MUST BE 0, 1, static, shared, or dynamic. WITH_INTL: '${WITH_I
 endif
 
 ifeq (${WITH_INTL},1)
-WITH_INTL=dynamic
+override WITH_INTL=dynamic
 endif
 
 ifneq ($(filter ${WITH_INTL},shared static dynamic),)

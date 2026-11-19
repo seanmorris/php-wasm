@@ -52,6 +52,9 @@ const queryWorkbenchUrlFor = (engine, target) => (
 	`query-workbench.html?${new URLSearchParams({engine, target, connect: '1'})}`
 );
 
+const filesystemErrorMessage = error => error?.message
+	?? (typeof error === 'string' ? error : JSON.stringify(error));
+
 const drupalInstallUrlFor = database => (
 	'install-demo.html?framework=drupal-11'
 	+ `&database=${database}`
@@ -325,7 +328,7 @@ function SelectFramework()
 
 		setOverlay(<Backup
 			onComplete = { () => setOverlay(null) }
-			onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+			onError = { (error) => setOverlay(<ErrorDialog message = {filesystemErrorMessage(error)} onConfirm = { () => setOverlay(null) } />)}
 		/>);
 	};
 
@@ -336,7 +339,7 @@ function SelectFramework()
 			setOverlay(<Restore
 				fileInput = {fileInput}
 				onComplete = { () => { setOverlay(null); refreshAll(); } }
-				onError = { (error) => setOverlay(<ErrorDialog message = {JSON.stringify(error)} onConfirm = { () => setOverlay(null) } />)}
+				onError = { (error) => setOverlay(<ErrorDialog message = {filesystemErrorMessage(error)} onConfirm = { () => setOverlay(null) } />)}
 			/>);
 		} }
 		onCancel = { () => setOverlay(null) }

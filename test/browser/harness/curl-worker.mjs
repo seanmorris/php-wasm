@@ -7,7 +7,7 @@ self.onmessage = async ({data: {version, libType, curlMode}}) => {
 	{
 		const cgi = new PhpCgiWebBase(import(`/packages/php-cgi-wasm/php${version}-cgi-worker.mjs`), {
 			version, docroot: '/preload', prefix: '/cgi/'
-			, sharedLibs: [...loadCgiSharedLibs(libType), ...(curlMode === 'static' ? [] : [curl])]
+			, sharedLibs: [...loadCgiSharedLibs(libType, version), ...(curlMode === 'static' ? [] : [curl])]
 			, libcurlFetchOptions: {credentials: 'omit'}
 		});
 		const binary = await cgi.binary;

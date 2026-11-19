@@ -20,7 +20,7 @@ browser contract, not an assertion of parity with every native SDL API.
 
 | Selected group | Native behavioral checks in `test/browser/` | Classification |
 | --- | --- | --- |
-| Events, timers and controller mappings | `sdl-bindings`, `sdl-input`: payloads, precise counters, browser input, device attachment/reconnection, event settings, mapping selection and live button remapping | Implemented; simulated gamepads, physical hardware unverified |
+| Events, timers, controller mappings and rumble | `sdl-bindings`, `sdl-input`: payloads, precise counters, browser input, device attachment/reconnection, event settings, mapping selection, live button remapping, exact-device dual-motor and trigger rumble | Implemented; simulated gamepads, physical hardware unverified |
 | Unicode, focus, fullscreen and pointer lock | `sdl-text`, `sdl-input`, `sdl-pointer`: composition transport, focus release, actual browser requests, policy errors and retired callback cleanup | Implemented; browser permissions and IME limits below |
 | Streaming textures and SDL batches | `sdl-bindings`, `sdl-geometry`, `sdl-coordinates`: pixel uploads/readback, all eight integer/float batches, indexed/packed geometry, state, scaling and coordinate conversion | Implemented; planar YUV upload outside this PHP byte-transfer contract |
 | Fonts | `sdl-bindings`, `sdl-streams`, `sdl-stress`: all supported text render variants, glyph metrics/styles, face metadata, size changes, callback failures and repeated allocation cleanup | Implemented; no HarfBuzz shaping |
@@ -47,7 +47,8 @@ Backend boundaries are explicit: one live SDL GL context per runtime; engine
 code reloads GPU assets after loss; no PHP native pointer inputs; no pixel-buffer
 object transfers through PHP byte-string upload/readback; no complex shaping
 without HarfBuzz; no browser mouse warping, desktop windows, threads or
-unavailable haptics/sensors. Compressed formats require actual context support
+general `SDL_Haptic*` effects and sensors. Controller rumble is supported through
+the joystick/game-controller APIs. Compressed formats require actual context support
 (PVRTC is not available on the test device). Textarea-based IME cannot edit a
 fullscreen canvas; EditContext supports that path where available. Physical
 OS IME, controllers, iPhones and hardware GPU/audio performance are unverified.
@@ -97,7 +98,7 @@ Keep the event loop yielding to browser frames as described in the README.
 | --- | --- | --- |
 | iPhone/iPad Safari | Load over both HTTPS and an HTTP LAN address; run the cube, tap Enable audio, rotate the device, background/restore the page and restart the runtime | Startup without a missing-Web-Locks error; resize/aspect behavior; gesture requirements and playback after explicit resume/reopen. The HTTP fallback coordinates only one page/worker. |
 | Physical keyboard and OS IME | Hold a key/modifier while moving focus to the editor; compose Japanese/Chinese text and a long Unicode commit after `SDL_StartTextInput()`; stop during composition; repeat in fullscreen | Key releases and normal editor typing; `SDL_TEXTEDITING` selection in codepoints; concatenated `SDL_TEXTINPUT` bytes equal committed UTF-8. Fullscreen IME requires EditContext; the textarea path must report that limit through `SDL_GetError()`. Font shaping is a separate limitation. |
-| USB/Bluetooth controllers | Press a button to expose each device, poll an open controller each frame, exercise axes/buttons, disconnect and reconnect at the same browser index; repeat with two devices | Browser mapping and event payloads; a new SDL instance ID on reconnection; the retained old handle stays detached. Record devices that the browser does not expose. Close controller and separately acquired joystick references. |
+| USB/Bluetooth controllers | Press a button to expose each device, poll an open controller each frame, exercise axes/buttons and dual-motor rumble, disconnect and reconnect at the same browser index; repeat with two devices and trigger rumble when supported | Browser mapping and event payloads; strong/weak motor identity and trigger support; a new SDL instance ID on reconnection; the retained old handle stays detached. Record devices that the browser does not expose. Close controller and separately acquired joystick references. |
 | Touchscreen | Move two contacts independently on a CSS-scaled canvas, lift each contact and trigger browser cancellation; repeat after rotation | Finger identity across motion, normalized positions/deltas and cancellation events. The pinned backend reports pressure as 1; pressure sensitivity is not claimed. |
 | Hardware audio output | Play concurrent WAV effects and MP3 music, suspend/resume through browser or OS controls, change the output route where supported, then close/reopen and refresh repeatedly | Audible output, interruption/resume policy, mixer return values and diagnostics; no hung close/reopen. Record glitches and device latency separately from the software-sink measurements. |
 | Hardware GPU | Run the rendering fixtures on the actual GPU, resize/recreate targets, lose/restore the WebGL context and recreate assets; exercise only advertised compressed formats | Pixel/error results, reported capabilities, resource recreation and frame times. Software-renderer results do not establish driver support or hardware performance. |

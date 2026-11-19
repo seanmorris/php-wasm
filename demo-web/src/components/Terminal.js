@@ -9,6 +9,7 @@ import loading from '../assets/ui/loading.svg';
 import Convert from 'ansi-to-html';
 import { libType } from '../lib/runtimePaths';
 import { sharedSupportLibs } from 'demo-web-shared-support-libs';
+import { pdoPgliteLibraries } from '../lib/pdoPgliteLibraries';
 
 // import libxml from 'php-wasm-libxml';
 
@@ -226,7 +227,7 @@ export default function Terminal({
 		const php = new PhpCliWeb({
 			...extras
 			, ...phpArgs
-			, sharedLibs: [...sharedLibs, ...defaultSharedLibs]
+			, sharedLibs: [...sharedLibs, ...defaultSharedLibs, ...pdoPgliteLibraries(libType, phpArgs.version)]
 			, interactive: interactiveMode
 			, script
 			, code

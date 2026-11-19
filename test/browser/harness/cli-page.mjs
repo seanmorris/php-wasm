@@ -19,7 +19,7 @@ const main = async () => {
 		code: query.get('code') ?? 'echo "Hello, World!";'
 		, ini: createIni()
 		, persist: [{mountPath: '/persist'}, {mountPath: '/config'}]
-		, sharedLibs: loadCliSharedLibs(libType)
+		, sharedLibs: loadCliSharedLibs(libType, runtimeVersion)
 		, version: runtimeVersion
 	});
 

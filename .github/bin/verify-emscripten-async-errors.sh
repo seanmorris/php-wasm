@@ -7,7 +7,30 @@ trap 'rm -rf "${WORK_DIR}"' EXIT
 cd "${WORK_DIR}"
 
 cat > async-side.c <<'EOF'
+#include <emscripten.h>
+
 extern int suspending_callback(int value);
+
+EMSCRIPTEN_KEEPALIVE int dynamic_native(int value) {
+	return value + 1;
+}
+
+EM_JS(int, dynamic_js, (int value), {
+	return Module.ccall('dynamic_native', 'number', ['number'], [value]);
+});
+
+EM_ASYNC_JS(int, dynamic_async_js, (int value), {
+	await Promise.resolve();
+	return Module.ccall('dynamic_native', 'number', ['number'], [value]);
+});
+
+EMSCRIPTEN_KEEPALIVE int side_js_call(int value) {
+	return dynamic_js(value);
+}
+
+EMSCRIPTEN_KEEPALIVE int side_async_js_call(int value) {
+	return dynamic_async_js(value);
+}
 
 int side_call(int value) {
 	volatile int saved = value;
@@ -98,6 +121,16 @@ test('side module frames survive repeated calls into a suspending main-module im
 	assert.equal(await call(runtime, 9), 42);
 });
 
+test('ccall resolves native exports and embedded JS from a side module', {timeout: 2000}, async () => {
+	const runtime = await createRuntime();
+	assert.equal(typeof runtime.resolveGlobalSymbol('dynamic_native').sym, 'function');
+	assert.equal(runtime.resolveGlobalSymbol('php_wasm_missing_probe').sym, undefined);
+	assert.equal(runtime.ccall('probe', 'number', ['number'], [0]), 42);
+	assert.equal(runtime.ccall('dynamic_native', 'number', ['number'], [41]), 42);
+	assert.equal(runtime.ccall('side_js_call', 'number', ['number'], [41]), 42);
+	assert.equal(await runtime.ccall('side_async_js_call', 'number', ['number'], [41], {async: true}), 42);
+});
+
 for (const mode of [2, 3, 6]) {
 	for (const failure of [new Error('native import failed'), undefined, null, 'import failure']) {
 		test(`mode ${mode} rejects with ${String(failure)} and disables the failed instance`, {timeout: 2000}, async () => {
@@ -156,7 +189,7 @@ for assertions in 0 1; do
 		-sENVIRONMENT=node \
 		-sEXIT_RUNTIME=1 \
 		-sASSERTIONS="${assertions}" \
-		-sEXPORTED_RUNTIME_METHODS=ccall \
+		'-sEXPORTED_RUNTIME_METHODS=["ccall","resolveGlobalSymbol"]' \
 		-o async-errors.mjs
 	node --test async-errors.test.mjs
 done
@@ -187,6 +220,47 @@ for assertions in 0 1; do
 		import createRuntime from "./callback.mjs";
 		const runtime = await createRuntime();
 		assert.equal(runtime._probe_callback(), 42);
+	'
+done
+
+# An EM_ASYNC_JS import called from a function that uses setjmp is reached
+# through an invoke_* wrapper, which takes the import's address.  The import is
+# registered as "__asyncjs__<name>", so the dynamic linker has to find it under
+# that name.  PHP compiled with optimisation inlines such a call (waitline's
+# readline) into a setjmp frame, and the runtime then failed to start.
+cat > async-setjmp.c <<'EOF'
+#include <emscripten.h>
+#include <setjmp.h>
+
+EM_ASYNC_JS(int, async_setjmp_value, (int value), {
+	await Promise.resolve();
+	return value + 1;
+});
+
+static jmp_buf async_setjmp_buffer;
+
+EMSCRIPTEN_KEEPALIVE int probe_async_setjmp(int value) {
+	if (setjmp(async_setjmp_buffer)) {
+		return -1;
+	}
+
+	return async_setjmp_value(value);
+}
+EOF
+
+for assertions in 0 1; do
+	emcc async-setjmp.c -O2 \
+		-sMAIN_MODULE=1 -sASYNCIFY=1 -sWASM_BIGINT=1 \
+		-sERROR_ON_UNDEFINED_SYMBOLS=0 \
+		-sASSERTIONS="${assertions}" -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=node \
+		'-sEXPORTED_RUNTIME_METHODS=["ccall"]' \
+		-o async-setjmp.mjs
+	node --input-type=module -e '
+		import assert from "node:assert/strict";
+		import createRuntime from "./async-setjmp.mjs";
+		const runtime = await createRuntime();
+		const result = await runtime.ccall("probe_async_setjmp", "number", ["number"], [41], {async: true});
+		assert.equal(result, 42);
 	'
 done
 

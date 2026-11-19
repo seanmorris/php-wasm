@@ -11,7 +11,7 @@ $(error WITH_LIBZIP MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBZIP: '${WI
 endif
 
 ifeq (${WITH_LIBZIP},1)
-WITH_LIBZIP=dynamic
+override WITH_LIBZIP=dynamic
 endif
 
 ifeq (${WITH_LIBZIP},static)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 181f3d36ce0e2c1a6202b7000039b2a91d6ec483 */
+ * Stub hash: a2d065a174467231079c3cb6f3262437ec8145a8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_SDL_GetTicks, 0, 0, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
@@ -111,6 +111,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_JoystickEventState, 0, 1, IS
 	ZEND_ARG_TYPE_INFO(0, state, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_JoystickRumble, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, joystick, SDL_Joystick, 0)
+	ZEND_ARG_TYPE_INFO(0, lowFrequency, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, highFrequency, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, duration, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_JoystickRumbleTriggers, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, joystick, SDL_Joystick, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, duration, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_SDL_JoystickHasRumble arginfo_SDL_JoystickGetAttached
+
+#define arginfo_SDL_JoystickHasRumbleTriggers arginfo_SDL_JoystickGetAttached
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_SDL_GameControllerOpen, 0, 1, SDL_GameController, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -155,6 +173,24 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_SDL_GameControllerMapping arginfo_SDL_GameControllerName
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_GameControllerRumble, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, controller, SDL_GameController, 0)
+	ZEND_ARG_TYPE_INFO(0, lowFrequency, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, highFrequency, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, duration, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_SDL_GameControllerRumbleTriggers, 0, 4, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, controller, SDL_GameController, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, duration, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_SDL_GameControllerHasRumble arginfo_SDL_GameControllerGetAttached
+
+#define arginfo_SDL_GameControllerHasRumbleTriggers arginfo_SDL_GameControllerGetAttached
+
 
 ZEND_FUNCTION(SDL_GetTicks);
 ZEND_FUNCTION(SDL_GetTicks64);
@@ -183,6 +219,10 @@ ZEND_FUNCTION(SDL_JoystickGetAttached);
 ZEND_FUNCTION(SDL_JoystickInstanceID);
 ZEND_FUNCTION(SDL_JoystickGetDeviceInstanceID);
 ZEND_FUNCTION(SDL_JoystickEventState);
+ZEND_FUNCTION(SDL_JoystickRumble);
+ZEND_FUNCTION(SDL_JoystickRumbleTriggers);
+ZEND_FUNCTION(SDL_JoystickHasRumble);
+ZEND_FUNCTION(SDL_JoystickHasRumbleTriggers);
 ZEND_FUNCTION(SDL_GameControllerOpen);
 ZEND_FUNCTION(SDL_GameControllerClose);
 ZEND_FUNCTION(SDL_GameControllerName);
@@ -195,6 +235,10 @@ ZEND_FUNCTION(SDL_GameControllerUpdate);
 ZEND_FUNCTION(SDL_GameControllerEventState);
 ZEND_FUNCTION(SDL_GameControllerAddMapping);
 ZEND_FUNCTION(SDL_GameControllerMapping);
+ZEND_FUNCTION(SDL_GameControllerRumble);
+ZEND_FUNCTION(SDL_GameControllerRumbleTriggers);
+ZEND_FUNCTION(SDL_GameControllerHasRumble);
+ZEND_FUNCTION(SDL_GameControllerHasRumbleTriggers);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -225,6 +269,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(SDL_JoystickInstanceID, arginfo_SDL_JoystickInstanceID)
 	ZEND_FE(SDL_JoystickGetDeviceInstanceID, arginfo_SDL_JoystickGetDeviceInstanceID)
 	ZEND_FE(SDL_JoystickEventState, arginfo_SDL_JoystickEventState)
+	ZEND_FE(SDL_JoystickRumble, arginfo_SDL_JoystickRumble)
+	ZEND_FE(SDL_JoystickRumbleTriggers, arginfo_SDL_JoystickRumbleTriggers)
+	ZEND_FE(SDL_JoystickHasRumble, arginfo_SDL_JoystickHasRumble)
+	ZEND_FE(SDL_JoystickHasRumbleTriggers, arginfo_SDL_JoystickHasRumbleTriggers)
 	ZEND_FE(SDL_GameControllerOpen, arginfo_SDL_GameControllerOpen)
 	ZEND_FE(SDL_GameControllerClose, arginfo_SDL_GameControllerClose)
 	ZEND_FE(SDL_GameControllerName, arginfo_SDL_GameControllerName)
@@ -237,5 +285,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(SDL_GameControllerEventState, arginfo_SDL_GameControllerEventState)
 	ZEND_FE(SDL_GameControllerAddMapping, arginfo_SDL_GameControllerAddMapping)
 	ZEND_FE(SDL_GameControllerMapping, arginfo_SDL_GameControllerMapping)
+	ZEND_FE(SDL_GameControllerRumble, arginfo_SDL_GameControllerRumble)
+	ZEND_FE(SDL_GameControllerRumbleTriggers, arginfo_SDL_GameControllerRumbleTriggers)
+	ZEND_FE(SDL_GameControllerHasRumble, arginfo_SDL_GameControllerHasRumble)
+	ZEND_FE(SDL_GameControllerHasRumbleTriggers, arginfo_SDL_GameControllerHasRumbleTriggers)
 	ZEND_FE_END
 };

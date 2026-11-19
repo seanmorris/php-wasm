@@ -13,7 +13,7 @@ $(error WITH_ICONV MUST BE 0, 1, static, shared, OR dynamic. WITH_ICONV: '${WITH
 endif
 
 ifeq (${WITH_ICONV},1)
-WITH_ICONV=dynamic
+override WITH_ICONV=dynamic
 endif
 
 ifneq (${WITH_ICONV},0)
