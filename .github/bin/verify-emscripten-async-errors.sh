@@ -223,4 +223,45 @@ for assertions in 0 1; do
 	'
 done
 
+# An EM_ASYNC_JS import called from a function that uses setjmp is reached
+# through an invoke_* wrapper, which takes the import's address.  The import is
+# registered as "__asyncjs__<name>", so the dynamic linker has to find it under
+# that name.  PHP compiled with optimisation inlines such a call (waitline's
+# readline) into a setjmp frame, and the runtime then failed to start.
+cat > async-setjmp.c <<'EOF'
+#include <emscripten.h>
+#include <setjmp.h>
+
+EM_ASYNC_JS(int, async_setjmp_value, (int value), {
+	await Promise.resolve();
+	return value + 1;
+});
+
+static jmp_buf async_setjmp_buffer;
+
+EMSCRIPTEN_KEEPALIVE int probe_async_setjmp(int value) {
+	if (setjmp(async_setjmp_buffer)) {
+		return -1;
+	}
+
+	return async_setjmp_value(value);
+}
+EOF
+
+for assertions in 0 1; do
+	emcc async-setjmp.c -O2 \
+		-sMAIN_MODULE=1 -sASYNCIFY=1 -sWASM_BIGINT=1 \
+		-sERROR_ON_UNDEFINED_SYMBOLS=0 \
+		-sASSERTIONS="${assertions}" -sMODULARIZE=1 -sEXPORT_ES6=1 -sENVIRONMENT=node \
+		'-sEXPORTED_RUNTIME_METHODS=["ccall"]' \
+		-o async-setjmp.mjs
+	node --input-type=module -e '
+		import assert from "node:assert/strict";
+		import createRuntime from "./async-setjmp.mjs";
+		const runtime = await createRuntime();
+		const result = await runtime.ccall("probe_async_setjmp", "number", ["number"], [41], {async: true});
+		assert.equal(result, 42);
+	'
+done
+
 echo 'Emscripten async error propagation checks passed'

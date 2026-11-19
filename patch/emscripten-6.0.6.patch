@@ -552,3 +552,21 @@ diff --git a/src/parseTools.mjs b/src/parseTools.mjs
      }
  
      const dyncall = `dynCall_${sig}`;
+diff --git a/src/lib/libdylink.js b/src/lib/libdylink.js
+--- a/src/lib/libdylink.js
++++ b/src/lib/libdylink.js
+@@ -130,6 +130,14 @@
+     if (isSymbolDefined(symName)) {
+       sym = wasmImports[symName];
+     }
++#if ASYNCIFY
++    // EM_ASYNC_JS registers its import as "__asyncjs__<name>", but code that
++    // takes the function's address asks for it by its C name. An invoke_*
++    // wrapper does, once the call is inlined into a function using setjmp.
++    else if (isSymbolDefined('__asyncjs__' + symName)) {
++      sym = wasmImports['__asyncjs__' + symName];
++    }
++#endif
+ #if !DISABLE_EXCEPTION_CATCHING || SUPPORT_LONGJMP == 'emscripten'
+     // Asm.js-style exception handling: invoke wrapper generation
+     else if (symName.startsWith('invoke_')) {
