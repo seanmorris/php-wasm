@@ -10,7 +10,8 @@ test('libxml error handlers can await JavaScript and resume parsing', {timeout: 
 	let waits = 0;
 	let stdout = '', stderr = '';
 	const php = new PhpNode(nodeRuntimeOptions({
-		sharedLibs: env.WITH_SIMPLEXML === 'dynamic' ? [libxml, simplexml] : []
+		runtime: 'php'
+		, sharedLibs: env.WITH_SIMPLEXML === 'dynamic' ? [libxml, simplexml] : []
 		, waitForError: async () => {
 			await Promise.resolve();
 			++waits;

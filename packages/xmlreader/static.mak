@@ -9,7 +9,7 @@ $(error WITH_XMLREADER MUST BE 0, 1, static, OR dynamic. WITH_XMLREADER: '${WITH
 endif
 
 ifeq (${WITH_XMLREADER},1)
-WITH_XMLREADER=dynamic
+override WITH_XMLREADER=dynamic
 endif
 
 ifeq (${WITH_XMLREADER},static)

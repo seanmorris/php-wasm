@@ -177,6 +177,16 @@ test('inspects a live phpdbg frame in the browser harness', async ({ page }) => 
 			globalReference: 'global-value',
 		},
 		hasServerSuperglobal: true,
+		debuggerApi: 2,
+		frameNames: ['phpdbg_inspection_inner', 'phpdbg_inspection_outer', ''],
+		selectedFrames: [0, 1],
+		described: {
+			localFloat: {type: 'float', className: null, count: null},
+			localArray: {type: 'array', className: null, count: 1},
+			localObject: {type: 'object', className: 'PhpDbgInspectionClass', count: null},
+			breakpointValue: {type: 'undefined', className: null, count: null},
+		},
+		unimportedGlobal: 'unimported-global',
 		constants: {
 			main: 'constant-value',
 			included: 'included-constant-value',
@@ -200,6 +210,16 @@ test('inspects a live phpdbg frame in the browser harness', async ({ page }) => 
 	expect(inspection.currentLine).toBeGreaterThan(0);
 	expect(inspection.files).toContain('/preload/test_www/phpdbg-inspection-include.php');
 	expect(inspection.backtrace.length).toBeGreaterThanOrEqual(2);
+	// A key named like a JavaScript array property, and private and protected
+	// properties, are read from PHP by key.
+	expect(inspection.children).toEqual({
+		length: ['string', 'data']
+		, sealed: {hidden: 4, guarded: 'guarded-value', open: 7}
+	});
+	// An anonymous class's name continues past a NUL byte with the file and
+	// line that declare it.
+	expect(inspection.described.localAnonymous.className)
+		.toMatch(/^class@anonymous\0.*phpdbg-inspection\.php:\d+\$[0-9a-f]+$/);
 });
 
 test('serves php through the cgi worker harness', async ({ page }) => {

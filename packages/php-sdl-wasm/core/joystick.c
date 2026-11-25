@@ -193,6 +193,51 @@ PHP_FUNCTION(SDL_GameControllerMapping)
 EVENT_STATE(SDL_JoystickEventState)
 EVENT_STATE(SDL_GameControllerEventState)
 
+/* Uint32 durations use decimal strings above PHP_INT_MAX on wasm32. */
+static zend_bool input_uint32(zval *value, Uint32 *result)
+{
+	uint64_t number = 0;
+	ZVAL_DEREF(value);
+	if (Z_TYPE_P(value) == IS_LONG && Z_LVAL_P(value) >= 0) {
+		number = (uint64_t)Z_LVAL_P(value);
+	} else if (Z_TYPE_P(value) == IS_STRING && Z_STRLEN_P(value) && Z_STRLEN_P(value) <= 10) {
+		for (size_t i = 0; i < Z_STRLEN_P(value); i++) {
+			unsigned char digit = Z_STRVAL_P(value)[i];
+			if (digit < '0' || digit > '9') {
+				zend_value_error("duration must be a uint32 integer or decimal string"); return 0;
+			}
+			number = number * 10 + digit - '0';
+		}
+	} else {
+		zend_value_error("duration must be a uint32 integer or decimal string"); return 0;
+	}
+	if (number > UINT32_MAX) { zend_value_error("duration must be between 0 and 4294967295"); return 0; }
+	*result = (Uint32)number;
+	return 1;
+}
+
+#define INPUT_RUMBLE(name, ce, type) PHP_FUNCTION(name) \
+{ zval *value, *duration_value; zend_long first, second; Uint32 duration; \
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollz", &value, ce, &first, &second, &duration_value) == FAILURE) { RETURN_THROWS(); } \
+	if (first < 0 || first > UINT16_MAX || second < 0 || second > UINT16_MAX) { \
+		zend_value_error("rumble strengths must be between 0 and 65535"); RETURN_THROWS(); \
+	} \
+	if (!input_uint32(duration_value, &duration)) { RETURN_THROWS(); } \
+	type *input = input_pointer(value); if (!input) { RETURN_THROWS(); } \
+	RETURN_LONG(name(input, (Uint16)first, (Uint16)second, duration)); }
+INPUT_RUMBLE(SDL_JoystickRumble, joystick_ce, SDL_Joystick)
+INPUT_RUMBLE(SDL_JoystickRumbleTriggers, joystick_ce, SDL_Joystick)
+INPUT_RUMBLE(SDL_GameControllerRumble, controller_ce, SDL_GameController)
+INPUT_RUMBLE(SDL_GameControllerRumbleTriggers, controller_ce, SDL_GameController)
+
+#define INPUT_CAPABILITY(name, ce, type) PHP_FUNCTION(name) \
+{ zval *value; if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &value, ce) == FAILURE) { RETURN_THROWS(); } \
+	type *input = input_pointer(value); if (!input) { RETURN_THROWS(); } RETURN_BOOL(name(input)); }
+INPUT_CAPABILITY(SDL_JoystickHasRumble, joystick_ce, SDL_Joystick)
+INPUT_CAPABILITY(SDL_JoystickHasRumbleTriggers, joystick_ce, SDL_Joystick)
+INPUT_CAPABILITY(SDL_GameControllerHasRumble, controller_ce, SDL_GameController)
+INPUT_CAPABILITY(SDL_GameControllerHasRumbleTriggers, controller_ce, SDL_GameController)
+
 PHP_MINIT_FUNCTION(sdl_joystick)
 {
 	zend_class_entry ce;

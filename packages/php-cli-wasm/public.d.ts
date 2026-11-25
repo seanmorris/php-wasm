@@ -11,6 +11,12 @@ export interface PhpPreloadFile {
 	name?: string;
 }
 
+/** A version-aware extension package accepted by sharedLibs and dynamicLibs. */
+export interface PhpLibraryLoader {
+	getLibs(php: {phpVersion?: PhpRuntimeVersion}): PhpSharedLibrary[];
+	getFiles?(php: {phpVersion?: PhpRuntimeVersion}): PhpPreloadFile[];
+}
+
 export interface PhpSharedLibrary {
 	name?: string;
 	url: string | URL;
@@ -39,8 +45,8 @@ export interface PhpRuntimeArgs {
 	libcurlFetchOptions?: {credentials?: 'omit' | 'same-origin' | 'include'};
 	locateFile?: (path: string, directory?: string) => string | URL | undefined;
 	files?: PhpPreloadFile[];
-	sharedLibs?: Array<string | URL | PhpSharedLibrary>;
-	dynamicLibs?: Array<string | URL | PhpSharedLibrary>;
+	sharedLibs?: Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
+	dynamicLibs?: Array<string | URL | PhpSharedLibrary | PhpLibraryLoader>;
 	debug?: boolean;
 	ini?: string;
 	persist?: object | boolean;

@@ -9,13 +9,20 @@ import loader from '../assets/ui/bar-spin.svg';
 import { PhpWeb } from 'php-wasm/PhpWeb';
 import { basePath } from '../lib/runtimePaths';
 import { getPhpBus } from '../lib/phpBus';
+import { sharedSupportLibs } from 'demo-web-shared-support-libs';
 
 import libxml from 'php-wasm-libxml';
 import zlib from 'php-wasm-zlib';
 import libzip from 'php-wasm-libzip';
 
 import { useEffect, useEffectEvent, useState } from 'react';
-const sharedLibs = [libxml, zlib, libzip];
+// A new shared-build runtime needs the same native support libraries as the
+// embedded demo. These three extension loaders already provide their own libs.
+const extensionSupportLibs = new Set(['libxml2.so', 'libz.so', 'libzip.so']);
+const sharedLibs = [
+	...sharedSupportLibs.filter(lib => !extensionSupportLibs.has(lib.name))
+	, libxml, zlib, libzip
+];
 
 /**
  * Creates a backup zip from the persisted demo filesystem and downloads it.

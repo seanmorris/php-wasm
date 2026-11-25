@@ -3,8 +3,8 @@ WITH_PDO_CFD1?=0
 
 ifeq (${WITH_PDO_CFD1},1)
 WITH_VRZNO?=1
-ifneq (${WITH_VRZNO},1)
-$(error WITH_PDO_CFD1=1 requires WITH_VRZNO=1)
+ifeq ($(filter ${WITH_VRZNO},1 static),)
+$(error WITH_PDO_CFD1=1 requires WITH_VRZNO=1 or static)
 endif
 EXTRA_FLAGS+= -D WITH_PDO_CFD1=1
 PDO_CFD1_SOURCE_STAMP=third_party/pdo-cfd1/.php-wasm-source.json

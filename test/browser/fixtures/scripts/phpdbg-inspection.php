@@ -30,16 +30,28 @@ final class PhpDbgInspectionClass implements PhpDbgInspectionContract
 	}
 }
 
+final class PhpDbgInspectionSealed
+{
+	private float $hidden = 4.0;
+	protected string $guarded = 'guarded-value';
+	public int $open = 7;
+}
+
 function phpdbg_inspection_inner(string $argument): string
 {
 	global $phpdbgInspectionGlobal;
 
 	$localString = 'local-value';
 	$localNumber = 42;
+	$localFloat = 3.0;
 	$localBoolean = true;
 	$localNull = null;
-	$localArray = ['nested' => ['answer' => 42]];
+	$localArray = ['nested' => ['answer' => 42, 'ratio' => 2.0]];
 	$localObject = new PhpDbgInspectionClass('object-value');
+	// Keys that are also properties of a JavaScript array, and members listed under mangled names.
+	$localLookalike = ['length' => 'data', 'constructor' => 1.0];
+	$localSealed = new PhpDbgInspectionSealed;
+	$localAnonymous = new class { public int $open = 1; };
 	$breakpointValue = $argument; // PHPDBG_INSPECTION_BREAKPOINT
 
 	return implode(':', [
@@ -62,6 +74,7 @@ function phpdbg_inspection_outer(): string
 }
 
 $phpdbgInspectionGlobal = 'global-value';
+$phpdbgInspectionUnimported = 'unimported-global';
 $inspectionResult = phpdbg_inspection_outer();
 
 echo "inspection-complete:$inspectionResult\n";

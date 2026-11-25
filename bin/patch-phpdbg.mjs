@@ -11,6 +11,10 @@ function insert(source, name, anchor, text, before = false) {
 	return source.replace(anchor, before ? block(name, text) + '\n' + anchor : anchor + '\n' + block(name, text));
 }
 
+// phpdbg_frame.c and phpdbg_info.c define the functions the bridge header makes visible
+// to a Vrzno side module; visibility is taken from the declaration their definition sees.
+export const instrumentedSources = ['phpdbg.c', 'phpdbg_prompt.c', 'phpdbg_out.c', 'phpdbg_frame.c', 'phpdbg_info.c'];
+
 export function instrumentSource(name, source) {
 	const include = name === 'phpdbg.c'
 		? '#define PHPDBG_WASM_BRIDGE_IMPL\n#include "phpdbg_wasm_bridge.h"\n#undef PHPDBG_WASM_BRIDGE_IMPL'
@@ -25,6 +29,9 @@ export function instrumentSource(name, source) {
 			'\t\tvolatile uint64_t wasm_shutdown_flags = PHPDBG_G(flags);\n\t\tvolatile int wasm_managed_shutdown = phpdbg_wasm_managed_shutdown() && (PHPDBG_G(flags) & (PHPDBG_IS_CLEANING | PHPDBG_IS_RUNNING | PHPDBG_IS_QUITTING)) == PHPDBG_IS_CLEANING;\n\t\tif (wasm_managed_shutdown) {\n\t\t\tPHPDBG_G(flags) &= ~PHPDBG_IS_STOPPING;\n\t\t\tPHPDBG_G(flags) |= PHPDBG_IS_RUNNING;\n\t\t\tif (EG(exception) && zend_is_unwind_exit(EG(exception))) zend_exception_error(EG(exception), E_ERROR);\n\t\t}', true);
 		source = insert(source, 'shutdown-end', '\t\t\tphp_request_shutdown(NULL);\n\t\t} zend_end_try();',
 			'\t\tif (wasm_managed_shutdown) PHPDBG_G(flags) = wasm_shutdown_flags | (PHPDBG_G(flags) & PHPDBG_IS_QUITTING);');
+		// Module startup registers a SAPI's additional functions, so set them first, as the CLI does for dl().
+		source = insert(source, 'additional-functions', '\tif (phpdbg->startup(phpdbg) == SUCCESS) {',
+			'\tphpdbg->additional_functions = phpdbg_wasm_additional_functions;', true);
 	}
 	if(name === 'phpdbg_out.c') {
 		source = insert(source, 'output', source.match(/(?:static )?int phpdbg_process_print\([^\n]+\) \{/)?.[0] ?? '__missing_output_signature__',
@@ -50,13 +57,19 @@ export function instrumentSource(name, source) {
 export async function patchPhpDbg(root) {
 	const directory = path.join(root, 'sapi/phpdbg');
 	const header = await fs.readFile(new URL('../source/phpdbg_wasm_bridge.h', import.meta.url));
-	const updates = await Promise.all(['phpdbg.c','phpdbg_prompt.c','phpdbg_out.c'].map(async name => {
+	const updates = await Promise.all(instrumentedSources.map(async name => {
 		const filename = path.join(directory, name);
 		const source = await fs.readFile(filename, 'utf8');
 		return {filename, source, patched: instrumentSource(name, source)};
 	}));
 	for(const {filename, source, patched} of updates) if(source !== patched) await fs.writeFile(filename, patched);
 	const target = path.join(directory, 'phpdbg_wasm_bridge.h');
-	if(!header.equals(await fs.readFile(target).catch(() => Buffer.alloc(0)))) await fs.writeFile(target, header);
+	if(!header.equals(await fs.readFile(target).catch(() => Buffer.alloc(0)))) {
+		await fs.writeFile(target, header);
+		// Not every supported PHP tracks header dependencies (8.0 does not), so a
+		// changed header alone would leave the objects that include it as they were.
+		const now = new Date();
+		await Promise.all(updates.map(({filename}) => fs.utimes(filename, now, now)));
+	}
 }
 if(process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await patchPhpDbg(process.argv[2]);

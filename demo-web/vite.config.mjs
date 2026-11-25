@@ -49,6 +49,7 @@ const localPhpPackages = [
 	, 'php-dbg-wasm'
 	, 'php-sdl-wasm'
 	, 'php-wasm'
+	, 'php-wasm-curl'
 	, 'php-wasm-dom'
 	, 'php-wasm-gd'
 	, 'php-wasm-iconv'

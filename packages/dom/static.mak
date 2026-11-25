@@ -9,7 +9,7 @@ $(error WITH_DOM MUST BE 0, 1, static, OR dynamic. WITH_DOM: '${WITH_DOM}' PLEAS
 endif
 
 ifeq (${WITH_DOM},1)
-WITH_DOM=dynamic
+override WITH_DOM=dynamic
 endif
 
 ifeq (${WITH_DOM},static)

@@ -3,6 +3,7 @@
     "pdo-pglite": "0.0.9-alpha-27",
     "php-cgi-wasm": "0.0.9-alpha-27",
     "php-wasm": "0.0.9-alpha-27",
+	"php-wasm-curl": "0.2.1",
     "php-wasm-dom": "0.0.9-alpha-27",
     "php-wasm-gd": "0.0.9-alpha-27",
     "php-wasm-iconv": "0.0.9-alpha-27",

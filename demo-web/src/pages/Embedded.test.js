@@ -1,4 +1,5 @@
 import React from 'react';
+import {readFileSync} from 'node:fs';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 const {
@@ -106,6 +107,15 @@ echo "Hello, World!";
 		);
 	});
 
+	it('explicitly loads PDO-PGlite for a supported dynamic PHP runtime', async () => {
+		window.history.replaceState({}, '', '/embedded-php.html?version=8.4&extensionFlags=0');
+		render(<Embedded />);
+		await waitFor(() => expect(PhpWeb).toHaveBeenCalled());
+		const [options] = PhpWeb.mock.calls[0];
+		expect(options.sharedLibs.flatMap(loader => loader.getLibs({phpVersion: '8.4'})).map(lib => lib.name))
+			.toEqual(['php8.4-pdo-pglite.so']);
+	});
+
 	it('autoruns the fetched demo code even if Ace is still empty', async () => {
 		render(<Embedded />);
 
@@ -124,6 +134,24 @@ echo "Hello, World!";
 		expect(executedCode).not.toBe('');
 		expect(new URLSearchParams(window.location.search).has('code')).toBe(false);
 		expect(new URLSearchParams(window.location.hash.slice(1)).get('code')).toBe(executedCode);
+	});
+
+	it('loads curl for its example and preserves that choice in shared links', async () => {
+		const curlCode = readFileSync('public/scripts/curl.php', 'utf8');
+		globalThis.fetch.mockResolvedValue({ok: true, text: async () => curlCode});
+		window.history.replaceState({}, '', '/embedded-php.html?demo=curl.php&version=8.4&extensionFlags=0');
+		render(<Embedded />);
+
+		await waitFor(() => expect(phpRun).toHaveBeenCalledTimes(1));
+		const [{sharedLibs}] = PhpWeb.mock.calls[0];
+		expect(sharedLibs.flatMap(module => module.getLibs({phpVersion: '8.4'}).map(lib => lib.name)))
+			.toContain('php8.4-curl.so');
+		expect(phpRun.mock.calls[0][0]).toContain(
+			new URL('/php-wasm/scripts/curl-example.json', window.location.origin).href
+		);
+		const sharedCode = new URLSearchParams(window.location.hash.slice(1)).get('code');
+		expect(sharedCode).toContain('"extensions":["curl"]');
+		expect(sharedCode).toContain('__PHP_WASM_CURL_DEMO_URL__');
 	});
 
 	it.each(['fragment', 'legacy query'])('restores and autoruns shared code from a %s link while Ace is empty', async kind => {

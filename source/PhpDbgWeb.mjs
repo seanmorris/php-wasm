@@ -5,7 +5,7 @@ export class PhpDbgWeb extends PhpDbgWebBase
 {
 	/**
 	 * Creates a browser-hosted debugger runtime.
-	 * @param {PhpRuntimeArgs} args Debugger runtime configuration.
+	 * @param {PhpDbgRuntimeArgs} args Debugger runtime configuration.
 	 */
 	constructor(args = {})
 	{

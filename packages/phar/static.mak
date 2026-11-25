@@ -7,7 +7,7 @@ $(error WITH_PHAR MUST BE 0, 1, static, dynamic. WITH_PHAR: '${WITH_PHAR}' PLEAS
 endif
 
 ifeq (${WITH_PHAR},1)
-WITH_PHAR=dynamic
+override WITH_PHAR=dynamic
 endif
 
 ifeq (${WITH_PHAR},static)

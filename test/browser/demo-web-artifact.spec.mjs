@@ -140,6 +140,33 @@ test('embedded php hello world runs', async ({ page }) => {
 	).toContain('Hello, World!');
 });
 
+test('embedded PHP curl example fetches its same-origin response', async ({ page }) => {
+	await page.goto(`embedded-php.html?demo=curl.php&version=${version}&no-service-worker`, {
+		waitUntil: 'domcontentloaded'
+	});
+
+	const outputFrame = page.locator('iframe').nth(1);
+	await expect.poll(
+		async () => (await outputFrame.getAttribute('srcdoc')) ?? '',
+		{timeout: 180000}
+	).toContain('Hello from php-wasm cURL!');
+	await expect(outputFrame).toHaveAttribute('srcdoc', /HTTP 200/);
+});
+
+test('dynamic extension example leaves YAML available for dl()', async ({ page }) => {
+	test.skip(libType !== 'dynamic', 'dl() example uses the dynamic demo');
+	await page.goto(`embedded-php.html?demo=dynamic-extension.php&version=${version}&extensionFlags=32&no-service-worker`, {
+		waitUntil: 'domcontentloaded'
+	});
+
+	await expect(page).toHaveURL(/extensionFlags=0/);
+	const outputFrame = page.locator('iframe').nth(1);
+	await expect.poll(
+		async () => (await outputFrame.getAttribute('srcdoc')) ?? '',
+		{timeout: 180000}
+	).toContain('key: value');
+});
+
 test.describe('SDL demo controls', () => {
 	test('cube shader nowdocs preserve highlighting and syntax validation', async ({page}) => {
 		await page.goto(`embedded-php.html?demo=sdl-cube.php&version=${version}&no-service-worker`, {waitUntil: 'domcontentloaded'});
@@ -968,7 +995,12 @@ test('WordPress 7.1 installs, serves its assets, and logs in with SQLite', async
 	await loginLink.click();
 	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-login\\.php`));
 	await page.locator('input[name="log"]').fill('admin');
-	await page.locator('input[name="pwd"]').fill('admin');
+	const password = page.locator('input[name="pwd"]');
+	// Check the currently attached field: a fill was lost in the shared CI run.
+	await expect.poll(async () => {
+		await password.fill('admin');
+		return password.inputValue();
+	}, {timeout: 15000}).toBe('admin');
 	await page.getByRole('button', { name: 'Log In' }).click();
 	await expect(page).toHaveURL(new RegExp(`${wordpressPrefix}wp-admin/`), {
 		timeout: 180000
@@ -1068,6 +1100,12 @@ test('embedded demo loads the selected extensions', async ({ page }) => {
 
 		for(const [, flag, value] of env.matchAll(/^(WITH_[A-Z]+)=(\S+)$/gm))
 		{
+			// The shared embedded demo does not load the optional curl side module.
+			if(flag === 'WITH_CURL' && value === 'dynamic')
+			{
+				absent.push('curl');
+				continue;
+			}
 			if(extensionsByFlag[flag] && ['static', 'shared', 'dynamic'].includes(value)) expected.push(...extensionsByFlag[flag]);
 		}
 	}

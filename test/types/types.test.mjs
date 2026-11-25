@@ -218,6 +218,13 @@ test('isolated npm packages expose every typed entry to ESM, CommonJS, Deno and 
 			}
 		}
 	}
+	for(const name of ['vrzno', 'pdo-pglite', 'waitline'])
+	{
+		const [packed] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', root], path.join(repoRoot, 'packages', name)).stdout);
+		const target = path.join(installed, 'node_modules', name);
+		await fs.mkdir(target, {recursive: true});
+		run('tar', ['-xzf', path.join(root, packed.filename), '--strip-components=1', '-C', target]);
+	}
 	for(const file of ['runtime.mts', 'runtime.cts', 'cloudflare.mts', 'sdl.mts', 'embedded.mts'])
 		await fs.copyFile(path.join(repoRoot, 'test/types', file), path.join(installed, file));
 	await fs.writeFile(path.join(installed, 'entries.mts'), esm.join('\n'));

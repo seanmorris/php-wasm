@@ -4,7 +4,7 @@ WITH_FILEINFO?=dynamic
 
 FILEINFO_TEST_LIST=$(filter-out packages/fileinfo/test/async-stream.mjs,$(wildcard packages/fileinfo/test/*.mjs))
 # Awaiting JavaScript in a PHP callback requires the optional Vrzno bridge.
-ifeq (${WITH_VRZNO},1)
+ifneq ($(filter ${WITH_VRZNO},1 static dynamic),)
 FILEINFO_TEST_LIST+=packages/fileinfo/test/async-stream.mjs
 endif
 
@@ -13,7 +13,7 @@ $(error WITH_FILEINFO MUST BE 0, 1, static, dynamic. WITH_FILEINFO: '${WITH_FILE
 endif
 
 ifeq (${WITH_FILEINFO},1)
-WITH_FILEINFO=dynamic
+override WITH_FILEINFO=dynamic
 endif
 
 ifeq (${WITH_FILEINFO},static)

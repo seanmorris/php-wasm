@@ -11,7 +11,7 @@ $(error WITH_LIBXML MUST BE 0, 1, static, shared, OR dynamic. WITH_LIBXML: '${WI
 endif
 
 ifeq (${WITH_LIBXML},1)
-WITH_LIBXML=dynamic
+override WITH_LIBXML=dynamic
 endif
 
 ifeq (${WITH_LIBXML},static)

@@ -43,6 +43,10 @@ function SDL_JoystickGetAttached(SDL_Joystick $joystick): bool {}
 function SDL_JoystickInstanceID(SDL_Joystick $joystick): int {}
 function SDL_JoystickGetDeviceInstanceID(int $index): int {}
 function SDL_JoystickEventState(int $state): int {}
+function SDL_JoystickRumble(SDL_Joystick $joystick, int $lowFrequency, int $highFrequency, int|string $duration): int {}
+function SDL_JoystickRumbleTriggers(SDL_Joystick $joystick, int $left, int $right, int|string $duration): int {}
+function SDL_JoystickHasRumble(SDL_Joystick $joystick): bool {}
+function SDL_JoystickHasRumbleTriggers(SDL_Joystick $joystick): bool {}
 function SDL_GameControllerOpen(int $index): ?SDL_GameController {}
 function SDL_GameControllerClose(SDL_GameController $controller): void {}
 function SDL_GameControllerName(SDL_GameController $controller): ?string {}
@@ -55,3 +59,7 @@ function SDL_GameControllerUpdate(): void {}
 function SDL_GameControllerEventState(int $state): int {}
 function SDL_GameControllerAddMapping(string $mapping): int {}
 function SDL_GameControllerMapping(SDL_GameController $controller): ?string {}
+function SDL_GameControllerRumble(SDL_GameController $controller, int $lowFrequency, int $highFrequency, int|string $duration): int {}
+function SDL_GameControllerRumbleTriggers(SDL_GameController $controller, int $left, int $right, int|string $duration): int {}
+function SDL_GameControllerHasRumble(SDL_GameController $controller): bool {}
+function SDL_GameControllerHasRumbleTriggers(SDL_GameController $controller): bool {}

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const run = promisify(execFile);
 const packages = new URL('../packages/', import.meta.url);
 const testLib = new URL('./lib/', import.meta.url);
+const version = process.env.PHP_VERSION ?? '8.4';
 
 // Eval scripts expose a global require and __dirname. The wrappers must still
 // load the runtime that sits beside them, in either module format.
@@ -31,7 +32,7 @@ for(const {name, dir, runtime, loaded} of wrappers)
 		// hiding the global require this test needs.
 		const output = await evalLoad(`
 			Promise.all([import(${JSON.stringify(options)}), import(${JSON.stringify(wrapper)})])
-				.then(([{nodeRuntimeOptions}, {${name}}]) => new ${name}(nodeRuntimeOptions({runtime: ${JSON.stringify(runtime)}})).${loaded})
+				.then(([{nodeRuntimeOptions}, {${name}}]) => new ${name}(nodeRuntimeOptions({runtime: ${JSON.stringify(runtime)}, version: ${JSON.stringify(version)}})).${loaded})
 				.then(() => { console.log('loaded'); process.exit(0); });
 		`);
 		assert.equal(output.split('\n').at(-1), 'loaded');
@@ -43,7 +44,7 @@ for(const {name, dir, runtime, loaded} of wrappers)
 		const output = await evalLoad(`
 			const {nodeRuntimeOptions} = require(${JSON.stringify(options)});
 			const {${name}} = require(${JSON.stringify(wrapper)});
-			const php = new ${name}(nodeRuntimeOptions({runtime: ${JSON.stringify(runtime)}}));
+			const php = new ${name}(nodeRuntimeOptions({runtime: ${JSON.stringify(runtime)}, version: ${JSON.stringify(version)}}));
 			php.${loaded}.then(() => { console.log('loaded'); process.exit(0); });
 		`);
 		assert.equal(output.split('\n').at(-1), 'loaded');

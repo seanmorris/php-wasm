@@ -7,7 +7,7 @@
   },
   "author": "Sean Morris <php-wasm@seanmorr.is>",
   "license": "(Apache-2.0 OR GPL-2.0-only)",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "files": [
     "*.mjs",
     "*.d.mts",

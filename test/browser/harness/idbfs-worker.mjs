@@ -4,7 +4,7 @@ import {loadCgiSharedLibs} from './runtime-libs.mjs';
 
 const query = new URL(location.href).searchParams;
 const version = query.get('version') ?? '8.4';
-const sharedLibs = loadCgiSharedLibs(query.get('libType') ?? 'dynamic');
+const sharedLibs = loadCgiSharedLibs(query.get('libType') ?? 'dynamic', version);
 const module = import(`/packages/php-cgi-wasm/php${version}-cgi-worker.mjs`);
 const runtimes = [];
 

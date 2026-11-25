@@ -103,8 +103,14 @@ jobs:
       - name: Build PHP for Web
         run: time make --debug=basic web-mjs web-js
 
+      - name: Build PHP for Worker and WebView
+        run: time make --debug=basic worker-mjs worker-js webview-mjs webview-js
+
       - name: Build PHP-CGI for Worker
         run: time make --debug=basic worker-cgi-mjs worker-cgi-js
+
+      - name: Build PHP CGI for Web and WebView
+        run: time make --debug=basic web-cgi-mjs web-cgi-js webview-cgi-mjs webview-cgi-js
 
       - name: Build PHP CGI for Node
         run: time make --debug=basic node-cgi-mjs node-cgi-js
@@ -126,6 +132,15 @@ jobs:
 
       - name: Stage every declared runtime wrapper
         run: make --debug=basic runtime-wrappers
+
+      - name: Build bridge extension side modules for npm
+        if: ${{ inputs.libType == 'dynamic' }}
+        run: time make --debug=basic bridge-modules
+
+      - name: Verify public wrappers have their native loaders
+        run: >-
+          node test/lib/runtime-imports.mjs --php-version '${{ inputs.phpVersion }}'
+          packages/php-wasm packages/php-cgi-wasm packages/php-cli-wasm packages/php-dbg-wasm
 
       - name: Take Snapshot
         run: |
